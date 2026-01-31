@@ -83,13 +83,20 @@ def run_arc():
 
 def run_continual():
     """Run continual learning demo."""
+    import sys
+    from pathlib import Path
+    demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
+    sys.path.insert(0, str(demos_dir))
     try:
-        from demos.agi_integration.scenario_continual import demo_continual_learning
+        from scenario_continual import demo_continual_learning
         demo_continual_learning()
-    except ImportError:
-        print("Continual learning demo not yet implemented.")
-        print("Coming soon: <10% forgetting across 3 sequential tasks")
+    except ImportError as e:
+        print(f"Continual learning demo import error: {e}")
+        print("Make sure neuro-continual is available.")
         return 1
+    finally:
+        if str(demos_dir) in sys.path:
+            sys.path.remove(str(demos_dir))
     return 0
 
 
