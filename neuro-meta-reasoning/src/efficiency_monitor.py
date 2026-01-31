@@ -13,7 +13,10 @@ from enum import Enum
 import numpy as np
 import time
 
-from .style_selector import ReasoningStyle
+try:
+    from .style_selector import ReasoningStyle
+except ImportError:
+    from style_selector import ReasoningStyle
 
 
 class TerminationReason(Enum):

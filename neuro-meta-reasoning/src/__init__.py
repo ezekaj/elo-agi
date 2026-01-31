@@ -9,48 +9,92 @@ Implements meta-level reasoning control:
 - Fallacy detection and correction
 """
 
-from .problem_classifier import (
-    ProblemClassifier,
-    ProblemClassifierConfig,
-    ProblemAnalysis,
-    ProblemType,
-    ProblemDifficulty,
-)
-from .style_selector import (
-    StyleSelector,
-    StyleSelectorConfig,
-    StyleSelection,
-    ReasoningStyle,
-    StyleFeedback,
-)
-from .efficiency_monitor import (
-    EfficiencyMonitor,
-    EfficiencyConfig,
-    ReasoningMetrics,
-    EfficiencyReport,
-    TerminationReason,
-)
-from .orchestrator import (
-    DynamicOrchestrator,
-    OrchestratorConfig,
-    OrchestrationPlan,
-    OrchestrationStep,
-    ExecutionResult,
-    PlanStatus,
-    CheckpointAction,
-)
-from .fallacy_detector import (
-    FallacyDetector,
-    FallacyDetectorConfig,
-    FallacyDetection,
-    FallacyType,
-    ReasoningStep,
-)
-from .integration import (
-    MetaReasoningController,
-    MetaReasoningConfig,
-    ReasoningSession,
-)
+try:
+    from .problem_classifier import (
+        ProblemClassifier,
+        ProblemClassifierConfig,
+        ProblemAnalysis,
+        ProblemType,
+        ProblemDifficulty,
+    )
+    from .style_selector import (
+        StyleSelector,
+        StyleSelectorConfig,
+        StyleSelection,
+        ReasoningStyle,
+        StyleFeedback,
+    )
+    from .efficiency_monitor import (
+        EfficiencyMonitor,
+        EfficiencyConfig,
+        ReasoningMetrics,
+        EfficiencyReport,
+        TerminationReason,
+    )
+    from .orchestrator import (
+        DynamicOrchestrator,
+        OrchestratorConfig,
+        OrchestrationPlan,
+        OrchestrationStep,
+        ExecutionResult,
+        PlanStatus,
+        CheckpointAction,
+    )
+    from .fallacy_detector import (
+        FallacyDetector,
+        FallacyDetectorConfig,
+        FallacyDetection,
+        FallacyType,
+        ReasoningStep,
+    )
+    from .integration import (
+        MetaReasoningController,
+        MetaReasoningConfig,
+        ReasoningSession,
+    )
+except ImportError:
+    from problem_classifier import (
+        ProblemClassifier,
+        ProblemClassifierConfig,
+        ProblemAnalysis,
+        ProblemType,
+        ProblemDifficulty,
+    )
+    from style_selector import (
+        StyleSelector,
+        StyleSelectorConfig,
+        StyleSelection,
+        ReasoningStyle,
+        StyleFeedback,
+    )
+    from efficiency_monitor import (
+        EfficiencyMonitor,
+        EfficiencyConfig,
+        ReasoningMetrics,
+        EfficiencyReport,
+        TerminationReason,
+    )
+    from orchestrator import (
+        DynamicOrchestrator,
+        OrchestratorConfig,
+        OrchestrationPlan,
+        OrchestrationStep,
+        ExecutionResult,
+        PlanStatus,
+        CheckpointAction,
+    )
+    from fallacy_detector import (
+        FallacyDetector,
+        FallacyDetectorConfig,
+        FallacyDetection,
+        FallacyType,
+        ReasoningStep,
+    )
+    from integration import (
+        MetaReasoningController,
+        MetaReasoningConfig,
+        ReasoningSession,
+    )
 
 __all__ = [
     # Problem Classifier

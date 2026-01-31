@@ -12,9 +12,14 @@ from typing import Dict, List, Optional, Tuple, Any, Callable
 from enum import Enum
 import numpy as np
 
-from .problem_classifier import ProblemAnalysis, ProblemType
-from .style_selector import StyleSelection, ReasoningStyle
-from .efficiency_monitor import EfficiencyMonitor, EfficiencyConfig
+try:
+    from .problem_classifier import ProblemAnalysis, ProblemType
+    from .style_selector import StyleSelection, ReasoningStyle
+    from .efficiency_monitor import EfficiencyMonitor, EfficiencyConfig
+except ImportError:
+    from problem_classifier import ProblemAnalysis, ProblemType
+    from style_selector import StyleSelection, ReasoningStyle
+    from efficiency_monitor import EfficiencyMonitor, EfficiencyConfig
 
 
 class PlanStatus(Enum):

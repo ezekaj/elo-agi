@@ -12,7 +12,10 @@ from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np
 
-from .problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
+try:
+    from .problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
+except ImportError:
+    from problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
 
 
 class ReasoningStyle(Enum):

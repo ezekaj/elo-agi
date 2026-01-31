@@ -13,38 +13,72 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Any, Callable
 import numpy as np
 
-from .problem_classifier import (
-    ProblemClassifier,
-    ProblemClassifierConfig,
-    ProblemAnalysis,
-    ProblemType,
-)
-from .style_selector import (
-    StyleSelector,
-    StyleSelectorConfig,
-    StyleSelection,
-    ReasoningStyle,
-    StyleFeedback,
-)
-from .efficiency_monitor import (
-    EfficiencyMonitor,
-    EfficiencyConfig,
-    ReasoningMetrics,
-    TerminationReason,
-)
-from .orchestrator import (
-    DynamicOrchestrator,
-    OrchestratorConfig,
-    OrchestrationPlan,
-    ExecutionResult,
-)
-from .fallacy_detector import (
-    FallacyDetector,
-    FallacyDetectorConfig,
-    FallacyDetection,
-    ReasoningStep,
-    FallacyType,
-)
+try:
+    from .problem_classifier import (
+        ProblemClassifier,
+        ProblemClassifierConfig,
+        ProblemAnalysis,
+        ProblemType,
+    )
+    from .style_selector import (
+        StyleSelector,
+        StyleSelectorConfig,
+        StyleSelection,
+        ReasoningStyle,
+        StyleFeedback,
+    )
+    from .efficiency_monitor import (
+        EfficiencyMonitor,
+        EfficiencyConfig,
+        ReasoningMetrics,
+        TerminationReason,
+    )
+    from .orchestrator import (
+        DynamicOrchestrator,
+        OrchestratorConfig,
+        OrchestrationPlan,
+        ExecutionResult,
+    )
+    from .fallacy_detector import (
+        FallacyDetector,
+        FallacyDetectorConfig,
+        FallacyDetection,
+        ReasoningStep,
+        FallacyType,
+    )
+except ImportError:
+    from problem_classifier import (
+        ProblemClassifier,
+        ProblemClassifierConfig,
+        ProblemAnalysis,
+        ProblemType,
+    )
+    from style_selector import (
+        StyleSelector,
+        StyleSelectorConfig,
+        StyleSelection,
+        ReasoningStyle,
+        StyleFeedback,
+    )
+    from efficiency_monitor import (
+        EfficiencyMonitor,
+        EfficiencyConfig,
+        ReasoningMetrics,
+        TerminationReason,
+    )
+    from orchestrator import (
+        DynamicOrchestrator,
+        OrchestratorConfig,
+        OrchestrationPlan,
+        ExecutionResult,
+    )
+    from fallacy_detector import (
+        FallacyDetector,
+        FallacyDetectorConfig,
+        FallacyDetection,
+        ReasoningStep,
+        FallacyType,
+    )
 
 
 @dataclass
