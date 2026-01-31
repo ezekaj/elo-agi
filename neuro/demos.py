@@ -64,13 +64,20 @@ def run_language():
 
 def run_arc():
     """Run ARC-style reasoning demo."""
+    import sys
+    from pathlib import Path
+    demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
+    sys.path.insert(0, str(demos_dir))
     try:
-        from demos.agi_integration.scenario_arc import demo_arc_reasoning
+        from scenario_arc import demo_arc_reasoning
         demo_arc_reasoning()
-    except ImportError:
-        print("ARC demo not yet implemented.")
-        print("Coming soon: Symbol binding, pattern causality, problem classification")
+    except ImportError as e:
+        print(f"ARC demo import error: {e}")
+        print("Make sure neuro-abstract, neuro-causal, neuro-meta-reasoning are available.")
         return 1
+    finally:
+        if str(demos_dir) in sys.path:
+            sys.path.remove(str(demos_dir))
     return 0
 
 
