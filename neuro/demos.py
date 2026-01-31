@@ -111,6 +111,8 @@ def run_all():
     run_medical()
     run_physics()
     run_language()
+    run_arc()
+    run_continual()
 
     print("\n" + "="*60)
     print("All demos complete!")
@@ -123,9 +125,9 @@ def list_demos():
     print("  medical   - Medical diagnosis reasoning")
     print("  physics   - Physics concept learning")
     print("  language  - Language understanding")
-    print("  arc       - ARC-style pattern reasoning (coming soon)")
-    print("  continual - Continual learning demo (coming soon)")
-    print("  all       - Run all demos")
+    print("  arc       - ARC-style pattern reasoning")
+    print("  continual - Continual learning demo")
+    print("  all       - Run all 5 demos")
 
 
 def main():
