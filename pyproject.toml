@@ -82,6 +82,7 @@ ignore = [
     "F811",  # redefined-while-unused
     "F821",  # undefined-name (test file issue)
     "F841",  # unused-variable
+    "E402",  # module-level-import-not-at-top (needed for path setup)
     "E712",  # true-false-comparison
     "E721",  # type-comparison
     "E722",  # bare-except
