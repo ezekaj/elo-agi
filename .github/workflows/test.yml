@@ -29,4 +29,23 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest neuro-*/tests/ -v --tb=short -x
+          # Run tests from within each module directory for correct imports
+          failed=0
+          for dir in neuro-*/; do
+            if [ -d "$dir/tests" ]; then
+              echo "=========================================="
+              echo "Testing $dir"
+              echo "=========================================="
+              cd "$dir"
+              if ! python -m pytest tests/ -v --tb=short -x; then
+                failed=1
+                echo "FAILED: $dir"
+              fi
+              cd ..
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo "Some tests failed!"
+            exit 1
+          fi
+          echo "All tests passed!"
