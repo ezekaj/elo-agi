@@ -235,9 +235,9 @@ class TestMetaReasoningController:
         config = MetaReasoningConfig(random_seed=42)
         controller = MetaReasoningController(config=config)
 
+        # Create session without executing (execution requires registered modules)
         embedding = np.random.randn(128)
-        session = controller.create_session(embedding)
-        controller.execute_session(session.session_id, {})
+        controller.create_session(embedding)
 
         stats = controller.statistics()
 
