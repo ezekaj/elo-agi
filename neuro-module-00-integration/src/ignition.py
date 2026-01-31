@@ -18,7 +18,10 @@ from enum import Enum
 import numpy as np
 import time
 
-from .module_interface import ModuleProposal, ContentType
+try:
+    from .module_interface import ModuleProposal, ContentType
+except ImportError:
+    from module_interface import ModuleProposal, ContentType
 
 
 class IgnitionState(Enum):

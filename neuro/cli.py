@@ -151,18 +151,13 @@ def cmd_check(args):
     except ImportError as e:
         checks.append(("neuro", str(e), False))
 
-    # Check key classes
-    key_imports = [
-        ("CognitiveCore", "cognitive_core", "CognitiveCore"),
-        ("SharedSpace", "shared_space", "SharedSpace"),
-        ("GlobalWorkspace", "global_workspace", "GlobalWorkspace"),
-    ]
+    # Check key classes (import through neuro package)
+    key_imports = ["CognitiveCore", "SharedSpace", "GlobalWorkspace"]
 
-    for name, module, cls in key_imports:
+    for name in key_imports:
         try:
-            import importlib
-            mod = importlib.import_module(module)
-            getattr(mod, cls)
+            import neuro
+            cls = getattr(neuro, name)
             checks.append((name, "available", True))
         except (ImportError, AttributeError) as e:
             checks.append((name, str(e)[:50], False))

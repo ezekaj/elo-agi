@@ -21,16 +21,30 @@ from enum import Enum
 import numpy as np
 import time
 
-from .module_interface import (
-    CognitiveModule,
-    ModuleProposal,
-    ModuleState,
-    ModuleType,
-    ContentType,
-)
-from .attention_competition import AttentionCompetition, CompetitionParams
-from .broadcast_system import BroadcastSystem, BroadcastParams
-from .ignition import IgnitionDetector, IgnitionParams
+try:
+    # Try relative imports first (when imported as package)
+    from .module_interface import (
+        CognitiveModule,
+        ModuleProposal,
+        ModuleState,
+        ModuleType,
+        ContentType,
+    )
+    from .attention_competition import AttentionCompetition, CompetitionParams
+    from .broadcast_system import BroadcastSystem, BroadcastParams
+    from .ignition import IgnitionDetector, IgnitionParams
+except ImportError:
+    # Fall back to absolute imports (when src is in sys.path)
+    from module_interface import (
+        CognitiveModule,
+        ModuleProposal,
+        ModuleState,
+        ModuleType,
+        ContentType,
+    )
+    from attention_competition import AttentionCompetition, CompetitionParams
+    from broadcast_system import BroadcastSystem, BroadcastParams
+    from ignition import IgnitionDetector, IgnitionParams
 
 
 class WorkspaceMode(Enum):

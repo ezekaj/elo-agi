@@ -17,7 +17,10 @@ from enum import Enum
 import numpy as np
 import time
 
-from .module_interface import ModuleProposal, ModuleType, ContentType
+try:
+    from .module_interface import ModuleProposal, ModuleType, ContentType
+except ImportError:
+    from module_interface import ModuleProposal, ModuleType, ContentType
 
 
 class BroadcastPriority(Enum):

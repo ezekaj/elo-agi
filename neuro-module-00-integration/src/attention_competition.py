@@ -15,7 +15,10 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Tuple, Dict, Any
 import numpy as np
 
-from .module_interface import ModuleProposal, ModuleType, ContentType
+try:
+    from .module_interface import ModuleProposal, ModuleType, ContentType
+except ImportError:
+    from module_interface import ModuleProposal, ModuleType, ContentType
 
 
 @dataclass
