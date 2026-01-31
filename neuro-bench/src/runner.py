@@ -15,7 +15,10 @@ import time
 import json
 from pathlib import Path
 
-from .base_benchmark import Benchmark, BenchmarkResult, BenchmarkSuite
+try:
+    from .base_benchmark import Benchmark, BenchmarkResult, BenchmarkSuite
+except ImportError:
+    from base_benchmark import Benchmark, BenchmarkResult, BenchmarkSuite
 
 
 @dataclass
@@ -86,10 +89,16 @@ class BenchmarkRunner:
 
     def create_default_suite(self) -> BenchmarkSuite:
         """Create a default comprehensive suite."""
-        from .reasoning_bench import PatternCompletion, AnalogySolving, LogicalInference
-        from .memory_bench import WorkingMemoryTest, EpisodicRecall, SequenceMemory
-        from .language_bench import TextCompletion, InstructionFollowing, QuestionAnswering
-        from .planning_bench import GoalAchievement, MultiStepPlanning
+        try:
+            from .reasoning_bench import PatternCompletion, AnalogySolving, LogicalInference
+            from .memory_bench import WorkingMemoryTest, EpisodicRecall, SequenceMemory
+            from .language_bench import TextCompletion, InstructionFollowing, QuestionAnswering
+            from .planning_bench import GoalAchievement, MultiStepPlanning
+        except ImportError:
+            from reasoning_bench import PatternCompletion, AnalogySolving, LogicalInference
+            from memory_bench import WorkingMemoryTest, EpisodicRecall, SequenceMemory
+            from language_bench import TextCompletion, InstructionFollowing, QuestionAnswering
+            from planning_bench import GoalAchievement, MultiStepPlanning
 
         suite = BenchmarkSuite("neuro-comprehensive")
 
@@ -299,6 +308,221 @@ class BenchmarkRunner:
         ])
 
         return "\n".join(lines)
+
+    def generate_html_report(
+        self,
+        run_result: Optional[RunResult] = None,
+        output_file: Optional[Path] = None,
+    ) -> str:
+        """
+        Generate an HTML report for benchmark results.
+
+        Args:
+            run_result: Result to report (uses latest if None)
+            output_file: Path to save HTML file (optional)
+
+        Returns:
+            HTML content as string
+        """
+        if run_result is None:
+            if not self._run_history:
+                return "<html><body>No runs to report.</body></html>"
+            run_result = self._run_history[-1]
+
+        # Group benchmarks by category
+        categories = {}
+        for name, result in run_result.results.items():
+            parts = name.split('/')
+            category = parts[0] if len(parts) > 1 else 'default'
+            bench_name = parts[-1]
+
+            if category not in categories:
+                categories[category] = []
+            categories[category].append((bench_name, result))
+
+        # Build HTML
+        html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro AGI Benchmark Report</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }}
+        h1 {{
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }}
+        h2 {{
+            color: #34495e;
+            margin-top: 30px;
+        }}
+        .summary {{
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }}
+        .metric {{
+            display: inline-block;
+            margin: 10px 20px 10px 0;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+        }}
+        .metric-value {{
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }}
+        .metric-label {{
+            font-size: 0.9em;
+            opacity: 0.9;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }}
+        th, td {{
+            padding: 12px 15px;
+            text-align: left;
+        }}
+        th {{
+            background: #3498db;
+            color: white;
+        }}
+        tr:nth-child(even) {{
+            background: #f8f9fa;
+        }}
+        tr:hover {{
+            background: #e8f4fd;
+        }}
+        .score-bar {{
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }}
+        .score-fill {{
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+            border-radius: 4px;
+        }}
+        .category {{
+            margin-bottom: 30px;
+        }}
+        .category-title {{
+            background: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }}
+        .timestamp {{
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }}
+        .footer {{
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }}
+    </style>
+</head>
+<body>
+    <h1>🧠 Neuro AGI Benchmark Report</h1>
+
+    <div class="summary">
+        <p class="timestamp">Generated: {time.ctime(run_result.timestamp)}</p>
+        <p class="timestamp">Suite: {run_result.suite_name} | Total Time: {run_result.total_time:.1f}s</p>
+
+        <div class="metric">
+            <span class="metric-value">{run_result.overall_score:.3f}</span>
+            <span class="metric-label">Overall Score</span>
+        </div>
+        <div class="metric">
+            <span class="metric-value">{run_result.overall_success_rate:.1%}</span>
+            <span class="metric-label">Success Rate</span>
+        </div>
+        <div class="metric">
+            <span class="metric-value">{run_result.n_benchmarks}</span>
+            <span class="metric-label">Benchmarks</span>
+        </div>
+    </div>
+'''
+
+        # Add benchmark tables by category
+        for category, benchmarks in sorted(categories.items()):
+            html += f'''
+    <div class="category">
+        <h3 class="category-title">{category.replace('-', ' ').title()}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Benchmark</th>
+                    <th>Score</th>
+                    <th>Success Rate</th>
+                    <th>Latency</th>
+                    <th>Progress</th>
+                </tr>
+            </thead>
+            <tbody>
+'''
+            for bench_name, result in benchmarks:
+                score_pct = min(100, result.mean_score * 100)
+                html += f'''
+                <tr>
+                    <td>{bench_name}</td>
+                    <td><strong>{result.mean_score:.3f}</strong></td>
+                    <td>{result.success_rate:.1%}</td>
+                    <td>{result.mean_latency:.3f}s</td>
+                    <td>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {score_pct}%"></div>
+                        </div>
+                    </td>
+                </tr>
+'''
+            html += '''
+            </tbody>
+        </table>
+    </div>
+'''
+
+        html += '''
+    <div class="footer">
+        <p>Generated by <strong>Neuro AGI Benchmark Suite v0.9.0</strong></p>
+        <p>38 cognitive modules | Neuroscience-inspired architecture</p>
+    </div>
+</body>
+</html>
+'''
+
+        # Save to file if requested
+        if output_file:
+            output_path = Path(output_file)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, 'w') as f:
+                f.write(html)
+
+        return html
 
 
 def create_random_agent() -> Callable[[Any], Any]:
