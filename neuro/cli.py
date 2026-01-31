@@ -39,6 +39,91 @@ def cmd_info(args):
     print("  core.initialize()")
 
 
+def cmd_research(args):
+    """Research assistant for document Q&A."""
+    from neuro.apps import ResearchAssistant
+
+    assistant = ResearchAssistant()
+
+    # Ingest files if provided
+    if args.ingest:
+        for file_path in args.ingest:
+            path = Path(file_path)
+            if not path.exists():
+                print(f"File not found: {file_path}")
+                continue
+
+            text = path.read_text()
+            n = assistant.ingest_text(text, source=path.name)
+            print(f"Ingested {path.name}: {n} facts extracted")
+
+    # Answer query if provided
+    if args.query:
+        if not assistant.statistics()["total_facts"]:
+            print("No documents ingested. Use --ingest first.")
+            return 1
+
+        result = assistant.query(args.query)
+        print(f"\nQ: {args.query}")
+        print(f"A: {result.answer}")
+        print(f"   Confidence: {result.confidence:.1%}")
+        return 0
+
+    # Interactive mode
+    if args.interactive:
+        print("Research Assistant Interactive Mode")
+        print("Commands: /ingest <file>, /sources, /quit")
+        print("-" * 40)
+
+        while True:
+            try:
+                user_input = input("\nQ: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print("\nGoodbye!")
+                break
+
+            if not user_input:
+                continue
+
+            if user_input == "/quit":
+                print("Goodbye!")
+                break
+
+            if user_input == "/sources":
+                sources = assistant.get_sources()
+                print(f"Sources: {', '.join(sources) if sources else 'none'}")
+                continue
+
+            if user_input.startswith("/ingest "):
+                file_path = user_input[8:].strip()
+                path = Path(file_path)
+                if path.exists():
+                    text = path.read_text()
+                    n = assistant.ingest_text(text, source=path.name)
+                    print(f"Ingested: {n} facts from {path.name}")
+                else:
+                    print(f"File not found: {file_path}")
+                continue
+
+            # Regular query
+            result = assistant.query(user_input)
+            print(f"A: {result.answer}")
+            if result.confidence > 0:
+                print(f"   Confidence: {result.confidence:.1%}")
+
+        return 0
+
+    # No action specified - show help
+    print("Research Assistant")
+    print("-" * 40)
+    print("Usage:")
+    print("  neuro research --ingest file.txt --query 'question'")
+    print("  neuro research --interactive")
+    stats = assistant.statistics()
+    print(f"\nCurrent state: {stats['total_facts']} facts from {stats['total_sources']} sources")
+    return 0
+
+
 def cmd_check(args):
     """Verify installation and importability."""
     print(f"Neuro AGI Installation Check v{get_version()}")
@@ -127,6 +212,24 @@ def main():
     # Check command
     check_parser = subparsers.add_parser("check", help="Verify installation")
     check_parser.set_defaults(func=cmd_check)
+
+    # Research command
+    research_parser = subparsers.add_parser("research", help="Research assistant")
+    research_parser.add_argument(
+        "--ingest", "-i",
+        nargs="+",
+        help="Files to ingest",
+    )
+    research_parser.add_argument(
+        "--query", "-q",
+        help="Question to answer",
+    )
+    research_parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interactive mode",
+    )
+    research_parser.set_defaults(func=cmd_research)
 
     args = parser.parse_args()
 
