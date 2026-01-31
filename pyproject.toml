@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neuro-agi"
+version = "0.9.0"
+description = "Neuroscience-inspired AGI architecture with 38 cognitive modules"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Elvi Zekaj", email = "elvizekaj02@gmail.com"}
+]
+keywords = [
+    "agi", "artificial-general-intelligence", "cognitive-architecture",
+    "neuroscience", "machine-learning", "reasoning"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[project.optional-dependencies]
+llm = [
+    "openai>=1.0.0",
+    "anthropic>=0.18.0",
+]
+viz = [
+    "matplotlib>=3.7.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+all = [
+    "neuro-agi[llm,viz,dev]",
+]
+
+[project.scripts]
+neuro = "neuro.cli:main"
+neuro-demo = "neuro.demos:main"
+neuro-bench = "neuro.benchmarks:main"
+
+[project.urls]
+Homepage = "https://github.com/ezekaj/neuro-agi"
+Documentation = "https://neuro-agi.readthedocs.io"
+Repository = "https://github.com/ezekaj/neuro-agi"
+Issues = "https://github.com/ezekaj/neuro-agi/issues"
+
+[tool.setuptools]
+packages = ["neuro"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
