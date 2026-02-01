@@ -15,10 +15,14 @@ from .core.stream import StreamHandler
 from .core.session import SessionManager
 from .core.permissions import PermissionManager, PermissionMode
 from .core.hooks import HooksManager
+from .core.mcp import MCPManager
 from .tools.executor import ToolExecutor
 from .tools.registry import ToolRegistry
+from .agents.manager import SubagentManager
+from .skills.loader import SkillsLoader
 from .ui.renderer import UIRenderer
 from .ui.status_bar import StatusBar
+from .ide.integration import create_integration, detect_ide, IDEType
 
 
 class NeuroApp:
@@ -77,6 +81,30 @@ class NeuroApp:
             permissions=self.permission_manager,
             hooks=self.hooks_manager,
             ui=self.ui,
+        )
+
+        # MCP Manager
+        self.mcp_manager = MCPManager(
+            project_dir=self.project_dir,
+        )
+
+        # Subagent Manager
+        self.subagent_manager = SubagentManager(
+            project_dir=self.project_dir,
+            chat_fn=self._chat_for_agent,
+            tool_executor=self.tool_executor,
+        )
+
+        # Skills Loader
+        self.skills_loader = SkillsLoader(
+            project_dir=self.project_dir,
+        )
+
+        # IDE Integration
+        self.ide_type = detect_ide()
+        self.ide_integration = create_integration(
+            workspace_root=self.project_dir,
+            ide_type=self.ide_type,
         )
 
         # System prompt
@@ -148,6 +176,12 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             return 1
 
         self.ui.print_status("ollama", f"Connected ({self.model})")
+
+        # Connect IDE integration if available
+        if self.ide_integration:
+            connected = await self.ide_integration.connect()
+            if connected:
+                self.ui.print_status("ide", f"{self.ide_type.value} integration active")
 
         # Load or create session
         if resume_session or session_id:
@@ -346,6 +380,33 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         elif cmd == "/permissions":
             self._print_permissions()
 
+        elif cmd == "/skills":
+            self._print_skills()
+
+        elif cmd == "/agents":
+            self._print_agents()
+
+        elif cmd == "/mcp":
+            await self._handle_mcp_command(args)
+
+        elif cmd == "/hooks":
+            self._print_hooks()
+
+        elif cmd == "/ide":
+            await self._handle_ide_command(args)
+
+        elif cmd == "/agent" or cmd == "/task":
+            await self._handle_agent_command(args)
+
+        # Check if it's a skill command
+        elif cmd.startswith("/"):
+            skill_name = cmd[1:]  # Remove leading /
+            skill = self.skills_loader.get_skill(skill_name)
+            if skill:
+                await self._execute_skill(skill_name, args)
+            else:
+                self.ui.print_dim(f"Unknown command: {cmd}. Try /help")
+
         else:
             self.ui.print_dim(f"Unknown command: {cmd}. Try /help")
 
@@ -396,6 +457,11 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             ("/status", "System status"),
             ("/model [name]", "View/switch model"),
             ("/tools", "List available tools"),
+            ("/skills", "List available skills"),
+            ("/agents", "List available agents"),
+            ("/mcp [cmd]", "MCP server management"),
+            ("/hooks", "View configured hooks"),
+            ("/ide [cmd]", "IDE integration"),
             ("/compact", "Compress context"),
             ("/cost", "Token usage"),
             ("/context", "Context usage bar"),
@@ -407,6 +473,20 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         print(f"\n  {self.ui.BOLD}Commands:{self.ui.RESET}")
         for cmd, desc in commands:
             print(f"  {self.ui.CYAN}{cmd:20}{self.ui.RESET} {desc}")
+
+        # Skills
+        skills = self.skills_loader.list_skills()
+        if skills:
+            print(f"\n  {self.ui.BOLD}Skills:{self.ui.RESET}")
+            for skill in skills[:6]:  # Show first 6
+                print(f"  {self.ui.CYAN}/{skill.name:19}{self.ui.RESET} {skill.description[:35]}")
+            if len(skills) > 6:
+                print(f"  {self.ui.DIM}...use /skills to see all{self.ui.RESET}")
+
+        # Agents
+        print(f"\n  {self.ui.BOLD}Agents:{self.ui.RESET}")
+        print(f"  {self.ui.CYAN}/agent <type> <task>{self.ui.RESET} Spawn a subagent")
+        print(f"  {self.ui.DIM}  Types: Explore, Plan, General, Bash{self.ui.RESET}")
 
         print(f"\n  {self.ui.BOLD}Syntax:{self.ui.RESET}")
         print(f"  {self.ui.CYAN}@./file{self.ui.RESET}             Include file content")
@@ -520,6 +600,30 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         print(f"  Session denies: {len(self.permission_manager._session_denies)}")
         print()
 
+    def _print_hooks(self):
+        """Print configured hooks."""
+        print(f"\n  {self.ui.BOLD}Hooks{self.ui.RESET}")
+        self.ui.print_divider()
+
+        if not self.hooks_manager.has_hooks():
+            print(f"  {self.ui.DIM}No hooks configured{self.ui.RESET}")
+            print(f"\n  {self.ui.DIM}Add hooks to ~/.neuro/settings.json:{self.ui.RESET}")
+            print(f'  {self.ui.DIM}{{"hooks": {{"PreToolUse": [{{"type": "command", "command": "./script.sh"}}]}}}}{self.ui.RESET}')
+            print()
+            return
+
+        all_hooks = self.hooks_manager.list_all_hooks()
+        for event, handlers in all_hooks.items():
+            print(f"\n  {self.ui.CYAN}{event}{self.ui.RESET}")
+            for handler in handlers:
+                if handler.get("command"):
+                    print(f"    {self.ui.DIM}command:{self.ui.RESET} {handler['command']}")
+                if handler.get("url"):
+                    print(f"    {self.ui.DIM}url:{self.ui.RESET} {handler['url']}")
+                if handler.get("matcher"):
+                    print(f"    {self.ui.DIM}matcher:{self.ui.RESET} {handler['matcher']}")
+        print()
+
     async def _check_ollama(self) -> bool:
         """Check if Ollama is available."""
         try:
@@ -552,6 +656,10 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
         # Close stream handler
         await self.stream_handler.close()
+
+        # Disconnect IDE integration
+        if self.ide_integration and self.ide_integration.connected:
+            await self.ide_integration.disconnect()
 
         self.ui.print_dim("Goodbye!")
 
@@ -609,3 +717,254 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             print()  # Final newline
 
         return 0
+
+    # =========================================================================
+    # Skills, Agents, and MCP
+    # =========================================================================
+
+    def _print_skills(self):
+        """Print available skills."""
+        print(f"\n  {self.ui.BOLD}Available Skills:{self.ui.RESET}")
+        self.ui.print_divider()
+
+        for skill in self.skills_loader.list_skills():
+            aliases = f" ({', '.join(skill.aliases)})" if skill.aliases else ""
+            print(f"  {self.ui.CYAN}/{skill.name:12}{self.ui.RESET} {skill.description}{self.ui.DIM}{aliases}{self.ui.RESET}")
+        print()
+        print(f"  {self.ui.DIM}Use /<skill> [args] to run a skill{self.ui.RESET}")
+        print()
+
+    def _print_agents(self):
+        """Print available agents."""
+        print(f"\n  {self.ui.BOLD}Available Agents:{self.ui.RESET}")
+        self.ui.print_divider()
+
+        for config in self.subagent_manager.get_available():
+            tools_str = f" [{len(config.tools)} tools]" if config.tools else ""
+            print(f"  {self.ui.CYAN}{config.name:12}{self.ui.RESET} {config.description}{self.ui.DIM}{tools_str}{self.ui.RESET}")
+        print()
+        print(f"  {self.ui.DIM}Use /agent <type> <task> to spawn an agent{self.ui.RESET}")
+        print()
+
+        # Show running agents
+        running = self.subagent_manager.get_running()
+        if running:
+            print(f"  {self.ui.BOLD}Running Agents:{self.ui.RESET}")
+            for exec in running:
+                print(f"  {self.ui.YELLOW}●{self.ui.RESET} {exec.id}: {exec.config.name} - {exec.task[:40]}...")
+            print()
+
+    async def _handle_mcp_command(self, args: str):
+        """Handle /mcp command."""
+        parts = args.split() if args else []
+        subcmd = parts[0] if parts else "list"
+
+        if subcmd == "list":
+            print(f"\n  {self.ui.BOLD}MCP Servers:{self.ui.RESET}")
+            self.ui.print_divider()
+
+            servers = self.mcp_manager.get_servers()
+            if not servers:
+                print(f"  {self.ui.DIM}No MCP servers configured{self.ui.RESET}")
+                print(f"  {self.ui.DIM}Add servers to ~/.neuro/mcp.json{self.ui.RESET}")
+            else:
+                for name in servers:
+                    connected = self.mcp_manager.is_connected(name)
+                    status = f"{self.ui.GREEN}●{self.ui.RESET}" if connected else f"{self.ui.DIM}○{self.ui.RESET}"
+                    print(f"  {status} {name}")
+            print()
+
+        elif subcmd == "connect":
+            if len(parts) < 2:
+                print(f"  {self.ui.DIM}Usage: /mcp connect <server>{self.ui.RESET}")
+                return
+            server = parts[1]
+            print(f"  Connecting to {server}...")
+            success = await self.mcp_manager.connect(server)
+            if success:
+                self.ui.print_success(f"Connected to {server}")
+                tools = [t for t in self.mcp_manager.get_tools() if t.server == server]
+                if tools:
+                    print(f"  {self.ui.DIM}Discovered {len(tools)} tools{self.ui.RESET}")
+            else:
+                self.ui.print_error(f"Failed to connect to {server}")
+
+        elif subcmd == "tools":
+            tools = self.mcp_manager.get_tools()
+            if tools:
+                print(f"\n  {self.ui.BOLD}MCP Tools:{self.ui.RESET}")
+                self.ui.print_divider()
+                for tool in tools:
+                    print(f"  {self.ui.CYAN}{tool.name}{self.ui.RESET}")
+                    print(f"    {self.ui.DIM}{tool.description}{self.ui.RESET}")
+            else:
+                print(f"  {self.ui.DIM}No MCP tools available{self.ui.RESET}")
+            print()
+
+        else:
+            print(f"  {self.ui.DIM}MCP commands: list, connect <server>, tools{self.ui.RESET}")
+
+    async def _handle_ide_command(self, args: str):
+        """Handle /ide command."""
+        parts = args.split() if args else []
+        subcmd = parts[0] if parts else "status"
+
+        if subcmd == "status":
+            print(f"\n  {self.ui.BOLD}IDE Integration{self.ui.RESET}")
+            self.ui.print_divider()
+
+            print(f"  Detected: {self.ide_type.value}")
+            if self.ide_integration:
+                status = f"{self.ui.GREEN}connected{self.ui.RESET}" if self.ide_integration.connected else f"{self.ui.DIM}disconnected{self.ui.RESET}"
+                print(f"  Status: {status}")
+
+                if self.ide_integration.connected:
+                    ctx = await self.ide_integration.get_context()
+                    if ctx.file_path:
+                        print(f"  Current file: {ctx.file_path}")
+                    if ctx.line_number:
+                        print(f"  Line: {ctx.line_number}")
+                    if ctx.open_files:
+                        print(f"  Open files: {len(ctx.open_files)}")
+            else:
+                print(f"  {self.ui.DIM}No integration available{self.ui.RESET}")
+            print()
+
+        elif subcmd == "open":
+            if len(parts) < 2:
+                print(f"  {self.ui.DIM}Usage: /ide open <file> [line]{self.ui.RESET}")
+                return
+
+            file_path = parts[1]
+            line = int(parts[2]) if len(parts) > 2 else None
+
+            if self.ide_integration and self.ide_integration.connected:
+                success = await self.ide_integration.open_file(file_path, line)
+                if success:
+                    self.ui.print_success(f"Opened {file_path}")
+                else:
+                    self.ui.print_error("Failed to open file")
+            else:
+                # Fallback: just try the code command
+                import subprocess
+                cmd = ["code", "--goto", f"{file_path}:{line}" if line else file_path]
+                try:
+                    subprocess.run(cmd, check=True)
+                    self.ui.print_success(f"Opened {file_path}")
+                except Exception as e:
+                    self.ui.print_error(str(e))
+
+        elif subcmd == "context":
+            if self.ide_integration and self.ide_integration.connected:
+                ctx = await self.ide_integration.get_context()
+                print(f"\n  {self.ui.BOLD}Editor Context{self.ui.RESET}")
+                self.ui.print_divider()
+                print(f"  File: {ctx.file_path or 'None'}")
+                print(f"  Line: {ctx.line_number or '-'}")
+                print(f"  Column: {ctx.column or '-'}")
+                print(f"  Language: {ctx.language or 'Unknown'}")
+                if ctx.selection:
+                    sel = ctx.selection[:50] + "..." if len(ctx.selection) > 50 else ctx.selection
+                    print(f"  Selection: {sel}")
+                print()
+            else:
+                print(f"  {self.ui.DIM}IDE not connected{self.ui.RESET}")
+
+        else:
+            print(f"  {self.ui.DIM}IDE commands: status, open <file> [line], context{self.ui.RESET}")
+
+    async def _handle_agent_command(self, args: str):
+        """Handle /agent command."""
+        if not args:
+            print(f"  {self.ui.DIM}Usage: /agent <type> <task>{self.ui.RESET}")
+            print(f"  {self.ui.DIM}Types: Explore, Plan, General, Bash{self.ui.RESET}")
+            return
+
+        parts = args.split(maxsplit=1)
+        agent_type = parts[0]
+        task = parts[1] if len(parts) > 1 else ""
+
+        if not task:
+            print(f"  {self.ui.DIM}Please provide a task for the agent{self.ui.RESET}")
+            return
+
+        config = self.subagent_manager.get_config(agent_type)
+        if not config:
+            print(f"  {self.ui.RED}Unknown agent type: {agent_type}{self.ui.RESET}")
+            return
+
+        print(f"\n  {self.ui.CYAN}Spawning {agent_type} agent...{self.ui.RESET}")
+        print(f"  {self.ui.DIM}Task: {task}{self.ui.RESET}")
+
+        try:
+            execution = await self.subagent_manager.spawn(agent_type, task)
+
+            if execution.status == "completed":
+                print(f"\n  {self.ui.GREEN}Agent completed{self.ui.RESET}")
+                print(f"  {self.ui.DIM}Turns: {execution.turns}{self.ui.RESET}")
+                if execution.result:
+                    print(f"\n  {self.ui.BOLD}Result:{self.ui.RESET}")
+                    self.ui.print_divider()
+                    for line in execution.result.split('\n')[:20]:
+                        print(f"  {line}")
+            else:
+                print(f"\n  {self.ui.RED}Agent failed: {execution.error}{self.ui.RESET}")
+
+        except Exception as e:
+            self.ui.print_error(str(e))
+
+        print()
+
+    async def _execute_skill(self, skill_name: str, args: str):
+        """Execute a skill."""
+        skill = self.skills_loader.get_skill(skill_name)
+        if not skill:
+            self.ui.print_error(f"Skill not found: {skill_name}")
+            return
+
+        print(f"\n  {self.ui.CYAN}Running /{skill_name}...{self.ui.RESET}")
+
+        # Build the prompt
+        prompt = self.skills_loader.execute_skill(skill_name, args)
+
+        # Add to history and process
+        self._current_session.add_message("user", f"/{skill_name} {args}")
+
+        # Stream the response
+        print(f"\n  {self.ui.GREEN}NEURO:{self.ui.RESET} ", end="", flush=True)
+
+        full_response = ""
+        async for event in self.stream_handler.stream(
+            messages=[{"role": "user", "content": prompt}],
+            system_prompt=self.system_prompt,
+        ):
+            if event.type.value == "token":
+                full_response += event.content
+
+        print()  # Newline after response
+
+        self._current_session.add_message("assistant", full_response)
+
+    async def _chat_for_agent(
+        self,
+        messages: List[Dict[str, str]],
+        model: Optional[str] = None,
+    ) -> str:
+        """Chat function for subagents."""
+        use_model = model or self.model
+
+        # Create a temporary stream handler if model differs
+        if use_model != self.model:
+            handler = StreamHandler(model=use_model)
+        else:
+            handler = self.stream_handler
+
+        response = ""
+        async for event in handler.stream(messages):
+            if event.type.value == "token":
+                response += event.content
+
+        if use_model != self.model:
+            await handler.close()
+
+        return response

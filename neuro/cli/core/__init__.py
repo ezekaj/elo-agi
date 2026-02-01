@@ -3,7 +3,8 @@
 from .stream import StreamHandler, StreamEvent, StreamEventType
 from .session import SessionManager, Session
 from .permissions import PermissionManager, PermissionMode
-from .hooks import HooksManager
+from .hooks import HooksManager, HookEvent, HookMatcher
+from .mcp import MCPManager, MCPTool, MCPResource
 
 __all__ = [
     "StreamHandler",
@@ -14,4 +15,9 @@ __all__ = [
     "PermissionManager",
     "PermissionMode",
     "HooksManager",
+    "HookEvent",
+    "HookMatcher",
+    "MCPManager",
+    "MCPTool",
+    "MCPResource",
 ]

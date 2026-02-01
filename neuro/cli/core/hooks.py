@@ -1,5 +1,29 @@
 """
 Hooks Manager - Lifecycle hooks for extensibility.
+
+Hooks allow external scripts to intercept and modify NEURO behavior.
+They can be used for:
+- Custom validation before tool execution
+- Audit logging
+- Custom permissions logic
+- Integration with external systems
+
+Configuration in ~/.neuro/settings.json or .neuro/settings.json:
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "./scripts/validate-tool.sh",
+        "timeout": 30,
+        "matcher": {
+          "tool_name": "write_file",
+          "file_pattern": "*.py"
+        }
+      }
+    ]
+  }
+}
 """
 
 from dataclasses import dataclass, field
@@ -9,6 +33,8 @@ import json
 import os
 import subprocess
 import asyncio
+import fnmatch
+import re
 
 
 class HookEvent(Enum):
@@ -19,14 +45,55 @@ class HookEvent(Enum):
     POST_TOOL_USE = "PostToolUse"
     STOP = "Stop"
     SESSION_END = "SessionEnd"
+    NOTIFICATION = "Notification"
+    SUBAGENT_SPAWN = "SubagentSpawn"
+
+
+@dataclass
+class HookMatcher:
+    """Matcher to filter when hooks run."""
+    tool_name: Optional[str] = None  # Match specific tool
+    tool_pattern: Optional[str] = None  # Glob pattern for tool names
+    file_pattern: Optional[str] = None  # Glob pattern for file paths
+    regex: Optional[str] = None  # Regex pattern for content
+
+    def matches(self, context: Dict[str, Any]) -> bool:
+        """Check if context matches this matcher."""
+        # Match tool name
+        if self.tool_name:
+            if context.get("tool_name") != self.tool_name:
+                return False
+
+        # Match tool pattern
+        if self.tool_pattern:
+            tool_name = context.get("tool_name", "")
+            if not fnmatch.fnmatch(tool_name, self.tool_pattern):
+                return False
+
+        # Match file pattern
+        if self.file_pattern:
+            file_path = context.get("file_path") or context.get("path", "")
+            if not fnmatch.fnmatch(file_path, self.file_pattern):
+                return False
+
+        # Match regex
+        if self.regex:
+            content = context.get("content") or context.get("prompt", "")
+            if not re.search(self.regex, str(content)):
+                return False
+
+        return True
 
 
 @dataclass
 class HookHandler:
     """A hook handler configuration."""
-    type: str = "command"  # "command" or "prompt"
+    type: str = "command"  # "command" or "url"
     command: Optional[str] = None
+    url: Optional[str] = None  # For webhook-style hooks
     timeout: int = 60
+    matcher: Optional[HookMatcher] = None
+    env: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -82,10 +149,24 @@ class HooksManager:
                             self._hooks[event] = []
 
                         for handler_config in handlers:
+                            # Parse matcher if present
+                            matcher = None
+                            if "matcher" in handler_config:
+                                m = handler_config["matcher"]
+                                matcher = HookMatcher(
+                                    tool_name=m.get("tool_name"),
+                                    tool_pattern=m.get("tool_pattern"),
+                                    file_pattern=m.get("file_pattern"),
+                                    regex=m.get("regex"),
+                                )
+
                             handler = HookHandler(
                                 type=handler_config.get("type", "command"),
                                 command=handler_config.get("command"),
+                                url=handler_config.get("url"),
                                 timeout=handler_config.get("timeout", 60),
+                                matcher=matcher,
+                                env=handler_config.get("env", {}),
                             )
                             self._hooks[event].append(handler)
                 except Exception:
@@ -125,6 +206,10 @@ class HooksManager:
 
         results = []
         for handler in handlers:
+            # Check matcher
+            if handler.matcher and not handler.matcher.matches(context):
+                continue
+
             result = await self._run_handler(handler, hook_input)
             results.append(result)
 
@@ -134,9 +219,13 @@ class HooksManager:
                     "success": False,
                     "decision": result.decision,
                     "reason": result.reason,
+                    "additional_context": result.additional_context,
                 }
 
-        return {"success": True}
+        return {
+            "success": True,
+            "handlers_run": len(results),
+        }
 
     async def _run_handler(
         self,
@@ -144,13 +233,32 @@ class HooksManager:
         hook_input: Dict,
     ) -> HookResult:
         """Run a single hook handler."""
-        if handler.type != "command" or not handler.command:
+        if handler.type == "command":
+            return await self._run_command_handler(handler, hook_input)
+        elif handler.type == "url":
+            return await self._run_url_handler(handler, hook_input)
+        else:
+            return HookResult()
+
+    async def _run_command_handler(
+        self,
+        handler: HookHandler,
+        hook_input: Dict,
+    ) -> HookResult:
+        """Run a command hook handler."""
+        if not handler.command:
             return HookResult()
 
         try:
             # Expand variables
             command = os.path.expandvars(handler.command)
             command = command.replace("$PROJECT_DIR", self.project_dir)
+
+            # Build environment
+            env = os.environ.copy()
+            env["NEURO_PROJECT_DIR"] = self.project_dir
+            env["NEURO_HOOK_EVENT"] = hook_input.get("event", "")
+            env.update(handler.env)
 
             # Run command with input on stdin
             process = await asyncio.create_subprocess_shell(
@@ -159,6 +267,7 @@ class HooksManager:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=self.project_dir,
+                env=env,
             )
 
             input_json = json.dumps(hook_input).encode()
@@ -196,6 +305,49 @@ class HooksManager:
         except Exception as e:
             return HookResult(success=False, reason=str(e))
 
+    async def _run_url_handler(
+        self,
+        handler: HookHandler,
+        hook_input: Dict,
+    ) -> HookResult:
+        """Run a URL/webhook hook handler."""
+        if not handler.url:
+            return HookResult()
+
+        try:
+            import aiohttp
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    handler.url,
+                    json=hook_input,
+                    timeout=aiohttp.ClientTimeout(total=handler.timeout),
+                ) as response:
+                    if response.status == 200:
+                        try:
+                            output = await response.json()
+                            return HookResult(
+                                success=True,
+                                decision=output.get("decision"),
+                                reason=output.get("reason"),
+                                additional_context=output.get("additionalContext"),
+                            )
+                        except Exception:
+                            return HookResult(success=True)
+                    elif response.status == 403:
+                        return HookResult(
+                            success=False,
+                            decision="block",
+                            reason="Blocked by webhook",
+                        )
+                    else:
+                        return HookResult(success=True)
+
+        except asyncio.TimeoutError:
+            return HookResult(success=False, reason="Webhook timed out")
+        except Exception as e:
+            return HookResult(success=False, reason=str(e))
+
     def register_hook(
         self,
         event: HookEvent,
@@ -209,3 +361,33 @@ class HooksManager:
     def get_hooks(self, event: HookEvent) -> List[HookHandler]:
         """Get all handlers for an event."""
         return self._hooks.get(event, [])
+
+    def list_all_hooks(self) -> Dict[str, List[Dict[str, Any]]]:
+        """List all configured hooks."""
+        result = {}
+        for event, handlers in self._hooks.items():
+            result[event.value] = []
+            for handler in handlers:
+                info = {
+                    "type": handler.type,
+                    "timeout": handler.timeout,
+                }
+                if handler.command:
+                    info["command"] = handler.command
+                if handler.url:
+                    info["url"] = handler.url
+                if handler.matcher:
+                    info["matcher"] = {
+                        k: v for k, v in {
+                            "tool_name": handler.matcher.tool_name,
+                            "tool_pattern": handler.matcher.tool_pattern,
+                            "file_pattern": handler.matcher.file_pattern,
+                            "regex": handler.matcher.regex,
+                        }.items() if v
+                    }
+                result[event.value].append(info)
+        return result
+
+    def has_hooks(self) -> bool:
+        """Check if any hooks are configured."""
+        return bool(self._hooks)
