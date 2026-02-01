@@ -741,6 +741,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                 if stream and output_format == "text":
                     print(event.content, end="", flush=True)
 
+        # Close stream handler
+        await self.stream_handler.close()
+
         if output_format == "json":
             print(json.dumps({"response": response}))
         elif output_format == "stream-json":

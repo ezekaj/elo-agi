@@ -46,7 +46,6 @@ Slash Commands:
     )
 
     # Core flags
-    parser.add_argument("prompt", nargs="?", help="Initial prompt")
     parser.add_argument("-v", "--version", action="store_true", help="Show version")
     parser.add_argument("-p", "--print", action="store_true", dest="print_mode",
                         help="Print response and exit (non-interactive)")
@@ -94,35 +93,39 @@ Slash Commands:
     parser.add_argument("--mcp-config", type=str, nargs="*",
                         help="MCP config files to load")
 
-    # Subcommands
-    subparsers = parser.add_subparsers(dest="command")
-    subparsers.add_parser("chat", help="Interactive chat (default)")
-    subparsers.add_parser("config", help="Open configuration")
-    subparsers.add_parser("mcp", help="Manage MCP servers")
-    subparsers.add_parser("doctor", help="Check installation")
-
     return parser
+
+
+# Valid subcommands (handled separately)
+SUBCOMMANDS = {"chat", "config", "mcp", "doctor"}
 
 
 def main():
     """Main entry point."""
     parser = create_parser()
-    args = parser.parse_args()
+    args, remaining = parser.parse_known_args()
 
     if args.version:
         print(f"neuro {get_version()}")
         return 0
 
-    # Handle subcommands
-    if args.command == "config":
-        from .commands.config import cmd_config
-        return cmd_config(args)
-    elif args.command == "mcp":
-        from .commands.mcp import cmd_mcp
-        return cmd_mcp(args)
-    elif args.command == "doctor":
-        from .commands.doctor import cmd_doctor
-        return cmd_doctor(args)
+    # Check if first remaining arg is a subcommand
+    if remaining and remaining[0] in SUBCOMMANDS:
+        subcommand = remaining[0]
+        if subcommand == "config":
+            from .commands.config import cmd_config
+            return cmd_config(args)
+        elif subcommand == "mcp":
+            from .commands.mcp import cmd_mcp
+            return cmd_mcp(args)
+        elif subcommand == "doctor":
+            from .commands.doctor import cmd_doctor
+            return cmd_doctor(args)
+        elif subcommand == "chat":
+            remaining = remaining[1:]  # Remove 'chat' from remaining
+
+    # Remaining args become the prompt
+    prompt = " ".join(remaining) if remaining else None
 
     # Default: run the app
     from .app import NeuroApp
@@ -137,25 +140,28 @@ def main():
 
     # Handle different modes
     if args.print_mode:
+        if not prompt:
+            print("Error: -p requires a prompt", file=sys.stderr)
+            return 1
         return app.run_print_mode(
-            prompt=args.prompt,
+            prompt=prompt,
             output_format=args.output_format,
             stream=not args.no_stream,
         )
     elif args.continue_session:
         return app.run_interactive(
-            initial_prompt=args.prompt,
+            initial_prompt=prompt,
             resume_session=True,
         )
     elif args.resume is not None:  # -r was used (with or without session ID)
         return app.run_interactive(
-            initial_prompt=args.prompt,
+            initial_prompt=prompt,
             resume_session=True,
             session_id=args.resume if args.resume else None,
         )
     else:
         return app.run_interactive(
-            initial_prompt=args.prompt,
+            initial_prompt=prompt,
         )
 
 
