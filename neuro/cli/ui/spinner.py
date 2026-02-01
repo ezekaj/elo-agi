@@ -1,67 +1,60 @@
 """
-Spinner - Animated loading spinner.
+Spinner - Rich-based animated loading indicators.
 """
 
-import sys
-import time
-import threading
-from typing import Optional, List
+from typing import Optional
+from contextlib import contextmanager
+
+from rich.console import Console
+from rich.status import Status
+from rich.spinner import Spinner as RichSpinner
 
 
 class Spinner:
-    """Animated spinner for loading states."""
+    """
+    Animated spinner using Rich.
 
-    FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-
-    RESET = "\033[0m"
-    CYAN = "\033[36m"
-    GREEN = "\033[32m"
-    RED = "\033[31m"
-    DIM = "\033[2m"
+    Provides a clean loading indicator during async operations.
+    """
 
     def __init__(
         self,
         message: str = "Loading",
-        frames: Optional[List[str]] = None,
+        spinner: str = "dots",
+        console: Optional[Console] = None,
     ):
         self.message = message
-        self.frames = frames or self.FRAMES
-        self._running = False
-        self._thread: Optional[threading.Thread] = None
-        self._frame = 0
+        self.spinner_type = spinner
+        self.console = console or Console()
+        self._status: Optional[Status] = None
 
     def start(self, message: Optional[str] = None):
         """Start the spinner."""
         if message:
             self.message = message
-        self._running = True
-        self._thread = threading.Thread(target=self._animate, daemon=True)
-        self._thread.start()
+        self._status = self.console.status(
+            f"[cyan]{self.message}[/cyan]",
+            spinner=self.spinner_type,
+        )
+        self._status.start()
 
     def update(self, message: str):
         """Update the spinner message."""
         self.message = message
+        if self._status:
+            self._status.update(f"[cyan]{message}[/cyan]")
 
     def stop(self, success: bool = True, message: Optional[str] = None):
         """Stop the spinner with final status."""
-        self._running = False
-        if self._thread:
-            self._thread.join(timeout=0.5)
+        if self._status:
+            self._status.stop()
+            self._status = None
 
-        # Clear line and show final status
-        icon = f"{self.GREEN}✓{self.RESET}" if success else f"{self.RED}✗{self.RESET}"
         final_msg = message or self.message
-        sys.stdout.write(f"\r\033[K  {icon} {final_msg}\n")
-        sys.stdout.flush()
-
-    def _animate(self):
-        """Animation loop."""
-        while self._running:
-            frame = self.frames[self._frame % len(self.frames)]
-            sys.stdout.write(f"\r\033[K  {self.CYAN}{frame}{self.RESET} {self.message}")
-            sys.stdout.flush()
-            self._frame += 1
-            time.sleep(0.08)
+        if success:
+            self.console.print(f"  [green]✓[/green] {final_msg}")
+        else:
+            self.console.print(f"  [red]✗[/red] {final_msg}")
 
     def __enter__(self):
         """Context manager entry."""
@@ -75,19 +68,57 @@ class Spinner:
         return False
 
 
-# Convenience function
-def with_spinner(message: str = "Loading"):
-    """Decorator to show spinner during function execution."""
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            spinner = Spinner(message)
-            spinner.start()
-            try:
-                result = func(*args, **kwargs)
-                spinner.stop(success=True)
-                return result
-            except Exception as e:
-                spinner.stop(success=False, message=str(e))
-                raise
-        return wrapper
-    return decorator
+class ToolSpinner(Spinner):
+    """Spinner specifically for tool execution."""
+
+    def __init__(self, tool_name: str, console: Optional[Console] = None):
+        super().__init__(
+            message=f"Running {tool_name}",
+            spinner="dots",
+            console=console,
+        )
+        self.tool_name = tool_name
+
+    def stop(self, success: bool = True, output: str = ""):
+        """Stop with tool-specific output."""
+        if self._status:
+            self._status.stop()
+            self._status = None
+
+        if success:
+            self.console.print(f"  [green]✓[/green] [bold]{self.tool_name}[/bold]")
+        else:
+            self.console.print(f"  [red]✗[/red] [bold]{self.tool_name}[/bold]")
+
+        if output:
+            lines = output.strip().split('\n')
+            for line in lines[:3]:
+                self.console.print(f"    [dim]{line}[/dim]")
+            if len(lines) > 3:
+                self.console.print(f"    [dim]... ({len(lines) - 3} more lines)[/dim]")
+
+
+@contextmanager
+def spinner(message: str = "Loading", console: Optional[Console] = None):
+    """Context manager for a quick spinner."""
+    s = Spinner(message, console=console)
+    s.start()
+    try:
+        yield s
+        s.stop(success=True)
+    except Exception:
+        s.stop(success=False)
+        raise
+
+
+@contextmanager
+def tool_spinner(tool_name: str, console: Optional[Console] = None):
+    """Context manager for tool execution spinner."""
+    s = ToolSpinner(tool_name, console=console)
+    s.start()
+    try:
+        yield s
+        s.stop(success=True)
+    except Exception as e:
+        s.stop(success=False, output=str(e))
+        raise

@@ -242,11 +242,10 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
     async def _get_input(self) -> str:
         """Get input from user."""
-        # Use asyncio-compatible input
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             None,
-            lambda: input(f"\n  {self.ui.CYAN}You:{self.ui.RESET} ").strip()
+            self.ui.print_user_prompt
         )
 
     async def _process_input(self, user_input: str):
@@ -266,11 +265,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         # Add to session
         self._current_session.add_message("user", user_input)
 
-        # Update status
-        self.status_bar.update(message="Thinking...")
-
         # Get response with streaming
-        print(f"\n  {self.ui.GREEN}NEURO:{self.ui.RESET} ", end="", flush=True)
+        self.ui.print_assistant_label()
+        self.ui.start_live()
 
         full_response = ""
         tool_calls = []
@@ -281,6 +278,7 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         ):
             if event.type.value == "token":
                 full_response += event.content
+                self.ui.append_live(event.content)
             elif event.type.value == "tool_use_start":
                 # Parse and execute tool
                 tool_result = await self._handle_tool_call(event.content)
@@ -289,10 +287,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             elif event.type.value == "done":
                 self.status_bar.update(
                     tokens=self._current_session.token_count,
-                    message="",
                 )
 
-        print()  # Newline after response
+        self.ui.stop_live()
 
         # Add response to session
         self._current_session.add_message("assistant", full_response)
@@ -314,7 +311,8 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
     def _on_token(self, token: str):
         """Callback for each streamed token."""
-        print(token, end="", flush=True)
+        # Now handled by UI live streaming
+        pass
 
     async def _handle_tool_call(self, content: str) -> Optional[tuple]:
         """Parse and execute a tool call."""
@@ -470,51 +468,47 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             ("/exit", "Exit NEURO"),
         ]
 
-        print(f"\n  {self.ui.BOLD}Commands:{self.ui.RESET}")
-        for cmd, desc in commands:
-            print(f"  {self.ui.CYAN}{cmd:20}{self.ui.RESET} {desc}")
+        self.ui.print_help(commands, title="Commands")
 
         # Skills
         skills = self.skills_loader.list_skills()
         if skills:
-            print(f"\n  {self.ui.BOLD}Skills:{self.ui.RESET}")
-            for skill in skills[:6]:  # Show first 6
-                print(f"  {self.ui.CYAN}/{skill.name:19}{self.ui.RESET} {skill.description[:35]}")
+            skill_list = [(f"/{s.name}", s.description[:40]) for s in skills[:6]]
+            self.ui.print_help(skill_list, title="Skills")
             if len(skills) > 6:
-                print(f"  {self.ui.DIM}...use /skills to see all{self.ui.RESET}")
+                self.ui.print_dim("...use /skills to see all")
 
-        # Agents
-        print(f"\n  {self.ui.BOLD}Agents:{self.ui.RESET}")
-        print(f"  {self.ui.CYAN}/agent <type> <task>{self.ui.RESET} Spawn a subagent")
-        print(f"  {self.ui.DIM}  Types: Explore, Plan, General, Bash{self.ui.RESET}")
-
-        print(f"\n  {self.ui.BOLD}Syntax:{self.ui.RESET}")
-        print(f"  {self.ui.CYAN}@./file{self.ui.RESET}             Include file content")
-        print(f"  {self.ui.CYAN}!command{self.ui.RESET}           Execute shell command")
-        print()
+        # Agents & Syntax
+        self.ui.print("[bold]Agents:[/bold]")
+        self.ui.print("  [cyan]/agent <type> <task>[/cyan] Spawn a subagent")
+        self.ui.print("  [dim]Types: Explore, Plan, General, Bash[/dim]")
+        self.ui.print()
+        self.ui.print("[bold]Syntax:[/bold]")
+        self.ui.print("  [cyan]@./file[/cyan]              Include file content")
+        self.ui.print("  [cyan]!command[/cyan]            Execute shell command")
+        self.ui.print()
 
     async def _print_status(self):
         """Print system status."""
-        print(f"\n  {self.ui.BOLD}NEURO Status{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]NEURO Status[/bold]")
         self.ui.print_divider()
 
-        # Model
-        print(f"  Model: {self.model}")
+        data = {
+            "Model": self.model,
+            "Permission mode": self.permission_manager.mode.value,
+        }
 
-        # Permission mode
-        print(f"  Permission mode: {self.permission_manager.mode.value}")
-
-        # Session
         if self._current_session:
-            print(f"  Session: {self._current_session.id[:8]}")
-            print(f"  Messages: {len(self._current_session.messages)}")
-            print(f"  Tokens: ~{self._current_session.token_count:,}")
+            data["Session"] = self._current_session.id[:8]
+            data["Messages"] = str(len(self._current_session.messages))
+            data["Tokens"] = f"~{self._current_session.token_count:,}"
 
-        # Tools
         tools = self.tool_registry.list_tools()
-        print(f"  Tools: {len(tools)} available")
+        data["Tools"] = f"{len(tools)} available"
 
-        print()
+        self.ui.print_key_value(data)
+        self.ui.print()
 
     async def _handle_model_command(self, args: str):
         """Handle /model command."""
@@ -522,9 +516,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             self.model = args
             self.stream_handler.model = args
             self.status_bar.update(model=args)
-            self.ui.print_dim(f"Switched to: {args}")
+            self.ui.print_success(f"Switched to: {args}")
         else:
-            print(f"  Current model: {self.model}")
+            self.ui.print(f"  Current model: [cyan]{self.model}[/cyan]")
             # List available models
             try:
                 import aiohttp
@@ -533,18 +527,19 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                         if r.status == 200:
                             data = await r.json()
                             models = [m["name"] for m in data.get("models", [])]
-                            print(f"  Available: {', '.join(models[:5])}")
+                            self.ui.print(f"  Available: [dim]{', '.join(models[:5])}[/dim]")
             except Exception:
                 pass
 
     def _print_tools(self):
         """Print available tools."""
-        print(f"\n  {self.ui.BOLD}Available Tools:{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]Available Tools[/bold]")
         self.ui.print_divider()
 
-        for name, tool in self.tool_registry.tools.items():
-            print(f"  {self.ui.CYAN}{name:15}{self.ui.RESET} {tool.description}")
-        print()
+        tools_list = [(name, tool.description) for name, tool in self.tool_registry.tools.items()]
+        self.ui.print_help(tools_list, title="")
+        self.ui.print()
 
     async def _compact_context(self):
         """Compact conversation context."""
@@ -557,15 +552,16 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
     def _print_cost(self):
         """Print token usage."""
-        print(f"\n  {self.ui.BOLD}Token Usage{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]Token Usage[/bold]")
         self.ui.print_divider()
 
         if self._current_session:
-            print(f"  Messages: {len(self._current_session.messages)}")
-            print(f"  Est. tokens: ~{self._current_session.token_count:,}")
-        print(f"  Model: {self.model}")
-        print(f"  {self.ui.DIM}(Local model - no API cost){self.ui.RESET}")
-        print()
+            self.ui.print(f"  Messages: {len(self._current_session.messages)}")
+            self.ui.print(f"  Est. tokens: ~{self._current_session.token_count:,}")
+        self.ui.print(f"  Model: {self.model}")
+        self.ui.print("  [dim](Local model - no API cost)[/dim]")
+        self.ui.print()
 
     def _print_context(self):
         """Print context usage visualization."""
@@ -574,55 +570,49 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
         total = self._current_session.token_count
         max_context = 32000
-        pct = min(1.0, total / max_context)
 
-        bar_width = 40
-        filled = int(bar_width * pct)
-
-        if pct < 0.5:
-            color = self.ui.GREEN
-        elif pct < 0.8:
-            color = self.ui.YELLOW
-        else:
-            color = self.ui.RED
-
-        bar = f"{color}{'█' * filled}{self.ui.DIM}{'░' * (bar_width - filled)}{self.ui.RESET}"
-        print(f"\n  [{bar}] {pct:.0%}")
-        print(f"  {self.ui.DIM}~{total:,} / ~{max_context:,} tokens{self.ui.RESET}")
-        print()
+        self.ui.print()
+        self.ui.print_progress_bar(total, max_context, label="Context")
+        self.ui.print(f"  [dim]~{total:,} / ~{max_context:,} tokens[/dim]")
+        self.ui.print()
 
     def _print_permissions(self):
         """Print current permissions."""
-        print(f"\n  {self.ui.BOLD}Permissions{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]Permissions[/bold]")
         self.ui.print_divider()
-        print(f"  Mode: {self.permission_manager.mode.value}")
-        print(f"  Session allows: {len(self.permission_manager._session_allows)}")
-        print(f"  Session denies: {len(self.permission_manager._session_denies)}")
-        print()
+        self.ui.print_key_value({
+            "Mode": self.permission_manager.mode.value,
+            "Session allows": str(len(self.permission_manager._session_allows)),
+            "Session denies": str(len(self.permission_manager._session_denies)),
+        })
+        self.ui.print()
 
     def _print_hooks(self):
         """Print configured hooks."""
-        print(f"\n  {self.ui.BOLD}Hooks{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]Hooks[/bold]")
         self.ui.print_divider()
 
         if not self.hooks_manager.has_hooks():
-            print(f"  {self.ui.DIM}No hooks configured{self.ui.RESET}")
-            print(f"\n  {self.ui.DIM}Add hooks to ~/.neuro/settings.json:{self.ui.RESET}")
-            print(f'  {self.ui.DIM}{{"hooks": {{"PreToolUse": [{{"type": "command", "command": "./script.sh"}}]}}}}{self.ui.RESET}')
-            print()
+            self.ui.print_dim("No hooks configured")
+            self.ui.print()
+            self.ui.print_dim("Add hooks to ~/.neuro/settings.json:")
+            self.ui.print('[dim]{"hooks": {"PreToolUse": [{"type": "command", "command": "./script.sh"}]}}[/dim]')
+            self.ui.print()
             return
 
         all_hooks = self.hooks_manager.list_all_hooks()
         for event, handlers in all_hooks.items():
-            print(f"\n  {self.ui.CYAN}{event}{self.ui.RESET}")
+            self.ui.print(f"\n  [cyan]{event}[/cyan]")
             for handler in handlers:
                 if handler.get("command"):
-                    print(f"    {self.ui.DIM}command:{self.ui.RESET} {handler['command']}")
+                    self.ui.print(f"    [dim]command:[/dim] {handler['command']}")
                 if handler.get("url"):
-                    print(f"    {self.ui.DIM}url:{self.ui.RESET} {handler['url']}")
+                    self.ui.print(f"    [dim]url:[/dim] {handler['url']}")
                 if handler.get("matcher"):
-                    print(f"    {self.ui.DIM}matcher:{self.ui.RESET} {handler['matcher']}")
-        print()
+                    self.ui.print(f"    [dim]matcher:[/dim] {handler['matcher']}")
+        self.ui.print()
 
     async def _check_ollama(self) -> bool:
         """Check if Ollama is available."""
@@ -724,35 +714,37 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
     def _print_skills(self):
         """Print available skills."""
-        print(f"\n  {self.ui.BOLD}Available Skills:{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]Available Skills[/bold]")
         self.ui.print_divider()
 
         for skill in self.skills_loader.list_skills():
-            aliases = f" ({', '.join(skill.aliases)})" if skill.aliases else ""
-            print(f"  {self.ui.CYAN}/{skill.name:12}{self.ui.RESET} {skill.description}{self.ui.DIM}{aliases}{self.ui.RESET}")
-        print()
-        print(f"  {self.ui.DIM}Use /<skill> [args] to run a skill{self.ui.RESET}")
-        print()
+            aliases = f" [dim]({', '.join(skill.aliases)})[/dim]" if skill.aliases else ""
+            self.ui.print(f"  [cyan]/{skill.name:12}[/cyan] {skill.description}{aliases}")
+        self.ui.print()
+        self.ui.print_dim("Use /<skill> [args] to run a skill")
+        self.ui.print()
 
     def _print_agents(self):
         """Print available agents."""
-        print(f"\n  {self.ui.BOLD}Available Agents:{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print("[bold]Available Agents[/bold]")
         self.ui.print_divider()
 
         for config in self.subagent_manager.get_available():
-            tools_str = f" [{len(config.tools)} tools]" if config.tools else ""
-            print(f"  {self.ui.CYAN}{config.name:12}{self.ui.RESET} {config.description}{self.ui.DIM}{tools_str}{self.ui.RESET}")
-        print()
-        print(f"  {self.ui.DIM}Use /agent <type> <task> to spawn an agent{self.ui.RESET}")
-        print()
+            tools_str = f" [dim][{len(config.tools)} tools][/dim]" if config.tools else ""
+            self.ui.print(f"  [cyan]{config.name:12}[/cyan] {config.description}{tools_str}")
+        self.ui.print()
+        self.ui.print_dim("Use /agent <type> <task> to spawn an agent")
+        self.ui.print()
 
         # Show running agents
         running = self.subagent_manager.get_running()
         if running:
-            print(f"  {self.ui.BOLD}Running Agents:{self.ui.RESET}")
+            self.ui.print("[bold]Running Agents:[/bold]")
             for exec in running:
-                print(f"  {self.ui.YELLOW}●{self.ui.RESET} {exec.id}: {exec.config.name} - {exec.task[:40]}...")
-            print()
+                self.ui.print(f"  [yellow]●[/yellow] {exec.id}: {exec.config.name} - {exec.task[:40]}...")
+            self.ui.print()
 
     async def _handle_mcp_command(self, args: str):
         """Handle /mcp command."""
@@ -760,49 +752,51 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         subcmd = parts[0] if parts else "list"
 
         if subcmd == "list":
-            print(f"\n  {self.ui.BOLD}MCP Servers:{self.ui.RESET}")
+            self.ui.print()
+            self.ui.print("[bold]MCP Servers[/bold]")
             self.ui.print_divider()
 
             servers = self.mcp_manager.get_servers()
             if not servers:
-                print(f"  {self.ui.DIM}No MCP servers configured{self.ui.RESET}")
-                print(f"  {self.ui.DIM}Add servers to ~/.neuro/mcp.json{self.ui.RESET}")
+                self.ui.print_dim("No MCP servers configured")
+                self.ui.print_dim("Add servers to ~/.neuro/mcp.json")
             else:
                 for name in servers:
                     connected = self.mcp_manager.is_connected(name)
-                    status = f"{self.ui.GREEN}●{self.ui.RESET}" if connected else f"{self.ui.DIM}○{self.ui.RESET}"
-                    print(f"  {status} {name}")
-            print()
+                    status = "[green]●[/green]" if connected else "[dim]○[/dim]"
+                    self.ui.print(f"  {status} {name}")
+            self.ui.print()
 
         elif subcmd == "connect":
             if len(parts) < 2:
-                print(f"  {self.ui.DIM}Usage: /mcp connect <server>{self.ui.RESET}")
+                self.ui.print_dim("Usage: /mcp connect <server>")
                 return
             server = parts[1]
-            print(f"  Connecting to {server}...")
+            self.ui.print(f"  Connecting to {server}...")
             success = await self.mcp_manager.connect(server)
             if success:
                 self.ui.print_success(f"Connected to {server}")
                 tools = [t for t in self.mcp_manager.get_tools() if t.server == server]
                 if tools:
-                    print(f"  {self.ui.DIM}Discovered {len(tools)} tools{self.ui.RESET}")
+                    self.ui.print_dim(f"Discovered {len(tools)} tools")
             else:
                 self.ui.print_error(f"Failed to connect to {server}")
 
         elif subcmd == "tools":
             tools = self.mcp_manager.get_tools()
             if tools:
-                print(f"\n  {self.ui.BOLD}MCP Tools:{self.ui.RESET}")
+                self.ui.print()
+                self.ui.print("[bold]MCP Tools[/bold]")
                 self.ui.print_divider()
                 for tool in tools:
-                    print(f"  {self.ui.CYAN}{tool.name}{self.ui.RESET}")
-                    print(f"    {self.ui.DIM}{tool.description}{self.ui.RESET}")
+                    self.ui.print(f"  [cyan]{tool.name}[/cyan]")
+                    self.ui.print(f"    [dim]{tool.description}[/dim]")
             else:
-                print(f"  {self.ui.DIM}No MCP tools available{self.ui.RESET}")
-            print()
+                self.ui.print_dim("No MCP tools available")
+            self.ui.print()
 
         else:
-            print(f"  {self.ui.DIM}MCP commands: list, connect <server>, tools{self.ui.RESET}")
+            self.ui.print_dim("MCP commands: list, connect <server>, tools")
 
     async def _handle_ide_command(self, args: str):
         """Handle /ide command."""
@@ -810,29 +804,30 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         subcmd = parts[0] if parts else "status"
 
         if subcmd == "status":
-            print(f"\n  {self.ui.BOLD}IDE Integration{self.ui.RESET}")
+            self.ui.print()
+            self.ui.print("[bold]IDE Integration[/bold]")
             self.ui.print_divider()
 
-            print(f"  Detected: {self.ide_type.value}")
+            self.ui.print(f"  Detected: {self.ide_type.value}")
             if self.ide_integration:
-                status = f"{self.ui.GREEN}connected{self.ui.RESET}" if self.ide_integration.connected else f"{self.ui.DIM}disconnected{self.ui.RESET}"
-                print(f"  Status: {status}")
+                status = "[green]connected[/green]" if self.ide_integration.connected else "[dim]disconnected[/dim]"
+                self.ui.print(f"  Status: {status}")
 
                 if self.ide_integration.connected:
                     ctx = await self.ide_integration.get_context()
                     if ctx.file_path:
-                        print(f"  Current file: {ctx.file_path}")
+                        self.ui.print(f"  Current file: {ctx.file_path}")
                     if ctx.line_number:
-                        print(f"  Line: {ctx.line_number}")
+                        self.ui.print(f"  Line: {ctx.line_number}")
                     if ctx.open_files:
-                        print(f"  Open files: {len(ctx.open_files)}")
+                        self.ui.print(f"  Open files: {len(ctx.open_files)}")
             else:
-                print(f"  {self.ui.DIM}No integration available{self.ui.RESET}")
-            print()
+                self.ui.print_dim("No integration available")
+            self.ui.print()
 
         elif subcmd == "open":
             if len(parts) < 2:
-                print(f"  {self.ui.DIM}Usage: /ide open <file> [line]{self.ui.RESET}")
+                self.ui.print_dim("Usage: /ide open <file> [line]")
                 return
 
             file_path = parts[1]
@@ -857,27 +852,30 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         elif subcmd == "context":
             if self.ide_integration and self.ide_integration.connected:
                 ctx = await self.ide_integration.get_context()
-                print(f"\n  {self.ui.BOLD}Editor Context{self.ui.RESET}")
+                self.ui.print()
+                self.ui.print("[bold]Editor Context[/bold]")
                 self.ui.print_divider()
-                print(f"  File: {ctx.file_path or 'None'}")
-                print(f"  Line: {ctx.line_number or '-'}")
-                print(f"  Column: {ctx.column or '-'}")
-                print(f"  Language: {ctx.language or 'Unknown'}")
+                self.ui.print_key_value({
+                    "File": ctx.file_path or "None",
+                    "Line": str(ctx.line_number or "-"),
+                    "Column": str(ctx.column or "-"),
+                    "Language": ctx.language or "Unknown",
+                })
                 if ctx.selection:
                     sel = ctx.selection[:50] + "..." if len(ctx.selection) > 50 else ctx.selection
-                    print(f"  Selection: {sel}")
-                print()
+                    self.ui.print(f"  Selection: {sel}")
+                self.ui.print()
             else:
-                print(f"  {self.ui.DIM}IDE not connected{self.ui.RESET}")
+                self.ui.print_dim("IDE not connected")
 
         else:
-            print(f"  {self.ui.DIM}IDE commands: status, open <file> [line], context{self.ui.RESET}")
+            self.ui.print_dim("IDE commands: status, open <file> [line], context")
 
     async def _handle_agent_command(self, args: str):
         """Handle /agent command."""
         if not args:
-            print(f"  {self.ui.DIM}Usage: /agent <type> <task>{self.ui.RESET}")
-            print(f"  {self.ui.DIM}Types: Explore, Plan, General, Bash{self.ui.RESET}")
+            self.ui.print_dim("Usage: /agent <type> <task>")
+            self.ui.print_dim("Types: Explore, Plan, General, Bash")
             return
 
         parts = args.split(maxsplit=1)
@@ -885,35 +883,38 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         task = parts[1] if len(parts) > 1 else ""
 
         if not task:
-            print(f"  {self.ui.DIM}Please provide a task for the agent{self.ui.RESET}")
+            self.ui.print_dim("Please provide a task for the agent")
             return
 
         config = self.subagent_manager.get_config(agent_type)
         if not config:
-            print(f"  {self.ui.RED}Unknown agent type: {agent_type}{self.ui.RESET}")
+            self.ui.print_error(f"Unknown agent type: {agent_type}")
             return
 
-        print(f"\n  {self.ui.CYAN}Spawning {agent_type} agent...{self.ui.RESET}")
-        print(f"  {self.ui.DIM}Task: {task}{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print(f"[cyan]Spawning {agent_type} agent...[/cyan]")
+        self.ui.print_dim(f"Task: {task}")
 
         try:
-            execution = await self.subagent_manager.spawn(agent_type, task)
+            with self.ui.spinner(f"Running {agent_type} agent"):
+                execution = await self.subagent_manager.spawn(agent_type, task)
 
             if execution.status == "completed":
-                print(f"\n  {self.ui.GREEN}Agent completed{self.ui.RESET}")
-                print(f"  {self.ui.DIM}Turns: {execution.turns}{self.ui.RESET}")
+                self.ui.print_success("Agent completed")
+                self.ui.print_dim(f"Turns: {execution.turns}")
                 if execution.result:
-                    print(f"\n  {self.ui.BOLD}Result:{self.ui.RESET}")
+                    self.ui.print()
+                    self.ui.print("[bold]Result:[/bold]")
                     self.ui.print_divider()
-                    for line in execution.result.split('\n')[:20]:
-                        print(f"  {line}")
+                    # Print result with markdown rendering
+                    self.ui.print_markdown(execution.result[:2000])
             else:
-                print(f"\n  {self.ui.RED}Agent failed: {execution.error}{self.ui.RESET}")
+                self.ui.print_error(f"Agent failed: {execution.error}")
 
         except Exception as e:
             self.ui.print_error(str(e))
 
-        print()
+        self.ui.print()
 
     async def _execute_skill(self, skill_name: str, args: str):
         """Execute a skill."""
@@ -922,7 +923,8 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             self.ui.print_error(f"Skill not found: {skill_name}")
             return
 
-        print(f"\n  {self.ui.CYAN}Running /{skill_name}...{self.ui.RESET}")
+        self.ui.print()
+        self.ui.print(f"[cyan]Running /{skill_name}...[/cyan]")
 
         # Build the prompt
         prompt = self.skills_loader.execute_skill(skill_name, args)
@@ -931,7 +933,8 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         self._current_session.add_message("user", f"/{skill_name} {args}")
 
         # Stream the response
-        print(f"\n  {self.ui.GREEN}NEURO:{self.ui.RESET} ", end="", flush=True)
+        self.ui.print_assistant_label()
+        self.ui.start_live()
 
         full_response = ""
         async for event in self.stream_handler.stream(
@@ -940,9 +943,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         ):
             if event.type.value == "token":
                 full_response += event.content
+                self.ui.append_live(event.content)
 
-        print()  # Newline after response
-
+        self.ui.stop_live()
         self._current_session.add_message("assistant", full_response)
 
     async def _chat_for_agent(
