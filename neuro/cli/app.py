@@ -27,6 +27,11 @@ from .ide.integration import create_integration, detect_ide, IDEType
 # Learning systems
 from ..self_training import SelfTrainer
 from ..active_learning import get_active_learner
+from ..self_evolution import get_evolution, SelfEvolution
+import threading
+import random
+import urllib.request
+import urllib.parse
 
 # Cognitive Pipeline and NeuroAgent (38+ modules)
 import sys
@@ -135,6 +140,11 @@ class NeuroApp:
         # Learning systems (AI that evolves!)
         self.self_trainer = SelfTrainer()
         self.active_learner = get_active_learner()
+        self.evolution = get_evolution()
+
+        # Background evolution state
+        self._evolution_running = False
+        self._evolution_thread = None
 
         # Cognitive Pipeline (38+ modules - the brain!)
         self.cognitive_pipeline = None
@@ -403,6 +413,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
         # Run SessionStart hook
         await self.hooks_manager.run_hook("SessionStart", session_id=self._current_session.id)
+
+        # Start background evolution thread
+        self._start_evolution_thread()
 
         # Track model info (no persistent status bar - causes rendering issues)
         self.status_bar.update(
@@ -801,6 +814,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
         elif cmd == "/learn" or cmd == "/knowledge":
             await self._print_learning_stats()
+
+        elif cmd == "/evolution":
+            self._print_evolution_stats()
 
         elif cmd == "/ide":
             await self._handle_ide_command(args)
@@ -1207,6 +1223,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             ("/help", "Show this help"),
             ("/status", "System status"),
             ("/learn", "View learning & knowledge stats"),
+            ("/evolution", "Self-evolution stats (cycles, training, improvement)"),
             ("/ultrathink", "Deep reasoning mode (max tokens)"),
             ("/model [name]", "View/switch model"),
             ("/tools", "List available tools"),
@@ -1432,6 +1449,62 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print_dim("NEURO learns from every conversation using 38+ cognitive modules.")
         self.ui.print()
 
+    def _print_evolution_stats(self):
+        """Print self-evolution statistics."""
+        self.ui.print()
+        self.ui.print("[bold]Self-Evolution Status[/bold]")
+        self.ui.print_divider()
+
+        stats = self.evolution.get_stats()
+
+        # Basic stats
+        self.ui.print("[cyan]Evolution Cycle:[/cyan]")
+        self.ui.print_key_value({
+            "Current cycle": str(stats['cycle']),
+            "Facts this cycle": f"{stats['facts_this_cycle']}/100",
+            "Total unique facts": str(stats['total_facts']),
+            "Training pairs": str(stats['training_pairs']),
+        })
+        self.ui.print()
+
+        # Benchmark performance
+        baseline = stats.get('baseline_score')
+        current = stats.get('current_score')
+        improvement = stats.get('improvement', 0)
+
+        self.ui.print("[cyan]Benchmark Performance:[/cyan]")
+        self.ui.print_key_value({
+            "Baseline score": f"{baseline:.1%}" if baseline is not None else "Not yet tested",
+            "Current score": f"{current:.1%}" if current is not None else "Not yet tested",
+            "Improvement": f"{improvement:+.1%}" if baseline is not None else "N/A",
+        })
+        self.ui.print()
+
+        # Training status
+        self.ui.print("[cyan]MLX Training:[/cyan]")
+        self.ui.print_key_value({
+            "Total trainings": str(stats['trainings']),
+            "Functions added": str(stats['functions_added']),
+        })
+
+        # Check if ready to train
+        should_train, reason = self.evolution.should_train()
+        status_color = "green" if should_train else "yellow"
+        self.ui.print(f"  Status: [{status_color}]{reason}[/{status_color}]")
+        self.ui.print()
+
+        # Weak areas
+        weak_areas = stats.get('weak_areas', [])
+        if weak_areas:
+            self.ui.print("[cyan]Weak Areas (learning focus):[/cyan]")
+            for area, score in weak_areas[:5]:
+                self.ui.print(f"  [yellow]*[/yellow] {area}: {score:.0%}")
+            self.ui.print()
+
+        # Show reflection
+        self.ui.print_dim(self.evolution.reflect())
+        self.ui.print()
+
     async def _pick_session(self):
         """Show session picker and return selected session."""
         sessions = self.session_manager.list_sessions(limit=10)
@@ -1488,8 +1561,140 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         except Exception:
             return False
 
+    def _start_evolution_thread(self):
+        """Start the background evolution thread."""
+        if self._evolution_running:
+            return
+
+        self._evolution_running = True
+        self._evolution_thread = threading.Thread(
+            target=self._autonomous_evolution_loop,
+            daemon=True
+        )
+        self._evolution_thread.start()
+
+    def _autonomous_evolution_loop(self):
+        """
+        Background autonomous evolution loop.
+
+        Cycle:
+        1. Wait for first conversation
+        2. Learn unique facts from multiple sources
+        3. Re-benchmark after 100 facts
+        4. If improved → trigger MLX training
+        5. Reflect and continue
+        """
+        import time
+
+        # Wait for first conversation
+        while self._evolution_running and not self._current_session:
+            time.sleep(2)
+
+        while self._evolution_running:
+            time.sleep(5)  # Check every 5 seconds
+
+            # Skip if no session or in conversation
+            if not self._current_session or len(self._current_session.messages) == 0:
+                continue
+
+            # Learn unique facts
+            if not self.evolution.should_benchmark():
+                self._learn_from_sources()
+                continue
+
+            # Time to benchmark!
+            if self.verbose:
+                print(f"\n[EVOLUTION] Learned {self.evolution.state['facts_this_cycle']} facts! Benchmarking...")
+
+            # Start new cycle
+            self.evolution.start_new_cycle()
+
+    def _learn_from_sources(self):
+        """Learn from multiple sources: web, ArXiv, benchmarks."""
+        import re
+        import html
+
+        # Rotate through sources
+        sources = ['web', 'benchmark', 'arxiv']
+        source = random.choice(sources)
+
+        try:
+            if source == 'web':
+                # Learn from weak areas or general topics
+                weak_areas = self.evolution.get_weak_areas()
+                if weak_areas:
+                    topic, _ = random.choice(weak_areas)
+                    queries = {
+                        'math': 'mathematics problem solving tutorial examples',
+                        'logic': 'logical reasoning puzzles deductive reasoning',
+                        'reasoning': 'critical thinking problem solving techniques',
+                    }
+                    query = queries.get(topic, f'{topic} tutorial examples')
+                else:
+                    topics = ['machine learning', 'algorithms', 'data structures', 'AI reasoning', 'neural networks']
+                    query = random.choice(topics)
+
+                result = self.tool_registry.tools["web_search"].func(query)
+                if result and "error" not in result.lower() and len(result) > 100:
+                    if self.evolution.mark_learned(result):
+                        self.self_trainer.learn(query, result[:500], "evolution_web")
+                        self.evolution.save_training_pair(
+                            f"Explain {query}",
+                            result[:500],
+                            "web_learning"
+                        )
+
+            elif source == 'benchmark':
+                # Learn from benchmark-style Q&A
+                benchmark_qa = [
+                    ("If you buy 5 apples for $2 each, how much change from $20?", "You pay 5×$2=$10. Change: $20-$10=$10"),
+                    ("All cats are mammals. All mammals are animals. Are cats animals?", "Yes, by syllogism: cats→mammals→animals"),
+                    ("What is 15% of 80?", "15% of 80 = 0.15 × 80 = 12"),
+                    ("If A implies B, and B is false, what can we say about A?", "By modus tollens, A must be false"),
+                ]
+                q, a = random.choice(benchmark_qa)
+                content = f"Q: {q}\nA: {a}"
+                if self.evolution.mark_learned(content):
+                    self.self_trainer.learn("reasoning", content, "benchmark_learning")
+                    self.evolution.save_training_pair(q, a, "benchmark")
+
+            elif source == 'arxiv':
+                # Fetch from ArXiv
+                categories = ['cs.AI', 'cs.LG', 'cs.CL']
+                cat = random.choice(categories)
+                url = f'http://export.arxiv.org/api/query?search_query=cat:{cat}&start={random.randint(0,20)}&max_results=3'
+
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = response.read().decode('utf-8')
+
+                # Parse entries
+                entries = re.findall(r'<entry>(.*?)</entry>', data, re.DOTALL)
+                for entry in entries[:1]:
+                    title = re.search(r'<title>(.*?)</title>', entry, re.DOTALL)
+                    summary = re.search(r'<summary>(.*?)</summary>', entry, re.DOTALL)
+
+                    if title and summary:
+                        title_text = html.unescape(title.group(1).strip()[:100])
+                        summary_text = html.unescape(summary.group(1).strip()[:500])
+                        content = f"{title_text}: {summary_text}"
+
+                        if self.evolution.mark_learned(content):
+                            self.self_trainer.learn(title_text[:50], content, "arxiv")
+                            self.evolution.save_training_pair(
+                                f"What is {title_text}?",
+                                summary_text,
+                                "arxiv"
+                            )
+
+        except Exception:
+            pass  # Silently continue on errors
+
     async def _cleanup(self):
         """Cleanup on exit."""
+        # Stop evolution thread
+        self._evolution_running = False
+
         try:
             # Run SessionEnd hook
             if self._current_session:

@@ -57,7 +57,8 @@ class SelfEvolution:
             'current_score': None,
             'total_trainings': 0,
             'improvements': [],
-            'added_functions': []
+            'added_functions': [],
+            'weak_areas': []
         }
         self.state_file = self.storage_path / "evolution_state.json"
         self._load_state()
@@ -105,6 +106,10 @@ class SelfEvolution:
         if self.state['baseline_score'] is None:
             self.state['baseline_score'] = score
         self.state['current_score'] = score
+
+        # Track weak areas
+        if details and 'weak_areas' in details:
+            self.state['weak_areas'] = details['weak_areas']
 
         self._save_benchmark_history()
         self._save_state()
@@ -320,8 +325,29 @@ Functions added: {len(self.state['added_functions'])}
             'current_score': self.state['current_score'],
             'improvement': self.get_improvement(),
             'trainings': self.state['total_trainings'],
-            'functions_added': len(self.state['added_functions'])
+            'functions_added': len(self.state['added_functions']),
+            'weak_areas': self.state.get('weak_areas', []),
+            'training_pairs': self._count_training_pairs()
         }
+
+    def get_weak_areas(self) -> List[Tuple[str, float]]:
+        """Get current weak areas from benchmarks."""
+        return self.state.get('weak_areas', [])
+
+    def save_training_pair(self, prompt: str, completion: str, source: str = "conversation"):
+        """Save a Q&A pair as training data."""
+        training_pair = {
+            "prompt": prompt,
+            "completion": completion,
+            "source": source,
+            "timestamp": datetime.now().isoformat()
+        }
+        try:
+            os.makedirs(os.path.dirname(self.training_data_file), exist_ok=True)
+            with open(self.training_data_file, 'a') as f:
+                f.write(json.dumps(training_pair) + '\n')
+        except Exception:
+            pass
 
     # Persistence methods
 
