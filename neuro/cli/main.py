@@ -52,8 +52,8 @@ Slash Commands:
                         help="Print response and exit (non-interactive)")
     parser.add_argument("-c", "--continue", action="store_true", dest="continue_session",
                         help="Continue most recent conversation")
-    parser.add_argument("-r", "--resume", type=str, metavar="SESSION",
-                        help="Resume specific session by ID")
+    parser.add_argument("-r", "--resume", type=str, nargs="?", const="", metavar="SESSION",
+                        help="Resume session (most recent if no ID given)")
 
     # Model flags
     parser.add_argument("--model", type=str, default="ministral-3:8b",
@@ -147,10 +147,11 @@ def main():
             initial_prompt=args.prompt,
             resume_session=True,
         )
-    elif args.resume:
+    elif args.resume is not None:  # -r was used (with or without session ID)
         return app.run_interactive(
             initial_prompt=args.prompt,
-            session_id=args.resume,
+            resume_session=True,
+            session_id=args.resume if args.resume else None,
         )
     else:
         return app.run_interactive(

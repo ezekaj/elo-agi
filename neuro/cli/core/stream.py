@@ -67,8 +67,16 @@ class StreamHandler:
         self,
         messages: List[Dict[str, str]],
         system_prompt: Optional[str] = None,
+        ultrathink: bool = False,
     ) -> AsyncGenerator[StreamEvent, None]:
-        """Stream response token-by-token."""
+        """
+        Stream response token-by-token.
+
+        Args:
+            messages: Conversation messages
+            system_prompt: System prompt
+            ultrathink: Enable deep reasoning mode with max tokens
+        """
         if aiohttp is None:
             yield StreamEvent(
                 type=StreamEventType.ERROR,
@@ -80,15 +88,48 @@ class StreamHandler:
 
         # Build payload
         all_messages = []
-        if system_prompt:
+
+        # Enhanced system prompt for ultrathink mode
+        if ultrathink:
+            ultrathink_prefix = """You are in ULTRATHINK mode. This means:
+1. Think step-by-step through EVERY aspect of the problem
+2. Consider multiple approaches before settling on one
+3. Show your reasoning process explicitly
+4. Break complex problems into smaller parts
+5. Question your assumptions
+6. Consider edge cases and potential issues
+7. Provide comprehensive, detailed responses
+8. Take your time - depth over brevity
+
+Begin your response with <thinking> to show your reasoning process, then provide your final answer.
+
+"""
+            if system_prompt:
+                all_messages.append({"role": "system", "content": ultrathink_prefix + system_prompt})
+            else:
+                all_messages.append({"role": "system", "content": ultrathink_prefix})
+        elif system_prompt:
             all_messages.append({"role": "system", "content": system_prompt})
+
         all_messages.extend(messages)
+
+        # Configure options based on mode
+        if ultrathink:
+            options = {
+                "temperature": 0.4,  # More focused
+                "num_ctx": 32768,    # Max context
+                "num_predict": 8192,  # Max output tokens
+                "top_p": 0.9,
+                "repeat_penalty": 1.1,
+            }
+        else:
+            options = {"temperature": 0.7}
 
         payload = {
             "model": self.model,
             "messages": all_messages,
             "stream": True,
-            "options": {"temperature": 0.7}
+            "options": options,
         }
 
         try:

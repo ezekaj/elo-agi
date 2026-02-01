@@ -267,6 +267,23 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
     async def _process_input(self, user_input: str):
         """Process user input and generate response."""
+        # Detect ultrathink mode
+        ultrathink = False
+        if user_input.lower().startswith("ultrathink") or user_input.lower().startswith("/ultrathink"):
+            ultrathink = True
+            # Remove the ultrathink prefix from the prompt
+            if user_input.lower().startswith("/ultrathink"):
+                user_input = user_input[11:].strip()
+            else:
+                user_input = user_input[10:].strip()
+
+            if not user_input:
+                self.ui.print_error("Please provide a prompt after ultrathink")
+                return
+
+            self.ui.print()
+            self.ui.print("[bold magenta]ULTRATHINK MODE[/bold magenta] [dim]Deep reasoning enabled[/dim]")
+
         # Expand file references (@./file)
         user_input = await self._expand_file_refs(user_input)
 
@@ -292,6 +309,7 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         async for event in self.stream_handler.stream(
             messages=self._current_session.get_history(),
             system_prompt=self.system_prompt,
+            ultrathink=ultrathink,
         ):
             if event.type.value == "token":
                 full_response += event.content
@@ -410,6 +428,13 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         elif cmd == "/ide":
             await self._handle_ide_command(args)
 
+        elif cmd == "/ultrathink":
+            if args:
+                await self._process_input(f"ultrathink {args}")
+            else:
+                self.ui.print_dim("Usage: /ultrathink <your question>")
+                self.ui.print_dim("Enables deep reasoning mode with max tokens")
+
         elif cmd == "/agent" or cmd == "/task":
             await self._handle_agent_command(args)
 
@@ -470,6 +495,7 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         commands = [
             ("/help", "Show this help"),
             ("/status", "System status"),
+            ("/ultrathink", "Deep reasoning mode (max tokens)"),
             ("/model [name]", "View/switch model"),
             ("/tools", "List available tools"),
             ("/skills", "List available skills"),
