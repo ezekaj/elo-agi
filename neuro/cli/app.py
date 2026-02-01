@@ -8,6 +8,7 @@ import asyncio
 import sys
 import os
 import json
+import signal
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 
@@ -148,6 +149,13 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
 
+        # Handle Ctrl+C gracefully
+        def handle_sigint(sig, frame):
+            self.ui.print()
+            self.ui.print_dim("Interrupted. Use /exit to quit.")
+
+        original_handler = signal.signal(signal.SIGINT, handle_sigint)
+
         try:
             return self._loop.run_until_complete(
                 self._interactive_loop(
@@ -156,7 +164,12 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                     session_id=session_id,
                 )
             )
+        except KeyboardInterrupt:
+            self.ui.print()
+            self._loop.run_until_complete(self._cleanup())
+            return 0
         finally:
+            signal.signal(signal.SIGINT, original_handler)
             self._loop.close()
 
     async def _interactive_loop(
@@ -200,8 +213,7 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         self.ui.print_dim("Commands: /help /status /model /tools /compact /clear /exit")
         self.ui.print_divider()
 
-        # Start status bar
-        self.status_bar.start()
+        # Track model info (no persistent status bar - causes rendering issues)
         self.status_bar.update(
             model=self.model,
             mode=self.permission_manager.mode.value,
@@ -215,26 +227,31 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         while True:
             try:
                 user_input = await self._get_input()
-            except (EOFError, KeyboardInterrupt):
+
+                if not user_input:
+                    continue
+
+                # Handle commands
+                if user_input.startswith("/"):
+                    should_exit = await self._handle_command(user_input)
+                    if should_exit:
+                        break
+                    continue
+
+                # Handle shell commands
+                if user_input.startswith("!"):
+                    await self._handle_shell_command(user_input[1:])
+                    continue
+
+                # Process normal input
+                await self._process_input(user_input)
+
+            except EOFError:
                 break
-
-            if not user_input:
+            except KeyboardInterrupt:
+                self.ui.print()
+                self.ui.print_dim("Interrupted. Type /exit to quit or continue chatting.")
                 continue
-
-            # Handle commands
-            if user_input.startswith("/"):
-                should_exit = await self._handle_command(user_input)
-                if should_exit:
-                    break
-                continue
-
-            # Handle shell commands
-            if user_input.startswith("!"):
-                await self._handle_shell_command(user_input[1:])
-                continue
-
-            # Process normal input
-            await self._process_input(user_input)
 
         # Cleanup
         await self._cleanup()
@@ -629,29 +646,30 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
     async def _cleanup(self):
         """Cleanup on exit."""
-        # Run SessionEnd hook
-        if self._current_session:
-            await self.hooks_manager.run_hook(
-                "SessionEnd",
-                session_id=self._current_session.id,
-            )
+        try:
+            # Run SessionEnd hook
+            if self._current_session:
+                await self.hooks_manager.run_hook(
+                    "SessionEnd",
+                    session_id=self._current_session.id,
+                )
 
-        # Stop status bar
-        self.status_bar.stop()
+            # Save session
+            if self._current_session and not self.no_session_persistence:
+                self.session_manager.save(self._current_session)
+                self.ui.print_dim(f"Session saved: {self._current_session.id[:8]}")
 
-        # Save session
-        if self._current_session and not self.no_session_persistence:
-            self.session_manager.save(self._current_session)
-            self.ui.print_dim(f"Session saved: {self._current_session.id[:8]}")
+            # Close stream handler
+            await self.stream_handler.close()
 
-        # Close stream handler
-        await self.stream_handler.close()
+            # Disconnect IDE integration
+            if self.ide_integration and self.ide_integration.connected:
+                await self.ide_integration.disconnect()
 
-        # Disconnect IDE integration
-        if self.ide_integration and self.ide_integration.connected:
-            await self.ide_integration.disconnect()
-
-        self.ui.print_dim("Goodbye!")
+            self.ui.print_dim("Goodbye!")
+        except Exception:
+            # Silently handle cleanup errors on interrupt
+            pass
 
     def run_print_mode(
         self,
