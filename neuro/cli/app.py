@@ -336,6 +336,11 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                     await self._handle_shell_command(user_input[1:])
                     continue
 
+                # Handle direct tool calls (e.g., "improve_self", "web_search python")
+                tool_result = await self._try_direct_tool(user_input)
+                if tool_result:
+                    continue
+
                 # Process normal input
                 await self._process_input(user_input)
 
@@ -685,6 +690,155 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             self.ui.print_dim(f"Unknown command: {cmd}. Try /help")
 
         return False
+
+    async def _try_direct_tool(self, user_input: str) -> bool:
+        """Try to execute a direct tool call. Returns True if handled."""
+        # Check if input starts with a known tool name
+        parts = user_input.strip().split(maxsplit=1)
+        if not parts:
+            return False
+
+        tool_name = parts[0].lower()
+        tool_arg = parts[1] if len(parts) > 1 else ""
+
+        # Map of direct tool commands
+        direct_tools = {
+            "improve_self": lambda: self.tool_registry.tools["improve_self"].func(tool_arg or "core"),
+            "web_search": lambda: self.tool_registry.tools["web_search"].func(tool_arg),
+            "web_fetch": lambda: self.tool_registry.tools["web_fetch"].func(tool_arg),
+            "read_file": lambda: self.tool_registry.tools["read_file"].func(tool_arg),
+            "list_files": lambda: self.tool_registry.tools["list_files"].func(tool_arg or "."),
+            "git_status": lambda: self.tool_registry.tools["git_status"].func(),
+            "git_diff": lambda: self.tool_registry.tools["git_diff"].func(),
+            "run_command": lambda: self.tool_registry.tools["run_command"].func(tool_arg),
+        }
+
+        # Special autonomous commands
+        if tool_name == "evolve" or tool_name == "learn_online":
+            await self._autonomous_evolve(tool_arg)
+            return True
+
+        if tool_name == "research":
+            await self._autonomous_research(tool_arg)
+            return True
+
+        if tool_name in direct_tools:
+            self.ui.print()
+            self.ui.print(f"[cyan]Executing tool: {tool_name}[/cyan]")
+
+            try:
+                with self.ui.spinner(f"Running {tool_name}..."):
+                    result = direct_tools[tool_name]()
+
+                # Display result
+                self.ui.print()
+                if len(result) > 2000:
+                    self.ui.print(result[:2000])
+                    self.ui.print_dim(f"... ({len(result) - 2000} more characters)")
+                else:
+                    self.ui.print(result)
+                self.ui.print()
+
+                # If this was improve_self, ask the AI to analyze and act
+                if tool_name == "improve_self":
+                    self.ui.print_dim("Analyzing improvement opportunities...")
+                    # Add the result to conversation and let AI analyze
+                    await self._process_input(
+                        f"Based on this code analysis, identify ONE specific improvement and implement it:\n\n{result[:1500]}"
+                    )
+
+                return True
+
+            except Exception as e:
+                self.ui.print_error(f"Tool error: {e}")
+                return True
+
+        return False
+
+    async def _autonomous_evolve(self, focus: str = ""):
+        """Autonomous self-evolution - research online and improve code."""
+        self.ui.print()
+        self.ui.print("[bold magenta]AUTONOMOUS EVOLUTION MODE[/bold magenta]")
+        self.ui.print_dim("Researching and improving myself...")
+        self.ui.print()
+
+        # Step 1: Analyze current state
+        self.ui.print_dim("Step 1: Analyzing my code...")
+        analysis = self.tool_registry.tools["improve_self"].func(focus or "core")
+        self.ui.print(analysis[:1000])
+
+        # Step 2: Search for improvements online
+        search_query = focus or "AI agent self-improvement techniques 2024"
+        self.ui.print()
+        self.ui.print_dim(f"Step 2: Researching online: {search_query}")
+        search_results = self.tool_registry.tools["web_search"].func(search_query)
+        self.ui.print(search_results[:800])
+
+        # Step 3: Let AI decide and implement improvement
+        self.ui.print()
+        self.ui.print_dim("Step 3: Deciding on improvements...")
+
+        prompt = f"""Based on my code analysis and online research, I will now improve myself.
+
+MY CODE ANALYSIS:
+{analysis[:1000]}
+
+RESEARCH FINDINGS:
+{search_results[:800]}
+
+I will now identify ONE specific improvement and implement it by:
+1. Reading the relevant file
+2. Making the improvement
+3. Testing it works
+
+Starting now..."""
+
+        await self._process_input(prompt)
+
+    async def _autonomous_research(self, topic: str):
+        """Autonomous research - search, learn, and store knowledge."""
+        if not topic:
+            self.ui.print_error("Please provide a topic: research <topic>")
+            return
+
+        self.ui.print()
+        self.ui.print(f"[bold cyan]AUTONOMOUS RESEARCH: {topic}[/bold cyan]")
+        self.ui.print_dim("Searching, learning, and storing knowledge...")
+        self.ui.print()
+
+        # Step 1: Web search
+        self.ui.print_dim("Searching the web...")
+        search_results = self.tool_registry.tools["web_search"].func(topic)
+        self.ui.print(search_results[:600])
+
+        # Step 2: Store as knowledge
+        self.ui.print()
+        self.ui.print_dim("Storing knowledge...")
+        self.self_trainer.learn(
+            topic=topic,
+            content=search_results,
+            source="web_research"
+        )
+
+        if self.cognitive_pipeline:
+            self.cognitive_pipeline.learn(
+                topic=topic,
+                content=search_results,
+                source="web_research",
+                importance=0.8
+            )
+
+        # Step 3: Let AI synthesize
+        self.ui.print()
+        self.ui.print_dim("Synthesizing knowledge...")
+
+        prompt = f"""I just researched "{topic}" and learned:
+
+{search_results[:1000]}
+
+Now I will synthesize this into useful knowledge and explain what I learned."""
+
+        await self._process_input(prompt)
 
     async def _handle_shell_command(self, cmd: str):
         """Execute shell command."""
