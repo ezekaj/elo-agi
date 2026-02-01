@@ -8,7 +8,6 @@ import asyncio
 import sys
 import os
 import json
-import signal
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 
