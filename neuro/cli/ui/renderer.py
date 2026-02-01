@@ -81,6 +81,118 @@ class UIRenderer:
             )
         )
 
+    def print_welcome_screen(
+        self,
+        version: str,
+        user_name: str,
+        model: str,
+        working_dir: str,
+        recent_sessions: list = None,
+        knowledge_stats: dict = None,
+    ):
+        """Print a beautiful welcome screen like Claude Code."""
+        from rich.columns import Columns
+        from rich.align import Align
+
+        # ASCII art logo for NEURO (using Text with styles)
+        logo = Text()
+        logo.append("    ╔╗╔╔═╗╦ ╦╦═╗╔═╗\n", style="bold cyan")
+        logo.append("    ║║║║╣ ║ ║╠╦╝║ ║\n", style="bold cyan")
+        logo.append("    ╝╚╝╚═╝╚═╝╩╚═╚═╝", style="bold cyan")
+
+        # Create left panel content
+        left_content = Text()
+        left_content.append(f"\n     Welcome back {user_name}!\n\n", style="bold white")
+        left_content.append_text(logo)
+        left_content.append(f"\n\n    {model}", style="dim")
+        left_content.append(f"\n    {working_dir}\n", style="dim cyan")
+
+        # Create right panel - Tips
+        tips_content = Text()
+        tips_content.append("Tips for getting started\n", style="bold yellow")
+        tips_content.append("Run ", style="dim")
+        tips_content.append("/help", style="cyan")
+        tips_content.append(" to see all commands\n", style="dim")
+        tips_content.append("Use ", style="dim")
+        tips_content.append("@./file", style="cyan")
+        tips_content.append(" to include file content\n", style="dim")
+        tips_content.append("Try ", style="dim")
+        tips_content.append("/ultrathink", style="cyan")
+        tips_content.append(" for deep reasoning\n", style="dim")
+        tips_content.append("Run ", style="dim")
+        tips_content.append("/learn", style="cyan")
+        tips_content.append(" to see what I've learned\n", style="dim")
+
+        # Recent activity section
+        activity_content = Text()
+        activity_content.append("\nRecent activity\n", style="bold yellow")
+
+        if recent_sessions and len(recent_sessions) > 0:
+            from datetime import datetime
+            for sess in recent_sessions[:3]:
+                created = datetime.fromisoformat(sess.get("created_at", datetime.now().isoformat()))
+                age = datetime.now() - created
+                if age.days > 0:
+                    time_str = f"{age.days}d ago"
+                elif age.seconds > 3600:
+                    time_str = f"{age.seconds // 3600}h ago"
+                else:
+                    time_str = f"{age.seconds // 60}m ago"
+
+                preview = sess.get("preview", "")[:25] + "..." if sess.get("preview") else ""
+                activity_content.append(f"  {sess['id'][:8]}", style="cyan")
+                activity_content.append(f" ({time_str})", style="dim")
+                if preview:
+                    activity_content.append(f" {preview}", style="dim")
+                activity_content.append("\n")
+        else:
+            activity_content.append("  No recent activity\n", style="dim")
+
+        # Knowledge stats if available
+        if knowledge_stats and knowledge_stats.get('total_facts', 0) > 0:
+            activity_content.append(f"\n  Knowledge: {knowledge_stats.get('total_facts', 0)} facts learned\n", style="dim green")
+
+        # Combine right panel
+        right_text = Text()
+        right_text.append_text(tips_content)
+        right_text.append_text(activity_content)
+
+        # Create panels
+        left_panel = Panel(
+            Align.center(left_content),
+            border_style="cyan",
+            title="NEURO v" + version,
+            title_align="left",
+            padding=(0, 1),
+        )
+
+        right_panel = Panel(
+            right_text,
+            border_style="yellow",
+            padding=(0, 1),
+        )
+
+        # Print side by side
+        self.console.print()
+
+        # Use columns for side-by-side layout
+        columns = Columns([left_panel, right_panel], expand=True, equal=True)
+        self.console.print(columns)
+        self.console.print()
+
+    def print_input_prompt(self, placeholder: str = ""):
+        """Print the input prompt with placeholder hint."""
+        self.console.print()
+        if placeholder:
+            prompt_text = Text()
+            prompt_text.append("> ", style="bold cyan")
+            prompt_text.append(placeholder, style="dim italic")
+            # Move cursor back to start of placeholder
+            self.console.print(prompt_text, end="")
+            # Clear the line and show just the prompt
+            print("\r", end="")
+        return self.console.input("[bold cyan]>[/bold cyan] ")
+
     # =========================================================================
     # Messages & Status
     # =========================================================================

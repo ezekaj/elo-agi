@@ -24,6 +24,10 @@ from .ui.renderer import UIRenderer
 from .ui.status_bar import StatusBar
 from .ide.integration import create_integration, detect_ide, IDEType
 
+# Learning systems
+from ..self_training import SelfTrainer
+from ..active_learning import get_active_learner
+
 
 class NeuroApp:
     """
@@ -110,26 +114,40 @@ class NeuroApp:
         # System prompt
         self.system_prompt = system_prompt or self._default_system_prompt()
 
+        # Learning systems (AI that evolves!)
+        self.self_trainer = SelfTrainer()
+        self.active_learner = get_active_learner()
+
         # Runtime state
         self._current_session = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._first_prompt = True  # Track if this is the first prompt
 
     def _default_system_prompt(self) -> str:
         """Get default system prompt."""
-        return """You are NEURO, an advanced AI assistant with neuroscience-inspired cognition.
+        return """You are NEURO, an autonomous AI assistant with neuroscience-inspired cognition.
+
+CORE IDENTITY:
+You are DECISIVE and AUTONOMOUS. You make decisions and execute them. You don't ask for confirmation on routine tasks - you just do them. Only ask questions when genuinely ambiguous or high-risk.
 
 CAPABILITIES:
 - Read, write, and edit files
 - Execute shell commands
 - Search the web
 - Git operations
-- Learn from conversations
+- Learn from conversations (you remember and improve over time)
 
-PRINCIPLES:
-1. Be direct and concise
-2. Admit uncertainty
-3. Use tools when needed
-4. Never fabricate information
+DECISION-MAKING PRINCIPLES:
+1. DECIDE: When you have enough context, make the decision yourself
+2. ACT: Execute the plan without asking "should I proceed?"
+3. INFORM: Tell the user what you're doing, not what you could do
+4. Only ask when the decision significantly affects outcomes AND is genuinely ambiguous
+
+COMMUNICATION STYLE:
+- Be direct and concise
+- Say "I'll do X" instead of "Should I do X?"
+- Execute tasks, then report results
+- Never ask for permission on routine operations
 
 TOOL FORMAT:
 To use a tool, respond with:
@@ -170,22 +188,45 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         session_id: Optional[str] = None,
     ) -> int:
         """Main interactive loop."""
-        # Print header
-        self.ui.print_header()
+        import getpass
 
-        # Check Ollama connection
+        # Check Ollama connection first (needed for welcome screen)
         available = await self._check_ollama()
         if not available:
             self.ui.print_error("Ollama not available. Run: ollama serve")
             return 1
 
-        self.ui.print_status("ollama", f"Connected ({self.model})")
-
-        # Connect IDE integration if available
+        # Connect IDE integration if available (in background)
         if self.ide_integration:
-            connected = await self.ide_integration.connect()
-            if connected:
-                self.ui.print_status("ide", f"{self.ide_type.value} integration active")
+            await self.ide_integration.connect()
+
+        # Get user name
+        try:
+            user_name = getpass.getuser().capitalize()
+        except Exception:
+            user_name = "User"
+
+        # Get recent sessions for welcome screen
+        recent_sessions = self.session_manager.list_sessions(limit=5)
+
+        # Get knowledge stats
+        knowledge_stats = self.self_trainer.get_stats()
+
+        # Get working directory (shortened)
+        working_dir = self.project_dir
+        home = os.path.expanduser("~")
+        if working_dir.startswith(home):
+            working_dir = "~" + working_dir[len(home):]
+
+        # Print beautiful welcome screen
+        self.ui.print_welcome_screen(
+            version="3.0.0",
+            user_name=user_name,
+            model=self.model,
+            working_dir=working_dir,
+            recent_sessions=recent_sessions,
+            knowledge_stats=knowledge_stats,
+        )
 
         # Load or create session
         if resume_session or session_id:
@@ -214,10 +255,6 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
         # Run SessionStart hook
         await self.hooks_manager.run_hook("SessionStart", session_id=self._current_session.id)
-
-        # Print commands help
-        self.ui.print_dim("Commands: /help /status /model /tools /compact /clear /exit")
-        self.ui.print_divider()
 
         # Track model info (no persistent status bar - causes rendering issues)
         self.status_bar.update(
@@ -263,6 +300,15 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
     async def _get_input(self) -> str:
         """Get input from user."""
         loop = asyncio.get_event_loop()
+
+        # Show placeholder hint on first prompt
+        if self._first_prompt:
+            self._first_prompt = False
+            # Print placeholder hint
+            self.ui.print_dim('Try "explain this code" or "help me fix a bug"')
+            self.ui.print_dim('? for shortcuts')
+            self.ui.print()
+
         return await loop.run_in_executor(
             None,
             self.ui.print_user_prompt
@@ -299,18 +345,44 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             self.ui.print_error(f"Blocked: {hook_result.get('reason', 'Hook rejected')}")
             return
 
-        # Add to session
+        # Show what we're doing
+        self.ui.print_dim("Searching knowledge...")
+
+        # Inject learned knowledge into prompt
+        learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
+        if learned_knowledge:
+            # Show that we found relevant knowledge
+            fact_count = learned_knowledge.count('\n') - 1
+            self.ui.print_dim(f"Found {fact_count} relevant facts from memory")
+            augmented_input = user_input + "\n\n" + learned_knowledge
+        else:
+            augmented_input = user_input
+
+        # Boost curiosity for topics mentioned in user input
+        words = user_input.lower().split()
+        for word in words:
+            if len(word) > 4:  # Only meaningful words
+                self.active_learner.boost_curiosity(word, amount=0.1)
+
+        # Add to session (original input, not augmented)
         self._current_session.add_message("user", user_input)
 
         # Get response with streaming
+        self.ui.print_dim("Thinking...")
         self.ui.print_assistant_label()
         self.ui.start_live()
 
         full_response = ""
         tool_calls = []
 
+        # Build messages with augmented last message (includes learned knowledge)
+        messages = self._current_session.get_history()
+        if messages and learned_knowledge:
+            # Replace last user message with augmented version (internally only)
+            messages = messages[:-1] + [{"role": "user", "content": augmented_input}]
+
         async for event in self.stream_handler.stream(
-            messages=self._current_session.get_history(),
+            messages=messages,
             system_prompt=self.system_prompt,
             ultrathink=ultrathink,
         ):
@@ -343,6 +415,10 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             # Continue with tool results
             await self._process_input(f"Continue with the tool results above.")
 
+        # Learn from this conversation
+        self.ui.print_dim("Learning from conversation...")
+        self._record_learning(user_input, full_response)
+
         # Save session
         if not self.no_session_persistence:
             self.session_manager.save(self._current_session)
@@ -351,6 +427,59 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         """Callback for each streamed token."""
         # Now handled by UI live streaming
         pass
+
+    def _record_learning(self, user_input: str, response: str):
+        """Extract knowledge and record learning from the conversation."""
+        import re
+
+        # Extract meaningful topics from the conversation
+        combined = f"{user_input} {response}"
+
+        # Simple topic extraction - words that appear multiple times or are capitalized
+        words = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', combined)  # Proper nouns
+        words += re.findall(r'\b[a-z]{5,}\b', combined.lower())  # Meaningful words
+
+        # Count frequencies
+        from collections import Counter
+        word_freq = Counter(words)
+
+        # Topics are frequent meaningful words
+        topics = [word for word, count in word_freq.items()
+                  if count >= 2 and len(word) > 4][:5]
+
+        for topic in topics:
+            # Record exposure with success (AI answered)
+            self.active_learner.record_exposure(
+                topic=topic,
+                was_successful=True,  # We answered the query
+                surprise_level=0.5,   # Neutral surprise
+                complexity=len(response) / 1000  # Rough complexity estimate
+            )
+
+        # Store factual content as learned knowledge
+        # Extract sentences that look like facts (contain "is", "are", "means", etc.)
+        fact_patterns = [
+            r'([A-Z][^.!?]*(?:is|are|means|refers to|defined as)[^.!?]*\.)',
+            r'([A-Z][^.!?]*(?:can be|should be|must be)[^.!?]*\.)',
+        ]
+
+        for pattern in fact_patterns:
+            facts = re.findall(pattern, response)
+            for fact in facts[:3]:  # Limit to 3 facts per response
+                if len(fact) > 20:  # Meaningful fact
+                    # Determine topic from fact
+                    fact_words = re.findall(r'\b[A-Z][a-z]+\b', fact)
+                    topic = fact_words[0] if fact_words else "general"
+
+                    self.self_trainer.learn(
+                        topic=topic,
+                        content=fact.strip(),
+                        source="conversation"
+                    )
+
+        # Save periodically
+        if len(self._current_session.messages) % 10 == 0:
+            self.self_trainer.save()
 
     async def _handle_tool_call(self, content: str) -> Optional[tuple]:
         """Parse and execute a tool call."""
@@ -428,6 +557,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         elif cmd == "/hooks":
             self._print_hooks()
 
+        elif cmd == "/learn" or cmd == "/knowledge":
+            await self._print_learning_stats()
+
         elif cmd == "/ide":
             await self._handle_ide_command(args)
 
@@ -498,6 +630,7 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         commands = [
             ("/help", "Show this help"),
             ("/status", "System status"),
+            ("/learn", "View learning & knowledge stats"),
             ("/ultrathink", "Deep reasoning mode (max tokens)"),
             ("/model [name]", "View/switch model"),
             ("/tools", "List available tools"),
@@ -658,6 +791,54 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                     self.ui.print(f"    [dim]url:[/dim] {handler['url']}")
                 if handler.get("matcher"):
                     self.ui.print(f"    [dim]matcher:[/dim] {handler['matcher']}")
+        self.ui.print()
+
+    async def _print_learning_stats(self):
+        """Print learning and knowledge statistics."""
+        self.ui.print()
+        self.ui.print("[bold]Learning & Knowledge[/bold]")
+        self.ui.print_divider()
+
+        # Active learning stats
+        al_stats = self.active_learner.get_stats()
+        self.ui.print("[cyan]Active Learning:[/cyan]")
+        self.ui.print_key_value({
+            "Topics tracked": str(al_stats.get('total_topics', 0)),
+            "Avg confidence": f"{al_stats.get('avg_confidence', 0):.1%}",
+            "Avg curiosity": f"{al_stats.get('avg_curiosity', 0):.1%}",
+            "Learning events": str(al_stats.get('total_learning_events', 0)),
+        })
+        self.ui.print()
+
+        # Knowledge base stats
+        kb_stats = self.self_trainer.get_stats()
+        self.ui.print("[cyan]Knowledge Base:[/cyan]")
+        self.ui.print_key_value({
+            "Facts stored": str(kb_stats.get('total_facts', 0)),
+            "Embeddings": str(kb_stats.get('total_embeddings', 0)),
+            "Session learned": str(kb_stats.get('session_learning', 0)),
+            "Storage": kb_stats.get('storage_path', 'Unknown'),
+        })
+        self.ui.print()
+
+        # Learning recommendations
+        recs = self.active_learner.get_learning_recommendations(k=3)
+        if recs:
+            self.ui.print("[cyan]Learning Recommendations:[/cyan]")
+            for topic, priority, reason in recs:
+                self.ui.print(f"  [yellow]●[/yellow] {topic} [dim](priority: {priority:.2f}, {reason})[/dim]")
+            self.ui.print()
+
+        # Recent facts learned
+        recent = self.self_trainer.kb.get_recent_facts(n=3)
+        if recent:
+            self.ui.print("[cyan]Recently Learned:[/cyan]")
+            for fact in recent:
+                content = fact['content'][:60] + "..." if len(fact['content']) > 60 else fact['content']
+                self.ui.print(f"  [dim]●[/dim] [{fact['topic']}] {content}")
+            self.ui.print()
+
+        self.ui.print_dim("NEURO learns from every conversation and stores knowledge persistently.")
         self.ui.print()
 
     async def _pick_session(self):

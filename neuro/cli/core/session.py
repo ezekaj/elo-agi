@@ -207,7 +207,7 @@ class SessionManager:
         return session
 
     def list_sessions(self, limit: int = 10) -> List[Dict]:
-        """List recent sessions."""
+        """List recent sessions with preview."""
         if not self.persist:
             return []
 
@@ -221,13 +221,27 @@ class SessionManager:
         for t in transcripts:
             try:
                 with open(t) as f:
-                    first_line = f.readline()
-                    data = json.loads(first_line)
-                    if data["type"] == "session":
+                    session_data = None
+                    preview = ""
+                    msg_count = 0
+
+                    for line in f:
+                        data = json.loads(line)
+                        if data["type"] == "session":
+                            session_data = data
+                        elif data["type"] == "message":
+                            msg_count += 1
+                            # Get first user message as preview
+                            if not preview and data.get("role") == "user":
+                                preview = data.get("content", "")[:50]
+
+                    if session_data:
                         sessions.append({
-                            "id": data["id"],
-                            "created_at": data["created_at"],
-                            "project_dir": data["project_dir"],
+                            "id": session_data["id"],
+                            "created_at": session_data["created_at"],
+                            "project_dir": session_data["project_dir"],
+                            "preview": preview,
+                            "message_count": msg_count,
                         })
             except Exception:
                 pass
