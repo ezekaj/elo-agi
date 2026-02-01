@@ -149,13 +149,6 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
 
-        # Handle Ctrl+C gracefully
-        def handle_sigint(sig, frame):
-            self.ui.print()
-            self.ui.print_dim("Interrupted. Use /exit to quit.")
-
-        original_handler = signal.signal(signal.SIGINT, handle_sigint)
-
         try:
             return self._loop.run_until_complete(
                 self._interactive_loop(
@@ -169,7 +162,6 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             self._loop.run_until_complete(self._cleanup())
             return 0
         finally:
-            signal.signal(signal.SIGINT, original_handler)
             self._loop.close()
 
     async def _interactive_loop(
@@ -198,9 +190,24 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
         # Load or create session
         if resume_session or session_id:
-            self._current_session = self.session_manager.resume(session_id)
+            if session_id:
+                # Resume specific session
+                self._current_session = self.session_manager.resume(session_id)
+            else:
+                # Show session picker
+                self._current_session = await self._pick_session()
+
             if self._current_session:
-                self.ui.print_dim(f"Resumed session: {self._current_session.id[:8]}")
+                msg_count = len(self._current_session.messages)
+                self.ui.print_success(f"Resumed session: {self._current_session.id[:8]} ({msg_count} messages)")
+                # Show recent history
+                if msg_count > 0:
+                    self.ui.print_dim("Recent history:")
+                    for msg in self._current_session.messages[-4:]:
+                        role = "[cyan]You:[/cyan]" if msg.role == "user" else "[green]NEURO:[/green]"
+                        content = msg.content[:60] + "..." if len(msg.content) > 60 else msg.content
+                        self.ui.print(f"  {role} {content}")
+                    self.ui.print()
             else:
                 self._current_session = self.session_manager.new_session()
         else:
@@ -246,12 +253,9 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                 # Process normal input
                 await self._process_input(user_input)
 
-            except EOFError:
-                break
-            except KeyboardInterrupt:
+            except (EOFError, KeyboardInterrupt):
                 self.ui.print()
-                self.ui.print_dim("Interrupted. Type /exit to quit or continue chatting.")
-                continue
+                break
 
         # Cleanup
         await self._cleanup()
@@ -656,6 +660,49 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                 if handler.get("matcher"):
                     self.ui.print(f"    [dim]matcher:[/dim] {handler['matcher']}")
         self.ui.print()
+
+    async def _pick_session(self):
+        """Show session picker and return selected session."""
+        sessions = self.session_manager.list_sessions(limit=10)
+
+        if not sessions:
+            self.ui.print_dim("No previous sessions found")
+            return None
+
+        self.ui.print()
+        self.ui.print("[bold]Recent Sessions[/bold]")
+        self.ui.print_divider()
+
+        from datetime import datetime
+
+        for i, sess in enumerate(sessions, 1):
+            created = datetime.fromisoformat(sess["created_at"])
+            age = datetime.now() - created
+            if age.days > 0:
+                time_str = f"{age.days}d ago"
+            elif age.seconds > 3600:
+                time_str = f"{age.seconds // 3600}h ago"
+            else:
+                time_str = f"{age.seconds // 60}m ago"
+
+            self.ui.print(f"  [cyan]{i}.[/cyan] {sess['id'][:8]} [dim]({time_str})[/dim]")
+
+        self.ui.print(f"  [cyan]n.[/cyan] [dim]New session[/dim]")
+        self.ui.print()
+
+        try:
+            choice = self.ui.console.input("[dim]Select session:[/dim] ").strip().lower()
+
+            if choice == 'n' or choice == '':
+                return None
+
+            idx = int(choice) - 1
+            if 0 <= idx < len(sessions):
+                return self.session_manager.resume(sessions[idx]["id"])
+        except (ValueError, EOFError, KeyboardInterrupt):
+            pass
+
+        return None
 
     async def _check_ollama(self) -> bool:
         """Check if Ollama is available."""
