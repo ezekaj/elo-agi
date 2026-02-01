@@ -28,7 +28,7 @@ from .ide.integration import create_integration, detect_ide, IDEType
 from ..self_training import SelfTrainer
 from ..active_learning import get_active_learner
 
-# Cognitive Pipeline (38+ modules)
+# Cognitive Pipeline and NeuroAgent (38+ modules)
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../neuro-model/src'))
 try:
@@ -36,6 +36,12 @@ try:
     COGNITIVE_PIPELINE_AVAILABLE = True
 except ImportError:
     COGNITIVE_PIPELINE_AVAILABLE = False
+
+try:
+    from neuro_agent import NeuroAgent
+    NEURO_AGENT_AVAILABLE = True
+except ImportError:
+    NEURO_AGENT_AVAILABLE = False
 
 
 class NeuroApp:
@@ -138,6 +144,18 @@ class NeuroApp:
             except Exception as e:
                 if verbose:
                     print(f"[NEURO] Cognitive pipeline init failed: {e}")
+
+        # NeuroAgent (full PERCEIVE -> THINK -> ACT -> LEARN -> IMPROVE workflow)
+        self.neuro_agent = None
+        if NEURO_AGENT_AVAILABLE:
+            try:
+                self.neuro_agent = NeuroAgent(model=model, verbose=verbose)
+                if verbose:
+                    stats = self.neuro_agent.get_stats()
+                    print(f"[NEURO] Agent loaded with {len(stats.get('components', {}))} components")
+            except Exception as e:
+                if verbose:
+                    print(f"[NEURO] NeuroAgent init failed: {e}")
 
         # Runtime state
         self._current_session = None
@@ -480,7 +498,12 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             self.ui.print_error(f"Blocked: {hook_result.get('reason', 'Hook rejected')}")
             return
 
-        # Show what we're doing - full cognitive processing
+        # Use NeuroAgent for full PERCEIVE -> THINK -> ACT -> LEARN -> IMPROVE workflow
+        if self.neuro_agent:
+            await self._process_with_agent(user_input, ultrathink)
+            return
+
+        # Fallback: Show what we're doing - full cognitive processing
         cognitive_context = ""
 
         if self.cognitive_pipeline:
@@ -876,6 +899,130 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                 return True
 
         return False
+
+    async def _process_with_agent(self, user_input: str, ultrathink: bool = False):
+        """Process input using the full NeuroAgent workflow."""
+        self.ui.print()
+
+        # Phase 1: PERCEIVE
+        self.ui.print_dim("PERCEIVE: Understanding input...")
+        self.neuro_agent.perceive(user_input)
+
+        if self.neuro_agent.state.knowledge:
+            self.ui.print_dim(f"  Retrieved {len(self.neuro_agent.state.knowledge)} knowledge items")
+        if self.neuro_agent.state.memories:
+            self.ui.print_dim(f"  Found {len(self.neuro_agent.state.memories)} relevant memories")
+        if self.neuro_agent.state.surprise > 0.3:
+            self.ui.print_dim(f"  Novelty: {self.neuro_agent.state.surprise:.0%}")
+
+        # Phase 2: THINK
+        self.ui.print_dim("THINK: Analyzing and planning...")
+        self.neuro_agent.think(deep=ultrathink)
+
+        analysis = self.neuro_agent.state.analysis
+        if analysis:
+            self.ui.print_dim(f"  Type: {analysis.get('type', 'general')}, Confidence: {analysis.get('confidence', 0.5):.0%}")
+        if self.neuro_agent.state.plan:
+            self.ui.print_dim(f"  Plan: {', '.join(self.neuro_agent.state.plan)}")
+
+        # Phase 3: ACT
+        self.ui.print_dim("ACT: Executing actions...")
+
+        # Define LLM callback for response generation
+        async def llm_callback(query, context, analysis, knowledge, memories):
+            # Build enhanced prompt
+            enhanced_prompt = query
+            if context:
+                enhanced_prompt += f"\n\n[Tool Results]:\n{context}"
+            if knowledge:
+                enhanced_prompt += f"\n\n[Knowledge]:\n" + "\n".join(knowledge[:3])
+
+            # Stream response
+            self.ui.print_assistant_label()
+            self.ui.start_live()
+
+            full_response = ""
+            messages = [{"role": "user", "content": enhanced_prompt}]
+
+            async for event in self.stream_handler.stream(
+                messages=messages,
+                system_prompt=self.system_prompt,
+                ultrathink=ultrathink,
+            ):
+                if event.type.value == "token":
+                    full_response += event.content
+                    self.ui.append_live(event.content)
+
+            self.ui.stop_live()
+            return full_response
+
+        # Run ACT phase with LLM callback (needs to be sync for the agent)
+        # We'll use a simpler approach - let agent execute tools, then stream response
+        self.neuro_agent.act(llm_callback=None)  # Execute tools first
+
+        # Show tool results
+        if self.neuro_agent.state.tools_used:
+            for tool in self.neuro_agent.state.tools_used:
+                self.ui.print_dim(f"  Used tool: {tool}")
+
+        # Now generate response with streaming
+        tool_context = ""
+        if self.neuro_agent.state.response:
+            tool_context = self.neuro_agent.state.response
+
+        # Build final prompt with tool results
+        final_prompt = user_input
+        if tool_context:
+            final_prompt = f"{user_input}\n\n[Tool Results]:\n{tool_context}"
+        if self.neuro_agent.state.knowledge:
+            final_prompt += "\n\n[Relevant Knowledge]:\n" + "\n".join(self.neuro_agent.state.knowledge[:3])
+
+        # Stream the final response
+        self.ui.print_assistant_label()
+        self.ui.start_live()
+
+        full_response = ""
+        messages = [{"role": "user", "content": final_prompt}]
+
+        async for event in self.stream_handler.stream(
+            messages=messages,
+            system_prompt=self.system_prompt,
+            ultrathink=ultrathink,
+        ):
+            if event.type.value == "token":
+                full_response += event.content
+                self.ui.append_live(event.content)
+
+        self.ui.stop_live()
+
+        # Update agent state with LLM response
+        self.neuro_agent.state.response = full_response
+
+        # Phase 4: LEARN with curiosity-driven Q&A
+        self.ui.print_dim("LEARN: Storing knowledge...")
+        self.neuro_agent.learn()
+
+        if self.neuro_agent.state.learnings:
+            for learning in self.neuro_agent.state.learnings[:2]:
+                self.ui.print_dim(f"  {learning}")
+
+        # Curiosity-driven deep learning - ask follow-up questions until confident
+        if self.neuro_agent.state.confidence < 0.7 and self.neuro_agent.state.surprise > 0.3:
+            await self._curiosity_learning_loop(user_input, full_response)
+
+        # Phase 5: IMPROVE
+        self.ui.print_dim("IMPROVE: Self-improvement cycle...")
+        improvements = self.neuro_agent.improve()
+
+        if improvements.get('patterns_learned', 0) > 0:
+            self.ui.print_dim(f"  Learned {improvements['patterns_learned']} new patterns")
+
+        # Save to session
+        self._current_session.add_message("user", user_input)
+        self._current_session.add_message("assistant", full_response)
+
+        if not self.no_session_persistence:
+            self.session_manager.save(self._current_session)
 
     async def _execute_intent(self, intent, user_input: str) -> bool:
         """Execute a detected intent."""
@@ -1665,6 +1812,116 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         self.ui.stop_live()
         self._current_session.add_message("assistant", full_response)
+
+    async def _curiosity_learning_loop(self, user_input: str, response: str):
+        """
+        Curiosity-driven learning loop - ask follow-up questions until confident.
+
+        Like a curious child, keeps asking "why?", "how?", "for how long?" until
+        it reaches a high confidence level about the topic.
+        """
+        MAX_QUESTIONS = 5
+        CONFIDENCE_THRESHOLD = 0.8
+
+        # Extract the main topic from the input
+        words = user_input.lower().split()
+        topic_words = [w for w in words if len(w) > 4 and w not in
+                       {'what', 'why', 'how', 'when', 'where', 'about', 'could', 'would', 'should'}]
+        topic = topic_words[0] if topic_words else "topic"
+
+        # Get current confidence for this topic
+        topic_state = self.active_learner.topics.get(topic)
+        current_confidence = topic_state.confidence if topic_state else 0.3
+        current_curiosity = topic_state.curiosity if topic_state else 0.8
+
+        self.ui.print()
+        self.ui.print_dim(f"[CURIOSITY] Topic: {topic}, Confidence: {current_confidence:.0%}, Curiosity: {current_curiosity:.0%}")
+
+        # Generate follow-up questions based on curiosity
+        question_templates = [
+            f"Why does {topic} work this way?",
+            f"How is {topic} typically implemented?",
+            f"What are the best practices for {topic}?",
+            f"What are common mistakes with {topic}?",
+            f"How has {topic} evolved over time?",
+            f"What alternatives exist to {topic}?",
+        ]
+
+        questions_asked = 0
+        knowledge_gained = []
+
+        while current_confidence < CONFIDENCE_THRESHOLD and questions_asked < MAX_QUESTIONS:
+            # Select next question based on what we haven't learned
+            question = question_templates[questions_asked % len(question_templates)]
+            questions_asked += 1
+
+            self.ui.print_dim(f"[CURIOSITY Q{questions_asked}] {question}")
+
+            # Search for answer
+            try:
+                search_result = self.tool_registry.tools["web_search"].func(question)
+
+                if search_result and "error" not in search_result.lower():
+                    # Store the knowledge
+                    self.self_trainer.learn(
+                        topic=topic,
+                        content=f"Q: {question}\nA: {search_result[:500]}",
+                        source="curiosity_learning"
+                    )
+
+                    # Also store in cognitive pipeline if available
+                    if self.cognitive_pipeline:
+                        try:
+                            self.cognitive_pipeline.learn(
+                                topic=topic,
+                                content=search_result[:500],
+                                source="curiosity_learning",
+                                importance=0.7 + (questions_asked * 0.05)  # Increase importance with depth
+                            )
+                        except Exception:
+                            pass
+
+                    knowledge_gained.append(search_result[:200])
+
+                    # Update confidence - each successful answer increases confidence
+                    confidence_boost = 0.1 + (0.05 * len(search_result) / 500)
+                    self.active_learner.record_exposure(
+                        topic=topic,
+                        was_successful=True,
+                        surprise_level=max(0, 0.5 - questions_asked * 0.1),  # Less surprise as we learn more
+                        complexity=0.6
+                    )
+
+                    # Recalculate confidence
+                    topic_state = self.active_learner.topics.get(topic)
+                    current_confidence = topic_state.confidence if topic_state else current_confidence + confidence_boost
+                    current_curiosity = topic_state.curiosity if topic_state else max(0.2, current_curiosity - 0.15)
+
+                    self.ui.print_dim(f"  -> Learned! Confidence: {current_confidence:.0%}")
+                else:
+                    self.ui.print_dim(f"  -> No results found")
+
+            except Exception as e:
+                self.ui.print_dim(f"  -> Search failed: {e}")
+
+            # Small delay to avoid hammering the search
+            await asyncio.sleep(0.5)
+
+        # Summary
+        if knowledge_gained:
+            self.ui.print()
+            self.ui.print_dim(f"[CURIOSITY] Learned {len(knowledge_gained)} new facts about {topic}")
+            self.ui.print_dim(f"[CURIOSITY] Final confidence: {current_confidence:.0%}")
+
+            # Store a summary fact
+            summary = f"Through curiosity-driven learning about {topic}: " + "; ".join([k[:50] for k in knowledge_gained[:3]])
+            self.self_trainer.learn(
+                topic=topic,
+                content=summary,
+                source="curiosity_summary"
+            )
+        else:
+            self.ui.print_dim(f"[CURIOSITY] Could not find additional information about {topic}")
 
     async def _chat_for_agent(
         self,
