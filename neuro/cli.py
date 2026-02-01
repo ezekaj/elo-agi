@@ -412,11 +412,24 @@ class LearningNotifier:
 
 def cmd_chat(args):
     """Chat with Neuro AGI using streaming responses."""
-    print_header()
+    # Get flags with defaults
+    model = getattr(args, 'model', 'ministral-3:8b') or 'ministral-3:8b'
+    verbose = getattr(args, 'verbose', False)
+    print_mode = getattr(args, 'print_mode', False)
+    initial_prompt = getattr(args, 'prompt', None)
+    no_stream = getattr(args, 'no_stream', False)
+    output_format = getattr(args, 'output_format', 'text')
+    system_prompt = getattr(args, 'system_prompt', None)
+    append_system_prompt = getattr(args, 'append_system_prompt', None)
+
+    # Skip header in print mode
+    if not print_mode:
+        print_header()
 
     # Check Ollama
-    spinner = Spinner("Connecting to Ollama")
-    spinner.start()
+    if not print_mode:
+        spinner = Spinner("Connecting to Ollama")
+        spinner.start()
 
     ollama_available = False
     models = []
@@ -430,7 +443,8 @@ def cmd_chat(args):
     except Exception:
         pass
 
-    spinner.stop()
+    if not print_mode:
+        spinner.stop()
 
     # Initialize the new NEURO Engine
     engine = None
@@ -439,10 +453,12 @@ def cmd_chat(args):
     try:
         from engine import NeuroEngine, EngineConfig
         config = EngineConfig(
-            model="ministral-3:8b",
-            show_thinking=True,
-            verbose=False
+            model=model,
+            show_thinking=not print_mode,
+            verbose=verbose
         )
+        if system_prompt:
+            config.system_prompt = system_prompt
         engine = NeuroEngine(config)
         engine_available = True
     except ImportError:
@@ -451,10 +467,12 @@ def cmd_chat(args):
             sys.path.insert(0, str(Path(__file__).parent))
             from engine import NeuroEngine, EngineConfig
             config = EngineConfig(
-                model="ministral-3:8b",
-                show_thinking=True,
-                verbose=False
+                model=model,
+                show_thinking=not print_mode,
+                verbose=verbose
             )
+            if system_prompt:
+                config.system_prompt = system_prompt
             engine = NeuroEngine(config)
             engine_available = True
         except ImportError:
@@ -578,11 +596,11 @@ def cmd_chat(args):
         print(f"  {Colors.BRIGHT_BLUE}●{Colors.RESET} Self-Improver: {Colors.BRIGHT_BLUE}{si_stats['learned_patterns']} patterns{Colors.RESET}, {si_stats['error_solutions']} solutions")
 
     print()
-    print(f"  {Colors.DIM}Commands: /think /tools /learn /benchmark /status /edit /git /ocr /clear /quit{Colors.RESET}")
+    print(f"  {Colors.DIM}Commands: /help /status /model /tools /learn /benchmark /compact /cost /clear /exit{Colors.RESET}")
     print(f"  {Colors.DIM}{'─' * 50}{Colors.RESET}")
 
     history = []
-    current_model = "ministral-3:8b"
+    current_model = model
 
     # Async event loop for streaming
     loop = asyncio.new_event_loop()
@@ -609,6 +627,49 @@ def cmd_chat(args):
         print(f"  {Colors.DIM}Goodbye!{Colors.RESET}\n")
         loop.close()
 
+    # Handle print mode (-p flag) - non-interactive
+    if print_mode and initial_prompt:
+        if not ollama_available:
+            print("Error: Ollama not available", file=sys.stderr)
+            return 1
+
+        try:
+            if engine_available:
+                response = loop.run_until_complete(
+                    engine.chat(initial_prompt, stream_to_terminal=not no_stream)
+                )
+            else:
+                import requests
+                r = requests.post(
+                    "http://localhost:11434/api/chat",
+                    json={"model": current_model, "messages": [{"role": "user", "content": initial_prompt}], "stream": False},
+                    timeout=120
+                )
+                response = r.json()["message"]["content"]
+
+            # Output based on format
+            if output_format == "json":
+                import json
+                print(json.dumps({"response": response}))
+            elif output_format == "stream-json":
+                import json
+                print(json.dumps({"type": "message", "content": response}))
+            else:
+                if no_stream:
+                    print(response)
+                # If streaming was on, response was already printed
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+
+        loop.close()
+        return 0
+
+    # Handle initial prompt in interactive mode
+    if initial_prompt and not print_mode:
+        history.append({"role": "user", "content": initial_prompt})
+        # Will be processed in first loop iteration
+
     while True:
         try:
             user_input = input(f"\n  {Colors.BRIGHT_CYAN}You:{Colors.RESET} ").strip()
@@ -628,6 +689,171 @@ def cmd_chat(args):
         if user_input == "/clear":
             history.clear()
             print(f"  {Colors.DIM}Conversation cleared{Colors.RESET}")
+            continue
+
+        # /help - Show all commands (Claude-style)
+        if user_input == "/help":
+            print(f"\n  {Colors.BOLD}{Colors.CYAN}NEURO Commands{Colors.RESET}")
+            print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
+            commands = [
+                ("/help", "Show this help message"),
+                ("/status", "View system and session status"),
+                ("/model [name]", "Switch model (e.g., /model qwen2.5:7b)"),
+                ("/tools", "List available tools"),
+                ("/learn", "Show learning statistics"),
+                ("/benchmark", "Run capability benchmark"),
+                ("/autonomous", "Show autonomous learning status"),
+                ("/think <query>", "Deep reasoning with UltraThink"),
+                ("/edit <file>", "Edit a file with diff preview"),
+                ("/git [cmd]", "Git operations (status, commit)"),
+                ("/ocr <image>", "Read text from image (DeepSeek OCR)"),
+                ("/compact", "Compress conversation context"),
+                ("/cost", "Show token usage and cost estimate"),
+                ("/context", "View context usage"),
+                ("/memory", "View/edit memory files"),
+                ("/config", "Open settings"),
+                ("/clear", "Clear conversation history"),
+                ("/exit", "Exit NEURO"),
+            ]
+            for cmd, desc in commands:
+                print(f"  {Colors.CYAN}{cmd:20}{Colors.RESET} {desc}")
+
+            print(f"\n  {Colors.BOLD}Input Syntax:{Colors.RESET}")
+            print(f"  {Colors.CYAN}@./file.py{Colors.RESET}          Reference a file")
+            print(f"  {Colors.CYAN}!command{Colors.RESET}           Execute shell command")
+            print()
+            continue
+
+        # /model - Switch model (Claude-style)
+        if user_input.startswith("/model"):
+            parts = user_input.split(maxsplit=1)
+            if len(parts) > 1:
+                new_model = parts[1].strip()
+                # Check if model exists
+                if new_model in models or ':' in new_model:
+                    current_model = new_model
+                    if engine_available:
+                        engine.config.model = new_model
+                    print(f"  {Colors.GREEN}Switched to model: {new_model}{Colors.RESET}")
+                else:
+                    print(f"  {Colors.RED}Model not found: {new_model}{Colors.RESET}")
+                    print(f"  {Colors.DIM}Available: {', '.join(models[:5])}...{Colors.RESET}")
+            else:
+                print(f"  {Colors.CYAN}Current model:{Colors.RESET} {current_model}")
+                print(f"  {Colors.DIM}Available models:{Colors.RESET}")
+                for m in models[:10]:
+                    marker = " *" if m == current_model else ""
+                    print(f"    {m}{marker}")
+                if len(models) > 10:
+                    print(f"    {Colors.DIM}... and {len(models) - 10} more{Colors.RESET}")
+            continue
+
+        # /compact - Compress context (Claude-style)
+        if user_input.startswith("/compact"):
+            if len(history) < 4:
+                print(f"  {Colors.DIM}Not enough history to compact{Colors.RESET}")
+                continue
+
+            # Summarize older messages
+            old_count = len(history)
+            if engine_available:
+                summary_prompt = "Summarize this conversation in 2-3 sentences, preserving key facts and decisions:\n\n"
+                for msg in history[:-4]:
+                    summary_prompt += f"{msg['role'].upper()}: {msg['content'][:200]}\n"
+
+                try:
+                    summary = loop.run_until_complete(
+                        engine.chat(summary_prompt, stream_to_terminal=False)
+                    )
+                    # Keep last 4 messages, prepend summary
+                    history = [{"role": "system", "content": f"Previous context: {summary}"}] + history[-4:]
+                    print(f"  {Colors.GREEN}Compacted {old_count} messages to {len(history)}{Colors.RESET}")
+                except Exception as e:
+                    print(f"  {Colors.RED}Compact failed: {e}{Colors.RESET}")
+            else:
+                # Simple truncation
+                history = history[-6:]
+                print(f"  {Colors.GREEN}Truncated to last 6 messages{Colors.RESET}")
+            continue
+
+        # /cost - Show token usage (Claude-style)
+        if user_input == "/cost":
+            print(f"\n  {Colors.BOLD}{Colors.CYAN}Token Usage{Colors.RESET}")
+            print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
+
+            # Estimate tokens (rough: 4 chars = 1 token)
+            total_chars = sum(len(m.get('content', '')) for m in history)
+            est_tokens = total_chars // 4
+
+            print(f"  {Colors.CYAN}Messages:{Colors.RESET} {len(history)}")
+            print(f"  {Colors.CYAN}Est. tokens:{Colors.RESET} ~{est_tokens:,}")
+            print(f"  {Colors.CYAN}Model:{Colors.RESET} {current_model}")
+            print(f"  {Colors.DIM}(Local model - no API cost){Colors.RESET}")
+            print()
+            continue
+
+        # /context - Show context grid (Claude-style)
+        if user_input == "/context":
+            print(f"\n  {Colors.BOLD}{Colors.CYAN}Context Usage{Colors.RESET}")
+            print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
+
+            # Visual context bar
+            total_chars = sum(len(m.get('content', '')) for m in history)
+            max_context = 32000  # Approximate for most models
+            usage = min(1.0, total_chars / max_context)
+            bar_width = 40
+            filled = int(bar_width * usage)
+
+            if usage < 0.5:
+                color = Colors.GREEN
+            elif usage < 0.8:
+                color = Colors.YELLOW
+            else:
+                color = Colors.RED
+
+            bar = f"{color}{'█' * filled}{Colors.DIM}{'░' * (bar_width - filled)}{Colors.RESET}"
+            print(f"  [{bar}] {usage:.0%}")
+            print(f"  {Colors.DIM}~{total_chars:,} chars / ~{max_context:,} max{Colors.RESET}")
+            print()
+            continue
+
+        # /memory - View memory files (Claude-style)
+        if user_input == "/memory":
+            print(f"\n  {Colors.BOLD}{Colors.CYAN}Memory Files{Colors.RESET}")
+            print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
+
+            memory_files = [
+                ("~/.neuro/settings.json", "User settings"),
+                ("~/.cognitive_ai_knowledge/", "Knowledge base"),
+                ("./.neuro/NEURO.md", "Project memory"),
+            ]
+            for path, desc in memory_files:
+                expanded = os.path.expanduser(path)
+                exists = os.path.exists(expanded)
+                status = f"{Colors.GREEN}exists{Colors.RESET}" if exists else f"{Colors.DIM}not found{Colors.RESET}"
+                print(f"  {path:35} {status}")
+            print()
+            continue
+
+        # /config - Open config (Claude-style)
+        if user_input == "/config":
+            config_path = os.path.expanduser("~/.neuro/settings.json")
+            print(f"\n  {Colors.BOLD}{Colors.CYAN}Configuration{Colors.RESET}")
+            print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
+            print(f"  {Colors.CYAN}Config file:{Colors.RESET} {config_path}")
+
+            if os.path.exists(config_path):
+                try:
+                    import json
+                    with open(config_path) as f:
+                        cfg = json.load(f)
+                    for k, v in cfg.items():
+                        print(f"  {Colors.CYAN}{k}:{Colors.RESET} {v}")
+                except Exception:
+                    print(f"  {Colors.DIM}(Could not read config){Colors.RESET}")
+            else:
+                print(f"  {Colors.DIM}(Config file not found - using defaults){Colors.RESET}")
+            print()
             continue
 
         if user_input == "/status":
@@ -993,6 +1219,51 @@ def cmd_chat(args):
                 print(f"  {Colors.RED}OCR Error: {e}{Colors.RESET}")
 
             continue
+
+        # ========================================================================
+        # SPECIAL INPUT SYNTAX (Claude-style)
+        # ========================================================================
+
+        # !command - Execute shell command
+        if user_input.startswith("!"):
+            cmd = user_input[1:].strip()
+            if cmd:
+                print(f"  {Colors.DIM}$ {cmd}{Colors.RESET}")
+                try:
+                    import subprocess
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+                    if result.stdout:
+                        print(f"  {result.stdout.rstrip()}")
+                    if result.stderr:
+                        print(f"  {Colors.RED}{result.stderr.rstrip()}{Colors.RESET}")
+                except subprocess.TimeoutExpired:
+                    print(f"  {Colors.RED}Command timed out{Colors.RESET}")
+                except Exception as e:
+                    print(f"  {Colors.RED}Error: {e}{Colors.RESET}")
+            continue
+
+        # @./file - Include file content in prompt
+        if "@" in user_input:
+            import re
+            file_refs = re.findall(r'@(\.?/[^\s]+)', user_input)
+            for ref in file_refs:
+                file_path = os.path.expanduser(ref)
+                if os.path.exists(file_path):
+                    try:
+                        if os.path.isdir(file_path):
+                            # List directory
+                            files = os.listdir(file_path)[:20]
+                            content = f"[Directory {ref}]: {', '.join(files)}"
+                        else:
+                            with open(file_path, 'r') as f:
+                                content = f.read()[:5000]  # Limit size
+                            content = f"[File {ref}]:\n```\n{content}\n```"
+                        user_input = user_input.replace(f"@{ref}", content)
+                        print(f"  {Colors.DIM}Included: {ref}{Colors.RESET}")
+                    except Exception as e:
+                        print(f"  {Colors.RED}Could not read {ref}: {e}{Colors.RESET}")
+                else:
+                    print(f"  {Colors.YELLOW}File not found: {ref}{Colors.RESET}")
 
         # Mark user activity - pause autonomous learning while chatting
         if engine_available and autonomous_started and engine.autonomous:
@@ -1395,15 +1666,57 @@ def main():
     parser = argparse.ArgumentParser(
         prog="neuro",
         description="NEURO AGI v2.0 - Local AI That Learns From Your Code",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  neuro                          Start interactive REPL
+  neuro "explain this code"      Start with initial prompt
+  neuro -p "what is 2+2"         Print mode (no interactive)
+  neuro -c                       Continue last conversation
+  neuro --model qwen2.5:7b       Use specific model
+  neuro info                     Show system information
+  neuro check                    Verify installation
+"""
     )
+
+    # Core flags (Claude-style)
+    parser.add_argument("prompt", nargs="?", help="Initial prompt to send")
     parser.add_argument("-v", "--version", action="store_true", help="Show version")
+    parser.add_argument("-p", "--print", action="store_true", dest="print_mode",
+                        help="Print response and exit (no interactive mode)")
+    parser.add_argument("-c", "--continue", action="store_true", dest="continue_session",
+                        help="Continue most recent conversation")
+    parser.add_argument("-r", "--resume", type=str, metavar="SESSION",
+                        help="Resume specific session by ID")
+    parser.add_argument("--model", type=str, default="ministral-3:8b",
+                        help="Model to use (default: ministral-3:8b)")
+    parser.add_argument("--verbose", action="store_true",
+                        help="Enable verbose logging")
 
+    # System prompt flags
+    parser.add_argument("--system-prompt", type=str,
+                        help="Custom system prompt (replaces default)")
+    parser.add_argument("--append-system-prompt", type=str,
+                        help="Append to default system prompt")
+
+    # Output flags
+    parser.add_argument("--output-format", choices=["text", "json", "stream-json"],
+                        default="text", help="Output format for print mode")
+    parser.add_argument("--no-stream", action="store_true",
+                        help="Disable streaming (wait for full response)")
+
+    # Permission flags
+    parser.add_argument("--dangerously-skip-permissions", action="store_true",
+                        help="Skip all permission prompts")
+
+    # Subcommands
     subparsers = parser.add_subparsers(dest="command")
-
-    subparsers.add_parser("chat", help="Chat with streaming").set_defaults(func=cmd_chat)
-    subparsers.add_parser("info", help="System information").set_defaults(func=cmd_info)
-    subparsers.add_parser("demo", help="Run demonstration").set_defaults(func=cmd_demo)
-    subparsers.add_parser("check", help="Verify installation").set_defaults(func=cmd_check)
+    subparsers.add_parser("chat", help="Chat with streaming (default)")
+    subparsers.add_parser("info", help="System information")
+    subparsers.add_parser("demo", help="Run demonstration")
+    subparsers.add_parser("check", help="Verify installation")
+    subparsers.add_parser("config", help="Open configuration")
+    subparsers.add_parser("mcp", help="Configure MCP servers")
 
     args = parser.parse_args()
 
@@ -1411,11 +1724,22 @@ def main():
         print(f"neuro-agi {get_version()}")
         return 0
 
-    if args.command is None:
-        # Default: go straight to chat
-        return cmd_chat(args)
+    # Handle subcommands
+    if args.command == "info":
+        return cmd_info(args)
+    elif args.command == "demo":
+        return cmd_demo(args)
+    elif args.command == "check":
+        return cmd_check(args)
+    elif args.command == "config":
+        print(f"  {Colors.DIM}Config location: ~/.neuro/settings.json{Colors.RESET}")
+        return 0
+    elif args.command == "mcp":
+        print(f"  {Colors.DIM}MCP not yet implemented{Colors.RESET}")
+        return 0
 
-    return args.func(args)
+    # Default: chat mode
+    return cmd_chat(args)
 
 
 if __name__ == "__main__":
