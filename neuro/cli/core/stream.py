@@ -63,6 +63,33 @@ class StreamHandler:
 
         self._session: Optional[Any] = None
 
+        # Native function calling tools (Ollama format)
+        self.tools = None
+
+    def set_tools(self, tools: List[Dict[str, Any]]):
+        """
+        Set tools for native Ollama function calling.
+
+        Format:
+        [
+            {
+                "type": "function",
+                "function": {
+                    "name": "web_search",
+                    "description": "Search the web",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {"type": "string", "description": "Search query"}
+                        },
+                        "required": ["query"]
+                    }
+                }
+            }
+        ]
+        """
+        self.tools = tools
+
     async def stream(
         self,
         messages: List[Dict[str, str]],
@@ -132,6 +159,10 @@ Begin your response with <thinking> to show your reasoning process, then provide
             "options": options,
         }
 
+        # Add native function calling tools if available
+        if hasattr(self, 'tools') and self.tools:
+            payload["tools"] = self.tools
+
         try:
             async with session.post(
                 f"{self.base_url}/api/chat",
@@ -157,8 +188,23 @@ Begin your response with <thinking> to show your reasoning process, then provide
                     except json.JSONDecodeError:
                         continue
 
-                    content = data.get("message", {}).get("content", "")
+                    message = data.get("message", {})
+                    content = message.get("content", "")
+                    tool_calls = message.get("tool_calls", [])
                     done = data.get("done", False)
+
+                    # Handle native function calls (Ollama API)
+                    if tool_calls:
+                        for tool_call in tool_calls:
+                            func = tool_call.get("function", {})
+                            tool_name = func.get("name", "")
+                            tool_args = func.get("arguments", {})
+
+                            yield StreamEvent(
+                                type=StreamEventType.TOOL_USE_START,
+                                content=tool_name,
+                                metadata={"name": tool_name, "arguments": tool_args, "native": True}
+                            )
 
                     if content:
                         buffer += content

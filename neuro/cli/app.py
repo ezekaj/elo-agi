@@ -73,6 +73,9 @@ class NeuroApp:
             on_token=self._on_token,
         )
 
+        # Register tools for native Ollama function calling
+        self._register_native_tools()
+
         self.session_manager = SessionManager(
             project_dir=self.project_dir,
             persist=not no_session_persistence,
@@ -140,6 +143,83 @@ class NeuroApp:
         self._current_session = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._first_prompt = True  # Track if this is the first prompt
+
+    def _register_native_tools(self):
+        """Register tools for Ollama native function calling."""
+        ollama_tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "web_search",
+                    "description": "Search the web for information",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {"type": "string", "description": "Search query"}
+                        },
+                        "required": ["query"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "read_file",
+                    "description": "Read contents of a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string", "description": "File path"}
+                        },
+                        "required": ["path"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "write_file",
+                    "description": "Write content to a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string", "description": "File path"},
+                            "content": {"type": "string", "description": "Content to write"}
+                        },
+                        "required": ["path", "content"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "run_command",
+                    "description": "Run a shell command",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "command": {"type": "string", "description": "Command to run"}
+                        },
+                        "required": ["command"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "improve_self",
+                    "description": "Analyze and improve NEURO's own code",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "area": {"type": "string", "description": "Area to improve: core, tools, learning, ui"}
+                        },
+                        "required": ["area"]
+                    }
+                }
+            },
+        ]
+        self.stream_handler.set_tools(ollama_tools)
 
     def _default_system_prompt(self) -> str:
         """Get default system prompt."""
@@ -480,10 +560,19 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                 full_response += event.content
                 self.ui.append_live(event.content)
             elif event.type.value == "tool_use_start":
-                # Parse and execute tool
-                tool_result = await self._handle_tool_call(event.content)
-                if tool_result:
-                    tool_calls.append(tool_result)
+                # Check if this is a native function call (from Ollama API)
+                if event.metadata.get("native"):
+                    tool_name = event.metadata.get("name", "")
+                    tool_args = event.metadata.get("arguments", {})
+                    self.ui.print_dim(f"Calling tool: {tool_name}")
+                    tool_result = await self._execute_native_tool(tool_name, tool_args)
+                    if tool_result:
+                        tool_calls.append(tool_result)
+                else:
+                    # Legacy XML-style tool parsing
+                    tool_result = await self._handle_tool_call(event.content)
+                    if tool_result:
+                        tool_calls.append(tool_result)
             elif event.type.value == "done":
                 self.status_bar.update(
                     tokens=self._current_session.token_count,
@@ -584,6 +673,32 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         # Save periodically
         if len(self._current_session.messages) % 10 == 0:
             self.self_trainer.save()
+
+    async def _execute_native_tool(self, tool_name: str, tool_args: Dict) -> Optional[tuple]:
+        """Execute a native Ollama function call."""
+        try:
+            if tool_name == "web_search":
+                result = self.tool_registry.tools["web_search"].func(tool_args.get("query", ""))
+            elif tool_name == "read_file":
+                result = self.tool_registry.tools["read_file"].func(tool_args.get("path", ""))
+            elif tool_name == "write_file":
+                result = self.tool_registry.tools["write_file"].func(
+                    tool_args.get("path", ""),
+                    tool_args.get("content", "")
+                )
+            elif tool_name == "run_command":
+                result = self.tool_registry.tools["run_command"].func(tool_args.get("command", ""))
+            elif tool_name == "improve_self":
+                result = self.tool_registry.tools["improve_self"].func(tool_args.get("area", "core"))
+            else:
+                return None
+
+            self.ui.print_tool_result(tool_name, True, str(result)[:200])
+            return (tool_name, result)
+
+        except Exception as e:
+            self.ui.print_error(f"Tool {tool_name} failed: {e}")
+            return (tool_name, f"Error: {e}")
 
     async def _handle_tool_call(self, content: str) -> Optional[tuple]:
         """Parse and execute a tool call."""
