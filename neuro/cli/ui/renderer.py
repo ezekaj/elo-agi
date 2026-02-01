@@ -149,8 +149,11 @@ class UIRenderer:
             activity_content.append("  No recent activity\n", style="dim")
 
         # Knowledge stats if available
-        if knowledge_stats and knowledge_stats.get('total_facts', 0) > 0:
-            activity_content.append(f"\n  Knowledge: {knowledge_stats.get('total_facts', 0)} facts learned\n", style="dim green")
+        if knowledge_stats:
+            facts = knowledge_stats.get('total_facts', 0)
+            modules = knowledge_stats.get('cognitive_modules', 0)
+            if facts > 0 or modules > 0:
+                activity_content.append(f"\n  Brain: {modules} modules, {facts} facts\n", style="dim green")
 
         # Combine right panel
         right_text = Text()

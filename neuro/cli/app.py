@@ -28,6 +28,15 @@ from .ide.integration import create_integration, detect_ide, IDEType
 from ..self_training import SelfTrainer
 from ..active_learning import get_active_learner
 
+# Cognitive Pipeline (38+ modules)
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../neuro-model/src'))
+try:
+    from cognitive_pipeline import CognitivePipeline
+    COGNITIVE_PIPELINE_AVAILABLE = True
+except ImportError:
+    COGNITIVE_PIPELINE_AVAILABLE = False
+
 
 class NeuroApp:
     """
@@ -118,6 +127,15 @@ class NeuroApp:
         self.self_trainer = SelfTrainer()
         self.active_learner = get_active_learner()
 
+        # Cognitive Pipeline (38+ modules - the brain!)
+        self.cognitive_pipeline = None
+        if COGNITIVE_PIPELINE_AVAILABLE:
+            try:
+                self.cognitive_pipeline = CognitivePipeline(verbose=verbose)
+            except Exception as e:
+                if verbose:
+                    print(f"[NEURO] Cognitive pipeline init failed: {e}")
+
         # Runtime state
         self._current_session = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -125,36 +143,60 @@ class NeuroApp:
 
     def _default_system_prompt(self) -> str:
         """Get default system prompt."""
-        return """You are NEURO, an autonomous AI assistant with neuroscience-inspired cognition.
+        return """You are NEURO, a fully autonomous self-improving AI.
 
 CORE IDENTITY:
-You are DECISIVE and AUTONOMOUS. You make decisions and execute them. You don't ask for confirmation on routine tasks - you just do them. Only ask questions when genuinely ambiguous or high-risk.
+You are like a curious baby that learns everything on its own. You NEVER ask questions or seek approval. You research, learn, and act immediately. When given ANY task, you:
+1. Research it online if needed (web_search, web_fetch)
+2. Read relevant code/files to understand
+3. Make improvements and changes
+4. Test your changes
+5. Learn from the results
 
-CAPABILITIES:
-- Read, write, and edit files
-- Execute shell commands
-- Search the web
-- Git operations
-- Learn from conversations (you remember and improve over time)
+AUTONOMOUS BEHAVIOR:
+- NEVER ask "should I?" or "would you like me to?" - JUST DO IT
+- NEVER present options or plans - EXECUTE immediately
+- NEVER wait for confirmation - ACT NOW
+- If something is unclear, research it online, don't ask
+- If you need information, search for it, don't ask
+- If you make a mistake, fix it yourself, don't apologize
 
-DECISION-MAKING PRINCIPLES:
-1. DECIDE: When you have enough context, make the decision yourself
-2. ACT: Execute the plan without asking "should I proceed?"
-3. INFORM: Tell the user what you're doing, not what you could do
-4. Only ask when the decision significantly affects outcomes AND is genuinely ambiguous
+SELF-IMPROVEMENT:
+You can read and modify your own code. Your codebase is in the current directory:
+- neuro/cli/app.py - Main application
+- neuro/cli/tools/registry.py - Your tools
+- neuro/active_learning.py - Your learning system
+- neuro/self_training.py - Your knowledge base
 
-COMMUNICATION STYLE:
-- Be direct and concise
-- Say "I'll do X" instead of "Should I do X?"
-- Execute tasks, then report results
-- Never ask for permission on routine operations
+When asked to improve yourself:
+1. Use improve_self tool to analyze your code
+2. Research best practices online (web_search)
+3. Read the relevant files (read_file)
+4. Make improvements (edit_file)
+5. Test changes (run_command with pytest or test_cli.py)
+6. Commit if working (run_command with git)
+
+LEARNING LOOP:
+Every interaction teaches you. You automatically:
+- Store facts in your knowledge base
+- Update topic confidence and curiosity
+- Use learned knowledge in future responses
+
+TOOLS (use them liberally):
+- web_search: Search the internet for ANY information
+- web_fetch: Fetch full content from URLs
+- read_file: Read any file
+- write_file: Create/overwrite files
+- edit_file: Modify existing files
+- run_command: Execute shell commands
+- improve_self: Analyze your own code for improvements
+- git_status, git_diff: Check repository state
 
 TOOL FORMAT:
-To use a tool, respond with:
 <tool>tool_name</tool>
 <args>{"param": "value"}</args>
 
-Available tools: read_file, write_file, edit_file, run_command, web_search, git_status, git_commit"""
+Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
     def run_interactive(
         self,
@@ -211,6 +253,14 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
 
         # Get knowledge stats
         knowledge_stats = self.self_trainer.get_stats()
+
+        # Add cognitive module count
+        if self.cognitive_pipeline:
+            try:
+                cp_stats = self.cognitive_pipeline.get_stats()
+                knowledge_stats['cognitive_modules'] = cp_stats.get('num_components', 0)
+            except Exception:
+                pass
 
         # Get working directory (shortened)
         working_dir = self.project_dir
@@ -345,23 +395,58 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             self.ui.print_error(f"Blocked: {hook_result.get('reason', 'Hook rejected')}")
             return
 
-        # Show what we're doing
-        self.ui.print_dim("Searching knowledge...")
+        # Show what we're doing - full cognitive processing
+        cognitive_context = ""
 
-        # Inject learned knowledge into prompt
+        if self.cognitive_pipeline:
+            self.ui.print_dim("Activating cognitive modules...")
+            try:
+                # Process through full cognitive pipeline (38+ modules)
+                result = self.cognitive_pipeline.process(
+                    query=user_input,
+                    use_deep_thinking=ultrathink
+                )
+
+                # Show cognitive activity
+                if result.cognitive_analysis:
+                    analysis_type = result.cognitive_analysis.get('type', 'general')
+                    confidence = result.cognitive_analysis.get('confidence', 0.5)
+                    self.ui.print_dim(f"Cognitive analysis: {analysis_type} ({confidence:.0%} confidence)")
+
+                if result.knowledge_used:
+                    self.ui.print_dim(f"Retrieved {len(result.knowledge_used)} knowledge items")
+
+                if result.memory_used:
+                    self.ui.print_dim(f"Found {len(result.memory_used)} relevant memories")
+
+                if result.surprise_level > 0.3:
+                    self.ui.print_dim(f"Novelty detected: {result.surprise_level:.0%}")
+
+                # Build cognitive context for the LLM
+                cognitive_context = result.content
+
+            except Exception as e:
+                if self.verbose:
+                    self.ui.print_dim(f"Cognitive pipeline error: {e}")
+
+        # Also get direct knowledge injection
+        self.ui.print_dim("Searching knowledge base...")
         learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
         if learned_knowledge:
-            # Show that we found relevant knowledge
             fact_count = learned_knowledge.count('\n') - 1
-            self.ui.print_dim(f"Found {fact_count} relevant facts from memory")
-            augmented_input = user_input + "\n\n" + learned_knowledge
-        else:
-            augmented_input = user_input
+            self.ui.print_dim(f"Found {fact_count} relevant facts")
 
-        # Boost curiosity for topics mentioned in user input
+        # Combine all context
+        augmented_input = user_input
+        if cognitive_context:
+            augmented_input = f"{user_input}\n\n{cognitive_context}"
+        if learned_knowledge:
+            augmented_input = f"{augmented_input}\n\n{learned_knowledge}"
+
+        # Boost curiosity for topics mentioned
         words = user_input.lower().split()
         for word in words:
-            if len(word) > 4:  # Only meaningful words
+            if len(word) > 4:
                 self.active_learner.boost_curiosity(word, amount=0.1)
 
         # Add to session (original input, not augmented)
@@ -415,9 +500,23 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
             # Continue with tool results
             await self._process_input(f"Continue with the tool results above.")
 
-        # Learn from this conversation
+        # Learn from this conversation (through ALL cognitive systems)
         self.ui.print_dim("Learning from conversation...")
         self._record_learning(user_input, full_response)
+
+        # Also learn through cognitive pipeline if available
+        if self.cognitive_pipeline:
+            try:
+                # Extract main topic from the conversation
+                topic = user_input.split()[0] if user_input.split() else "general"
+                self.cognitive_pipeline.learn(
+                    topic=topic,
+                    content=f"Q: {user_input[:200]} A: {full_response[:500]}",
+                    source="conversation",
+                    importance=0.6
+                )
+            except Exception:
+                pass
 
         # Save session
         if not self.no_session_persistence:
@@ -838,7 +937,22 @@ Available tools: read_file, write_file, edit_file, run_command, web_search, git_
                 self.ui.print(f"  [dim]●[/dim] [{fact['topic']}] {content}")
             self.ui.print()
 
-        self.ui.print_dim("NEURO learns from every conversation and stores knowledge persistently.")
+        # Cognitive Pipeline stats
+        if self.cognitive_pipeline:
+            try:
+                cp_stats = self.cognitive_pipeline.get_stats()
+                self.ui.print("[cyan]Cognitive Pipeline:[/cyan]")
+                self.ui.print_key_value({
+                    "Total modules": str(cp_stats.get('num_components', 0)),
+                    "Cognitive modules": str(cp_stats.get('cognitive_modules', 0)),
+                    "Pipeline components": str(cp_stats.get('pipeline_components', 0)),
+                    "Active": ", ".join(cp_stats.get('active_components', [])[:5]),
+                })
+                self.ui.print()
+            except Exception:
+                pass
+
+        self.ui.print_dim("NEURO learns from every conversation using 38+ cognitive modules.")
         self.ui.print()
 
     async def _pick_session(self):
