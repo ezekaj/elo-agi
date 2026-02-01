@@ -693,7 +693,14 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
     async def _try_direct_tool(self, user_input: str) -> bool:
         """Try to execute a direct tool call. Returns True if handled."""
-        # Check if input starts with a known tool name
+        from .core.intent_router import detect_intent
+
+        # First, try intent detection (natural language)
+        intent = detect_intent(user_input)
+        if intent and intent.confidence >= 0.6:
+            return await self._execute_intent(intent, user_input)
+
+        # Fall back to keyword matching
         parts = user_input.strip().split(maxsplit=1)
         if not parts:
             return False
@@ -752,6 +759,60 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             except Exception as e:
                 self.ui.print_error(f"Tool error: {e}")
                 return True
+
+        return False
+
+    async def _execute_intent(self, intent, user_input: str) -> bool:
+        """Execute a detected intent."""
+        self.ui.print()
+        self.ui.print_dim(f"Detected intent: {intent.name} ({intent.confidence:.0%})")
+
+        query = intent.params.get("query", "") or user_input
+
+        if intent.name == "improve_self":
+            await self._autonomous_evolve(query)
+            return True
+
+        elif intent.name == "research":
+            await self._autonomous_research(query)
+            return True
+
+        elif intent.name == "web_search":
+            result = self.tool_registry.tools["web_search"].func(query)
+            self.ui.print(result)
+            # Store the knowledge
+            self.self_trainer.learn(topic=query.split()[0], content=result, source="web_search")
+            return True
+
+        elif intent.name == "read_file":
+            result = self.tool_registry.tools["read_file"].func(query)
+            self.ui.print_code(result[:3000], language="python")
+            return True
+
+        elif intent.name == "list_files":
+            result = self.tool_registry.tools["list_files"].func(".")
+            self.ui.print(result)
+            return True
+
+        elif intent.name == "git_status":
+            result = self.tool_registry.tools["git_status"].func()
+            self.ui.print(result)
+            return True
+
+        elif intent.name == "run_tests":
+            result = self.tool_registry.tools["run_command"].func("python test_cli.py")
+            self.ui.print(result)
+            return True
+
+        elif intent.name == "run_command":
+            result = self.tool_registry.tools["run_command"].func(query)
+            self.ui.print(result)
+            return True
+
+        elif intent.name == "analyze_code":
+            result = self.tool_registry.tools["improve_self"].func("core")
+            self.ui.print(result)
+            return True
 
         return False
 
