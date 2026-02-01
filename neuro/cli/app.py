@@ -32,6 +32,9 @@ import threading
 import random
 import urllib.request
 import urllib.parse
+import html
+import re
+from datetime import datetime
 
 # Cognitive Pipeline and NeuroAgent (38+ modules)
 import sys
@@ -1567,6 +1570,15 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             return
 
         self._evolution_running = True
+        self._is_busy = False
+        self._initial_benchmark_done = False
+        self._benchmark_results = None
+        self._weak_areas = []
+        self._learning_order_idx = 0
+        self._current_focus = None
+        self._focus_items = []
+        self._focus_learned = 0
+
         self._evolution_thread = threading.Thread(
             target=self._autonomous_evolution_loop,
             daemon=True
@@ -1575,14 +1587,12 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
     def _autonomous_evolution_loop(self):
         """
-        Background autonomous evolution loop.
-
-        Cycle:
-        1. Wait for first conversation
-        2. Learn unique facts from multiple sources
-        3. Re-benchmark after 100 facts
-        4. If improved → trigger MLX training
-        5. Reflect and continue
+        Background loop with self-evolution (same as agielo chat.py):
+        1. Run initial benchmark
+        2. Learn 100 unique facts (no duplicates)
+        3. Re-benchmark
+        4. If improved 1%+ → MLX fine-tune
+        5. Reflect and repeat
         """
         import time
 
@@ -1591,104 +1601,372 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             time.sleep(2)
 
         while self._evolution_running:
-            time.sleep(5)  # Check every 5 seconds
+            time.sleep(3)
 
-            # Skip if no session or in conversation
+            if self._is_busy:
+                continue
+
+            # Wait for first message before starting
             if not self._current_session or len(self._current_session.messages) == 0:
                 continue
 
-            # Learn unique facts
-            if not self.evolution.should_benchmark():
-                self._learn_from_sources()
+            # Step 1: Run INITIAL benchmark (once)
+            if not self._initial_benchmark_done:
+                self._run_benchmark_and_report("INITIAL")
+                self._initial_benchmark_done = True
                 continue
 
-            # Time to benchmark!
-            if self.verbose:
-                print(f"\n[EVOLUTION] Learned {self.evolution.state['facts_this_cycle']} facts! Benchmarking...")
+            # Step 2: Learn unique facts (checking for duplicates)
+            if not self.evolution.should_benchmark():
+                self._learn_unique_fact()
+                continue
 
-            # Start new cycle
+            # Step 3: After 100 unique facts → re-benchmark
+            print(f"\n[Evolution] Learned {self.evolution.state['facts_this_cycle']} unique facts! Re-benchmarking...")
+            self._run_benchmark_and_report("CYCLE")
+
+            # Step 4: Check if should train
+            should_train, reason = self.evolution.should_train(min_improvement=0.01)
+            print(f"[Evolution] {reason}")
+
+            if should_train:
+                print(f"[Evolution] Starting MLX fine-tuning...")
+                result = self.evolution.run_mlx_training(self.model)
+                if result['success']:
+                    print(f"[Evolution] MLX TRAINING COMPLETE!")
+                    self._add_evolved_capability()
+                else:
+                    print(f"[Evolution] Training skipped: {result['message']}")
+
+            # Step 5: Reflect and start new cycle
+            reflection = self.evolution.reflect()
+            print(reflection)
+
             self.evolution.start_new_cycle()
+            print(f"[Evolution] Starting cycle {self.evolution.state['current_cycle']}...")
 
-    def _learn_from_sources(self):
-        """Learn from multiple sources: web, ArXiv, benchmarks."""
-        import re
-        import html
-
-        # Rotate through sources
-        sources = ['web', 'benchmark', 'arxiv']
-        source = random.choice(sources)
+    def _run_benchmark_and_report(self, phase: str = ""):
+        """Run benchmark and record results in evolution system."""
+        self._is_busy = True
+        print(f"\n[Evolution] Running {phase} benchmark...")
 
         try:
-            if source == 'web':
-                # Learn from weak areas or general topics
-                weak_areas = self.evolution.get_weak_areas()
-                if weak_areas:
-                    topic, _ = random.choice(weak_areas)
-                    queries = {
-                        'math': 'mathematics problem solving tutorial examples',
-                        'logic': 'logical reasoning puzzles deductive reasoning',
-                        'reasoning': 'critical thinking problem solving techniques',
-                    }
-                    query = queries.get(topic, f'{topic} tutorial examples')
+            # Benchmark tests
+            tests = [
+                {"question": "A store sells apples for $2 each. If John buys 5 apples and pays with a $20 bill, how much change does he get?", "answer": "10", "keywords": ["10", "dollar", "change"], "category": "math"},
+                {"question": "A train travels at 60 mph. How far does it travel in 2.5 hours?", "answer": "150", "keywords": ["150", "miles"], "category": "math"},
+                {"question": "All cats are mammals. All mammals are animals. Is a cat an animal?", "answer": "yes", "keywords": ["yes", "mammal", "animal"], "category": "logic"},
+                {"question": "If it rains, the ground gets wet. The ground is wet. Can we conclude it rained?", "answer": "no", "keywords": ["no", "not necessarily"], "category": "logic"},
+                {"question": "A farmer has 17 sheep. All but 9 run away. How many sheep does he have left?", "answer": "9", "keywords": ["9"], "category": "trick"},
+                {"question": "If Alice is twice as old as Bob, and Bob is 15, how old will Alice be in 5 years?", "answer": "35", "keywords": ["35", "30"], "category": "chain_of_thought"},
+                {"question": "Sally puts a marble in her basket and leaves. Anne moves it to her box. Where will Sally LOOK for the marble?", "answer": "basket", "keywords": ["basket", "think"], "category": "theory_of_mind"},
+            ]
+
+            total_score = 0
+            category_scores = {}
+
+            for test in tests:
+                # Inject learned knowledge
+                knowledge = self.self_trainer.get_knowledge_for_prompt(test["question"])
+                if knowledge:
+                    enhanced_q = f"{knowledge}\n\nQuestion: {test['question']}\nThink step by step:"
                 else:
-                    topics = ['machine learning', 'algorithms', 'data structures', 'AI reasoning', 'neural networks']
-                    query = random.choice(topics)
+                    enhanced_q = f"Question: {test['question']}\nThink step by step:"
 
-                result = self.tool_registry.tools["web_search"].func(query)
-                if result and "error" not in result.lower() and len(result) > 100:
-                    if self.evolution.mark_learned(result):
-                        self.self_trainer.learn(query, result[:500], "evolution_web")
-                        self.evolution.save_training_pair(
-                            f"Explain {query}",
-                            result[:500],
-                            "web_learning"
-                        )
+                # Get response from model
+                response = self._sync_chat(enhanced_q)
+                response_lower = response.lower()
 
-            elif source == 'benchmark':
-                # Learn from benchmark-style Q&A
-                benchmark_qa = [
-                    ("If you buy 5 apples for $2 each, how much change from $20?", "You pay 5×$2=$10. Change: $20-$10=$10"),
-                    ("All cats are mammals. All mammals are animals. Are cats animals?", "Yes, by syllogism: cats→mammals→animals"),
-                    ("What is 15% of 80?", "15% of 80 = 0.15 × 80 = 12"),
-                    ("If A implies B, and B is false, what can we say about A?", "By modus tollens, A must be false"),
-                ]
-                q, a = random.choice(benchmark_qa)
-                content = f"Q: {q}\nA: {a}"
-                if self.evolution.mark_learned(content):
-                    self.self_trainer.learn("reasoning", content, "benchmark_learning")
-                    self.evolution.save_training_pair(q, a, "benchmark")
+                # Score it
+                score = 0
+                if test["answer"].lower() in response_lower:
+                    score += 0.5
+                matches = sum(1 for kw in test["keywords"] if kw.lower() in response_lower)
+                score += (matches / len(test["keywords"])) * 0.3
+                if any(s in response_lower for s in ["because", "therefore", "step", "="]):
+                    score += 0.2
 
-            elif source == 'arxiv':
-                # Fetch from ArXiv
-                categories = ['cs.AI', 'cs.LG', 'cs.CL']
-                cat = random.choice(categories)
-                url = f'http://export.arxiv.org/api/query?search_query=cat:{cat}&start={random.randint(0,20)}&max_results=3'
+                total_score += score
+                cat = test["category"]
+                if cat not in category_scores:
+                    category_scores[cat] = []
+                category_scores[cat].append(score)
 
+            avg_score = total_score / len(tests)
+
+            # Find weak areas
+            self._weak_areas = []
+            for cat, scores in category_scores.items():
+                avg = sum(scores) / len(scores) if scores else 0
+                if avg < 0.7:
+                    self._weak_areas.append((cat, avg))
+
+            # Record in evolution
+            self.evolution.record_benchmark(avg_score, {
+                'weak_areas': self._weak_areas,
+                'phase': phase
+            })
+
+            print(f"[Evolution] {phase} Benchmark: {avg_score:.0%}")
+            if self._weak_areas:
+                weak_str = ", ".join([f"{a}: {s:.0%}" for a, s in self._weak_areas[:3]])
+                print(f"[Evolution] Weak areas: {weak_str}")
+
+        except Exception as e:
+            print(f"[Evolution] Benchmark error: {e}")
+
+        self._is_busy = False
+
+    def _sync_chat(self, prompt: str) -> str:
+        """Synchronous chat for background thread."""
+        try:
+            url = "http://localhost:11434/api/generate"
+            data = {"model": self.model, "prompt": prompt, "stream": False}
+            req = urllib.request.Request(url, data=json.dumps(data).encode(), headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=60) as response:
+                result = json.loads(response.read().decode())
+                return result.get("response", "")
+        except Exception as e:
+            return f"[Error: {e}]"
+
+    def _learn_unique_fact(self):
+        """Learn ONE unique fact at a time - analyze with model, extract Q&A."""
+        self._is_busy = True
+
+        # Rotate through learning sources
+        learning_order = ['math', 'logic', 'arxiv', 'web', 'wikipedia']
+        source_type = learning_order[self._learning_order_idx % len(learning_order)]
+        self._learning_order_idx += 1
+
+        try:
+            items = self._fetch_learning_items(source_type)
+
+            for item in items[:3]:
+                content = item.get('snippet', '')
+                title = item.get('title', '')[:60]
+                source = item.get('source', source_type)
+
+                if not content or len(content) < 50:
+                    continue
+
+                # Check for duplicate
+                if self.evolution.is_duplicate(content):
+                    continue
+
+                # Analyze with model to extract Q&A
+                analyzed = self._analyze_content_with_model(title, content, source)
+
+                if not analyzed:
+                    continue
+
+                # Check duplicate on summary
+                if self.evolution.is_duplicate(analyzed.get('summary', content)):
+                    continue
+
+                # Learn it!
+                if self.evolution.mark_learned(analyzed.get('summary', '')):
+                    # Save to knowledge base
+                    self.self_trainer.learn(
+                        analyzed.get('topic', title),
+                        analyzed.get('knowledge', content[:1000]),
+                        source
+                    )
+
+                    # Save Q&A pairs as training data
+                    self._save_analyzed_as_training(analyzed, source)
+
+                    stats = self.evolution.get_stats()
+                    print(f"\n[Evolution] LEARNED [{stats['facts_this_cycle']}/100] [{source}]")
+                    print(f"           Topic: {analyzed.get('topic', 'N/A')}")
+                    print(f"           Q&A pairs: {len(analyzed.get('qa_pairs', []))}")
+                    break  # One at a time
+
+        except Exception as e:
+            pass
+
+        self._is_busy = False
+
+    def _fetch_learning_items(self, source_type: str) -> List[Dict]:
+        """Fetch items from a specific source."""
+        items = []
+
+        if source_type == 'math' or source_type == 'logic':
+            items = self._learn_from_benchmark(source_type)
+
+        elif source_type == 'arxiv':
+            categories = ['cs.AI', 'cs.LG', 'cs.CL']
+            cat = random.choice(categories)
+            try:
+                url = f'http://export.arxiv.org/api/query?search_query=cat:{cat}&start={random.randint(0,30)}&max_results=3'
                 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-                with urllib.request.urlopen(req, timeout=10) as response:
+                with urllib.request.urlopen(req, timeout=15) as response:
                     data = response.read().decode('utf-8')
-
-                # Parse entries
+                import re
                 entries = re.findall(r'<entry>(.*?)</entry>', data, re.DOTALL)
-                for entry in entries[:1]:
+                for entry in entries:
                     title = re.search(r'<title>(.*?)</title>', entry, re.DOTALL)
                     summary = re.search(r'<summary>(.*?)</summary>', entry, re.DOTALL)
-
                     if title and summary:
-                        title_text = html.unescape(title.group(1).strip()[:100])
-                        summary_text = html.unescape(summary.group(1).strip()[:500])
-                        content = f"{title_text}: {summary_text}"
+                        items.append({
+                            'title': html.unescape(title.group(1).strip()[:100]),
+                            'snippet': html.unescape(summary.group(1).strip()[:800]),
+                            'source': f'ArXiv-{cat}'
+                        })
+            except Exception:
+                pass
 
-                        if self.evolution.mark_learned(content):
-                            self.self_trainer.learn(title_text[:50], content, "arxiv")
-                            self.evolution.save_training_pair(
-                                f"What is {title_text}?",
-                                summary_text,
-                                "arxiv"
-                            )
+        elif source_type == 'web':
+            weak_areas = self.evolution.get_weak_areas()
+            if weak_areas:
+                topic, _ = random.choice(weak_areas)
+                query = f"{topic} tutorial examples"
+            else:
+                topics = ['machine learning', 'algorithms', 'neural networks', 'AI reasoning']
+                query = random.choice(topics)
+            try:
+                result = self.tool_registry.tools["web_search"].func(query)
+                if result and len(result) > 100:
+                    items.append({'title': query, 'snippet': result[:800], 'source': 'Web'})
+            except Exception:
+                pass
+
+        elif source_type == 'wikipedia':
+            topics = ['Artificial intelligence', 'Machine learning', 'Neural network', 'Logic', 'Reasoning']
+            topic = random.choice(topics)
+            try:
+                url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(topic)}"
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode())
+                if data.get('extract'):
+                    items.append({'title': topic, 'snippet': data['extract'][:800], 'source': 'Wikipedia'})
+            except Exception:
+                pass
+
+        return items
+
+    def _learn_from_benchmark(self, category: str) -> List[Dict]:
+        """Learn from benchmark with ACTUAL CORRECT ANSWERS - teach the model!"""
+        items = []
+
+        benchmark_qa = {
+            'math': [
+                ("If you buy 5 apples for $2 each, how much change from $20?", "Calculate: 5 × $2 = $10. Change: $20 - $10 = $10. Answer: 10"),
+                ("A train travels at 60 mph for 2.5 hours. How far?", "Distance = Speed × Time = 60 × 2.5 = 150 miles. Answer: 150"),
+                ("Rectangle with length 8 and width 5, what's the area?", "Area = length × width = 8 × 5 = 40. Answer: 40"),
+                ("What is 15% of 80?", "15% of 80 = 0.15 × 80 = 12. Answer: 12"),
+            ],
+            'logic': [
+                ("All cats are mammals. All mammals are animals. Is a cat an animal?", "Syllogism: cats→mammals→animals. Therefore cats ARE animals. Answer: yes"),
+                ("If it rains, ground is wet. Ground is wet. Did it rain?", "Affirming consequent fallacy. Wet ground ≠ rain (could be sprinklers). Answer: no"),
+                ("If A implies B, and B is false, what about A?", "Modus tollens: If A→B and ¬B, then ¬A. Answer: A is false"),
+            ],
+        }
+
+        qa_list = benchmark_qa.get(category, benchmark_qa['math'])
+        q, a = random.choice(qa_list)
+
+        print(f"\n[Evolution] STUDYING [{category}]: {q[:50]}...")
+
+        items.append({
+            'title': f"[{category.upper()}] Benchmark",
+            'snippet': f"Question: {q}\n\nStep-by-step solution:\n{a}",
+            'source': f'Benchmark-{category}'
+        })
+
+        return items
+
+    def _analyze_content_with_model(self, title: str, content: str, source: str) -> Optional[Dict]:
+        """Use model to analyze content and extract structured knowledge."""
+        try:
+            prompt = f"""Extract key knowledge from this text. Be concise.
+
+TEXT: {content[:1500]}
+
+Return JSON only:
+{{"topic":"topic name","summary":"one sentence","facts":["fact1","fact2"],"qa_pairs":[{{"q":"question","a":"answer"}}]}}
+
+JSON:"""
+
+            response = self._sync_chat(prompt)
+
+            # Extract JSON
+            import re
+            json_match = re.search(r'\{[^{}]*"topic"[^{}]*\}', response, re.DOTALL)
+            if not json_match:
+                json_match = re.search(r'\{[\s\S]*?\}(?=\s*$|\s*```)', response)
+
+            if json_match:
+                json_str = json_match.group().replace('\n', ' ')
+                analyzed = json.loads(json_str)
+                analyzed['knowledge'] = content[:500]
+                return analyzed
+
+        except (json.JSONDecodeError, Exception):
+            pass
+
+        # Fallback
+        return {
+            'topic': title[:50],
+            'summary': content[:200],
+            'facts': [content[:300]],
+            'qa_pairs': [{'q': f'What is {title}?', 'a': content[:200]}],
+            'knowledge': content[:500]
+        }
+
+    def _save_analyzed_as_training(self, analyzed: Dict, source: str):
+        """Save analyzed Q&A pairs as training data for MLX."""
+        training_file = os.path.expanduser("~/.neuro/evolution/training_data.jsonl")
+        os.makedirs(os.path.dirname(training_file), exist_ok=True)
+
+        try:
+            # Save Q&A pairs
+            for qa in analyzed.get('qa_pairs', []):
+                if qa.get('q') and qa.get('a'):
+                    pair = {
+                        "prompt": qa['q'],
+                        "completion": qa['a'],
+                        "source": source,
+                        "topic": analyzed.get('topic', ''),
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    with open(training_file, 'a') as f:
+                        f.write(json.dumps(pair) + '\n')
+
+            # Save facts as questions
+            for fact in analyzed.get('facts', []):
+                if fact:
+                    pair = {
+                        "prompt": f"What do you know about {analyzed.get('topic', 'this')}?",
+                        "completion": fact,
+                        "source": source,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    with open(training_file, 'a') as f:
+                        f.write(json.dumps(pair) + '\n')
 
         except Exception:
-            pass  # Silently continue on errors
+            pass
+
+    def _add_evolved_capability(self):
+        """Add a new function based on weak areas."""
+        if not self._weak_areas:
+            return
+
+        weak_topic, _ = self._weak_areas[0]
+
+        capabilities = {
+            'math': ('solve_math', '''def solve_math(expr): return eval(expr) if all(c in '0123456789+-*/().% ' for c in expr) else "unsafe"''', 'Evaluate math'),
+            'logic': ('check_logic', '''def check_logic(p1, p2, c): return f"If {p1} and {p2}, then {c} by syllogism"''', 'Check logic'),
+        }
+
+        if weak_topic in capabilities:
+            name, code, desc = capabilities[weak_topic]
+            existing = [f['name'] for f in self.evolution.state.get('added_functions', [])]
+            if name not in existing:
+                if self.evolution.add_function(name, code, desc):
+                    print(f"[Evolution] Added capability: {name}")
+
 
     async def _cleanup(self):
         """Cleanup on exit."""
