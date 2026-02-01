@@ -487,6 +487,68 @@ class NeuroTrainer:
             'improvement': self.evolution.get_improvement()
         }
 
+    def run_until_crushed(self, target_score: float = 0.85, delay: int = 30):
+        """Run training continuously until benchmark target is reached."""
+        print("\n" + "="*60)
+        print("NEURO CONTINUOUS TRAINING - CRUSH MODE")
+        print("="*60)
+        print(f"Model: {self.model}")
+        print(f"Target score: {target_score:.0%}")
+        print(f"Delay between cycles: {delay}s")
+        print("Will run FOREVER until target is reached!")
+        print("="*60)
+
+        cycle = 0
+        best_score = 0
+        start_time = datetime.now()
+
+        while True:
+            cycle += 1
+            print(f"\n>>> CYCLE {cycle} | Best: {best_score:.0%} | Target: {target_score:.0%}")
+
+            try:
+                result = self.run_cycle()
+                current_score = result['score']
+
+                if current_score > best_score:
+                    best_score = current_score
+                    print(f"\n*** NEW BEST SCORE: {best_score:.0%} ***")
+
+                if current_score >= target_score:
+                    elapsed = datetime.now() - start_time
+                    print("\n" + "="*60)
+                    print("BENCHMARK CRUSHED!")
+                    print("="*60)
+                    print(f"Final score: {current_score:.0%}")
+                    print(f"Target was: {target_score:.0%}")
+                    print(f"Total cycles: {cycle}")
+                    print(f"Time elapsed: {elapsed}")
+                    print("="*60)
+                    break
+
+                # Adaptive delay - faster when improving
+                if result['improvement'] > 0.02:
+                    actual_delay = delay // 2
+                    print(f"Improving fast! Reducing delay to {actual_delay}s")
+                else:
+                    actual_delay = delay
+
+                print(f"\nWaiting {actual_delay}s... (Ctrl+C to stop)")
+                time.sleep(actual_delay)
+
+            except KeyboardInterrupt:
+                elapsed = datetime.now() - start_time
+                print(f"\n\nTraining stopped after {cycle} cycles ({elapsed})")
+                print(f"Best score achieved: {best_score:.0%}")
+                self.trainer.save()
+                break
+            except Exception as e:
+                print(f"\n[ERROR] Cycle failed: {e}")
+                print("Continuing in 60s...")
+                time.sleep(60)
+
+        return best_score
+
     def run_continuous(self, cycles: int = 10, delay: int = 30):
         """Run multiple training cycles continuously."""
         print("\n" + "="*60)
@@ -530,7 +592,15 @@ class NeuroTrainer:
 
 
 def main():
-    model = sys.argv[1] if len(sys.argv) > 1 else "ministral-3:8b"
+    model = "ministral-3:8b"
+    auto_crush = False
+
+    # Parse args
+    for arg in sys.argv[1:]:
+        if arg == "--crush" or arg == "-c":
+            auto_crush = True
+        elif not arg.startswith("-"):
+            model = arg
 
     # Check Ollama is running
     try:
@@ -543,19 +613,26 @@ def main():
 
     trainer = NeuroTrainer(model)
 
+    # Auto crush mode - run until benchmarks crushed
+    if auto_crush:
+        print("\n[AUTO] Starting continuous training until benchmarks crushed...")
+        trainer.run_until_crushed(target_score=0.85, delay=30)
+        return
+
     # Interactive mode
     print("\n" + "="*60)
     print("NEURO LLM TRAINING")
     print("="*60)
     print(f"Model: {model}")
     print("\nCommands:")
-    print("  1  - Run single training cycle")
-    print("  5  - Run 5 cycles")
-    print("  10 - Run 10 cycles")
-    print("  b  - Run benchmark only")
-    print("  c  - Collect data only")
-    print("  s  - Show stats")
-    print("  q  - Quit")
+    print("  1   - Run single training cycle")
+    print("  5   - Run 5 cycles")
+    print("  10  - Run 10 cycles")
+    print("  x   - CRUSH MODE (run until 85%+ score)")
+    print("  b   - Run benchmark only")
+    print("  c   - Collect data only")
+    print("  s   - Show stats")
+    print("  q   - Quit")
     print("="*60)
 
     while True:
@@ -575,6 +652,9 @@ def main():
 
             elif cmd == '10':
                 trainer.run_continuous(cycles=10)
+
+            elif cmd == 'x' or cmd == 'crush':
+                trainer.run_until_crushed(target_score=0.85, delay=30)
 
             elif cmd == 'b':
                 trainer.run_benchmark()
