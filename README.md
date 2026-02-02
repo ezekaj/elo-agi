@@ -1,8 +1,50 @@
-# Neuro AGI
+<p align="center">
+  <img src="assets/logo-full.svg" width="400" alt="NEURO">
+</p>
 
-Neuroscience-inspired AGI architecture with 38 cognitive modules.
+<h3 align="center">Local AI That Learns From Your Code</h3>
+
+<p align="center">
+  The only AI coding assistant that gets smarter the more you use it.<br>
+  No cloud. No API costs. 100% private.
+</p>
+
+<p align="center">
+  <a href="#installation">Installation</a> •
+  <a href="#features">Features</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#benchmarks">Benchmarks</a> •
+  <a href="#contributing">Contributing</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/pypi/v/neuro-agi?style=flat-square&color=00d4ff" alt="PyPI">
+  <img src="https://img.shields.io/pypi/pyversions/neuro-agi?style=flat-square" alt="Python">
+  <img src="https://img.shields.io/github/license/ezekaj/elo-agi?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/modules-38-00d4ff?style=flat-square" alt="Modules">
+</p>
+
+---
+
+## Why NEURO?
+
+| Feature | NEURO | Cloud AI |
+|---------|-------|----------|
+| Runs locally | Yes | No |
+| Learns from your code | Yes | No |
+| Free forever | Yes | $20+/month |
+| Private & secure | Yes | Data sent to cloud |
+| Works offline | Yes | No |
+| Neuroscience-based | 26 cognitive modules | Black box |
 
 ## Installation
+
+```bash
+pip install neuro-agi
+```
+
+Or install from source:
 
 ```bash
 git clone https://github.com/ezekaj/elo-agi.git
@@ -10,7 +52,20 @@ cd elo-agi
 pip install -e .
 ```
 
+**Requirements:** Python 3.9+, [Ollama](https://ollama.ai) for LLM backend
+
 ## Quick Start
+
+### CLI
+
+```bash
+neuro                        # Start interactive session
+neuro --version              # Check installation
+neuro info                   # System information
+neuro check                  # Verify all modules
+```
+
+### Python API
 
 ```python
 from neuro import CognitiveCore
@@ -19,41 +74,70 @@ core = CognitiveCore()
 core.step()  # Run one cognitive cycle
 ```
 
-## CLI Commands
+### Demos
 
 ```bash
-neuro --version              # Check installation
-neuro info                   # System information
-neuro check                  # Verify all modules
-
-neuro-demo all               # Run all 5 demos
+neuro-demo all               # Run all demos
 neuro-demo medical           # Medical diagnosis reasoning
 neuro-demo physics           # Physics concept learning
 neuro-demo language          # Language understanding
 neuro-demo arc               # ARC-style pattern reasoning
-neuro-demo continual         # Continual learning demo
-
-neuro-bench -o report.html   # Generate benchmark report
+neuro-demo continual         # Continual learning
 ```
+
+## Features
+
+### Cognitive Architecture
+- **Global Workspace Theory** - Attention and information broadcast
+- **Predictive Coding** - Free Energy Principle implementation
+- **Dual Process Theory** - System 1/2 reasoning
+- **Episodic Memory** - Long-term context retention
+- **Metacognition** - Self-awareness and reflection
+
+### Learning & Adaptation
+- **Continual Learning** - Learns without forgetting (EWC, PackNet, SI)
+- **Active Learning** - Asks questions when uncertain
+- **Pattern Recognition** - Discovers coding patterns automatically
+- **Knowledge Integration** - Builds understanding over time
+
+### Developer Tools
+- **Code Understanding** - Deep analysis of your codebase
+- **Intelligent Suggestions** - Context-aware recommendations
+- **Multi-file Reasoning** - Understands project structure
+- **Tool Integration** - Git, shell, file operations
 
 ## Architecture
 
-38 modules across 4 tiers:
+38 cognitive modules across 4 tiers:
 
-| Tier | Modules | Purpose |
-|------|---------|---------|
-| Cognitive | 20 | Core cognitive functions (memory, reasoning, language, etc.) |
-| Infrastructure | 6 | System core, LLM integration, knowledge management |
-| Support | 5 | Benchmarks, perception, environment |
-| AGI | 7 | Causal reasoning, abstraction, planning, continual learning |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      NEURO ARCHITECTURE                      │
+├─────────────────────────────────────────────────────────────┤
+│  COGNITIVE TIER (20 modules)                                │
+│  Memory, Language, Reasoning, Creativity, Executive...      │
+├─────────────────────────────────────────────────────────────┤
+│  INFRASTRUCTURE TIER (6 modules)                            │
+│  Core System, LLM Integration, Knowledge Graph              │
+├─────────────────────────────────────────────────────────────┤
+│  SUPPORT TIER (5 modules)                                   │
+│  Benchmarks, Perception, Environment                        │
+├─────────────────────────────────────────────────────────────┤
+│  AGI TIER (7 modules)                                       │
+│  Causal Reasoning, Abstraction, Planning, Continual         │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ### Key Modules
 
-- **neuro-system** - Active inference loop, module coordination
-- **neuro-causal** - Differentiable causal reasoning with SCMs
-- **neuro-abstract** - Neuro-symbolic binding with HRR
-- **neuro-continual** - Catastrophic forgetting prevention (EWC, PackNet, SI)
-- **neuro-planning** - Hierarchical task planning
+| Module | Purpose | Tests |
+|--------|---------|-------|
+| `neuro-system` | Active inference loop, module coordination | Core |
+| `neuro-causal` | Differentiable causal reasoning with SCMs | 124 |
+| `neuro-abstract` | Neuro-symbolic binding with HRR | 144 |
+| `neuro-continual` | Catastrophic forgetting prevention | 88 |
+| `neuro-robust` | Uncertainty quantification, OOD detection | 192 |
+| `neuro-planning` | Hierarchical task planning with MCTS | 82 |
 
 ## Benchmarks
 
@@ -61,13 +145,21 @@ neuro-bench -o report.html   # Generate benchmark report
 Overall Score: 0.697
 Success Rate: 96.4%
 
-Categories:
-- Reasoning: 0.67
-- Memory: 0.72
-- Language: 0.66
-- Causal: 0.70
-- Abstraction: 0.71
-- Continual: 0.75
+┌─────────────┬───────┐
+│ Category    │ Score │
+├─────────────┼───────┤
+│ Continual   │ 0.75  │
+│ Memory      │ 0.72  │
+│ Abstraction │ 0.71  │
+│ Causal      │ 0.70  │
+│ Reasoning   │ 0.67  │
+│ Language    │ 0.66  │
+└─────────────┴───────┘
+```
+
+Run benchmarks:
+```bash
+neuro-bench -o report.html
 ```
 
 ## Development
@@ -84,6 +176,30 @@ black .
 ruff check .
 ```
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## Roadmap
+
+- [x] Core cognitive architecture (38 modules)
+- [x] Causal reasoning engine
+- [x] Continual learning without forgetting
+- [ ] VS Code extension
+- [ ] Real-time streaming responses
+- [ ] Multi-agent collaboration
+- [ ] Voice interface
+
+## Community
+
+- [Report a bug](https://github.com/ezekaj/elo-agi/issues)
+- [Request a feature](https://github.com/ezekaj/elo-agi/issues)
+- [Contributing guide](CONTRIBUTING.md)
+
 ## License
 
-MIT
+MIT - see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  <sub>Built with neuroscience principles. Runs on your machine.</sub>
+</p>
