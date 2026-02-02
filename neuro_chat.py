@@ -185,7 +185,7 @@ def save_history(history: list):
     """Save conversation history."""
     try:
         with open(HISTORY_FILE, 'w') as f:
-            json.dump(history[-50], f)
+            json.dump(history[-50:], f)
     except:
         pass
 
