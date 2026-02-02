@@ -359,12 +359,18 @@ if __name__ == "__main__":
     # Quick one-liner mode
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
         prompt = " ".join(sys.argv[1:])
-        connected, _ = check_ollama()
+        connected, models = check_ollama()
         if connected:
+            # Auto-select model if default not available
+            if MODEL not in models and models:
+                MODEL = models[0]
             console.print("[bold cyan]NEURO[/bold cyan]", end=" ")
-            for token in stream_chat(prompt):
-                console.print(token, end="")
-            console.print()
+            try:
+                for token in stream_chat(prompt):
+                    console.print(token, end="")
+                console.print()
+            except Exception as e:
+                console.print(f"\n[error]Error: {e}[/error]")
         else:
             console.print("[error]Ollama not running. Start with: ollama serve[/error]")
     else:
