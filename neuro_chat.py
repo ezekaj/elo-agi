@@ -62,11 +62,27 @@ MODEL = os.environ.get("NEURO_MODEL", "mistral")
 HISTORY_FILE = Path.home() / ".neuro_history.json"
 WORKING_DIR = Path.cwd()
 
-# Try to import agent (optional for basic mode)
+# Try to import agent and other modules (optional for basic mode)
 AGENT_AVAILABLE = False
+SESSIONS_AVAILABLE = False
+PROJECT_AVAILABLE = False
+
 try:
     from neuro_cli.agent import Agent
+    from neuro_cli.permissions import check_permission
     AGENT_AVAILABLE = True
+except ImportError:
+    pass
+
+try:
+    from neuro_cli.sessions import session_manager
+    SESSIONS_AVAILABLE = True
+except ImportError:
+    pass
+
+try:
+    from neuro_cli.project import detect_project, get_project_summary
+    PROJECT_AVAILABLE = True
 except ImportError:
     pass
 
@@ -177,6 +193,8 @@ def show_help():
         ("/fix", "Fix bugs in loaded file"),
         ("/test", "Generate tests for loaded file"),
         ("/tools", "List available tools"),
+        ("/sessions", "List recent sessions"),
+        ("/resume <id>", "Resume a session"),
         ("/models", "List available models"),
         ("/model <name>", "Switch model"),
         ("/exit", "Exit NEURO"),
@@ -398,10 +416,31 @@ def main():
 
     agent_status = "[green]✓ Agent mode[/green]" if AGENT_AVAILABLE else "[yellow]Basic mode[/yellow]"
     console.print(f"[success]✓[/success] Connected! Using [cyan]{MODEL}[/cyan] | {agent_status}")
-    console.print(f"[dim]Working directory: {WORKING_DIR}[/dim]")
+
+    # Show project info if available
+    if PROJECT_AVAILABLE:
+        project_info = get_project_summary(str(WORKING_DIR))
+        console.print(f"[dim]Project: {project_info}[/dim]")
+    else:
+        console.print(f"[dim]Working directory: {WORKING_DIR}[/dim]")
+
     console.print("[dim]Type /help for commands or just start chatting.[/dim]\n")
 
-    history = load_history()
+    # Initialize session
+    history = []
+    if SESSIONS_AVAILABLE:
+        # Check for continue flag
+        if "-c" in sys.argv or "--continue" in sys.argv:
+            last_id = session_manager.get_last_session_id()
+            if last_id:
+                history = session_manager.resume(last_id)
+                console.print(f"[success]✓[/success] Resumed session [cyan]{last_id}[/cyan]")
+            else:
+                session_manager.new_session(MODEL, str(WORKING_DIR))
+        else:
+            session_manager.new_session(MODEL, str(WORKING_DIR))
+    else:
+        history = load_history()
     current_file = None
     current_content = None
 
@@ -436,6 +475,28 @@ def main():
 
                 elif cmd == "/tools":
                     show_tools()
+                    continue
+
+                elif cmd == "/sessions":
+                    if SESSIONS_AVAILABLE:
+                        session_manager.show_sessions()
+                    else:
+                        console.print("[warning]Sessions not available[/warning]")
+                    continue
+
+                elif cmd == "/resume":
+                    if not SESSIONS_AVAILABLE:
+                        console.print("[warning]Sessions not available[/warning]")
+                        continue
+                    if arg:
+                        messages = session_manager.resume(arg)
+                        if messages:
+                            history = messages
+                            console.print(f"[success]✓[/success] Resumed session [cyan]{arg}[/cyan] ({len(messages)} messages)")
+                        else:
+                            console.print(f"[error]Session '{arg}' not found[/error]")
+                    else:
+                        console.print("[warning]Usage: /resume <session_id>[/warning]")
                     continue
 
                 elif cmd == "/models":
@@ -520,7 +581,12 @@ def main():
                 if response_text:
                     history.append({"role": "user", "content": user_input})
                     history.append({"role": "assistant", "content": response_text})
-                    save_history(history)
+                    # Save to session or file
+                    if SESSIONS_AVAILABLE:
+                        session_manager.add_message("user", user_input)
+                        session_manager.add_message("assistant", response_text)
+                    else:
+                        save_history(history)
                     continue
 
             # Fallback to basic streaming
@@ -546,7 +612,11 @@ def main():
             # Save to history
             history.append({"role": "user", "content": user_input})
             history.append({"role": "assistant", "content": response_text})
-            save_history(history)
+            if SESSIONS_AVAILABLE:
+                session_manager.add_message("user", user_input)
+                session_manager.add_message("assistant", response_text)
+            else:
+                save_history(history)
 
         except KeyboardInterrupt:
             console.print("\n[dim]Press Ctrl+C again or type /exit to quit[/dim]")
