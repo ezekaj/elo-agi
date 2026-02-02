@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="neuralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0099cc;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#1a1a2e"/>
+
+  <!-- Neural network nodes -->
+  <!-- Input layer -->
+  <circle cx="25" cy="30" r="6" fill="url(#neuralGradient)"/>
+  <circle cx="25" cy="50" r="6" fill="url(#neuralGradient)"/>
+  <circle cx="25" cy="70" r="6" fill="url(#neuralGradient)"/>
+
+  <!-- Hidden layer -->
+  <circle cx="50" cy="35" r="7" fill="url(#neuralGradient)"/>
+  <circle cx="50" cy="65" r="7" fill="url(#neuralGradient)"/>
+
+  <!-- Output layer -->
+  <circle cx="75" cy="50" r="8" fill="url(#neuralGradient)"/>
+
+  <!-- Connections -->
+  <g stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.6">
+    <!-- Input to hidden -->
+    <line x1="31" y1="30" x2="43" y2="35"/>
+    <line x1="31" y1="30" x2="43" y2="65"/>
+    <line x1="31" y1="50" x2="43" y2="35"/>
+    <line x1="31" y1="50" x2="43" y2="65"/>
+    <line x1="31" y1="70" x2="43" y2="35"/>
+    <line x1="31" y1="70" x2="43" y2="65"/>
+
+    <!-- Hidden to output -->
+    <line x1="57" y1="35" x2="67" y2="50"/>
+    <line x1="57" y1="65" x2="67" y2="50"/>
+  </g>
+
+  <!-- Pulse effect on output -->
+  <circle cx="75" cy="50" r="12" fill="none" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.3"/>
+</svg>
