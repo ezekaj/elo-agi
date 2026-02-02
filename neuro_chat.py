@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
-NEURO Chat - Beautiful Terminal Interface
-==========================================
-The easiest way to use NEURO. Just run: python neuro_chat.py
+NEURO Chat - Full-Featured Coding Assistant
+============================================
+A powerful local AI coding assistant with file operations,
+shell execution, and intelligent tool use.
 
-Features:
-- Beautiful Rich terminal UI
-- Streaming responses
-- File context
-- Conversation history
-- One-command setup
+Usage:
+    neuro                    # Interactive mode
+    neuro "your question"    # Quick one-liner
+    neuro -c                 # Continue last session
 """
 
 import os
@@ -24,11 +23,12 @@ try:
     from rich.panel import Panel
     from rich.markdown import Markdown
     from rich.table import Table
-    from rich.prompt import Prompt
+    from rich.prompt import Prompt, Confirm
     from rich.live import Live
     from rich.text import Text
     from rich.theme import Theme
     from rich.progress import Progress, SpinnerColumn, TextColumn
+    from rich.syntax import Syntax
 except ImportError:
     print("Installing Rich for beautiful terminal UI...")
     os.system(f"{sys.executable} -m pip install rich -q")
@@ -36,11 +36,12 @@ except ImportError:
     from rich.panel import Panel
     from rich.markdown import Markdown
     from rich.table import Table
-    from rich.prompt import Prompt
+    from rich.prompt import Prompt, Confirm
     from rich.live import Live
     from rich.text import Text
     from rich.theme import Theme
     from rich.progress import Progress, SpinnerColumn, TextColumn
+    from rich.syntax import Syntax
 
 # NEURO Theme
 theme = Theme({
@@ -50,6 +51,7 @@ theme = Theme({
     "success": "green",
     "neuro": "bold cyan",
     "dim": "dim white",
+    "tool": "bold magenta",
 })
 
 console = Console(theme=theme)
@@ -58,6 +60,15 @@ console = Console(theme=theme)
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 MODEL = os.environ.get("NEURO_MODEL", "mistral")
 HISTORY_FILE = Path.home() / ".neuro_history.json"
+WORKING_DIR = Path.cwd()
+
+# Try to import agent (optional for basic mode)
+AGENT_AVAILABLE = False
+try:
+    from neuro_cli.agent import Agent
+    AGENT_AVAILABLE = True
+except ImportError:
+    pass
 
 
 BANNER = """[bold cyan]
@@ -68,7 +79,7 @@ BANNER = """[bold cyan]
     ██║ ╚████║███████╗╚██████╔╝██║  ██║╚██████╔╝
     ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝
 [/bold cyan]
-    [dim]Local AI That Learns From Your Code[/dim]
+    [dim]Local AI Coding Assistant with Tools[/dim]
 """
 
 
@@ -84,22 +95,39 @@ def check_ollama() -> tuple[bool, list]:
         return False, []
 
 
-def stream_chat(prompt: str, history: list = None) -> str:
+def stream_chat(prompt: str, history: list = None, use_tools: bool = False) -> str:
     """Stream a chat response from Ollama."""
     messages = []
 
     # System prompt
+    system_content = "You are NEURO, a helpful AI coding assistant. Be concise and helpful. Format code with markdown code blocks."
+
+    if use_tools and AGENT_AVAILABLE:
+        system_content += """
+
+You have access to these tools:
+- read_file(path): Read file contents
+- write_file(path, content): Create/overwrite files
+- edit_file(path, old_text, new_text): Replace text in files
+- glob(pattern): Find files by pattern
+- grep(pattern, path): Search file contents
+- ls(path): List directory contents
+- bash(command): Execute shell commands
+
+When you need to use a tool, respond with a JSON object like:
+{"tool": "read_file", "args": {"path": "README.md"}}
+"""
+
     messages.append({
         "role": "system",
-        "content": "You are NEURO, a helpful AI coding assistant. Be concise and helpful. Format code with markdown code blocks."
+        "content": system_content
     })
 
     # Add history
     if history:
-        for msg in history[-10:]:  # Last 10 messages
+        for msg in history[-10:]:
             messages.append(msg)
 
-    # Add current message
     messages.append({"role": "user", "content": prompt})
 
     data = json.dumps({
@@ -142,9 +170,13 @@ def show_help():
         ("/help", "Show this help"),
         ("/clear", "Clear conversation"),
         ("/file <path>", "Load file into context"),
+        ("/ls [path]", "List directory contents"),
+        ("/run <cmd>", "Execute shell command"),
+        ("/read <path>", "Read and display a file"),
         ("/explain", "Explain loaded file"),
         ("/fix", "Fix bugs in loaded file"),
         ("/test", "Generate tests for loaded file"),
+        ("/tools", "List available tools"),
         ("/models", "List available models"),
         ("/model <name>", "Switch model"),
         ("/exit", "Exit NEURO"),
@@ -154,7 +186,27 @@ def show_help():
         table.add_row(cmd, desc)
 
     console.print(table)
-    console.print("\n[dim]Or just type your question to chat![/dim]")
+    console.print("\n[dim]Or just ask questions - NEURO can read, write, and run code![/dim]")
+
+
+def show_tools():
+    """Show available tools."""
+    if not AGENT_AVAILABLE:
+        console.print("[warning]Agent tools not available. Install with: pip install -e .[/warning]")
+        return
+
+    from neuro_cli.tools import registry
+
+    table = Table(title="[bold cyan]Available Tools[/bold cyan]", border_style="cyan")
+    table.add_column("Tool", style="cyan")
+    table.add_column("Description")
+    table.add_column("Permission", style="dim")
+
+    for tool in registry.list_tools():
+        perm = "[yellow]Required[/yellow]" if tool.requires_permission else "[green]Auto[/green]"
+        table.add_row(tool.name, tool.description[:50] + "...", perm)
+
+    console.print(table)
 
 
 def show_models(models: list, current: str):
@@ -181,6 +233,78 @@ def load_file(path: str) -> tuple[str, str]:
         return None, None
 
 
+def run_command(cmd: str) -> None:
+    """Run a shell command and display output."""
+    if AGENT_AVAILABLE:
+        from neuro_cli.tools import BashTool
+        tool = BashTool()
+
+        # Check if safe
+        if not tool.is_safe(cmd):
+            if not Confirm.ask(f"[warning]Execute:[/warning] {cmd}?"):
+                console.print("[dim]Cancelled[/dim]")
+                return
+
+        result = tool.execute(command=cmd)
+        if result.success:
+            console.print(Panel(result.output, title=f"[tool]{cmd}[/tool]", border_style="green"))
+        else:
+            console.print(Panel(result.error, title=f"[error]{cmd}[/error]", border_style="red"))
+    else:
+        import subprocess
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+            output = result.stdout + result.stderr
+            console.print(Panel(output, title=f"[tool]{cmd}[/tool]", border_style="cyan"))
+        except Exception as e:
+            console.print(f"[error]Error: {e}[/error]")
+
+
+def list_directory(path: str = ".") -> None:
+    """List directory contents."""
+    if AGENT_AVAILABLE:
+        from neuro_cli.tools import LsTool
+        tool = LsTool()
+        result = tool.execute(path=path)
+        console.print(result.output)
+    else:
+        try:
+            p = Path(path).expanduser().resolve()
+            entries = sorted(p.iterdir())
+            for entry in entries:
+                if entry.is_dir():
+                    console.print(f"  [cyan]📁 {entry.name}/[/cyan]")
+                else:
+                    size = entry.stat().st_size
+                    console.print(f"  📄 {entry.name} ({size:,} bytes)")
+        except Exception as e:
+            console.print(f"[error]Error: {e}[/error]")
+
+
+def read_file_display(path: str) -> None:
+    """Read and display a file with syntax highlighting."""
+    try:
+        p = Path(path).expanduser()
+        content = p.read_text()
+
+        # Detect language from extension
+        ext = p.suffix.lstrip('.')
+        lang_map = {
+            'py': 'python', 'js': 'javascript', 'ts': 'typescript',
+            'rs': 'rust', 'go': 'go', 'rb': 'ruby', 'java': 'java',
+            'c': 'c', 'cpp': 'cpp', 'h': 'c', 'hpp': 'cpp',
+            'sh': 'bash', 'bash': 'bash', 'zsh': 'bash',
+            'json': 'json', 'yaml': 'yaml', 'yml': 'yaml',
+            'md': 'markdown', 'html': 'html', 'css': 'css',
+        }
+        lang = lang_map.get(ext, 'text')
+
+        syntax = Syntax(content, lang, line_numbers=True, theme="monokai")
+        console.print(Panel(syntax, title=f"[cyan]{path}[/cyan]", border_style="cyan"))
+    except Exception as e:
+        console.print(f"[error]Error: {e}[/error]")
+
+
 def save_history(history: list):
     """Save conversation history."""
     try:
@@ -198,6 +322,48 @@ def load_history() -> list:
     except:
         pass
     return []
+
+
+def permission_prompt(tool_name: str, args: dict) -> bool:
+    """Prompt user for permission to execute a tool."""
+    console.print(f"\n[tool]Tool: {tool_name}[/tool]")
+    console.print(f"[dim]Args: {json.dumps(args, indent=2)}[/dim]")
+    return Confirm.ask("[warning]Allow this action?[/warning]", default=True)
+
+
+def run_with_agent(prompt: str, history: list) -> str:
+    """Run prompt using the full agent with tools."""
+    if not AGENT_AVAILABLE:
+        console.print("[warning]Agent not available, using basic mode[/warning]")
+        return None
+
+    agent = Agent(model=MODEL, ollama_url=OLLAMA_URL)
+    agent.set_permission_callback(permission_prompt)
+
+    # Load previous history into agent
+    if history:
+        agent.messages = [{"role": "system", "content": agent.messages[0]["content"] if agent.messages else ""}]
+        agent.messages.extend(history[-10:])
+
+    response_text = ""
+
+    console.print()
+    console.print("[bold cyan]NEURO[/bold cyan]", end=" ")
+
+    try:
+        with Live(console=console, refresh_per_second=10, vertical_overflow="visible") as live:
+            for chunk in agent.run(prompt):
+                response_text += chunk
+                try:
+                    live.update(Markdown(response_text))
+                except:
+                    live.update(Text(response_text))
+    except Exception as e:
+        console.print(f"\n[error]Error: {e}[/error]")
+        return None
+
+    console.print()
+    return response_text
 
 
 def main():
@@ -230,7 +396,9 @@ def main():
     if MODEL not in models and models:
         MODEL = models[0]
 
-    console.print(f"[success]✓[/success] Connected! Using [cyan]{MODEL}[/cyan]")
+    agent_status = "[green]✓ Agent mode[/green]" if AGENT_AVAILABLE else "[yellow]Basic mode[/yellow]"
+    console.print(f"[success]✓[/success] Connected! Using [cyan]{MODEL}[/cyan] | {agent_status}")
+    console.print(f"[dim]Working directory: {WORKING_DIR}[/dim]")
     console.print("[dim]Type /help for commands or just start chatting.[/dim]\n")
 
     history = load_history()
@@ -252,21 +420,28 @@ def main():
                 arg = parts[1] if len(parts) > 1 else ""
 
                 if cmd in ["/exit", "/quit", "/q"]:
-                    console.print("[dim]Goodbye! 👋[/dim]")
+                    console.print("[dim]Goodbye![/dim]")
                     break
 
                 elif cmd == "/help":
                     show_help()
+                    continue
 
                 elif cmd == "/clear":
                     history = []
                     current_file = None
                     current_content = None
                     console.print("[success]✓[/success] Cleared!")
+                    continue
+
+                elif cmd == "/tools":
+                    show_tools()
+                    continue
 
                 elif cmd == "/models":
                     _, models = check_ollama()
                     show_models(models, MODEL)
+                    continue
 
                 elif cmd == "/model":
                     if arg:
@@ -279,6 +454,25 @@ def main():
                     else:
                         _, models = check_ollama()
                         show_models(models, MODEL)
+                    continue
+
+                elif cmd == "/ls":
+                    list_directory(arg if arg else ".")
+                    continue
+
+                elif cmd == "/run":
+                    if arg:
+                        run_command(arg)
+                    else:
+                        console.print("[warning]Usage: /run <command>[/warning]")
+                    continue
+
+                elif cmd == "/read":
+                    if arg:
+                        read_file_display(arg)
+                    else:
+                        console.print("[warning]Usage: /read <path>[/warning]")
+                    continue
 
                 elif cmd == "/file":
                     if arg:
@@ -288,6 +482,7 @@ def main():
                             console.print(f"[success]✓[/success] Loaded [cyan]{current_file}[/cyan] ({lines} lines)")
                     else:
                         console.print("[warning]Usage: /file <path>[/warning]")
+                    continue
 
                 elif cmd == "/explain":
                     if current_content:
@@ -314,16 +509,21 @@ def main():
                     console.print(f"[warning]Unknown command: {cmd}[/warning]")
                     continue
 
-                # If we handled a command that doesn't need chat, continue
-                if cmd in ["/help", "/clear", "/models", "/model", "/file"]:
-                    continue
-
-            # Add context if file loaded
+            # Build prompt with context
             prompt = user_input
             if current_content and not user_input.startswith("```"):
                 prompt = f"Context - Current file ({current_file}):\n```\n{current_content[:2000]}\n```\n\nQuestion: {user_input}"
 
-            # Stream response
+            # Try agent mode first if available
+            if AGENT_AVAILABLE:
+                response_text = run_with_agent(prompt, history)
+                if response_text:
+                    history.append({"role": "user", "content": user_input})
+                    history.append({"role": "assistant", "content": response_text})
+                    save_history(history)
+                    continue
+
+            # Fallback to basic streaming
             console.print()
             console.print("[bold cyan]NEURO[/bold cyan]", end=" ")
 
@@ -333,7 +533,6 @@ def main():
                 with Live(console=console, refresh_per_second=15, vertical_overflow="visible") as live:
                     for token in stream_chat(prompt, history):
                         response_text += token
-                        # Try markdown rendering
                         try:
                             live.update(Markdown(response_text))
                         except:
@@ -356,12 +555,17 @@ def main():
 
 
 if __name__ == "__main__":
+    # Parse arguments
+    continue_session = "-c" in sys.argv or "--continue" in sys.argv
+
+    # Remove flags from argv
+    args = [a for a in sys.argv[1:] if not a.startswith("-")]
+
     # Quick one-liner mode
-    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
-        prompt = " ".join(sys.argv[1:])
+    if args and not args[0].startswith("/"):
+        prompt = " ".join(args)
         connected, models = check_ollama()
         if connected:
-            # Auto-select model if default not available
             if MODEL not in models and models:
                 MODEL = models[0]
             console.print("[bold cyan]NEURO[/bold cyan]", end=" ")

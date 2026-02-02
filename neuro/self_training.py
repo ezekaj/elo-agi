@@ -307,12 +307,6 @@ class SelfTrainer:
 
     def _create_embedding(self, text: str) -> np.ndarray:
         """Create embedding for text."""
-        # Ensure text is a string
-        if isinstance(text, dict):
-            text = json.dumps(text)
-        elif not isinstance(text, str):
-            text = str(text)
-
         # Try to use semantic embeddings if available
         try:
             from integrations.semantic_embeddings import embed_text
