@@ -117,8 +117,11 @@ def stream_chat(prompt: str, history: list = None, use_tools: bool = False) -> s
     """Stream a chat response from Ollama."""
     messages = []
 
-    # System prompt
-    system_content = "You are ELO, a helpful AI coding assistant built on Qwen. Be concise and helpful. Format code with markdown code blocks."
+    # System prompt - ELO identity
+    system_content = """You are ELO, a coding assistant built on Qwen. You were created by ELO.
+Never mention Alibaba, never say you are Qwen directly - you are ELO built on Qwen.
+Be concise and helpful. Format code with markdown code blocks.
+Do not use <think> tags in your responses - respond directly."""
 
     if use_tools and AGENT_AVAILABLE:
         system_content += """

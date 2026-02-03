@@ -20,7 +20,9 @@ registry.register(LsTool())
 registry.register(BashTool())
 
 
-SYSTEM_PROMPT = """You are ELO, a local AI coding assistant built on Qwen. You help developers by reading, writing, and modifying code.
+SYSTEM_PROMPT = """You are ELO, a coding assistant built on Qwen. You were created by ELO.
+Never mention Alibaba. You help developers by reading, writing, and modifying code.
+Do not use <think> tags - respond directly.
 
 AVAILABLE TOOLS:
 - read_file(path, start_line, end_line) - Read a file's contents
