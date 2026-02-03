@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-NEURO Chat - Full-Featured Coding Assistant
-============================================
+ELO Chat - Full-Featured Coding Assistant
+==========================================
 A powerful local AI coding assistant with file operations,
 shell execution, and intelligent tool use.
 
+Built on Qwen.
+
 Usage:
-    neuro                    # Interactive mode
-    neuro "your question"    # Quick one-liner
-    neuro -c                 # Continue last session
+    elo                    # Interactive mode
+    elo "your question"    # Quick one-liner
+    elo -c                 # Continue last session
 """
 
 import os
@@ -43,13 +45,13 @@ except ImportError:
     from rich.progress import Progress, SpinnerColumn, TextColumn
     from rich.syntax import Syntax
 
-# NEURO Theme
+# ELO Theme
 theme = Theme({
     "info": "cyan",
     "warning": "yellow",
     "error": "red bold",
     "success": "green",
-    "neuro": "bold cyan",
+    "elo": "bold cyan",
     "dim": "dim white",
     "tool": "bold magenta",
 })
@@ -58,8 +60,8 @@ console = Console(theme=theme)
 
 # Config
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-MODEL = os.environ.get("NEURO_MODEL", "mistral")
-HISTORY_FILE = Path.home() / ".neuro_history.json"
+MODEL = os.environ.get("ELO_MODEL", "mistral")
+HISTORY_FILE = Path.home() / ".elo_history.json"
 WORKING_DIR = Path.cwd()
 
 # Try to import agent and other modules (optional for basic mode)
@@ -68,34 +70,34 @@ SESSIONS_AVAILABLE = False
 PROJECT_AVAILABLE = False
 
 try:
-    from neuro_cli.agent import Agent
-    from neuro_cli.permissions import check_permission
+    from elo_cli.agent import Agent
+    from elo_cli.permissions import check_permission
     AGENT_AVAILABLE = True
 except ImportError:
     pass
 
 try:
-    from neuro_cli.sessions import session_manager
+    from elo_cli.sessions import session_manager
     SESSIONS_AVAILABLE = True
 except ImportError:
     pass
 
 try:
-    from neuro_cli.project import detect_project, get_project_summary
+    from elo_cli.project import detect_project, get_project_summary
     PROJECT_AVAILABLE = True
 except ImportError:
     pass
 
 
 BANNER = """[bold cyan]
-    ███╗   ██╗███████╗██╗   ██╗██████╗  ██████╗
-    ████╗  ██║██╔════╝██║   ██║██╔══██╗██╔═══██╗
-    ██╔██╗ ██║█████╗  ██║   ██║██████╔╝██║   ██║
-    ██║╚██╗██║██╔══╝  ██║   ██║██╔══██╗██║   ██║
-    ██║ ╚████║███████╗╚██████╔╝██║  ██║╚██████╔╝
-    ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝
+    ███████╗██╗      ██████╗
+    ██╔════╝██║     ██╔═══██╗
+    █████╗  ██║     ██║   ██║
+    ██╔══╝  ██║     ██║   ██║
+    ███████╗███████╗╚██████╔╝
+    ╚══════╝╚══════╝ ╚═════╝
 [/bold cyan]
-    [dim]Local AI Coding Assistant with Tools[/dim]
+    [dim]AI Coding Assistant • Built on Qwen[/dim]
 """
 
 
@@ -116,7 +118,7 @@ def stream_chat(prompt: str, history: list = None, use_tools: bool = False) -> s
     messages = []
 
     # System prompt
-    system_content = "You are NEURO, a helpful AI coding assistant. Be concise and helpful. Format code with markdown code blocks."
+    system_content = "You are ELO, a helpful AI coding assistant built on Qwen. Be concise and helpful. Format code with markdown code blocks."
 
     if use_tools and AGENT_AVAILABLE:
         system_content += """
@@ -178,7 +180,7 @@ When you need to use a tool, respond with a JSON object like:
 
 def show_help():
     """Show help."""
-    table = Table(title="[bold cyan]NEURO Commands[/bold cyan]", border_style="cyan", show_header=True)
+    table = Table(title="[bold cyan]ELO Commands[/bold cyan]", border_style="cyan", show_header=True)
     table.add_column("Command", style="cyan", width=20)
     table.add_column("Description")
 
@@ -197,14 +199,14 @@ def show_help():
         ("/resume <id>", "Resume a session"),
         ("/models", "List available models"),
         ("/model <name>", "Switch model"),
-        ("/exit", "Exit NEURO"),
+        ("/exit", "Exit ELO"),
     ]
 
     for cmd, desc in commands:
         table.add_row(cmd, desc)
 
     console.print(table)
-    console.print("\n[dim]Or just ask questions - NEURO can read, write, and run code![/dim]")
+    console.print("\n[dim]Or just ask questions - ELO can read, write, and run code![/dim]")
 
 
 def show_tools():
@@ -213,7 +215,7 @@ def show_tools():
         console.print("[warning]Agent tools not available. Install with: pip install -e .[/warning]")
         return
 
-    from neuro_cli.tools import registry
+    from elo_cli.tools import registry
 
     table = Table(title="[bold cyan]Available Tools[/bold cyan]", border_style="cyan")
     table.add_column("Tool", style="cyan")
@@ -254,7 +256,7 @@ def load_file(path: str) -> tuple[str, str]:
 def run_command(cmd: str) -> None:
     """Run a shell command and display output."""
     if AGENT_AVAILABLE:
-        from neuro_cli.tools import BashTool
+        from elo_cli.tools import BashTool
         tool = BashTool()
 
         # Check if safe
@@ -281,7 +283,7 @@ def run_command(cmd: str) -> None:
 def list_directory(path: str = ".") -> None:
     """List directory contents."""
     if AGENT_AVAILABLE:
-        from neuro_cli.tools import LsTool
+        from elo_cli.tools import LsTool
         tool = LsTool()
         result = tool.execute(path=path)
         console.print(result.output)
@@ -366,7 +368,7 @@ def run_with_agent(prompt: str, history: list) -> str:
     response_text = ""
 
     console.print()
-    console.print("[bold cyan]NEURO[/bold cyan]", end=" ")
+    console.print("[bold cyan]ELO[/bold cyan]", end=" ")
 
     try:
         with Live(console=console, refresh_per_second=10, vertical_overflow="visible") as live:
@@ -591,7 +593,7 @@ def main():
 
             # Fallback to basic streaming
             console.print()
-            console.print("[bold cyan]NEURO[/bold cyan]", end=" ")
+            console.print("[bold cyan]ELO[/bold cyan]", end=" ")
 
             response_text = ""
 
@@ -638,7 +640,7 @@ if __name__ == "__main__":
         if connected:
             if MODEL not in models and models:
                 MODEL = models[0]
-            console.print("[bold cyan]NEURO[/bold cyan]", end=" ")
+            console.print("[bold cyan]ELO[/bold cyan]", end=" ")
             try:
                 for token in stream_chat(prompt):
                     console.print(token, end="")

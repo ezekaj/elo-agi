@@ -1,4 +1,4 @@
-"""NEURO Agent - Orchestrates tool calling with Ollama."""
+"""ELO Agent - Orchestrates tool calling with Ollama."""
 
 import json
 import re
@@ -20,7 +20,7 @@ registry.register(LsTool())
 registry.register(BashTool())
 
 
-SYSTEM_PROMPT = """You are NEURO, a local AI coding assistant. You help developers by reading, writing, and modifying code.
+SYSTEM_PROMPT = """You are ELO, a local AI coding assistant built on Qwen. You help developers by reading, writing, and modifying code.
 
 AVAILABLE TOOLS:
 - read_file(path, start_line, end_line) - Read a file's contents
@@ -64,7 +64,7 @@ def parse_tool_calls(text: str) -> list[dict]:
 
 
 class Agent:
-    """NEURO Agent with prompt-based tool calling."""
+    """ELO Agent with prompt-based tool calling."""
 
     def __init__(self, model: str = "mistral", ollama_url: str = "http://localhost:11434"):
         self.model = model
