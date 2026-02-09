@@ -764,6 +764,21 @@
           <svg class="w-4 h-4 text-slate-600 group-hover:text-purple transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         </a>
 
+        <!-- Bank Transfer -->
+        <div class="sponsor-card flex items-start gap-4 group">
+          <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-cyan/10 border border-cyan/20 flex items-center justify-center">
+            <svg class="w-6 h-6 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-white font-semibold text-sm">Bank Transfer</h3>
+            <p class="text-slate-500 text-xs mt-0.5">IBAN</p>
+            <div class="flex items-center gap-2 mt-2 p-2 rounded-lg bg-white/[0.02] border border-white/5">
+              <code class="text-xs text-slate-400 font-mono flex-1">AL-C0100002334708</code>
+              <button onclick="navigator.clipboard.writeText('AL-C0100002334708');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" class="text-xs text-cyan font-semibold hover:text-white transition-colors flex-shrink-0">Copy</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Crypto -->
         <div class="sponsor-card sm:col-span-2">
           <div class="flex items-start gap-4 mb-4">
