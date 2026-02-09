@@ -3,319 +3,846 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ELO-AGI (NEURO) — Neuroscience-Inspired AGI</title>
-  <meta name="description" content="A comprehensive neuroscience-inspired artificial general intelligence system implementing 38 cognitive modules inspired by human brain architecture. Local, privacy-first AI coding assistant.">
+  <title>ELO-AGI (NEURO) — Neuroscience-Inspired AGI Framework</title>
+  <meta name="description" content="A complete cognitive architecture with 38 modules modeling the human brain. Local execution, zero API costs, continual learning without catastrophic forgetting.">
   <meta name="theme-color" content="#7C3AED">
+  <meta property="og:title" content="NEURO — Neuroscience-Inspired AGI Framework">
+  <meta property="og:description" content="38 cognitive modules. Local execution. Zero API costs. Open source under MIT.">
+  <meta property="og:type" content="website">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: '#7C3AED',
-            secondary: '#0B0D17',
-            accent: '#06B6D4',
-            surface: '#0B0D17',
+            base: '#0B0D17',
+            surface: '#111327',
+            surfaceLight: '#191C33',
+            purple: '#7C3AED',
+            violet: '#8B5CF6',
+            cyan: '#06B6D4',
+            teal: '#14B8A6',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
           }
         }
       }
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Inter', system-ui, sans-serif; }
-    .gradient-hero { background: linear-gradient(135deg, #1a0a2e 0%, #0B0D17 40%, #0d1117 70%, #0a1628 100%); }
-    .gradient-purple { background: linear-gradient(135deg, #7C3AED, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.06); }
-    .glow-purple { box-shadow: 0 0 40px rgba(124,58,237,0.15); }
-    .card-hover { transition: transform 0.3s, box-shadow 0.3s; }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-    .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
-    @keyframes fadeIn { to { opacity: 1; } }
-    .fade-in:nth-child(2) { animation-delay: 0.1s; }
-    .fade-in:nth-child(3) { animation-delay: 0.2s; }
-    .fade-in:nth-child(4) { animation-delay: 0.3s; }
-    .fade-in:nth-child(5) { animation-delay: 0.4s; }
-    .fade-in:nth-child(6) { animation-delay: 0.5s; }
-    .tier-connector { position: relative; }
-    .tier-connector::after { content: ''; position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); width: 2px; height: 16px; background: rgba(124,58,237,0.3); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0B0D17; color: #e2e8f0; }
+
+    .logo-gradient {
+      background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-bg {
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(124,58,237,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 20% 70%, rgba(6,182,212,0.05) 0%, transparent 50%),
+        #0B0D17;
+    }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .bar-gradient { background: linear-gradient(90deg, #7C3AED, #06B6D4); }
+
+    .code-block {
+      background: #0d0f1a;
+      border: 1px solid rgba(124,58,237,0.15);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .code-block .code-header {
+      background: rgba(124,58,237,0.06);
+      border-bottom: 1px solid rgba(124,58,237,0.1);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .code-block pre {
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .module-tile {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .module-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(124,58,237,0.15);
+    }
+    .module-tile .module-desc {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .module-tile.expanded .module-desc {
+      max-height: 200px;
+      padding-top: 10px;
+    }
+
+    .brain-region {
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+    }
+    .brain-region:hover {
+      transform: scale(1.05);
+      filter: brightness(1.3);
+    }
+
+    .layer-bar {
+      position: relative;
+      border-radius: 6px;
+      padding: 16px 24px;
+      transition: transform 0.2s ease;
+    }
+    .layer-bar:hover {
+      transform: scale(1.02);
+    }
+
+    .tooltip {
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #14B8A6;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+    }
+    .tooltip.show { opacity: 1; }
+
+    .nav-link {
+      position: relative;
+      color: #94a3b8;
+      transition: color 0.2s ease;
+    }
+    .nav-link:hover { color: #e2e8f0; }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #7C3AED, #06B6D4);
+      transition: width 0.2s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.03);
+      color: #94a3b8;
+    }
+    .tab-btn:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+    .tab-btn.active { color: #fff; }
+
+    .table-wrapper { overflow-x: auto; }
+    .research-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+    }
+    .research-table th {
+      background: rgba(124,58,237,0.08);
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(124,58,237,0.15);
+    }
+    .research-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .research-table tr:last-child td {
+      border-bottom: none;
+      font-weight: 700;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.3s ease forwards; }
+
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,58,237,0.2), transparent);
+    }
+
+    .pip-pill {
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .pip-pill:hover {
+      background: rgba(124,58,237,0.15) !important;
+    }
   </style>
 </head>
-<body class="bg-surface text-gray-200 antialiased">
+<body class="bg-base min-h-screen">
 
-  <!-- Nav -->
-  <nav class="fixed top-0 w-full z-50 glass">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="#" class="text-lg font-bold gradient-purple">NEURO</a>
-      <div class="flex items-center gap-4">
-        <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-primary transition-colors">GitHub</a>
-        <a href="https://zedigital.tech" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-primary transition-colors">Portfolio</a>
+  <!-- ========== NAV ========== -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background: rgba(11,13,23,0.92); backdrop-filter: blur(16px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-2">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="2" fill="none"/>
+            <circle cx="14" cy="10" r="3" fill="url(#logoGrad)"/>
+            <path d="M8 18 Q14 22 20 18" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+          </svg>
+          <span class="logo-gradient text-xl font-extrabold tracking-tight">NEURO</span>
+        </a>
+
+        <!-- Center Links (desktop) -->
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#modules" class="nav-link text-sm font-medium">Modules</a>
+          <a href="#benchmarks" class="nav-link text-sm font-medium">Benchmarks</a>
+          <a href="#quickstart" class="nav-link text-sm font-medium">Docs</a>
+          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="nav-link text-sm font-medium">GitHub</a>
+        </div>
+
+        <!-- Right: pip install pill -->
+        <div class="hidden md:flex items-center gap-3">
+          <div class="pip-pill flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5" onclick="copyPip(this)" title="Click to copy">
+            <span class="text-purple font-mono text-xs">$</span>
+            <code class="text-xs font-mono text-slate-300">pip install neuro-agi</code>
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+            <span class="tooltip" id="pipTooltip">Copied!</span>
+          </div>
+        </div>
+
+        <!-- Hamburger (mobile) -->
+        <button class="md:hidden p-2 rounded-lg hover:bg-white/5" onclick="toggleMobile()" aria-label="Toggle menu">
+          <svg id="hamburgerIcon" class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="closeIcon" class="w-6 h-6 text-slate-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="hidden md:hidden border-t border-white/5 bg-base/95 backdrop-blur-lg">
+      <div class="px-4 py-4 space-y-3">
+        <a href="#modules" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Modules</a>
+        <a href="#benchmarks" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Benchmarks</a>
+        <a href="#quickstart" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Docs</a>
+        <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="block text-sm text-slate-300 hover:text-white py-2">GitHub</a>
+        <div class="pt-2 border-t border-white/5">
+          <div class="pip-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5" onclick="copyPip(this)">
+            <span class="text-purple font-mono text-xs">$</span>
+            <code class="text-xs font-mono text-slate-300">pip install neuro-agi</code>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
 
-  <!-- Hero -->
-  <section class="gradient-hero min-h-screen flex items-center relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, rgba(124,58,237,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(6,182,212,0.15) 0%, transparent 50%);"></div>
-    <div class="max-w-6xl mx-auto px-6 pt-24 pb-16 relative z-10">
-      <div class="max-w-3xl">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs font-medium text-primary mb-6">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-          Neuroscience-Inspired AGI
+  <!-- ========== HERO ========== -->
+  <section class="hero-bg grid-bg pt-28 pb-20 lg:pt-36 lg:pb-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+        <!-- Left 60% -->
+        <div class="lg:col-span-3 space-y-8">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple/30 bg-purple/10">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple"></span>
+            <span class="text-xs font-semibold text-purple tracking-wide">v1.0 &mdash; 38 Cognitive Modules</span>
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-white">
+            Neuroscience-Inspired<br>
+            <span class="logo-gradient">AGI Framework</span>
+          </h1>
+
+          <p class="text-lg text-slate-400 max-w-xl leading-relaxed">
+            A complete cognitive architecture modeling the human brain. Local execution, zero API costs, continual learning without catastrophic forgetting.
+          </p>
+
+          <div class="flex flex-wrap gap-4">
+            <button onclick="copyPip(this)" class="relative group flex items-center gap-2 px-6 py-3 rounded-lg bg-purple hover:bg-purple/90 text-white font-semibold text-sm transition-all">
+              <span class="text-purple-200/70 font-mono">$</span>
+              <span class="font-mono">pip install neuro-agi</span>
+              <span class="tooltip" style="top:-36px;">Copied!</span>
+            </button>
+            <a href="#modules" class="flex items-center gap-2 px-6 py-3 rounded-lg border border-cyan/40 text-cyan hover:bg-cyan/10 font-semibold text-sm transition-all">
+              Explore Modules
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </a>
+          </div>
         </div>
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-800 leading-tight mb-6">
-          <span class="text-white">ELO-AGI</span><br>
-          <span class="gradient-purple">NEURO</span>
-        </h1>
-        <p class="text-lg sm:text-xl text-gray-400 mb-8 max-w-2xl leading-relaxed">
-          Neuroscience-Inspired AGI with 38 Cognitive Modules. A comprehensive neuroscience-inspired artificial general intelligence system implementing 38 cognitive modules inspired by human brain architecture. Local, privacy-first AI coding assistant that learns from your codebase without cloud dependency.
-        </p>
-        <div class="flex flex-wrap items-center gap-4 mb-10">
-          <div class="px-5 py-2.5 rounded-xl glass glow-purple text-primary font-bold text-lg">
-            96.4% Success Rate
-          </div>
-          <div class="px-5 py-2.5 rounded-xl glass text-gray-300 font-medium">
-            38 Modules
-          </div>
-          <div class="px-5 py-2.5 rounded-xl glass text-gray-300 font-medium">
-            Zero API Costs
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-3">
-          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all font-medium">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            View on GitHub
-          </a>
+
+        <!-- Right 40%: Brain Diagram -->
+        <div class="lg:col-span-2 flex justify-center">
+          <svg viewBox="0 0 320 320" class="w-full max-w-[360px]" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer ring -->
+            <circle cx="160" cy="160" r="150" fill="none" stroke="rgba(124,58,237,0.12)" stroke-width="1"/>
+            <circle cx="160" cy="160" r="120" fill="none" stroke="rgba(124,58,237,0.06)" stroke-width="1"/>
+
+            <!-- Cross lines -->
+            <line x1="160" y1="20" x2="160" y2="300" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="20" y1="160" x2="300" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+            <!-- Top-left: Cognitive (purple) -->
+            <g class="brain-region" style="transform-origin: 90px 90px;">
+              <path d="M160 160 L160 20 A140 140 0 0 0 20 160 Z" fill="rgba(124,58,237,0.12)" stroke="rgba(124,58,237,0.3)" stroke-width="1.5"/>
+              <text x="75" y="88" fill="#7C3AED" font-size="12" font-weight="700" text-anchor="middle">Cognitive</text>
+              <text x="75" y="106" fill="#7C3AED" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">20 modules</text>
+              <circle cx="75" cy="120" r="14" fill="rgba(124,58,237,0.2)" stroke="#7C3AED" stroke-width="1.5"/>
+              <text x="75" y="124" fill="#7C3AED" font-size="11" font-weight="700" text-anchor="middle">20</text>
+            </g>
+
+            <!-- Top-right: Infrastructure (cyan) -->
+            <g class="brain-region" style="transform-origin: 230px 90px;">
+              <path d="M160 160 L300 160 A140 140 0 0 0 160 20 Z" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" stroke-width="1.5"/>
+              <text x="228" y="88" fill="#06B6D4" font-size="12" font-weight="700" text-anchor="middle">Infrastructure</text>
+              <text x="228" y="106" fill="#06B6D4" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">6 modules</text>
+              <circle cx="228" cy="120" r="14" fill="rgba(6,182,212,0.15)" stroke="#06B6D4" stroke-width="1.5"/>
+              <text x="228" y="124" fill="#06B6D4" font-size="11" font-weight="700" text-anchor="middle">6</text>
+            </g>
+
+            <!-- Bottom-left: Support (violet) -->
+            <g class="brain-region" style="transform-origin: 90px 230px;">
+              <path d="M160 160 L20 160 A140 140 0 0 0 160 300 Z" fill="rgba(139,92,246,0.1)" stroke="rgba(139,92,246,0.3)" stroke-width="1.5"/>
+              <text x="82" y="222" fill="#8B5CF6" font-size="12" font-weight="700" text-anchor="middle">Support</text>
+              <text x="82" y="240" fill="#8B5CF6" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">5 modules</text>
+              <circle cx="82" cy="254" r="14" fill="rgba(139,92,246,0.15)" stroke="#8B5CF6" stroke-width="1.5"/>
+              <text x="82" y="258" fill="#8B5CF6" font-size="11" font-weight="700" text-anchor="middle">5</text>
+            </g>
+
+            <!-- Bottom-right: AGI (teal) -->
+            <g class="brain-region" style="transform-origin: 230px 230px;">
+              <path d="M160 160 L160 300 A140 140 0 0 0 300 160 Z" fill="rgba(20,184,166,0.1)" stroke="rgba(20,184,166,0.3)" stroke-width="1.5"/>
+              <text x="235" y="222" fill="#14B8A6" font-size="12" font-weight="700" text-anchor="middle">AGI</text>
+              <text x="235" y="240" fill="#14B8A6" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">7 modules</text>
+              <circle cx="235" cy="254" r="14" fill="rgba(20,184,166,0.15)" stroke="#14B8A6" stroke-width="1.5"/>
+              <text x="235" y="258" fill="#14B8A6" font-size="11" font-weight="700" text-anchor="middle">7</text>
+            </g>
+
+            <!-- Center node -->
+            <circle cx="160" cy="160" r="22" fill="#0B0D17" stroke="url(#centerGrad)" stroke-width="2"/>
+            <text x="160" y="157" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="middle">38</text>
+            <text x="160" y="169" fill="#94a3b8" font-size="7" font-weight="500" text-anchor="middle">TOTAL</text>
+
+            <defs>
+              <linearGradient id="centerGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop stop-color="#7C3AED"/>
+                <stop offset="1" stop-color="#06B6D4"/>
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Overview -->
-  <section class="py-20 sm:py-28">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-3xl sm:text-4xl font-bold mb-6 text-white">What It Does</h2>
-      <div class="max-w-3xl space-y-4 text-gray-400 leading-relaxed">
-        <p>ELO-AGI (NEURO) is a comprehensive neuroscience-inspired artificial general intelligence system that implements 38 cognitive modules modeled after human brain architecture. It spans four architectural tiers: Cognitive, Infrastructure, Support, and AGI.</p>
-        <p>The system runs entirely locally using Ollama as its LLM backend, ensuring complete privacy with zero cloud dependency and zero API costs. It learns from your codebase, adapts to your patterns, and provides intelligent coding assistance without ever transmitting your data.</p>
-        <p>Drawing from cognitive science research, NEURO implements global workspace theory, predictive coding, dual-process reasoning, continual learning with catastrophic forgetting prevention, causal reasoning, and meta-cognition -- creating a unified cognitive architecture that mirrors the modularity and integration of the human brain.</p>
+  <div class="section-divider"></div>
+
+  <!-- ========== MODULE EXPLORER ========== -->
+  <section id="modules" class="py-20 lg:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Module Explorer</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">38 Cognitive Modules</h2>
+        <p class="mt-3 text-slate-400 max-w-lg mx-auto">Each module implements a neuroscience-grounded capability. Click any tile to learn more.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex flex-wrap justify-center gap-3 mb-10">
+        <button class="tab-btn active" data-tab="cognitive" style="border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.1); color: #fff;" onclick="switchTab('cognitive', this)">
+          Cognitive <span class="ml-1 text-xs opacity-70">(20)</span>
+        </button>
+        <button class="tab-btn" data-tab="infrastructure" onclick="switchTab('infrastructure', this)">
+          Infrastructure <span class="ml-1 text-xs opacity-70">(6)</span>
+        </button>
+        <button class="tab-btn" data-tab="support" onclick="switchTab('support', this)">
+          Support <span class="ml-1 text-xs opacity-70">(5)</span>
+        </button>
+        <button class="tab-btn" data-tab="agi" onclick="switchTab('agi', this)">
+          AGI <span class="ml-1 text-xs opacity-70">(7)</span>
+        </button>
+      </div>
+
+      <!-- Module Grids -->
+      <div id="moduleContainer">
+        <!-- Cognitive -->
+        <div id="tab-cognitive" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 fade-in"></div>
+        <!-- Infrastructure -->
+        <div id="tab-infrastructure" class="module-grid grid grid-cols-2 sm:grid-cols-3 gap-3 hidden fade-in"></div>
+        <!-- Support -->
+        <div id="tab-support" class="module-grid grid grid-cols-2 sm:grid-cols-3 gap-3 hidden fade-in"></div>
+        <!-- AGI -->
+        <div id="tab-agi" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 hidden fade-in"></div>
       </div>
     </div>
   </section>
 
-  <!-- Features -->
-  <section class="py-20 sm:py-28 relative">
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent"></div>
-    <div class="max-w-6xl mx-auto px-6 relative z-10">
-      <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-white">Key Features</h2>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="section-divider"></div>
 
-        <div class="glass rounded-2xl p-6 card-hover fade-in">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-          </div>
-          <h3 class="text-white font-semibold mb-2">38 Cognitive Modules</h3>
-          <p class="text-gray-400 text-sm leading-relaxed">20 cognitive + 6 infrastructure + 5 support + 7 AGI modules spanning the full cognitive architecture.</p>
+  <!-- ========== BENCHMARKS ========== -->
+  <section id="benchmarks" class="py-20 lg:py-28">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Evaluation</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Benchmark Performance</h2>
+        <p class="mt-3 text-slate-400">All 627 tests passing across 5 evaluation categories.</p>
+      </div>
+
+      <div class="rounded-xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="table-wrapper">
+          <table class="research-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Score</th>
+                <th class="hidden sm:table-cell" style="min-width:180px;">Distribution</th>
+                <th>Tests</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="benchmarkBody"></tbody>
+          </table>
         </div>
-
-        <div class="glass rounded-2xl p-6 card-hover fade-in">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
-          </div>
-          <h3 class="text-white font-semibold mb-2">Local Execution</h3>
-          <p class="text-gray-400 text-sm leading-relaxed">Runs entirely on your machine with Ollama backend. No cloud, no data transmission, zero API costs.</p>
-        </div>
-
-        <div class="glass rounded-2xl p-6 card-hover fade-in">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          </div>
-          <h3 class="text-white font-semibold mb-2">Continual Learning</h3>
-          <p class="text-gray-400 text-sm leading-relaxed">EWC and PackNet prevent catastrophic forgetting. System learns new skills without losing old ones.</p>
-        </div>
-
-        <div class="glass rounded-2xl p-6 card-hover fade-in">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          </div>
-          <h3 class="text-white font-semibold mb-2">Causal Reasoning</h3>
-          <p class="text-gray-400 text-sm leading-relaxed">Counterfactual reasoning module with 124 tests. Understands cause-and-effect relationships.</p>
-        </div>
-
-        <div class="glass rounded-2xl p-6 card-hover fade-in">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-          </div>
-          <h3 class="text-white font-semibold mb-2">Knowledge Graphs</h3>
-          <p class="text-gray-400 text-sm leading-relaxed">Semantic knowledge representation with ontology management for structured reasoning.</p>
-        </div>
-
-        <div class="glass rounded-2xl p-6 card-hover fade-in">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          </div>
-          <h3 class="text-white font-semibold mb-2">Benchmark Suite</h3>
-          <p class="text-gray-400 text-sm leading-relaxed">Comprehensive benchmarking across reasoning, memory, language, abstraction, and causal categories.</p>
-        </div>
-
       </div>
     </div>
   </section>
 
-  <!-- Architecture -->
-  <section class="py-20 sm:py-28">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-white">Architecture</h2>
-      <p class="text-gray-400 mb-12 max-w-2xl">Four-tier cognitive architecture spanning 38 modules inspired by human brain organization.</p>
-      <div class="space-y-4">
+  <div class="section-divider"></div>
 
-        <div class="glass rounded-2xl p-6 tier-connector">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="px-3 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider">Cognitive Tier</div>
-            <span class="text-sm text-gray-500">20 modules</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Global Workspace</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Predictive Coding</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Dual Process</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Memory</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Language</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Emotions</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Creativity</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Executive</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Social</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-sm text-gray-300">Consciousness</span>
-          </div>
-        </div>
-
-        <div class="glass rounded-2xl p-6 tier-connector">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="px-3 py-1 rounded-lg bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider">Infrastructure Tier</div>
-            <span class="text-sm text-gray-500">6 modules</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg bg-accent/5 border border-accent/10 text-sm text-gray-300">System</span>
-            <span class="px-3 py-1.5 rounded-lg bg-accent/5 border border-accent/10 text-sm text-gray-300">LLM</span>
-            <span class="px-3 py-1.5 rounded-lg bg-accent/5 border border-accent/10 text-sm text-gray-300">Knowledge</span>
-            <span class="px-3 py-1.5 rounded-lg bg-accent/5 border border-accent/10 text-sm text-gray-300">Grounding</span>
-            <span class="px-3 py-1.5 rounded-lg bg-accent/5 border border-accent/10 text-sm text-gray-300">Scale</span>
-            <span class="px-3 py-1.5 rounded-lg bg-accent/5 border border-accent/10 text-sm text-gray-300">Transfer</span>
-          </div>
-        </div>
-
-        <div class="glass rounded-2xl p-6 tier-connector">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="px-3 py-1 rounded-lg bg-purple-400/20 text-purple-400 text-xs font-bold uppercase tracking-wider">Support Tier</div>
-            <span class="text-sm text-gray-500">5 modules</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg bg-purple-400/5 border border-purple-400/10 text-sm text-gray-300">Environment</span>
-            <span class="px-3 py-1.5 rounded-lg bg-purple-400/5 border border-purple-400/10 text-sm text-gray-300">Benchmarks</span>
-            <span class="px-3 py-1.5 rounded-lg bg-purple-400/5 border border-purple-400/10 text-sm text-gray-300">Inference</span>
-            <span class="px-3 py-1.5 rounded-lg bg-purple-400/5 border border-purple-400/10 text-sm text-gray-300">Perception</span>
-            <span class="px-3 py-1.5 rounded-lg bg-purple-400/5 border border-purple-400/10 text-sm text-gray-300">Integration</span>
-          </div>
-        </div>
-
-        <div class="glass rounded-2xl p-6">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="px-3 py-1 rounded-lg bg-cyan-400/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">AGI Tier</div>
-            <span class="text-sm text-gray-500">7 modules</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Causal</span>
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Abstract</span>
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Continual</span>
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Robust</span>
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Planning</span>
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Meta-reasoning</span>
-            <span class="px-3 py-1.5 rounded-lg bg-cyan-400/5 border border-cyan-400/10 text-sm text-gray-300">Credit</span>
-          </div>
-        </div>
-
+  <!-- ========== QUICK START ========== -->
+  <section id="quickstart" class="py-20 lg:py-28">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Getting Started</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Quick Start</h2>
+        <p class="mt-3 text-slate-400">Three steps to a running cognitive architecture.</p>
       </div>
-    </div>
-  </section>
 
-  <!-- Tech Stack -->
-  <section class="py-20 sm:py-28 relative">
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent"></div>
-    <div class="max-w-6xl mx-auto px-6 relative z-10">
-      <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-white">Tech Stack</h2>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div>
-          <h3 class="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Core</h3>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">Python</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">NumPy</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">SciPy</span>
+      <div class="space-y-8">
+        <!-- Step 1 -->
+        <div class="flex gap-4 sm:gap-6">
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple/15 border border-purple/20 flex items-center justify-center">
+            <span class="text-purple font-bold text-sm">1</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-white font-semibold mb-3">Install</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs text-slate-500 font-mono">bash</span>
+                <button class="text-xs text-slate-500 hover:text-slate-300 transition-colors" onclick="copyCode(this, 'pip install neuro-agi')">Copy</button>
+              </div>
+              <pre><code class="text-slate-300"><span class="text-slate-500 select-none">1  </span><span class="text-cyan">pip</span> install neuro-agi</code></pre>
+            </div>
           </div>
         </div>
-        <div>
-          <h3 class="text-xs font-semibold text-primary uppercase tracking-wider mb-3">AI/ML</h3>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">Ollama</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">Knowledge Graphs</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">EWC</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">PackNet</span>
+
+        <!-- Step 2 -->
+        <div class="flex gap-4 sm:gap-6">
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple/15 border border-purple/20 flex items-center justify-center">
+            <span class="text-purple font-bold text-sm">2</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-white font-semibold mb-3">Initialize</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs text-slate-500 font-mono">python</span>
+                <button class="text-xs text-slate-500 hover:text-slate-300 transition-colors" onclick="copyCode(this, `from neuro.system import CognitiveCore\ncore = CognitiveCore()\nprint(f'Modules loaded: {core.module_count}')`)">Copy</button>
+              </div>
+              <pre><code class="text-slate-300"><span class="text-slate-500 select-none">1  </span><span class="text-purple">from</span> <span class="text-cyan">neuro.system</span> <span class="text-purple">import</span> CognitiveCore
+<span class="text-slate-500 select-none">2  </span>core = <span class="text-cyan">CognitiveCore</span>()
+<span class="text-slate-500 select-none">3  </span><span class="text-purple">print</span>(<span class="text-teal">f"Modules loaded: </span><span class="text-yellow-400">{core.module_count}</span><span class="text-teal">"</span>)</code></pre>
+            </div>
           </div>
         </div>
-        <div>
-          <h3 class="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Testing</h3>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">pytest</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">pytest-cov</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">mypy</span>
+
+        <!-- Step 3 -->
+        <div class="flex gap-4 sm:gap-6">
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple/15 border border-purple/20 flex items-center justify-center">
+            <span class="text-purple font-bold text-sm">3</span>
           </div>
-        </div>
-        <div>
-          <h3 class="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Tools</h3>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">black</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">ruff</span>
-            <span class="px-3 py-1.5 rounded-lg glass text-sm text-gray-300">matplotlib</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-white font-semibold mb-3">Run</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs text-slate-500 font-mono">python</span>
+                <button class="text-xs text-slate-500 hover:text-slate-300 transition-colors" onclick="copyCode(this, `result = core.reason(problem='medical diagnosis')\nprint(f'Success: {result.success_rate}%')`)">Copy</button>
+              </div>
+              <pre><code class="text-slate-300"><span class="text-slate-500 select-none">1  </span>result = core.<span class="text-cyan">reason</span>(problem=<span class="text-teal">"medical diagnosis"</span>)
+<span class="text-slate-500 select-none">2  </span><span class="text-purple">print</span>(<span class="text-teal">f"Success: </span><span class="text-yellow-400">{result.success_rate}</span><span class="text-teal">%"</span>)</code></pre>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Metrics -->
-  <section class="py-20 sm:py-28">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-3xl sm:text-4xl font-bold mb-12 text-white">Performance</h2>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="glass rounded-2xl p-6 text-center glow-purple">
-          <div class="text-3xl sm:text-4xl font-bold gradient-purple mb-2">96.4%</div>
-          <div class="text-sm text-gray-400">Success Rate</div>
+  <div class="section-divider"></div>
+
+  <!-- ========== ARCHITECTURE ========== -->
+  <section id="architecture" class="py-20 lg:py-28">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">System Design</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Architecture</h2>
+        <p class="mt-3 text-slate-400">Four-tier cognitive architecture inspired by the human brain.</p>
+      </div>
+
+      <div class="space-y-4 relative">
+        <!-- Connecting line -->
+        <div class="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-purple via-cyan to-teal hidden sm:block" style="transform: translateX(-50%);"></div>
+
+        <!-- Layer 1: Cognitive -->
+        <div class="layer-bar w-full" style="background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25);">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="text-purple font-bold text-sm">Cognitive Layer</span>
+              <span class="text-slate-500 text-xs ml-2">20 modules</span>
+            </div>
+            <div class="text-xs text-slate-500 font-mono hidden md:block">Memory / Language / Reasoning / Creativity / Executive Control / Emotion / Attention / Perception / Consciousness / ...</div>
+          </div>
         </div>
-        <div class="glass rounded-2xl p-6 text-center">
-          <div class="text-3xl sm:text-4xl font-bold text-white mb-2">0.697</div>
-          <div class="text-sm text-gray-400">Benchmark Score</div>
+
+        <!-- Layer 2: Infrastructure -->
+        <div class="layer-bar w-[92%] mx-auto" style="background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2);">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="text-cyan font-bold text-sm">Infrastructure Layer</span>
+              <span class="text-slate-500 text-xs ml-2">6 modules</span>
+            </div>
+            <div class="text-xs text-slate-500 font-mono hidden md:block">Core System / LLM Integration / Knowledge Graph / Sensors / Actuators / Distributed Scaling</div>
+          </div>
         </div>
-        <div class="glass rounded-2xl p-6 text-center">
-          <div class="text-3xl sm:text-4xl font-bold text-white mb-2">38</div>
-          <div class="text-sm text-gray-400">Cognitive Modules</div>
+
+        <!-- Layer 3: Support -->
+        <div class="layer-bar w-[84%] mx-auto" style="background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2);">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="text-violet font-bold text-sm">Support Layer</span>
+              <span class="text-slate-500 text-xs ml-2">5 modules</span>
+            </div>
+            <div class="text-xs text-slate-500 font-mono hidden md:block">Benchmarking / Perception Pipeline / Environment Manager / Data Loader / Logger</div>
+          </div>
         </div>
-        <div class="glass rounded-2xl p-6 text-center">
-          <div class="text-3xl sm:text-4xl font-bold text-white mb-2">4</div>
-          <div class="text-sm text-gray-400">Architecture Tiers</div>
+
+        <!-- Layer 4: AGI -->
+        <div class="layer-bar w-[76%] mx-auto" style="background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2);">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="text-teal font-bold text-sm">AGI Layer</span>
+              <span class="text-slate-500 text-xs ml-2">7 modules</span>
+            </div>
+            <div class="text-xs text-slate-500 font-mono hidden md:block">Causal Reasoning / Compositional Abstraction / Continual Learning / Robustness / Transfer</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <div class="section-divider"></div>
+
+  <!-- ========== COMPARISON TABLE ========== -->
+  <section id="comparison" class="py-20 lg:py-28">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Comparison</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">How NEURO Compares</h2>
+        <p class="mt-3 text-slate-400">Feature-level comparison against established cognitive architectures and LLMs.</p>
+      </div>
+
+      <div class="rounded-xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="table-wrapper">
+          <table class="research-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th><span class="logo-gradient font-bold" style="-webkit-text-fill-color: unset; background: none; color: #7C3AED;">ELO-AGI</span></th>
+                <th>ACT-R</th>
+                <th>SOAR</th>
+                <th>GPT-4</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-slate-300 font-medium">Modules</td>
+                <td class="font-mono"><span class="text-white font-semibold">38</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">~12</td>
+                <td class="text-slate-500 font-mono">~8</td>
+                <td class="text-slate-500 font-mono">Monolithic</td>
+              </tr>
+              <tr>
+                <td class="text-slate-300 font-medium">Local Execution</td>
+                <td class="font-mono"><span class="text-white font-semibold">Yes</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">Yes</td>
+                <td class="text-slate-500 font-mono">Yes</td>
+                <td class="text-slate-500 font-mono">No</td>
+              </tr>
+              <tr>
+                <td class="text-slate-300 font-medium">Continual Learning</td>
+                <td class="font-mono"><span class="text-white font-semibold">Yes</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">Limited</td>
+                <td class="text-slate-500 font-mono">Limited</td>
+                <td class="text-slate-500 font-mono">No</td>
+              </tr>
+              <tr>
+                <td class="text-slate-300 font-medium">Causal Reasoning</td>
+                <td class="font-mono"><span class="text-white font-semibold">Native</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">Rule-based</td>
+                <td class="text-slate-500 font-mono">Rule-based</td>
+                <td class="text-slate-500 font-mono">Prompted</td>
+              </tr>
+              <tr>
+                <td class="text-slate-300 font-medium">Zero API Cost</td>
+                <td class="font-mono"><span class="text-white font-semibold">Yes</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">Yes</td>
+                <td class="text-slate-500 font-mono">Yes</td>
+                <td class="text-slate-500 font-mono">No</td>
+              </tr>
+              <tr>
+                <td class="text-slate-300 font-medium">Open Source</td>
+                <td class="font-mono"><span class="text-white font-semibold">MIT</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">Academic</td>
+                <td class="text-slate-500 font-mono">Academic</td>
+                <td class="text-slate-500 font-mono">No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ========== FOOTER ========== -->
   <footer class="py-12 border-t border-white/5">
-    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p class="text-sm text-gray-500">Built by ELO from <a href="https://zedigital.tech" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary transition-colors">Z.E Digital Tech</a></p>
-      <div class="flex items-center gap-4">
-        <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">GitHub</a>
-        <a href="https://zedigital.tech" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Portfolio</a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <span class="logo-gradient text-lg font-extrabold">NEURO</span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-purple/30 bg-purple/10 text-purple">MIT License</span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-cyan/30 bg-cyan/10 text-cyan">Open Source</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="hover:text-slate-300 transition-colors">GitHub</a>
+          <a href="https://zedigital.tech" target="_blank" rel="noopener" class="hover:text-slate-300 transition-colors">Portfolio</a>
+          <span class="text-slate-600">Built by Z.E Digital Tech</span>
+        </div>
       </div>
     </div>
   </footer>
 
+  <!-- ========== JAVASCRIPT ========== -->
+  <script>
+    // ---- Module Data ----
+    const modules = {
+      cognitive: [
+        { name: 'Memory', desc: 'Implements sensory, working, and long-term memory systems with hippocampal replay for consolidation and retrieval.' },
+        { name: 'Language', desc: 'Natural language understanding and generation with semantic parsing, pragmatics, and discourse modeling.' },
+        { name: 'Reasoning', desc: 'Dimensional, interactive, logical, and perceptual reasoning pathways inspired by dual-process theory.' },
+        { name: 'Creativity', desc: 'Divergent thinking, conceptual blending, and novelty generation using stochastic recombination of learned representations.' },
+        { name: 'Executive Control', desc: 'Top-down attention regulation, task switching, inhibition, and goal management for coherent behavior.' },
+        { name: 'Spatial', desc: 'Allocentric and egocentric spatial representations with cognitive mapping and mental rotation capabilities.' },
+        { name: 'Time Perception', desc: 'Embodied temporal cognition modeling interval timing, sequence learning, and temporal prediction.' },
+        { name: 'Learning', desc: 'Adaptive learning mechanisms including meta-learning, curriculum learning, and learning rate modulation.' },
+        { name: 'Embodied Cognition', desc: 'Grounding abstract concepts in simulated sensorimotor experience and body-based representations.' },
+        { name: 'Social Cognition', desc: 'Theory of mind, social inference, shared intentionality, and multi-agent social modeling.' },
+        { name: 'Consciousness', desc: 'Global workspace broadcasting, metacognitive monitoring, and self-model maintenance for reflective awareness.' },
+        { name: 'World Modeling', desc: 'Internal generative world model for prediction, simulation, counterfactual reasoning, and planning.' },
+        { name: 'Emotion', desc: 'Appraisal-based emotional processing that modulates decision-making, attention, and memory encoding.' },
+        { name: 'Attention', desc: 'Selective, sustained, and divided attention mechanisms with priority-based resource allocation.' },
+        { name: 'Perception', desc: 'Hierarchical feature extraction and integration across visual, auditory, and multimodal streams.' },
+        { name: 'Motor Control', desc: 'Motor planning, action selection, and forward-model-based movement prediction and correction.' },
+        { name: 'Decision Making', desc: 'Evidence accumulation, value-based choice, and satisficing strategies under uncertainty.' },
+        { name: 'Metacognition', desc: 'Self-monitoring of cognitive states, confidence estimation, and adaptive strategy selection.' },
+        { name: 'Planning', desc: 'Hierarchical task decomposition, forward search, and plan repair with temporal abstraction.' },
+        { name: 'Communication', desc: 'Multi-channel communication management including dialogue, gestures, and pragmatic inference.' }
+      ],
+      infrastructure: [
+        { name: 'Core System', desc: 'Unified cognitive core implementing active inference loop, free energy minimization, and module orchestration.' },
+        { name: 'LLM Integration', desc: 'Semantic bridge to language models for grounding, dialogue generation, and knowledge extraction.' },
+        { name: 'Knowledge Graph', desc: 'Structured fact store with ontological reasoning, graph-based inference, and dynamic knowledge updates.' },
+        { name: 'Sensors', desc: 'Camera, microphone, and proprioception interfaces for multimodal sensory input processing.' },
+        { name: 'Actuators', desc: 'Motor output, speech synthesis, and environment manipulation interfaces for embodied action.' },
+        { name: 'Distributed Scaling', desc: 'Coordinator-worker architecture with GPU kernel fusion and gradient aggregation for scale-out.' }
+      ],
+      support: [
+        { name: 'Benchmarking', desc: 'Comprehensive test suites for reasoning, memory, language, and planning evaluation with standardized metrics.' },
+        { name: 'Perception Pipeline', desc: 'End-to-end sensory processing pipeline with feature extraction, integration, and attention-gated filtering.' },
+        { name: 'Environment Manager', desc: 'Context and environment management for simulation, testing, and deployment configuration.' },
+        { name: 'Data Loader', desc: 'Efficient data loading, preprocessing, and batching for training and inference workloads.' },
+        { name: 'Logger', desc: 'Structured logging, telemetry, and cognitive state tracing for debugging and analysis.' }
+      ],
+      agi: [
+        { name: 'Causal Reasoning', desc: 'Counterfactual reasoning with structural causal models, intervention calculus, and causal DAG discovery.' },
+        { name: 'Compositional Abstraction', desc: 'Neuro-symbolic binding with hierarchical concept composition for ARC-style generalization tasks.' },
+        { name: 'Continual Learning', desc: 'Elastic weight consolidation, hippocampal replay, and meta-learning to prevent catastrophic forgetting.' },
+        { name: 'Robustness', desc: 'Uncertainty quantification, out-of-distribution detection, adversarial defense, and calibration.' },
+        { name: 'Planning', desc: 'Advanced planning with causal model integration, hierarchical goal decomposition, and plan verification.' },
+        { name: 'Transfer Learning', desc: 'Cross-domain knowledge transfer, domain adaptation, and few-shot generalization mechanisms.' },
+        { name: 'Integration', desc: 'Advanced inter-module integration layer coordinating all AGI capabilities into unified cognitive processing.' }
+      ]
+    };
+
+    const tierColors = {
+      cognitive: { border: 'rgba(124,58,237,0.25)', bg: 'rgba(124,58,237,0.06)', text: '#7C3AED', hoverBg: 'rgba(124,58,237,0.12)' },
+      infrastructure: { border: 'rgba(6,182,212,0.25)', bg: 'rgba(6,182,212,0.06)', text: '#06B6D4', hoverBg: 'rgba(6,182,212,0.12)' },
+      support: { border: 'rgba(139,92,246,0.25)', bg: 'rgba(139,92,246,0.06)', text: '#8B5CF6', hoverBg: 'rgba(139,92,246,0.12)' },
+      agi: { border: 'rgba(20,184,166,0.25)', bg: 'rgba(20,184,166,0.06)', text: '#14B8A6', hoverBg: 'rgba(20,184,166,0.12)' }
+    };
+
+    // ---- Render Modules ----
+    function renderModules() {
+      Object.keys(modules).forEach(tier => {
+        const container = document.getElementById('tab-' + tier);
+        const colors = tierColors[tier];
+        container.innerHTML = modules[tier].map((mod, i) => `
+          <div class="module-tile rounded-lg p-4" style="background:${colors.bg}; border:1px solid ${colors.border};" onclick="toggleTile(this)">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${colors.text};"></span>
+              <span class="text-sm font-semibold text-white">${mod.name}</span>
+            </div>
+            <div class="module-desc text-xs text-slate-400 leading-relaxed">${mod.desc}</div>
+          </div>
+        `).join('');
+      });
+    }
+
+    function toggleTile(el) {
+      el.classList.toggle('expanded');
+    }
+
+    // ---- Tab Switching ----
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.module-grid').forEach(g => g.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderColor = 'transparent';
+        b.style.background = 'rgba(255,255,255,0.03)';
+        b.style.color = '#94a3b8';
+      });
+      const target = document.getElementById('tab-' + tab);
+      target.classList.remove('hidden');
+      // Re-trigger animation
+      target.classList.remove('fade-in');
+      void target.offsetWidth;
+      target.classList.add('fade-in');
+
+      const colors = tierColors[tab];
+      btn.classList.add('active');
+      btn.style.borderColor = colors.border;
+      btn.style.background = colors.bg;
+      btn.style.color = '#fff';
+    }
+
+    // ---- Benchmark Table ----
+    const benchmarks = [
+      { cat: 'Causal Reasoning', score: 0.85, tests: '124/124' },
+      { cat: 'Compositional Abstraction', score: 0.74, tests: '144/144' },
+      { cat: 'Continual Learning', score: 0.72, tests: '89/89' },
+      { cat: 'Robustness', score: 0.71, tests: '192/192' },
+      { cat: 'Language Understanding', score: 0.69, tests: '78/78' },
+      { cat: 'Overall', score: 0.697, tests: '627/627' }
+    ];
+
+    function renderBenchmarks() {
+      const body = document.getElementById('benchmarkBody');
+      body.innerHTML = benchmarks.map((b, i) => {
+        const pct = (b.score * 100).toFixed(0);
+        const isLast = i === benchmarks.length - 1;
+        return `
+          <tr class="${isLast ? 'border-t border-white/5' : ''}">
+            <td class="text-slate-300 ${isLast ? 'font-bold text-white' : 'font-medium'}">${b.cat}</td>
+            <td class="font-mono text-white font-semibold">${b.score.toFixed(b.score === 0.697 ? 3 : 2)}</td>
+            <td class="hidden sm:table-cell">
+              <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                <div class="bar-gradient h-full rounded-full" style="width:${pct}%;"></div>
+              </div>
+            </td>
+            <td class="font-mono text-slate-400 text-sm">${b.tests}</td>
+            <td><span class="text-green-400 font-semibold text-sm">&#10003; Pass</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ---- Copy to Clipboard ----
+    function copyPip(el) {
+      navigator.clipboard.writeText('pip install neuro-agi').then(() => {
+        const tip = el.querySelector('.tooltip');
+        if (tip) {
+          tip.classList.add('show');
+          setTimeout(() => tip.classList.remove('show'), 1500);
+        }
+      });
+    }
+
+    function copyCode(btn, code) {
+      navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.color = '#14B8A6';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.color = '';
+        }, 1500);
+      });
+    }
+
+    // ---- Mobile Menu ----
+    function toggleMobile() {
+      const menu = document.getElementById('mobileMenu');
+      const hamburger = document.getElementById('hamburgerIcon');
+      const close = document.getElementById('closeIcon');
+      const isHidden = menu.classList.contains('hidden');
+      menu.classList.toggle('hidden');
+      hamburger.classList.toggle('hidden', isHidden);
+      close.classList.toggle('hidden', !isHidden);
+    }
+
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', () => {
+      renderModules();
+      renderBenchmarks();
+    });
+  </script>
 </body>
 </html>
