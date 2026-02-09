@@ -217,6 +217,32 @@
       background: rgba(124,58,237,0.15) !important;
     }
 
+    /* Connection Status */
+    #api-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 10px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+    #api-status.connected { color: #4ade80; background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); }
+    #api-status.disconnected { color: #94a3b8; background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.15); }
+    #api-status.connecting { color: #facc15; background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.15); }
+    #api-status .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    #api-status.connected .status-dot { animation: pulse-green 2s infinite; }
+    @keyframes pulse-green {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
     /* REPL Styles */
     #repl-container {
       background: #0a0c14;
@@ -540,7 +566,10 @@
             </div>
             <span class="text-xs text-slate-500 font-mono">Python 3.11 &mdash; neuro_agi</span>
           </div>
-          <button onclick="replClear()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors font-mono px-2 py-1 rounded hover:bg-white/5">Clear</button>
+          <div class="flex items-center gap-3">
+            <span id="api-status" class="connecting"><span class="status-dot"></span>Connecting...</span>
+            <button onclick="replClear()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors font-mono px-2 py-1 rounded hover:bg-white/5">Clear</button>
+          </div>
         </div>
         <!-- Output area -->
         <div id="repl-output" onclick="document.getElementById('repl-input').focus()"></div>
@@ -992,6 +1021,90 @@
     }
 
     // ================================================================
+    // API CONNECTION
+    // ================================================================
+    const API_BASE = 'https://zedigital-elo-agi.fly.dev';
+    let apiConnected = false;
+    let apiChecking = false;
+
+    async function checkApiConnection() {
+      apiChecking = true;
+      const statusEl = document.getElementById('api-status');
+      statusEl.className = 'connecting';
+      statusEl.innerHTML = '<span class="status-dot"></span>Connecting...';
+      try {
+        const res = await fetch(API_BASE + '/api/health', { signal: AbortSignal.timeout(5000) });
+        if (res.ok) {
+          apiConnected = true;
+          statusEl.className = 'connected';
+          statusEl.innerHTML = '<span class="status-dot"></span>Live API';
+        } else {
+          throw new Error('Not ok');
+        }
+      } catch (e) {
+        apiConnected = false;
+        statusEl.className = 'disconnected';
+        statusEl.innerHTML = '<span class="status-dot"></span>Offline (simulated)';
+      }
+      apiChecking = false;
+    }
+
+    async function apiRepl(command) {
+      try {
+        const res = await fetch(API_BASE + '/api/repl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command }),
+          signal: AbortSignal.timeout(15000),
+        });
+        if (!res.ok) throw new Error('API error');
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function apiModules() {
+      try {
+        const res = await fetch(API_BASE + '/api/modules', { signal: AbortSignal.timeout(5000) });
+        if (!res.ok) throw new Error('API error');
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function apiBenchmark() {
+      try {
+        const res = await fetch(API_BASE + '/api/benchmark', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+          signal: AbortSignal.timeout(30000),
+        });
+        if (!res.ok) throw new Error('API error');
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function apiAnalyze(text, types) {
+      try {
+        const res = await fetch(API_BASE + '/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, analysis_types: types }),
+          signal: AbortSignal.timeout(15000),
+        });
+        if (!res.ok) throw new Error('API error');
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // ================================================================
     // INTERACTIVE PYTHON REPL
     // ================================================================
     const replOutput = document.getElementById('repl-output');
@@ -1076,6 +1189,145 @@
       replHistoryIdx = -1;
       replAddPromptLine(cmd);
 
+      // Always handle clear() and help() locally for instant response
+      if (cmd === 'clear()') {
+        replOutput.innerHTML = '';
+        return;
+      }
+
+      // Try API first if connected
+      if (apiConnected) {
+        // For certain known commands, use specialized API endpoints
+        const dpMatch = cmd.match(/^neuro_agi\.cognitive\.DualProcess\.run\(["'](.+?)["']\)$/);
+        const emMatch = cmd.match(/^neuro_agi\.cognitive\.EmotionEngine\.analyze\(["'](.+?)["']\)$/);
+
+        if (dpMatch) {
+          const text = dpMatch[1];
+          replAddOutput('Analyzing with dual-process cognition...');
+          const result = await apiAnalyze(text, ['dual_process']);
+          if (result && result.analyses && result.analyses.dual_process) {
+            const dp = result.analyses.dual_process;
+            replAddOutput(esc(`DualProcess Analysis: "${text}"\n${'─'.repeat(50)}`));
+            replAddOutput(esc(
+`System 1 (Fast / Intuitive):
+  Response time: ${dp.system1.response_time_ms}ms
+  Confidence:    ${dp.system1.confidence}
+  Assessment:    ${dp.system1.assessment}
+  Basis:         ${dp.system1.basis}
+
+System 2 (Slow / Analytical):
+  Response time: ${dp.system2.response_time_ms}ms
+  Confidence:    ${dp.system2.confidence}
+  Assessment:    ${dp.system2.assessment}
+  Basis:         ${dp.system2.basis}
+
+  Integrated:    ${dp.integration.override ? 'System 2 override' : 'System 1 sufficient'} (confidence delta: ${dp.integration.confidence_delta > 0 ? '+' : ''}${dp.integration.confidence_delta})
+  Complexity:    ${dp.integration.complexity}
+  Recommendation: ${dp.integration.recommendation}
+  Execution time: ${result.execution_time}s`));
+            return;
+          }
+          // Fall through to local simulation
+        }
+
+        if (emMatch) {
+          const text = emMatch[1];
+          replAddOutput('Running emotion analysis...');
+          const result = await apiAnalyze(text, ['emotion']);
+          if (result && result.analyses && result.analyses.emotion) {
+            const em = result.analyses.emotion;
+            replAddOutput(esc(`EmotionEngine Analysis: "${text}"\n${'─'.repeat(50)}`));
+            const spectrum = Object.entries(em.affect_spectrum);
+            let spectrumStr = spectrum.map(([name, score]) => {
+              const filled = Math.round(score * 20);
+              const empty = 20 - filled;
+              return `    ${name.padEnd(12)} ${'\u2588'.repeat(filled)}${'\u2591'.repeat(empty)}  ${score.toFixed(2)}`;
+            }).join('\n');
+            replAddOutput(esc(
+`  Primary emotion:   ${em.primary_emotion.padEnd(10)} (${em.primary_score})
+  Valence:           ${em.valence > 0 ? '+' : ''}${em.valence} (${em.valence > 0.3 ? 'positive' : em.valence < -0.3 ? 'negative' : 'neutral'})
+  Arousal:           ${em.arousal} (${em.arousal > 0.5 ? 'high' : 'low'})
+  Dominance:         ${em.dominance}
+
+  Affect spectrum:
+${spectrumStr}
+
+  Cognitive impact:
+    Memory encoding:  ${em.cognitive_impact.memory_encoding}
+    Attention bias:   ${em.cognitive_impact.attention_bias}
+    Decision weight:  ${em.cognitive_impact.decision_weight}
+  Execution time: ${result.execution_time}s`));
+            return;
+          }
+        }
+
+        // For benchmark, use the benchmark API endpoint
+        if (cmd === 'neuro_agi.run_benchmark()') {
+          replAddOutput('Running benchmarks on live API...');
+          const stages = [10,20,30,40,50,60,70,80,90,100];
+          for (const pct of stages) {
+            await sleep(100);
+            const filled = Math.round(pct / 5);
+            const empty = 20 - filled;
+            const last = replOutput.lastElementChild;
+            if (last) last.innerHTML = '<span class="repl-output-text">[' + '\u2588'.repeat(filled) + '\u2591'.repeat(empty) + '] ' + pct + '%</span>';
+          }
+          const result = await apiBenchmark();
+          if (result && result.results) {
+            const r = result.results;
+            let catStr = '';
+            if (r.categories) {
+              catStr = Object.entries(r.categories).map(([cat, data]) => {
+                const pct = (data.average_score * 100).toFixed(1);
+                return `  ${cat.padEnd(22)} ${pct}%    ${data.passed}/${data.tests}`;
+              }).join('\n');
+            }
+            replAddOutput(esc(
+`
+  Category          Score    Tests
+  ${'─'.repeat(37)}
+${catStr}
+  ${'─'.repeat(37)}
+  Overall           ${(r.overall_score * 100).toFixed(1)}%    ${r.total_tests} tests
+
+  Time elapsed: ${result.execution_time}s
+  Source: Live API (zedigital-elo-agi.fly.dev)`));
+            return;
+          }
+          // Fall through to local
+        }
+
+        // For module listing, use modules API
+        if (cmd === 'neuro_agi.list_modules()') {
+          const result = await apiModules();
+          if (result && result.modules) {
+            let header = `  ${'Module'.padEnd(26)} ${'Category'.padEnd(18)} Description`;
+            let sep = `  ${'─'.repeat(26)} ${'─'.repeat(18)} ${'─'.repeat(42)}`;
+            let rows = result.modules.map(m => `  ${m.name.padEnd(26)} ${m.category.padEnd(18)} ${m.description.substring(0, 50)}...`);
+            replAddOutput(esc(header + '\n' + sep + '\n' + rows.join('\n') + `\n\n  [${result.total} modules total] (from live API)`));
+            return;
+          }
+        }
+
+        // For general commands, try the REPL API endpoint
+        const apiResult = await apiRepl(cmd);
+        if (apiResult) {
+          if (apiResult.output) {
+            replAddOutput(esc(apiResult.output.replace(/\n$/, '')));
+          }
+          if (apiResult.error) {
+            replAddOutput('<span class="repl-error">' + esc(apiResult.error) + '</span>');
+          }
+          if (!apiResult.output && !apiResult.error) {
+            // Command executed but no output (like assignments)
+          }
+          return;
+        }
+        // If API call failed, fall through to local simulation
+      }
+
+      // ---- LOCAL SIMULATION FALLBACK ----
+
       // help()
       if (cmd === 'help()') {
         replAddOutput(esc(
@@ -1105,18 +1357,12 @@ ${'─'.repeat(50)}
         return;
       }
 
-      // clear()
-      if (cmd === 'clear()') {
-        replOutput.innerHTML = '';
-        return;
-      }
-
       // neuro_agi.info()
       if (cmd === 'neuro_agi.info()') {
         replAddOutput(esc(
 `\u2554${'═'.repeat(38)}\u2557
 \u2551   ELO-AGI Cognitive Framework v2.0  \u2551
-\u2551   38 Modules | 4 Tiers | 127 Tests \u2551
+\u2551   38 Modules | 4 Tiers | 627 Tests \u2551
 \u2551   Type help() for available commands\u2551
 \u255A${'═'.repeat(38)}\u255D`));
         return;
@@ -1627,19 +1873,30 @@ ${'─'.repeat(36)}
 
     // Auto-run welcome script
     async function replWelcome() {
-      await sleep(400);
+      // Check API connection first
+      await checkApiConnection();
+
+      await sleep(300);
       replAddPromptLine('import neuro_agi');
-      await sleep(300);
+      await sleep(200);
+
+      if (apiConnected) {
+        replAddOutput('<span class="repl-comment"># Connected to live API at zedigital-elo-agi.fly.dev</span>');
+      } else {
+        replAddOutput('<span class="repl-comment"># Running in offline simulation mode</span>');
+      }
+
+      await sleep(200);
       replAddPromptLine('neuro_agi.__version__');
-      await sleep(200);
+      await sleep(150);
       replAddOutput('<span class="repl-string">\'2.0.0\'</span>');
-      await sleep(300);
-      replAddPromptLine('neuro_agi.info()');
       await sleep(200);
+      replAddPromptLine('neuro_agi.info()');
+      await sleep(150);
       replAddOutput(esc(
 `\u2554${'═'.repeat(38)}\u2557
 \u2551   ELO-AGI Cognitive Framework v2.0  \u2551
-\u2551   38 Modules | 4 Tiers | 127 Tests \u2551
+\u2551   38 Modules | 4 Tiers | 627 Tests \u2551
 \u2551   Type help() for available commands\u2551
 \u255A${'═'.repeat(38)}\u255D`));
       replOutput.scrollTop = replOutput.scrollHeight;
