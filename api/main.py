@@ -14,9 +14,13 @@ import time
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 PROJECT_ROOT = Path(__file__).parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,11 +37,15 @@ for module_dir in PROJECT_ROOT.glob("neuro-*"):
 
 from api.sandbox import execute_code
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(
     title="ELO-AGI API",
     description="Neuroscience-inspired AGI framework API with 38 cognitive modules",
     version="2.0.0",
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -156,7 +164,8 @@ MODULE_DATA = [
 # ---- Endpoints ----
 
 @app.get("/api/health", response_model=HealthResponse)
-async def health():
+@limiter.limit("30/minute")
+async def health(request: Request):
     return HealthResponse(
         status="ok",
         uptime=round(time.time() - _start_time, 2),
@@ -165,7 +174,8 @@ async def health():
 
 
 @app.get("/api/info", response_model=InfoResponse)
-async def info():
+@limiter.limit("30/minute")
+async def info(request: Request):
     return InfoResponse(
         name="ELO-AGI (NEURO)",
         version="2.0.0",
@@ -193,13 +203,15 @@ async def info():
 
 
 @app.get("/api/modules", response_model=ModulesResponse)
-async def list_modules():
+@limiter.limit("30/minute")
+async def list_modules(request: Request):
     modules = [ModuleInfo(**m) for m in MODULE_DATA]
     return ModulesResponse(modules=modules, total=len(modules))
 
 
 @app.post("/api/repl", response_model=REPLResponse)
-async def repl(request: REPLRequest):
+@limiter.limit("10/minute")
+async def repl(request: REPLRequest, raw_request: Request):
     command = request.command.strip()
     if not command:
         raise HTTPException(status_code=400, detail="Empty command")
@@ -217,7 +229,8 @@ async def repl(request: REPLRequest):
 
 
 @app.post("/api/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+@limiter.limit("30/minute")
+async def chat(request: ChatRequest, raw_request: Request):
     message = request.message.strip()
     if not message:
         raise HTTPException(status_code=400, detail="Empty message")
@@ -236,7 +249,8 @@ async def chat(request: ChatRequest):
 
 
 @app.post("/api/benchmark", response_model=BenchmarkResponse)
-async def run_benchmark(request: BenchmarkRequest = None):
+@limiter.limit("10/minute")
+async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
     start = time.time()
 
     try:
@@ -294,7 +308,8 @@ async def run_benchmark(request: BenchmarkRequest = None):
 
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)
-async def analyze(request: AnalyzeRequest):
+@limiter.limit("30/minute")
+async def analyze(request: AnalyzeRequest, raw_request: Request):
     start = time.time()
     text = request.text.strip()
     analyses = {}
