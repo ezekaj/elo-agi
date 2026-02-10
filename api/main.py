@@ -74,6 +74,12 @@ class ChatResponse(BaseModel):
     response: str
     cognitive_context: Optional[Dict[str, Any]] = None
 
+VALID_ANALYSIS_TYPES = {"dual_process", "emotion", "reasoning"}
+VALID_BENCHMARK_CATEGORIES = {
+    "causal_reasoning", "compositional", "continual_learning",
+    "robustness", "language", "memory", "planning", "reasoning",
+}
+
 class BenchmarkRequest(BaseModel):
     categories: Optional[List[str]] = None
 
@@ -253,6 +259,14 @@ async def chat(request: ChatRequest, raw_request: Request):
 async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
     start = time.time()
 
+    if request and request.categories:
+        invalid_cats = set(request.categories) - VALID_BENCHMARK_CATEGORIES
+        if invalid_cats:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid benchmark categories: {', '.join(invalid_cats)}. Valid: {', '.join(sorted(VALID_BENCHMARK_CATEGORIES))}",
+            )
+
     try:
         from neuro.benchmark import Benchmark
         bench = Benchmark("/tmp/elo_agi_bench")
@@ -312,6 +326,16 @@ async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
 async def analyze(request: AnalyzeRequest, raw_request: Request):
     start = time.time()
     text = request.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Empty text")
+
+    invalid_types = set(request.analysis_types) - VALID_ANALYSIS_TYPES
+    if invalid_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid analysis types: {', '.join(invalid_types)}. Valid: {', '.join(sorted(VALID_ANALYSIS_TYPES))}",
+        )
+
     analyses = {}
 
     if "dual_process" in request.analysis_types:
