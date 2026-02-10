@@ -635,7 +635,7 @@ function animateBrainSequence(containerId, loopDelay) {
 }
 
 // ================================================================
-// SCROLL REVEAL
+// SCROLL REVEAL WITH STAGGER
 // ================================================================
 
 function initScrollReveal() {
@@ -646,11 +646,115 @@ function initScrollReveal() {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
+        const children = entry.target.querySelectorAll('.reveal-child');
+        children.forEach((child, i) => {
+          setTimeout(() => child.classList.add('visible'), i * 100);
+        });
       }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
   reveals.forEach(el => observer.observe(el));
+}
+
+// ================================================================
+// SCROLL PROGRESS BAR
+// ================================================================
+
+function initScrollProgress() {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = pct + '%';
+  }, { passive: true });
+}
+
+// ================================================================
+// NAV SCROLL EFFECT
+// ================================================================
+
+function initNavScroll() {
+  const nav = document.querySelector('nav');
+  if (!nav) return;
+  nav.classList.add('nav-glass');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (window.scrollY > 20) {
+          nav.classList.add('nav-scrolled');
+        } else {
+          nav.classList.remove('nav-scrolled');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+// ================================================================
+// PARALLAX
+// ================================================================
+
+function initParallax() {
+  const els = document.querySelectorAll('.parallax-slow');
+  if (!els.length) return;
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    els.forEach(el => {
+      const speed = parseFloat(el.dataset.speed) || 0.3;
+      el.style.transform = 'translateY(' + (scrollY * speed) + 'px)';
+    });
+  }, { passive: true });
+}
+
+// ================================================================
+// ANIMATED COUNTERS
+// ================================================================
+
+function animateCounters() {
+  const counters = document.querySelectorAll('[data-counter]');
+  if (!counters.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.counter, 10);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        const duration = 1500;
+        const start = performance.now();
+
+        function step(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.round(target * eased);
+          el.textContent = prefix + current + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(el => observer.observe(el));
+}
+
+// ================================================================
+// DYNAMIC YEAR
+// ================================================================
+
+function initDynamicYear() {
+  document.querySelectorAll('[data-year]').forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
 }
 
 // ================================================================
@@ -683,10 +787,14 @@ function toggleFaq(el) {
 
 document.addEventListener('DOMContentLoaded', function() {
   initScrollReveal();
+  initScrollProgress();
+  initNavScroll();
+  initParallax();
+  animateCounters();
+  initDynamicYear();
   if (document.getElementById('repl-input')) initRepl();
   if (document.getElementById('benchmarkBody')) {
     renderBenchmarks();
-    // Animate bars when they come into view
     const benchSection = document.getElementById('benchmarks');
     if (benchSection) {
       const obs = new IntersectionObserver((entries) => {
