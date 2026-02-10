@@ -3,12 +3,15 @@ Sandboxed Python execution environment for the ELO-AGI REPL API.
 
 Executes Python code with neuro_agi modules available while restricting
 dangerous operations like filesystem access, network calls, and os.system.
+Uses a strict allowlist for builtins, memory limits, output size limits,
+and execution timeouts.
 """
 
 import sys
 import io
 import time
 import signal
+import resource
 import traceback
 from typing import Dict, Any
 from contextlib import redirect_stdout, redirect_stderr
@@ -17,20 +20,40 @@ from contextlib import redirect_stdout, redirect_stderr
 BLOCKED_IMPORTS = {
     "subprocess", "shutil", "socket", "http", "urllib",
     "requests", "ftplib", "smtplib", "telnetlib",
-    "ctypes", "multiprocessing", "signal",
+    "ctypes", "multiprocessing", "signal", "resource",
+    "os", "pathlib", "importlib", "code", "codeop",
+    "pickle", "shelve", "marshal", "tempfile",
 }
 
-BLOCKED_BUILTINS = {
-    "exec", "eval", "compile", "__import__", "open",
-    "input", "breakpoint",
+SAFE_BUILTINS = {
+    "print", "len", "range", "str", "int", "float",
+    "list", "dict", "tuple", "set", "bool",
+    "abs", "round", "min", "max", "sum",
+    "sorted", "reversed", "enumerate", "zip", "map", "filter",
+    "isinstance", "hasattr",
+    "True", "False", "None",
+    "frozenset", "bytes", "bytearray",
+    "hex", "oct", "bin", "ord", "chr",
+    "all", "any", "repr", "hash",
+    "slice", "complex",
+    "ValueError", "TypeError", "KeyError", "IndexError",
+    "AttributeError", "RuntimeError", "StopIteration",
+    "ZeroDivisionError", "OverflowError", "ImportError",
+    "Exception", "ArithmeticError", "LookupError",
 }
+
+MAX_OUTPUT_BYTES = 10 * 1024  # 10KB
+MAX_MEMORY_BYTES = 256 * 1024 * 1024  # 256MB
+DEFAULT_TIMEOUT = 10
 
 
 def _make_safe_globals() -> Dict[str, Any]:
+    builtins_source = __builtins__.__dict__ if hasattr(__builtins__, '__dict__') else __builtins__
+
     safe_builtins = {}
-    for name, obj in __builtins__.__dict__.items() if hasattr(__builtins__, '__dict__') else __builtins__.items():
-        if name not in BLOCKED_BUILTINS:
-            safe_builtins[name] = obj
+    for name in SAFE_BUILTINS:
+        if name in builtins_source:
+            safe_builtins[name] = builtins_source[name]
 
     original_import = __builtins__.__import__ if hasattr(__builtins__, '__import__') else __import__
 
@@ -46,37 +69,61 @@ def _make_safe_globals() -> Dict[str, Any]:
     return safe_builtins
 
 
-class TimeoutError(Exception):
+class SandboxTimeoutError(Exception):
     pass
 
 
 def _timeout_handler(signum, frame):
-    raise TimeoutError("Execution timed out (10 second limit)")
+    raise SandboxTimeoutError("Execution timed out (10 second limit)")
 
 
-def execute_code(code: str, timeout: int = 10) -> Dict[str, Any]:
+def _set_memory_limit():
+    try:
+        soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+        resource.setrlimit(resource.RLIMIT_AS, (MAX_MEMORY_BYTES, hard))
+    except (ValueError, resource.error):
+        pass
+
+
+def execute_code(code: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any]:
     """
     Execute Python code in a sandboxed environment.
 
+    Security measures:
+    - Allowlist-only builtins (no getattr, setattr, globals, locals, etc.)
+    - Blocked dangerous imports
+    - Memory limit: 256MB
+    - Output size limit: 10KB
+    - Execution timeout: 10 seconds
+
     Returns:
         {
-            "output": str,      # stdout output
-            "error": str|None,  # error message if any
+            "output": str,
+            "error": str|None,
             "execution_time": float
         }
     """
+    if len(code) > 5000:
+        return {
+            "output": "",
+            "error": "Input too long (max 5000 characters)",
+            "execution_time": 0.0,
+        }
+
     start_time = time.time()
     stdout_capture = io.StringIO()
     stderr_capture = io.StringIO()
 
+    old_handler = None
     try:
         old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(timeout)
     except (ValueError, AttributeError):
         old_handler = None
 
-    safe_globals = _make_safe_globals()
+    _set_memory_limit()
 
+    safe_globals = _make_safe_globals()
     safe_globals["__name__"] = "__main__"
 
     try:
@@ -92,13 +139,17 @@ def execute_code(code: str, timeout: int = 10) -> Dict[str, Any]:
         output = stdout_capture.getvalue()
         error = stderr_capture.getvalue() if stderr_capture.getvalue() else None
 
-    except TimeoutError as e:
+    except SandboxTimeoutError as e:
         output = stdout_capture.getvalue()
         error = str(e)
 
     except ImportError as e:
         output = stdout_capture.getvalue()
         error = f"ImportError: {e}"
+
+    except MemoryError:
+        output = stdout_capture.getvalue()
+        error = "MemoryError: Execution exceeded 256MB memory limit"
 
     except Exception as e:
         output = stdout_capture.getvalue()
@@ -116,8 +167,8 @@ def execute_code(code: str, timeout: int = 10) -> Dict[str, Any]:
 
     execution_time = time.time() - start_time
 
-    if output and len(output) > 50000:
-        output = output[:50000] + "\n... (output truncated at 50KB)"
+    if output and len(output) > MAX_OUTPUT_BYTES:
+        output = output[:MAX_OUTPUT_BYTES] + "\n... (output truncated at 10KB)"
 
     return {
         "output": output,
