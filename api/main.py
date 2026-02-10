@@ -315,7 +315,7 @@ async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
                 },
                 "overall_score": 0.742,
                 "total_tests": 627,
-                "note": "Using cached benchmark results (benchmark module not available in this environment)",
+                "note": "Pre-computed reference values from offline benchmark suite -- not live results. Run the benchmark module locally for live scoring.",
             },
             execution_time=round(time.time() - start, 3),
         )
@@ -384,13 +384,14 @@ def _generate_cognitive_response(message: str, history=None) -> str:
 
     if any(w in message.lower() for w in ["benchmark", "test", "performance"]):
         return (
-            "ELO-AGI benchmarks across 5 categories with 627 total tests:\n"
+            "ELO-AGI pre-computed reference scores across 5 categories (627 total tests):\n"
             "- Causal Reasoning: 0.85 (124 tests)\n"
             "- Compositional Abstraction: 0.74 (144 tests)\n"
             "- Continual Learning: 0.72 (89 tests)\n"
             "- Robustness: 0.71 (192 tests)\n"
             "- Language Understanding: 0.69 (78 tests)\n"
             "Overall: 0.742\n\n"
+            "These are pre-computed reference values from the offline benchmark suite.\n"
             "Run neuro_agi.run_benchmark() in the REPL for live results."
         )
 
