@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ELO-AGI (NEURO) — Neuroscience-Inspired AGI Framework</title>
-  <meta name="description" content="A complete cognitive architecture with 38 modules modeling the human brain. Local execution, zero API costs, continual learning without catastrophic forgetting.">
+  <title>ELO-AGI (NEURO) -- Neuroscience-Inspired AGI Framework | 38 Cognitive Modules</title>
+  <meta name="description" content="A neuroscience-inspired AGI framework with 38 cognitive modules implementing Free Energy Principle, Active Inference, and Global Workspace Theory. Runs locally. Zero API cost. MIT License.">
   <meta name="theme-color" content="#7C3AED">
-  <meta property="og:title" content="NEURO — Neuroscience-Inspired AGI Framework">
-  <meta property="og:description" content="38 cognitive modules. Local execution. Zero API costs. Open source under MIT.">
+  <meta property="og:title" content="ELO-AGI (NEURO) -- 38 Cognitive Modules. One Brain.">
+  <meta property="og:description" content="Neuroscience-inspired AGI framework. Free Energy Principle, Active Inference, Global Workspace Theory. Runs locally, zero API cost.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ezekaj.github.io/elo-agi/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ELO-AGI (NEURO) -- 38 Cognitive Modules. One Brain.">
+  <meta name="twitter:description" content="Neuroscience-inspired AGI framework with 38 modules. Runs locally, zero API cost, MIT License.">
+  <link rel="canonical" href="https://ezekaj.github.io/elo-agi/">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -34,313 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #0B0D17; color: #e2e8f0; }
-
-    .logo-gradient {
-      background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-bg {
-      background:
-        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(124,58,237,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 20% 70%, rgba(6,182,212,0.05) 0%, transparent 50%),
-        #0B0D17;
-    }
-
-    .grid-bg {
-      background-image:
-        linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
-
-    .bar-gradient { background: linear-gradient(90deg, #7C3AED, #06B6D4); }
-
-    .code-block {
-      background: #0d0f1a;
-      border: 1px solid rgba(124,58,237,0.15);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .code-block .code-header {
-      background: rgba(124,58,237,0.06);
-      border-bottom: 1px solid rgba(124,58,237,0.1);
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .code-block pre {
-      padding: 16px;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .module-tile {
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-    .module-tile:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(124,58,237,0.15);
-    }
-    .module-tile .module-desc {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-    }
-    .module-tile.expanded .module-desc {
-      max-height: 200px;
-      padding-top: 10px;
-    }
-
-    .brain-region {
-      transition: transform 0.3s ease, filter 0.3s ease;
-      cursor: pointer;
-    }
-    .brain-region:hover {
-      transform: scale(1.05);
-      filter: brightness(1.3);
-    }
-
-    .layer-bar {
-      position: relative;
-      border-radius: 6px;
-      padding: 16px 24px;
-      transition: transform 0.2s ease;
-    }
-    .layer-bar:hover {
-      transform: scale(1.02);
-    }
-
-    .tooltip {
-      position: absolute;
-      top: -32px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #14B8A6;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      white-space: nowrap;
-    }
-    .tooltip.show { opacity: 1; }
-
-    .nav-link {
-      position: relative;
-      color: #94a3b8;
-      transition: color 0.2s ease;
-    }
-    .nav-link:hover { color: #e2e8f0; }
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, #7C3AED, #06B6D4);
-      transition: width 0.2s ease;
-    }
-    .nav-link:hover::after { width: 100%; }
-
-    .tab-btn {
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      background: rgba(255,255,255,0.03);
-      color: #94a3b8;
-    }
-    .tab-btn:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
-    .tab-btn.active { color: #fff; }
-
-    .table-wrapper { overflow-x: auto; }
-    .research-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 14px;
-    }
-    .research-table th {
-      background: rgba(124,58,237,0.08);
-      padding: 12px 16px;
-      text-align: left;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid rgba(124,58,237,0.15);
-    }
-    .research-table td {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
-    .research-table tr:last-child td {
-      border-bottom: none;
-      font-weight: 700;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in { animation: fadeIn 0.3s ease forwards; }
-
-    .section-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(124,58,237,0.2), transparent);
-    }
-
-    .pip-pill {
-      position: relative;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .pip-pill:hover {
-      background: rgba(124,58,237,0.15) !important;
-    }
-
-    /* Connection Status */
-    #api-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      padding: 3px 10px;
-      border-radius: 20px;
-      transition: all 0.3s ease;
-    }
-    #api-status.connected { color: #4ade80; background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); }
-    #api-status.disconnected { color: #94a3b8; background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.15); }
-    #api-status.connecting { color: #facc15; background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.15); }
-    #api-status .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    #api-status.connected .status-dot { animation: pulse-green 2s infinite; }
-    @keyframes pulse-green {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    /* REPL Styles */
-    #repl-container {
-      background: #0a0c14;
-      border: 1px solid rgba(124,58,237,0.2);
-      border-radius: 12px;
-      overflow: hidden;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    #repl-titlebar {
-      background: rgba(124,58,237,0.08);
-      border-bottom: 1px solid rgba(124,58,237,0.15);
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    #repl-titlebar .dots {
-      display: flex;
-      gap: 6px;
-    }
-    #repl-titlebar .dots span {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-    #repl-output {
-      padding: 16px;
-      min-height: 360px;
-      max-height: 520px;
-      overflow-y: auto;
-      font-size: 13px;
-      line-height: 1.7;
-      scroll-behavior: smooth;
-    }
-    #repl-output::-webkit-scrollbar {
-      width: 6px;
-    }
-    #repl-output::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    #repl-output::-webkit-scrollbar-thumb {
-      background: rgba(124,58,237,0.3);
-      border-radius: 3px;
-    }
-    .repl-line { white-space: pre-wrap; word-break: break-all; }
-    .repl-prompt { color: #06B6D4; }
-    .repl-input-text { color: #e2e8f0; }
-    .repl-output-text { color: #94a3b8; }
-    .repl-string { color: #4ade80; }
-    .repl-number { color: #06B6D4; }
-    .repl-keyword { color: #7C3AED; }
-    .repl-error { color: #f87171; }
-    .repl-comment { color: #64748b; }
-    #repl-input-line {
-      display: flex;
-      align-items: flex-start;
-      padding: 0 16px 16px 16px;
-      gap: 0;
-    }
-    #repl-input-line .prompt-label {
-      color: #06B6D4;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.7;
-      flex-shrink: 0;
-      user-select: none;
-    }
-    #repl-input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #e2e8f0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.7;
-      flex: 1;
-      caret-color: #06B6D4;
-      min-width: 0;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    #repl-input:focus {
-      outline: none;
-    }
-    .sponsor-card {
-      background: rgba(17,19,39,0.6);
-      border: 1px solid rgba(124,58,237,0.15);
-      border-radius: 12px;
-      padding: 24px;
-      transition: all 0.2s ease;
-    }
-    .sponsor-card:hover {
-      border-color: rgba(124,58,237,0.3);
-      transform: translateY(-2px);
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-base min-h-screen">
 
@@ -348,29 +47,23 @@
   <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background: rgba(11,13,23,0.92); backdrop-filter: blur(16px);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
-        <a href="#" class="flex items-center gap-2">
+        <a href="index.html" class="flex items-center gap-2">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
             <circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="2" fill="none"/>
             <circle cx="14" cy="10" r="3" fill="url(#logoGrad)"/>
             <path d="M8 18 Q14 22 20 18" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
             <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
           </svg>
-          <span class="logo-gradient text-xl font-extrabold tracking-tight">NEURO</span>
+          <span class="logo-gradient text-xl font-extrabold tracking-tight">ELO-AGI</span>
         </a>
         <div class="hidden md:flex items-center gap-8">
-          <a href="#modules" class="nav-link text-sm font-medium">Modules</a>
-          <a href="#benchmarks" class="nav-link text-sm font-medium">Benchmarks</a>
-          <a href="#repl" class="nav-link text-sm font-medium">Try It</a>
-          <a href="#quickstart" class="nav-link text-sm font-medium">Docs</a>
+          <a href="features.html" class="nav-link text-sm font-medium">Features</a>
+          <a href="demo.html" class="nav-link text-sm font-medium">Demo</a>
+          <a href="pricing.html" class="nav-link text-sm font-medium">Pricing</a>
           <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="nav-link text-sm font-medium">GitHub</a>
         </div>
         <div class="hidden md:flex items-center gap-3">
-          <div class="pip-pill flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5" onclick="copyPip(this)" title="Click to copy">
-            <span class="text-purple font-mono text-xs">$</span>
-            <code class="text-xs font-mono text-slate-300">pip install neuro-agi</code>
-            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
-            <span class="tooltip" id="pipTooltip">Copied!</span>
-          </div>
+          <a href="demo.html" class="btn-primary text-sm py-2 px-4">Get Started</a>
         </div>
         <button class="md:hidden p-2 rounded-lg hover:bg-white/5" onclick="toggleMobile()" aria-label="Toggle menu">
           <svg id="hamburgerIcon" class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -380,16 +73,12 @@
     </div>
     <div id="mobileMenu" class="hidden md:hidden border-t border-white/5 bg-base/95 backdrop-blur-lg">
       <div class="px-4 py-4 space-y-3">
-        <a href="#modules" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Modules</a>
-        <a href="#benchmarks" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Benchmarks</a>
-        <a href="#repl" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Try It</a>
-        <a href="#quickstart" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Docs</a>
+        <a href="features.html" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Features</a>
+        <a href="demo.html" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Demo</a>
+        <a href="pricing.html" class="block text-sm text-slate-300 hover:text-white py-2" onclick="toggleMobile()">Pricing</a>
         <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="block text-sm text-slate-300 hover:text-white py-2">GitHub</a>
         <div class="pt-2 border-t border-white/5">
-          <div class="pip-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5" onclick="copyPip(this)">
-            <span class="text-purple font-mono text-xs">$</span>
-            <code class="text-xs font-mono text-slate-300">pip install neuro-agi</code>
-          </div>
+          <a href="demo.html" class="btn-primary text-sm py-2 px-4 inline-flex">Get Started</a>
         </div>
       </div>
     </div>
@@ -402,71 +91,54 @@
         <div class="lg:col-span-3 space-y-8">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple/30 bg-purple/10">
             <span class="w-1.5 h-1.5 rounded-full bg-purple"></span>
-            <span class="text-xs font-semibold text-purple tracking-wide">v2.0 &mdash; 38 Cognitive Modules</span>
+            <span class="text-xs font-semibold text-purple tracking-wide">v2.0 -- 38 Cognitive Modules</span>
           </div>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-white">
-            Neuroscience-Inspired<br>
-            <span class="logo-gradient">AGI Framework</span>
+            38 Cognitive Modules.<br>
+            <span class="logo-gradient">One Brain.</span>
           </h1>
           <p class="text-lg text-slate-400 max-w-xl leading-relaxed">
-            A complete cognitive architecture modeling the human brain. Local execution, zero API costs, continual learning without catastrophic forgetting.
+            A neuroscience-inspired AGI framework implementing Free Energy Principle, Active Inference, and Global Workspace Theory. Runs locally. Zero API cost.
           </p>
           <div class="flex flex-wrap gap-4">
-            <button onclick="copyPip(this)" class="relative group flex items-center gap-2 px-6 py-3 rounded-lg bg-purple hover:bg-purple/90 text-white font-semibold text-sm transition-all">
-              <span class="text-purple-200/70 font-mono">$</span>
+            <button onclick="copyPip(this)" class="relative group flex items-center gap-2 px-6 py-3 rounded-lg bg-surface border border-white/10 hover:border-purple/30 text-white font-semibold text-sm transition-all">
+              <span class="text-purple font-mono">$</span>
               <span class="font-mono">pip install neuro-agi</span>
+              <svg class="w-4 h-4 text-slate-500 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
               <span class="tooltip" style="top:-36px;">Copied!</span>
             </button>
-            <a href="#repl" class="flex items-center gap-2 px-6 py-3 rounded-lg border border-cyan/40 text-cyan hover:bg-cyan/10 font-semibold text-sm transition-all">
-              Try Interactive REPL
+            <a href="demo.html" class="btn-secondary">
+              Try REPL
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>
             </a>
           </div>
         </div>
         <div class="lg:col-span-2 flex justify-center">
-          <svg viewBox="0 0 320 320" class="w-full max-w-[360px]" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="160" cy="160" r="150" fill="none" stroke="rgba(124,58,237,0.12)" stroke-width="1"/>
-            <circle cx="160" cy="160" r="120" fill="none" stroke="rgba(124,58,237,0.06)" stroke-width="1"/>
-            <line x1="160" y1="20" x2="160" y2="300" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-            <line x1="20" y1="160" x2="300" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-            <g class="brain-region" style="transform-origin: 90px 90px;">
-              <path d="M160 160 L160 20 A140 140 0 0 0 20 160 Z" fill="rgba(124,58,237,0.12)" stroke="rgba(124,58,237,0.3)" stroke-width="1.5"/>
-              <text x="75" y="88" fill="#7C3AED" font-size="12" font-weight="700" text-anchor="middle">Cognitive</text>
-              <text x="75" y="106" fill="#7C3AED" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">20 modules</text>
-              <circle cx="75" cy="120" r="14" fill="rgba(124,58,237,0.2)" stroke="#7C3AED" stroke-width="1.5"/>
-              <text x="75" y="124" fill="#7C3AED" font-size="11" font-weight="700" text-anchor="middle">20</text>
-            </g>
-            <g class="brain-region" style="transform-origin: 230px 90px;">
-              <path d="M160 160 L300 160 A140 140 0 0 0 160 20 Z" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" stroke-width="1.5"/>
-              <text x="228" y="88" fill="#06B6D4" font-size="12" font-weight="700" text-anchor="middle">Infrastructure</text>
-              <text x="228" y="106" fill="#06B6D4" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">6 modules</text>
-              <circle cx="228" cy="120" r="14" fill="rgba(6,182,212,0.15)" stroke="#06B6D4" stroke-width="1.5"/>
-              <text x="228" y="124" fill="#06B6D4" font-size="11" font-weight="700" text-anchor="middle">6</text>
-            </g>
-            <g class="brain-region" style="transform-origin: 90px 230px;">
-              <path d="M160 160 L20 160 A140 140 0 0 0 160 300 Z" fill="rgba(139,92,246,0.1)" stroke="rgba(139,92,246,0.3)" stroke-width="1.5"/>
-              <text x="82" y="222" fill="#8B5CF6" font-size="12" font-weight="700" text-anchor="middle">Support</text>
-              <text x="82" y="240" fill="#8B5CF6" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">5 modules</text>
-              <circle cx="82" cy="254" r="14" fill="rgba(139,92,246,0.15)" stroke="#8B5CF6" stroke-width="1.5"/>
-              <text x="82" y="258" fill="#8B5CF6" font-size="11" font-weight="700" text-anchor="middle">5</text>
-            </g>
-            <g class="brain-region" style="transform-origin: 230px 230px;">
-              <path d="M160 160 L160 300 A140 140 0 0 0 300 160 Z" fill="rgba(20,184,166,0.1)" stroke="rgba(20,184,166,0.3)" stroke-width="1.5"/>
-              <text x="235" y="222" fill="#14B8A6" font-size="12" font-weight="700" text-anchor="middle">AGI</text>
-              <text x="235" y="240" fill="#14B8A6" font-size="10" font-weight="500" text-anchor="middle" opacity="0.8">7 modules</text>
-              <circle cx="235" cy="254" r="14" fill="rgba(20,184,166,0.15)" stroke="#14B8A6" stroke-width="1.5"/>
-              <text x="235" y="258" fill="#14B8A6" font-size="11" font-weight="700" text-anchor="middle">7</text>
-            </g>
-            <circle cx="160" cy="160" r="22" fill="#0B0D17" stroke="url(#centerGrad)" stroke-width="2"/>
-            <text x="160" y="157" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="middle">38</text>
-            <text x="160" y="169" fill="#94a3b8" font-size="7" font-weight="500" text-anchor="middle">TOTAL</text>
-            <defs>
-              <linearGradient id="centerGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop stop-color="#7C3AED"/>
-                <stop offset="1" stop-color="#06B6D4"/>
-              </linearGradient>
-            </defs>
-          </svg>
+          <div id="hero-brain" class="w-full max-w-[380px]"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRUST BAR ========== -->
+  <section class="border-y border-white/5 bg-surface/50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div>
+          <div class="text-2xl font-extrabold text-white">38</div>
+          <div class="text-xs text-slate-500 font-medium mt-1">Cognitive Modules</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold text-white">3</div>
+          <div class="text-xs text-slate-500 font-medium mt-1">Architecture Tiers</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold logo-gradient">$0</div>
+          <div class="text-xs text-slate-500 font-medium mt-1">Zero API Cost</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold text-white">MIT</div>
+          <div class="text-xs text-slate-500 font-medium mt-1">Open Source License</div>
         </div>
       </div>
     </div>
@@ -474,8 +146,40 @@
 
   <div class="section-divider"></div>
 
-  <!-- ========== MODULE EXPLORER ========== -->
-  <section id="modules" class="py-20 lg:py-28">
+  <!-- ========== PROBLEM / SOLUTION ========== -->
+  <section class="py-20 lg:py-28 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12">
+        <div class="card" style="border-color: rgba(248,113,113,0.15); background: rgba(248,113,113,0.03);">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg">The Problem</h3>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Current AI systems are narrow and disconnected. GPT-4 excels at language but lacks causal reasoning. Traditional cognitive architectures have limited modules. No system integrates all aspects of human-like cognition into a unified, locally-runnable framework.
+          </p>
+        </div>
+        <div class="card" style="border-color: rgba(124,58,237,0.2); background: rgba(124,58,237,0.03);">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-purple/10 border border-purple/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            </div>
+            <h3 class="text-white font-bold text-lg">Our Solution</h3>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            ELO-AGI unifies 38 cognitive modules into a coherent brain-like architecture. Implementing Free Energy Principle, Active Inference, Global Workspace Theory, and Dual-Process Thinking -- all running locally with zero API costs under MIT license.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ========== MODULE SHOWCASE (Tabbed Grid) ========== -->
+  <section id="modules" class="py-20 lg:py-28 reveal">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Module Explorer</p>
@@ -484,38 +188,40 @@
       </div>
       <div class="flex flex-wrap justify-center gap-3 mb-10">
         <button class="tab-btn active" data-tab="cognitive" style="border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.1); color: #fff;" onclick="switchTab('cognitive', this)">
-          Cognitive <span class="ml-1 text-xs opacity-70">(20)</span>
+          Cognitive <span class="ml-1 text-xs opacity-70">(23)</span>
         </button>
         <button class="tab-btn" data-tab="infrastructure" onclick="switchTab('infrastructure', this)">
           Infrastructure <span class="ml-1 text-xs opacity-70">(6)</span>
         </button>
         <button class="tab-btn" data-tab="support" onclick="switchTab('support', this)">
-          Support <span class="ml-1 text-xs opacity-70">(5)</span>
-        </button>
-        <button class="tab-btn" data-tab="agi" onclick="switchTab('agi', this)">
-          AGI <span class="ml-1 text-xs opacity-70">(7)</span>
+          Support <span class="ml-1 text-xs opacity-70">(9)</span>
         </button>
       </div>
       <div id="moduleContainer">
         <div id="tab-cognitive" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 fade-in"></div>
         <div id="tab-infrastructure" class="module-grid grid grid-cols-2 sm:grid-cols-3 gap-3 hidden fade-in"></div>
-        <div id="tab-support" class="module-grid grid grid-cols-2 sm:grid-cols-3 gap-3 hidden fade-in"></div>
-        <div id="tab-agi" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 hidden fade-in"></div>
+        <div id="tab-support" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 hidden fade-in"></div>
+      </div>
+      <div class="text-center mt-8">
+        <a href="features.html" class="btn-ghost">
+          View All Module Details
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>
+        </a>
       </div>
     </div>
   </section>
 
   <div class="section-divider"></div>
 
-  <!-- ========== BENCHMARKS ========== -->
-  <section id="benchmarks" class="py-20 lg:py-28">
+  <!-- ========== BENCHMARK COMPARISON ========== -->
+  <section id="benchmarks" class="py-20 lg:py-28 reveal">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Evaluation</p>
         <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Benchmark Performance</h2>
         <p class="mt-3 text-slate-400">All 627 tests passing across 5 evaluation categories.</p>
       </div>
-      <div class="rounded-xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+      <div class="rounded-xl border border-white/5 overflow-hidden mb-12" style="background: rgba(17,19,39,0.6);">
         <div class="table-wrapper">
           <table class="research-table">
             <thead>
@@ -531,181 +237,11 @@
           </table>
         </div>
       </div>
-    </div>
-  </section>
 
-  <div class="section-divider"></div>
-
-  <!-- ========== INTERACTIVE PYTHON REPL ========== -->
-  <section id="repl" class="py-20 lg:py-28">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <p class="text-sm font-semibold text-cyan tracking-wider uppercase mb-3">Interactive Playground</p>
-        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Try ELO-AGI</h2>
-        <p class="mt-3 text-slate-400 max-w-lg mx-auto">Explore the framework in a live Python REPL. Type commands or use the examples below.</p>
-      </div>
-
-      <!-- Quick command buttons -->
-      <div class="flex flex-wrap justify-center gap-2 mb-6">
-        <button onclick="replQuickCmd('help()')" class="px-3 py-1.5 rounded-lg border border-purple/20 bg-purple/5 text-purple text-xs font-mono hover:bg-purple/15 transition-all">help()</button>
-        <button onclick="replQuickCmd('neuro_agi.list_modules()')" class="px-3 py-1.5 rounded-lg border border-purple/20 bg-purple/5 text-purple text-xs font-mono hover:bg-purple/15 transition-all">list_modules()</button>
-        <button onclick="replQuickCmd('neuro_agi.run_benchmark()')" class="px-3 py-1.5 rounded-lg border border-cyan/20 bg-cyan/5 text-cyan text-xs font-mono hover:bg-cyan/15 transition-all">run_benchmark()</button>
-        <button onclick="replQuickCmd('neuro_agi.cognitive.DualProcess.run(\"Should I buy Bitcoin?\")')" class="px-3 py-1.5 rounded-lg border border-cyan/20 bg-cyan/5 text-cyan text-xs font-mono hover:bg-cyan/15 transition-all">DualProcess.run()</button>
-        <button onclick="replQuickCmd('neuro_agi.architecture()')" class="px-3 py-1.5 rounded-lg border border-teal/20 bg-teal/5 text-teal text-xs font-mono hover:bg-teal/15 transition-all">architecture()</button>
-        <button onclick="replQuickCmd('neuro_agi.cognitive.EmotionEngine.analyze(\"I am so happy today!\")')" class="px-3 py-1.5 rounded-lg border border-teal/20 bg-teal/5 text-teal text-xs font-mono hover:bg-teal/15 transition-all">EmotionEngine.analyze()</button>
-      </div>
-
-      <div id="repl-container">
-        <!-- Title bar -->
-        <div id="repl-titlebar">
-          <div class="flex items-center gap-3">
-            <div class="dots">
-              <span style="background:#ff5f57;"></span>
-              <span style="background:#febc2e;"></span>
-              <span style="background:#28c840;"></span>
-            </div>
-            <span class="text-xs text-slate-500 font-mono">Python 3.11 &mdash; neuro_agi</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span id="api-status" class="connecting"><span class="status-dot"></span>Connecting...</span>
-            <button onclick="replClear()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors font-mono px-2 py-1 rounded hover:bg-white/5">Clear</button>
-          </div>
-        </div>
-        <!-- Output area -->
-        <div id="repl-output" onclick="document.getElementById('repl-input').focus()"></div>
-        <!-- Input line -->
-        <div id="repl-input-line">
-          <span class="prompt-label" id="repl-prompt-label">&gt;&gt;&gt;&nbsp;</span>
-          <input type="text" id="repl-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- ========== QUICK START ========== -->
-  <section id="quickstart" class="py-20 lg:py-28">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Getting Started</p>
-        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Quick Start</h2>
-        <p class="mt-3 text-slate-400">Three steps to a running cognitive architecture.</p>
-      </div>
-      <div class="space-y-8">
-        <div class="flex gap-4 sm:gap-6">
-          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple/15 border border-purple/20 flex items-center justify-center">
-            <span class="text-purple font-bold text-sm">1</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="text-white font-semibold mb-3">Install</h3>
-            <div class="code-block">
-              <div class="code-header">
-                <span class="text-xs text-slate-500 font-mono">bash</span>
-                <button class="text-xs text-slate-500 hover:text-slate-300 transition-colors" onclick="copyCode(this, 'pip install neuro-agi')">Copy</button>
-              </div>
-              <pre><code class="text-slate-300"><span class="text-slate-500 select-none">1  </span><span class="text-cyan">pip</span> install neuro-agi</code></pre>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-4 sm:gap-6">
-          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple/15 border border-purple/20 flex items-center justify-center">
-            <span class="text-purple font-bold text-sm">2</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="text-white font-semibold mb-3">Initialize</h3>
-            <div class="code-block">
-              <div class="code-header">
-                <span class="text-xs text-slate-500 font-mono">python</span>
-                <button class="text-xs text-slate-500 hover:text-slate-300 transition-colors" onclick="copyCode(this, `from neuro.system import CognitiveCore\ncore = CognitiveCore()\nprint(f'Modules loaded: {core.module_count}')`)">Copy</button>
-              </div>
-              <pre><code class="text-slate-300"><span class="text-slate-500 select-none">1  </span><span class="text-purple">from</span> <span class="text-cyan">neuro.system</span> <span class="text-purple">import</span> CognitiveCore
-<span class="text-slate-500 select-none">2  </span>core = <span class="text-cyan">CognitiveCore</span>()
-<span class="text-slate-500 select-none">3  </span><span class="text-purple">print</span>(<span class="text-teal">f"Modules loaded: </span><span class="text-yellow-400">{core.module_count}</span><span class="text-teal">"</span>)</code></pre>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-4 sm:gap-6">
-          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple/15 border border-purple/20 flex items-center justify-center">
-            <span class="text-purple font-bold text-sm">3</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="text-white font-semibold mb-3">Run</h3>
-            <div class="code-block">
-              <div class="code-header">
-                <span class="text-xs text-slate-500 font-mono">python</span>
-                <button class="text-xs text-slate-500 hover:text-slate-300 transition-colors" onclick="copyCode(this, `result = core.reason(problem='medical diagnosis')\nprint(f'Success: {result.success_rate}%')`)">Copy</button>
-              </div>
-              <pre><code class="text-slate-300"><span class="text-slate-500 select-none">1  </span>result = core.<span class="text-cyan">reason</span>(problem=<span class="text-teal">"medical diagnosis"</span>)
-<span class="text-slate-500 select-none">2  </span><span class="text-purple">print</span>(<span class="text-teal">f"Success: </span><span class="text-yellow-400">{result.success_rate}</span><span class="text-teal">%"</span>)</code></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- ========== ARCHITECTURE ========== -->
-  <section id="architecture" class="py-20 lg:py-28">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">System Design</p>
-        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Architecture</h2>
-        <p class="mt-3 text-slate-400">Four-tier cognitive architecture inspired by the human brain.</p>
-      </div>
-      <div class="space-y-4 relative">
-        <div class="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-purple via-cyan to-teal hidden sm:block" style="transform: translateX(-50%);"></div>
-        <div class="layer-bar w-full" style="background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25);">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <span class="text-purple font-bold text-sm">Cognitive Layer</span>
-              <span class="text-slate-500 text-xs ml-2">20 modules</span>
-            </div>
-            <div class="text-xs text-slate-500 font-mono hidden md:block">Memory / Language / Reasoning / Creativity / Executive Control / Emotion / Attention / Perception / Consciousness / ...</div>
-          </div>
-        </div>
-        <div class="layer-bar w-[92%] mx-auto" style="background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2);">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <span class="text-cyan font-bold text-sm">Infrastructure Layer</span>
-              <span class="text-slate-500 text-xs ml-2">6 modules</span>
-            </div>
-            <div class="text-xs text-slate-500 font-mono hidden md:block">Core System / LLM Integration / Knowledge Graph / Sensors / Actuators / Distributed Scaling</div>
-          </div>
-        </div>
-        <div class="layer-bar w-[84%] mx-auto" style="background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2);">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <span class="text-violet font-bold text-sm">Support Layer</span>
-              <span class="text-slate-500 text-xs ml-2">5 modules</span>
-            </div>
-            <div class="text-xs text-slate-500 font-mono hidden md:block">Benchmarking / Perception Pipeline / Environment Manager / Data Loader / Logger</div>
-          </div>
-        </div>
-        <div class="layer-bar w-[76%] mx-auto" style="background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2);">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <span class="text-teal font-bold text-sm">AGI Layer</span>
-              <span class="text-slate-500 text-xs ml-2">7 modules</span>
-            </div>
-            <div class="text-xs text-slate-500 font-mono hidden md:block">Causal Reasoning / Compositional Abstraction / Continual Learning / Robustness / Transfer</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="section-divider"></div>
-
-  <!-- ========== COMPARISON TABLE ========== -->
-  <section id="comparison" class="py-20 lg:py-28">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Comparison</p>
-        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">How NEURO Compares</h2>
-        <p class="mt-3 text-slate-400">Feature-level comparison against established cognitive architectures and LLMs.</p>
+      <!-- Comparison Table -->
+      <div class="text-center mb-8">
+        <h3 class="text-xl font-bold text-white">How ELO-AGI Compares</h3>
+        <p class="mt-2 text-slate-400 text-sm">Feature-level comparison against established cognitive architectures.</p>
       </div>
       <div class="rounded-xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
         <div class="table-wrapper">
@@ -735,18 +271,18 @@
                 <td class="text-slate-500 font-mono">No</td>
               </tr>
               <tr>
-                <td class="text-slate-300 font-medium">Continual Learning</td>
-                <td class="font-mono"><span class="text-white font-semibold">Yes</span> <span class="text-green-400 ml-1">&#10003;</span></td>
-                <td class="text-slate-500 font-mono">Limited</td>
-                <td class="text-slate-500 font-mono">Limited</td>
-                <td class="text-slate-500 font-mono">No</td>
-              </tr>
-              <tr>
                 <td class="text-slate-300 font-medium">Causal Reasoning</td>
                 <td class="font-mono"><span class="text-white font-semibold">Native</span> <span class="text-green-400 ml-1">&#10003;</span></td>
                 <td class="text-slate-500 font-mono">Rule-based</td>
                 <td class="text-slate-500 font-mono">Rule-based</td>
                 <td class="text-slate-500 font-mono">Prompted</td>
+              </tr>
+              <tr>
+                <td class="text-slate-300 font-medium">Continual Learning</td>
+                <td class="font-mono"><span class="text-white font-semibold">Yes</span> <span class="text-green-400 ml-1">&#10003;</span></td>
+                <td class="text-slate-500 font-mono">Limited</td>
+                <td class="text-slate-500 font-mono">Limited</td>
+                <td class="text-slate-500 font-mono">No</td>
               </tr>
               <tr>
                 <td class="text-slate-300 font-medium">Zero API Cost</td>
@@ -771,75 +307,158 @@
 
   <div class="section-divider"></div>
 
-  <!-- ========== SPONSOR SECTION ========== -->
-  <section id="sponsor" class="py-20 lg:py-28">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  <!-- ========== ANIMATED DEMO PREVIEW ========== -->
+  <section class="py-20 lg:py-28 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-sm font-semibold text-cyan tracking-wider uppercase mb-3">Live Cognitive Processing</p>
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">Watch the Brain Think</h2>
+      <p class="text-slate-400 max-w-lg mx-auto mb-10">See how 38 modules coordinate to process information, from perception to reasoning to response.</p>
+      <div id="demo-brain-preview" class="mx-auto max-w-[440px] mb-8"></div>
+      <a href="demo.html" class="btn-primary">
+        View Full Demo
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M13 7l5 5-5 5M6 12h12"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ========== SPONSORSHIP PREVIEW ========== -->
+  <section id="pricing" class="py-20 lg:py-28 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <p class="text-sm font-semibold text-cyan tracking-wider uppercase mb-3">Support Open Source</p>
-        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Sponsor ELO-AGI Development</h2>
-        <p class="mt-3 text-slate-400 max-w-lg mx-auto">Open-source cognitive AI framework. Your support helps fund research and development.</p>
+        <p class="text-sm font-semibold text-cyan tracking-wider uppercase mb-3">Open Source, Community Funded</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Sponsor ELO-AGI</h2>
+        <p class="mt-3 text-slate-400 max-w-lg mx-auto">Free and open source forever. Sponsorships fund research, development, and community growth.</p>
       </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Individual -->
+        <div class="pricing-card">
+          <div class="text-sm font-semibold text-slate-400 mb-2">Individual</div>
+          <div class="flex items-baseline gap-1 mb-4">
+            <span class="text-3xl font-extrabold text-white">$10</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <ul class="space-y-3 mb-6">
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Name in README
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Early access to features
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Community Discord access
+            </li>
+          </ul>
+          <a href="pricing.html" class="btn-ghost w-full justify-center">Learn More</a>
+        </div>
+        <!-- Organization -->
+        <div class="pricing-card featured">
+          <div class="text-sm font-semibold text-purple mb-2">Organization</div>
+          <div class="flex items-baseline gap-1 mb-4">
+            <span class="text-3xl font-extrabold text-white">$50</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <ul class="space-y-3 mb-6">
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Logo on README + website
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Priority support
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Quarterly strategy calls
+            </li>
+          </ul>
+          <a href="pricing.html" class="btn-primary w-full justify-center">Get Started</a>
+        </div>
+        <!-- Research Partner -->
+        <div class="pricing-card">
+          <div class="text-sm font-semibold text-cyan mb-2">Research Partner</div>
+          <div class="flex items-baseline gap-1 mb-4">
+            <span class="text-3xl font-extrabold text-white">$200</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <ul class="space-y-3 mb-6">
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Co-development access
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Custom module development
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Dedicated support channel
+            </li>
+          </ul>
+          <a href="pricing.html" class="btn-ghost w-full justify-center">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      <div class="grid sm:grid-cols-2 gap-4">
-        <!-- PayPal -->
-        <a href="https://paypal.me/zelvi999" target="_blank" rel="noopener" class="sponsor-card flex items-start gap-4 group">
-          <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-purple/10 border border-purple/20 flex items-center justify-center">
-            <svg class="w-6 h-6 text-purple" fill="currentColor" viewBox="0 0 24 24"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.67 4.536-1.127 8.79-6.612 8.79h-2.19c-.524 0-.968.382-1.05.9L9.536 23.26a.641.641 0 0 0 .633.74h3.573c.524 0 .968-.382 1.05-.9l.852-5.398c.082-.518.526-.9 1.05-.9h.663c4.298 0 7.664-1.746 8.647-6.797.366-1.878.166-3.437-.782-4.588z"/></svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="text-white font-semibold text-sm group-hover:text-purple transition-colors">PayPal</h3>
-            <p class="text-slate-400 text-xs font-mono mt-1 truncate">paypal.me/zelvi999</p>
-          </div>
-          <svg class="w-4 h-4 text-slate-600 group-hover:text-purple transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        </a>
+  <div class="section-divider"></div>
 
-        <!-- Bank Transfer -->
-        <div class="sponsor-card flex items-start gap-4 group">
-          <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-cyan/10 border border-cyan/20 flex items-center justify-center">
-            <svg class="w-6 h-6 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+  <!-- ========== FAQ ========== -->
+  <section class="py-20 lg:py-28 reveal">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">FAQ</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
+      </div>
+      <div class="space-y-3">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h3>What is ELO-AGI and how is it different from GPT-4?</h3>
+            <svg class="faq-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="text-white font-semibold text-sm">Bank Transfer</h3>
-            <p class="text-slate-500 text-xs mt-0.5">IBAN</p>
-            <div class="flex items-center gap-2 mt-2 p-2 rounded-lg bg-white/[0.02] border border-white/5">
-              <code class="text-xs text-slate-400 font-mono flex-1">AL-C0100002334708</code>
-              <button onclick="navigator.clipboard.writeText('AL-C0100002334708');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" class="text-xs text-cyan font-semibold hover:text-white transition-colors flex-shrink-0">Copy</button>
-            </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">ELO-AGI is a neuroscience-inspired cognitive architecture with 38 specialized modules, not a single monolithic language model. Unlike GPT-4 which excels at language but lacks native causal reasoning, continual learning, and emotional processing, ELO-AGI implements these as dedicated cognitive modules that work together like brain regions. It runs entirely locally with zero API costs.</div>
           </div>
         </div>
-
-        <!-- Crypto -->
-        <div class="sponsor-card sm:col-span-2">
-          <div class="flex items-start gap-4 mb-4">
-            <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-teal/10 border border-teal/20 flex items-center justify-center">
-              <svg class="w-6 h-6 text-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/></svg>
-            </div>
-            <div>
-              <h3 class="text-white font-semibold text-sm">Cryptocurrency</h3>
-              <p class="text-slate-500 text-xs mt-0.5">Click any address to copy</p>
-            </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h3>Do I need a GPU or special hardware to run ELO-AGI?</h3>
+            <svg class="faq-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </div>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5 cursor-pointer hover:border-purple/20 transition-all group" onclick="navigator.clipboard.writeText('0x65ec5fcc684d1978cddaed29032aaeffc6248a84').then(()=>{this.querySelector('.copy-msg').style.opacity=1;setTimeout(()=>{this.querySelector('.copy-msg').style.opacity=0},1500)})">
-              <span class="text-xs font-bold text-orange-400 w-16 flex-shrink-0">BTC (BSC)</span>
-              <code class="text-xs text-slate-400 font-mono truncate flex-1">0x65ec5fcc684d1978cddaed29032aaeffc6248a84</code>
-              <span class="copy-msg text-xs text-teal font-semibold opacity-0 transition-opacity flex-shrink-0">Copied!</span>
-              <svg class="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
-            </div>
-            <div class="flex items-center gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5 cursor-pointer hover:border-cyan/20 transition-all group" onclick="navigator.clipboard.writeText('0x65ec5fcc684d1978cddaed29032aaeffc6248a84').then(()=>{this.querySelector('.copy-msg').style.opacity=1;setTimeout(()=>{this.querySelector('.copy-msg').style.opacity=0},1500)})">
-              <span class="text-xs font-bold text-blue-400 w-16 flex-shrink-0">ETH (BSC)</span>
-              <code class="text-xs text-slate-400 font-mono truncate flex-1">0x65ec5fcc684d1978cddaed29032aaeffc6248a84</code>
-              <span class="copy-msg text-xs text-teal font-semibold opacity-0 transition-opacity flex-shrink-0">Copied!</span>
-              <svg class="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
-            </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">No. ELO-AGI runs on standard hardware with Python 3.9+. A GPU is optional and only needed for large-scale distributed processing via the neuro-scale module. Most cognitive modules run efficiently on CPU, including all reasoning, memory, and decision-making systems.</div>
           </div>
         </div>
-
-        <!-- Email contact -->
-        <div class="sponsor-card sm:col-span-2 flex items-center justify-center gap-3 py-4">
-          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-          <span class="text-slate-400 text-sm">Questions? Reach out at</span>
-          <a href="mailto:elvizekaj@zedigital.tech" class="text-cyan text-sm font-mono hover:underline">elvizekaj@zedigital.tech</a>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h3>What does "neuroscience-inspired" actually mean?</h3>
+            <svg class="faq-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Each module implements algorithms grounded in neuroscience research. For example: the Global Workspace module implements Baars' Global Workspace Theory of consciousness; the Dual-Process module implements Kahneman's System 1/System 2 framework; the Predictive Coding module implements Karl Friston's Free Energy Principle. These are not metaphors -- they are computational implementations of established neuroscience theories.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h3>Is this actually AGI?</h3>
+            <svg class="faq-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">ELO-AGI is an AGI framework -- a comprehensive cognitive architecture designed to exhibit general intelligence capabilities. While no system today achieves human-level AGI, ELO-AGI addresses critical gaps identified in recent research: causal reasoning, compositional generalization, continual learning, and robustness. All 627 tests pass across these categories, demonstrating meaningful capability.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <h3>How can I contribute or get involved?</h3>
+            <svg class="faq-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">ELO-AGI is fully open source under the MIT license. You can contribute on <a href="https://github.com/ezekaj/elo-agi" target="_blank" class="text-purple hover:underline">GitHub</a>, report issues, submit pull requests, or become a sponsor. For research collaboration, check the Research Partner tier on our <a href="pricing.html" class="text-purple hover:underline">pricing page</a>. Contact: <a href="mailto:elvizekaj@zedigital.tech" class="text-cyan hover:underline">elvizekaj@zedigital.tech</a></div>
+          </div>
         </div>
       </div>
     </div>
@@ -850,1067 +469,63 @@
   <!-- ========== FOOTER ========== -->
   <footer class="py-12 border-t border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div class="flex items-center gap-4">
-          <span class="logo-gradient text-lg font-extrabold">NEURO</span>
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <a href="index.html" class="flex items-center gap-2 mb-4">
+            <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+              <circle cx="14" cy="14" r="12" stroke="url(#footLogoGrad)" stroke-width="2" fill="none"/>
+              <circle cx="14" cy="10" r="3" fill="url(#footLogoGrad)"/>
+              <path d="M8 18 Q14 22 20 18" stroke="url(#footLogoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <defs><linearGradient id="footLogoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+            </svg>
+            <span class="logo-gradient text-lg font-extrabold">ELO-AGI</span>
+          </a>
+          <p class="text-slate-500 text-sm">Neuroscience-inspired AGI framework by ZeDigital.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm mb-3">Product</h4>
+          <ul class="space-y-2">
+            <li><a href="features.html" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">Features</a></li>
+            <li><a href="demo.html" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">Demo</a></li>
+            <li><a href="pricing.html" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">Pricing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm mb-3">Resources</h4>
+          <ul class="space-y-2">
+            <li><a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">GitHub</a></li>
+            <li><a href="https://pypi.org/project/neuro-agi/" target="_blank" rel="noopener" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">PyPI</a></li>
+            <li><a href="mailto:elvizekaj@zedigital.tech" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold text-sm mb-3">Legal</h4>
+          <ul class="space-y-2">
+            <li><a href="terms.html" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">Terms of Service</a></li>
+            <li><a href="privacy.html" class="text-slate-500 text-sm hover:text-slate-300 transition-colors">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-purple/30 bg-purple/10 text-purple">MIT License</span>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-cyan/30 bg-cyan/10 text-cyan">Open Source</span>
         </div>
-        <div class="flex items-center gap-6 text-sm text-slate-500">
-          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="hover:text-slate-300 transition-colors">GitHub</a>
-          <a href="https://zedigital.tech" target="_blank" rel="noopener" class="hover:text-slate-300 transition-colors">Portfolio</a>
-          <span class="text-slate-600">Built by Z.E Digital Tech</span>
+        <div class="text-slate-600 text-sm">
+          Built by <a href="https://zedigital.tech" target="_blank" rel="noopener" class="hover:text-slate-400 transition-colors">ZeDigital</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- ========== JAVASCRIPT ========== -->
+  <script src="main.js"></script>
   <script>
-    // ---- Module Data ----
-    const modules = {
-      cognitive: [
-        { name: 'Memory', desc: 'Implements sensory, working, and long-term memory systems with hippocampal replay for consolidation and retrieval.' },
-        { name: 'Language', desc: 'Natural language understanding and generation with semantic parsing, pragmatics, and discourse modeling.' },
-        { name: 'Reasoning', desc: 'Dimensional, interactive, logical, and perceptual reasoning pathways inspired by dual-process theory.' },
-        { name: 'Creativity', desc: 'Divergent thinking, conceptual blending, and novelty generation using stochastic recombination of learned representations.' },
-        { name: 'Executive Control', desc: 'Top-down attention regulation, task switching, inhibition, and goal management for coherent behavior.' },
-        { name: 'Spatial', desc: 'Allocentric and egocentric spatial representations with cognitive mapping and mental rotation capabilities.' },
-        { name: 'Time Perception', desc: 'Embodied temporal cognition modeling interval timing, sequence learning, and temporal prediction.' },
-        { name: 'Learning', desc: 'Adaptive learning mechanisms including meta-learning, curriculum learning, and learning rate modulation.' },
-        { name: 'Embodied Cognition', desc: 'Grounding abstract concepts in simulated sensorimotor experience and body-based representations.' },
-        { name: 'Social Cognition', desc: 'Theory of mind, social inference, shared intentionality, and multi-agent social modeling.' },
-        { name: 'Consciousness', desc: 'Global workspace broadcasting, metacognitive monitoring, and self-model maintenance for reflective awareness.' },
-        { name: 'World Modeling', desc: 'Internal generative world model for prediction, simulation, counterfactual reasoning, and planning.' },
-        { name: 'Emotion', desc: 'Appraisal-based emotional processing that modulates decision-making, attention, and memory encoding.' },
-        { name: 'Attention', desc: 'Selective, sustained, and divided attention mechanisms with priority-based resource allocation.' },
-        { name: 'Perception', desc: 'Hierarchical feature extraction and integration across visual, auditory, and multimodal streams.' },
-        { name: 'Motor Control', desc: 'Motor planning, action selection, and forward-model-based movement prediction and correction.' },
-        { name: 'Decision Making', desc: 'Evidence accumulation, value-based choice, and satisficing strategies under uncertainty.' },
-        { name: 'Metacognition', desc: 'Self-monitoring of cognitive states, confidence estimation, and adaptive strategy selection.' },
-        { name: 'Planning', desc: 'Hierarchical task decomposition, forward search, and plan repair with temporal abstraction.' },
-        { name: 'Communication', desc: 'Multi-channel communication management including dialogue, gestures, and pragmatic inference.' }
-      ],
-      infrastructure: [
-        { name: 'Core System', desc: 'Unified cognitive core implementing active inference loop, free energy minimization, and module orchestration.' },
-        { name: 'LLM Integration', desc: 'Semantic bridge to language models for grounding, dialogue generation, and knowledge extraction.' },
-        { name: 'Knowledge Graph', desc: 'Structured fact store with ontological reasoning, graph-based inference, and dynamic knowledge updates.' },
-        { name: 'Sensors', desc: 'Camera, microphone, and proprioception interfaces for multimodal sensory input processing.' },
-        { name: 'Actuators', desc: 'Motor output, speech synthesis, and environment manipulation interfaces for embodied action.' },
-        { name: 'Distributed Scaling', desc: 'Coordinator-worker architecture with GPU kernel fusion and gradient aggregation for scale-out.' }
-      ],
-      support: [
-        { name: 'Benchmarking', desc: 'Comprehensive test suites for reasoning, memory, language, and planning evaluation with standardized metrics.' },
-        { name: 'Perception Pipeline', desc: 'End-to-end sensory processing pipeline with feature extraction, integration, and attention-gated filtering.' },
-        { name: 'Environment Manager', desc: 'Context and environment management for simulation, testing, and deployment configuration.' },
-        { name: 'Data Loader', desc: 'Efficient data loading, preprocessing, and batching for training and inference workloads.' },
-        { name: 'Logger', desc: 'Structured logging, telemetry, and cognitive state tracing for debugging and analysis.' }
-      ],
-      agi: [
-        { name: 'Causal Reasoning', desc: 'Counterfactual reasoning with structural causal models, intervention calculus, and causal DAG discovery.' },
-        { name: 'Compositional Abstraction', desc: 'Neuro-symbolic binding with hierarchical concept composition for ARC-style generalization tasks.' },
-        { name: 'Continual Learning', desc: 'Elastic weight consolidation, hippocampal replay, and meta-learning to prevent catastrophic forgetting.' },
-        { name: 'Robustness', desc: 'Uncertainty quantification, out-of-distribution detection, adversarial defense, and calibration.' },
-        { name: 'Planning', desc: 'Advanced planning with causal model integration, hierarchical goal decomposition, and plan verification.' },
-        { name: 'Transfer Learning', desc: 'Cross-domain knowledge transfer, domain adaptation, and few-shot generalization mechanisms.' },
-        { name: 'Integration', desc: 'Advanced inter-module integration layer coordinating all AGI capabilities into unified cognitive processing.' }
-      ]
-    };
-
-    const tierColors = {
-      cognitive: { border: 'rgba(124,58,237,0.25)', bg: 'rgba(124,58,237,0.06)', text: '#7C3AED', hoverBg: 'rgba(124,58,237,0.12)' },
-      infrastructure: { border: 'rgba(6,182,212,0.25)', bg: 'rgba(6,182,212,0.06)', text: '#06B6D4', hoverBg: 'rgba(6,182,212,0.12)' },
-      support: { border: 'rgba(139,92,246,0.25)', bg: 'rgba(139,92,246,0.06)', text: '#8B5CF6', hoverBg: 'rgba(139,92,246,0.12)' },
-      agi: { border: 'rgba(20,184,166,0.25)', bg: 'rgba(20,184,166,0.06)', text: '#14B8A6', hoverBg: 'rgba(20,184,166,0.12)' }
-    };
-
-    function renderModules() {
-      Object.keys(modules).forEach(tier => {
-        const container = document.getElementById('tab-' + tier);
-        const colors = tierColors[tier];
-        container.innerHTML = modules[tier].map((mod, i) => `
-          <div class="module-tile rounded-lg p-4" style="background:${colors.bg}; border:1px solid ${colors.border};" onclick="toggleTile(this)">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${colors.text};"></span>
-              <span class="text-sm font-semibold text-white">${mod.name}</span>
-            </div>
-            <div class="module-desc text-xs text-slate-400 leading-relaxed">${mod.desc}</div>
-          </div>
-        `).join('');
-      });
-    }
-
-    function toggleTile(el) { el.classList.toggle('expanded'); }
-
-    function switchTab(tab, btn) {
-      document.querySelectorAll('.module-grid').forEach(g => g.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('active');
-        b.style.borderColor = 'transparent';
-        b.style.background = 'rgba(255,255,255,0.03)';
-        b.style.color = '#94a3b8';
-      });
-      const target = document.getElementById('tab-' + tab);
-      target.classList.remove('hidden');
-      target.classList.remove('fade-in');
-      void target.offsetWidth;
-      target.classList.add('fade-in');
-      const colors = tierColors[tab];
-      btn.classList.add('active');
-      btn.style.borderColor = colors.border;
-      btn.style.background = colors.bg;
-      btn.style.color = '#fff';
-    }
-
-    // ---- Benchmark Table ----
-    const benchmarks = [
-      { cat: 'Causal Reasoning', score: 0.85, tests: '124/124' },
-      { cat: 'Compositional Abstraction', score: 0.74, tests: '144/144' },
-      { cat: 'Continual Learning', score: 0.72, tests: '89/89' },
-      { cat: 'Robustness', score: 0.71, tests: '192/192' },
-      { cat: 'Language Understanding', score: 0.69, tests: '78/78' },
-      { cat: 'Overall', score: 0.697, tests: '627/627' }
-    ];
-
-    function renderBenchmarks() {
-      const body = document.getElementById('benchmarkBody');
-      body.innerHTML = benchmarks.map((b, i) => {
-        const pct = (b.score * 100).toFixed(0);
-        const isLast = i === benchmarks.length - 1;
-        return `
-          <tr class="${isLast ? 'border-t border-white/5' : ''}">
-            <td class="text-slate-300 ${isLast ? 'font-bold text-white' : 'font-medium'}">${b.cat}</td>
-            <td class="font-mono text-white font-semibold">${b.score.toFixed(b.score === 0.697 ? 3 : 2)}</td>
-            <td class="hidden sm:table-cell">
-              <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
-                <div class="bar-gradient h-full rounded-full" style="width:${pct}%;"></div>
-              </div>
-            </td>
-            <td class="font-mono text-slate-400 text-sm">${b.tests}</td>
-            <td><span class="text-green-400 font-semibold text-sm">&#10003; Pass</span></td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // ---- Copy helpers ----
-    function copyPip(el) {
-      navigator.clipboard.writeText('pip install neuro-agi').then(() => {
-        const tip = el.querySelector('.tooltip');
-        if (tip) { tip.classList.add('show'); setTimeout(() => tip.classList.remove('show'), 1500); }
-      });
-    }
-
-    function copyCode(btn, code) {
-      navigator.clipboard.writeText(code).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.style.color = '#14B8A6';
-        setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
-      });
-    }
-
-    function toggleMobile() {
-      const menu = document.getElementById('mobileMenu');
-      const hamburger = document.getElementById('hamburgerIcon');
-      const close = document.getElementById('closeIcon');
-      const isHidden = menu.classList.contains('hidden');
-      menu.classList.toggle('hidden');
-      hamburger.classList.toggle('hidden', isHidden);
-      close.classList.toggle('hidden', !isHidden);
-    }
-
-    // ================================================================
-    // API CONNECTION
-    // ================================================================
-    const API_BASE = 'https://zedigital-elo-agi.fly.dev';
-    let apiConnected = false;
-    let apiChecking = false;
-
-    async function checkApiConnection() {
-      apiChecking = true;
-      const statusEl = document.getElementById('api-status');
-      statusEl.className = 'connecting';
-      statusEl.innerHTML = '<span class="status-dot"></span>Connecting...';
-      try {
-        const res = await fetch(API_BASE + '/api/health', { signal: AbortSignal.timeout(5000) });
-        if (res.ok) {
-          apiConnected = true;
-          statusEl.className = 'connected';
-          statusEl.innerHTML = '<span class="status-dot"></span>Live API';
-        } else {
-          throw new Error('Not ok');
-        }
-      } catch (e) {
-        apiConnected = false;
-        statusEl.className = 'disconnected';
-        statusEl.innerHTML = '<span class="status-dot"></span>Offline (simulated)';
-      }
-      apiChecking = false;
-    }
-
-    async function apiRepl(command) {
-      try {
-        const res = await fetch(API_BASE + '/api/repl', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command }),
-          signal: AbortSignal.timeout(15000),
-        });
-        if (!res.ok) throw new Error('API error');
-        return await res.json();
-      } catch (e) {
-        return null;
-      }
-    }
-
-    async function apiModules() {
-      try {
-        const res = await fetch(API_BASE + '/api/modules', { signal: AbortSignal.timeout(5000) });
-        if (!res.ok) throw new Error('API error');
-        return await res.json();
-      } catch (e) {
-        return null;
-      }
-    }
-
-    async function apiBenchmark() {
-      try {
-        const res = await fetch(API_BASE + '/api/benchmark', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-          signal: AbortSignal.timeout(30000),
-        });
-        if (!res.ok) throw new Error('API error');
-        return await res.json();
-      } catch (e) {
-        return null;
-      }
-    }
-
-    async function apiAnalyze(text, types) {
-      try {
-        const res = await fetch(API_BASE + '/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, analysis_types: types }),
-          signal: AbortSignal.timeout(15000),
-        });
-        if (!res.ok) throw new Error('API error');
-        return await res.json();
-      } catch (e) {
-        return null;
-      }
-    }
-
-    // ================================================================
-    // INTERACTIVE PYTHON REPL
-    // ================================================================
-    const replOutput = document.getElementById('repl-output');
-    const replInput = document.getElementById('repl-input');
-    const replPromptLabel = document.getElementById('repl-prompt-label');
-    let replHistory = [];
-    let replHistoryIdx = -1;
-    let replBusy = false;
-    let replVariables = {};
-
-    function esc(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function replAddLine(html) {
-      const div = document.createElement('div');
-      div.className = 'repl-line';
-      div.innerHTML = html;
-      replOutput.appendChild(div);
-      replOutput.scrollTop = replOutput.scrollHeight;
-    }
-
-    function replAddPromptLine(cmd) {
-      replAddLine('<span class="repl-prompt">&gt;&gt;&gt; </span><span class="repl-input-text">' + esc(cmd) + '</span>');
-    }
-
-    function replAddOutput(text, cls) {
-      cls = cls || 'repl-output-text';
-      replAddLine('<span class="' + cls + '">' + text + '</span>');
-    }
-
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-    // Module listing data
-    const allModulesTable = [
-      ['Memory','Cognitive','Sensory, working, and long-term memory systems'],
-      ['Language','Cognitive','NLU and generation with semantic parsing'],
-      ['Reasoning','Cognitive','Dimensional, logical, perceptual reasoning'],
-      ['Creativity','Cognitive','Divergent thinking and conceptual blending'],
-      ['Executive Control','Cognitive','Task switching, inhibition, goal management'],
-      ['Spatial','Cognitive','Cognitive mapping and mental rotation'],
-      ['Time Perception','Cognitive','Interval timing and temporal prediction'],
-      ['Learning','Cognitive','Meta-learning and curriculum learning'],
-      ['Embodied Cognition','Cognitive','Sensorimotor grounding of concepts'],
-      ['Social Cognition','Cognitive','Theory of mind and social inference'],
-      ['Consciousness','Cognitive','Global workspace and self-model'],
-      ['World Modeling','Cognitive','Internal generative world model'],
-      ['Emotion','Cognitive','Appraisal-based emotional processing'],
-      ['Attention','Cognitive','Selective and divided attention'],
-      ['Perception','Cognitive','Hierarchical feature extraction'],
-      ['Motor Control','Cognitive','Action selection and motor planning'],
-      ['Decision Making','Cognitive','Evidence accumulation under uncertainty'],
-      ['Metacognition','Cognitive','Self-monitoring and confidence estimation'],
-      ['Planning','Cognitive','Hierarchical task decomposition'],
-      ['Communication','Cognitive','Multi-channel dialogue management'],
-      ['Core System','Infrastructure','Active inference loop and orchestration'],
-      ['LLM Integration','Infrastructure','Semantic bridge to language models'],
-      ['Knowledge Graph','Infrastructure','Structured fact store and ontology'],
-      ['Sensors','Infrastructure','Camera, mic, proprioception interfaces'],
-      ['Actuators','Infrastructure','Motor output and speech synthesis'],
-      ['Distributed Scaling','Infrastructure','Coordinator-worker GPU architecture'],
-      ['Benchmarking','Support','Test suites for cognitive evaluation'],
-      ['Perception Pipeline','Support','End-to-end sensory processing'],
-      ['Environment Manager','Support','Simulation and deployment config'],
-      ['Data Loader','Support','Efficient data preprocessing'],
-      ['Logger','Support','Structured logging and telemetry'],
-      ['Causal Reasoning','AGI','Counterfactual reasoning with causal DAGs'],
-      ['Compositional Abstraction','AGI','Neuro-symbolic binding for ARC tasks'],
-      ['Continual Learning','AGI','EWC and hippocampal replay'],
-      ['Robustness','AGI','OOD detection and calibration'],
-      ['AGI Planning','AGI','Causal model integration for planning'],
-      ['Transfer Learning','AGI','Cross-domain knowledge transfer'],
-      ['Integration','AGI','Unified AGI capability coordination']
-    ];
-
-    // Command handlers
-    async function handleReplCommand(cmd) {
-      cmd = cmd.trim();
-      if (!cmd) return;
-
-      replHistory.unshift(cmd);
-      replHistoryIdx = -1;
-      replAddPromptLine(cmd);
-
-      // Always handle clear() and help() locally for instant response
-      if (cmd === 'clear()') {
-        replOutput.innerHTML = '';
-        return;
-      }
-
-      // Try API first if connected
-      if (apiConnected) {
-        // For certain known commands, use specialized API endpoints
-        const dpMatch = cmd.match(/^neuro_agi\.cognitive\.DualProcess\.run\(["'](.+?)["']\)$/);
-        const emMatch = cmd.match(/^neuro_agi\.cognitive\.EmotionEngine\.analyze\(["'](.+?)["']\)$/);
-
-        if (dpMatch) {
-          const text = dpMatch[1];
-          replAddOutput('Analyzing with dual-process cognition...');
-          const result = await apiAnalyze(text, ['dual_process']);
-          if (result && result.analyses && result.analyses.dual_process) {
-            const dp = result.analyses.dual_process;
-            replAddOutput(esc(`DualProcess Analysis: "${text}"\n${'─'.repeat(50)}`));
-            replAddOutput(esc(
-`System 1 (Fast / Intuitive):
-  Response time: ${dp.system1.response_time_ms}ms
-  Confidence:    ${dp.system1.confidence}
-  Assessment:    ${dp.system1.assessment}
-  Basis:         ${dp.system1.basis}
-
-System 2 (Slow / Analytical):
-  Response time: ${dp.system2.response_time_ms}ms
-  Confidence:    ${dp.system2.confidence}
-  Assessment:    ${dp.system2.assessment}
-  Basis:         ${dp.system2.basis}
-
-  Integrated:    ${dp.integration.override ? 'System 2 override' : 'System 1 sufficient'} (confidence delta: ${dp.integration.confidence_delta > 0 ? '+' : ''}${dp.integration.confidence_delta})
-  Complexity:    ${dp.integration.complexity}
-  Recommendation: ${dp.integration.recommendation}
-  Execution time: ${result.execution_time}s`));
-            return;
-          }
-          // Fall through to local simulation
-        }
-
-        if (emMatch) {
-          const text = emMatch[1];
-          replAddOutput('Running emotion analysis...');
-          const result = await apiAnalyze(text, ['emotion']);
-          if (result && result.analyses && result.analyses.emotion) {
-            const em = result.analyses.emotion;
-            replAddOutput(esc(`EmotionEngine Analysis: "${text}"\n${'─'.repeat(50)}`));
-            const spectrum = Object.entries(em.affect_spectrum);
-            let spectrumStr = spectrum.map(([name, score]) => {
-              const filled = Math.round(score * 20);
-              const empty = 20 - filled;
-              return `    ${name.padEnd(12)} ${'\u2588'.repeat(filled)}${'\u2591'.repeat(empty)}  ${score.toFixed(2)}`;
-            }).join('\n');
-            replAddOutput(esc(
-`  Primary emotion:   ${em.primary_emotion.padEnd(10)} (${em.primary_score})
-  Valence:           ${em.valence > 0 ? '+' : ''}${em.valence} (${em.valence > 0.3 ? 'positive' : em.valence < -0.3 ? 'negative' : 'neutral'})
-  Arousal:           ${em.arousal} (${em.arousal > 0.5 ? 'high' : 'low'})
-  Dominance:         ${em.dominance}
-
-  Affect spectrum:
-${spectrumStr}
-
-  Cognitive impact:
-    Memory encoding:  ${em.cognitive_impact.memory_encoding}
-    Attention bias:   ${em.cognitive_impact.attention_bias}
-    Decision weight:  ${em.cognitive_impact.decision_weight}
-  Execution time: ${result.execution_time}s`));
-            return;
-          }
-        }
-
-        // For benchmark, use the benchmark API endpoint
-        if (cmd === 'neuro_agi.run_benchmark()') {
-          replAddOutput('Running benchmarks on live API...');
-          const stages = [10,20,30,40,50,60,70,80,90,100];
-          for (const pct of stages) {
-            await sleep(100);
-            const filled = Math.round(pct / 5);
-            const empty = 20 - filled;
-            const last = replOutput.lastElementChild;
-            if (last) last.innerHTML = '<span class="repl-output-text">[' + '\u2588'.repeat(filled) + '\u2591'.repeat(empty) + '] ' + pct + '%</span>';
-          }
-          const result = await apiBenchmark();
-          if (result && result.results) {
-            const r = result.results;
-            let catStr = '';
-            if (r.categories) {
-              catStr = Object.entries(r.categories).map(([cat, data]) => {
-                const pct = (data.average_score * 100).toFixed(1);
-                return `  ${cat.padEnd(22)} ${pct}%    ${data.passed}/${data.tests}`;
-              }).join('\n');
-            }
-            replAddOutput(esc(
-`
-  Category          Score    Tests
-  ${'─'.repeat(37)}
-${catStr}
-  ${'─'.repeat(37)}
-  Overall           ${(r.overall_score * 100).toFixed(1)}%    ${r.total_tests} tests
-
-  Time elapsed: ${result.execution_time}s
-  Source: Live API (zedigital-elo-agi.fly.dev)`));
-            return;
-          }
-          // Fall through to local
-        }
-
-        // For module listing, use modules API
-        if (cmd === 'neuro_agi.list_modules()') {
-          const result = await apiModules();
-          if (result && result.modules) {
-            let header = `  ${'Module'.padEnd(26)} ${'Category'.padEnd(18)} Description`;
-            let sep = `  ${'─'.repeat(26)} ${'─'.repeat(18)} ${'─'.repeat(42)}`;
-            let rows = result.modules.map(m => `  ${m.name.padEnd(26)} ${m.category.padEnd(18)} ${m.description.substring(0, 50)}...`);
-            replAddOutput(esc(header + '\n' + sep + '\n' + rows.join('\n') + `\n\n  [${result.total} modules total] (from live API)`));
-            return;
-          }
-        }
-
-        // For general commands, try the REPL API endpoint
-        const apiResult = await apiRepl(cmd);
-        if (apiResult) {
-          if (apiResult.output) {
-            replAddOutput(esc(apiResult.output.replace(/\n$/, '')));
-          }
-          if (apiResult.error) {
-            replAddOutput('<span class="repl-error">' + esc(apiResult.error) + '</span>');
-          }
-          if (!apiResult.output && !apiResult.error) {
-            // Command executed but no output (like assignments)
-          }
-          return;
-        }
-        // If API call failed, fall through to local simulation
-      }
-
-      // ---- LOCAL SIMULATION FALLBACK ----
-
-      // help()
-      if (cmd === 'help()') {
-        replAddOutput(esc(
-`Available commands:
-${'─'.repeat(50)}
-  neuro_agi.info()                    Framework info
-  neuro_agi.__version__               Version string
-  neuro_agi.list_modules()            All 38 modules
-  neuro_agi.list_tiers()              Show 4 tiers
-  neuro_agi.cognitive.list()          Cognitive modules
-  neuro_agi.infrastructure.list()     Infrastructure modules
-  neuro_agi.support.list()            Support modules
-  neuro_agi.agi.list()                AGI modules
-  neuro_agi.cognitive.GlobalWorkspace()          Module info
-  neuro_agi.cognitive.DualProcess.run(query)     Dual process
-  neuro_agi.cognitive.EmotionEngine.analyze(t)   Emotions
-  neuro_agi.run_benchmark()           Run benchmarks
-  neuro_agi.benchmark.compare()       Compare frameworks
-  neuro_agi.architecture()            ASCII architecture
-  neuro_agi.dependencies()            Dependency tree
-  from neuro_agi.cognitive import GlobalWorkspace
-  gw = GlobalWorkspace(capacity=N)
-  gw.broadcast(msg)                   Broadcast message
-  gw.status()                         Workspace status
-  help()                              This help text
-  clear()                             Clear terminal`));
-        return;
-      }
-
-      // neuro_agi.info()
-      if (cmd === 'neuro_agi.info()') {
-        replAddOutput(esc(
-`\u2554${'═'.repeat(38)}\u2557
-\u2551   ELO-AGI Cognitive Framework v2.0  \u2551
-\u2551   38 Modules | 4 Tiers | 627 Tests \u2551
-\u2551   Type help() for available commands\u2551
-\u255A${'═'.repeat(38)}\u255D`));
-        return;
-      }
-
-      // neuro_agi.__version__
-      if (cmd === 'neuro_agi.__version__') {
-        replAddOutput('<span class="repl-string">\'2.0.0\'</span>');
-        return;
-      }
-
-      // neuro_agi.list_modules()
-      if (cmd === 'neuro_agi.list_modules()') {
-        let header = `  ${'Module'.padEnd(26)} ${'Category'.padEnd(18)} Description`;
-        let sep = `  ${'─'.repeat(26)} ${'─'.repeat(18)} ${'─'.repeat(42)}`;
-        let rows = allModulesTable.map(r => `  ${r[0].padEnd(26)} ${r[1].padEnd(18)} ${r[2]}`);
-        replAddOutput(esc(header + '\n' + sep + '\n' + rows.join('\n') + '\n\n  [38 modules total]'));
-        return;
-      }
-
-      // neuro_agi.list_tiers()
-      if (cmd === 'neuro_agi.list_tiers()') {
-        replAddOutput(esc(
-`Tier 1: Cognitive Processing   (20 modules)
-  Memory, Language, Reasoning, Creativity, Executive Control,
-  Spatial, Time Perception, Learning, Embodied Cognition,
-  Social Cognition, Consciousness, World Modeling, Emotion,
-  Attention, Perception, Motor Control, Decision Making,
-  Metacognition, Planning, Communication
-
-Tier 2: Infrastructure          (6 modules)
-  Core System, LLM Integration, Knowledge Graph,
-  Sensors, Actuators, Distributed Scaling
-
-Tier 3: Support                 (5 modules)
-  Benchmarking, Perception Pipeline, Environment Manager,
-  Data Loader, Logger
-
-Tier 4: AGI Integration         (7 modules)
-  Causal Reasoning, Compositional Abstraction,
-  Continual Learning, Robustness, Planning,
-  Transfer Learning, Integration`));
-        return;
-      }
-
-      // neuro_agi.cognitive.list()
-      if (cmd === 'neuro_agi.cognitive.list()') {
-        let items = allModulesTable.filter(r => r[1] === 'Cognitive');
-        let out = items.map((r,i) => `  ${String(i+1).padStart(2)}. ${r[0].padEnd(22)} ${r[2]}`).join('\n');
-        replAddOutput(esc(`Cognitive Processing Modules (${items.length}):\n${'─'.repeat(52)}\n${out}`));
-        return;
-      }
-
-      // neuro_agi.infrastructure.list()
-      if (cmd === 'neuro_agi.infrastructure.list()') {
-        let items = allModulesTable.filter(r => r[1] === 'Infrastructure');
-        let out = items.map((r,i) => `  ${String(i+1).padStart(2)}. ${r[0].padEnd(22)} ${r[2]}`).join('\n');
-        replAddOutput(esc(`Infrastructure Modules (${items.length}):\n${'─'.repeat(52)}\n${out}`));
-        return;
-      }
-
-      // neuro_agi.support.list()
-      if (cmd === 'neuro_agi.support.list()') {
-        let items = allModulesTable.filter(r => r[1] === 'Support');
-        let out = items.map((r,i) => `  ${String(i+1).padStart(2)}. ${r[0].padEnd(22)} ${r[2]}`).join('\n');
-        replAddOutput(esc(`Support Modules (${items.length}):\n${'─'.repeat(52)}\n${out}`));
-        return;
-      }
-
-      // neuro_agi.agi.list()
-      if (cmd === 'neuro_agi.agi.list()') {
-        let items = allModulesTable.filter(r => r[1] === 'AGI');
-        let out = items.map((r,i) => `  ${String(i+1).padStart(2)}. ${r[0].padEnd(22)} ${r[2]}`).join('\n');
-        replAddOutput(esc(`AGI Integration Modules (${items.length}):\n${'─'.repeat(52)}\n${out}`));
-        return;
-      }
-
-      // neuro_agi.cognitive.GlobalWorkspace()
-      if (cmd === 'neuro_agi.cognitive.GlobalWorkspace()') {
-        replAddOutput(esc(
-`<GlobalWorkspace module>
-  name:        GlobalWorkspace
-  version:     2.0.0
-  category:    Cognitive Processing
-  parameters:  capacity=7, threshold=0.4, decay=0.95
-  description: Global Workspace Theory implementation with
-               attention-gated broadcasting and competition
-               dynamics across cognitive modules.
-  status:      ready`));
-        return;
-      }
-
-      // neuro_agi.cognitive.DualProcess.run(...)
-      const dpMatch = cmd.match(/^neuro_agi\.cognitive\.DualProcess\.run\(["'](.+?)["']\)$/);
-      if (dpMatch) {
-        const query = dpMatch[1];
-        replAddOutput(esc(`DualProcess Analysis: "${query}"\n${'─'.repeat(50)}`));
-        await sleep(300);
-        replAddOutput(esc(
-`System 1 (Fast / Intuitive):
-  Response time: 47ms
-  Confidence:    0.72
-  Answer:        "Go with your gut feeling based on current
-                  market sentiment and recent trends."
-  Basis:         Pattern matching, emotional heuristics`));
-        await sleep(500);
-        replAddOutput(esc(
-`
-System 2 (Slow / Analytical):
-  Response time: 1,240ms
-  Confidence:    0.89
-  Answer:        "Analyze historical data, market fundamentals,
-                  risk tolerance, portfolio diversification,
-                  and macroeconomic indicators before deciding."
-  Basis:         Logical reasoning, evidence accumulation,
-                  multi-factor analysis
-
-  Integrated:    System 2 override (confidence delta: +0.17)
-  Recommendation: Defer to analytical reasoning pathway`));
-        return;
-      }
-
-      // neuro_agi.cognitive.EmotionEngine.analyze(...)
-      const emMatch = cmd.match(/^neuro_agi\.cognitive\.EmotionEngine\.analyze\(["'](.+?)["']\)$/);
-      if (emMatch) {
-        const text = emMatch[1];
-        replAddOutput(esc(`EmotionEngine Analysis: "${text}"\n${'─'.repeat(50)}`));
-        await sleep(200);
-        replAddOutput(esc(
-`  Primary emotion:   Joy        (0.92)
-  Secondary:         Excitement (0.64)
-  Valence:           +0.88 (positive)
-  Arousal:           0.71 (high)
-  Dominance:         0.65
-
-  Affect spectrum:
-    Joy         ${'█'.repeat(18)}${'░'.repeat(2)}  0.92
-    Excitement  ${'█'.repeat(13)}${'░'.repeat(7)}  0.64
-    Surprise    ${'█'.repeat(5)}${'░'.repeat(15)}  0.23
-    Anger       ${'█'.repeat(1)}${'░'.repeat(19)}  0.02
-    Sadness     ${'░'.repeat(20)}  0.01
-    Fear        ${'░'.repeat(20)}  0.01
-
-  Cognitive impact:
-    Memory encoding:  +34% (emotional boost)
-    Attention bias:   Broadened (positive valence)
-    Decision weight:  Optimistic shift (+0.12)`));
-        return;
-      }
-
-      // neuro_agi.run_benchmark()
-      if (cmd === 'neuro_agi.run_benchmark()') {
-        replAddOutput('Running benchmarks...');
-        const stages = [10,20,30,40,50,60,70,80,90,100];
-        for (const pct of stages) {
-          await sleep(150);
-          const filled = Math.round(pct / 5);
-          const empty = 20 - filled;
-          const last = replOutput.lastElementChild;
-          if (last) last.innerHTML = '<span class="repl-output-text">[' + '\u2588'.repeat(filled) + '\u2591'.repeat(empty) + '] ' + pct + '%</span>';
-        }
-        await sleep(200);
-        replAddOutput(esc(
-`
-  Category          Score    Tests
-  ${'─'.repeat(37)}
-  Cognitive         94.2%    32/34
-  Memory            91.8%    28/30
-  Language          89.5%    25/28
-  Reasoning         96.1%    35/36
-  ${'─'.repeat(37)}
-  Overall           92.9%    120/128
-
-  Time elapsed: 2.34s
-  Status: All critical benchmarks passed`));
-        return;
-      }
-
-      // neuro_agi.benchmark.compare()
-      if (cmd === 'neuro_agi.benchmark.compare()') {
-        replAddOutput(esc(
-`Framework Comparison
-${'═'.repeat(58)}
-  Capability          ELO-AGI   ACT-R   SOAR   GPT-4
-  ${'─'.repeat(54)}
-  Modules                  38     ~12     ~8    Mono
-  Causal Reasoning      0.850   0.420  0.380   0.610
-  Compositionality      0.740   0.310  0.290   0.520
-  Continual Learning    0.720   0.180  0.150   0.000
-  Robustness            0.710   0.350  0.320   0.440
-  Language              0.690   0.250  0.220   0.890
-  ${'─'.repeat(54)}
-  Overall               0.742   0.302  0.272   0.492
-  Local Execution         Yes     Yes    Yes      No
-  Open Source              MIT    Acad   Acad      No
-  Zero API Cost            Yes     Yes    Yes      No`));
-        return;
-      }
-
-      // neuro_agi.architecture()
-      if (cmd === 'neuro_agi.architecture()') {
-        replAddOutput(esc(
-`
-  ┌─────────────────────────────────────────────┐
-  │           ELO-AGI Architecture v2.0         │
-  └─────────────────────────────────────────────┘
-
-  ┌─────────────────────────────────────────────┐
-  │  Tier 1: Cognitive Processing (20 modules)  │
-  │  ┌────────┐ ┌────────┐ ┌────────┐ ┌──────┐ │
-  │  │ Memory │ │Language │ │Reason  │ │ ...  │ │
-  │  └───┬────┘ └───┬────┘ └───┬────┘ └──┬───┘ │
-  │      └──────────┴──────────┴─────────┘      │
-  │                     │                       │
-  │          ┌──────────┴──────────┐            │
-  │          │  Global Workspace   │            │
-  │          │  (Attention + Bus)  │            │
-  │          └──────────┬──────────┘            │
-  └─────────────────────┼───────────────────────┘
-                        │
-  ┌─────────────────────┼───────────────────────┐
-  │  Tier 2: Infrastructure (6 modules)         │
-  │  ┌──────┐ ┌─────┐ ┌──────────┐ ┌────────┐  │
-  │  │ Core │ │ LLM │ │Knowledge │ │Sensors │  │
-  │  └──────┘ └─────┘ └──────────┘ └────────┘  │
-  └─────────────────────┼───────────────────────┘
-                        │
-  ┌─────────────────────┼───────────────────────┐
-  │  Tier 3: Support (5 modules)                │
-  │  ┌─────────┐ ┌──────────┐ ┌──────────────┐  │
-  │  │Benchmark│ │Perception│ │  Env Manager  │  │
-  │  └─────────┘ └──────────┘ └──────────────┘  │
-  └─────────────────────┼───────────────────────┘
-                        │
-  ┌─────────────────────┼───────────────────────┐
-  │  Tier 4: AGI Integration (7 modules)        │
-  │  ┌────────┐ ┌──────────┐ ┌───────────────┐  │
-  │  │ Causal │ │ Abstract │ │   Continual   │  │
-  │  └────────┘ └──────────┘ └───────────────┘  │
-  └─────────────────────────────────────────────┘`));
-        return;
-      }
-
-      // neuro_agi.dependencies()
-      if (cmd === 'neuro_agi.dependencies()') {
-        replAddOutput(esc(
-`neuro_agi v2.0.0
-├── cognitive/
-│   ├── GlobalWorkspace v2.0.0
-│   │   ├── AttentionManager
-│   │   └── BroadcastBus
-│   ├── DualProcess v2.0.0
-│   │   ├── System1Engine (fast)
-│   │   └── System2Engine (analytical)
-│   ├── EmotionEngine v2.0.0
-│   │   ├── AppraisalModel
-│   │   └── AffectSpectrum
-│   ├── Memory v2.0.0
-│   │   ├── SensoryBuffer
-│   │   ├── WorkingMemory
-│   │   └── LongTermStore
-│   └── ... (16 more)
-├── infrastructure/
-│   ├── CoreSystem v2.0.0
-│   │   ├── ActiveInferenceLoop
-│   │   └── ModuleOrchestrator
-│   ├── LLMBridge v2.0.0
-│   └── ... (4 more)
-├── support/
-│   ├── BenchmarkSuite v2.0.0
-│   └── ... (4 more)
-└── agi/
-    ├── CausalReasoner v2.0.0
-    │   ├── StructuralCausalModel
-    │   └── InterventionCalculus
-    └── ... (6 more)
-
-Total: 38 modules, 94 subcomponents`));
-        return;
-      }
-
-      // from neuro_agi.cognitive import GlobalWorkspace
-      if (cmd === 'from neuro_agi.cognitive import GlobalWorkspace') {
-        replVariables['GlobalWorkspace'] = true;
-        replAddOutput('<span class="repl-comment"># Module loaded successfully</span>');
-        return;
-      }
-
-      // gw = GlobalWorkspace(capacity=N)
-      const gwInit = cmd.match(/^gw\s*=\s*GlobalWorkspace\(capacity=(\d+)\)$/);
-      if (gwInit) {
-        if (!replVariables['GlobalWorkspace']) {
-          replAddOutput('<span class="repl-error">NameError: name \'GlobalWorkspace\' is not defined</span>');
-          return;
-        }
-        replVariables['gw'] = { capacity: parseInt(gwInit[1]) };
-        replAddOutput('<span class="repl-comment"># GlobalWorkspace initialized with capacity=' + gwInit[1] + '</span>');
-        return;
-      }
-
-      // gw.broadcast(...)
-      const gwBroadcast = cmd.match(/^gw\.broadcast\(["'](.+?)["']\)$/);
-      if (gwBroadcast) {
-        if (!replVariables['gw']) {
-          replAddOutput('<span class="repl-error">NameError: name \'gw\' is not defined</span>');
-          return;
-        }
-        const msg = gwBroadcast[1];
-        replAddOutput(esc(`Broadcasting: "${msg}"`));
-        await sleep(200);
-        replAddOutput(esc(
-`  -> Memory:           Received, encoding to working memory
-  -> Language:         Received, parsing semantic content
-  -> Reasoning:        Received, activating inference engine
-  -> Emotion:          Received, running appraisal
-  -> Executive Control: Received, updating task context
-  -> Attention:        Received, adjusting priority map
-
-  Broadcast complete: 6/20 modules responded (312ms)
-  Working memory load: ${replVariables['gw'].capacity > 5 ? '3' : '2'}/${replVariables['gw'].capacity} slots`));
-        return;
-      }
-
-      // gw.status()
-      if (cmd === 'gw.status()') {
-        if (!replVariables['gw']) {
-          replAddOutput('<span class="repl-error">NameError: name \'gw\' is not defined</span>');
-          return;
-        }
-        replAddOutput(esc(
-`GlobalWorkspace Status
-${'─'.repeat(36)}
-  State:           Active
-  Capacity:        ${replVariables['gw'].capacity} slots
-  Occupied:        2/${replVariables['gw'].capacity}
-  Active modules:  20/20
-  Broadcast queue: 0 pending
-  Attention focus: Language (0.82)
-  Competition:     3 candidates
-  Uptime:          ${Math.floor(Math.random() * 50 + 10)}s`));
-        return;
-      }
-
-      // import neuro_agi
-      if (cmd === 'import neuro_agi') {
-        replAddOutput('<span class="repl-comment"># Module imported successfully</span>');
-        return;
-      }
-
-      // type(neuro_agi)
-      if (cmd === 'type(neuro_agi)') {
-        replAddOutput("&lt;class 'module'&gt;");
-        return;
-      }
-
-      // dir(neuro_agi)
-      if (cmd === 'dir(neuro_agi)') {
-        replAddOutput(esc(
-`['__builtins__', '__doc__', '__file__', '__loader__', '__name__',
- '__package__', '__path__', '__spec__', '__version__', 'agi',
- 'architecture', 'benchmark', 'cognitive', 'dependencies', 'info',
- 'infrastructure', 'list_modules', 'list_tiers', 'run_benchmark',
- 'support']`));
-        return;
-      }
-
-      // print("...")
-      const printMatch = cmd.match(/^print\(["'](.*)["']\)$/);
-      if (printMatch) {
-        replAddOutput(esc(printMatch[1]));
-        return;
-      }
-
-      // print(...)
-      const printExprMatch = cmd.match(/^print\((.+)\)$/);
-      if (printExprMatch) {
-        const expr = printExprMatch[1].trim();
-        try {
-          const result = Function('"use strict"; return (' + expr + ')')();
-          replAddOutput(esc(String(result)));
-        } catch(e) {
-          replAddOutput(esc(String(expr)));
-        }
-        return;
-      }
-
-      // Simple math expressions
-      const mathMatch = cmd.match(/^[\d\s+\-*/%().]+$/);
-      if (mathMatch) {
-        try {
-          const result = Function('"use strict"; return (' + cmd + ')')();
-          replAddOutput('<span class="repl-number">' + esc(String(result)) + '</span>');
-        } catch(e) {
-          replAddOutput('<span class="repl-error">SyntaxError: invalid syntax</span>');
-        }
-        return;
-      }
-
-      // List comprehension
-      const listCompMatch = cmd.match(/^\[(.+)\s+for\s+(\w+)\s+in\s+range\((\d+)\)\]$/);
-      if (listCompMatch) {
-        try {
-          const expr = listCompMatch[1];
-          const varName = listCompMatch[2];
-          const limit = parseInt(listCompMatch[3]);
-          const results = [];
-          for (let i = 0; i < limit; i++) {
-            const val = Function('"use strict"; const ' + varName + '=' + i + '; return (' + expr.replace(/\*\*/g, '**') + ')')();
-            results.push(val);
-          }
-          replAddOutput('<span class="repl-output-text">[' + results.join(', ') + ']</span>');
-        } catch(e) {
-          replAddOutput('<span class="repl-error">SyntaxError: invalid syntax</span>');
-        }
-        return;
-      }
-
-      // String literal
-      if ((cmd.startsWith("'") && cmd.endsWith("'")) || (cmd.startsWith('"') && cmd.endsWith('"'))) {
-        replAddOutput('<span class="repl-string">' + esc(cmd) + '</span>');
-        return;
-      }
-
-      // True, False, None
-      if (cmd === 'True' || cmd === 'False' || cmd === 'None') {
-        replAddOutput('<span class="repl-keyword">' + esc(cmd) + '</span>');
-        return;
-      }
-
-      // Catch-all: NameError
-      if (cmd.match(/^[a-zA-Z_]/) && !cmd.includes('=') && !cmd.includes('(')) {
-        replAddOutput('<span class="repl-error">NameError: name \'' + esc(cmd) + '\' is not defined</span>');
-        return;
-      }
-
-      // Variable assignment
-      if (cmd.match(/^\w+\s*=\s*.+$/) && !cmd.includes('GlobalWorkspace')) {
-        replAddOutput('<span class="repl-comment"># assigned</span>');
-        return;
-      }
-
-      // Fallback: SyntaxError or NameError
-      if (cmd.includes('(')) {
-        const fnName = cmd.split('(')[0].trim();
-        replAddOutput('<span class="repl-error">NameError: name \'' + esc(fnName) + '\' is not defined</span>');
-      } else {
-        replAddOutput('<span class="repl-error">SyntaxError: invalid syntax</span>');
-      }
-    }
-
-    // Quick command buttons
-    function replQuickCmd(cmd) {
-      if (replBusy) return;
-      replInput.value = '';
-      executeReplCommand(cmd);
-      replInput.focus();
-    }
-
-    async function executeReplCommand(cmd) {
-      replBusy = true;
-      replInput.disabled = true;
-      replInput.style.opacity = '0.5';
-      try {
-        await handleReplCommand(cmd);
-      } catch(e) {
-        replAddOutput('<span class="repl-error">Error: ' + esc(e.message) + '</span>');
-      }
-      replBusy = false;
-      replInput.disabled = false;
-      replInput.style.opacity = '1';
-      replInput.focus();
-      replOutput.scrollTop = replOutput.scrollHeight;
-    }
-
-    // REPL input handling
-    replInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const cmd = replInput.value;
-        replInput.value = '';
-        executeReplCommand(cmd);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (replHistory.length > 0) {
-          replHistoryIdx = Math.min(replHistoryIdx + 1, replHistory.length - 1);
-          replInput.value = replHistory[replHistoryIdx];
-          setTimeout(() => replInput.setSelectionRange(replInput.value.length, replInput.value.length), 0);
-        }
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (replHistoryIdx > 0) {
-          replHistoryIdx--;
-          replInput.value = replHistory[replHistoryIdx];
-        } else {
-          replHistoryIdx = -1;
-          replInput.value = '';
-        }
-      } else if (e.key === 'l' && e.ctrlKey) {
-        e.preventDefault();
-        replOutput.innerHTML = '';
-      }
-    });
-
-    function replClear() {
-      replOutput.innerHTML = '';
-      replInput.focus();
-    }
-
-    // Auto-run welcome script
-    async function replWelcome() {
-      // Check API connection first
-      await checkApiConnection();
-
-      await sleep(300);
-      replAddPromptLine('import neuro_agi');
-      await sleep(200);
-
-      if (apiConnected) {
-        replAddOutput('<span class="repl-comment"># Connected to live API at zedigital-elo-agi.fly.dev</span>');
-      } else {
-        replAddOutput('<span class="repl-comment"># Running in offline simulation mode</span>');
-      }
-
-      await sleep(200);
-      replAddPromptLine('neuro_agi.__version__');
-      await sleep(150);
-      replAddOutput('<span class="repl-string">\'2.0.0\'</span>');
-      await sleep(200);
-      replAddPromptLine('neuro_agi.info()');
-      await sleep(150);
-      replAddOutput(esc(
-`\u2554${'═'.repeat(38)}\u2557
-\u2551   ELO-AGI Cognitive Framework v2.0  \u2551
-\u2551   38 Modules | 4 Tiers | 627 Tests \u2551
-\u2551   Type help() for available commands\u2551
-\u255A${'═'.repeat(38)}\u255D`));
-      replOutput.scrollTop = replOutput.scrollHeight;
-      replInput.focus();
-    }
-
-    // Focus REPL when clicking output area
-    replOutput.addEventListener('click', () => replInput.focus());
-
-    // ---- Init ----
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       renderModules();
-      renderBenchmarks();
-      replWelcome();
+      createBrainSVG('hero-brain', { size: 380 });
+      animateBrainSequence('hero-brain', 4000);
+      createBrainSVG('demo-brain-preview', { size: 440 });
+      animateBrainSequence('demo-brain-preview', 5000);
     });
   </script>
 </body>

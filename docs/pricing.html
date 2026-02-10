@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sponsorship & Pricing -- ELO-AGI (NEURO)</title>
+  <meta name="description" content="Support ELO-AGI development. Free and open source forever. Sponsorship tiers for individuals, organizations, and research partners.">
+  <meta name="theme-color" content="#7C3AED">
+  <meta property="og:title" content="Sponsor ELO-AGI -- Support Open Source AGI Research">
+  <meta property="og:description" content="Free and open source. Sponsor tiers: Individual ($10/mo), Organization ($50/mo), Research Partner ($200/mo).">
+  <meta property="og:type" content="website">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { base: '#0B0D17', surface: '#111327', surfaceLight: '#191C33', purple: '#7C3AED', violet: '#8B5CF6', cyan: '#06B6D4', teal: '#14B8A6' }, fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-base min-h-screen">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background: rgba(11,13,23,0.92); backdrop-filter: blur(16px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="2" fill="none"/><circle cx="14" cy="10" r="3" fill="url(#logoGrad)"/><path d="M8 18 Q14 22 20 18" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs></svg>
+          <span class="logo-gradient text-xl font-extrabold tracking-tight">ELO-AGI</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="features.html" class="nav-link text-sm font-medium">Features</a>
+          <a href="demo.html" class="nav-link text-sm font-medium">Demo</a>
+          <a href="pricing.html" class="nav-link active text-sm font-medium">Pricing</a>
+          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="nav-link text-sm font-medium">GitHub</a>
+        </div>
+        <div class="hidden md:flex items-center gap-3">
+          <a href="demo.html" class="btn-primary text-sm py-2 px-4">Get Started</a>
+        </div>
+        <button class="md:hidden p-2 rounded-lg hover:bg-white/5" onclick="toggleMobile()" aria-label="Toggle menu">
+          <svg id="hamburgerIcon" class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="closeIcon" class="w-6 h-6 text-slate-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden border-t border-white/5 bg-base/95 backdrop-blur-lg">
+      <div class="px-4 py-4 space-y-3">
+        <a href="features.html" class="block text-sm text-slate-300 hover:text-white py-2">Features</a>
+        <a href="demo.html" class="block text-sm text-slate-300 hover:text-white py-2">Demo</a>
+        <a href="pricing.html" class="block text-sm text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="https://github.com/ezekaj/elo-agi" target="_blank" class="block text-sm text-slate-300 hover:text-white py-2">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero-bg grid-bg pt-28 pb-16 lg:pt-36 lg:pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan/30 bg-cyan/10 mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan"></span>
+        <span class="text-xs font-semibold text-cyan tracking-wide">Free & Open Source Forever</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-white mb-6">
+        Free to Use.<br><span class="logo-gradient">Sponsor to Sustain.</span>
+      </h1>
+      <p class="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        ELO-AGI is 100% free and open source under MIT license. Every feature, every module, zero cost. Sponsorships fund continued research, new modules, and community infrastructure.
+      </p>
+    </div>
+  </section>
+
+  <!-- WHAT'S FREE -->
+  <section class="py-16 reveal">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <h2 class="text-2xl font-bold text-white">Everything Included Free</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card text-center p-6">
+          <div class="w-12 h-12 mx-auto rounded-xl bg-purple/10 border border-purple/20 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">38 Modules</h3>
+          <p class="text-slate-500 text-xs">All cognitive, infrastructure, and support modules</p>
+        </div>
+        <div class="card text-center p-6">
+          <div class="w-12 h-12 mx-auto rounded-xl bg-cyan/10 border border-cyan/20 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">Local Execution</h3>
+          <p class="text-slate-500 text-xs">Runs entirely on your hardware, no cloud needed</p>
+        </div>
+        <div class="card text-center p-6">
+          <div class="w-12 h-12 mx-auto rounded-xl bg-teal/10 border border-teal/20 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">Full Source Code</h3>
+          <p class="text-slate-500 text-xs">MIT license, fork, modify, distribute freely</p>
+        </div>
+        <div class="card text-center p-6">
+          <div class="w-12 h-12 mx-auto rounded-xl bg-violet/10 border border-violet/20 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-violet" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">627 Tests</h3>
+          <p class="text-slate-500 text-xs">Full benchmark suite and evaluation tools</p>
+        </div>
+        <div class="card text-center p-6">
+          <div class="w-12 h-12 mx-auto rounded-xl bg-purple/10 border border-purple/20 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">Documentation</h3>
+          <p class="text-slate-500 text-xs">Full API docs and architecture guides</p>
+        </div>
+        <div class="card text-center p-6">
+          <div class="w-12 h-12 mx-auto rounded-xl bg-cyan/10 border border-cyan/20 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">Updates Forever</h3>
+          <p class="text-slate-500 text-xs">Continuous improvements and new modules</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- PRICING TIERS -->
+  <section class="py-20 lg:py-28 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Sponsorship Tiers</p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Choose Your Level</h2>
+        <p class="mt-3 text-slate-400 max-w-lg mx-auto">Your sponsorship directly funds AGI research, new module development, and open-source infrastructure.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Individual -->
+        <div class="pricing-card">
+          <div class="text-sm font-semibold text-slate-400 mb-2">Individual</div>
+          <div class="flex items-baseline gap-1 mb-6">
+            <span class="text-4xl font-extrabold text-white">$10</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <p class="text-slate-500 text-sm mb-6">Perfect for individual developers and researchers who want to support open-source AGI research.</p>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Name listed in project README
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Early access to new features
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Private community Discord channel
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Sponsor badge on GitHub
+            </li>
+          </ul>
+          <a href="https://paypal.me/zelvi999" target="_blank" rel="noopener" class="btn-ghost w-full justify-center">Sponsor via PayPal</a>
+        </div>
+
+        <!-- Organization -->
+        <div class="pricing-card featured">
+          <div class="text-sm font-semibold text-purple mb-2">Organization</div>
+          <div class="flex items-baseline gap-1 mb-6">
+            <span class="text-4xl font-extrabold text-white">$50</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <p class="text-slate-500 text-sm mb-6">For teams and companies that rely on ELO-AGI and want visibility plus priority support.</p>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Logo on README + website
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Priority issue resolution
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Quarterly strategy calls
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Private support channel
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              All Individual benefits
+            </li>
+          </ul>
+          <a href="https://paypal.me/zelvi999" target="_blank" rel="noopener" class="btn-primary w-full justify-center">Become a Sponsor</a>
+        </div>
+
+        <!-- Research Partner -->
+        <div class="pricing-card">
+          <div class="text-sm font-semibold text-cyan mb-2">Research Partner</div>
+          <div class="flex items-baseline gap-1 mb-6">
+            <span class="text-4xl font-extrabold text-white">$200</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <p class="text-slate-500 text-sm mb-6">For research labs and institutions wanting deep collaboration on cognitive architecture research.</p>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Co-development access
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Custom module development
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Academic collaboration on papers
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Dedicated support channel
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Monthly roadmap input
+            </li>
+            <li class="flex items-start gap-2 text-sm text-slate-400">
+              <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              All Organization benefits
+            </li>
+          </ul>
+          <a href="mailto:elvizekaj@zedigital.tech?subject=Research Partnership — ELO-AGI" class="btn-secondary w-full justify-center">Contact Us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- WHY SPONSOR -->
+  <section class="py-20 lg:py-28 reveal">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold text-white">Why Sponsor?</h2>
+        <p class="mt-3 text-slate-400">Your sponsorship directly impacts AGI research and open-source AI.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <h3 class="text-white font-bold mb-2">Fund Research</h3>
+          <p class="text-slate-400 text-sm">Sponsorships fund the development of new cognitive modules, benchmark evaluations, and research publications advancing the field of artificial general intelligence.</p>
+        </div>
+        <div class="card p-6">
+          <h3 class="text-white font-bold mb-2">Keep It Open</h3>
+          <p class="text-slate-400 text-sm">Your support ensures ELO-AGI remains free and open source under MIT license. No features behind paywalls, ever. Community-funded means community-owned.</p>
+        </div>
+        <div class="card p-6">
+          <h3 class="text-white font-bold mb-2">Shape the Roadmap</h3>
+          <p class="text-slate-400 text-sm">Organization and Research Partner sponsors get direct input on the development roadmap, ensuring the framework evolves to meet real-world needs.</p>
+        </div>
+        <div class="card p-6">
+          <h3 class="text-white font-bold mb-2">Build Community</h3>
+          <p class="text-slate-400 text-sm">Sponsorships fund community infrastructure: Discord servers, documentation, tutorials, and events that grow the cognitive AI ecosystem.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- PAYMENT METHODS -->
+  <section class="py-20 lg:py-28 reveal">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Payment Methods</p>
+        <h2 class="text-3xl font-extrabold text-white">How to Pay</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <!-- PayPal -->
+        <a href="https://paypal.me/zelvi999" target="_blank" rel="noopener" class="sponsor-card flex items-start gap-4 group">
+          <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-purple/10 border border-purple/20 flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple" fill="currentColor" viewBox="0 0 24 24"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.67 4.536-1.127 8.79-6.612 8.79h-2.19c-.524 0-.968.382-1.05.9L9.536 23.26a.641.641 0 0 0 .633.74h3.573c.524 0 .968-.382 1.05-.9l.852-5.398c.082-.518.526-.9 1.05-.9h.663c4.298 0 7.664-1.746 8.647-6.797.366-1.878.166-3.437-.782-4.588z"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-white font-semibold text-sm group-hover:text-purple transition-colors">PayPal</h3>
+            <p class="text-slate-400 text-xs font-mono mt-1 truncate">paypal.me/zelvi999</p>
+          </div>
+          <svg class="w-4 h-4 text-slate-600 group-hover:text-purple transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+
+        <!-- Bank Transfer -->
+        <div class="sponsor-card flex items-start gap-4">
+          <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-cyan/10 border border-cyan/20 flex items-center justify-center">
+            <svg class="w-6 h-6 text-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-white font-semibold text-sm">Bank Transfer (IBAN)</h3>
+            <div class="flex items-center gap-2 mt-2 p-2 rounded-lg bg-white/[0.02] border border-white/5">
+              <code class="text-xs text-slate-400 font-mono flex-1">AL-C0100002334708</code>
+              <button onclick="navigator.clipboard.writeText('AL-C0100002334708');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" class="text-xs text-cyan font-semibold hover:text-white transition-colors flex-shrink-0">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crypto -->
+        <div class="sponsor-card sm:col-span-2">
+          <div class="flex items-start gap-4 mb-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-teal/10 border border-teal/20 flex items-center justify-center">
+              <svg class="w-6 h-6 text-teal" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-white font-semibold text-sm">Cryptocurrency (BSC Network)</h3>
+              <p class="text-slate-500 text-xs mt-0.5">Click to copy the wallet address</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5 cursor-pointer hover:border-purple/20 transition-all group" onclick="navigator.clipboard.writeText('0x65ec5fcc684d1978cddaed29032aaeffc6248a84').then(()=>{this.querySelector('.copy-msg').style.opacity=1;setTimeout(()=>{this.querySelector('.copy-msg').style.opacity=0},1500)})">
+            <span class="text-xs font-bold text-teal w-16 flex-shrink-0">BSC</span>
+            <code class="text-xs text-slate-400 font-mono truncate flex-1">0x65ec5fcc684d1978cddaed29032aaeffc6248a84</code>
+            <span class="copy-msg text-xs text-teal font-semibold opacity-0 transition-opacity flex-shrink-0">Copied!</span>
+            <svg class="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="sponsor-card sm:col-span-2 flex items-center justify-center gap-3 py-4">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span class="text-slate-400 text-sm">Questions about sponsorship?</span>
+          <a href="mailto:elvizekaj@zedigital.tech" class="text-cyan text-sm font-mono hover:underline">elvizekaj@zedigital.tech</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="logo-gradient text-lg font-extrabold">ELO-AGI</a>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-purple/30 bg-purple/10 text-purple">MIT License</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+          <a href="index.html" class="hover:text-slate-300 transition-colors">Home</a>
+          <a href="features.html" class="hover:text-slate-300 transition-colors">Features</a>
+          <a href="terms.html" class="hover:text-slate-300 transition-colors">Terms</a>
+          <a href="privacy.html" class="hover:text-slate-300 transition-colors">Privacy</a>
+          <span class="text-slate-600">Built by <a href="https://zedigital.tech" target="_blank" class="hover:text-slate-400">ZeDigital</a></span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service -- ELO-AGI (NEURO)</title>
+  <meta name="description" content="Terms of Service for ELO-AGI (NEURO) neuroscience-inspired AGI framework.">
+  <meta name="theme-color" content="#7C3AED">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { base: '#0B0D17', surface: '#111327', surfaceLight: '#191C33', purple: '#7C3AED', violet: '#8B5CF6', cyan: '#06B6D4', teal: '#14B8A6' }, fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-base min-h-screen">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background: rgba(11,13,23,0.92); backdrop-filter: blur(16px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="2" fill="none"/><circle cx="14" cy="10" r="3" fill="url(#logoGrad)"/><path d="M8 18 Q14 22 20 18" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs></svg>
+          <span class="logo-gradient text-xl font-extrabold tracking-tight">ELO-AGI</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="features.html" class="nav-link text-sm font-medium">Features</a>
+          <a href="demo.html" class="nav-link text-sm font-medium">Demo</a>
+          <a href="pricing.html" class="nav-link text-sm font-medium">Pricing</a>
+          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="nav-link text-sm font-medium">GitHub</a>
+        </div>
+        <div class="hidden md:flex items-center gap-3">
+          <a href="demo.html" class="btn-primary text-sm py-2 px-4">Get Started</a>
+        </div>
+        <button class="md:hidden p-2 rounded-lg hover:bg-white/5" onclick="toggleMobile()" aria-label="Toggle menu">
+          <svg id="hamburgerIcon" class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="closeIcon" class="w-6 h-6 text-slate-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden border-t border-white/5 bg-base/95 backdrop-blur-lg">
+      <div class="px-4 py-4 space-y-3">
+        <a href="features.html" class="block text-sm text-slate-300 hover:text-white py-2">Features</a>
+        <a href="demo.html" class="block text-sm text-slate-300 hover:text-white py-2">Demo</a>
+        <a href="pricing.html" class="block text-sm text-slate-300 hover:text-white py-2">Pricing</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <section class="pt-28 pb-20 lg:pt-36 lg:pb-28">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl font-extrabold text-white mb-2">Terms of Service</h1>
+      <p class="text-slate-500 text-sm mb-8">Last updated: February 2026</p>
+
+      <div class="legal-content">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing or using the ELO-AGI (NEURO) framework, website, or associated services (collectively, the "Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+        <h2>2. Description of Service</h2>
+        <p>ELO-AGI (NEURO) is an open-source neuroscience-inspired AGI framework distributed under the MIT License. The Service includes the software framework, documentation, website, interactive demos, and sponsorship programs operated by ZeDigital ("we", "us", "our").</p>
+
+        <h2>3. MIT License</h2>
+        <p>The ELO-AGI software is released under the MIT License. You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the conditions of the MIT License. The full license text is available in the project repository.</p>
+
+        <h2>4. Use of the Website</h2>
+        <p>You may use the website and interactive demos for personal, educational, or commercial purposes. You agree not to:</p>
+        <ul>
+          <li>Attempt to disrupt or compromise the website or API services</li>
+          <li>Use automated tools to scrape or overload the service</li>
+          <li>Misrepresent your identity or affiliation</li>
+          <li>Use the service for any unlawful purpose</li>
+        </ul>
+
+        <h2>5. Sponsorship & Payments</h2>
+        <p>Sponsorship payments are voluntary contributions to support development. Payments are processed through PayPal, bank transfer (IBAN), or cryptocurrency. Sponsorship benefits are provided as described on the pricing page and may be modified with reasonable notice. Payments are non-refundable except at our discretion.</p>
+
+        <h2>6. Intellectual Property</h2>
+        <p>The ELO-AGI software is open source under MIT License. The website design, branding, and non-code content are copyright ZeDigital. The "ELO-AGI" and "NEURO" names and associated logos are trademarks of ZeDigital.</p>
+
+        <h2>7. Disclaimer of Warranties</h2>
+        <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR SUITABLE FOR ANY PARTICULAR PURPOSE. USE AT YOUR OWN RISK.</p>
+
+        <h2>8. Limitation of Liability</h2>
+        <p>IN NO EVENT SHALL ZEDIGITAL BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE, WHETHER BASED ON WARRANTY, CONTRACT, TORT, OR ANY OTHER LEGAL THEORY.</p>
+
+        <h2>9. Changes to Terms</h2>
+        <p>We may update these Terms at any time. Changes will be posted on this page with an updated date. Continued use of the Service after changes constitutes acceptance of the new Terms.</p>
+
+        <h2>10. Contact</h2>
+        <p>For questions about these Terms, contact us at <a href="mailto:elvizekaj@zedigital.tech">elvizekaj@zedigital.tech</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="logo-gradient text-lg font-extrabold">ELO-AGI</a>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+          <a href="index.html" class="hover:text-slate-300 transition-colors">Home</a>
+          <a href="privacy.html" class="hover:text-slate-300 transition-colors">Privacy</a>
+          <span class="text-slate-600">Built by <a href="https://zedigital.tech" target="_blank" class="hover:text-slate-400">ZeDigital</a></span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

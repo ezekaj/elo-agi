@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy -- ELO-AGI (NEURO)</title>
+  <meta name="description" content="Privacy Policy for ELO-AGI (NEURO) neuroscience-inspired AGI framework website and services.">
+  <meta name="theme-color" content="#7C3AED">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { base: '#0B0D17', surface: '#111327', surfaceLight: '#191C33', purple: '#7C3AED', violet: '#8B5CF6', cyan: '#06B6D4', teal: '#14B8A6' }, fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-base min-h-screen">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background: rgba(11,13,23,0.92); backdrop-filter: blur(16px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="2" fill="none"/><circle cx="14" cy="10" r="3" fill="url(#logoGrad)"/><path d="M8 18 Q14 22 20 18" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs></svg>
+          <span class="logo-gradient text-xl font-extrabold tracking-tight">ELO-AGI</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="features.html" class="nav-link text-sm font-medium">Features</a>
+          <a href="demo.html" class="nav-link text-sm font-medium">Demo</a>
+          <a href="pricing.html" class="nav-link text-sm font-medium">Pricing</a>
+          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="nav-link text-sm font-medium">GitHub</a>
+        </div>
+        <div class="hidden md:flex items-center gap-3">
+          <a href="demo.html" class="btn-primary text-sm py-2 px-4">Get Started</a>
+        </div>
+        <button class="md:hidden p-2 rounded-lg hover:bg-white/5" onclick="toggleMobile()" aria-label="Toggle menu">
+          <svg id="hamburgerIcon" class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="closeIcon" class="w-6 h-6 text-slate-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden border-t border-white/5 bg-base/95 backdrop-blur-lg">
+      <div class="px-4 py-4 space-y-3">
+        <a href="features.html" class="block text-sm text-slate-300 hover:text-white py-2">Features</a>
+        <a href="demo.html" class="block text-sm text-slate-300 hover:text-white py-2">Demo</a>
+        <a href="pricing.html" class="block text-sm text-slate-300 hover:text-white py-2">Pricing</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <section class="pt-28 pb-20 lg:pt-36 lg:pb-28">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl font-extrabold text-white mb-2">Privacy Policy</h1>
+      <p class="text-slate-500 text-sm mb-8">Last updated: February 2026</p>
+
+      <div class="legal-content">
+        <h2>1. Introduction</h2>
+        <p>ZeDigital ("we", "us", "our") operates the ELO-AGI (NEURO) website and associated services. This Privacy Policy explains how we collect, use, and protect your information when you visit our website or use our services.</p>
+
+        <h2>2. Information We Collect</h2>
+        <h3>Information You Provide</h3>
+        <ul>
+          <li>Email address (when contacting us or subscribing to updates)</li>
+          <li>Payment information (processed by PayPal or your bank; we do not store payment details)</li>
+          <li>Name and organization (for sponsor listings)</li>
+        </ul>
+
+        <h3>Automatically Collected Information</h3>
+        <ul>
+          <li>Browser type and version</li>
+          <li>Operating system</li>
+          <li>Pages visited and time spent</li>
+          <li>Referring website</li>
+          <li>IP address (anonymized where possible)</li>
+        </ul>
+
+        <h3>Interactive Demo Data</h3>
+        <p>Commands entered in the interactive REPL demo may be sent to our API server for processing. These commands are not stored or logged beyond the immediate processing session. No personal data is extracted from demo interactions.</p>
+
+        <h2>3. How We Use Information</h2>
+        <p>We use collected information to:</p>
+        <ul>
+          <li>Provide and maintain the website and services</li>
+          <li>Process sponsorship payments</li>
+          <li>Display sponsor names/logos as agreed</li>
+          <li>Respond to your inquiries</li>
+          <li>Improve our website and services</li>
+          <li>Send updates about ELO-AGI (only if you opt in)</li>
+        </ul>
+
+        <h2>4. Data Sharing</h2>
+        <p>We do not sell your personal information. We may share information with:</p>
+        <ul>
+          <li>Payment processors (PayPal) for transaction processing</li>
+          <li>GitHub Pages for website hosting</li>
+          <li>Fly.io for API service hosting</li>
+        </ul>
+        <p>These service providers are bound by their own privacy policies and process data only as needed to provide their services.</p>
+
+        <h2>5. Cookies</h2>
+        <p>This website uses minimal cookies. We do not use advertising or tracking cookies. Any cookies used are strictly necessary for website functionality (such as remembering your preferences).</p>
+
+        <h2>6. Data Security</h2>
+        <p>We implement appropriate security measures to protect your information. However, no method of electronic transmission or storage is 100% secure. We cannot guarantee absolute security.</p>
+
+        <h2>7. Open Source Data</h2>
+        <p>The ELO-AGI framework itself does not collect, transmit, or store any personal data. It runs entirely locally on your machine. Any data processed by the framework stays on your local system.</p>
+
+        <h2>8. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Access the personal information we hold about you</li>
+          <li>Request correction of inaccurate information</li>
+          <li>Request deletion of your information</li>
+          <li>Opt out of communications</li>
+          <li>Request your sponsor listing be removed</li>
+        </ul>
+        <p>To exercise these rights, contact <a href="mailto:elvizekaj@zedigital.tech">elvizekaj@zedigital.tech</a>.</p>
+
+        <h2>9. Children's Privacy</h2>
+        <p>Our services are not directed at individuals under 13 years of age. We do not knowingly collect personal information from children.</p>
+
+        <h2>10. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date. We encourage you to review this page periodically.</p>
+
+        <h2>11. Contact</h2>
+        <p>For questions about this Privacy Policy, contact us at <a href="mailto:elvizekaj@zedigital.tech">elvizekaj@zedigital.tech</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="logo-gradient text-lg font-extrabold">ELO-AGI</a>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+          <a href="index.html" class="hover:text-slate-300 transition-colors">Home</a>
+          <a href="terms.html" class="hover:text-slate-300 transition-colors">Terms</a>
+          <span class="text-slate-600">Built by <a href="https://zedigital.tech" target="_blank" class="hover:text-slate-400">ZeDigital</a></span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
