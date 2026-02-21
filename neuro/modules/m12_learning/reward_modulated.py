@@ -110,13 +110,15 @@ class RewardModulatedSTDP(STDPNetwork):
         dt: float = 1.0
     ) -> None:
         """Update eligibility traces (not weights yet)"""
-        # Update spike traces
+        # Update pre trace first (LTP uses updated pre_trace)
         self.pre_trace = self.pre_trace * self.trace_decay + pre_spikes
-        self.post_trace = self.post_trace * self.trace_decay + post_spikes
 
-        # Compute STDP-based eligibility
+        # Compute STDP-based eligibility using old post_trace for LTD
         ltp = self.params.A_plus * np.outer(post_spikes, self.pre_trace)
         ltd = self.params.A_minus * np.outer(self.post_trace, pre_spikes)
+
+        # Now update post trace
+        self.post_trace = self.post_trace * self.trace_decay + post_spikes
 
         # Accumulate in eligibility trace
         self.eligibility_trace = self.eligibility_trace * self.eligibility_decay + (ltp - ltd)
