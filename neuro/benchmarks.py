@@ -15,8 +15,9 @@ from pathlib import Path
 
 
 def get_version():
-    """Get version from __init__.py."""
-    return "0.9.0"
+    """Get version from package metadata."""
+    from neuro import __version__
+    return __version__
 
 
 def run_demo_benchmarks(n_trials: int = 10, verbose: bool = True):

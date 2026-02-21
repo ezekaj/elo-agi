@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           # Run tests from within each module directory for correct imports
           passed=0
@@ -55,9 +55,20 @@ jobs:
           if [ $failed -gt 0 ]; then
             echo "Failed modules:$failed_modules"
           fi
-          # Allow up to 8 module failures for now (flaky tests being fixed)
           if [ $failed -gt 8 ]; then
             echo "Too many failures (>8), failing CI"
             exit 1
           fi
           echo "CI passed ($passed modules passed, $failed within tolerance)"
+
+      - name: Run coverage report
+        if: matrix.python-version == '3.11'
+        run: |
+          python -m pytest neuro-*/tests/ --cov=neuro --cov-report=xml --cov-report=term-missing -q || true
+
+      - name: Upload coverage artifact
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml

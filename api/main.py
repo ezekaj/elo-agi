@@ -33,7 +33,7 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(
     title="ELO-AGI API",
     description="Neuroscience-inspired AGI framework API with 38 cognitive modules",
-    version="2.0.0",
+    version="0.9.0",
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -45,6 +45,19 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Accept"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "0"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    return response
 
 
 # ---- Request/Response Models ----
@@ -166,7 +179,7 @@ async def health(request: Request):
     return HealthResponse(
         status="ok",
         uptime=round(time.time() - _start_time, 2),
-        version="2.0.0",
+        version="0.9.0",
     )
 
 
@@ -175,7 +188,7 @@ async def health(request: Request):
 async def info(request: Request):
     return InfoResponse(
         name="ELO-AGI (NEURO)",
-        version="2.0.0",
+        version="0.9.0",
         module_count=38,
         tiers={
             "Cognitive": 20,

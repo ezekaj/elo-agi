@@ -17,7 +17,11 @@ Usage:
     action = core.act()
 """
 
-__version__ = "0.9.0"
+try:
+    from importlib.metadata import version as _pkg_version
+    __version__ = _pkg_version("neuro-agi")
+except Exception:
+    __version__ = "0.9.0"
 __author__ = "Elvi Zekaj"
 
 # Lazy imports to avoid loading everything at startup

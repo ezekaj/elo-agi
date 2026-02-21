@@ -192,11 +192,19 @@ ruff check .
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/). During `0.x` releases, minor versions may include breaking changes. Starting from `1.0.0`, breaking changes will only occur in major versions with deprecation warnings issued at least one minor version before removal.
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
 ## Roadmap
 
 - [x] Core cognitive architecture (38 modules)
 - [x] Causal reasoning engine
 - [x] Continual learning without forgetting
+- [x] Package restructure and PyPI publishing
+- [ ] External benchmark validation (ARC, GSM8K)
 - [ ] VS Code extension
 - [ ] Real-time streaming responses
 - [ ] Multi-agent collaboration
