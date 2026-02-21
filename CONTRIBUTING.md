@@ -52,9 +52,18 @@ black .
 3. Make your changes
 4. Run tests (`pytest neuro-*/tests/ -v`)
 5. Run linting (`ruff check .`)
-6. Commit your changes
-7. Push to your fork
-8. Open a Pull Request
+6. Add a changelog entry to `CHANGELOG.md` under `[Unreleased]`
+7. Commit your changes
+8. Push to your fork
+9. Open a Pull Request
+
+## Changelog
+
+All notable changes must be documented in `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/) format. Add entries under the `[Unreleased]` section using these categories: Added, Changed, Fixed, Removed, Security.
+
+## Security
+
+If you discover a security vulnerability, **do not** open a public issue. Instead, follow the process in [SECURITY.md](SECURITY.md).
 
 ## Module Structure
 
@@ -62,14 +71,20 @@ Each module follows this structure:
 
 ```
 neuro-<name>/
-├── src/           # Python source files
 ├── tests/         # pytest tests
 └── .gitignore
+
+neuro/modules/<name>/
+├── __init__.py    # Module exports
+└── *.py           # Source files
 ```
+
+Source code lives in `neuro/modules/<name>/` (the installable package). Tests remain in `neuro-<name>/tests/`.
 
 ## Adding a New Module
 
-1. Create the directory structure above
-2. Add source files in `src/`
-3. Add tests in `tests/`
-4. Update `neuro/__init__.py` if adding public exports
+1. Create source files in `neuro/modules/<name>/`
+2. Add `__init__.py` with exports
+3. Add tests in `neuro-<name>/tests/`
+4. Update `neuro/__init__.py` if adding public lazy imports
+5. Add a changelog entry
