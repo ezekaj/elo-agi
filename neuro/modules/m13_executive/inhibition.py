@@ -58,8 +58,12 @@ class ResponseInhibitor:
         self.stop_activation += (self.params.inhibition_strength * dt / 100.0) + noise
         self.stop_activation = np.clip(self.stop_activation, 0, 1)
 
-        if self.stop_activation >= self.params.stop_threshold and not self.response_made:
+        # Stop signal suppresses go activation
+        self.go_activation = max(0.0, self.go_activation - self.stop_activation * dt / 100.0)
+
+        if self.stop_activation >= self.params.stop_threshold:
             self.response_inhibited = True
+            self.response_made = False
 
         return self.stop_activation
 
@@ -82,21 +86,34 @@ class ResponseInhibitor:
         reaction_time = None
         stop_time = None
 
+        go_crossed_at = None
         for t in np.arange(0, max_time, dt):
-            # Always update go process
+            # Update go process
             self.update_go(dt)
+
+            # Track when go first crossed threshold
+            if self.response_made and go_crossed_at is None:
+                go_crossed_at = t
 
             # Update stop process after delay on stop trials
             if is_stop_trial and t >= ssd:
                 self.update_stop(dt)
 
-            if self.response_made and reaction_time is None:
-                reaction_time = t
-                break
-
+            # Check inhibition first (stop wins ties)
             if self.response_inhibited and stop_time is None:
                 stop_time = t
                 break
+
+            # Go response finalizes immediately on non-stop trials
+            if self.response_made and reaction_time is None and not is_stop_trial:
+                reaction_time = t
+                break
+
+            # On stop trials, go response finalizes only after motor execution delay
+            if is_stop_trial and go_crossed_at is not None and reaction_time is None:
+                if not self.response_inhibited and (t - go_crossed_at) >= 80.0:
+                    reaction_time = t
+                    break
 
         return {
             "is_stop_trial": is_stop_trial,

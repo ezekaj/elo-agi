@@ -273,8 +273,8 @@ class WorkingMemory:
             True if match
         """
         patterns = self.dlpfc.stored_patterns
-        if len(patterns) >= n:
-            n_back_item = patterns[-n]
+        if len(patterns) >= n + 1:
+            n_back_item = patterns[-(n + 1)]
             similarity = np.dot(item, n_back_item) / (
                 np.linalg.norm(item) * np.linalg.norm(n_back_item) + 1e-8
             )

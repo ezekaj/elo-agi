@@ -65,8 +65,7 @@ class TaskSwitcher:
         """Prepare for upcoming task (advance cuing)"""
         self.preparation_time = prep_time
         self.task_activation[task] = min(1.0, 0.5 + prep_time / 1000.0)
-        if task == self.current_task:
-            self.prepared = True
+        self.prepared = True
 
     def execute_trial(self, stimulus: np.ndarray, task: int) -> dict:
         """Execute a trial with given stimulus and task
