@@ -1,131 +1,120 @@
-# CLAUDE.md - Neuro Cognitive Architecture
+# CLAUDE.md
 
-This file provides guidance to Claude Code when working with the Neuro AGI project.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Quick Reference
+## Project
+
+NEURO (neuro-agi v0.9.0) — a neuroscience-inspired AGI architecture with 38 cognitive modules. Local-first, privacy-preserving AI that runs entirely on the user's machine. Python 3.9+, MIT licensed.
+
+## Commands
 
 ```bash
-# Run tests for any module
-cd neuro-<module> && python -m pytest tests/ -v
+# Install
+pip install -e .              # Basic
+pip install -e ".[dev]"       # With pytest, ruff, black, mypy
+pip install -e ".[all]"       # Everything (llm, viz, dev)
 
-# Common modules
-pytest neuro-system/tests/ -v          # Core system (active inference, module loader)
-pytest neuro-module-00-integration/tests/ -v  # Global Workspace
-pytest neuro-llm/tests/ -v             # LLM integration
-pytest neuro-bench/tests/ -v           # Benchmarks
+# Run tests
+pytest neuro-*/tests/ -v                          # All modules
+cd neuro-<module> && python -m pytest tests/ -v   # Single module
+pytest neuro-system/tests/ -v                     # Core system
+pytest neuro-causal/tests/ -v                     # Causal (124 tests)
+pytest neuro-abstract/tests/ -v                   # Abstraction (144 tests)
+pytest neuro-robust/tests/ -v                     # Robustness (192 tests)
 
-# Setup venv (if needed)
-python -m venv .venv && source .venv/bin/activate
-pip install pytest numpy scipy
+# Lint & format
+ruff check .                  # Lint
+ruff check . --fix            # Auto-fix
+black .                       # Format (line-length=100)
+mypy                          # Type check
+
+# CLI entry points (defined in pyproject.toml [project.scripts])
+neuro                         # Interactive session
+neuro-demo all                # Run demos
+neuro-bench -o report.html    # Run benchmarks
+
+# API server
+uvicorn api.main:app --host 0.0.0.0 --port 8080
+
+# Docker
+docker build -t elo-agi . && docker run -p 8080:8080 elo-agi
 ```
 
-## Architecture Overview
+## Architecture
 
-Neuro is a neuroscience-inspired AGI architecture with 29 modules across 3 tiers:
+### Four-tier modular design
 
-### Tier 1: Cognitive Modules (23)
-| ID | Module | Purpose |
-|----|--------|---------|
-| 00 | integration | Global Workspace Theory, attention, broadcast |
-| 01 | predictive-coding | Free Energy Principle, hierarchical predictions |
-| 02 | dual-process | System 1/2 emergence from geometry |
-| 03 | reasoning-types | Dimensional, interactive, logical, perceptual |
-| 04 | memory | Sensory, working, long-term memory |
-| 05 | sleep-consolidation | Replay, systems consolidation, homeostasis |
-| 06 | motivation | Path entropy, dopamine, curiosity |
-| 07 | emotions-decisions | Emotional valuation in decisions |
-| 08 | language | Language processing/generation |
-| 09 | creativity | Creative thought generation |
-| 10 | spatial-cognition | Spatial reasoning |
-| 11 | time-perception | Embodied temporal cognition |
-| 12 | learning | Adaptive learning mechanisms |
-| 13 | executive | Executive control, planning |
-| 14 | embodied | Embodied cognition |
-| 15 | social | Social reasoning |
-| 16 | consciousness | Metacognition, self-awareness |
-| 17 | world-model | Internal world modeling |
-| 18 | self-improvement | Self-directed improvement |
-| 19 | multi-agent | Multi-agent coordination |
-| 20 | causal | Counterfactual reasoning, causal DAGs, interventions |
-| 21 | abstract | Neuro-symbolic binding, compositional generalization |
-| 22 | robust | Uncertainty quantification, OOD detection, calibration |
+**Tier 1 — Cognitive Modules (20):** `neuro-module-00-integration/` through `neuro-module-19-multi-agent/`. Each follows `neuro-module-{ID}-{name}/src/` + `tests/` pattern. Module 00 (Global Workspace) coordinates attention/broadcast across all others.
 
-### Tier 2: Infrastructure (6)
-| Module | Purpose |
-|--------|---------|
-| neuro-system | Unified core: active inference, module loader, sensory/motor |
-| neuro-llm | LLM oracle, semantic bridge, grounding, dialogue |
-| neuro-knowledge | Fact store, knowledge graph, ontology, inference |
-| neuro-ground | Sensors (camera, mic, proprioception), actuators (motor, speech) |
-| neuro-scale | Distributed: coordinator, workers, aggregators, GPU kernels |
-| neuro-transfer | Transfer learning mechanisms |
+**Tier 2 — Infrastructure (6):** `neuro-system` (active inference core, module loader), `neuro-llm` (LLM oracle), `neuro-knowledge` (knowledge graph), `neuro-ground` (sensors/actuators), `neuro-scale` (distributed), `neuro-transfer`.
 
-### Tier 3: Support (5)
-| Module | Purpose |
-|--------|---------|
-| neuro-env | Environment/context management |
-| neuro-bench | Benchmarks: reasoning, memory, language, planning |
-| neuro-inference | Bayesian, analogical, causal reasoning engines |
-| neuro-perception | Visual, auditory, multimodal integration |
-| neuro-integrate | Advanced integration layer |
+**Tier 3 — Support (5):** `neuro-env`, `neuro-bench`, `neuro-inference`, `neuro-perception`, `neuro-integrate`.
 
-## Module Patterns
+**Tier 4 — AGI Extensions (7):** `neuro-causal`, `neuro-abstract`, `neuro-continual`, `neuro-robust`, `neuro-planning`, `neuro-credit`, `neuro-meta-reasoning`.
 
-**File Structure:**
-```
-neuro-<name>/
-├── src/           # Python source
-├── tests/         # pytest tests
-├── .gitignore     # Python standard
-└── CLAUDE.md      # Module-specific guidance (if exists)
-```
+### Core processing pipeline
 
-**Code Conventions:**
+`neuro-system/src/cognitive_core.py` runs the active inference loop: **perceive → think → act**. Modules are loaded dynamically via `neuro-system/src/module_loader.py`. The `neuro/` package is the main Python package with lazy imports in `__init__.py`.
+
+### Entry points
+
+- **CLI:** `neuro/cli.py` (main interface, streaming responses) + `neuro/cli/` subpackage (commands, tools, agents, UI, skills)
+- **API:** `api/main.py` — FastAPI with endpoints: `/api/health`, `/api/info`, `/api/modules`, `/api/chat`, `/api/repl` (sandboxed Python via `api/sandbox.py`), `/api/benchmarks`, `/api/analyze`
+- **Web docs:** `docs/` — static HTML site (index, features, pricing, demo, privacy, terms)
+- **Legacy:** `elo.py` (ELO v1.0), `elo_chat.py` (chat interface), `elo_cli/` (legacy CLI framework)
+
+### Key files
+
+- `neuro-system/src/cognitive_core.py` — CognitiveCore with active inference loop
+- `neuro-system/src/active_inference.py` — Free energy minimization
+- `neuro-module-00-integration/src/global_workspace.py` — Attention & broadcast
+- `neuro/engine.py` — Cognitive processing engine
+- `neuro/orchestrator.py` — Module coordination/scheduling
+- `api/main.py` — FastAPI REST backend
+
+## Code Conventions
+
 - Dataclass configs with sensible defaults
 - `.statistics()` method on major classes
 - Clean `__all__` exports in `__init__.py`
 - Simulated mode by default (no hardware required)
+- Lazy imports in `neuro/__init__.py` to minimize startup overhead
+- Line length: 100 (ruff and black)
+- Target Python: 3.9
 
-**Integration Points:**
-- neuro-system loads modules via ModuleLoader
-- neuro-module-00 (Global Workspace) coordinates attention/broadcast
-- neuro-llm provides language understanding
-- neuro-ground provides sensor/actuator interfaces
+## Module Pattern
 
-## Key Files
+Every `neuro-<name>/` module follows:
+```
+neuro-<name>/
+├── src/         # Python source
+├── tests/       # pytest tests (test_*.py, test_* functions)
+└── CLAUDE.md    # Module-specific guidance (optional)
+```
 
-- `neuro-system/src/core.py` - CognitiveCore with active inference loop
-- `neuro-module-00-integration/src/global_workspace.py` - Attention & broadcast
-- `neuro-module-01-predictive-coding/src/` - Free Energy computations
-- `neuro-llm/src/oracle.py` - LLM integration
-- `neuro-ground/src/sensors/` - Camera, Microphone, Proprioception
-- `neuro-bench/src/benchmarks/` - AGI capability tests
+## CI/CD
 
-## AGI Roadmap: Progress
+- **`.github/workflows/test.yml`** — pytest across Python 3.9-3.12, tolerates up to 8 module failures
+- **`.github/workflows/lint.yml`** — ruff check on push/PR
+- **`.github/workflows/publish.yml`** — PyPI publication
+- **Deployment:** Fly.io (`fly.toml`), Frankfurt region, 1024MB RAM, auto-stop/start, Docker-based
 
-Based on 2024-2026 research, critical gaps addressed for human-level AGI:
+## API Endpoints
 
-### Priority 1: Causal Reasoning ✅ COMPLETE
-- Counterfactual reasoning, causal DAGs, intervention modeling
-- Module: `neuro-causal` (124 tests)
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/api/health` | Health check + uptime |
+| GET | `/api/info` | System info (modules, capabilities) |
+| GET | `/api/modules` | List all cognitive modules |
+| POST | `/api/chat` | Chat with cognitive AI |
+| POST | `/api/repl` | Sandboxed Python REPL execution |
+| POST | `/api/benchmarks` | Run benchmark suite |
+| POST | `/api/analyze` | Cognitive analysis (dual-process, emotion, reasoning) |
 
-### Priority 2: Compositional Abstraction ✅ COMPLETE
-- ARC Prize core challenge: neuro-symbolic binding
-- Hierarchical concept composition
-- Module: `neuro-abstract` (144 tests)
+## AGI Roadmap
 
-### Priority 3: Continual Learning
-- Hippocampal replay mechanisms
-- Meta-learning for learning-to-learn
-- Enhance: neuro-module-05-sleep-consolidation
-
-### Priority 4: Robustness ✅ COMPLETE
-- Adversarial training, uncertainty quantification
-- OOD detection
-- Module: `neuro-robust` (192 tests)
-
-### Key Research Papers
-1. Agentic AI Survey (arxiv:2510.25445)
-2. Neuro-Symbolic AI 2024 (arxiv:2501.05435)
-3. Embodied AI: LLMs to World Models (arxiv:2509.20021)
-4. ARC Prize 2025 Technical Report (arxiv:2601.10904)
+1. **Causal Reasoning** — COMPLETE (`neuro-causal`, 124 tests)
+2. **Compositional Abstraction** — COMPLETE (`neuro-abstract`, 144 tests)
+3. **Continual Learning** — In progress (`neuro-continual`, 88 tests)
+4. **Robustness** — COMPLETE (`neuro-robust`, 192 tests)
+5. **Hierarchical Planning** — COMPLETE (`neuro-planning`, 82 tests)
