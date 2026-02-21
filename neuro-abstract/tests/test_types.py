@@ -12,7 +12,7 @@ Tests cover:
 
 import pytest
 import numpy as np
-from src.composition_types import (
+from neuro.modules.abstract.composition_types import (
     CompositionType,
     AtomicType,
     FunctionType,
@@ -23,7 +23,6 @@ from src.composition_types import (
     TypeInferencer,
     INT, FLOAT, STR, BOOL, ANY, NONE,
 )
-
 
 class TestAtomicType:
     """Test atomic types."""
@@ -102,7 +101,6 @@ class TestAtomicType:
         assert rep.shape == (64,)
         assert np.abs(np.linalg.norm(rep) - 1.0) < 0.01
 
-
 class TestFunctionType:
     """Test function types."""
 
@@ -163,7 +161,6 @@ class TestFunctionType:
         f = FunctionType((INT,), BOOL)
         curried = f.curry()
         assert curried == f
-
 
 class TestStructuredType:
     """Test structured (record) types."""
@@ -226,7 +223,6 @@ class TestStructuredType:
         # (opposite of typical structural subtyping)
         assert base.is_subtype_of(base)
 
-
 class TestListType:
     """Test list types."""
 
@@ -268,7 +264,6 @@ class TestListType:
         t = ListType(INT)
         assert repr(t) == "[int]"
 
-
 class TestUnionType:
     """Test union types."""
 
@@ -306,7 +301,6 @@ class TestUnionType:
         assert t1 == t2
         assert t1 != t3
 
-
 class TestTypeVariable:
     """Test type variables."""
 
@@ -327,7 +321,6 @@ class TestTypeVariable:
         t = TypeVariable("T", bound=INT)
         assert t.validate(42)
         assert not t.validate("hello")
-
 
 class TestTypeInferencer:
     """Test type inference."""
@@ -390,7 +383,6 @@ class TestTypeInferencer:
         v2 = inferencer.fresh_variable()
         assert v1 != v2
 
-
 class TestNeuralRepresentations:
     """Test neural representations of types."""
 
@@ -425,7 +417,6 @@ class TestNeuralRepresentations:
         t = ListType(INT)
         rep = t.to_neural(64)
         assert rep.shape == (64,)
-
 
 class TestTypeCompositionComplex:
     """Test complex type compositions."""

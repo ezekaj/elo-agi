@@ -11,15 +11,11 @@ These tests push the system to its limits and test edge cases:
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.predictive_hierarchy import PredictiveLayer, PredictiveHierarchy
-from src.precision_weighting import PrecisionWeightedError, AdaptivePrecision, HierarchicalPrecision
-from src.cognitive_manifold import CognitiveState, CognitiveManifold, DualProcess, AttractorLandscape
-from src.temporal_dynamics import TemporalLayer, TemporalHierarchy, MultiTimescaleIntegrator
-from src.omission_detector import OmissionDetector, SequenceOmissionDetector, RhythmicOmissionDetector
-
+from neuro.modules.m01_predictive_coding.predictive_hierarchy import PredictiveLayer, PredictiveHierarchy
+from neuro.modules.m01_predictive_coding.precision_weighting import PrecisionWeightedError, AdaptivePrecision, HierarchicalPrecision
+from neuro.modules.m01_predictive_coding.cognitive_manifold import CognitiveState, CognitiveManifold, DualProcess, AttractorLandscape
+from neuro.modules.m01_predictive_coding.temporal_dynamics import TemporalLayer, TemporalHierarchy, MultiTimescaleIntegrator
+from neuro.modules.m01_predictive_coding.omission_detector import OmissionDetector, SequenceOmissionDetector, RhythmicOmissionDetector
 
 class TestNumericalStability:
     """Tests for numerical stability under extreme conditions"""
@@ -97,7 +93,6 @@ class TestNumericalStability:
             assert np.all(np.isfinite(result['total_error']))
             assert result['total_error'] < 1e10  # Bounded
 
-
 class TestHighDimensional:
     """Tests for high-dimensional scenarios"""
 
@@ -147,7 +142,6 @@ class TestHighDimensional:
             for p in precs:
                 assert np.all(np.isfinite(p))
                 assert np.all(p > 0)
-
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""
@@ -211,7 +205,6 @@ class TestEdgeCases:
         assert landscape.find_nearest_attractor(np.array([5.0, 5.0])) == 0
         assert landscape.find_nearest_attractor(np.array([-10.0, 10.0])) == 0
 
-
 class TestRapidChanges:
     """Tests for handling rapid changes and regime shifts"""
 
@@ -264,7 +257,6 @@ class TestRapidChanges:
             for _ in range(20):
                 manifold.flow(dt=0.1)
                 assert np.all(np.isfinite(manifold.state.position))
-
 
 class TestIntegration:
     """Integration tests combining multiple components"""
@@ -327,7 +319,6 @@ class TestIntegration:
             for state in states:
                 assert np.all(np.isfinite(state))
 
-
 class TestAdversarial:
     """Tests with adversarial/pathological inputs"""
 
@@ -385,7 +376,6 @@ class TestAdversarial:
             result = hierarchy.step(obs)
             assert np.all(np.isfinite(result['total_error']))
 
-
 class TestPerformance:
     """Performance-related tests"""
 
@@ -430,7 +420,6 @@ class TestPerformance:
             for state in states:
                 assert np.all(np.isfinite(state))
 
-
 class TestOmissionEdgeCases:
     """Edge cases for omission detection"""
 
@@ -463,7 +452,6 @@ class TestOmissionEdgeCases:
 
         # Period estimate should be uncertain
         assert detector.period_confidence < 0.9
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--tb=short'])

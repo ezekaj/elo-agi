@@ -2,11 +2,10 @@
 
 import numpy as np
 import pytest
-from src.cognitive_map import CognitiveMap, Environment, Landmark
-from src.border_cells import WallDirection
-from src.head_direction_cells import HeadDirectionSystem
-from src.path_integration import PathIntegrator
-
+from neuro.modules.m10_spatial_cognition.cognitive_map import CognitiveMap, Environment, Landmark
+from neuro.modules.m10_spatial_cognition.border_cells import WallDirection
+from neuro.modules.m10_spatial_cognition.head_direction_cells import HeadDirectionSystem
+from neuro.modules.m10_spatial_cognition.path_integration import PathIntegrator
 
 class TestEnvironment:
     """Test environment representation."""
@@ -42,7 +41,6 @@ class TestEnvironment:
         landmark, distance, bearing = visible[0]
         assert landmark.name == "tree"
         assert distance == pytest.approx(0.2, rel=0.1)
-
 
 class TestCognitiveMap:
     """Test integrated cognitive map."""
@@ -165,7 +163,6 @@ class TestCognitiveMap:
         trajectory = cog_map.get_trajectory()
         assert len(trajectory) >= 5
 
-
 class TestHeadDirectionSystem:
     """Test head direction cells."""
 
@@ -199,7 +196,6 @@ class TestHeadDirectionSystem:
 
         heading = hd.get_current_heading()
         assert heading == pytest.approx(0.1, rel=0.2)
-
 
 class TestPathIntegrator:
     """Test path integration."""
@@ -245,7 +241,6 @@ class TestPathIntegrator:
 
         total = pi.get_total_distance()
         assert total == pytest.approx(0.1, rel=0.2)
-
 
 class TestLandmark:
     """Test landmark dataclass."""

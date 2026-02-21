@@ -3,8 +3,7 @@
 import pytest
 import numpy as np
 
-from src.engram import Engram, Neuron, EngramState
-
+from neuro.modules.m04_memory.engram import Engram, Neuron, EngramState
 
 class TestNeuron:
     """Tests for individual neurons"""
@@ -26,7 +25,6 @@ class TestNeuron:
         neuron.reset()
 
         assert neuron.activation == 0.0
-
 
 class TestEngram:
     """Tests for engram formation and operations"""
@@ -145,7 +143,6 @@ class TestEngram:
 
         assert engram.similarity(pattern2) > 0.9
         assert engram.similarity(pattern3) < 0.5
-
 
 class TestEngramManipulation:
     """Tests for engram manipulation (erase, trigger, implant)"""

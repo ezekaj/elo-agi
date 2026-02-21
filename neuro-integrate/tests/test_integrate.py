@@ -11,33 +11,29 @@ Covers:
 
 import pytest
 import numpy as np
-import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from shared_space import (
+from neuro.modules.integrate.shared_space import (
     SharedSpace, SharedSpaceConfig, SemanticEmbedding,
     ProjectionLayer, ModalityType
 )
-from cross_module_learning import (
+from neuro.modules.integrate.cross_module_learning import (
     CrossModuleLearner, LearningSignal, SignalType,
     GradientRouter, ModuleSynapse
 )
-from conflict_resolution import (
+from neuro.modules.integrate.conflict_resolution import (
     ConflictResolver, Conflict, Resolution, ConflictType,
     ResolutionStrategy
 )
-from evidence_accumulation import (
+from neuro.modules.integrate.evidence_accumulation import (
     EvidenceAccumulator, Evidence, EvidenceSource, EvidenceType,
     AccumulatorConfig, DriftDiffusionAccumulator, BayesianAccumulator
 )
-from coherence_checker import (
+from neuro.modules.integrate.coherence_checker import (
     CoherenceChecker, Belief, Inconsistency, InconsistencyType,
     BeliefNetwork, CoherenceReport
 )
-
 
 # =============================================================================
 # Tests: Shared Space
@@ -55,7 +51,6 @@ class TestSharedSpaceConfig:
         config = SharedSpaceConfig(embedding_dim=256, temperature=0.5)
         assert config.embedding_dim == 256
         assert config.temperature == 0.5
-
 
 class TestSemanticEmbedding:
     """Tests for SemanticEmbedding."""
@@ -100,7 +95,6 @@ class TestSemanticEmbedding:
         assert blended.source_module == "blended"
         assert blended.confidence == pytest.approx(0.7)
 
-
 class TestProjectionLayer:
     """Tests for ProjectionLayer."""
 
@@ -134,7 +128,6 @@ class TestProjectionLayer:
         weights_before = proj.weights.copy()
         proj.update(error, input_vec)
         assert not np.allclose(proj.weights, weights_before)
-
 
 class TestSharedSpace:
     """Tests for SharedSpace."""
@@ -226,7 +219,6 @@ class TestSharedSpace:
         assert stats["n_registered_modules"] == 1
         assert stats["n_active_embeddings"] == 1
 
-
 # =============================================================================
 # Tests: Cross-Module Learning
 # =============================================================================
@@ -255,7 +247,6 @@ class TestModuleSynapse:
         synapse.update(pre, post, reward=1.0)
         # Weights should change
         assert not np.allclose(synapse.weights, weights)
-
 
 class TestGradientRouter:
     """Tests for GradientRouter."""
@@ -293,7 +284,6 @@ class TestGradientRouter:
         credits = router.assign_credit(1.0, activities)
         assert "m1" in credits
         assert "m2" in credits
-
 
 class TestCrossModuleLearner:
     """Tests for CrossModuleLearner."""
@@ -378,7 +368,6 @@ class TestCrossModuleLearner:
         stats = learner.statistics()
         assert stats["n_registered_modules"] == 1
 
-
 # =============================================================================
 # Tests: Conflict Resolution
 # =============================================================================
@@ -415,7 +404,6 @@ class TestConflict:
             confidences={"m1": 0.9, "m2": 0.8}
         )
         assert conflict.severity > 0  # Should have high severity
-
 
 class TestConflictResolver:
     """Tests for ConflictResolver."""
@@ -522,7 +510,6 @@ class TestConflictResolver:
         assert "total_conflicts" in stats
         assert "module_reliability" in stats
 
-
 # =============================================================================
 # Tests: Evidence Accumulation
 # =============================================================================
@@ -534,7 +521,6 @@ class TestEvidenceSource:
         source = EvidenceSource(name="vision", reliability=0.9)
         assert source.name == "vision"
         assert source.reliability == 0.9
-
 
 class TestEvidence:
     """Tests for Evidence."""
@@ -561,7 +547,6 @@ class TestEvidence:
         # Weight should account for reliability and uncertainty
         assert evidence.weight < 1.0
 
-
 class TestDriftDiffusionAccumulator:
     """Tests for DriftDiffusionAccumulator."""
 
@@ -584,7 +569,6 @@ class TestDriftDiffusionAccumulator:
         ddm = DriftDiffusionAccumulator()
         prob = ddm.get_decision_probability()
         assert 0 <= prob <= 1
-
 
 class TestBayesianAccumulator:
     """Tests for BayesianAccumulator."""
@@ -612,7 +596,6 @@ class TestBayesianAccumulator:
         bayes = BayesianAccumulator(n_hypotheses=3)
         entropy = bayes.get_entropy()
         assert entropy > 0
-
 
 class TestEvidenceAccumulator:
     """Tests for EvidenceAccumulator."""
@@ -682,7 +665,6 @@ class TestEvidenceAccumulator:
         assert "n_sources" in stats
         assert "total_evidence" in stats
 
-
 # =============================================================================
 # Tests: Coherence Checker
 # =============================================================================
@@ -711,7 +693,6 @@ class TestBelief:
         b2 = Belief("b2", emb2, "m2", 0.9, 1.0)
 
         assert b1.similarity(b2) == pytest.approx(1.0)
-
 
 class TestBeliefNetwork:
     """Tests for BeliefNetwork."""
@@ -751,7 +732,6 @@ class TestBeliefNetwork:
 
         clusters = network.find_clusters()
         assert len(clusters) >= 1
-
 
 class TestCoherenceChecker:
     """Tests for CoherenceChecker."""
@@ -851,7 +831,6 @@ class TestCoherenceChecker:
         stats = checker.statistics()
         assert "n_beliefs" in stats
         assert "coherence_score" in stats
-
 
 # =============================================================================
 # Integration Tests
@@ -960,7 +939,6 @@ class TestIntegration:
         )
 
         assert learner._total_updates > 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -10,19 +10,15 @@ Covers:
 import pytest
 import numpy as np
 import time
-import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from config import SystemConfig, ModuleConfig, DEFAULT_CONFIG
-from module_loader import ModuleLoader, ModuleStatus, ModuleStub
-from sensory_interface import SensoryInterface, SensoryInput, InputType
-from motor_interface import MotorInterface, MotorOutput, OutputType, ActionCategory
-from active_inference import ActiveInferenceController, Policy, EFEResult
-from cognitive_core import CognitiveCore, CognitiveState, CycleResult
-
+from neuro.modules.system.config import SystemConfig, ModuleConfig, DEFAULT_CONFIG
+from neuro.modules.system.module_loader import ModuleLoader, ModuleStatus, ModuleStub
+from neuro.modules.system.sensory_interface import SensoryInterface, SensoryInput, InputType
+from neuro.modules.system.motor_interface import MotorInterface, MotorOutput, OutputType, ActionCategory
+from neuro.modules.system.active_inference import ActiveInferenceController, Policy, EFEResult
+from neuro.modules.system.cognitive_core import CognitiveCore, CognitiveState, CycleResult
 
 # =============================================================================
 # Unit Tests: Config
@@ -61,7 +57,6 @@ class TestConfig:
         config.enable_module("05")
         assert config.module_configs["05"].enabled
 
-
 # =============================================================================
 # Unit Tests: Module Loader
 # =============================================================================
@@ -96,7 +91,6 @@ class TestModuleLoader:
         assert stub.propose() == []
         stub.receive_broadcast()  # Should not raise
         stub.process()  # Should not raise
-
 
 # =============================================================================
 # Unit Tests: Sensory Interface
@@ -164,7 +158,6 @@ class TestSensoryInterface:
         combined = interface.get_combined_input(3)
         assert len(combined) == interface.config.input_dim
 
-
 # =============================================================================
 # Unit Tests: Motor Interface
 # =============================================================================
@@ -216,7 +209,6 @@ class TestMotorInterface:
 
         selected = interface.select_action()
         assert selected is not None
-
 
 # =============================================================================
 # Unit Tests: Active Inference Controller
@@ -279,7 +271,6 @@ class TestActiveInference:
 
         assert isinstance(action, np.ndarray)
         assert len(action) == controller.config.output_dim
-
 
 # =============================================================================
 # Integration Tests
@@ -354,7 +345,6 @@ class TestIntegration:
         for r in results:
             assert isinstance(r, CycleResult)
 
-
 # =============================================================================
 # Stress Tests
 # =============================================================================
@@ -417,7 +407,6 @@ class TestStress:
 
         assert core.state.cycle_count == 10
 
-
 # =============================================================================
 # Additional Tests
 # =============================================================================
@@ -472,7 +461,6 @@ class TestCognitiveCore:
 
         assert not core._initialized
         assert len(core._modules) == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

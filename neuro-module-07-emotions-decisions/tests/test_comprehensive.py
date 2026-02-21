@@ -7,36 +7,33 @@ Tests all components with edge cases, stress conditions, and research validation
 import numpy as np
 import pytest
 import sys
-sys.path.insert(0, '..')
-
-from src.emotion_circuit import (
+from neuro.modules.m07_emotions_decisions.emotion_circuit import (
     EmotionCircuit, Amygdala, VMPFC, ACC, Insula,
     EmotionType, BodyState
 )
-from src.dual_emotion_routes import (
+from neuro.modules.m07_emotions_decisions.dual_emotion_routes import (
     DualRouteProcessor, FastEmotionRoute, SlowEmotionRoute,
     ThalamusRelay, ResponseType
 )
-from src.motivational_states import (
+from neuro.modules.m07_emotions_decisions.motivational_states import (
     MotivationalSystem, IncentiveSalience, Drive, DriveDirection
 )
-from src.emotional_states import (
+from neuro.modules.m07_emotions_decisions.emotional_states import (
     OutcomeEvaluator, EmotionalDynamics, Outcome, OutcomeType,
     EmotionCategory
 )
-from src.moral_reasoning import (
+from neuro.modules.m07_emotions_decisions.moral_reasoning import (
     MoralDilemmaProcessor, VMPFCLesionModel, DeontologicalSystem,
     UtilitarianSystem, create_trolley_switch, create_trolley_push,
     create_crying_baby, MoralScenario, HarmType
 )
-from src.value_computation import (
+from neuro.modules.m07_emotions_decisions.value_computation import (
     OFCValueComputer, VMPFCIntegrator, ValueSignal
 )
-from src.emotion_decision_integrator import (
+from neuro.modules.m07_emotions_decisions.emotion_decision_integrator import (
     EmotionDecisionSystem, Situation, SituationType,
     create_threat_situation, create_reward_situation, create_moral_situation
 )
-
 
 class ResultsTracker:
     def __init__(self):
@@ -64,12 +61,10 @@ class ResultsTracker:
         print(f"{'='*60}")
         return self.failed == 0
 
-
 @pytest.fixture
 def results():
     """Provide ResultsTracker instance for tests."""
     return ResultsTracker()
-
 
 def test_emotion_circuit_comprehensive(results):
     """Comprehensive tests for emotion circuit."""
@@ -169,7 +164,6 @@ def test_emotion_circuit_comprehensive(results):
         f"threat={result.threat_level:.3f}, valence={result.valence:.3f}"
     )
 
-
 def test_dual_routes_comprehensive(results):
     """Comprehensive tests for dual emotion routes."""
     print("\n" + "="*60)
@@ -255,7 +249,6 @@ def test_dual_routes_comprehensive(results):
         f"before={before_cond.intensity:.3f}, after={after_cond.intensity:.3f}"
     )
 
-
 def test_motivational_states_comprehensive(results):
     """Comprehensive tests for motivational states."""
     print("\n" + "="*60)
@@ -336,7 +329,6 @@ def test_motivational_states_comprehensive(results):
         f"before={before_tol:.3f}, after={after_tol:.3f}"
     )
 
-
 def test_emotional_states_comprehensive(results):
     """Comprehensive tests for emotional states."""
     print("\n" + "="*60)
@@ -408,7 +400,6 @@ def test_emotional_states_comprehensive(results):
         after_reg < before_reg,
         f"before={before_reg:.3f}, after={after_reg:.3f}"
     )
-
 
 def test_moral_reasoning_comprehensive(results):
     """Comprehensive tests for moral reasoning."""
@@ -497,7 +488,6 @@ def test_moral_reasoning_comprehensive(results):
         f"decision={custom_dec.action_taken}"
     )
 
-
 def test_value_computation_comprehensive(results):
     """Comprehensive tests for value computation."""
     print("\n" + "="*60)
@@ -584,7 +574,6 @@ def test_value_computation_comprehensive(results):
         isinstance(accept, bool),
         f"accept={accept}, value={value:.3f}"
     )
-
 
 def test_full_integration_comprehensive(results):
     """Comprehensive tests for full system integration."""
@@ -685,7 +674,6 @@ def test_full_integration_comprehensive(results):
         )
         test_sys.restore_all()
 
-
 def test_edge_cases(results):
     """Test edge cases and boundary conditions."""
     print("\n" + "="*60)
@@ -740,7 +728,6 @@ def test_edge_cases(results):
     discounted = ofc.delay_discount(100, delay=-5)
     results.test("Negative delay treated as immediate", discounted == 100)
 
-
 def run_all_tests():
     """Run all comprehensive tests."""
     print("\n" + "="*70)
@@ -776,7 +763,6 @@ def run_all_tests():
     print("✓ Fairness preferences (ultimatum game)")
 
     return success
-
 
 if __name__ == "__main__":
     success = run_all_tests()

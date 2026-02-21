@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.goal_hierarchy import (
+from neuro.modules.planning.goal_hierarchy import (
     Goal,
     GoalNode,
     GoalTree,
@@ -11,7 +11,6 @@ from src.goal_hierarchy import (
     MAXQDecomposition,
     CompletionFunction,
 )
-
 
 class TestGoal:
     """Tests for Goal class."""
@@ -42,7 +41,6 @@ class TestGoal:
     def test_goal_with_deadline(self):
         goal = Goal(name="deadline_goal", deadline=100.0)
         assert goal.deadline == 100.0
-
 
 class TestGoalNode:
     """Tests for GoalNode class."""
@@ -101,7 +99,6 @@ class TestGoalNode:
 
         descendants = root.get_descendants()
         assert len(descendants) == 3
-
 
 class TestGoalTree:
     """Tests for GoalTree class."""
@@ -166,7 +163,6 @@ class TestGoalTree:
         assert stats["total_nodes"] == 2
         assert stats["primitive_goals"] == 1
 
-
 class TestCompletionFunction:
     """Tests for CompletionFunction class."""
 
@@ -177,7 +173,6 @@ class TestCompletionFunction:
         )
         assert cf.evaluate(5) == pytest.approx(0.5)
         assert cf.evaluate(10) == pytest.approx(1.0)
-
 
 class TestMAXQDecomposition:
     """Tests for MAXQDecomposition class."""
@@ -270,7 +265,6 @@ class TestMAXQDecomposition:
         stats = decomp.statistics()
         assert stats["total_decompositions"] == 1
         assert stats["tree_nodes"] == 2
-
 
 class TestMAXQValueDecomposition:
     """Tests for MAXQ value function decomposition."""

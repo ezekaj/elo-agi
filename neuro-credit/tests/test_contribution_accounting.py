@@ -3,12 +3,11 @@
 import pytest
 import numpy as np
 
-from src.contribution_accounting import (
+from neuro.modules.credit.contribution_accounting import (
     Contribution,
     ShapleyConfig,
     ContributionAccountant,
 )
-
 
 class TestShapleyConfig:
     """Tests for ShapleyConfig class."""
@@ -21,7 +20,6 @@ class TestShapleyConfig:
     def test_custom_config(self):
         config = ShapleyConfig(use_approximation=False, num_samples=50)
         assert not config.use_approximation
-
 
 class TestContribution:
     """Tests for Contribution class."""
@@ -36,7 +34,6 @@ class TestContribution:
         )
         assert contrib.module_id == "mod1"
         assert contrib.shapley_value == 0.5
-
 
 class TestContributionAccountant:
     """Tests for ContributionAccountant class."""
@@ -221,7 +218,6 @@ class TestContributionAccountant:
         assert "total_modules" in stats
         assert "total_computations" in stats
         assert stats["total_modules"] == 2
-
 
 class TestShapleyProperties:
     """Tests for Shapley value properties."""

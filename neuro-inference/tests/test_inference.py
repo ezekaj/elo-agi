@@ -4,40 +4,36 @@ Tests for neuro-inference: Probabilistic and causal reasoning.
 
 import pytest
 import numpy as np
-import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from bayesian.networks import (
+from neuro.modules.inference.bayesian.networks import (
     BayesianNetwork, DiscreteNode, ContinuousNode, CPT, NetworkQuery,
 )
-from bayesian.belief_prop import (
+from neuro.modules.inference.bayesian.belief_prop import (
     BeliefPropagation, Message, FactorGraph, Factor,
 )
-from bayesian.learning import (
+from neuro.modules.inference.bayesian.learning import (
     StructureLearner, ParameterLearner, BayesianScore,
 )
-from causal.scm import (
+from neuro.modules.inference.causal.scm import (
     StructuralCausalModel, CausalVariable, StructuralEquation, VariableType,
 )
-from causal.intervention import (
+from neuro.modules.inference.causal.intervention import (
     Intervention, InterventionEngine, DoOperator,
 )
-from causal.counterfactual import (
+from neuro.modules.inference.causal.counterfactual import (
     CounterfactualReasoner, CounterfactualQuery, PotentialOutcome,
 )
-from analogical.mapping import (
+from neuro.modules.inference.analogical.mapping import (
     StructureMapper, Analogy, StructuralAlignment,
     RelationalStructure, Predicate, RelationOrder,
 )
-from analogical.retrieval import (
+from neuro.modules.inference.analogical.retrieval import (
     AnalogyRetriever, CaseLibrary, Case,
 )
-from integration import (
+from neuro.modules.inference.integration import (
     ProbabilisticReasoner, InferenceResult, ReasoningType,
 )
-
 
 # =============================================================================
 # Bayesian Network Tests
@@ -70,7 +66,6 @@ class TestCPT:
         assert cpt.get_probability("yes", {"rain": "yes"}) == 0.9
         assert cpt.get_probability("yes", {"rain": "no"}) == 0.1
 
-
 class TestDiscreteNode:
     """Tests for DiscreteNode."""
 
@@ -82,7 +77,6 @@ class TestDiscreteNode:
         )
         assert node.name == "weather"
         assert len(node.values) == 3
-
 
 class TestBayesianNetwork:
     """Tests for BayesianNetwork."""
@@ -172,7 +166,6 @@ class TestBayesianNetwork:
         assert stats["n_nodes"] == 3
         assert stats["n_edges"] == 3
 
-
 # =============================================================================
 # Belief Propagation Tests
 # =============================================================================
@@ -200,7 +193,6 @@ class TestFactor:
         # P(A=1) = 0.1 + 0.4 = 0.5
         assert "B" not in marg.variables
 
-
 class TestFactorGraph:
     """Tests for FactorGraph."""
 
@@ -224,7 +216,6 @@ class TestFactorGraph:
         fg.add_factor(Factor("f_AB", ["A", "B"]))
         # A--f_AB--B is a tree
         assert fg.is_tree()
-
 
 class TestBeliefPropagation:
     """Tests for BeliefPropagation."""
@@ -258,7 +249,6 @@ class TestBeliefPropagation:
         belief = bp.get_belief("A")
         assert 0 in belief or 1 in belief
 
-
 # =============================================================================
 # Structure Learning Tests
 # =============================================================================
@@ -284,7 +274,6 @@ class TestParameterLearner:
         # P(wet=yes | rain=no) should be low
         assert cpt.get_probability("yes", {"rain": "no"}) < 0.2
 
-
 class TestStructureLearner:
     """Tests for StructureLearner."""
 
@@ -305,7 +294,6 @@ class TestStructureLearner:
         # Should find some structure
         assert structure is not None
         assert "A" in structure
-
 
 # =============================================================================
 # Structural Causal Model Tests
@@ -348,7 +336,6 @@ class TestStructuralCausalModel:
         assert "X" in simple_scm.get_ancestors("Y")
         assert "Y" in simple_scm.get_descendants("X")
 
-
 class TestIntervention:
     """Tests for Intervention classes."""
 
@@ -363,7 +350,6 @@ class TestIntervention:
         do = DoOperator.multiple({"X": 1, "Z": 2})
         assert "X" in do.variables
         assert "Z" in do.variables
-
 
 class TestInterventionEngine:
     """Tests for InterventionEngine."""
@@ -389,7 +375,6 @@ class TestInterventionEngine:
         ate, se = engine.average_treatment_effect("X", "Y", 0, 1, n_samples=1000)
         # True ATE is 1
         assert 0.5 < ate < 1.5
-
 
 # =============================================================================
 # Counterfactual Tests
@@ -421,7 +406,6 @@ class TestCounterfactualReasoner:
         # Result should exist
         assert "outcomes" in result or "error" in result
 
-
 class TestPotentialOutcome:
     """Tests for PotentialOutcome."""
 
@@ -434,7 +418,6 @@ class TestPotentialOutcome:
             value=10,
         )
         assert "Y(X=1)" in str(po)
-
 
 # =============================================================================
 # Analogical Reasoning Tests
@@ -452,7 +435,6 @@ class TestRelationalStructure:
 
         assert "sun" in structure.objects
         assert len(structure.predicates) == 1
-
 
 class TestStructureMapper:
     """Tests for StructureMapper."""
@@ -498,7 +480,6 @@ class TestStructureMapper:
         # Should have high systematicity due to causal structure
         assert analogy.systematicity >= 0
 
-
 class TestCaseLibrary:
     """Tests for CaseLibrary."""
 
@@ -523,7 +504,6 @@ class TestCaseLibrary:
 
         retrieved = library.get_case("test_case")
         assert retrieved.name == "test_case"
-
 
 class TestAnalogyRetriever:
     """Tests for AnalogyRetriever."""
@@ -570,7 +550,6 @@ class TestAnalogyRetriever:
 
         results = retriever.retrieve(query, top_k=2)
         assert len(results) >= 1
-
 
 # =============================================================================
 # Integration Tests
@@ -634,7 +613,6 @@ class TestProbabilisticReasoner:
         stats = reasoner.statistics()
         assert "has_bayesian_network" in stats
 
-
 class TestInferenceResult:
     """Tests for InferenceResult."""
 
@@ -649,7 +627,6 @@ class TestInferenceResult:
         summary = result.summary()
         assert "P(A)" in summary
         assert "0.9" in summary
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

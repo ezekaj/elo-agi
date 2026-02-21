@@ -10,17 +10,13 @@ Covers:
 
 import pytest
 import numpy as np
-import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from llm_interface import LLMOracle, MockLLM, LLMConfig, LLMResponse, create_llm
-from semantic_bridge import SemanticBridge, SemanticConfig, Embedding
-from language_grounding import LanguageGrounding, GroundingConfig, GroundedConcept
-from dialogue_agent import NeuroDialogueAgent, DialogueConfig, ConversationTurn, MultiAgentDialogue
-
+from neuro.modules.llm.llm_interface import LLMOracle, MockLLM, LLMConfig, LLMResponse, create_llm
+from neuro.modules.llm.semantic_bridge import SemanticBridge, SemanticConfig, Embedding
+from neuro.modules.llm.language_grounding import LanguageGrounding, GroundingConfig, GroundedConcept
+from neuro.modules.llm.dialogue_agent import NeuroDialogueAgent, DialogueConfig, ConversationTurn, MultiAgentDialogue
 
 # =============================================================================
 # Tests: LLM Interface
@@ -39,7 +35,6 @@ class TestLLMConfig:
         assert config.provider == "anthropic"
         assert config.model == "claude-3-opus"
 
-
 class TestLLMResponse:
     """Tests for LLMResponse."""
 
@@ -48,7 +43,6 @@ class TestLLMResponse:
         assert response.text == "Hello"
         assert response.tokens_used == 5
         assert not response.cached
-
 
 class TestMockLLM:
     """Tests for MockLLM."""
@@ -122,7 +116,6 @@ class TestMockLLM:
         llm.clear_cache()
         assert len(llm._cache) == 0
 
-
 class TestCreateLLM:
     """Tests for create_llm factory."""
 
@@ -133,7 +126,6 @@ class TestCreateLLM:
     def test_create_default(self):
         llm = create_llm()
         assert isinstance(llm, MockLLM)
-
 
 # =============================================================================
 # Tests: Semantic Bridge
@@ -161,7 +153,6 @@ class TestEmbedding:
         emb1 = Embedding(vector=vec1, text="a")
         emb2 = Embedding(vector=vec2, text="b")
         assert emb1.similarity(emb2) == pytest.approx(0.0)
-
 
 class TestSemanticBridge:
     """Tests for SemanticBridge."""
@@ -227,7 +218,6 @@ class TestSemanticBridge:
         bridge.reset()
         assert len(bridge._memory) == 0
 
-
 # =============================================================================
 # Tests: Language Grounding
 # =============================================================================
@@ -261,7 +251,6 @@ class TestGroundedConcept:
         )
         assert concept.occurrences == 2
         assert concept.confidence > 0.5
-
 
 class TestLanguageGrounding:
     """Tests for LanguageGrounding."""
@@ -343,7 +332,6 @@ class TestLanguageGrounding:
         assert stats['concept_count'] == 1
         assert stats['ground_count'] == 1
 
-
 # =============================================================================
 # Tests: Dialogue Agent
 # =============================================================================
@@ -355,7 +343,6 @@ class TestConversationTurn:
         turn = ConversationTurn(role="user", content="Hello")
         assert turn.role == "user"
         assert turn.content == "Hello"
-
 
 class TestNeuroDialogueAgent:
     """Tests for NeuroDialogueAgent."""
@@ -438,7 +425,6 @@ class TestNeuroDialogueAgent:
         assert len(agent._history) == 0
         assert agent._current_state is None
 
-
 class TestMultiAgentDialogue:
     """Tests for MultiAgentDialogue."""
 
@@ -486,7 +472,6 @@ class TestMultiAgentDialogue:
         multi.run_turn("alice", "Test")
         multi.clear_log()
         assert len(multi._conversation_log) == 0
-
 
 # =============================================================================
 # Integration Tests
@@ -554,7 +539,6 @@ class TestIntegration:
         assert len(description) > 0
         assert len(response) > 0
         assert action.shape[0] > 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

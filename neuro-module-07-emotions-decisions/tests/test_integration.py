@@ -2,13 +2,12 @@
 
 import numpy as np
 import pytest
-from src.emotion_decision_integrator import (
+from neuro.modules.m07_emotions_decisions.emotion_decision_integrator import (
     EmotionDecisionSystem, Situation, SituationType,
     create_threat_situation, create_reward_situation, create_moral_situation
 )
-from src.moral_reasoning import create_trolley_push, create_trolley_switch
-from src.emotional_states import Outcome, OutcomeType
-
+from neuro.modules.m07_emotions_decisions.moral_reasoning import create_trolley_push, create_trolley_switch
+from neuro.modules.m07_emotions_decisions.emotional_states import Outcome, OutcomeType
 
 class TestEmotionDecisionSystem:
     """Test the full integrated system."""
@@ -61,7 +60,6 @@ class TestEmotionDecisionSystem:
         # System should have learned
         assert len(system.decision_history) > 0
 
-
 class TestLesionSimulation:
     """Test lesion effects on decision-making."""
 
@@ -95,7 +93,6 @@ class TestLesionSimulation:
         # Lesioned should have reduced threat response
         assert lesion_decision.emotional_state.threat_level <= normal_decision.emotional_state.threat_level
 
-
 class TestStressEffects:
     """Test stress effects on processing."""
 
@@ -109,7 +106,6 @@ class TestStressEffects:
         # Under high stress, should rely more on fast route
         # Processing time should be faster
         assert decision.processing_time_ms < 50  # Closer to fast route timing
-
 
 class TestEmotionalDynamics:
     """Test emotional state changes over time."""

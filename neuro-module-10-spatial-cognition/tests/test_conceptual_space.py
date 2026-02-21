@@ -2,10 +2,9 @@
 
 import numpy as np
 import pytest
-from src.conceptual_space import (
+from neuro.modules.m10_spatial_cognition.conceptual_space import (
     ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap, ConceptFeatures
 )
-
 
 class TestConceptCell:
     """Test concept cell functionality."""
@@ -47,7 +46,6 @@ class TestConceptCell:
         assert cell.is_active(np.array([0.5, 0.5]))
         assert not cell.is_active(np.array([2.0, 2.0]))
 
-
 class TestConceptualGrid:
     """Test conceptual grid functionality."""
 
@@ -68,7 +66,6 @@ class TestConceptualGrid:
             np.array([0.3, 0.4])
         )
         assert dist == pytest.approx(0.5, rel=0.01)
-
 
 class TestSocialDistanceGrid:
     """Test social distance encoding."""
@@ -110,7 +107,6 @@ class TestSocialDistanceGrid:
         similar = sg.find_socially_similar("alice", threshold=0.3)
         assert len(similar) == 1
         assert similar[0][0] == "bob"
-
 
 class TestConceptualMap:
     """Test conceptual map integration."""
@@ -217,7 +213,6 @@ class TestConceptualMap:
         assert "b" in concepts
         assert len(concepts) == 2
 
-
 class TestConceptFeatures:
     """Test concept features dataclass."""
 
@@ -230,7 +225,6 @@ class TestConceptFeatures:
         assert cf.name == "democracy"
         assert cf.category == "political"
         assert len(cf.features) == 3
-
 
 class TestResearchValidation:
     """Test that implementation validates 2025 research findings."""

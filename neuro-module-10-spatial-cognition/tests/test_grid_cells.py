@@ -2,8 +2,7 @@
 
 import numpy as np
 import pytest
-from src.grid_cells import GridCell, GridCellModule, GridCellPopulation, GridParameters
-
+from neuro.modules.m10_spatial_cognition.grid_cells import GridCell, GridCellModule, GridCellPopulation, GridParameters
 
 class TestGridCell:
     """Test individual grid cell functionality."""
@@ -35,7 +34,6 @@ class TestGridCell:
         )
         assert len(nodes) > 0
 
-
 class TestGridCellModule:
     """Test grid cell module functionality."""
 
@@ -59,7 +57,6 @@ class TestGridCellModule:
         activity = module.get_module_activity(np.array([0.5, 0.5]))
         assert len(activity) == 20
         assert np.all(activity >= 0)
-
 
 class TestGridCellPopulation:
     """Test multi-scale grid cell population."""
@@ -112,7 +109,6 @@ class TestGridCellPopulation:
         )
         assert X.shape == (20, 20)
         assert firing_map.shape == (20, 20)
-
 
 class TestGridParameters:
     """Test grid parameters dataclass."""

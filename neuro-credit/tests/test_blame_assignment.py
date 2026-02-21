@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.blame_assignment import (
+from neuro.modules.credit.blame_assignment import (
     Failure,
     FailureType,
     BlameResult,
@@ -11,7 +11,6 @@ from src.blame_assignment import (
     BlameAssignment,
     CounterfactualBlame,
 )
-
 
 class TestFailure:
     """Tests for Failure class."""
@@ -26,7 +25,6 @@ class TestFailure:
         assert failure.failure_type == FailureType.GOAL_UNREACHED
         assert failure.severity == 0.8
 
-
 class TestModuleAction:
     """Tests for ModuleAction class."""
 
@@ -39,7 +37,6 @@ class TestModuleAction:
             timestamp=10,
         )
         assert action.module_id == "mod1"
-
 
 class TestCounterfactualBlame:
     """Tests for CounterfactualBlame class."""
@@ -79,7 +76,6 @@ class TestCounterfactualBlame:
 
         assert outcome == 0.0
         assert len(simulated) == 0
-
 
 class TestBlameAssignment:
     """Tests for BlameAssignment class."""
@@ -191,7 +187,6 @@ class TestBlameAssignment:
         assert "total_failures" in stats
         assert "total_blame_assignments" in stats
         assert stats["total_blame_assignments"] == 1
-
 
 class TestBlameWithWorldModel:
     """Tests for blame assignment with world model."""

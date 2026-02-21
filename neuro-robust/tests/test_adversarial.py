@@ -2,11 +2,10 @@
 
 import pytest
 import numpy as np
-from src.adversarial import (
+from neuro.modules.robust.adversarial import (
     SimpleNN, AdversarialAttack, AdversarialDefense,
     AttackType, DefenseType, AttackResult, DefenseResult,
 )
-
 
 class TestSimpleNN:
     """Tests for SimpleNN."""
@@ -68,7 +67,6 @@ class TestSimpleNN:
         pred = model.predict(x)
         assert isinstance(pred, int)
         assert 0 <= pred < 3
-
 
 class TestAdversarialAttack:
     """Tests for AdversarialAttack."""
@@ -184,7 +182,6 @@ class TestAdversarialAttack:
         result = attack.fgsm(sample_input, target_class, epsilon=0.3, targeted=True)
         assert isinstance(result, AttackResult)
 
-
 class TestAdversarialDefense:
     """Tests for AdversarialDefense."""
 
@@ -272,7 +269,6 @@ class TestAdversarialDefense:
         stats = defense.statistics()
         assert stats["n_defended"] == 2
 
-
 class TestAttackDefenseInteraction:
     """Tests for attack-defense interaction."""
 
@@ -345,7 +341,6 @@ class TestAttackDefenseInteraction:
 
         assert success_large >= success_small
 
-
 class TestAttackEdgeCases:
     """Edge case tests for attacks."""
 
@@ -382,7 +377,6 @@ class TestAttackEdgeCases:
         x = np.ones(10)
         result = attack.fgsm(x, 1, epsilon=0.1)
         assert result.adversarial.shape == x.shape
-
 
 class TestDefenseEdgeCases:
     """Edge case tests for defenses."""

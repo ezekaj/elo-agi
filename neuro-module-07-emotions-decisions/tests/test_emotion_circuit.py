@@ -2,11 +2,10 @@
 
 import numpy as np
 import pytest
-from src.emotion_circuit import (
+from neuro.modules.m07_emotions_decisions.emotion_circuit import (
     VMPFC, Amygdala, ACC, Insula, EmotionCircuit,
     EmotionType, BodyState
 )
-
 
 class TestAmygdala:
     """Test amygdala threat/reward detection."""
@@ -46,7 +45,6 @@ class TestAmygdala:
         assert len(amygdala.emotional_memories) == 1
         assert amygdala.emotional_memories[0].valence == -0.8
 
-
 class TestVMPFC:
     """Test VMPFC value computation."""
 
@@ -76,7 +74,6 @@ class TestVMPFC:
         assert valence > 0  # Positive past outcomes
         assert confidence > 0
 
-
 class TestACC:
     """Test ACC conflict monitoring."""
 
@@ -102,7 +99,6 @@ class TestACC:
         expected = acc.get_expected_value('action_a')
         assert 0.4 < expected < 0.8
 
-
 class TestInsula:
     """Test insula body state mapping."""
 
@@ -117,7 +113,6 @@ class TestInsula:
         insula.update_body_state(heart_rate=0.3, muscle_tension=0.2)
         emotion = insula.map_to_emotion()
         assert emotion.arousal < 0.5
-
 
 class TestEmotionCircuit:
     """Test integrated emotion circuit."""

@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.narrative_self import (
+from neuro.modules.m16_consciousness.narrative_self import (
     AutobiographicalMemory, SelfConcept, NarrativeSelf, NarrativeParams
 )
-
 
 class TestAutobiographicalMemory:
     """Tests for autobiographical memory"""
@@ -61,7 +57,6 @@ class TestAutobiographicalMemory:
 
         assert memory.get_memory_count() <= 5
 
-
 class TestSelfConcept:
     """Tests for self-concept"""
 
@@ -97,7 +92,6 @@ class TestSelfConcept:
         result = sc.process_self_relevant(stimulus)
         assert "self_relevance" in result
         assert "mpfc_activity" in result
-
 
 class TestNarrativeSelf:
     """Tests for integrated narrative self"""
@@ -146,7 +140,6 @@ class TestNarrativeSelf:
         state = ns.get_narrative_self_state()
         assert "memory_count" in state
         assert "narrative_coherence" in state
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

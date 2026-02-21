@@ -3,12 +3,11 @@
 import pytest
 import numpy as np
 
-from src.integration import (
+from neuro.modules.continual.integration import (
     ContinualLearningController,
     ContinualLearningConfig,
 )
-from src.forgetting_prevention import ForgettingPreventionMethod
-
+from neuro.modules.continual.forgetting_prevention import ForgettingPreventionMethod
 
 class TestContinualLearningConfig:
     """Tests for ContinualLearningConfig class."""
@@ -29,7 +28,6 @@ class TestContinualLearningConfig:
         assert config.task_change_threshold == 0.3
         assert config.ewc_lambda == 500.0
         assert not config.auto_detect_tasks
-
 
 class TestContinualLearningController:
     """Tests for ContinualLearningController class."""
@@ -243,7 +241,6 @@ class TestContinualLearningController:
         assert "forgetting" in stats
         assert "replay" in stats
         assert "capabilities" in stats
-
 
 class TestEndToEndContinualLearning:
     """End-to-end tests for continual learning."""

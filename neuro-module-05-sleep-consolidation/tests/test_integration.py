@@ -6,11 +6,10 @@ in realistic usage scenarios.
 
 import pytest
 import numpy as np
-from src.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
-from src.meta_learning import MetaLearningController, MemoryType
-from src.interference_resolution import InterferenceResolver
-from src.schema_refinement import SchemaRefiner
-
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
+from neuro.modules.m05_sleep_consolidation.meta_learning import MetaLearningController, MemoryType
+from neuro.modules.m05_sleep_consolidation.interference_resolution import InterferenceResolver
+from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner
 
 class TestFullConsolidationCycle:
     """Tests for complete consolidation cycles."""
@@ -88,7 +87,6 @@ class TestFullConsolidationCycle:
             schedule = scheduler.get_schedule(f"mem{i}")
             assert schedule.interval > 1.0, "Interval should grow with success"
 
-
 class TestInterferenceWithConsolidation:
     """Tests for interference during consolidation."""
 
@@ -155,7 +153,6 @@ class TestInterferenceWithConsolidation:
         assert replayed.count("mem_a") >= 4
         assert replayed.count("mem_b") >= 4
 
-
 class TestSchemaEvolution:
     """Tests for schema evolution during consolidation."""
 
@@ -216,7 +213,6 @@ class TestSchemaEvolution:
 
         assert schema is not None
         assert len(schema.instances) >= 7
-
 
 class TestAdaptiveLearning:
     """Tests for adaptive learning behavior."""
@@ -279,7 +275,6 @@ class TestAdaptiveLearning:
         total = sum(adapted_weights.values())
         assert total == pytest.approx(1.0, abs=0.01)
 
-
 class TestCrossComponentConsistency:
     """Tests for consistency across components."""
 
@@ -320,7 +315,6 @@ class TestCrossComponentConsistency:
 
         assert sched.repetition_count == 1
         assert len(curve.consolidation_history) == 2  # initial + review
-
 
 class TestRealisticScenarios:
     """Tests for realistic learning scenarios."""

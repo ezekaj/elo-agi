@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "logical_inference",
+  "n_trials": 2,
+  "success_rate": 1.0,
+  "mean_score": 1.0,
+  "std_score": 0.0,
+  "mean_latency": 4.172325134277344e-06,
+  "error_count": 0,
+  "total_time": 2.384185791015625e-05,
+  "timestamp": 1771713513.784422,
+  "config": {
+    "name": "logical_inference",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

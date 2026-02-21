@@ -2,17 +2,13 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.cognitive_manifold import (
+from neuro.modules.m01_predictive_coding.cognitive_manifold import (
     CognitiveState,
     CognitiveManifold,
     DualProcess,
     FlowType,
     AttractorLandscape
 )
-
 
 class TestCognitiveState:
     """Tests for cognitive state representation"""
@@ -98,7 +94,6 @@ class TestCognitiveState:
         assert np.allclose(copy.position, state.position)
         assert np.allclose(copy.velocity, state.velocity)
         assert copy is not state
-
 
 class TestCognitiveManifold:
     """Tests for cognitive manifold with potential"""
@@ -240,7 +235,6 @@ class TestCognitiveManifold:
         # Natural gradient accounts for metric
         assert not np.allclose(euclidean, natural)
 
-
 class TestDualProcess:
     """Tests for dual-process cognition emergence"""
 
@@ -348,7 +342,6 @@ class TestDualProcess:
             # (This is a soft test as exact dynamics depend on parameters)
             assert len(systems) > 0
 
-
 class TestAttractorLandscape:
     """Tests for attractor dynamics"""
 
@@ -398,7 +391,6 @@ class TestAttractorLandscape:
 
         assert landscape.in_basin(np.array([0.5, 0.5]), 0, radius=1.0)
         assert not landscape.in_basin(np.array([2.0, 2.0]), 0, radius=1.0)
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

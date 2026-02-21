@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.cognitive_flexibility import (
+from neuro.modules.m13_executive.cognitive_flexibility import (
     TaskSwitcher, SetShifter, CognitiveFlexibility, FlexibilityParams
 )
-
 
 class TestTaskSwitcher:
     """Tests for task switching"""
@@ -72,7 +68,6 @@ class TestTaskSwitcher:
         result = switcher.execute_trial(np.zeros(10), task=1)
 
         assert result["prepared"]
-
 
 class TestSetShifter:
     """Tests for set shifting"""
@@ -163,7 +158,6 @@ class TestSetShifter:
         assert shifter.total_errors == 0
         assert shifter.categories_completed == 0
 
-
 class TestCognitiveFlexibility:
     """Tests for integrated cognitive flexibility"""
 
@@ -214,7 +208,6 @@ class TestCognitiveFlexibility:
 
         # lPFC should have some activation
         assert np.sum(flex.lpfc_activation) > 0
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

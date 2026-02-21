@@ -3,15 +3,14 @@
 import pytest
 import numpy as np
 
-from src.integration import (
+from neuro.modules.planning.integration import (
     PlanningConfig,
     PlanningIntegration,
     WorldModelAdapter,
 )
-from src.goal_hierarchy import Goal
-from src.skill_library import Skill, SkillType
-from src.subgoal_discovery import Trajectory
-
+from neuro.modules.planning.goal_hierarchy import Goal
+from neuro.modules.planning.skill_library import Skill, SkillType
+from neuro.modules.planning.subgoal_discovery import Trajectory
 
 class TestPlanningConfig:
     """Tests for PlanningConfig class."""
@@ -31,7 +30,6 @@ class TestPlanningConfig:
         assert config.state_dim == 128
         assert config.action_dim == 8
         assert config.mcts_simulations == 50
-
 
 class TestWorldModelAdapterIntegration:
     """Tests for WorldModelAdapter in integration context."""
@@ -83,7 +81,6 @@ class TestWorldModelAdapterIntegration:
 
         stats = adapter.statistics()
         assert stats["imagination_calls"] == 2
-
 
 class TestPlanningIntegration:
     """Tests for PlanningIntegration class."""
@@ -297,7 +294,6 @@ class TestPlanningIntegration:
         assert "decomposition_stats" in stats
         assert "options_stats" in stats
         assert "skills_stats" in stats
-
 
 class TestEndToEndPlanning:
     """End-to-end planning tests."""

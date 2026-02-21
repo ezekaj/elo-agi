@@ -2,17 +2,13 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.intrinsic_motivation import (
+from neuro.modules.m06_motivation.intrinsic_motivation import (
     PathEntropyMaximizer,
     PossibilitySpace,
     ActionDiversityTracker,
     IntrinsicDrive,
     DriveType
 )
-
 
 class TestPossibilitySpace:
     """Tests for possibility space tracking"""
@@ -85,7 +81,6 @@ class TestPossibilitySpace:
         # Should have some positive value for expansion
         assert value >= 0.0
 
-
 class TestActionDiversityTracker:
     """Tests for action diversity tracking"""
 
@@ -131,7 +126,6 @@ class TestActionDiversityTracker:
 
         assert rare_bonus > common_bonus
 
-
 class TestIntrinsicDrive:
     """Tests for individual intrinsic drives"""
 
@@ -171,7 +165,6 @@ class TestIntrinsicDrive:
         for _ in range(100):
             drive.update(satisfaction=1.0, dt=1.0)
         assert drive.level >= 0.0
-
 
 class TestPathEntropyMaximizer:
     """Tests for the complete path entropy maximizer"""
@@ -261,7 +254,6 @@ class TestPathEntropyMaximizer:
         # Should have healthy diversity
         metrics = maximizer.get_metrics()
         assert metrics['state_diversity'] > 0.3
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

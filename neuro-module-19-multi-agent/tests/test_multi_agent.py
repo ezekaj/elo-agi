@@ -11,24 +11,23 @@ import pytest
 import numpy as np
 import time
 
-from src.agent import (
+from neuro.modules.m19_multi_agent.agent import (
     CognitiveAgent, AgentParams, AgentRole, BeliefState,
     Message, ModuleProposal, ContentType
 )
-from src.population import (
+from neuro.modules.m19_multi_agent.population import (
     AgentPopulation, PopulationParams, PopulationState, TopologyType
 )
-from src.coordination import (
+from neuro.modules.m19_multi_agent.coordination import (
     EmergentCoordination, CoordinationMechanism, CoordinationParams,
     Task, Action, EmergentPattern
 )
-from src.collective_memory import (
+from neuro.modules.m19_multi_agent.collective_memory import (
     CollectiveMemory, MemoryParams, MemoryEntry
 )
-from src.swarm import (
+from neuro.modules.m19_multi_agent.swarm import (
     SwarmIntelligence, SwarmParams, Problem, Solution, ProblemStatus
 )
-
 
 # =============================================================================
 # Unit Tests: CognitiveAgent
@@ -114,7 +113,6 @@ class TestCognitiveAgent:
             # Each role should be able to generate proposals
             assert isinstance(proposals, list)
 
-
 class TestBeliefState:
     """Tests for BeliefState."""
 
@@ -138,7 +136,6 @@ class TestBeliefState:
         belief1.merge(belief2, weight=0.5)
 
         assert "key2" in belief1.beliefs
-
 
 # =============================================================================
 # Unit Tests: AgentPopulation
@@ -208,7 +205,6 @@ class TestAgentPopulation:
         assert result is True
         assert len(pop.agents) == 3
 
-
 # =============================================================================
 # Unit Tests: EmergentCoordination
 # =============================================================================
@@ -257,7 +253,6 @@ class TestEmergentCoordination:
 
         # Should detect synchronization pattern
         assert isinstance(patterns, list)
-
 
 # =============================================================================
 # Unit Tests: CollectiveMemory
@@ -342,7 +337,6 @@ class TestCollectiveMemory:
         score2 = mem.get_agent_contribution("agent2")
 
         assert score1 > score2  # agent1 contributed more
-
 
 # =============================================================================
 # Integration Tests
@@ -431,7 +425,6 @@ class TestIntegration:
         # Should maintain some diversity
         assert diversity >= 0
 
-
 # =============================================================================
 # Stress Tests
 # =============================================================================
@@ -512,7 +505,6 @@ class TestStress:
         )
         solution = swarm.solve(problem)
         assert solution is not None
-
 
 # =============================================================================
 # Additional Unit Tests
@@ -596,7 +588,6 @@ class TestSwarmIntelligence:
         stats = swarm.get_statistics()
         assert stats['step_count'] == 0
         assert stats['problems_solved'] == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

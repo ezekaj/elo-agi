@@ -4,15 +4,14 @@ import pytest
 import numpy as np
 import time
 
-from src.efficiency_monitor import (
+from neuro.modules.meta_reasoning.efficiency_monitor import (
     EfficiencyMonitor,
     EfficiencyConfig,
     ReasoningMetrics,
     EfficiencyReport,
     TerminationReason,
 )
-from src.style_selector import ReasoningStyle
-
+from neuro.modules.meta_reasoning.style_selector import ReasoningStyle
 
 class TestEfficiencyConfig:
     """Tests for EfficiencyConfig class."""
@@ -27,7 +26,6 @@ class TestEfficiencyConfig:
         config = EfficiencyConfig(time_limit_seconds=30.0, cost_limit=50.0)
         assert config.time_limit_seconds == 30.0
         assert config.cost_limit == 50.0
-
 
 class TestEfficiencyMonitor:
     """Tests for EfficiencyMonitor class."""
@@ -181,7 +179,6 @@ class TestEfficiencyMonitor:
         assert "avg_efficiency" in stats
         assert stats["completed_sessions"] == 1
 
-
 class TestTerminationReason:
     """Tests for TerminationReason enum."""
 
@@ -190,7 +187,6 @@ class TestTerminationReason:
         assert TerminationReason.TIME_LIMIT.value == "time_limit"
         assert TerminationReason.COST_LIMIT.value == "cost_limit"
         assert TerminationReason.DIMINISHING_RETURNS.value == "diminishing_returns"
-
 
 class TestReasoningMetrics:
     """Tests for ReasoningMetrics dataclass."""

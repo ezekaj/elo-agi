@@ -6,35 +6,31 @@ Tests visual, auditory, and multimodal processing.
 
 import pytest
 import numpy as np
-import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+from neuro.modules.perception.visual.retina import Retina, RetinaOutput, PhotoreceptorType, GanglionCellType
+from neuro.modules.perception.visual.v1_v2 import V1Processor, V2Processor, V1Output, V2Output
+from neuro.modules.perception.visual.v4_it import V4Processor, ITProcessor, V4Output, ITOutput, ShapeDescriptor
+from neuro.modules.perception.visual.dorsal_ventral import DorsalStream, VentralStream, VisualPathways
 
-from visual.retina import Retina, RetinaOutput, PhotoreceptorType, GanglionCellType
-from visual.v1_v2 import V1Processor, V2Processor, V1Output, V2Output
-from visual.v4_it import V4Processor, ITProcessor, V4Output, ITOutput, ShapeDescriptor
-from visual.dorsal_ventral import DorsalStream, VentralStream, VisualPathways
+from neuro.modules.perception.auditory.cochlea import Cochlea, CochleaOutput, GammatoneFilterbank
+from neuro.modules.perception.auditory.a1 import A1Processor, A1Output
+from neuro.modules.perception.auditory.speech import SpeechProcessor, SpeechOutput, PhonemeRecognizer, FormantTracker, VoicingDetector
 
-from auditory.cochlea import Cochlea, CochleaOutput, GammatoneFilterbank
-from auditory.a1 import A1Processor, A1Output
-from auditory.speech import SpeechProcessor, SpeechOutput, PhonemeRecognizer, FormantTracker, VoicingDetector
-
-from multimodal.binding import (
+from neuro.modules.perception.multimodal.binding import (
     CrossModalBinder, BindingOutput, ModalityInput, Modality,
     TemporalBinder, SpatialBinder, FeatureBinder
 )
-from multimodal.attention import (
+from neuro.modules.perception.multimodal.attention import (
     SelectiveAttention, AttentionOutput, SaliencyComputer,
     TopDownController, AttentionGate
 )
 
-from interface import (
+from neuro.modules.perception.interface import (
     PerceptionSystem, VisualPipeline, AuditoryPipeline,
     VisualPercept, AuditoryPercept, MultimodalPercept,
     create_perception_system
 )
-
 
 # ============== Visual Tests ==============
 
@@ -101,7 +97,6 @@ class TestRetina:
         center_val = rf_map[16, 16]
         edge_val = rf_map[0, 0]
         assert center_val != edge_val
-
 
 class TestV1V2:
     """Tests for V1 and V2 processing."""
@@ -192,7 +187,6 @@ class TestV1V2:
 
         # Corners should be detected
         assert v2_out.corner_map.max() > 0
-
 
 class TestV4IT:
     """Tests for V4 and IT processing."""
@@ -293,7 +287,6 @@ class TestV4IT:
         assert len(it._prototypes) == n_before + 1
         assert "new_object" in it._prototypes
 
-
 class TestDorsalVentral:
     """Tests for dorsal/ventral streams."""
 
@@ -360,7 +353,6 @@ class TestDorsalVentral:
         assert "reach" in affordances
         assert "avoid" in affordances
         assert "track" in affordances
-
 
 # ============== Auditory Tests ==============
 
@@ -433,7 +425,6 @@ class TestCochlea:
         assert spec.shape[0] == 32
         assert spec.shape[1] > 0
 
-
 class TestA1:
     """Tests for A1 processing."""
 
@@ -479,7 +470,6 @@ class TestA1:
         assert "rate_spectrum" in mod_spec
         assert "scale_spectrum" in mod_spec
         assert len(mod_spec["rate_spectrum"]) == 4
-
 
 class TestSpeech:
     """Tests for speech processing."""
@@ -535,7 +525,6 @@ class TestSpeech:
 
         assert isinstance(speech_out, SpeechOutput)
         assert speech_out.formant_tracks.shape[0] == 3
-
 
 # ============== Multimodal Tests ==============
 
@@ -636,7 +625,6 @@ class TestBinding:
         assert Modality.AUDITORY in percept.modalities
         assert len(percept.unified_features) == 256
 
-
 class TestAttention:
     """Tests for attention mechanisms."""
 
@@ -680,7 +668,7 @@ class TestAttention:
         """Test attention gating."""
         gate = AttentionGate(capacity=2)
 
-        from multimodal.binding import BoundPercept
+        from neuro.modules.perception.multimodal.binding import BoundPercept
         percepts = [
             BoundPercept(
                 id="p1",
@@ -718,7 +706,7 @@ class TestAttention:
         """Test complete selective attention."""
         attention = SelectiveAttention()
 
-        from multimodal.binding import BoundPercept
+        from neuro.modules.perception.multimodal.binding import BoundPercept
         inputs = [
             ModalityInput(Modality.VISUAL, np.random.randn(64)),
         ]
@@ -737,7 +725,6 @@ class TestAttention:
 
         assert isinstance(output, AttentionOutput)
         assert len(output.attended_percepts) > 0
-
 
 # ============== Interface Tests ==============
 
@@ -782,7 +769,6 @@ class TestVisualPipeline:
         assert len(features) > 0
         assert abs(np.linalg.norm(features) - 1.0) < 1e-6
 
-
 class TestAuditoryPipeline:
     """Tests for auditory pipeline."""
 
@@ -815,7 +801,6 @@ class TestAuditoryPipeline:
         features = pipeline.get_features(percept)
 
         assert len(features) > 0
-
 
 class TestPerceptionSystem:
     """Tests for complete perception system."""
@@ -900,7 +885,6 @@ class TestPerceptionSystem:
         assert "auditory" in stats
         assert "binding" in stats
         assert "attention" in stats
-
 
 # ============== Integration Tests ==============
 
@@ -992,7 +976,6 @@ class TestIntegration:
         assert "visual" in stats
         assert "retina" in stats["visual"]
         assert "v1" in stats["visual"]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

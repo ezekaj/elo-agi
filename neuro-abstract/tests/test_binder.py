@@ -11,7 +11,7 @@ Tests cover:
 
 import pytest
 import numpy as np
-from src.symbolic_binder import (
+from neuro.modules.abstract.symbolic_binder import (
     SymbolicBinder,
     CompositeBinding,
     RoleBinding,
@@ -19,7 +19,6 @@ from src.symbolic_binder import (
     HRROperations,
     TPROperations,
 )
-
 
 class TestHRROperations:
     """Test Holographic Reduced Representation operations."""
@@ -69,7 +68,6 @@ class TestHRROperations:
         normalized = HRROperations.normalize(v)
         np.testing.assert_array_equal(normalized, v)
 
-
 class TestTPROperations:
     """Test Tensor Product Representation operations."""
 
@@ -90,7 +88,6 @@ class TestTPROperations:
         """Sum of empty list should be empty."""
         result = TPROperations.sum_tpr([])
         assert len(result) == 0
-
 
 class TestSymbolicBinder:
     """Test SymbolicBinder class."""
@@ -326,7 +323,6 @@ class TestSymbolicBinder:
         assert stats["n_symbols"] > 0
         assert stats["n_bindings"] == 1
 
-
 class TestHRRVsTPR:
     """Compare HRR and TPR binding methods."""
 
@@ -347,7 +343,6 @@ class TestHRRVsTPR:
             composed = binder.compose([binding])
             assert composed.shape == (128,)
             assert np.linalg.norm(composed) > 0.99
-
 
 class TestEdgeCases:
     """Test edge cases."""

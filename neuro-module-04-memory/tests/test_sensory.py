@@ -4,8 +4,7 @@ import pytest
 import numpy as np
 import time
 
-from src.sensory_memory import IconicBuffer, EchoicBuffer
-
+from neuro.modules.m04_memory.sensory_memory import IconicBuffer, EchoicBuffer
 
 class TestIconicBuffer:
     """Tests for visual sensory memory"""
@@ -61,7 +60,6 @@ class TestIconicBuffer:
         buffer.clear()
 
         assert buffer.read() is None
-
 
 class TestEchoicBuffer:
     """Tests for auditory sensory memory"""
@@ -126,7 +124,6 @@ class TestEchoicBuffer:
         # Should only include chunks from t=1.0 and t=2.0
         assert len(result) == 4  # [3, 4, 5, 6]
 
-
 class TestSensoryIntegration:
     """Integration tests for sensory memory"""
 
@@ -146,8 +143,8 @@ class TestSensoryIntegration:
         iconic.capture(np.array([1]))
         echoic.capture(np.array([1]))
 
-        # After 1 second
-        current_time = 1.0
+        # After 2 seconds (iconic decay_time=0.25s, so exp(-2/0.25)≈0.0003 < 0.01 threshold)
+        current_time = 2.0
 
         assert not iconic.is_available()  # Decayed
-        assert echoic.is_available()  # Still available
+        assert echoic.is_available()  # Still available (decay_time=3.5s)

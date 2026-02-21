@@ -13,19 +13,15 @@ These tests push the dual-process system to its limits:
 import pytest
 import numpy as np
 import time
-import sys
-sys.path.insert(0, '..')
-
-from src.dual_process_controller import DualProcessController
-from src.system1.pattern_recognition import PatternRecognition
-from src.system1.habit_executor import HabitExecutor, Action
-from src.system1.emotional_valuation import EmotionalValuation
-from src.system2.working_memory import WorkingMemory
-from src.system2.cognitive_control import CognitiveControl, Response, ConflictLevel
-from src.system2.relational_reasoning import RelationalReasoning, RelationType
-from src.hpc_pfc_complex import HPCPFCComplex
-from src.logic_network import LogicNetwork, Proposition, PropositionType
-
+from neuro.modules.m02_dual_process.dual_process_controller import DualProcessController
+from neuro.modules.m02_dual_process.system1.pattern_recognition import PatternRecognition
+from neuro.modules.m02_dual_process.system1.habit_executor import HabitExecutor, Action
+from neuro.modules.m02_dual_process.system1.emotional_valuation import EmotionalValuation
+from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory
+from neuro.modules.m02_dual_process.system2.cognitive_control import CognitiveControl, Response, ConflictLevel
+from neuro.modules.m02_dual_process.system2.relational_reasoning import RelationalReasoning, RelationType
+from neuro.modules.m02_dual_process.hpc_pfc_complex import HPCPFCComplex
+from neuro.modules.m02_dual_process.logic_network import LogicNetwork, Proposition, PropositionType
 
 class TestWorkingMemoryStress:
     """Stress test working memory limits"""
@@ -98,7 +94,6 @@ class TestWorkingMemoryStress:
         nodes = wm.query_by_binding("type", "node")
         assert len(nodes) == 3
 
-
 class TestConflictResolutionStress:
     """Stress test conflict detection and resolution"""
 
@@ -164,7 +159,6 @@ class TestConflictResolutionStress:
         others = [r for r in result if r.id != "r_9"]
         for r in others:
             assert r.activation < 0.5
-
 
 class TestRelationalReasoningStress:
     """Stress test compositional structures"""
@@ -252,7 +246,6 @@ class TestRelationalReasoningStress:
 
         assert result is not None
         assert len(result.relations) >= 1
-
 
 class TestLogicNetworkStress:
     """Stress test logical inference"""
@@ -347,7 +340,6 @@ class TestLogicNetworkStress:
         assert updated["N0"] is True
         assert updated["N1"] is True
 
-
 class TestHPCPFCStress:
     """Stress test episodic and schematic memory"""
 
@@ -423,7 +415,6 @@ class TestHPCPFCStress:
 
         # Should be fast (< 1 second for 100 retrievals)
         assert elapsed < 1.0
-
 
 class TestDualProcessIntegrationStress:
     """Full system integration stress tests"""
@@ -523,7 +514,6 @@ class TestDualProcessIntegrationStress:
             # Should have bounded deliberation
             assert result.s2_output.deliberation_steps <= 10
 
-
 class TestPatternRecognitionStress:
     """Stress test pattern matching at scale"""
 
@@ -579,7 +569,6 @@ class TestPatternRecognitionStress:
             matches = pr.match(test)
             # May or may not match depending on noise
 
-
 class TestEmotionalProcessingStress:
     """Stress test emotional valuation"""
 
@@ -618,7 +607,6 @@ class TestEmotionalProcessingStress:
         # Should still be somewhat threatening
         valence = ev.evaluate(stimulus)
         assert valence.threat > 0.3
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short", "-x"])

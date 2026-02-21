@@ -2,22 +2,18 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.predictive_language import (
+from neuro.modules.m08_language.predictive_language import (
     PredictiveLanguageProcessor,
     LanguageAcquisitionSimulator
 )
-from src.recursive_parser import (
+from neuro.modules.m08_language.recursive_parser import (
     RecursiveGrammar,
     ConstituentParser,
     LinearPredictor,
     Constituent,
     compare_human_vs_llm
 )
-from src.grammar_manifold import ImpossibleGrammarGenerator
-
+from neuro.modules.m08_language.grammar_manifold import ImpossibleGrammarGenerator
 
 class TestPredictiveLanguageProcessor:
     """Tests for integrated language processor"""
@@ -95,7 +91,6 @@ class TestPredictiveLanguageProcessor:
         assert 'semantic' in activations
         assert 'pragmatic' in activations
 
-
 class TestRecursiveParser:
     """Tests for recursive parser"""
 
@@ -158,7 +153,6 @@ class TestRecursiveParser:
         assert not result['llm_has_hierarchy']
         assert result['human_depth'] >= 1
 
-
 class TestLanguageAcquisition:
     """Tests for language acquisition simulation"""
 
@@ -188,7 +182,6 @@ class TestLanguageAcquisition:
         assert 'possible' in result
         assert 'impossible' in result
         assert 'selective_inhibition' in result
-
 
 class TestFullPipeline:
     """End-to-end integration tests"""
@@ -256,7 +249,6 @@ class TestFullPipeline:
         # State should be cleared
         assert processor.current_state is None
         assert len(processor.processing_history) == 0
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

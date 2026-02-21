@@ -2,17 +2,13 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.curiosity_drive import (
+from neuro.modules.m06_motivation.curiosity_drive import (
     CuriosityModule,
     NoveltyDetector,
     InformationValue,
     ExplorationController,
     InformationPacket
 )
-
 
 class TestNoveltyDetector:
     """Tests for novelty detection"""
@@ -70,7 +66,6 @@ class TestNoveltyDetector:
         far = np.array([10.0, 10.0])
         assert detector.is_novel(far)
 
-
 class TestInformationValue:
     """Tests for information value computation"""
 
@@ -124,7 +119,6 @@ class TestInformationValue:
         assert 'topic_a' in gaps
         assert 'topic_c' in gaps
         assert 'topic_b' not in gaps
-
 
 class TestExplorationController:
     """Tests for exploration vs exploitation control"""
@@ -181,7 +175,6 @@ class TestExplorationController:
         # Should explore roughly half the time (with variance)
         # Using wider bounds to account for randomness
         assert 20 <= explore_count <= 80
-
 
 class TestCuriosityModule:
     """Tests for integrated curiosity system"""
@@ -293,7 +286,6 @@ class TestCuriosityModule:
         assert 'curiosity_level' in metrics
         assert 'boredom_level' in metrics
         assert 'novelty_trend' in metrics
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

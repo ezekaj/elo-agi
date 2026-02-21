@@ -3,13 +3,12 @@
 import pytest
 import numpy as np
 
-from src.policy_gradient import (
+from neuro.modules.credit.policy_gradient import (
     GAEConfig,
     Advantage,
     CrossModulePolicyGradient,
     PolicyGradientResult,
 )
-
 
 class TestGAEConfig:
     """Tests for GAEConfig class."""
@@ -24,7 +23,6 @@ class TestGAEConfig:
         config = GAEConfig(gamma=0.9, normalize_advantages=False)
         assert config.gamma == 0.9
         assert not config.normalize_advantages
-
 
 class TestCrossModulePolicyGradient:
     """Tests for CrossModulePolicyGradient class."""
@@ -235,7 +233,6 @@ class TestCrossModulePolicyGradient:
 
         assert "total_trajectories" in stats
         assert stats["total_trajectories"] == 1
-
 
 class TestAdvantage:
     """Tests for Advantage dataclass."""

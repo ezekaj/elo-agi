@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "goal_achievement",
+  "n_trials": 2,
+  "success_rate": 1.0,
+  "mean_score": 1.0,
+  "std_score": 0.0,
+  "mean_latency": 4.76837158203125e-07,
+  "error_count": 0,
+  "total_time": 6.794929504394531e-05,
+  "timestamp": 1771713513.786269,
+  "config": {
+    "name": "goal_achievement",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

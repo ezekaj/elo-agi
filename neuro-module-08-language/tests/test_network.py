@@ -2,16 +2,12 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.language_network import (
+from neuro.modules.m08_language.language_network import (
     BrocaRegion,
     WernickeRegion,
     ArcuateFasciculus,
     DistributedLanguageNetwork
 )
-
 
 class TestBrocaRegion:
     """Tests for Broca's area"""
@@ -82,7 +78,6 @@ class TestBrocaRegion:
         output = broca.process_syntax(np.ones(32))
         assert np.linalg.norm(output) < 32  # Reduced
 
-
 class TestWernickeRegion:
     """Tests for Wernicke's area"""
 
@@ -127,7 +122,6 @@ class TestWernickeRegion:
         assert integrated.shape == (32,)
         assert np.all(np.isfinite(integrated))
 
-
 class TestArcuateFasciculus:
     """Tests for arcuate fasciculus"""
 
@@ -162,7 +156,6 @@ class TestArcuateFasciculus:
 
         assert broca_update.shape == (32,)
         assert wernicke_update.shape == (32,)
-
 
 class TestDistributedLanguageNetwork:
     """Tests for full distributed network"""
@@ -242,7 +235,6 @@ class TestDistributedLanguageNetwork:
         assert 'broca' in states
         assert 'wernicke' in states
         assert 'combined' in states
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

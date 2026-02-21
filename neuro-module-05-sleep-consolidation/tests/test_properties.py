@@ -6,11 +6,10 @@ regardless of the specific inputs or sequence of operations.
 
 import pytest
 import numpy as np
-from src.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
-from src.meta_learning import MetaLearningController, MemoryType, ReplayWeights
-from src.interference_resolution import InterferenceResolver
-from src.schema_refinement import SchemaRefiner
-
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
+from neuro.modules.m05_sleep_consolidation.meta_learning import MetaLearningController, MemoryType, ReplayWeights
+from neuro.modules.m05_sleep_consolidation.interference_resolution import InterferenceResolver
+from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner
 
 class TestSpacedRepetitionInvariants:
     """Property tests for spaced repetition."""
@@ -109,7 +108,6 @@ class TestSpacedRepetitionInvariants:
             assert curr_total > prev_total
             prev_total = curr_total
 
-
 class TestMetaLearningInvariants:
     """Property tests for meta-learning controller."""
 
@@ -171,7 +169,6 @@ class TestMetaLearningInvariants:
             for mem_type in MemoryType:
                 rate = controller.update_learning_rates(mem_type, success_rate)
                 assert 0.01 <= rate <= 0.5, f"Rate {rate} out of bounds"
-
 
 class TestInterferenceInvariants:
     """Property tests for interference resolution."""
@@ -239,7 +236,6 @@ class TestInterferenceInvariants:
             assert event.similarity >= resolver.similarity_threshold, \
                 f"Event similarity {event.similarity} below threshold"
 
-
 class TestSchemaInvariants:
     """Property tests for schema refinement."""
 
@@ -288,7 +284,6 @@ class TestSchemaInvariants:
         schema = refiner.get_schema("test")
         for inst_id in added:
             assert inst_id in schema.instances, f"{inst_id} not in schema instances"
-
 
 class TestDeterminism:
     """Tests for deterministic behavior with seeds."""

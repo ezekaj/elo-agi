@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.metacognition import (
+from neuro.modules.m16_consciousness.metacognition import (
     ConfidenceEstimator, PerformanceMonitor, MetacognitiveSystem, MetaParams
 )
-
 
 class TestConfidenceEstimator:
     """Tests for confidence estimation"""
@@ -46,7 +42,6 @@ class TestConfidenceEstimator:
         estimator.receive_feedback(0.9, False)
 
         assert not np.allclose(estimator.calibration, initial_cal)
-
 
 class TestPerformanceMonitor:
     """Tests for performance monitoring"""
@@ -92,7 +87,6 @@ class TestPerformanceMonitor:
 
         trend = monitor.get_performance_trend(window=2)
         # May be positive or zero depending on window
-
 
 class TestMetacognitiveSystem:
     """Tests for integrated metacognition"""
@@ -140,7 +134,6 @@ class TestMetacognitiveSystem:
 
         result = system.introspect_confidence()
         assert "calibration_quality" in result
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

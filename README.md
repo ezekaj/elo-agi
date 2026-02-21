@@ -52,7 +52,21 @@ cd elo-agi
 pip install -e .
 ```
 
-**Requirements:** Python 3.9+, [Ollama](https://ollama.ai) for LLM backend
+### Prerequisites
+
+| Interface | Requirements |
+|-----------|-------------|
+| Python Library | Python 3.9+, numpy, scipy |
+| CLI (`neuro`) | Python 3.9+ and [Ollama](https://ollama.ai) with `ministral-3:8b` model |
+| Web REPL | Browser only -- [try it here](https://ezekaj.github.io/elo-agi/demo.html) |
+
+### Setup Ollama (for CLI)
+
+```bash
+# Install from https://ollama.ai, then:
+ollama serve
+ollama pull ministral-3:8b
+```
 
 ## Quick Start
 

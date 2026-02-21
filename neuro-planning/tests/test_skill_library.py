@@ -3,14 +3,13 @@
 import pytest
 import numpy as np
 
-from src.skill_library import (
+from neuro.modules.planning.skill_library import (
     Skill,
     SkillMetadata,
     SkillType,
     SkillLibrary,
     SkillComposer,
 )
-
 
 class TestSkillMetadata:
     """Tests for SkillMetadata class."""
@@ -45,7 +44,6 @@ class TestSkillMetadata:
         assert meta.success_rate == 0.5
         assert meta.average_steps == pytest.approx(15.0)
         assert meta.average_reward == pytest.approx(1.0)
-
 
 class TestSkill:
     """Tests for Skill class."""
@@ -149,7 +147,6 @@ class TestSkill:
         assert skill1.similarity(skill2) == pytest.approx(1.0)
         assert skill1.similarity(skill3) == pytest.approx(0.0)
 
-
 class TestSkillComposer:
     """Tests for SkillComposer class."""
 
@@ -212,7 +209,6 @@ class TestSkillComposer:
 
         assert composed.predict_effects(5) == 5
         assert composed.predict_effects(-5) == -5
-
 
 class TestSkillLibrary:
     """Tests for SkillLibrary class."""

@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.structural_plasticity import (
+from neuro.modules.m12_learning.structural_plasticity import (
     StructuralPlasticity, SynapticPruning, DendriticGrowth, StructuralParams
 )
-
 
 class TestStructuralPlasticity:
     """Tests for structural plasticity"""
@@ -87,7 +83,6 @@ class TestStructuralPlasticity:
 
         assert 0 <= density <= 1
 
-
 class TestSynapticPruning:
     """Tests for synaptic pruning"""
 
@@ -131,7 +126,6 @@ class TestSynapticPruning:
         # Should have pruned some weights
         final_weights = pruner.get_weights()
         assert np.sum(final_weights == 0) > 0
-
 
 class TestDendriticGrowth:
     """Tests for dendritic growth"""
@@ -189,7 +183,6 @@ class TestDendriticGrowth:
         sizes = growth.get_receptive_field_sizes()
 
         assert len(sizes) == 5
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

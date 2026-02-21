@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.temporal_abstraction import (
+from neuro.modules.planning.temporal_abstraction import (
     Option,
     OptionPolicy,
     TerminationCondition,
@@ -11,7 +11,6 @@ from src.temporal_abstraction import (
     OptionsFramework,
     IntraOptionLearning,
 )
-
 
 class TestTerminationCondition:
     """Tests for TerminationCondition class."""
@@ -33,7 +32,6 @@ class TestTerminationCondition:
         assert term.termination_probability(5) == pytest.approx(0.25)
         assert term.termination_probability(15) == 1.0
 
-
 class TestOptionPolicy:
     """Tests for OptionPolicy class."""
 
@@ -54,7 +52,6 @@ class TestOptionPolicy:
         )
         assert policy.select_action(1) == "up"
         assert policy.select_action(-1) == "down"
-
 
 class TestOption:
     """Tests for Option class."""
@@ -151,7 +148,6 @@ class TestOption:
         assert option.steps_taken == 0
         assert option.cumulative_reward == 0.0
 
-
 class TestIntraOptionLearning:
     """Tests for IntraOptionLearning class."""
 
@@ -199,7 +195,6 @@ class TestIntraOptionLearning:
 
         stats = learner.statistics()
         assert stats["options_tracked"] == 1
-
 
 class TestOptionsFramework:
     """Tests for OptionsFramework class."""
@@ -346,7 +341,6 @@ class TestOptionsFramework:
         stats = framework.statistics()
         assert stats["total_options"] == 1
         assert stats["total_options_executed"] == 1
-
 
 class TestOptionTerminationBehavior:
     """Tests for option termination behaviors."""

@@ -3,14 +3,13 @@
 import pytest
 import numpy as np
 
-from src.selective_consolidation import (
+from neuro.modules.continual.selective_consolidation import (
     SelectiveConsolidation,
     ConsolidationConfig,
     ConsolidationStrategy,
     ConsolidationPlan,
     PerformanceRecord,
 )
-
 
 class TestConsolidationConfig:
     """Tests for ConsolidationConfig class."""
@@ -28,7 +27,6 @@ class TestConsolidationConfig:
         )
         assert config.strategy == ConsolidationStrategy.UNIFORM
         assert config.max_consolidation_budget == 500
-
 
 class TestSelectiveConsolidation:
     """Tests for SelectiveConsolidation class."""
@@ -175,7 +173,6 @@ class TestSelectiveConsolidation:
         assert "total_consolidations" in stats
         assert "avg_performance_gap" in stats
         assert stats["total_tasks"] == 1
-
 
 class TestConsolidationStrategy:
     """Tests for ConsolidationStrategy enum."""

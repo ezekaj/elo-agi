@@ -2,11 +2,10 @@
 
 import pytest
 import numpy as np
-from src.meta_learning import (
+from neuro.modules.m05_sleep_consolidation.meta_learning import (
     MetaLearningController, LearningCurve, ReplayWeights,
     MemoryType, ConsolidationOutcome,
 )
-
 
 class TestLearningCurve:
     """Tests for LearningCurve."""
@@ -68,7 +67,6 @@ class TestLearningCurve:
         efficiency = curve.get_efficiency()
         assert efficiency == pytest.approx(0.1, abs=0.01)
 
-
 class TestReplayWeights:
     """Tests for ReplayWeights."""
 
@@ -92,7 +90,6 @@ class TestReplayWeights:
         assert "recency" in d
         assert "emotional_salience" in d
         assert "incompleteness" in d
-
 
 class TestMetaLearningController:
     """Tests for MetaLearningController."""

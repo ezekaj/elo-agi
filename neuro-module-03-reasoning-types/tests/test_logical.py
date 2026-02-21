@@ -1,15 +1,11 @@
 """Tests for logical reasoning components"""
 
 import pytest
-import sys
-sys.path.insert(0, '..')
-
-from src.logical.inductive import InductiveReasoner, Observation
-from src.logical.deductive import (
+from neuro.modules.m03_reasoning_types.logical.inductive import InductiveReasoner, Observation
+from neuro.modules.m03_reasoning_types.logical.deductive import (
     DeductiveReasoner, Proposition, PropositionType
 )
-from src.logical.abductive import AbductiveReasoner, Effect
-
+from neuro.modules.m03_reasoning_types.logical.abductive import AbductiveReasoner, Effect
 
 class TestInductiveReasoning:
     def test_observation_and_hypothesis(self):
@@ -58,7 +54,6 @@ class TestInductiveReasoning:
         assert result is not None
         assert result[0] == 'ocean'
         assert result[1] == 1.0
-
 
 class TestDeductiveReasoning:
     def test_modus_ponens(self):
@@ -140,7 +135,6 @@ class TestDeductiveReasoning:
         is_valid, explanation = reasoner.validate(valid_conclusion, premises)
         assert is_valid
 
-
 class TestAbductiveReasoning:
     def test_hypothesis_generation(self):
         """Test generating explanatory hypotheses"""
@@ -192,7 +186,6 @@ class TestAbductiveReasoning:
         reasoner.update_from_feedback(explanation.explanation_id, was_correct=True)
 
         assert explanation.cause.prior_probability >= initial_prior
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

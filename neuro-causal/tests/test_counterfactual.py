@@ -12,15 +12,14 @@ Tests cover:
 
 import pytest
 import numpy as np
-from src.differentiable_scm import DifferentiableSCM
-from src.counterfactual import (
+from neuro.modules.causal.differentiable_scm import DifferentiableSCM
+from neuro.modules.causal.counterfactual import (
     NestedCounterfactual,
     CounterfactualQuery,
     CounterfactualResult,
     ContrastiveExplanation,
     ExplanationType,
 )
-
 
 @pytest.fixture
 def simple_scm():
@@ -31,7 +30,6 @@ def simple_scm():
     scm.add_linear_mechanism("Z", ["Y"], {"Y": 3.0}, intercept=0.0, noise_std=0.1)
     return scm
 
-
 @pytest.fixture
 def fork_scm():
     """Create a fork SCM: Y <- X -> Z."""
@@ -40,7 +38,6 @@ def fork_scm():
     scm.add_linear_mechanism("Y", ["X"], {"X": 2.0}, intercept=0.0, noise_std=0.1)
     scm.add_linear_mechanism("Z", ["X"], {"X": 3.0}, intercept=0.0, noise_std=0.1)
     return scm
-
 
 @pytest.fixture
 def diamond_scm():
@@ -51,7 +48,6 @@ def diamond_scm():
     scm.add_linear_mechanism("C", ["A"], {"A": 1.5}, intercept=0.0, noise_std=0.1)
     scm.add_linear_mechanism("D", ["B", "C"], {"B": 1.0, "C": 1.0}, intercept=0.0, noise_std=0.1)
     return scm
-
 
 class TestBasicCounterfactual:
     """Test basic counterfactual computation."""
@@ -125,7 +121,6 @@ class TestBasicCounterfactual:
         # X=2 -> Y=4 -> Z=12
         assert abs(result.counterfactual_value - 12.0) < 2.0
 
-
 class TestNestedCounterfactual:
     """Test nested counterfactual computation."""
 
@@ -171,7 +166,6 @@ class TestNestedCounterfactual:
         assert "inner_world" in result
         assert "nested_world" in result
         assert "B" in result["inner_world"]
-
 
 class TestContrastiveExplanation:
     """Test contrastive explanation generation."""
@@ -219,7 +213,6 @@ class TestContrastiveExplanation:
         assert isinstance(explanation.explanation, str)
         assert len(explanation.explanation) > 0
         assert "Y" in explanation.explanation or "X" in explanation.explanation
-
 
 class TestProbabilityOfNecessity:
     """Test Probability of Necessity computation."""
@@ -274,7 +267,6 @@ class TestProbabilityOfNecessity:
         # Should be low because Y doesn't depend on X
         assert pn < 0.5
 
-
 class TestProbabilityOfSufficiency:
     """Test Probability of Sufficiency computation."""
 
@@ -308,7 +300,6 @@ class TestProbabilityOfSufficiency:
         # Should be reasonably high
         assert ps > 0.2
 
-
 class TestExplanationType:
     """Test explanation type classification."""
 
@@ -330,7 +321,6 @@ class TestExplanationType:
         assert ExplanationType.SUFFICIENT is not None
         assert ExplanationType.NECESSARY_SUFFICIENT is not None
         assert ExplanationType.CONTRIBUTORY is not None
-
 
 class TestCounterfactualStability:
     """Test counterfactual stability analysis."""
@@ -376,7 +366,6 @@ class TestCounterfactualStability:
 
         assert stability["stability"] > 0.5
 
-
 class TestStatisticsTracking:
     """Test statistics and tracking."""
 
@@ -414,7 +403,6 @@ class TestStatisticsTracking:
 
         final_stats = cf.statistics()
         assert final_stats["n_explanations"] == initial_stats["n_explanations"] + 1
-
 
 class TestEdgeCases:
     """Test edge cases and robustness."""
@@ -483,7 +471,6 @@ class TestEdgeCases:
         )
 
         assert result.counterfactual_value == 10.0
-
 
 class TestMathematicalConsistency:
     """Test mathematical properties of counterfactuals."""

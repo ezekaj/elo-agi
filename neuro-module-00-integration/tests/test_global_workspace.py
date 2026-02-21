@@ -4,12 +4,9 @@ Tests for the Global Workspace integration system.
 
 import pytest
 import numpy as np
-import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from src.module_interface import (
+from neuro.modules.m00_integration.module_interface import (
     CognitiveModule,
     ModuleProposal,
     ModuleParams,
@@ -17,15 +14,14 @@ from src.module_interface import (
     ContentType,
     DummyModule,
 )
-from src.global_workspace import (
+from neuro.modules.m00_integration.global_workspace import (
     GlobalWorkspace,
     WorkspaceParams,
     WorkspaceMode,
 )
-from src.attention_competition import AttentionCompetition, CompetitionParams
-from src.broadcast_system import BroadcastSystem, BroadcastParams
-from src.ignition import IgnitionDetector, IgnitionParams, IgnitionState
-
+from neuro.modules.m00_integration.attention_competition import AttentionCompetition, CompetitionParams
+from neuro.modules.m00_integration.broadcast_system import BroadcastSystem, BroadcastParams
+from neuro.modules.m00_integration.ignition import IgnitionDetector, IgnitionParams, IgnitionState
 
 class TestModuleInterface:
     """Tests for the cognitive module interface."""
@@ -110,7 +106,6 @@ class TestModuleInterface:
         state = module.get_state()
         assert state.activation_level == 0.0
         assert len(state.pending_proposals) == 0
-
 
 class TestAttentionCompetition:
     """Tests for attention-based competition."""
@@ -207,7 +202,6 @@ class TestAttentionCompetition:
         # Aligned should be first winner (higher score)
         assert result.winners[0].content is aligned_content
 
-
 class TestIgnitionDetector:
     """Tests for ignition detection."""
 
@@ -261,7 +255,6 @@ class TestIgnitionDetector:
         assert 'total_events' in stats
         assert stats['total_events'] == 10
 
-
 class TestBroadcastSystem:
     """Tests for the broadcast system."""
 
@@ -301,7 +294,6 @@ class TestBroadcastSystem:
             system.broadcast(proposal, [ModuleType.EMOTION])
         stats = system.get_statistics()
         assert stats['total_broadcasts'] >= 1
-
 
 class TestGlobalWorkspace:
     """Tests for the complete global workspace."""
@@ -389,7 +381,6 @@ class TestGlobalWorkspace:
         assert stats['step_count'] == 10
         assert stats['module_count'] == 3
 
-
 class TestIntegration:
     """Integration tests for the complete system."""
 
@@ -462,7 +453,6 @@ class TestIntegration:
 
         state = workspace.get_state()
         assert len(state.buffer) <= 3
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

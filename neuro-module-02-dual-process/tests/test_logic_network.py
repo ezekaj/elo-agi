@@ -1,11 +1,7 @@
 """Tests for Logic Network"""
 
 import pytest
-import sys
-sys.path.insert(0, '..')
-
-from src.logic_network import LogicNetwork, Proposition, PropositionType
-
+from neuro.modules.m02_dual_process.logic_network import LogicNetwork, Proposition, PropositionType
 
 class TestRelationalProcessing:
     """Tests for relational information handling"""
@@ -33,7 +29,6 @@ class TestRelationalProcessing:
         results = ln.query_relation("is_a", [None, "mortal"])
 
         assert len(results) == 2
-
 
 class TestConstraintComputation:
     """Tests for constraint-based reasoning"""
@@ -81,7 +76,6 @@ class TestConstraintComputation:
         consistent, contradictions = ln.check_consistency([p, not_p])
         assert not consistent
         assert len(contradictions) > 0
-
 
 class TestInferenceRules:
     """Tests for logical inference"""
@@ -187,7 +181,6 @@ class TestInferenceRules:
         q_derived = any(inf.conclusion.id == "Q" for inf in inferences)
         assert q_derived
 
-
 class TestStructureUpdating:
     """Tests for mental model revision"""
 
@@ -215,7 +208,6 @@ class TestStructureUpdating:
 
         assert updated["A"] is True
         assert updated["B"] is True  # Propagated
-
 
 class TestValidityChecking:
     """Tests for argument validity"""
@@ -246,7 +238,6 @@ class TestValidityChecking:
         valid, reason = ln.is_valid_argument([p], q)
         assert not valid
 
-
 class TestSyllogism:
     """Classic syllogism tests"""
 
@@ -270,7 +261,6 @@ class TestSyllogism:
         valid, _ = ln.is_valid_argument([all_a_are_b, x_is_a], b)
         # Note: Full syllogism requires more sophisticated premise matching
         # This test verifies the basic inference mechanism
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

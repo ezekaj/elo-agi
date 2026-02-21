@@ -3,13 +3,12 @@
 import pytest
 import numpy as np
 
-from src.surprise_modulation import (
+from neuro.modules.credit.surprise_modulation import (
     SurpriseMetrics,
     SurpriseConfig,
     SurpriseType,
     SurpriseModulatedLearning,
 )
-
 
 class TestSurpriseConfig:
     """Tests for SurpriseConfig class."""
@@ -26,7 +25,6 @@ class TestSurpriseConfig:
         )
         assert config.base_learning_rate == 0.1
         assert config.consolidation_threshold == 0.9
-
 
 class TestSurpriseModulatedLearning:
     """Tests for SurpriseModulatedLearning class."""
@@ -163,7 +161,6 @@ class TestSurpriseModulatedLearning:
         assert "total_surprises" in stats
         assert stats["total_surprises"] == 5
         assert "consolidation_rate" in stats
-
 
 class TestSurpriseTypes:
     """Tests for different surprise types."""

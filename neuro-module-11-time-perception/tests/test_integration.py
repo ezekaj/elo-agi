@@ -2,18 +2,14 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.temporal_integration import (
+from neuro.modules.m11_time_perception.temporal_integration import (
     SubjectiveTimeSystem,
     TimePerceptionOrchestrator,
     TemporalEstimate
 )
-from src.time_modulation import EmotionalState
-from src.interval_timing import TimingMode
-from src.embodied_time import BodyState
-
+from neuro.modules.m11_time_perception.time_modulation import EmotionalState
+from neuro.modules.m11_time_perception.interval_timing import TimingMode
+from neuro.modules.m11_time_perception.embodied_time import BodyState
 
 class TestSubjectiveTimeSystem:
     """Tests for subjective time system"""
@@ -142,7 +138,6 @@ class TestSubjectiveTimeSystem:
         assert estimate.interval_estimate > 0
         assert estimate.embodied_estimate > 0
         assert estimate.modulation_ratio > 0
-
 
 class TestTimePerceptionOrchestrator:
     """Tests for orchestrator"""
@@ -332,7 +327,6 @@ class TestTimePerceptionOrchestrator:
 
         assert estimate.age == 80
 
-
 class TestResearchValidation:
     """Tests validating key research findings"""
 
@@ -372,7 +366,6 @@ class TestResearchValidation:
         old = orchestrator.estimate(10.0, age=70)
 
         assert old.perceived_duration < young.perceived_duration
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

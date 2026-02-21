@@ -12,18 +12,14 @@ Covers:
 
 import pytest
 import numpy as np
-import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from base_env import NeuroEnvironment, EnvironmentConfig, StepResult, SimplePatternEnv
-from text_world import TextWorld, TextWorldConfig, Room, Item, ProcGenTextWorld
-from dialogue_env import DialogueEnvironment, DialogueConfig, DialoguePartner
-from curriculum import DevelopmentalCurriculum, Stage, CurriculumConfig, AdaptiveCurriculum
-from experience_buffer import ExperienceBuffer, Experience, Episode, SequenceBuffer, ConsolidationBuffer
-
+from neuro.modules.env.base_env import NeuroEnvironment, EnvironmentConfig, StepResult, SimplePatternEnv
+from neuro.modules.env.text_world import TextWorld, TextWorldConfig, Room, Item, ProcGenTextWorld
+from neuro.modules.env.dialogue_env import DialogueEnvironment, DialogueConfig, DialoguePartner
+from neuro.modules.env.curriculum import DevelopmentalCurriculum, Stage, CurriculumConfig, AdaptiveCurriculum
+from neuro.modules.env.experience_buffer import ExperienceBuffer, Experience, Episode, SequenceBuffer, ConsolidationBuffer
 
 # =============================================================================
 # Tests: Base Environment
@@ -42,7 +38,6 @@ class TestEnvironmentConfig:
         config = EnvironmentConfig(observation_dim=128, action_dim=64)
         assert config.observation_dim == 128
         assert config.action_dim == 64
-
 
 class TestSimplePatternEnv:
     """Tests for SimplePatternEnv."""
@@ -87,7 +82,6 @@ class TestSimplePatternEnv:
         stats = env.get_statistics()
         assert stats['step_count'] == 1
         assert stats['episode_count'] == 1
-
 
 # =============================================================================
 # Tests: Text World
@@ -148,7 +142,6 @@ class TestTextWorld:
         # Should not crash and should have some history
         assert env._step_count > 0
 
-
 class TestProcGenTextWorld:
     """Tests for procedurally generated text world."""
 
@@ -164,7 +157,6 @@ class TestProcGenTextWorld:
         obs2, _ = env2.reset(seed=123)
         # Should be different
         assert not np.allclose(obs1, obs2)
-
 
 # =============================================================================
 # Tests: Dialogue Environment
@@ -195,7 +187,6 @@ class TestDialoguePartner:
         partner.respond("Hello!")
         partner.reset()
         assert len(partner._context) == 0
-
 
 class TestDialogueEnvironment:
     """Tests for DialogueEnvironment."""
@@ -233,7 +224,6 @@ class TestDialogueEnvironment:
         output = env.render()
         assert output is not None
 
-
 # =============================================================================
 # Tests: Curriculum
 # =============================================================================
@@ -262,7 +252,6 @@ class TestStage:
         stage.metrics.total_episodes = 100
         stage.metrics.success_rate = 0.9
         assert stage.is_complete()
-
 
 class TestDevelopmentalCurriculum:
     """Tests for DevelopmentalCurriculum."""
@@ -310,7 +299,6 @@ class TestDevelopmentalCurriculum:
         curriculum.add_stage(new_stage)
         assert len(curriculum._stages) == initial_count + 1
 
-
 class TestAdaptiveCurriculum:
     """Tests for AdaptiveCurriculum."""
 
@@ -321,7 +309,6 @@ class TestAdaptiveCurriculum:
     def test_difficulty_property(self):
         curriculum = AdaptiveCurriculum()
         assert curriculum.difficulty == 1.0
-
 
 # =============================================================================
 # Tests: Experience Buffer
@@ -340,7 +327,6 @@ class TestExperience:
         )
         assert exp.reward == 1.0
         assert not exp.done
-
 
 class TestExperienceBuffer:
     """Tests for ExperienceBuffer."""
@@ -459,7 +445,6 @@ class TestExperienceBuffer:
         assert stats['size'] == 10
         assert stats['mean_reward'] == 4.5
 
-
 class TestSequenceBuffer:
     """Tests for SequenceBuffer."""
 
@@ -481,7 +466,6 @@ class TestSequenceBuffer:
         assert len(sequences) > 0
         if sequences:
             assert len(sequences[0]) == 8
-
 
 class TestConsolidationBuffer:
     """Tests for ConsolidationBuffer."""
@@ -520,7 +504,6 @@ class TestConsolidationBuffer:
                 done=False,
             )
         assert buffer.should_consolidate()
-
 
 # =============================================================================
 # Integration Tests
@@ -611,7 +594,6 @@ class TestIntegration:
         if len(buffer) >= 5:
             experiences, _, weights = buffer.sample(5)
             assert len(experiences) == 5
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

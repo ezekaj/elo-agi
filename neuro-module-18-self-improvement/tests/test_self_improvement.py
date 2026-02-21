@@ -11,28 +11,24 @@ Covers:
 
 import pytest
 import numpy as np
-import sys
 import os
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from src.generator import (
+from neuro.modules.m18_self_improvement.generator import (
     ModificationGenerator, GeneratorParams, Modification, ModificationType
 )
-from src.verifier import (
+from neuro.modules.m18_self_improvement.verifier import (
     ChangeVerifier, VerifierParams, VerificationResult, VerificationMethod
 )
-from src.updater import (
+from neuro.modules.m18_self_improvement.updater import (
     SystemUpdater, UpdaterParams, UpdateResult, UpdateStatus, Checkpoint
 )
-from src.meta_learner import (
+from neuro.modules.m18_self_improvement.meta_learner import (
     MetaLearner, MetaParams, LearningStrategy, StrategyType
 )
-from src.darwin_godel import (
+from neuro.modules.m18_self_improvement.darwin_godel import (
     DarwinGodelMachine, DGMParams, ImprovementCycle, ImprovementPhase
 )
-
 
 class MockSystem:
     """Mock system for testing improvements."""
@@ -64,7 +60,6 @@ class MockSystem:
     def rollback(self) -> None:
         self.weights = np.random.randn(10)
         self.performance = 0.5
-
 
 class TestModificationGenerator:
     """Tests for the modification generator."""
@@ -173,7 +168,6 @@ class TestModificationGenerator:
         mutated = generator._mutate(mod)
         assert isinstance(mutated, Modification)
         assert mutated.mod_id != mod.mod_id
-
 
 class TestChangeVerifier:
     """Tests for the change verifier."""
@@ -284,7 +278,6 @@ class TestChangeVerifier:
         assert not result.verified
         assert len(result.warnings) > 0
 
-
 class TestSystemUpdater:
     """Tests for the system updater."""
 
@@ -354,7 +347,6 @@ class TestSystemUpdater:
         success = updater.rollback(checkpoint.checkpoint_id)
         assert success
         assert state['value'] == 100
-
 
 class TestMetaLearner:
     """Tests for the meta learner."""
@@ -451,7 +443,6 @@ class TestMetaLearner:
 
         stats = learner.get_statistics()
         assert stats['n_experiences'] == 20
-
 
 class TestDarwinGodelMachine:
     """Tests for the Darwin Gödel Machine."""
@@ -564,7 +555,6 @@ class TestDarwinGodelMachine:
         assert dgm._cycle_count == 0
         assert len(dgm._cycle_history) == 0
 
-
 class TestStress:
     """Stress tests for the self-improvement module."""
 
@@ -646,7 +636,6 @@ class TestStress:
         stats = dgm.get_statistics()
         assert stats['cycle_count'] == 20
 
-
 class TestIntegration:
     """Integration tests."""
 
@@ -697,7 +686,6 @@ class TestIntegration:
         # Check meta-learner state
         ml_stats = dgm.meta_learner.get_statistics()
         assert ml_stats['n_experiences'] > 0
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

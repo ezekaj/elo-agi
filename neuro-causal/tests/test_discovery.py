@@ -12,14 +12,13 @@ Tests cover:
 import pytest
 import numpy as np
 from scipy import stats
-from src.causal_discovery import (
+from neuro.modules.causal.causal_discovery import (
     CausalDiscovery,
     ConditionalIndependenceTest,
     CausalGraph,
     CausalEdge,
     EdgeType,
 )
-
 
 def generate_data_from_dag(
     n_samples: int,
@@ -52,7 +51,6 @@ def generate_data_from_dag(
 
     return data, variables
 
-
 @pytest.fixture
 def chain_data():
     """Generate data from chain: A -> B -> C."""
@@ -63,7 +61,6 @@ def chain_data():
     }
     data, var_names = generate_data_from_dag(500, adjacency)
     return data, var_names, adjacency
-
 
 @pytest.fixture
 def fork_data():
@@ -76,7 +73,6 @@ def fork_data():
     data, var_names = generate_data_from_dag(500, adjacency)
     return data, var_names, adjacency
 
-
 @pytest.fixture
 def collider_data():
     """Generate data from collider: A -> C <- B."""
@@ -87,7 +83,6 @@ def collider_data():
     }
     data, var_names = generate_data_from_dag(500, adjacency)
     return data, var_names, adjacency
-
 
 class TestConditionalIndependenceTest:
     """Test CI testing methods."""
@@ -164,7 +159,6 @@ class TestConditionalIndependenceTest:
         stats = ci_test.statistics()
         assert stats["n_tests"] == 2
 
-
 class TestCausalGraph:
     """Test CausalGraph data structure."""
 
@@ -231,7 +225,6 @@ class TestCausalGraph:
         assert edge.confidence == 0.9
 
         assert graph.get_edge("B", "A") is None  # Directed, not symmetric
-
 
 class TestPCAlgorithm:
     """Test PC algorithm implementation."""
@@ -332,7 +325,6 @@ class TestPCAlgorithm:
         assert graph.get_edge("B", "C") is None
         assert graph.get_edge("C", "B") is None
 
-
 class TestStructureUncertainty:
     """Test uncertainty estimation."""
 
@@ -362,7 +354,6 @@ class TestStructureUncertainty:
         ab_key = tuple(sorted(["A", "B"]))
         if ab_key in edge_conf:
             assert edge_conf[ab_key] > 0.5
-
 
 class TestGraphComparison:
     """Test graph comparison metrics."""
@@ -401,7 +392,6 @@ class TestGraphComparison:
         assert metrics["precision"] == 0.0
         assert metrics["recall"] == 0.0
 
-
 class TestGraphScoring:
     """Test BIC scoring of graphs."""
 
@@ -431,7 +421,6 @@ class TestGraphScoring:
         # Note: This may not always hold depending on noise
         assert isinstance(true_score, float)
         assert isinstance(wrong_score, float)
-
 
 class TestEdgeCases:
     """Test edge cases."""
@@ -494,7 +483,6 @@ class TestEdgeCases:
 
         # Should detect strong dependence
         assert len(graph.edges) >= 0  # May or may not detect depending on numerical issues
-
 
 class TestStatisticsTracking:
     """Test statistics tracking."""

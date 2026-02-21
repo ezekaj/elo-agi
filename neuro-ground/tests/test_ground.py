@@ -7,12 +7,9 @@ Tests sensors, actuators, sim2real, and calibration components.
 import pytest
 import numpy as np
 import time
-import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from sensors.camera import (
+from neuro.modules.ground.sensors.camera import (
     CameraType,
     ColorSpace,
     CameraConfig,
@@ -21,7 +18,7 @@ from sensors.camera import (
     Camera,
     VisionProcessor,
 )
-from sensors.microphone import (
+from neuro.modules.ground.sensors.microphone import (
     AudioFormat,
     MicrophoneConfig,
     AudioBuffer,
@@ -29,7 +26,7 @@ from sensors.microphone import (
     Microphone,
     AudioProcessor,
 )
-from sensors.proprioception import (
+from neuro.modules.ground.sensors.proprioception import (
     JointType,
     JointState,
     EndEffectorState,
@@ -39,7 +36,7 @@ from sensors.proprioception import (
     ProprioceptionProcessor,
 )
 
-from actuators.motor_controller import (
+from neuro.modules.ground.actuators.motor_controller import (
     ControlMode,
     TrajectoryType,
     MotorConfig,
@@ -49,7 +46,7 @@ from actuators.motor_controller import (
     MotorController,
     TrajectoryPlanner,
 )
-from actuators.speech_synth import (
+from neuro.modules.ground.actuators.speech_synth import (
     Voice,
     EmotionType,
     SpeechConfig,
@@ -60,7 +57,7 @@ from actuators.speech_synth import (
     ProsodyController,
 )
 
-from sim2real import (
+from neuro.modules.ground.sim2real import (
     DomainType,
     RandomizationType,
     RandomizationConfig,
@@ -69,14 +66,13 @@ from sim2real import (
     RealityGap,
     SimToRealTransfer,
 )
-from calibration import (
+from neuro.modules.ground.calibration import (
     CalibrationType,
     CalibrationStatus,
     CalibrationConfig,
     CalibrationResult,
     SensorCalibrator,
 )
-
 
 # =============================================================================
 # CAMERA TESTS
@@ -154,7 +150,6 @@ class TestCamera:
         stats = camera.statistics()
         assert stats["frame_count"] == 1
 
-
 class TestVisionProcessor:
     """Tests for VisionProcessor."""
 
@@ -220,7 +215,6 @@ class TestVisionProcessor:
         histograms = processor.compute_histogram(frame)
         assert "red" in histograms or "gray" in histograms
 
-
 # =============================================================================
 # MICROPHONE TESTS
 # =============================================================================
@@ -281,7 +275,6 @@ class TestMicrophone:
         stats = mic.statistics()
         assert stats["buffer_count"] == 2
 
-
 class TestAudioProcessor:
     """Tests for AudioProcessor."""
 
@@ -340,7 +333,6 @@ class TestAudioProcessor:
 
         pitch = processor.compute_pitch(buffer)
         # May or may not detect pitch depending on test signal
-
 
 # =============================================================================
 # PROPRIOCEPTION TESTS
@@ -404,7 +396,6 @@ class TestProprioceptionSensor:
         ee_positions = sensor.forward_kinematics(positions)
         assert "hand" in ee_positions
 
-
 class TestProprioceptionProcessor:
     """Tests for ProprioceptionProcessor."""
 
@@ -451,7 +442,6 @@ class TestProprioceptionProcessor:
         energy = processor.compute_energy(state)
         assert "kinetic_energy" in energy
         assert "potential_energy" in energy
-
 
 # =============================================================================
 # MOTOR CONTROLLER TESTS
@@ -526,7 +516,6 @@ class TestMotorController:
 
         stats = controller.statistics()
         assert stats["n_motors"] == 1
-
 
 class TestTrajectoryPlanner:
     """Tests for TrajectoryPlanner."""
@@ -618,7 +607,6 @@ class TestTrajectoryPlanner:
         # Should exceed limits
         assert not valid or error is not None
 
-
 # =============================================================================
 # SPEECH SYNTHESIZER TESTS
 # =============================================================================
@@ -664,7 +652,6 @@ class TestSpeechSynthesizer:
 
         stats = synth.statistics()
         assert stats["utterances_generated"] == 2
-
 
 class TestProsodyController:
     """Tests for ProsodyController."""
@@ -717,7 +704,6 @@ class TestProsodyController:
 
         emotion = controller.analyze_text_sentiment("I am sad")
         assert emotion == EmotionType.SAD
-
 
 # =============================================================================
 # SIM2REAL TESTS
@@ -772,7 +758,6 @@ class TestDomainRandomization:
         history = rand.get_history()
         assert len(history) == 2
 
-
 class TestRealityGap:
     """Tests for RealityGap."""
 
@@ -815,7 +800,6 @@ class TestRealityGap:
         reward_gap = gap.compute_reward_gap()
         assert abs(reward_gap - 0.3) < 0.1
 
-
 class TestSimToRealTransfer:
     """Tests for SimToRealTransfer."""
 
@@ -852,7 +836,6 @@ class TestSimToRealTransfer:
         eval_result = transfer.evaluate_transfer_quality()
         assert "distribution_distance" in eval_result
         assert "reward_gap" in eval_result
-
 
 # =============================================================================
 # CALIBRATION TESTS
@@ -933,7 +916,6 @@ class TestSensorCalibrator:
 
         calibrator.calibrate_joint_encoder("enc_0", [0, 100], [0.0, 1.0])
         assert calibrator.get_status("enc_0") == CalibrationStatus.CALIBRATED
-
 
 # =============================================================================
 # INTEGRATION TESTS
@@ -1038,7 +1020,6 @@ class TestIntegration:
 
         stats = calibrator.statistics()
         assert stats["n_calibrations"] == 2
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

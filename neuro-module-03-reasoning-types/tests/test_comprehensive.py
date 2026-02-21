@@ -7,28 +7,24 @@ require integration of multiple reasoning types.
 
 import pytest
 import numpy as np
-import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from neuro.modules.m03_reasoning_types.perceptual.visual_features import VisualFeatureExtractor, FeatureMap, Feature, FeatureType
+from neuro.modules.m03_reasoning_types.perceptual.multimodal_integration import MultimodalIntegrator, SensoryInput, Modality
+from neuro.modules.m03_reasoning_types.perceptual.object_recognition import ObjectRecognizer, CategoryLevel
 
-from src.perceptual.visual_features import VisualFeatureExtractor, FeatureMap, Feature, FeatureType
-from src.perceptual.multimodal_integration import MultimodalIntegrator, SensoryInput, Modality
-from src.perceptual.object_recognition import ObjectRecognizer, CategoryLevel
+from neuro.modules.m03_reasoning_types.dimensional.spatial_reasoning import SpatialReasoner, SpatialObject, SpatialRelations
+from neuro.modules.m03_reasoning_types.dimensional.temporal_reasoning import TemporalReasoner, TemporalEvent, SequenceMemory
+from neuro.modules.m03_reasoning_types.dimensional.hierarchical_reasoning import HierarchicalReasoner, Rule, AbstractionLevel
 
-from src.dimensional.spatial_reasoning import SpatialReasoner, SpatialObject, SpatialRelations
-from src.dimensional.temporal_reasoning import TemporalReasoner, TemporalEvent, SequenceMemory
-from src.dimensional.hierarchical_reasoning import HierarchicalReasoner, Rule, AbstractionLevel
+from neuro.modules.m03_reasoning_types.logical.inductive import InductiveReasoner, Observation
+from neuro.modules.m03_reasoning_types.logical.deductive import DeductiveReasoner, Proposition, PropositionType
+from neuro.modules.m03_reasoning_types.logical.abductive import AbductiveReasoner, Effect
 
-from src.logical.inductive import InductiveReasoner, Observation
-from src.logical.deductive import DeductiveReasoner, Proposition, PropositionType
-from src.logical.abductive import AbductiveReasoner, Effect
+from neuro.modules.m03_reasoning_types.interactive.feedback_adaptation import FeedbackAdapter, State, Action, ActionOutcome
+from neuro.modules.m03_reasoning_types.interactive.theory_of_mind import TheoryOfMind, MentalStateModel
+from neuro.modules.m03_reasoning_types.interactive.collaborative import CollaborativeReasoner, Agent, Task
 
-from src.interactive.feedback_adaptation import FeedbackAdapter, State, Action, ActionOutcome
-from src.interactive.theory_of_mind import TheoryOfMind, MentalStateModel
-from src.interactive.collaborative import CollaborativeReasoner, Agent, Task
-
-from src.reasoning_orchestrator import ReasoningOrchestrator, ReasoningType
-
+from neuro.modules.m03_reasoning_types.reasoning_orchestrator import ReasoningOrchestrator, ReasoningType
 
 class TestPerceptualStress:
     """Stress tests for perceptual reasoning"""
@@ -123,7 +119,6 @@ class TestPerceptualStress:
 
         if result:
             assert result.level in [CategoryLevel.BASIC, CategoryLevel.SUBORDINATE]
-
 
 class TestDimensionalStress:
     """Stress tests for dimensional reasoning"""
@@ -242,7 +237,6 @@ class TestDimensionalStress:
         result, rule_used = reasoner.reason(150)
         assert result is not None
 
-
 class TestLogicalStress:
     """Stress tests for logical reasoning"""
 
@@ -329,7 +323,6 @@ class TestLogicalStress:
 
         inferences = reasoner.derive([p1, p2])
         assert len(inferences) >= 0
-
 
 class TestInteractiveStress:
     """Stress tests for interactive reasoning"""
@@ -420,7 +413,6 @@ class TestInteractiveStress:
         assert coordinator.tasks[subtask1.task_id].completed
         assert coordinator.tasks[subtask4.task_id].completed
 
-
 class TestOrchestratorStress:
     """Stress tests for the reasoning orchestrator"""
 
@@ -469,7 +461,6 @@ class TestOrchestratorStress:
         meta = orchestrator.meta_reason(complex_task)
         assert 'recommendations' in meta
         assert len(meta['recommendations']) > 0
-
 
 class TestIntegrationScenarios:
     """Integration tests with realistic scenarios"""
@@ -575,7 +566,6 @@ class TestIntegrationScenarios:
         )
 
         assert len(feedback.experiences) == 1
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--tb=short'])

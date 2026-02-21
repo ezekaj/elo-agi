@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.hebbian import (
+from neuro.modules.m12_learning.hebbian import (
     HebbianLearning, OjaRule, BCMRule, HebbianNetwork, LearningParams
 )
-
 
 class TestHebbianLearning:
     """Tests for basic Hebbian learning"""
@@ -59,7 +55,6 @@ class TestHebbianLearning:
         assert np.all(weights <= 1.0)
         assert np.all(weights >= 0.0)
 
-
 class TestOjaRule:
     """Tests for Oja's normalized Hebbian rule"""
 
@@ -92,7 +87,6 @@ class TestOjaRule:
 
         # Weight vector should have reasonable magnitude
         assert np.linalg.norm(weights) < 10
-
 
 class TestBCMRule:
     """Tests for BCM learning rule"""
@@ -135,7 +129,6 @@ class TestBCMRule:
         dW_low = rule.compute_weight_change(pre, low_post)
 
         assert np.mean(dW_high) > np.mean(dW_low)
-
 
 class TestHebbianNetwork:
     """Tests for Hebbian network"""
@@ -188,7 +181,6 @@ class TestHebbianNetwork:
 
         assert len(errors) == 5
         assert all(np.isfinite(e) for e in errors)
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.planning_search import (
+from neuro.modules.planning.planning_search import (
     SearchNode,
     NodeType,
     MCTSConfig,
@@ -11,7 +11,6 @@ from src.planning_search import (
     PlanResult,
     WorldModelAdapter,
 )
-
 
 class TestSearchNode:
     """Tests for SearchNode class."""
@@ -82,7 +81,6 @@ class TestSearchNode:
         assert root.visit_count == 1
         assert root.value_sum == pytest.approx(0.81)
 
-
 class TestWorldModelAdapter:
     """Tests for WorldModelAdapter class."""
 
@@ -143,7 +141,6 @@ class TestWorldModelAdapter:
         assert len(rewards) == len(states) - 1
         assert reached_terminal
 
-
 class TestMCTSConfig:
     """Tests for MCTSConfig class."""
 
@@ -162,7 +159,6 @@ class TestMCTSConfig:
         assert config.num_simulations == 50
         assert config.exploration_weight == 2.0
         assert config.max_depth == 100
-
 
 class TestHierarchicalMCTS:
     """Tests for HierarchicalMCTS class."""
@@ -285,7 +281,6 @@ class TestHierarchicalMCTS:
         assert stats["simulations_run"] == 10
         assert stats["nodes_expanded"] > 0
 
-
 class TestPlanResult:
     """Tests for PlanResult class."""
 
@@ -302,7 +297,6 @@ class TestPlanResult:
         assert len(result.actions) == 3
         assert result.expected_value == 5.0
         assert result.confidence == 0.8
-
 
 class TestMCTSExploration:
     """Tests for MCTS exploration behavior."""
@@ -348,7 +342,6 @@ class TestMCTSExploration:
 
         stats = mcts.statistics()
         assert stats["nodes_expanded"] < 100 * 50
-
 
 class TestMCTSWithUncertainty:
     """Tests for MCTS with uncertainty bonuses."""

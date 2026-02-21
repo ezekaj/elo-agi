@@ -11,29 +11,25 @@ Covers:
 
 import pytest
 import numpy as np
-import sys
 import os
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from src.state_encoder import (
+from neuro.modules.m17_world_model.state_encoder import (
     StateEncoder, EncoderParams, EncodedState, Modality
 )
-from src.transition_model import (
+from neuro.modules.m17_world_model.transition_model import (
     TransitionModel, TransitionParams, Transition, ActionType
 )
-from src.imagination import (
+from neuro.modules.m17_world_model.imagination import (
     Imagination, ImaginationParams, Rollout, Trajectory, RolloutStrategy
 )
-from src.counterfactual import (
+from neuro.modules.m17_world_model.counterfactual import (
     CounterfactualEngine, CounterfactualParams, Counterfactual, CounterfactualType
 )
-from src.world_memory import (
+from neuro.modules.m17_world_model.world_memory import (
     WorldMemory, MemoryParams, WorldState, Entity, Relation,
     EntityType, RelationType
 )
-
 
 class TestStateEncoder:
     """Tests for the state encoder."""
@@ -112,7 +108,6 @@ class TestStateEncoder:
         encoded = encoder.encode(obs)
         kl = encoded.kl_divergence()
         assert kl >= 0
-
 
 class TestTransitionModel:
     """Tests for the transition model."""
@@ -205,7 +200,6 @@ class TestTransitionModel:
 
         # Note: This test may be flaky due to random initialization
         assert isinstance(unfamiliar.ensemble_variance, float)
-
 
 class TestImagination:
     """Tests for the imagination module."""
@@ -300,7 +294,6 @@ class TestImagination:
         assert isinstance(actual, Rollout)
         assert isinstance(cf, Rollout)
 
-
 class TestCounterfactualEngine:
     """Tests for counterfactual reasoning."""
 
@@ -380,7 +373,6 @@ class TestCounterfactualEngine:
         assert 'actual_outcome' in analysis
         assert 'regret' in analysis
         assert 'could_have_improved' in analysis
-
 
 class TestWorldMemory:
     """Tests for world memory."""
@@ -500,7 +492,6 @@ class TestWorldMemory:
         assert predicted is not None
         assert len(predicted) == 128
 
-
 class TestStress:
     """Stress tests for the world model."""
 
@@ -591,7 +582,6 @@ class TestStress:
         stats = engine.get_statistics()
         assert stats['n_counterfactuals'] == 50
 
-
 class TestIntegration:
     """Integration tests combining all components."""
 
@@ -656,7 +646,6 @@ class TestIntegration:
         stats = transition.get_statistics()
         assert stats['n_predictions'] >= 1
         assert stats['prediction_errors']['mean'] > 0  # Training was done
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.theory_of_mind import (
+from neuro.modules.m15_social.theory_of_mind import (
     BeliefTracker, MentalStateAttribution, TheoryOfMind, ToMParams
 )
-
 
 class TestBeliefTracker:
     """Tests for belief tracking"""
@@ -51,7 +47,6 @@ class TestBeliefTracker:
         tracker.attribute_belief("sally", "location", false_belief)
         assert tracker.check_false_belief("sally", "location")
 
-
 class TestMentalStateAttribution:
     """Tests for mental state attribution"""
 
@@ -82,7 +77,6 @@ class TestMentalStateAttribution:
         attr.observe_behavior("agent1", np.random.rand(50))
         prediction = attr.predict_behavior("agent1")
         assert prediction is not None
-
 
 class TestTheoryOfMind:
     """Tests for integrated ToM"""
@@ -123,7 +117,6 @@ class TestTheoryOfMind:
         initial = np.mean(tom.tpj_activation)
         tom.update(dt=10.0)
         assert np.mean(tom.tpj_activation) < initial
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -6,38 +6,34 @@ Tests abstraction, curriculum, few-shot, meta-learning, domain adaptation, and s
 
 import pytest
 import numpy as np
-import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from abstraction import (
+from neuro.modules.transfer.abstraction import (
     AbstractionEngine, AbstractionLevel, AbstractConcept,
     StructuralAnalogy, DomainPrinciple, RelationExtractor,
     StructureMapper, PrincipleExtractor
 )
-from curriculum import (
+from neuro.modules.transfer.curriculum import (
     CurriculumLearner, Task, TaskDifficulty, LearningPath,
     ProgressTracker, DifficultyEstimator, TaskSelector, LearnerState
 )
-from few_shot import (
+from neuro.modules.transfer.few_shot import (
     FewShotLearner, PrototypeNetwork, MatchingNetwork,
     SupportSet, QueryResult, EmbeddingNetwork
 )
-from meta_learner import (
+from neuro.modules.transfer.meta_learner import (
     MetaLearner, MAML, LearningStrategy, TaskDistribution,
     AdaptationResult, SimpleNN
 )
-from domain_adapter import (
+from neuro.modules.transfer.domain_adapter import (
     DomainAdapter, DomainEmbedding, DomainAlignment,
     TransferMapping, AdaptedRepresentation,
     SubspaceAlignment, CorrelationAlignment
 )
-from skill_library import (
+from neuro.modules.transfer.skill_library import (
     SkillLibrary, Skill, SkillPrimitive, CompositeSkill,
     SkillExecution, SkillType, SkillComposer, SkillMatcher
 )
-
 
 # ============== Abstraction Tests ==============
 
@@ -133,7 +129,6 @@ class TestAbstraction:
 
         assert analogy.source_domain == "education"
         assert analogy.target_domain == "medicine"
-
 
 class TestCurriculum:
     """Tests for curriculum learning."""
@@ -235,7 +230,6 @@ class TestCurriculum:
         assert len(path.tasks) > 0
         assert "addition" in path.skills_progression or "multiplication" in path.skills_progression
 
-
 class TestFewShot:
     """Tests for few-shot learning."""
 
@@ -322,7 +316,6 @@ class TestFewShot:
         assert "accuracy" in metrics
         assert 0 <= metrics["accuracy"] <= 1
 
-
 class TestMetaLearner:
     """Tests for meta-learning."""
 
@@ -382,7 +375,6 @@ class TestMetaLearner:
 
         assert isinstance(strategy, LearningStrategy)
         assert "classification" in strategy.applicable_tasks
-
 
 class TestDomainAdapter:
     """Tests for domain adaptation."""
@@ -461,7 +453,6 @@ class TestDomainAdapter:
 
         dist = adapter.compute_domain_distance("d1", "d2")
         assert dist > 0
-
 
 class TestSkillLibrary:
     """Tests for skill library."""
@@ -584,7 +575,6 @@ class TestSkillLibrary:
 
         math_skills = library.get_skills_by_domain("math")
         assert len(math_skills) == 2
-
 
 # ============== Integration Tests ==============
 
@@ -721,7 +711,6 @@ class TestTransferIntegration:
 
         assert len(concepts) > 0
         assert skill.domain == "target"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

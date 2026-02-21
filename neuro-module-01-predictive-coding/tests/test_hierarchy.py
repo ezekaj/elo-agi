@@ -2,11 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.predictive_hierarchy import PredictiveLayer, PredictiveHierarchy
-
+from neuro.modules.m01_predictive_coding.predictive_hierarchy import PredictiveLayer, PredictiveHierarchy
 
 class TestPredictiveLayer:
     """Tests for single predictive layer"""
@@ -93,7 +89,6 @@ class TestPredictiveLayer:
 
         assert np.allclose(layer.hidden_state, 0)
         assert len(layer.error_history) == 0
-
 
 class TestPredictiveHierarchy:
     """Tests for full hierarchy"""
@@ -218,7 +213,6 @@ class TestPredictiveHierarchy:
         for layer in hierarchy.layers:
             assert np.allclose(layer.hidden_state, 0)
 
-
 class TestHierarchyLesion:
     """Tests simulating lesion experiments"""
 
@@ -265,7 +259,6 @@ class TestHierarchyLesion:
         for i, s in enumerate(initial_states):
             change = np.linalg.norm(final_states[i] - s)
             assert change < 1.0  # Bounded change
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

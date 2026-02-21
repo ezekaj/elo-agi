@@ -4,15 +4,14 @@ Tests for Mental Imagery Systems
 
 import pytest
 import numpy as np
-from src.imagery import (
+from neuro.modules.m09_creativity.imagery import (
     VisualImagery, AuditoryImagery, MotorImagery,
     TactileImagery, ImagerySystem, MultimodalImage
 )
-from src.imagery.visual_imagery import VisualProperty
-from src.imagery.auditory_imagery import AuditoryProperty
-from src.imagery.motor_imagery import MotorProperty
-from src.imagery.tactile_imagery import TactileProperty
-
+from neuro.modules.m09_creativity.imagery.visual_imagery import VisualProperty
+from neuro.modules.m09_creativity.imagery.auditory_imagery import AuditoryProperty
+from neuro.modules.m09_creativity.imagery.motor_imagery import MotorProperty
+from neuro.modules.m09_creativity.imagery.tactile_imagery import TactileProperty
 
 class TestVisualImagery:
     """Tests for Visual Imagery System"""
@@ -90,7 +89,6 @@ class TestVisualImagery:
 
         assert morphed is not None
         assert "cat" in morphed.description.lower() or "dog" in morphed.description.lower()
-
 
 class TestAuditoryImagery:
     """Tests for Auditory Imagery System"""
@@ -174,7 +172,6 @@ class TestAuditoryImagery:
         assert layered is not None
         assert layered.duration == max(s1.duration, s2.duration)
 
-
 class TestMotorImagery:
     """Tests for Motor Imagery System"""
 
@@ -251,7 +248,6 @@ class TestMotorImagery:
         mirrored = motor.mirror(action.id)
 
         assert "left" in str(mirrored.body_parts).lower() or mirrored is not None
-
 
 class TestTactileImagery:
     """Tests for Tactile Imagery System"""
@@ -369,7 +365,6 @@ class TestTactileImagery:
         # Rich tactile imagery should produce diverse semantic associations
         unique_associations = set(all_associations)
         assert len(unique_associations) >= 5  # Multiple distinct associations
-
 
 class TestImagerySystem:
     """Tests for Integrated Imagery System"""
@@ -523,7 +518,6 @@ class TestImagerySystem:
         assert "auditory" in vividness
         assert "tactile" in vividness
         assert all(0 <= v <= 1 for v in vividness.values())
-
 
 class TestImageryIntegration:
     """Tests for imagery integration across modalities"""

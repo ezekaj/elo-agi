@@ -3,13 +3,9 @@
 import pytest
 import numpy as np
 import time
-import sys
-sys.path.insert(0, '..')
-
-from src.system2.working_memory import WorkingMemory, MemorySlot
-from src.system2.cognitive_control import CognitiveControl, Response, ConflictLevel
-from src.system2.relational_reasoning import RelationalReasoning, RelationType
-
+from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory, MemorySlot
+from neuro.modules.m02_dual_process.system2.cognitive_control import CognitiveControl, Response, ConflictLevel
+from neuro.modules.m02_dual_process.system2.relational_reasoning import RelationalReasoning, RelationType
 
 class TestWorkingMemory:
     """Tests for limited-capacity working memory"""
@@ -91,7 +87,6 @@ class TestWorkingMemory:
         results = wm.serial_process(["step1", "step2", "step3"])
 
         assert results == ["first", "second", "third"]
-
 
 class TestCognitiveControl:
     """Tests for conflict detection and inhibition"""
@@ -180,7 +175,6 @@ class TestCognitiveControl:
 
         # Total should not exceed budget (1.0)
         assert sum(allocated.values()) <= 1.0
-
 
 class TestRelationalReasoning:
     """Tests for compositional binding"""
@@ -278,7 +272,6 @@ class TestRelationalReasoning:
         assert result is not None
         assert len(result.relations) == 1
         assert result.relations[0].relation_type == RelationType.IS_A
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -2,17 +2,13 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.sleep_stages import (
+from neuro.modules.m05_sleep_consolidation.sleep_stages import (
     SleepStage,
     StageProperties,
     SleepStageController,
     OscillationGenerator,
     OscillationEvent
 )
-
 
 class TestSleepStage:
     """Tests for sleep stage enum and properties"""
@@ -46,7 +42,6 @@ class TestSleepStage:
 
         assert wake_props.plasticity_mode == "encoding"
         assert wake_props.arousal_threshold == 0.0
-
 
 class TestOscillationGenerator:
     """Tests for neural oscillation generation"""
@@ -136,7 +131,6 @@ class TestOscillationGenerator:
 
         gen.theta_wave(duration=2.0)
         assert gen.current_time == 3.0
-
 
 class TestSleepStageController:
     """Tests for sleep stage controller"""
@@ -249,7 +243,6 @@ class TestSleepStageController:
         assert controller.total_time == 0.0
         assert controller.cycle_count == 0
 
-
 class TestSleepCycleArchitecture:
     """Tests for sleep architecture patterns"""
 
@@ -290,7 +283,6 @@ class TestSleepCycleArchitecture:
 
         # Default cycle duration
         assert controller.cycle_duration == 90.0
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

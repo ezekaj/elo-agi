@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.minimal_self import (
+from neuro.modules.m16_consciousness.minimal_self import (
     AgencyDetector, OwnershipProcessor, MinimalSelf, MinimalSelfParams
 )
-
 
 class TestAgencyDetector:
     """Tests for agency detection"""
@@ -53,7 +49,6 @@ class TestAgencyDetector:
 
         # Agency should increase with good match
         # (depends on threshold)
-
 
 class TestOwnershipProcessor:
     """Tests for body ownership"""
@@ -101,7 +96,6 @@ class TestOwnershipProcessor:
 
         assert sync_result["illusion_strength"] > async_result["illusion_strength"]
 
-
 class TestMinimalSelf:
     """Tests for integrated minimal self"""
 
@@ -142,7 +136,6 @@ class TestMinimalSelf:
         assert "agency_level" in state
         assert "ownership_level" in state
         assert "self_integrity" in state
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

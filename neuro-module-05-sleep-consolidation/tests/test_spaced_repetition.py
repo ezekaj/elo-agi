@@ -2,10 +2,9 @@
 
 import pytest
 import numpy as np
-from src.spaced_repetition import (
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
     SpacedRepetitionScheduler, RepetitionSchedule, ReviewQuality, ReviewResult,
 )
-
 
 class TestRepetitionSchedule:
     """Tests for RepetitionSchedule."""
@@ -73,7 +72,6 @@ class TestRepetitionSchedule:
             last_review=0.0,
         )
         assert not reviewed_schedule.is_new()
-
 
 class TestSpacedRepetitionScheduler:
     """Tests for SpacedRepetitionScheduler."""

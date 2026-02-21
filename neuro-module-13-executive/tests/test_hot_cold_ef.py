@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.hot_cold_ef import (
+from neuro.modules.m13_executive.hot_cold_ef import (
     HotExecutiveFunction, ColdExecutiveFunction, EmotionalRegulator, HotColdParams
 )
-
 
 class TestHotExecutiveFunction:
     """Tests for hot EF"""
@@ -95,7 +91,6 @@ class TestHotExecutiveFunction:
         assert "valence" in state
         assert "expected_reward" in state
 
-
 class TestColdExecutiveFunction:
     """Tests for cold EF"""
 
@@ -180,7 +175,6 @@ class TestColdExecutiveFunction:
         assert "cognitive_load" in state
         assert "active_rules" in state
         assert "rule_strengths" in state
-
 
 class TestEmotionalRegulator:
     """Tests for emotional regulation"""
@@ -274,7 +268,6 @@ class TestEmotionalRegulator:
         assert "hot" in state
         assert "cold" in state
         assert "regulation_strategy" in state
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

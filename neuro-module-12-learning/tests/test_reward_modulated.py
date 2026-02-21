@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.reward_modulated import (
+from neuro.modules.m12_learning.reward_modulated import (
     DopamineSystem, RewardModulatedSTDP, ErrorBasedLearning, DopamineParams
 )
-
 
 class TestDopamineSystem:
     """Tests for dopamine system"""
@@ -73,7 +69,6 @@ class TestDopamineSystem:
         da.expected_reward = 2.0
         da.receive_reward(0.0)
         assert da.get_modulation() == 0
-
 
 class TestRewardModulatedSTDP:
     """Tests for reward-modulated STDP"""
@@ -154,7 +149,6 @@ class TestRewardModulatedSTDP:
 
         assert w_change > 0
 
-
 class TestErrorBasedLearning:
     """Tests for error-based learning"""
 
@@ -198,7 +192,6 @@ class TestErrorBasedLearning:
 
         assert len(errors) == 50
         assert errors[-1] < errors[0]  # Error decreased
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

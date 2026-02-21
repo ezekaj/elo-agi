@@ -2,15 +2,11 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.precision_weighting import (
+from neuro.modules.m01_predictive_coding.precision_weighting import (
     PrecisionWeightedError,
     AdaptivePrecision,
     HierarchicalPrecision
 )
-
 
 class TestPrecisionWeightedError:
     """Tests for basic precision-weighted error computation"""
@@ -79,7 +75,6 @@ class TestPrecisionWeightedError:
             pwe.update_precision(np.random.randn(2) * 100)
 
         assert np.all(pwe.precision >= 0.1)
-
 
 class TestAdaptivePrecision:
     """Tests for adaptive precision with volatility tracking"""
@@ -198,7 +193,6 @@ class TestAdaptivePrecision:
         # Just verify it runs without error
         _ = ap.detect_regime_change()
 
-
 class TestHierarchicalPrecision:
     """Tests for hierarchical precision across levels"""
 
@@ -261,13 +255,12 @@ class TestHierarchicalPrecision:
 
         assert 0.0 <= confidence <= 1.0
 
-
 class TestPrecisionIntegration:
     """Integration tests for precision with prediction"""
 
     def test_precision_modulates_learning(self):
         """Test that precision affects weight update magnitude"""
-        from src.predictive_hierarchy import PredictiveLayer
+        from neuro.modules.m01_predictive_coding.predictive_hierarchy import PredictiveLayer
 
         # Create two separate layers for fair comparison
         layer_low = PredictiveLayer(state_dim=3, output_dim=4, learning_rate=0.5)
@@ -302,7 +295,6 @@ class TestPrecisionIntegration:
         # Higher precision should lead to larger (or equal due to clipping) weight changes
         # The implementation clips updates, so we test >= instead of >
         assert high_change >= low_change * 0.9  # Allow small tolerance
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

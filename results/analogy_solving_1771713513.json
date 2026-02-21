@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "analogy_solving",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.0,
+  "std_score": 0.0,
+  "mean_latency": 9.5367431640625e-07,
+  "error_count": 0,
+  "total_time": 8.392333984375e-05,
+  "timestamp": 1771713513.784307,
+  "config": {
+    "name": "analogy_solving",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.capability_tracking import (
+from neuro.modules.continual.capability_tracking import (
     CapabilityTracker,
     CapabilityConfig,
     CapabilityStatus,
@@ -11,7 +11,6 @@ from src.capability_tracking import (
     CapabilityRecord,
     InterferenceReport,
 )
-
 
 class TestCapabilityConfig:
     """Tests for CapabilityConfig class."""
@@ -26,7 +25,6 @@ class TestCapabilityConfig:
         config = CapabilityConfig(regression_threshold=0.2, history_window=20)
         assert config.regression_threshold == 0.2
         assert config.history_window == 20
-
 
 class TestCapabilityTracker:
     """Tests for CapabilityTracker class."""
@@ -198,7 +196,6 @@ class TestCapabilityTracker:
         assert "status_distribution" in stats
         assert stats["total_capabilities"] == 2
 
-
 class TestCapabilityStatus:
     """Tests for CapabilityStatus enum."""
 
@@ -207,7 +204,6 @@ class TestCapabilityStatus:
         assert CapabilityStatus.STABLE.value == "stable"
         assert CapabilityStatus.REGRESSING.value == "regressing"
         assert CapabilityStatus.UNKNOWN.value == "unknown"
-
 
 class TestCapabilityMetric:
     """Tests for CapabilityMetric dataclass."""
@@ -224,7 +220,6 @@ class TestCapabilityMetric:
         assert metric.name == "reasoning"
         assert metric.score == 0.8
         assert metric.confidence == 0.9
-
 
 class TestInterferenceReport:
     """Tests for InterferenceReport dataclass."""

@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.action_simulation import (
+from neuro.modules.m14_embodied.action_simulation import (
     MotorSimulator, MirrorSystem, ActionUnderstanding, SimulationParams
 )
-
 
 class TestMotorSimulator:
     """Tests for motor simulation"""
@@ -72,7 +68,6 @@ class TestMotorSimulator:
 
         assert not simulator.simulating
         assert simulator.inhibition_level == 0.0
-
 
 class TestMirrorSystem:
     """Tests for mirror neuron system"""
@@ -147,7 +142,6 @@ class TestMirrorSystem:
 
         assert mirror.get_resonance() < initial
 
-
 class TestActionUnderstanding:
     """Tests for action understanding"""
 
@@ -203,7 +197,6 @@ class TestActionUnderstanding:
         understanding.update(dt=10.0)
 
         assert understanding.understanding_confidence <= initial_conf
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -2,25 +2,21 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.intrinsic_motivation import (
+from neuro.modules.m06_motivation.intrinsic_motivation import (
     PathEntropyMaximizer, PossibilitySpace, ActionDiversityTracker, DriveType
 )
-from src.dopamine_system import (
+from neuro.modules.m06_motivation.dopamine_system import (
     DopamineSystem, PredictionErrorComputer, IncentiveSalience, BenefitCostEvaluator
 )
-from src.curiosity_drive import (
+from neuro.modules.m06_motivation.curiosity_drive import (
     CuriosityModule, NoveltyDetector, InformationValue, ExplorationController
 )
-from src.homeostatic_regulation import (
+from neuro.modules.m06_motivation.homeostatic_regulation import (
     HomeostaticState, NeedBasedValuation, InternalStateTracker, NeedType
 )
-from src.effort_valuation import (
+from neuro.modules.m06_motivation.effort_valuation import (
     EffortCostModel, ParadoxicalEffort, MotivationalTransform, EffortProfile
 )
-
 
 class TestNumericalStability:
     """Tests for numerical stability under extreme conditions"""
@@ -123,7 +119,6 @@ class TestNumericalStability:
         assert np.isfinite(cost)
         assert cost > 0
 
-
 class TestHighDimensional:
     """Tests for high-dimensional state/action spaces"""
 
@@ -160,7 +155,6 @@ class TestHighDimensional:
                 cue=np.random.randn(30)
             )
             assert np.isfinite(signal.prediction_error)
-
 
 class TestLongRunning:
     """Tests for long-running stability"""
@@ -221,7 +215,6 @@ class TestLongRunning:
             if i % 100 == 0:
                 wellbeing = state.get_overall_wellbeing()
                 assert np.isfinite(wellbeing)
-
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""
@@ -294,7 +287,6 @@ class TestEdgeCases:
         cost = model.compute_cost(profile)
         assert cost == 0.0
 
-
 class TestRapidChanges:
     """Tests for rapid state changes"""
 
@@ -352,7 +344,6 @@ class TestRapidChanges:
         assert recovered_level > depleted_level
         # Drive should have decreased (or stayed same if both maxed)
         assert recovered_drive <= depleted_drive
-
 
 class TestIntegration:
     """Integration tests combining multiple systems"""
@@ -441,7 +432,6 @@ class TestIntegration:
         # High motivation should reduce perceived cost
         assert high_motivation_cost < low_motivation_cost
 
-
 class TestAdversarial:
     """Adversarial tests with unusual inputs"""
 
@@ -505,7 +495,6 @@ class TestAdversarial:
             # Should remain stable
             wellbeing = homeostatic.get_overall_wellbeing()
             assert np.isfinite(wellbeing)
-
 
 class TestBehavioralPredictions:
     """Tests for behavioral predictions from the theory"""
@@ -595,7 +584,6 @@ class TestBehavioralPredictions:
         # High effort should add more value (effort justification)
         assert high_effort_value > low_effort_value
 
-
 class TestPerformance:
     """Performance and scalability tests"""
 
@@ -639,7 +627,6 @@ class TestPerformance:
         # Check value function has learned
         summary = dopamine.get_state_summary()
         assert np.isfinite(summary['recent_rpe_mean'])
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

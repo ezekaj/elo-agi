@@ -451,7 +451,7 @@ def cmd_chat(args):
     engine_available = False
 
     try:
-        from engine import NeuroEngine, EngineConfig
+        from neuro.engine import NeuroEngine, EngineConfig
         config = EngineConfig(
             model=model,
             show_thinking=not print_mode,
@@ -464,8 +464,7 @@ def cmd_chat(args):
     except ImportError:
         # Fallback: try relative import
         try:
-            sys.path.insert(0, str(Path(__file__).parent))
-            from engine import NeuroEngine, EngineConfig
+            from neuro.engine import NeuroEngine, EngineConfig
             config = EngineConfig(
                 model=model,
                 show_thinking=not print_mode,
@@ -482,8 +481,7 @@ def cmd_chat(args):
     tools = None
     tools_available = False
     try:
-        sys.path.insert(0, str(Path(__file__).parent.parent / "neuro-model" / "src"))
-        from tools import Tools
+        from neuro.modules.model.tools import Tools
         tools = Tools(work_dir=os.getcwd())
         tools_available = True
     except ImportError:
@@ -1513,8 +1511,7 @@ def cmd_demo(args):
     spinner.start()
 
     try:
-        sys.path.insert(0, str(Path(__file__).parent))
-        from engine import NeuroEngine, EngineConfig
+        from neuro.engine import NeuroEngine, EngineConfig
         config = EngineConfig(model="ministral-3:8b", show_thinking=False)
         engine = NeuroEngine(config)
         spinner.stop()

@@ -2,10 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.dopamine_system import (
+from neuro.modules.m06_motivation.dopamine_system import (
     DopamineSystem,
     PredictionErrorComputer,
     IncentiveSalience,
@@ -13,7 +10,6 @@ from src.dopamine_system import (
     DopamineSignal,
     DopamineChannel
 )
-
 
 class TestPredictionErrorComputer:
     """Tests for reward prediction error computation"""
@@ -77,7 +73,6 @@ class TestPredictionErrorComputer:
 
         assert surprise_pos == surprise_neg == 0.5
 
-
 class TestIncentiveSalience:
     """Tests for incentive salience (wanting)"""
 
@@ -131,7 +126,6 @@ class TestIncentiveSalience:
         idx, value = salience.get_most_wanted([cue_low, cue_high])
         assert idx == 1  # cue_high is second in list
 
-
 class TestBenefitCostEvaluator:
     """Tests for benefit/cost evaluation"""
 
@@ -172,7 +166,6 @@ class TestBenefitCostEvaluator:
         # High dopamine should increase willingness
         # (or at minimum equal if implementation clips)
         assert high_willingness >= low_willingness
-
 
 class TestDopamineSystem:
     """Tests for integrated dopamine system"""
@@ -261,7 +254,6 @@ class TestDopamineSystem:
         assert 'tonic_level' in summary
         assert 'motivation' in summary
         assert 'exploration_bonus' in summary
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

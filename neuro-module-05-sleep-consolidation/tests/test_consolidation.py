@@ -2,11 +2,8 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.memory_replay import MemoryTrace, HippocampalReplay, ReplayPrioritizer
-from src.systems_consolidation import (
+from neuro.modules.m05_sleep_consolidation.memory_replay import MemoryTrace, HippocampalReplay, ReplayPrioritizer
+from neuro.modules.m05_sleep_consolidation.systems_consolidation import (
     HippocampalStore,
     CorticalStore,
     HippocampalCorticalDialogue,
@@ -14,7 +11,6 @@ from src.systems_consolidation import (
     MemoryTransformation,
     StoredMemory
 )
-
 
 class TestMemoryTrace:
     """Tests for memory trace representation"""
@@ -48,7 +44,6 @@ class TestMemoryTrace:
 
         sim = trace1.similarity_to(trace2)
         assert 0 < sim < 1
-
 
 class TestHippocampalReplay:
     """Tests for hippocampal replay system"""
@@ -139,7 +134,6 @@ class TestHippocampalReplay:
         selected_ids = [id(m) for m in selected]
         assert id(recent) in selected_ids or id(emotional) in selected_ids
 
-
 class TestReplayPrioritizer:
     """Tests for replay prioritization"""
 
@@ -178,7 +172,6 @@ class TestReplayPrioritizer:
         complete_priority = prioritizer.compute_priority(complete, current_time=0.0)
 
         assert incomplete_priority > complete_priority
-
 
 class TestHippocampalStore:
     """Tests for hippocampal memory store"""
@@ -226,7 +219,6 @@ class TestHippocampalStore:
 
         assert retrieved.consolidation_level == 0.3
 
-
 class TestCorticalStore:
     """Tests for cortical memory store"""
 
@@ -272,7 +264,6 @@ class TestCorticalStore:
         similarity = np.corrcoef(schema.flatten(), base.flatten())[0, 1]
         assert similarity > 0.9
 
-
 class TestConsolidationWindow:
     """Tests for consolidation window timing"""
 
@@ -311,7 +302,6 @@ class TestConsolidationWindow:
         )
 
         assert optimal.get_consolidation_boost() > suboptimal.get_consolidation_boost()
-
 
 class TestHippocampalCorticalDialogue:
     """Tests for hippocampal-cortical memory transfer"""
@@ -373,7 +363,6 @@ class TestHippocampalCorticalDialogue:
         assert "consolidated" in stats
         assert "transferred" in stats
 
-
 class TestMemoryTransformation:
     """Tests for memory transformation during consolidation"""
 
@@ -403,7 +392,6 @@ class TestMemoryTransformation:
         # Should be between original and schema (at least some elements changed)
         assert np.any(integrated != trace.content)
         assert np.any(integrated != schema)
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

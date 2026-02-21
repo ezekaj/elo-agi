@@ -7,11 +7,10 @@ Tests system behavior under high load, edge cases, and adversarial inputs.
 import pytest
 import numpy as np
 import time
-from src.creative_process import CreativeProcess
-from src.networks import DefaultModeNetwork, ExecutiveControlNetwork, SalienceNetwork
-from src.networks.salience_network import NetworkState, SwitchTrigger
-from src.imagery import ImagerySystem
-
+from neuro.modules.m09_creativity.creative_process import CreativeProcess
+from neuro.modules.m09_creativity.networks import DefaultModeNetwork, ExecutiveControlNetwork, SalienceNetwork
+from neuro.modules.m09_creativity.networks.salience_network import NetworkState, SwitchTrigger
+from neuro.modules.m09_creativity.imagery import ImagerySystem
 
 class TestDMNStress:
     """Stress tests for Default Mode Network"""
@@ -98,7 +97,6 @@ class TestDMNStress:
         if found_distances:
             assert max(found_distances) >= 5
 
-
 class TestECNStress:
     """Stress tests for Executive Control Network"""
 
@@ -156,7 +154,7 @@ class TestECNStress:
         """Test evaluation with extreme criteria weights"""
         ecn = ExecutiveControlNetwork()
 
-        from src.networks.executive_control_network import EvaluationCriterion
+        from neuro.modules.m09_creativity.networks.executive_control_network import EvaluationCriterion
 
         # Extreme weights
         extreme_weights = {
@@ -174,7 +172,6 @@ class TestECNStress:
 
         # Should still produce valid score
         assert 0 <= evaluation.overall_score
-
 
 class TestSalienceNetworkStress:
     """Stress tests for Salience Network"""
@@ -223,7 +220,6 @@ class TestSalienceNetworkStress:
 
         # Should make some decisions
         assert len(decisions) == 100
-
 
 class TestImageryStress:
     """Stress tests for Imagery System"""
@@ -307,7 +303,6 @@ class TestImageryStress:
             assert img.auditory is not None
             assert img.motor is not None
             assert img.tactile is not None
-
 
 class TestCreativeProcessStress:
     """Stress tests for Creative Process"""
@@ -423,7 +418,6 @@ class TestCreativeProcessStress:
         for idea in ideas:
             cp.imagine_idea(idea.id, modalities=["visual", "tactile", "motor"])
 
-
 class TestEdgeCases:
     """Edge case tests"""
 
@@ -480,7 +474,7 @@ class TestEdgeCases:
 
     def test_extreme_vividness_values(self):
         """Test imagery with extreme vividness"""
-        from src.imagery import VisualImagery
+        from neuro.modules.m09_creativity.imagery import VisualImagery
 
         visual = VisualImagery(default_vividness=0.0)
         img1 = visual.visualize("Zero vividness")
@@ -520,7 +514,6 @@ class TestEdgeCases:
 
         thought = dmn.generate_spontaneous_thought()
         assert thought is not None
-
 
 class TestPerformance:
     """Performance benchmarks"""

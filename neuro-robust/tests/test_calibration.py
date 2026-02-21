@@ -2,11 +2,10 @@
 
 import pytest
 import numpy as np
-from src.calibration import (
+from neuro.modules.robust.calibration import (
     ConfidenceCalibrator, CalibrationMethod, CalibrationResult,
 )
-from src.uncertainty import SimpleDropoutNN
-
+from neuro.modules.robust.uncertainty import SimpleDropoutNN
 
 class TestConfidenceCalibrator:
     """Tests for ConfidenceCalibrator."""
@@ -162,7 +161,6 @@ class TestConfidenceCalibrator:
         stats = calibrator.statistics()
         assert stats["n_calibrations"] == 2
 
-
 class TestCalibrationMethods:
     """Tests comparing calibration methods."""
 
@@ -204,7 +202,6 @@ class TestCalibrationMethods:
 
             # Ranking should be preserved
             assert np.argmax(probs_t1) == np.argmax(probs_t3)
-
 
 class TestCalibrationEdgeCases:
     """Edge case tests for calibration."""
@@ -270,7 +267,6 @@ class TestCalibrationEdgeCases:
         result = calibrator.calibrate(logits)
         assert result.calibrated_probs[0] == 1.0
 
-
 class TestECEComputation:
     """Detailed tests for ECE computation."""
 
@@ -334,7 +330,6 @@ class TestECEComputation:
 
             brier = calibrator.brier_score(probs, labels)
             assert 0 <= brier <= 2
-
 
 class TestFittingBehavior:
     """Tests for calibration fitting behavior."""

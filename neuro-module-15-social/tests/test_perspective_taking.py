@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.perspective_taking import (
+from neuro.modules.m15_social.perspective_taking import (
     SelfOtherDistinction, TPJNetwork, PerspectiveTaking, PerspectiveParams
 )
-
 
 class TestSelfOtherDistinction:
     """Tests for self-other distinction"""
@@ -47,7 +43,6 @@ class TestSelfOtherDistinction:
         influence = sod.get_self_influence("similar")
         assert influence > 0
 
-
 class TestTPJNetwork:
     """Tests for TPJ network"""
 
@@ -85,7 +80,6 @@ class TestTPJNetwork:
         tpj.switch_perspective("other1")
         viewed = tpj.view_from_perspective(np.zeros(50))
         assert np.sum(np.abs(viewed)) > 0  # Modified by perspective
-
 
 class TestPerspectiveTaking:
     """Tests for integrated perspective taking"""
@@ -133,7 +127,6 @@ class TestPerspectiveTaking:
         pt.update_model("other1", np.random.rand(50))
         assert "other1" in pt.tpj.perspectives
         assert "other1" in pt.self_other.other_representations
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

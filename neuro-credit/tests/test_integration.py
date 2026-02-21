@@ -3,9 +3,8 @@
 import pytest
 import numpy as np
 
-from src.integration import CreditConfig, CreditAssignmentSystem
-from src.blame_assignment import FailureType
-
+from neuro.modules.credit.integration import CreditConfig, CreditAssignmentSystem
+from neuro.modules.credit.blame_assignment import FailureType
 
 class TestCreditConfig:
     """Tests for CreditConfig class."""
@@ -19,7 +18,6 @@ class TestCreditConfig:
         config = CreditConfig(gamma=0.95, use_shapley=False)
         assert config.gamma == 0.95
         assert not config.use_shapley
-
 
 class TestCreditAssignmentSystem:
     """Tests for CreditAssignmentSystem class."""
@@ -214,7 +212,6 @@ class TestCreditAssignmentSystem:
         assert "blame_stats" in stats
         assert "surprise_stats" in stats
         assert "contribution_stats" in stats
-
 
 class TestEndToEndCredit:
     """End-to-end credit assignment tests."""

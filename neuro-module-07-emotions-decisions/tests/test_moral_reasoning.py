@@ -1,12 +1,11 @@
 """Tests for moral reasoning."""
 
 import pytest
-from src.moral_reasoning import (
+from neuro.modules.m07_emotions_decisions.moral_reasoning import (
     DeontologicalSystem, UtilitarianSystem, MoralDilemmaProcessor,
     VMPFCLesionModel, MoralFramework, HarmType,
     create_trolley_switch, create_trolley_push, create_crying_baby
 )
-
 
 class TestDeontologicalSystem:
     """Test deontological (rule-based) moral reasoning."""
@@ -36,7 +35,6 @@ class TestDeontologicalSystem:
         emotional = deont.emotional_response(push)
         assert emotional < 0  # Negative emotional response to harm
 
-
 class TestUtilitarianSystem:
     """Test utilitarian (outcome-based) moral reasoning."""
 
@@ -57,7 +55,6 @@ class TestUtilitarianSystem:
 
         # Utilitarian doesn't distinguish personal/impersonal
         assert abs(switch_util - push_util) < 0.1
-
 
 class TestMoralDilemmaProcessor:
     """Test integrated moral dilemma processing."""
@@ -95,7 +92,6 @@ class TestMoralDilemmaProcessor:
         # Personal should lean deontological
         assert push_decision.deontological_weight > push_decision.utilitarian_weight
 
-
 class TestVMPFCLesionModel:
     """Test VMPFC lesion effects on moral reasoning."""
 
@@ -131,7 +127,6 @@ class TestVMPFCLesionModel:
 
         # Lesioned should have reduced emotional response
         assert abs(comparison['lesioned'].emotional_response) <= abs(comparison['healthy'].emotional_response)
-
 
 class TestTrolleyProblemPredictions:
     """Test that model matches known trolley problem findings."""

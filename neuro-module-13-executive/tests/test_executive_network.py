@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.executive_network import (
+from neuro.modules.m13_executive.executive_network import (
     ConflictMonitor, PFCController, ExecutiveNetwork, ExecutiveParams
 )
-
 
 class TestConflictMonitor:
     """Tests for conflict monitoring"""
@@ -70,7 +66,6 @@ class TestConflictMonitor:
         mean = monitor.get_mean_conflict(window=5)
 
         assert mean >= 0
-
 
 class TestPFCController:
     """Tests for PFC controller"""
@@ -134,7 +129,6 @@ class TestPFCController:
         assert "current_goal" in state
         assert "goal_activation" in state
         assert "control_level" in state
-
 
 class TestExecutiveNetwork:
     """Tests for integrated executive network"""
@@ -227,7 +221,6 @@ class TestExecutiveNetwork:
 
         # Arousal should be in valid range
         assert 0.2 <= network.arousal <= 1.0
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

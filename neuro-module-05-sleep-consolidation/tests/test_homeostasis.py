@@ -2,16 +2,12 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.synaptic_homeostasis import (
+from neuro.modules.m05_sleep_consolidation.synaptic_homeostasis import (
     Synapse,
     SynapticHomeostasis,
     SelectiveConsolidation,
     SleepWakeCycle
 )
-
 
 class TestSynapse:
     """Tests for single synapse representation"""
@@ -25,7 +21,6 @@ class TestSynapse:
         assert synapse.source == 1
         assert synapse.target == 2
         assert not synapse.is_tagged
-
 
 class TestSynapticHomeostasis:
     """Tests for synaptic homeostasis system"""
@@ -135,7 +130,6 @@ class TestSynapticHomeostasis:
         assert "total_strength" in stats
         assert "mean_weight" in stats
         assert "energy_cost" in stats
-
 
 class TestSelectiveConsolidation:
     """Tests for selective protection from downscaling"""
@@ -253,7 +247,6 @@ class TestSelectiveConsolidation:
 
         assert selective.get_tagged_count() == 0
 
-
 class TestSleepWakeCycle:
     """Tests for complete sleep-wake cycle"""
 
@@ -343,7 +336,6 @@ class TestSleepWakeCycle:
         # (homeostasis should keep it bounded)
         assert final_strength < initial_strength * 5  # Reasonable bound
 
-
 class TestHomeostasisIntegration:
     """Integration tests for homeostasis with other systems"""
 
@@ -397,7 +389,6 @@ class TestHomeostasisIntegration:
 
         # SNR should improve (or at least not worsen much)
         assert final_snr >= initial_snr * 0.9
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

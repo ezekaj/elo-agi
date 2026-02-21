@@ -8,12 +8,9 @@ and efficiency optimization components.
 import pytest
 import numpy as np
 import time
-import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from distributed.coordinator import (
+from neuro.modules.scale.distributed.coordinator import (
     TaskStatus,
     SchedulingPolicy,
     CoordinatorConfig,
@@ -23,14 +20,14 @@ from distributed.coordinator import (
     LoadBalancer,
     TaskCoordinator,
 )
-from distributed.worker import (
+from neuro.modules.scale.distributed.worker import (
     WorkerStatus,
     WorkResult,
     WorkerConfig,
     Worker,
     WorkerPool,
 )
-from distributed.aggregator import (
+from neuro.modules.scale.distributed.aggregator import (
     AggregationStrategy,
     AggregatedResult,
     WeightedAverage,
@@ -39,7 +36,7 @@ from distributed.aggregator import (
     ResultAggregator,
 )
 
-from gpu.kernels import (
+from neuro.modules.scale.gpu.kernels import (
     KernelConfig,
     KernelStats,
     GPUKernel,
@@ -49,7 +46,7 @@ from gpu.kernels import (
     ReductionKernel,
     KernelManager,
 )
-from gpu.batch_inference import (
+from neuro.modules.scale.gpu.batch_inference import (
     BatchConfig,
     InferenceBatch,
     BatchResult,
@@ -58,7 +55,7 @@ from gpu.batch_inference import (
     BatchInference,
 )
 
-from sparse.pruning import (
+from neuro.modules.scale.sparse.pruning import (
     PruningStrategy,
     PruningResult,
     PruningConfig,
@@ -68,7 +65,7 @@ from sparse.pruning import (
     StructuredPruning,
     NetworkPruner,
 )
-from sparse.quantization import (
+from neuro.modules.scale.sparse.quantization import (
     QuantizationLevel,
     QuantizationConfig,
     QuantizedTensor,
@@ -76,7 +73,7 @@ from sparse.quantization import (
     Quantizer,
 )
 
-from efficiency import (
+from neuro.modules.scale.efficiency import (
     LatencyProfile,
     ThroughputMetrics,
     MemoryProfile,
@@ -86,7 +83,6 @@ from efficiency import (
     MemoryOptimizer,
     EfficiencyOptimizer,
 )
-
 
 # =============================================================================
 # DISTRIBUTED TESTS
@@ -148,7 +144,6 @@ class TestTaskQueue:
         assert peeked.id == "task_1"
         assert queue.size() == 1  # Still there
 
-
 class TestLoadBalancer:
     """Tests for LoadBalancer."""
 
@@ -182,7 +177,6 @@ class TestLoadBalancer:
         balancer.update_load("worker_1", 0.5)
         balancer.remove_worker("worker_1")
         assert "worker_1" not in balancer.get_worker_loads()
-
 
 class TestTaskCoordinator:
     """Tests for TaskCoordinator."""
@@ -278,7 +272,6 @@ class TestTaskCoordinator:
         stats = coordinator.get_task_stats()
         assert stats["total_tasks"] == 2
 
-
 class TestWorker:
     """Tests for Worker."""
 
@@ -342,7 +335,6 @@ class TestWorker:
         stats = worker.statistics()
         assert stats["tasks_completed"] == 2
 
-
 class TestWorkerPool:
     """Tests for WorkerPool."""
 
@@ -392,7 +384,6 @@ class TestWorkerPool:
         assert stats["n_workers"] == 2
         assert stats["completed_tasks"] == 1
 
-
 class TestWeightedAverage:
     """Tests for WeightedAverage aggregator."""
 
@@ -424,7 +415,6 @@ class TestWeightedAverage:
         agg = WeightedAverage()
         aggregated = agg.aggregate([])
         assert aggregated.n_inputs == 0
-
 
 class TestVoting:
     """Tests for Voting aggregator."""
@@ -461,7 +451,6 @@ class TestVoting:
         aggregated = voter.aggregate(results, weights)
         assert aggregated.value == "B"
 
-
 class TestConcatAggregator:
     """Tests for ConcatAggregator."""
 
@@ -481,7 +470,6 @@ class TestConcatAggregator:
         aggregated = agg.aggregate(results)
         # ConcatAggregator tries numpy first, then falls back to list concat
         np.testing.assert_array_equal(aggregated.value, [1, 2, 3, 4])
-
 
 class TestResultAggregator:
     """Tests for ResultAggregator."""
@@ -539,7 +527,6 @@ class TestResultAggregator:
         assert "accuracy" in aggregated
         assert "loss" in aggregated
 
-
 # =============================================================================
 # GPU KERNEL TESTS
 # =============================================================================
@@ -583,7 +570,6 @@ class TestMatMulKernel:
         with pytest.raises(ValueError):
             kernel.execute(A, B)
 
-
 class TestConvolutionKernel:
     """Tests for ConvolutionKernel."""
 
@@ -609,7 +595,6 @@ class TestConvolutionKernel:
 
         result = kernel.execute(input, conv_filter)
         assert result.shape == (3, 8, 8)
-
 
 class TestSoftmaxKernel:
     """Tests for SoftmaxKernel."""
@@ -641,7 +626,6 @@ class TestSoftmaxKernel:
         # Should not produce NaN or Inf
         assert np.all(np.isfinite(result))
         np.testing.assert_almost_equal(result.sum(), 1.0)
-
 
 class TestReductionKernel:
     """Tests for ReductionKernel."""
@@ -678,7 +662,6 @@ class TestReductionKernel:
         result = kernel.execute(x, axis=1)
         np.testing.assert_array_equal(result, [3, 7])
 
-
 class TestKernelManager:
     """Tests for KernelManager."""
 
@@ -710,7 +693,6 @@ class TestKernelManager:
         manager = KernelManager()
         stats = manager.statistics()
         assert stats["n_kernels"] == 6
-
 
 # =============================================================================
 # BATCH INFERENCE TESTS
@@ -754,7 +736,6 @@ class TestInferenceCache:
         # First entry should be evicted
         assert cache.size == 2
 
-
 class TestBatchBuilder:
     """Tests for BatchBuilder."""
 
@@ -788,7 +769,6 @@ class TestBatchBuilder:
         batch = builder.flush()
         assert batch is not None
         assert batch.size == 1
-
 
 class TestBatchInference:
     """Tests for BatchInference."""
@@ -850,7 +830,6 @@ class TestBatchInference:
         stats = batch_inf.statistics()
         assert stats["total_requests"] == 1
 
-
 # =============================================================================
 # SPARSE PRUNING TESTS
 # =============================================================================
@@ -879,7 +858,6 @@ class TestPruningMask:
         mask.update(np.array([True, True, False, False]))
 
         assert mask.sparsity == 0.5
-
 
 class TestMagnitudePruning:
     """Tests for MagnitudePruning."""
@@ -915,7 +893,6 @@ class TestMagnitudePruning:
         mask = pruner.compute_mask(weights, sparsity=1.0)
         assert not mask.any()  # All zeros
 
-
 class TestRandomPruning:
     """Tests for RandomPruning."""
 
@@ -934,7 +911,6 @@ class TestRandomPruning:
         # Should be approximately 50% pruned
         actual_sparsity = 1.0 - mask.mean()
         assert 0.3 < actual_sparsity < 0.7
-
 
 class TestStructuredPruning:
     """Tests for StructuredPruning."""
@@ -959,7 +935,6 @@ class TestStructuredPruning:
         # Entire channels should be pruned/kept
         for i in range(4):
             assert mask[i].all() or not mask[i].any()
-
 
 class TestNetworkPruner:
     """Tests for NetworkPruner."""
@@ -1008,7 +983,6 @@ class TestNetworkPruner:
 
         stats = pruner.statistics()
         assert "strategy" in stats
-
 
 # =============================================================================
 # QUANTIZATION TESTS
@@ -1078,7 +1052,6 @@ class TestQuantizer:
         assert "mae" in error
         assert "snr_db" in error
 
-
 class TestQuantizedTensor:
     """Tests for QuantizedTensor."""
 
@@ -1095,7 +1068,6 @@ class TestQuantizedTensor:
         result = qtensor.dequantize()
         expected = np.array([0.0, 0.64, 1.27])
         np.testing.assert_array_almost_equal(result, expected, decimal=2)
-
 
 # =============================================================================
 # EFFICIENCY TESTS
@@ -1150,7 +1122,6 @@ class TestProfiler:
         assert "op1" in summary
         assert "op2" in summary
 
-
 class TestOperationFuser:
     """Tests for OperationFuser."""
 
@@ -1180,7 +1151,6 @@ class TestOperationFuser:
 
         # Should have fewer operations due to fusion
         assert len(optimized) < len(operations)
-
 
 class TestMemoryOptimizer:
     """Tests for MemoryOptimizer."""
@@ -1215,7 +1185,6 @@ class TestMemoryOptimizer:
 
         peak = optimizer.compute_peak_memory(lifetimes, sizes, n_ops=5)
         assert peak > 0
-
 
 class TestEfficiencyOptimizer:
     """Tests for EfficiencyOptimizer."""
@@ -1285,7 +1254,6 @@ class TestEfficiencyOptimizer:
         optimizer = EfficiencyOptimizer()
         stats = optimizer.statistics()
         assert "n_optimizations_applied" in stats
-
 
 # =============================================================================
 # INTEGRATION TESTS
@@ -1397,7 +1365,6 @@ class TestIntegration:
 
         assert profile.n_samples == 5
         assert "n_optimizations_applied" in stats
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

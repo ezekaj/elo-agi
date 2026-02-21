@@ -2,10 +2,9 @@
 
 import pytest
 import numpy as np
-from src.ood_detection import (
+from neuro.modules.robust.ood_detection import (
     SimpleClassifier, OODDetector, OODMethod, OODResult,
 )
-
 
 class TestSimpleClassifier:
     """Tests for SimpleClassifier."""
@@ -37,7 +36,6 @@ class TestSimpleClassifier:
         probs = model.predict_proba(x)
         assert np.all(probs >= 0)
         assert np.isclose(np.sum(probs), 1.0)
-
 
 class TestOODDetector:
     """Tests for OODDetector."""
@@ -207,7 +205,6 @@ class TestOODDetector:
         rate = detector.detection_rate()
         assert 0 <= rate <= 1
 
-
 class TestOODMethods:
     """Tests for different OOD methods."""
 
@@ -261,7 +258,6 @@ class TestOODMethods:
             # At least the median OOD should be higher than median in-dist
             assert median_ood >= median_in - 0.5, f"Method {method} failed"
 
-
 class TestIsolationForest:
     """Tests specifically for Isolation Forest implementation."""
 
@@ -303,7 +299,6 @@ class TestIsolationForest:
 
         # Anomaly should have higher score (shorter path -> higher score)
         assert score_anomaly > score_normal
-
 
 class TestOODEdgeCases:
     """Edge case tests for OOD detection."""

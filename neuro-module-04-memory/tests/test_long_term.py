@@ -3,13 +3,12 @@
 import pytest
 import time
 
-from src.long_term_memory import (
+from neuro.modules.m04_memory.long_term_memory import (
     EpisodicMemory, Episode,
     SemanticMemory, Concept,
     ProceduralMemory, Procedure
 )
-from src.long_term_memory.procedural_memory import Pattern, Action
-
+from neuro.modules.m04_memory.long_term_memory.procedural_memory import Pattern, Action
 
 class TestEpisodicMemory:
     """Tests for episodic memory"""
@@ -94,7 +93,6 @@ class TestEpisodicMemory:
         assert episode.strength < 1.0
         assert episode.vividness < 1.0
 
-
 class TestSemanticMemory:
     """Tests for semantic memory"""
 
@@ -154,7 +152,6 @@ class TestSemanticMemory:
         assert "mammal" in categories
         assert "dog" in members
         assert "cat" in members
-
 
 class TestProceduralMemory:
     """Tests for procedural memory"""
@@ -233,4 +230,4 @@ class TestProceduralMemory:
 
         pm.decay_all(amount=0.1)
 
-        assert procedure.strength == 0.7
+        assert procedure.strength == pytest.approx(0.7)

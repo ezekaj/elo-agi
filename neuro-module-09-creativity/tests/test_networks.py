@@ -4,10 +4,9 @@ Tests for Creative Networks (DMN, ECN, Salience)
 
 import pytest
 import numpy as np
-from src.networks import DefaultModeNetwork, ExecutiveControlNetwork, SalienceNetwork
-from src.networks.salience_network import NetworkState, SwitchTrigger
-from src.networks.executive_control_network import EvaluationCriterion
-
+from neuro.modules.m09_creativity.networks import DefaultModeNetwork, ExecutiveControlNetwork, SalienceNetwork
+from neuro.modules.m09_creativity.networks.salience_network import NetworkState, SwitchTrigger
+from neuro.modules.m09_creativity.networks.executive_control_network import EvaluationCriterion
 
 class TestDefaultModeNetwork:
     """Tests for Default Mode Network"""
@@ -111,7 +110,6 @@ class TestDefaultModeNetwork:
         thought1 = dmn.generate_spontaneous_thought(seed="water")
 
         assert thought1.novelty_score >= 0
-
 
 class TestExecutiveControlNetwork:
     """Tests for Executive Control Network"""
@@ -224,7 +222,6 @@ class TestExecutiveControlNetwork:
         # Both should have evaluations
         assert eval_simple is not None
         assert eval_complex is not None
-
 
 class TestSalienceNetwork:
     """Tests for Salience Network"""
@@ -340,7 +337,6 @@ class TestSalienceNetwork:
         # Both should have reconfiguration
         assert high_novelty_reconfig >= 0
         assert low_novelty_reconfig >= 0
-
 
 class TestNetworkIntegration:
     """Tests for network integration"""

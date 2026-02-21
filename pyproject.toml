@@ -58,13 +58,12 @@ neuro-demo = "neuro.demos:main"
 neuro-bench = "neuro.benchmarks:main"
 
 [project.urls]
-Homepage = "https://github.com/ezekaj/neuro-agi"
-Documentation = "https://neuro-agi.readthedocs.io"
-Repository = "https://github.com/ezekaj/neuro-agi"
-Issues = "https://github.com/ezekaj/neuro-agi/issues"
+Homepage = "https://ezekaj.github.io/elo-agi/"
+Repository = "https://github.com/ezekaj/elo-agi"
+Issues = "https://github.com/ezekaj/elo-agi/issues"
 
-[tool.setuptools]
-packages = ["neuro"]
+[tool.setuptools.packages.find]
+include = ["neuro", "neuro.*"]
 
 [tool.black]
 line-length = 100

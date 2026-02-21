@@ -2,14 +2,10 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.homeostatic import (
+from neuro.modules.m12_learning.homeostatic import (
     HomeostaticRegulation, SynapticScaling, MetaplasticityRegulation,
     ActivityRegulator, HomeostaticParams
 )
-
 
 class TestHomeostaticRegulation:
     """Tests for homeostatic regulation"""
@@ -84,7 +80,6 @@ class TestHomeostaticRegulation:
         assert regulated_weights.shape == weights.shape
         assert np.all(np.isfinite(regulated_weights))
 
-
 class TestSynapticScaling:
     """Tests for synaptic scaling"""
 
@@ -116,7 +111,6 @@ class TestSynapticScaling:
 
         row_sums = np.sum(normalized, axis=1)
         assert np.allclose(row_sums, 1.0)
-
 
 class TestMetaplasticityRegulation:
     """Tests for metaplasticity"""
@@ -158,7 +152,6 @@ class TestMetaplasticityRegulation:
         assert direction[1] == 0  # At threshold = neutral
         assert direction[2] < 0  # Below threshold = LTD
 
-
 class TestActivityRegulator:
     """Tests for combined activity regulation"""
 
@@ -193,7 +186,6 @@ class TestActivityRegulator:
 
         assert len(exc) == 5
         assert len(thresh) == 5
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

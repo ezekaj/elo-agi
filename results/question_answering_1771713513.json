@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "question_answering",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.0,
+  "std_score": 0.0,
+  "mean_latency": 9.5367431640625e-07,
+  "error_count": 0,
+  "total_time": 0.0002651214599609375,
+  "timestamp": 1771713513.786112,
+  "config": {
+    "name": "question_answering",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

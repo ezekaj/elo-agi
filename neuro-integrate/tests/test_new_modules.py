@@ -10,15 +10,9 @@ Tests integration between:
 
 import pytest
 import numpy as np
-import sys
 import os
 
 # Add parent paths for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'neuro-abstract', 'src'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'neuro-robust', 'src'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'neuro-causal', 'src'))
-
-
 class TestNeuroAbstractSharedSpaceIntegration:
     """Tests for neuro-abstract → SharedSpace integration."""
 
@@ -128,7 +122,6 @@ class TestNeuroAbstractSharedSpaceIntegration:
         stats = shared_space_integration.statistics()
         assert stats["n_projections"] >= 2
         assert stats["n_active_embeddings"] >= 2
-
 
 class TestNeuroRobustSharedSpaceIntegration:
     """Tests for neuro-robust → SharedSpace integration."""
@@ -257,7 +250,6 @@ class TestNeuroRobustSharedSpaceIntegration:
         stats = shared_space_robustness.statistics()
         assert stats["n_processed"] == 5
 
-
 class TestNeuroCausalInferenceIntegration:
     """Tests for neuro-causal → neuro-inference integration."""
 
@@ -370,7 +362,6 @@ class TestNeuroCausalInferenceIntegration:
         assert stats["n_variables"] >= 1
         assert stats["adapter_type"] == "InferenceSCMAdapter"
 
-
 class TestCausalInferenceEnhanced:
     """Tests for enhanced causal inference engine."""
 
@@ -417,7 +408,6 @@ class TestCausalInferenceEnhanced:
         attributions = engine.causal_attribution("C", 2.0, evidence)
 
         assert "A" in attributions or "B" in attributions
-
 
 class TestEndToEndIntegration:
     """End-to-end integration tests combining all new modules."""

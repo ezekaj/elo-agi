@@ -10,14 +10,11 @@ These tests push the system to its limits:
 
 import pytest
 import numpy as np
-import sys
 import os
 import time
 import gc
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-from src.module_interface import (
+from neuro.modules.m00_integration.module_interface import (
     CognitiveModule,
     ModuleProposal,
     ModuleParams,
@@ -25,15 +22,14 @@ from src.module_interface import (
     ContentType,
     DummyModule,
 )
-from src.global_workspace import (
+from neuro.modules.m00_integration.global_workspace import (
     GlobalWorkspace,
     WorkspaceParams,
     WorkspaceMode,
 )
-from src.attention_competition import AttentionCompetition, CompetitionParams
-from src.broadcast_system import BroadcastSystem, BroadcastParams
-from src.ignition import IgnitionDetector, IgnitionParams, IgnitionState
-
+from neuro.modules.m00_integration.attention_competition import AttentionCompetition, CompetitionParams
+from neuro.modules.m00_integration.broadcast_system import BroadcastSystem, BroadcastParams
+from neuro.modules.m00_integration.ignition import IgnitionDetector, IgnitionParams, IgnitionState
 
 class StressModule(DummyModule):
     """Module that generates many proposals for stress testing."""
@@ -66,7 +62,6 @@ class StressModule(DummyModule):
     def receive_broadcast(self, proposal: ModuleProposal) -> None:
         super().receive_broadcast(proposal)
         self.broadcast_count += 1
-
 
 class TestHighVolume:
     """Tests with high volume of proposals and modules."""
@@ -122,7 +117,6 @@ class TestHighVolume:
         # Should complete 1000 cycles in reasonable time
         assert elapsed < 10.0  # Less than 10 seconds
         assert workspace.get_state().step_count == 1000
-
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -211,7 +205,6 @@ class TestEdgeCases:
             winners, broadcast = workspace.run_cycle(np.random.randn(size))
             assert isinstance(winners, list)
 
-
 class TestIgnitionDynamics:
     """Tests for ignition behavior under various conditions."""
 
@@ -274,7 +267,6 @@ class TestIgnitionDynamics:
 
         # Should be fading
         assert result.state in [IgnitionState.FADING, IgnitionState.SUSTAINED, IgnitionState.IGNITED]
-
 
 class TestCompetitionDynamics:
     """Tests for attention competition edge cases."""
@@ -360,7 +352,6 @@ class TestCompetitionDynamics:
         # Stronger one should inhibit weaker
         assert len(result.winners) >= 1
 
-
 class TestMemoryAndStability:
     """Tests for memory usage and numerical stability."""
 
@@ -425,7 +416,6 @@ class TestMemoryAndStability:
         assert len(detector._history) <= 100
         assert len(broadcast._history) <= 50
 
-
 class TestConcurrentAccess:
     """Tests for behavior under rapid state changes."""
 
@@ -481,7 +471,6 @@ class TestConcurrentAccess:
                 # Should work after reset
                 workspace.run_cycle(np.random.randn(64))
 
-
 class TestBroadcastSystem:
     """Additional broadcast system tests."""
 
@@ -529,7 +518,6 @@ class TestBroadcastSystem:
         # Immediate second broadcast should be rate limited
         event2 = system.broadcast(proposal, [ModuleType.EMOTION])
         assert event2.metadata.get('skipped') == True
-
 
 class TestFullIntegration:
     """Full system integration tests."""
@@ -596,7 +584,6 @@ class TestFullIntegration:
 
         # Winners should exist
         assert len(winners) >= 1
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--tb=short'])

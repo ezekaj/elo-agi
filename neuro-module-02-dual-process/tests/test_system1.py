@@ -2,13 +2,9 @@
 
 import pytest
 import numpy as np
-import sys
-sys.path.insert(0, '..')
-
-from src.system1.pattern_recognition import PatternRecognition, Pattern, PatternMatch
-from src.system1.habit_executor import HabitExecutor, Action, HabitStrength
-from src.system1.emotional_valuation import EmotionalValuation, ValenceType
-
+from neuro.modules.m02_dual_process.system1.pattern_recognition import PatternRecognition, Pattern, PatternMatch
+from neuro.modules.m02_dual_process.system1.habit_executor import HabitExecutor, Action, HabitStrength
+from neuro.modules.m02_dual_process.system1.emotional_valuation import EmotionalValuation, ValenceType
 
 class TestPatternRecognition:
     """Tests for parallel pattern matching"""
@@ -68,7 +64,6 @@ class TestPatternRecognition:
         matches = pr.generalize(novel)
 
         assert len(matches) > 0
-
 
 class TestHabitExecutor:
     """Tests for automatic habit execution"""
@@ -136,7 +131,6 @@ class TestHabitExecutor:
         # Should trigger in correct context
         response = he.execute(stimulus, context="work")
         assert response.triggered
-
 
 class TestEmotionalValuation:
     """Tests for rapid threat/reward assessment"""
@@ -220,7 +214,6 @@ class TestEmotionalValuation:
 
         # Reward should cause approach (positive)
         assert ev.get_approach_avoid(reward) > 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

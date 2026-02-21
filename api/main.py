@@ -26,15 +26,6 @@ PROJECT_ROOT = Path(__file__).parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-NEURO_PATH = PROJECT_ROOT / "neuro"
-if str(NEURO_PATH) not in sys.path:
-    sys.path.insert(0, str(NEURO_PATH))
-
-for module_dir in PROJECT_ROOT.glob("neuro-*"):
-    src_dir = module_dir / "src"
-    if src_dir.exists() and str(src_dir) not in sys.path:
-        sys.path.insert(0, str(src_dir))
-
 from api.sandbox import execute_code
 
 limiter = Limiter(key_func=get_remote_address)

@@ -2,11 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.social_network import SocialBrain, SocialCognitionNetwork
-
+from neuro.modules.m15_social.social_network import SocialBrain, SocialCognitionNetwork
 
 class TestSocialBrain:
     """Tests for social brain model"""
@@ -45,7 +41,6 @@ class TestSocialBrain:
         assert "cognitive" in activations
         assert "affective" in activations
         assert "integrated" in activations
-
 
 class TestSocialCognitionNetwork:
     """Tests for full social cognition network"""
@@ -138,7 +133,6 @@ class TestSocialCognitionNetwork:
         assert "empathy" in state
         assert "perspective" in state
         assert "social_brain" in state
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

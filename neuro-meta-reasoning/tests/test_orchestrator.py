@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.orchestrator import (
+from neuro.modules.meta_reasoning.orchestrator import (
     DynamicOrchestrator,
     OrchestratorConfig,
     OrchestrationPlan,
@@ -12,9 +12,8 @@ from src.orchestrator import (
     PlanStatus,
     CheckpointAction,
 )
-from src.problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
-from src.style_selector import StyleSelection, ReasoningStyle
-
+from neuro.modules.meta_reasoning.problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
+from neuro.modules.meta_reasoning.style_selector import StyleSelection, ReasoningStyle
 
 class TestOrchestratorConfig:
     """Tests for OrchestratorConfig class."""
@@ -29,7 +28,6 @@ class TestOrchestratorConfig:
         config = OrchestratorConfig(max_steps=50, checkpoint_frequency=10)
         assert config.max_steps == 50
         assert config.checkpoint_frequency == 10
-
 
 class TestDynamicOrchestrator:
     """Tests for DynamicOrchestrator class."""
@@ -329,7 +327,6 @@ class TestDynamicOrchestrator:
         assert "total_executions" in stats
         assert "success_rate" in stats
 
-
 class TestPlanStatus:
     """Tests for PlanStatus enum."""
 
@@ -338,7 +335,6 @@ class TestPlanStatus:
         assert PlanStatus.IN_PROGRESS.value == "in_progress"
         assert PlanStatus.COMPLETED.value == "completed"
         assert PlanStatus.FAILED.value == "failed"
-
 
 class TestCheckpointAction:
     """Tests for CheckpointAction enum."""

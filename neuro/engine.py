@@ -23,21 +23,16 @@ from typing import Optional, Dict, Any, List, Callable, AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import datetime
 
-# Add neuro-model to path
-NEURO_MODEL_PATH = Path(__file__).parent.parent / "neuro-model" / "src"
-if str(NEURO_MODEL_PATH) not in sys.path:
-    sys.path.insert(0, str(NEURO_MODEL_PATH))
-
 # Import engine components
-from stream import StreamHandler, StreamConfig, StreamChunk, TerminalStreamer
-from editor import CodeEditor, Edit, EditResult
-from executor import ParallelExecutor, ToolCall, ToolResult, ToolStatus
-from git import GitAutomator, GitResult, GitStatus
+from neuro.stream import StreamHandler, StreamConfig, StreamChunk, TerminalStreamer
+from neuro.editor import CodeEditor, Edit, EditResult
+from neuro.executor import ParallelExecutor, ToolCall, ToolResult, ToolStatus
+from neuro.git import GitAutomator, GitResult, GitStatus
 
 # Import autonomous learning
 try:
-    from autonomous import AutonomousLoop, WebLearner
-    from benchmark import Benchmark
+    from neuro.autonomous import AutonomousLoop, WebLearner
+    from neuro.benchmark import Benchmark
     AUTONOMOUS_AVAILABLE = True
 except ImportError:
     AUTONOMOUS_AVAILABLE = False

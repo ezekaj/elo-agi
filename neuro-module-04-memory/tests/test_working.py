@@ -3,8 +3,7 @@
 import pytest
 import time
 
-from src.working_memory import WorkingMemory, MemorySlot
-
+from neuro.modules.m04_memory.working_memory.working_memory import WorkingMemory, MemorySlot
 
 class TestWorkingMemory:
     """Tests for working memory capacity and decay"""
@@ -135,7 +134,6 @@ class TestWorkingMemory:
         assert "a" in items
         assert "b" in items
         assert "c" in items
-
 
 class TestMemorySlot:
     """Tests for individual memory slots"""

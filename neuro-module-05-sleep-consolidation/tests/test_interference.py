@@ -2,11 +2,10 @@
 
 import pytest
 import numpy as np
-from src.interference_resolution import (
+from neuro.modules.m05_sleep_consolidation.interference_resolution import (
     InterferenceResolver, InterferenceEvent, MemoryVector,
     ResolutionStrategy, InterferenceType, InterleaveSchedule,
 )
-
 
 class TestMemoryVector:
     """Tests for MemoryVector."""
@@ -44,7 +43,6 @@ class TestMemoryVector:
         mem2 = MemoryVector("mem2", vec2, 0.0)
 
         assert mem1.similarity(mem2) == pytest.approx(1.0, abs=0.01)
-
 
 class TestInterleaveSchedule:
     """Tests for InterleaveSchedule."""
@@ -84,7 +82,6 @@ class TestInterleaveSchedule:
             schedule.next_memory()
 
         assert schedule.is_complete()
-
 
 class TestInterferenceResolver:
     """Tests for InterferenceResolver."""

@@ -2,11 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.consciousness_network import GlobalWorkspace, ConsciousnessNetwork
-
+from neuro.modules.m16_consciousness.consciousness_network import GlobalWorkspace, ConsciousnessNetwork
 
 class TestGlobalWorkspace:
     """Tests for global workspace"""
@@ -65,7 +61,6 @@ class TestGlobalWorkspace:
         workspace.decay(rate=0.5)
 
         assert workspace.activations.get("content", 0) < initial
-
 
 class TestConsciousnessNetwork:
     """Tests for full consciousness network"""
@@ -162,7 +157,6 @@ class TestConsciousnessNetwork:
         assert "metacognition" in state
         assert "introspection" in state
         assert "workspace_contents" in state
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

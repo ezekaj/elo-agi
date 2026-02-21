@@ -2,16 +2,12 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.grammar_manifold import (
+from neuro.modules.m08_language.grammar_manifold import (
     GrammarConstraintManifold,
     UniversalGrammar,
     ImpossibleGrammarGenerator,
     GrammarState
 )
-
 
 class TestGrammarConstraintManifold:
     """Tests for grammar constraint manifold"""
@@ -105,7 +101,6 @@ class TestGrammarConstraintManifold:
         assert isinstance(state.is_possible, bool)
         assert np.isfinite(state.violation_score)
 
-
 class TestUniversalGrammar:
     """Tests for Universal Grammar"""
 
@@ -154,7 +149,6 @@ class TestUniversalGrammar:
         settings = ug.get_parameter_settings()
         assert settings['head_direction'] == 1.0  # Clipped
 
-
 class TestImpossibleGrammarGenerator:
     """Tests for impossible grammar generation"""
 
@@ -194,7 +188,6 @@ class TestImpossibleGrammarGenerator:
         assert len(test_set['possible']) == 5
         assert len(test_set['impossible']) == 5
 
-
 class TestSelectiveInhibition:
     """Tests verifying selective inhibition for impossible grammars"""
 
@@ -218,7 +211,6 @@ class TestSelectiveInhibition:
         # Impossible grammars should trigger more inhibition
         # This is a soft test as the manifold is randomly initialized
         assert mean_impossible >= mean_possible * 0.5 or mean_possible < 0.3
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

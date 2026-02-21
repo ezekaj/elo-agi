@@ -10,15 +10,14 @@ Tests cover:
 
 import pytest
 import numpy as np
-from src.program_synthesis import (
+from neuro.modules.abstract.program_synthesis import (
     ProgramSynthesizer,
     PrimitiveLibrary,
     Primitive,
     Program,
     Example,
 )
-from src.composition_types import INT, BOOL, ListType
-
+from neuro.modules.abstract.composition_types import INT, BOOL, ListType
 
 class TestPrimitive:
     """Test Primitive class."""
@@ -56,7 +55,6 @@ class TestPrimitive:
         )
 
         assert "inc" in repr(inc)
-
 
 class TestProgram:
     """Test Program class."""
@@ -144,7 +142,6 @@ class TestProgram:
         p = Program(primitive=add, arguments=[x, x])
         assert "add" in repr(p)
 
-
 class TestPrimitiveLibrary:
     """Test PrimitiveLibrary class."""
 
@@ -214,7 +211,6 @@ class TestPrimitiveLibrary:
         assert length([1, 2, 3]) == 3
         assert total([1, 2, 3, 4]) == 10
 
-
 class TestExample:
     """Test Example class."""
 
@@ -228,7 +224,6 @@ class TestExample:
         """Should have readable repr."""
         ex = Example(inputs=[1, 2], output=3)
         assert "(1, 2) -> 3" in repr(ex)
-
 
 class TestProgramSynthesizer:
     """Test ProgramSynthesizer class."""
@@ -382,7 +377,6 @@ class TestProgramSynthesizer:
         assert stats["programs_enumerated"] > 0
         assert stats["programs_evaluated"] > 0
 
-
 class TestComplexSynthesis:
     """Test more complex synthesis tasks."""
 
@@ -434,7 +428,6 @@ class TestComplexSynthesis:
 
         if program:  # May not find due to size limits
             assert program.execute([[1, 100, 50]]) == 100
-
 
 class TestEdgeCases:
     """Test edge cases."""

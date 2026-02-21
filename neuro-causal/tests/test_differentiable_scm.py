@@ -13,7 +13,7 @@ Tests cover:
 
 import pytest
 import numpy as np
-from src.differentiable_scm import (
+from neuro.modules.causal.differentiable_scm import (
     DifferentiableSCM,
     CausalMechanism,
     NeuralNetwork,
@@ -22,7 +22,6 @@ from src.differentiable_scm import (
     apply_activation,
     activation_gradient,
 )
-
 
 class TestActivationFunctions:
     """Test activation functions and their gradients."""
@@ -81,7 +80,6 @@ class TestActivationFunctions:
 
             np.testing.assert_allclose(numerical_grad, analytical_grad, rtol=1e-4)
 
-
 class TestNeuralNetwork:
     """Test neural network implementation."""
 
@@ -136,7 +134,6 @@ class TestNeuralNetwork:
 
         np.testing.assert_array_equal(y1, y2)
 
-
 class TestCausalMechanism:
     """Test causal mechanisms."""
 
@@ -187,7 +184,6 @@ class TestCausalMechanism:
         grads = mechanism.backward(1.0)
 
         assert set(grads.keys()) == {"X1", "X2", "X3"}
-
 
 class TestDifferentiableSCM:
     """Test full SCM implementation."""
@@ -395,7 +391,6 @@ class TestDifferentiableSCM:
         # Loss should decrease or stay reasonable
         assert final_loss["Y"] < initial_loss["Y"] * 2  # At least not much worse
 
-
 class TestComplexCausalStructures:
     """Test complex causal structures and edge cases."""
 
@@ -461,7 +456,6 @@ class TestComplexCausalStructures:
 
         # X and Y should NOT be d-separated given C (explaining away)
         assert not scm.is_d_separated("X", "Y", {"C"})
-
 
 class TestEdgeCases:
     """Test edge cases and error handling."""

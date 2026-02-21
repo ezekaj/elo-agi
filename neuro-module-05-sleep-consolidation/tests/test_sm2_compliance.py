@@ -17,10 +17,9 @@ SM-2 Reference:
 
 import pytest
 import numpy as np
-from src.spaced_repetition import (
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
     SpacedRepetitionScheduler, RepetitionSchedule, ReviewQuality,
 )
-
 
 class TestSM2EasinessFormula:
     """Tests for SM-2 easiness factor updates."""
@@ -100,7 +99,6 @@ class TestSM2EasinessFormula:
 
         assert scheduler.get_schedule("mem1").easiness <= 2.5
 
-
 class TestSM2IntervalProgression:
     """Tests for SM-2 interval progression."""
 
@@ -167,7 +165,6 @@ class TestSM2IntervalProgression:
         # Should reset to ~initial interval (1 day)
         assert reset_interval == pytest.approx(1.0, rel=0.1)
 
-
 class TestSM2RepetitionCount:
     """Tests for repetition count tracking."""
 
@@ -196,7 +193,6 @@ class TestSM2RepetitionCount:
         scheduler.schedule_review("mem1", ReviewQuality.INCORRECT)
         assert scheduler.get_schedule("mem1").repetition_count == 0
 
-
 class TestSM2QualityBoundaries:
     """Tests for quality rating boundaries."""
 
@@ -224,7 +220,6 @@ class TestSM2QualityBoundaries:
 
         assert scheduler.get_schedule("mem1").repetition_count == 0
         assert scheduler.get_schedule("mem1").streak == 0
-
 
 class TestSM2Integration:
     """Integration tests for SM-2 algorithm over multiple reviews."""

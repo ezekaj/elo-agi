@@ -3,13 +3,12 @@
 import pytest
 import numpy as np
 
-from src.eligibility_traces import (
+from neuro.modules.credit.eligibility_traces import (
     EligibilityTrace,
     TraceConfig,
     TraceType,
     EligibilityTraceManager,
 )
-
 
 class TestEligibilityTrace:
     """Tests for EligibilityTrace class."""
@@ -50,7 +49,6 @@ class TestEligibilityTrace:
         trace.dutch_update(1.0, 0.9, max_trace=5.0)
         assert 0 < trace.trace_value < 5.0
 
-
 class TestTraceConfig:
     """Tests for TraceConfig class."""
 
@@ -67,7 +65,6 @@ class TestTraceConfig:
         )
         assert config.trace_type == TraceType.REPLACING
         assert config.lambda_param == 0.8
-
 
 class TestEligibilityTraceManager:
     """Tests for EligibilityTraceManager class."""
@@ -234,7 +231,6 @@ class TestEligibilityTraceManager:
         assert "active_traces" in stats
         assert "total_credits_distributed" in stats
         assert stats["total_decay_events"] == 1
-
 
 class TestTDLambda:
     """Tests for TD(lambda) specific behavior."""

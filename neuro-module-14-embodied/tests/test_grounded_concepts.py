@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.grounded_concepts import (
+from neuro.modules.m14_embodied.grounded_concepts import (
     ModalityBindings, GroundedConcept, ConceptGrounding, GroundingParams
 )
-
 
 class TestModalityBindings:
     """Tests for modality bindings"""
@@ -54,7 +50,6 @@ class TestModalityBindings:
         similarity = bindings.compute_similarity("apple", "pear")
 
         assert 0 <= similarity <= 1
-
 
 class TestGroundedConcept:
     """Tests for grounded concept"""
@@ -115,7 +110,6 @@ class TestGroundedConcept:
         similarity = concept1.get_similarity(concept2)
 
         assert -1 <= similarity <= 1
-
 
 class TestConceptGrounding:
     """Tests for concept grounding system"""
@@ -180,7 +174,6 @@ class TestConceptGrounding:
 
         # Activation should decay
         assert system.concepts["apple"].activation < 0.5
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -2,10 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.time_circuits import (
+from neuro.modules.m11_time_perception.time_circuits import (
     Insula,
     SMA,
     BasalGanglia,
@@ -14,7 +11,6 @@ from src.time_circuits import (
     TimingScale,
     TemporalSignal
 )
-
 
 class TestInsula:
     """Tests for insula interoceptive timing"""
@@ -57,7 +53,6 @@ class TestInsula:
         assert rhythm['heartbeat_rate'] == 80.0
         assert rhythm['heartbeat_period'] == 60.0 / 80.0
 
-
 class TestSMA:
     """Tests for SMA motor timing"""
 
@@ -99,7 +94,6 @@ class TestSMA:
         )
 
         assert signal.confidence > sma.motor_precision  # Sync improves precision
-
 
 class TestBasalGanglia:
     """Tests for basal ganglia interval timing"""
@@ -160,7 +154,6 @@ class TestBasalGanglia:
         memory = bg.get_temporal_memory()
         assert len(memory) <= 5  # Capacity limited
 
-
 class TestCerebellum:
     """Tests for cerebellar precise timing"""
 
@@ -200,7 +193,6 @@ class TestCerebellum:
         # All intervals should be close to target
         for interval in intervals:
             assert 0.3 < interval < 0.7
-
 
 class TestTimeCircuit:
     """Tests for integrated time circuit"""
@@ -260,7 +252,6 @@ class TestTimeCircuit:
 
         assert stats['current_time'] == 15.0
         assert stats['insula_signals'] >= 2
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -2,10 +2,9 @@
 
 import pytest
 import numpy as np
-from src.schema_refinement import (
+from neuro.modules.m05_sleep_consolidation.schema_refinement import (
     SchemaRefiner, Schema, SchemaUpdateType, SchemaUpdate,
 )
-
 
 class TestSchema:
     """Tests for Schema."""
@@ -65,7 +64,6 @@ class TestSchema:
 
         assert schema.similarity_to(same) == pytest.approx(1.0, abs=0.01)
         assert schema.similarity_to(orthogonal) == pytest.approx(0.0, abs=0.01)
-
 
 class TestSchemaRefiner:
     """Tests for SchemaRefiner."""

@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from src.causal_bench import (
+from neuro.modules.bench.causal_bench import (
     CausalGraph,
     CounterfactualBenchmark,
     InterventionBenchmark,
@@ -11,7 +11,7 @@ from src.causal_bench import (
     NestedCounterfactualBenchmark,
     create_causal_benchmark_suite,
 )
-from src.abstraction_bench import (
+from neuro.modules.bench.abstraction_bench import (
     SymbolBindingBenchmark,
     CompositionalBenchmark,
     ProgramSynthesisBenchmark,
@@ -19,7 +19,7 @@ from src.abstraction_bench import (
     AbstractionLevelBenchmark,
     create_abstraction_benchmark_suite,
 )
-from src.robustness_bench import (
+from neuro.modules.bench.robustness_bench import (
     OODDetectionBenchmark,
     CalibrationBenchmark,
     AdversarialBenchmark,
@@ -27,7 +27,7 @@ from src.robustness_bench import (
     SelectivePredictionBenchmark,
     create_robustness_benchmark_suite,
 )
-from src.consolidation_bench import (
+from neuro.modules.bench.consolidation_bench import (
     RetentionBenchmark,
     InterferenceBenchmark,
     LearningEfficiencyBenchmark,
@@ -35,8 +35,7 @@ from src.consolidation_bench import (
     SpacedRepetitionBenchmark,
     create_consolidation_benchmark_suite,
 )
-from src.base_benchmark import BenchmarkConfig
-
+from neuro.modules.bench.base_benchmark import BenchmarkConfig
 
 class TestCausalBenchmarks:
     """Tests for causal reasoning benchmarks."""
@@ -157,7 +156,6 @@ class TestCausalBenchmarks:
         suite = create_causal_benchmark_suite()
         assert len(suite) == 4
 
-
 class TestAbstractionBenchmarks:
     """Tests for abstraction benchmarks."""
 
@@ -273,7 +271,6 @@ class TestAbstractionBenchmarks:
         """Test suite creation."""
         suite = create_abstraction_benchmark_suite()
         assert len(suite) == 5
-
 
 class TestRobustnessBenchmarks:
     """Tests for robustness benchmarks."""
@@ -404,7 +401,6 @@ class TestRobustnessBenchmarks:
         """Test suite creation."""
         suite = create_robustness_benchmark_suite()
         assert len(suite) == 5
-
 
 class TestConsolidationBenchmarks:
     """Tests for consolidation benchmarks."""
@@ -544,7 +540,6 @@ class TestConsolidationBenchmarks:
         """Test suite creation."""
         suite = create_consolidation_benchmark_suite()
         assert len(suite) == 5
-
 
 class TestBenchmarkExecution:
     """Tests for running benchmarks."""

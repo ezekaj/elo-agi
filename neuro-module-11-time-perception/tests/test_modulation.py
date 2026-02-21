@@ -2,10 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.time_modulation import (
+from neuro.modules.m11_time_perception.time_modulation import (
     EmotionalModulator,
     AttentionalModulator,
     DopamineModulator,
@@ -14,7 +11,6 @@ from src.time_modulation import (
     EmotionalState,
     ModulationEffect
 )
-
 
 class TestEmotionalModulator:
     """Tests for emotional modulation of time"""
@@ -76,7 +72,6 @@ class TestEmotionalModulator:
 
         assert new_arousal > 0.5
 
-
 class TestAttentionalModulator:
     """Tests for attentional modulation of time"""
 
@@ -117,7 +112,6 @@ class TestAttentionalModulator:
         hard = modulator.dual_task_effect(task_difficulty=0.9)
 
         assert hard < easy
-
 
 class TestDopamineModulator:
     """Tests for dopamine modulation of time"""
@@ -166,7 +160,6 @@ class TestDopamineModulator:
 
         assert modulator.current_level < 0.5
 
-
 class TestAgeModulator:
     """Tests for age modulation of time"""
 
@@ -203,7 +196,6 @@ class TestAgeModulator:
         subjective = modulator.get_subjective_year_length(40)
 
         assert subjective < 1.0
-
 
 class TestTimeModulationSystem:
     """Tests for integrated modulation system"""
@@ -267,7 +259,6 @@ class TestTimeModulationSystem:
         )
 
         assert fear_perceived > neutral_perceived
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

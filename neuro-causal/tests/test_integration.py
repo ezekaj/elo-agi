@@ -11,12 +11,11 @@ Tests the interaction between:
 
 import pytest
 import numpy as np
-from src.differentiable_scm import DifferentiableSCM
-from src.counterfactual import NestedCounterfactual
-from src.causal_discovery import CausalDiscovery, CausalGraph, CausalEdge, EdgeType
-from src.causal_representation import CausalRepresentationLearner
-from src.active_inference import CausalActiveInference, CausalBelief
-
+from neuro.modules.causal.differentiable_scm import DifferentiableSCM
+from neuro.modules.causal.counterfactual import NestedCounterfactual
+from neuro.modules.causal.causal_discovery import CausalDiscovery, CausalGraph, CausalEdge, EdgeType
+from neuro.modules.causal.causal_representation import CausalRepresentationLearner
+from neuro.modules.causal.active_inference import CausalActiveInference, CausalBelief
 
 class TestSCMWithCounterfactual:
     """Test SCM and counterfactual integration."""
@@ -69,7 +68,6 @@ class TestSCMWithCounterfactual:
 
         # Should be approximately equal
         assert abs(scm_effect - cf_effect) < 1.0
-
 
 class TestSCMWithDiscovery:
     """Test SCM generation and structure discovery."""
@@ -132,7 +130,6 @@ class TestSCMWithDiscovery:
         # SCM should have same structure
         assert set(scm._variables) == graph.nodes
 
-
 class TestRepresentationWithSCM:
     """Test representation learning with SCM."""
 
@@ -183,7 +180,6 @@ class TestRepresentationWithSCM:
         consistency = learner.interventional_consistency(data, n_tests=20)
 
         assert 0.0 <= consistency <= 1.0
-
 
 class TestActiveInferenceWithSCM:
     """Test active inference with causal model."""
@@ -246,7 +242,6 @@ class TestActiveInferenceWithSCM:
         # Should return an action
         assert isinstance(action, dict)
         assert isinstance(outcome.expected_free_energy, float)
-
 
 class TestEndToEndPipeline:
     """Test complete end-to-end pipelines."""
@@ -312,7 +307,6 @@ class TestEndToEndPipeline:
         action, outcome = ai.select_action()
         assert isinstance(action, dict)
 
-
 class TestCausalBeliefIntegration:
     """Test CausalBelief with other components."""
 
@@ -352,7 +346,6 @@ class TestCausalBeliefIntegration:
 
         assert abs(mean - 3.0) < 1.0
         assert std > 0
-
 
 class TestStressTests:
     """Stress tests for robustness."""

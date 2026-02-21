@@ -2,10 +2,7 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.language_hierarchy import (
+from neuro.modules.m08_language.language_hierarchy import (
     LanguageLayer,
     PhonologicalLayer,
     SyntacticLayer,
@@ -13,7 +10,6 @@ from src.language_hierarchy import (
     PragmaticLayer,
     LanguageProcessingHierarchy
 )
-
 
 class TestLanguageLayer:
     """Tests for base language layer"""
@@ -69,7 +65,6 @@ class TestLanguageLayer:
 
         assert conf_consistent > conf_variable
 
-
 class TestPhonologicalLayer:
     """Tests for phonological layer"""
 
@@ -87,7 +82,6 @@ class TestPhonologicalLayer:
 
         assert phonemes.shape == (24,)
         assert np.all(np.isfinite(phonemes))
-
 
 class TestSyntacticLayer:
     """Tests for syntactic layer"""
@@ -107,7 +101,6 @@ class TestSyntacticLayer:
 
         gram_score = layer.check_grammaticality()
         assert 0 <= gram_score <= 1
-
 
 class TestSemanticLayer:
     """Tests for semantic layer"""
@@ -133,7 +126,6 @@ class TestSemanticLayer:
         unknown = layer.lookup_word("xyz")
         assert unknown is None
 
-
 class TestPragmaticLayer:
     """Tests for pragmatic layer"""
 
@@ -153,7 +145,6 @@ class TestPragmaticLayer:
 
         assert output.shape == (24,)
         assert np.all(np.isfinite(output))
-
 
 class TestLanguageProcessingHierarchy:
     """Tests for full language hierarchy"""
@@ -239,7 +230,6 @@ class TestLanguageProcessingHierarchy:
         for conf in confidences.values():
             assert 0 <= conf <= 1
 
-
 class TestHierarchyLearning:
     """Tests for hierarchy learning dynamics"""
 
@@ -269,7 +259,6 @@ class TestHierarchyLearning:
         for inp in sequence:
             result = hierarchy.step(inp)
             assert np.all(np.isfinite(result['total_error']))
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

@@ -11,12 +11,11 @@ Tests the interaction between:
 
 import pytest
 import numpy as np
-from src.symbolic_binder import SymbolicBinder, RoleType
-from src.composition_types import INT, STR, FunctionType, StructuredType
-from src.program_synthesis import ProgramSynthesizer, Example
-from src.abstraction_engine import AbstractionEngine, AbstractionLevel
-from src.integration import SharedSpaceIntegration, SemanticModalityType
-
+from neuro.modules.abstract.symbolic_binder import SymbolicBinder, RoleType
+from neuro.modules.abstract.composition_types import INT, STR, FunctionType, StructuredType
+from neuro.modules.abstract.program_synthesis import ProgramSynthesizer, Example
+from neuro.modules.abstract.abstraction_engine import AbstractionEngine, AbstractionLevel
+from neuro.modules.abstract.integration import SharedSpaceIntegration, SemanticModalityType
 
 class TestBinderWithTypes:
     """Test symbolic binder with type system."""
@@ -42,7 +41,6 @@ class TestBinderWithTypes:
         binding = binder.bind("add_function", neural_rep=func_rep)
         assert binding is not None
 
-
 class TestBinderWithSynthesis:
     """Test symbolic binding with program synthesis."""
 
@@ -63,7 +61,6 @@ class TestBinderWithSynthesis:
 
         program = synthesizer.synthesize_auto(examples)
         assert program is not None
-
 
 class TestAbstractionWithBinding:
     """Test abstraction engine with symbolic binding."""
@@ -120,7 +117,6 @@ class TestAbstractionWithBinding:
 
         assert target.get_filler(RoleType.AGENT) == "lion"
         assert target.get_filler(RoleType.PATIENT) == "gazelle"
-
 
 class TestSharedSpaceIntegration:
     """Test SharedSpaceIntegration class."""
@@ -262,7 +258,6 @@ class TestSharedSpaceIntegration:
         assert "binder_stats" in stats
         assert "abstraction_stats" in stats
 
-
 class TestEndToEndPipeline:
     """Test end-to-end pipelines."""
 
@@ -350,7 +345,6 @@ class TestEndToEndPipeline:
             )
 
             assert embedding.modality == SemanticModalityType.GROUNDED
-
 
 class TestCrossModuleConsistency:
     """Test consistency across modules."""

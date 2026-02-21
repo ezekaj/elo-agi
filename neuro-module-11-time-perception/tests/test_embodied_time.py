@@ -2,17 +2,13 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.embodied_time import (
+from neuro.modules.m11_time_perception.embodied_time import (
     InteroceptiveTimer,
     MotorTimer,
     BodyEnvironmentCoupler,
     EmbodiedTimeSystem,
     BodyState
 )
-
 
 class TestInteroceptiveTimer:
     """Tests for interoceptive timing"""
@@ -83,7 +79,6 @@ class TestInteroceptiveTimer:
 
         assert timer.body_state.heart_rate > baseline_hr
 
-
 class TestMotorTimer:
     """Tests for motor timing"""
 
@@ -135,7 +130,6 @@ class TestMotorTimer:
 
         assert len(taps) == 10
         assert asynchrony < 0.2  # Reasonable synchronization
-
 
 class TestBodyEnvironmentCoupler:
     """Tests for body-environment coupling"""
@@ -195,7 +189,6 @@ class TestBodyEnvironmentCoupler:
 
         assert estimate > 0
         assert entrainment > 0
-
 
 class TestEmbodiedTimeSystem:
     """Tests for integrated embodied time system"""
@@ -268,7 +261,6 @@ class TestEmbodiedTimeSystem:
 
         assert stats['heartbeat_count'] > 0
         assert stats['action_count'] > 0
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

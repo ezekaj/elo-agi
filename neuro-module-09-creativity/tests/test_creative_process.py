@@ -4,9 +4,8 @@ Tests for Creative Process Orchestrator
 
 import pytest
 import numpy as np
-from src.creative_process import CreativeProcess, Idea, CreativeOutput
-from src.networks.salience_network import NetworkState
-
+from neuro.modules.m09_creativity.creative_process import CreativeProcess, Idea, CreativeOutput
+from neuro.modules.m09_creativity.networks.salience_network import NetworkState
 
 class TestCreativeProcess:
     """Tests for Creative Process"""
@@ -306,7 +305,6 @@ class TestCreativeProcess:
 
         # Tactile imagery should provide semantic associations
 
-
 class TestCreativeOutput:
     """Tests for Creative Output dataclass"""
 
@@ -338,7 +336,6 @@ class TestCreativeOutput:
         assert output.network_reconfigurations == 3
         assert output.creativity_score == 0.75
 
-
 class TestIdea:
     """Tests for Idea dataclass"""
 
@@ -358,7 +355,6 @@ class TestIdea:
         assert idea.imagery is None
         assert idea.evaluation is None
         assert len(idea.refinements) == 0
-
 
 class TestCreativeProcessIntegration:
     """Integration tests for creative process"""

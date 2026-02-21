@@ -2,11 +2,7 @@
 
 import pytest
 import numpy as np
-import sys
-sys.path.insert(0, '..')
-
-from src.hpc_pfc_complex import Hippocampus, PrefrontalCortex, HPCPFCComplex, Episode
-
+from neuro.modules.m02_dual_process.hpc_pfc_complex import Hippocampus, PrefrontalCortex, HPCPFCComplex, Episode
 
 class TestHippocampus:
     """Tests for episodic encoding and cognitive maps"""
@@ -87,7 +83,6 @@ class TestHippocampus:
 
         assert e1.encoding_strength >= original_strength
 
-
 class TestPrefrontalCortex:
     """Tests for schema extraction and abstraction"""
 
@@ -113,7 +108,7 @@ class TestPrefrontalCortex:
         pfc = PrefrontalCortex()
 
         # Manually create a schema
-        from src.hpc_pfc_complex import Schema
+        from neuro.modules.m02_dual_process.hpc_pfc_complex import Schema
         schema = Schema(
             id="test_schema",
             structure={"type": "greeting", "target": "<SLOT:target>"},
@@ -131,7 +126,7 @@ class TestPrefrontalCortex:
     def test_schema_matching(self):
         pfc = PrefrontalCortex()
 
-        from src.hpc_pfc_complex import Schema
+        from neuro.modules.m02_dual_process.hpc_pfc_complex import Schema
         schema = Schema(
             id="meal_schema",
             structure={"type": "meal", "location": "<SLOT:location>"},
@@ -146,7 +141,6 @@ class TestPrefrontalCortex:
 
         assert result is not None
         assert result[0].id == "meal_schema"
-
 
 class TestHPCPFCComplex:
     """Tests for integrated HPC-PFC system"""
@@ -193,13 +187,12 @@ class TestHPCPFCComplex:
         if recent:
             assert recent[-1].encoding_strength >= 1.0
 
-
 class TestCompositionalThinking:
     """Tests specifically for compositional 'jump twice' capability"""
 
     def test_jump_twice_binding(self):
         """Core test: can we bind 'jump' with 'twice'?"""
-        from src.system2.relational_reasoning import RelationalReasoning, RelationType
+        from neuro.modules.m02_dual_process.system2.relational_reasoning import RelationalReasoning, RelationType
 
         rr = RelationalReasoning()
 
@@ -229,7 +222,6 @@ class TestCompositionalThinking:
         # Should be marked as novel
         assert result["novel"] is True
         assert result["components"] == ["jump", 2]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

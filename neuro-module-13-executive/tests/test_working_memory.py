@@ -2,13 +2,9 @@
 
 import numpy as np
 import pytest
-import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-
-from src.working_memory import (
+from neuro.modules.m13_executive.working_memory import (
     CapacityLimitedStore, DLPFCNetwork, WorkingMemory, WMParams
 )
-
 
 class TestCapacityLimitedStore:
     """Tests for capacity-limited store"""
@@ -85,7 +81,6 @@ class TestCapacityLimitedStore:
 
         assert len(contents) == 2
 
-
 class TestDLPFCNetwork:
     """Tests for DLPFC network"""
 
@@ -138,7 +133,6 @@ class TestDLPFCNetwork:
 
         assert np.sum(network.activity) == 0
         assert len(network.stored_patterns) == 0
-
 
 class TestWorkingMemory:
     """Tests for integrated working memory"""
@@ -218,7 +212,6 @@ class TestWorkingMemory:
 
         # Should still have item (decay is slow)
         assert wm.get_load() <= initial_load
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

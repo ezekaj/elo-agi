@@ -2,11 +2,10 @@
 
 import numpy as np
 import pytest
-from src.dual_emotion_routes import (
+from neuro.modules.m07_emotions_decisions.dual_emotion_routes import (
     FastEmotionRoute, SlowEmotionRoute, DualRouteProcessor,
     ThalamusRelay, ResponseType
 )
-
 
 class TestFastRoute:
     """Test fast emotion pathway (12ms)."""
@@ -41,7 +40,6 @@ class TestFastRoute:
 
         # Should detect threat after conditioning
         assert after.intensity > before.intensity
-
 
 class TestSlowRoute:
     """Test slow emotion pathway (100ms)."""
@@ -79,7 +77,6 @@ class TestSlowRoute:
         danger_response = slow.process(stimulus, danger_context)
 
         assert danger_response.details['threat_assessment'] > safe_response.details['threat_assessment']
-
 
 class TestDualRouteProcessor:
     """Test integrated dual route processing."""
@@ -126,7 +123,6 @@ class TestDualRouteProcessor:
 
         # Should be overridden
         assert 'override' in str(after.details).lower() or after.intensity < before.intensity
-
 
 class TestTimingDifference:
     """Test the critical timing difference between routes."""

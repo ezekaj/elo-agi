@@ -6,11 +6,10 @@ conditions gracefully without crashing or producing invalid results.
 
 import pytest
 import numpy as np
-from src.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
-from src.meta_learning import MetaLearningController, MemoryType, LearningCurve
-from src.interference_resolution import InterferenceResolver, MemoryVector
-from src.schema_refinement import SchemaRefiner, Schema
-
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
+from neuro.modules.m05_sleep_consolidation.meta_learning import MetaLearningController, MemoryType, LearningCurve
+from neuro.modules.m05_sleep_consolidation.interference_resolution import InterferenceResolver, MemoryVector
+from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner, Schema
 
 class TestZeroVectorHandling:
     """Tests for zero vector edge cases."""
@@ -46,7 +45,6 @@ class TestZeroVectorHandling:
 
         assert np.isfinite(sim), "Similarity should be finite"
         assert sim == 0.0
-
 
 class TestEmptyInputs:
     """Tests for empty input handling."""
@@ -103,7 +101,6 @@ class TestEmptyInputs:
 
         assert curve.get_learning_velocity() == 0.0
         assert curve.get_efficiency() == 0.0
-
 
 class TestExtremeValues:
     """Tests for extreme value handling."""
@@ -170,7 +167,6 @@ class TestExtremeValues:
         outcome = controller.track_consolidation_success("tiny", 1e-10, 1e-9, 1)
         assert np.isfinite(outcome.efficiency)
 
-
 class TestNonexistentReferences:
     """Tests for operations on nonexistent items."""
 
@@ -206,7 +202,6 @@ class TestNonexistentReferences:
 
         schema = refiner.get_schema("nonexistent")
         assert schema is None
-
 
 class TestBoundaryConditions:
     """Tests for boundary conditions."""
@@ -266,7 +261,6 @@ class TestBoundaryConditions:
         result = schema.contains(wrong_dim)
         assert result is False  # Should not contain mismatched vector
 
-
 class TestNumericalStability:
     """Tests for numerical stability."""
 
@@ -307,7 +301,6 @@ class TestNumericalStability:
 
         sim = resolver.compute_similarity("tiny1", "tiny2")
         assert np.isfinite(sim) or sim == 0.0
-
 
 class TestTypeConsistency:
     """Tests for type consistency across operations."""

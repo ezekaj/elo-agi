@@ -20,64 +20,54 @@ Usage:
 __version__ = "0.9.0"
 __author__ = "Elvi Zekaj"
 
-import sys
-from pathlib import Path
-
-# Add module paths for imports
-_neuro_root = Path(__file__).parent.parent
-for module_dir in _neuro_root.glob("neuro-*"):
-    src_dir = module_dir / "src"
-    if src_dir.exists() and str(src_dir) not in sys.path:
-        sys.path.insert(0, str(src_dir))
-
 # Lazy imports to avoid loading everything at startup
 _lazy_imports = {
-    # Core
-    "CognitiveCore": ("cognitive_core", "CognitiveCore"),
-    "SystemConfig": ("config", "SystemConfig"),
+    # Core (neuro.modules.system)
+    "CognitiveCore": ("neuro.modules.system.cognitive_core", "CognitiveCore"),
+    "SystemConfig": ("neuro.modules.system.config", "SystemConfig"),
 
-    # Integration
-    "SharedSpace": ("shared_space", "SharedSpace"),
-    "CrossModuleLearner": ("cross_module_learning", "CrossModuleLearner"),
+    # Integration (neuro.modules.integrate)
+    "SharedSpace": ("neuro.modules.integrate.shared_space", "SharedSpace"),
+    "CrossModuleLearner": ("neuro.modules.integrate.cross_module_learning", "CrossModuleLearner"),
 
-    # Global Workspace
-    "GlobalWorkspace": ("global_workspace", "GlobalWorkspace"),
+    # Global Workspace (neuro.modules.m00_integration)
+    "GlobalWorkspace": ("neuro.modules.m00_integration.global_workspace", "GlobalWorkspace"),
 
-    # LLM
-    "LLMOracle": ("oracle", "LLMOracle"),
+    # LLM (neuro.modules.llm)
+    "LLMOracle": ("neuro.modules.llm.llm_interface", "LLMOracle"),
 
-    # Knowledge
-    "KnowledgeBase": ("knowledge_graph", "KnowledgeGraph"),
+    # Knowledge (neuro.modules.knowledge)
+    "KnowledgeBase": ("neuro.modules.knowledge.knowledge_graph", "KnowledgeGraph"),
 
-    # Causal
-    "DifferentiableSCM": ("differentiable_scm", "DifferentiableSCM"),
-    "CausalDiscovery": ("causal_discovery", "CausalDiscovery"),
+    # Causal (neuro.modules.causal)
+    "DifferentiableSCM": ("neuro.modules.causal.differentiable_scm", "DifferentiableSCM"),
+    "CausalDiscovery": ("neuro.modules.causal.causal_discovery", "CausalDiscovery"),
 
-    # Abstract
-    "SymbolicBinder": ("symbolic_binder", "SymbolicBinder"),
-    "ProgramSynthesizer": ("program_synthesis", "ProgramSynthesizer"),
+    # Abstract (neuro.modules.abstract)
+    "SymbolicBinder": ("neuro.modules.abstract.symbolic_binder", "SymbolicBinder"),
+    "ProgramSynthesizer": ("neuro.modules.abstract.program_synthesis", "ProgramSynthesizer"),
 
-    # Robust
-    "UncertaintyQuantifier": ("uncertainty", "UncertaintyQuantifier"),
-    "OODDetector": ("ood_detection", "OODDetector"),
+    # Robust (neuro.modules.robust)
+    "UncertaintyQuantifier": ("neuro.modules.robust.uncertainty", "UncertaintyQuantifier"),
+    "OODDetector": ("neuro.modules.robust.ood_detection", "OODDetector"),
 
-    # Planning
-    "HierarchicalMCTS": ("planning_search", "HierarchicalMCTS"),
-    "MAXQDecomposition": ("goal_hierarchy", "MAXQDecomposition"),
+    # Planning (neuro.modules.planning)
+    "HierarchicalMCTS": ("neuro.modules.planning.planning_search", "HierarchicalMCTS"),
+    "MAXQDecomposition": ("neuro.modules.planning.goal_hierarchy", "MAXQDecomposition"),
 
-    # Credit
-    "EligibilityTraceManager": ("eligibility_traces", "EligibilityTraceManager"),
-    "ContributionAccountant": ("contribution_accounting", "ContributionAccountant"),
+    # Credit (neuro.modules.credit)
+    "EligibilityTraceManager": ("neuro.modules.credit.eligibility_traces", "EligibilityTraceManager"),
+    "ContributionAccountant": ("neuro.modules.credit.contribution_accounting", "ContributionAccountant"),
 
-    # Continual
-    "TaskInference": ("task_inference", "TaskInference"),
-    "CatastrophicForgettingPrevention": ("forgetting_prevention", "CatastrophicForgettingPrevention"),
+    # Continual (neuro.modules.continual)
+    "TaskInference": ("neuro.modules.continual.task_inference", "TaskInference"),
+    "CatastrophicForgettingPrevention": ("neuro.modules.continual.forgetting_prevention", "CatastrophicForgettingPrevention"),
 
-    # Meta-reasoning
-    "ProblemClassifier": ("problem_classifier", "ProblemClassifier"),
-    "StyleSelector": ("style_selector", "StyleSelector"),
-    "DynamicOrchestrator": ("orchestrator", "DynamicOrchestrator"),
-    "FallacyDetector": ("fallacy_detector", "FallacyDetector"),
+    # Meta-reasoning (neuro.modules.meta_reasoning)
+    "ProblemClassifier": ("neuro.modules.meta_reasoning.problem_classifier", "ProblemClassifier"),
+    "StyleSelector": ("neuro.modules.meta_reasoning.style_selector", "StyleSelector"),
+    "DynamicOrchestrator": ("neuro.modules.meta_reasoning.orchestrator", "DynamicOrchestrator"),
+    "FallacyDetector": ("neuro.modules.meta_reasoning.fallacy_detector", "FallacyDetector"),
 }
 
 

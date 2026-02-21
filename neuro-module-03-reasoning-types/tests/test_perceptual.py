@@ -2,19 +2,15 @@
 
 import pytest
 import numpy as np
-import sys
-sys.path.insert(0, '..')
-
-from src.perceptual.visual_features import (
+from neuro.modules.m03_reasoning_types.perceptual.visual_features import (
     VisualFeatureExtractor, FeatureMap, Feature, FeatureType
 )
-from src.perceptual.multimodal_integration import (
+from neuro.modules.m03_reasoning_types.perceptual.multimodal_integration import (
     MultimodalIntegrator, SensoryInput, Modality
 )
-from src.perceptual.object_recognition import (
+from neuro.modules.m03_reasoning_types.perceptual.object_recognition import (
     ObjectRecognizer, CategoryLevel
 )
-
 
 class TestVisualFeatures:
     def test_edge_detection(self):
@@ -70,7 +66,6 @@ class TestVisualFeatures:
         motion = extractor.extract_motion([frame1, frame2])
 
         assert len(motion) >= 0
-
 
 class TestMultimodalIntegration:
     def test_visual_audio_binding(self):
@@ -147,7 +142,6 @@ class TestMultimodalIntegration:
         assert percept is not None
         assert len(percept.modalities) == 2
 
-
 class TestObjectRecognition:
     def test_category_learning(self):
         """Test learning a new category from examples"""
@@ -194,7 +188,6 @@ class TestObjectRecognition:
         )
 
         assert normalized_small['width'] != features_small['width']
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
