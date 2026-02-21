@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation -- ELO-AGI (NEURO)</title>
+  <meta name="description" content="Complete REST API reference for ELO-AGI. 7 endpoints for health checks, cognitive chat, sandboxed REPL, benchmarks, and analysis.">
+  <meta name="theme-color" content="#7C3AED">
+  <meta property="og:title" content="ELO-AGI API Documentation -- 7 REST Endpoints">
+  <meta property="og:description" content="Full API reference: health, info, modules, chat, REPL, benchmarks, and cognitive analysis endpoints.">
+  <meta property="og:type" content="website">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { base: '#0B0D17', surface: '#111327', surfaceLight: '#191C33', purple: '#7C3AED', violet: '#8B5CF6', cyan: '#06B6D4', teal: '#14B8A6' }, fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-base min-h-screen">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background: rgba(11,13,23,0.92); backdrop-filter: blur(16px);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="2" fill="none"/><circle cx="14" cy="10" r="3" fill="url(#logoGrad)"/><path d="M8 18 Q14 22 20 18" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs></svg>
+          <span class="logo-gradient text-xl font-extrabold tracking-tight">ELO-AGI</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="getting-started.html" class="nav-link text-sm font-medium">Getting Started</a>
+          <a href="features.html" class="nav-link text-sm font-medium">Features</a>
+          <a href="api-docs.html" class="nav-link active text-sm font-medium">API Docs</a>
+          <a href="demo.html" class="nav-link text-sm font-medium">Demo</a>
+          <a href="pricing.html" class="nav-link text-sm font-medium">Pricing</a>
+          <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener" class="nav-link text-sm font-medium">GitHub</a>
+        </div>
+        <div class="hidden md:flex items-center gap-3">
+          <a href="getting-started.html" class="btn-primary text-sm py-2 px-4">Get Started</a>
+        </div>
+        <button class="md:hidden p-2 rounded-lg hover:bg-white/5" onclick="toggleMobile()" aria-label="Toggle menu">
+          <svg id="hamburgerIcon" class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="closeIcon" class="w-6 h-6 text-slate-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden border-t border-white/5 bg-base/95 backdrop-blur-lg">
+      <div class="px-4 py-4 space-y-3">
+        <a href="getting-started.html" class="block text-sm text-slate-300 hover:text-white py-2">Getting Started</a>
+        <a href="features.html" class="block text-sm text-slate-300 hover:text-white py-2">Features</a>
+        <a href="api-docs.html" class="block text-sm text-slate-300 hover:text-white py-2">API Docs</a>
+        <a href="demo.html" class="block text-sm text-slate-300 hover:text-white py-2">Demo</a>
+        <a href="pricing.html" class="block text-sm text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="https://github.com/ezekaj/elo-agi" target="_blank" class="block text-sm text-slate-300 hover:text-white py-2">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero-bg grid-bg pt-28 pb-16 lg:pt-36 lg:pb-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple/30 bg-purple/10 mb-6">
+          <span class="w-1.5 h-1.5 rounded-full bg-purple"></span>
+          <span class="text-xs font-semibold text-purple tracking-wide">REST API / 7 Endpoints</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-tight text-white mb-4">
+          API <span class="logo-gradient">Documentation</span>
+        </h1>
+        <p class="text-lg text-slate-400 max-w-xl leading-relaxed">
+          Complete reference for the ELO-AGI REST API. Health checks, cognitive chat, sandboxed Python REPL, benchmarks, and analysis.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BASE URL -->
+  <section class="py-12 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 p-6 sm:p-8" style="background: rgba(17,19,39,0.6);">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="text-white font-bold text-lg mb-1">Base URL</h2>
+            <code class="font-mono text-cyan text-sm sm:text-base">https://zedigital-elo-agi.fly.dev</code>
+          </div>
+          <div>
+            <a href="https://zedigital-elo-agi.fly.dev/docs" target="_blank" rel="noopener" class="btn-secondary text-sm py-2 px-4">
+              Interactive Swagger Docs
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+          </div>
+        </div>
+        <p class="text-slate-500 text-sm mt-4">All endpoints return JSON. Interactive Swagger/OpenAPI documentation is available at <code class="font-mono text-slate-400">/docs</code> on the API server.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ENDPOINT NAVIGATION -->
+  <section class="py-12 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-xl font-bold text-white mb-6">Endpoints</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <a href="#health" class="rounded-xl border border-white/5 p-4 hover:border-cyan/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan/15 text-cyan border border-cyan/25">GET</span>
+            <span class="font-mono text-sm text-white">/api/health</span>
+          </div>
+          <p class="text-slate-500 text-xs">Health check</p>
+        </a>
+        <a href="#info" class="rounded-xl border border-white/5 p-4 hover:border-cyan/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan/15 text-cyan border border-cyan/25">GET</span>
+            <span class="font-mono text-sm text-white">/api/info</span>
+          </div>
+          <p class="text-slate-500 text-xs">System information</p>
+        </a>
+        <a href="#modules" class="rounded-xl border border-white/5 p-4 hover:border-cyan/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-cyan/15 text-cyan border border-cyan/25">GET</span>
+            <span class="font-mono text-sm text-white">/api/modules</span>
+          </div>
+          <p class="text-slate-500 text-xs">List all cognitive modules</p>
+        </a>
+        <a href="#chat" class="rounded-xl border border-white/5 p-4 hover:border-purple/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <span class="font-mono text-sm text-white">/api/chat</span>
+          </div>
+          <p class="text-slate-500 text-xs">Chat with cognitive AI</p>
+        </a>
+        <a href="#repl" class="rounded-xl border border-white/5 p-4 hover:border-purple/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <span class="font-mono text-sm text-white">/api/repl</span>
+          </div>
+          <p class="text-slate-500 text-xs">Sandboxed Python REPL</p>
+        </a>
+        <a href="#benchmark" class="rounded-xl border border-white/5 p-4 hover:border-purple/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <span class="font-mono text-sm text-white">/api/benchmark</span>
+          </div>
+          <p class="text-slate-500 text-xs">Run benchmark suite</p>
+        </a>
+        <a href="#analyze" class="rounded-xl border border-white/5 p-4 hover:border-purple/25 transition-all" style="background: rgba(17,19,39,0.4);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <span class="font-mono text-sm text-white">/api/analyze</span>
+          </div>
+          <p class="text-slate-500 text-xs">Cognitive analysis</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ENDPOINT: /api/health -->
+  <section id="health" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-cyan/15 text-cyan border border-cyan/25">GET</span>
+            <code class="font-mono text-lg text-white">/api/health</code>
+          </div>
+          <p class="text-slate-400 text-sm">Health check endpoint. Returns the current status, uptime in seconds, and API version.</p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Rate limit: 30 requests/minute
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, 'curl https://zedigital-elo-agi.fly.dev/api/health')" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> https://zedigital-elo-agi.fly.dev/api/health</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"status"</span>: <span class="text-teal">"ok"</span>,
+  <span class="text-purple">"uptime"</span>: <span class="text-cyan">123.45</span>,
+  <span class="text-purple">"version"</span>: <span class="text-teal">"0.9.0"</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT: /api/info -->
+  <section id="info" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-cyan/15 text-cyan border border-cyan/25">GET</span>
+            <code class="font-mono text-lg text-white">/api/info</code>
+          </div>
+          <p class="text-slate-400 text-sm">Returns detailed system information including module counts, tier breakdown, capabilities list, and author details.</p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Rate limit: 30 requests/minute
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, 'curl https://zedigital-elo-agi.fly.dev/api/info')" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> https://zedigital-elo-agi.fly.dev/api/info</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"name"</span>: <span class="text-teal">"ELO-AGI (NEURO)"</span>,
+  <span class="text-purple">"version"</span>: <span class="text-teal">"0.9.0"</span>,
+  <span class="text-purple">"module_count"</span>: <span class="text-cyan">38</span>,
+  <span class="text-purple">"tiers"</span>: {
+    <span class="text-purple">"cognitive"</span>: <span class="text-cyan">23</span>,
+    <span class="text-purple">"infrastructure"</span>: <span class="text-cyan">6</span>,
+    <span class="text-purple">"support"</span>: <span class="text-cyan">9</span>
+  },
+  <span class="text-purple">"capabilities"</span>: [
+    <span class="text-teal">"causal_reasoning"</span>,
+    <span class="text-teal">"compositional_abstraction"</span>,
+    <span class="text-teal">"continual_learning"</span>,
+    <span class="text-teal">"robustness"</span>,
+    <span class="text-teal">"language_understanding"</span>
+  ],
+  <span class="text-purple">"author"</span>: <span class="text-teal">"Z.E Digital Tech."</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT: /api/modules -->
+  <section id="modules" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-cyan/15 text-cyan border border-cyan/25">GET</span>
+            <code class="font-mono text-lg text-white">/api/modules</code>
+          </div>
+          <p class="text-slate-400 text-sm">Returns an array of all 38 cognitive modules with their name, category, and description, plus the total count.</p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Rate limit: 30 requests/minute
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, 'curl https://zedigital-elo-agi.fly.dev/api/modules')" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> https://zedigital-elo-agi.fly.dev/api/modules</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"modules"</span>: [
+    {
+      <span class="text-purple">"name"</span>: <span class="text-teal">"Global Workspace"</span>,
+      <span class="text-purple">"category"</span>: <span class="text-teal">"Cognitive"</span>,
+      <span class="text-purple">"description"</span>: <span class="text-teal">"GWT attention-gated broadcasting"</span>
+    },
+    {
+      <span class="text-purple">"name"</span>: <span class="text-teal">"Predictive Coding"</span>,
+      <span class="text-purple">"category"</span>: <span class="text-teal">"Cognitive"</span>,
+      <span class="text-purple">"description"</span>: <span class="text-teal">"Free Energy Principle, hierarchical predictions"</span>
+    }
+    <span class="text-slate-500">// ... 36 more modules</span>
+  ],
+  <span class="text-purple">"total"</span>: <span class="text-cyan">38</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT: /api/chat -->
+  <section id="chat" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <code class="font-mono text-lg text-white">/api/chat</code>
+          </div>
+          <p class="text-slate-400 text-sm">Chat with the cognitive AI engine. Accepts a message and optional conversation history, returns a response with cognitive context.</p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Rate limit: 30 requests/minute
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Request Body</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"message"</span>: <span class="text-teal">"string (max 10000 characters)"</span>,
+  <span class="text-purple">"history"</span>: [
+    { <span class="text-purple">"role"</span>: <span class="text-teal">"user"</span>, <span class="text-purple">"content"</span>: <span class="text-teal">"previous message"</span> },
+    { <span class="text-purple">"role"</span>: <span class="text-teal">"assistant"</span>, <span class="text-purple">"content"</span>: <span class="text-teal">"previous response"</span> }
+  ]
+}</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, `curl -X POST https://zedigital-elo-agi.fly.dev/api/chat \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"message\": \"Explain causal reasoning\", \"history\": []}'`)" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> -X POST https://zedigital-elo-agi.fly.dev/api/chat \
+  -H <span class="text-teal">'Content-Type: application/json'</span> \
+  -d <span class="text-teal">'{"message": "Explain causal reasoning", "history": []}'</span></pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"response"</span>: <span class="text-teal">"Causal reasoning is the ability to identify..."</span>,
+  <span class="text-purple">"cognitive_context"</span>: {
+    <span class="text-purple">"modules_activated"</span>: [<span class="text-teal">"reasoning"</span>, <span class="text-teal">"language"</span>, <span class="text-teal">"memory"</span>],
+    <span class="text-purple">"processing_time_ms"</span>: <span class="text-cyan">245</span>,
+    <span class="text-purple">"confidence"</span>: <span class="text-cyan">0.87</span>
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT: /api/repl -->
+  <section id="repl" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <code class="font-mono text-lg text-white">/api/repl</code>
+          </div>
+          <p class="text-slate-400 text-sm">Execute Python commands in a sandboxed REPL environment. Dangerous imports are blocked, with a 256MB memory limit and 10-second execution timeout.</p>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Rate limit: 10 requests/minute
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-yellow-500/20 bg-yellow-500/5 text-yellow-400">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Sandboxed execution
+            </span>
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Request Body</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"command"</span>: <span class="text-teal">"string (max 5000 characters)"</span>
+}</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, `curl -X POST https://zedigital-elo-agi.fly.dev/api/repl \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"command\": \"print(2 + 2)\"}'`)" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> -X POST https://zedigital-elo-agi.fly.dev/api/repl \
+  -H <span class="text-teal">'Content-Type: application/json'</span> \
+  -d <span class="text-teal">'{"command": "print(2 + 2)"}'</span></pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"output"</span>: <span class="text-teal">"4\n"</span>,
+  <span class="text-purple">"error"</span>: <span class="text-cyan">null</span>,
+  <span class="text-purple">"execution_time"</span>: <span class="text-cyan">0.003</span>
+}</pre>
+            </div>
+          </div>
+          <div class="rounded-xl border border-yellow-500/15 bg-yellow-500/[0.03] p-4">
+            <h4 class="text-yellow-400 font-semibold text-sm mb-2">Sandbox Restrictions</h4>
+            <ul class="text-slate-400 text-xs space-y-1.5">
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-500 mt-0.5">--</span>
+                Dangerous imports blocked (os, subprocess, sys, shutil, etc.)
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-500 mt-0.5">--</span>
+                256MB memory limit per execution
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-500 mt-0.5">--</span>
+                10-second execution timeout
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-500 mt-0.5">--</span>
+                No filesystem or network access
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT: /api/benchmark -->
+  <section id="benchmark" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <code class="font-mono text-lg text-white">/api/benchmark</code>
+          </div>
+          <p class="text-slate-400 text-sm">Run the cognitive benchmark suite. Optionally specify which categories to evaluate. Returns scores per category with an overall aggregate.</p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Rate limit: 10 requests/minute
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Request Body</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"categories"</span>: [<span class="text-teal">"causal_reasoning"</span>, <span class="text-teal">"compositional"</span>]  <span class="text-slate-500">// optional</span>
+}</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Valid Categories</h3>
+            <div class="flex flex-wrap gap-2">
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">causal_reasoning</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">compositional</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">continual_learning</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">robustness</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">language</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">memory</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">planning</code>
+              <code class="inline-block px-2.5 py-1 rounded text-xs font-mono border border-white/10 bg-white/[0.03] text-slate-300">reasoning</code>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, `curl -X POST https://zedigital-elo-agi.fly.dev/api/benchmark \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"categories\": [\"causal_reasoning\", \"robustness\"]}'`)" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> -X POST https://zedigital-elo-agi.fly.dev/api/benchmark \
+  -H <span class="text-teal">'Content-Type: application/json'</span> \
+  -d <span class="text-teal">'{"categories": ["causal_reasoning", "robustness"]}'</span></pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"results"</span>: {
+    <span class="text-purple">"categories"</span>: {
+      <span class="text-purple">"causal_reasoning"</span>: {
+        <span class="text-purple">"average_score"</span>: <span class="text-cyan">0.85</span>,
+        <span class="text-purple">"tests"</span>: <span class="text-cyan">124</span>,
+        <span class="text-purple">"passed"</span>: <span class="text-cyan">124</span>
+      },
+      <span class="text-purple">"robustness"</span>: {
+        <span class="text-purple">"average_score"</span>: <span class="text-cyan">0.71</span>,
+        <span class="text-purple">"tests"</span>: <span class="text-cyan">192</span>,
+        <span class="text-purple">"passed"</span>: <span class="text-cyan">192</span>
+      }
+    },
+    <span class="text-purple">"overall_score"</span>: <span class="text-cyan">0.78</span>,
+    <span class="text-purple">"total_tests"</span>: <span class="text-cyan">316</span>
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENDPOINT: /api/analyze -->
+  <section id="analyze" class="py-16 reveal">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl border border-white/5 overflow-hidden" style="background: rgba(17,19,39,0.6);">
+        <div class="p-6 sm:p-8 border-b border-white/5">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold font-mono bg-purple/15 text-purple border border-purple/25">POST</span>
+            <code class="font-mono text-lg text-white">/api/analyze</code>
+          </div>
+          <p class="text-slate-400 text-sm">Run cognitive analysis on input text. Supports dual-process thinking, emotion analysis, and reasoning chain analysis.</p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/[0.03] text-slate-400">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Rate limit: 30 requests/minute
+          </div>
+        </div>
+        <div class="p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Request Body</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"text"</span>: <span class="text-teal">"string (max 5000 characters)"</span>,
+  <span class="text-purple">"analysis_types"</span>: [<span class="text-teal">"dual_process"</span>, <span class="text-teal">"emotion"</span>, <span class="text-teal">"reasoning"</span>]
+}</pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Analysis Types</h3>
+            <div class="grid sm:grid-cols-3 gap-3">
+              <div class="rounded-lg border border-purple/15 bg-purple/[0.03] p-3">
+                <code class="font-mono text-xs text-purple">dual_process</code>
+                <p class="text-slate-500 text-xs mt-1">System 1 (fast/intuitive) vs System 2 (slow/analytical) thinking pathways</p>
+              </div>
+              <div class="rounded-lg border border-cyan/15 bg-cyan/[0.03] p-3">
+                <code class="font-mono text-xs text-cyan">emotion</code>
+                <p class="text-slate-500 text-xs mt-1">Affect spectrum, valence, arousal, and primary emotion detection</p>
+              </div>
+              <div class="rounded-lg border border-violet/15 bg-violet/[0.03] p-3">
+                <code class="font-mono text-xs text-violet">reasoning</code>
+                <p class="text-slate-500 text-xs mt-1">Logical, analogical, and causal reasoning chain analysis</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">cURL Example</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">bash</span>
+                <button onclick="copyCode(this, `curl -X POST https://zedigital-elo-agi.fly.dev/api/analyze \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"text\": \"The discovery filled me with wonder\", \"analysis_types\": [\"dual_process\", \"emotion\"]}'`)" class="text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">Copy</button>
+              </div>
+              <pre class="text-slate-300"><span class="text-cyan">curl</span> -X POST https://zedigital-elo-agi.fly.dev/api/analyze \
+  -H <span class="text-teal">'Content-Type: application/json'</span> \
+  -d <span class="text-teal">'{"text": "The discovery filled me with wonder", "analysis_types": ["dual_process", "emotion"]}'</span></pre>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-white font-semibold text-sm mb-3">Response</h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="text-xs font-mono text-slate-500">json</span>
+              </div>
+              <pre class="text-slate-300">{
+  <span class="text-purple">"analyses"</span>: {
+    <span class="text-purple">"dual_process"</span>: {
+      <span class="text-purple">"system1"</span>: {
+        <span class="text-purple">"response_time_ms"</span>: <span class="text-cyan">42</span>,
+        <span class="text-purple">"confidence"</span>: <span class="text-cyan">0.78</span>,
+        <span class="text-purple">"assessment"</span>: <span class="text-teal">"Positive emotional content detected"</span>
+      },
+      <span class="text-purple">"system2"</span>: {
+        <span class="text-purple">"response_time_ms"</span>: <span class="text-cyan">1180</span>,
+        <span class="text-purple">"confidence"</span>: <span class="text-cyan">0.91</span>,
+        <span class="text-purple">"assessment"</span>: <span class="text-teal">"Expression of epistemic emotion (wonder/awe)"</span>
+      },
+      <span class="text-purple">"integration"</span>: {
+        <span class="text-purple">"override"</span>: <span class="text-cyan">true</span>
+      }
+    },
+    <span class="text-purple">"emotion"</span>: {
+      <span class="text-purple">"primary_emotion"</span>: <span class="text-teal">"awe"</span>,
+      <span class="text-purple">"primary_score"</span>: <span class="text-cyan">0.89</span>,
+      <span class="text-purple">"valence"</span>: <span class="text-cyan">0.82</span>,
+      <span class="text-purple">"arousal"</span>: <span class="text-cyan">0.65</span>,
+      <span class="text-purple">"affect_spectrum"</span>: {
+        <span class="text-purple">"joy"</span>: <span class="text-cyan">0.72</span>,
+        <span class="text-purple">"surprise"</span>: <span class="text-cyan">0.68</span>,
+        <span class="text-purple">"anticipation"</span>: <span class="text-cyan">0.45</span>
+      }
+    }
+  },
+  <span class="text-purple">"execution_time"</span>: <span class="text-cyan">1.24</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- CTA -->
+  <section class="py-16 reveal">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-white mb-4">Ready to Integrate?</h2>
+      <p class="text-slate-400 mb-8">Try the interactive demo or explore the Swagger docs.</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="demo.html" class="btn-primary">Try the Demo</a>
+        <a href="https://zedigital-elo-agi.fly.dev/docs" target="_blank" rel="noopener" class="btn-secondary">
+          Swagger Docs
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="logo-gradient text-lg font-extrabold">ELO-AGI</a>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-purple/30 bg-purple/10 text-purple">MIT License</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+          <a href="index.html" class="hover:text-slate-300 transition-colors">Home</a>
+          <a href="demo.html" class="hover:text-slate-300 transition-colors">Demo</a>
+          <a href="pricing.html" class="hover:text-slate-300 transition-colors">Pricing</a>
+          <a href="terms.html" class="hover:text-slate-300 transition-colors">Terms</a>
+          <a href="privacy.html" class="hover:text-slate-300 transition-colors">Privacy</a>
+          <span class="text-slate-600">Built by <a href="https://zedigital.tech" target="_blank" class="hover:text-slate-400">Z.E Digital Tech.</a></span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
