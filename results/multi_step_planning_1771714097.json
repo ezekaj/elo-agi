@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "multi_step_planning",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.0,
+  "std_score": 0.0,
+  "mean_latency": 4.76837158203125e-07,
+  "error_count": 0,
+  "total_time": 0.0001201629638671875,
+  "timestamp": 1771714097.776015,
+  "config": {
+    "name": "multi_step_planning",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

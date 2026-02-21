@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "text_completion",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.0,
+  "std_score": 0.0,
+  "mean_latency": 1.5497207641601562e-06,
+  "error_count": 0,
+  "total_time": 0.00042128562927246094,
+  "timestamp": 1771714097.774966,
+  "config": {
+    "name": "text_completion",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

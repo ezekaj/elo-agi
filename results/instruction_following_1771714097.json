@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "instruction_following",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.0,
+  "std_score": 0.0,
+  "mean_latency": 9.5367431640625e-07,
+  "error_count": 0,
+  "total_time": 0.0001990795135498047,
+  "timestamp": 1771714097.7752461,
+  "config": {
+    "name": "instruction_following",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

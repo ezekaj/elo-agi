@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "sequence_memory",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.14583333333333331,
+  "std_score": 0.02083333333333333,
+  "mean_latency": 3.4570693969726562e-06,
+  "error_count": 0,
+  "total_time": 3.528594970703125e-05,
+  "timestamp": 1771714097.774454,
+  "config": {
+    "name": "sequence_memory",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}

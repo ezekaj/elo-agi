@@ -1,0 +1,16 @@
+{
+  "benchmark_name": "working_memory",
+  "n_trials": 2,
+  "success_rate": 0.0,
+  "mean_score": 0.07142857142857142,
+  "std_score": 0.07142857142857142,
+  "mean_latency": 3.933906555175781e-06,
+  "error_count": 0,
+  "total_time": 4.291534423828125e-05,
+  "timestamp": 1771714097.774123,
+  "config": {
+    "name": "working_memory",
+    "difficulty": "medium",
+    "n_trials": 100
+  }
+}
