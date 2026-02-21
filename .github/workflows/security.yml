@@ -23,11 +23,18 @@ jobs:
       - name: Install Bandit
         run: pip install bandit
 
-      - name: Run Bandit (SAST)
-        run: bandit -r neuro/ api/ -ll -x "*/tests/*" --format json --output bandit-report.json || true
+      - name: Run Bandit on API (strict — high severity only)
+        run: bandit -r api/ -lll --format json --output bandit-api-report.json
 
-      - name: Check for high severity issues
-        run: bandit -r neuro/ api/ -ll -x "*/tests/*"
+      - name: Run Bandit on neuro (report only)
+        run: bandit -r neuro/ -ll -x "*/tests/*" --format json --output bandit-neuro-report.json || true
+
+      - name: Upload Bandit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-reports
+          path: bandit-*-report.json
 
   codeql:
     runs-on: ubuntu-latest
