@@ -68,7 +68,7 @@ class SelfOtherDistinction:
             np.linalg.norm(other) + 1e-8
         )
 
-        distinction = 1 - abs(similarity)
+        distinction = (1 - similarity) / 2
         return distinction * self.boundary_strength
 
     def get_self_influence(self, agent: str) -> float:
