@@ -121,11 +121,14 @@ class SituatedContext:
 
     def _update_combined(self):
         """Update combined context features"""
-        self.context_features = np.concatenate([
+        combined = np.concatenate([
             self.physical_context,
             self.social_context,
             self.task_context
-        ])[:self.params.n_features]
+        ])
+        self.context_features = np.zeros(self.params.n_features)
+        n = min(len(combined), self.params.n_features)
+        self.context_features[:n] = combined[:n]
 
         self.context_history.append(self.context_features.copy())
 

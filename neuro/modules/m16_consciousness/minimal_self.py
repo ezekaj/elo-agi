@@ -158,11 +158,14 @@ class OwnershipProcessor:
         self.proprioceptive_channel = 0.5 * self.proprioceptive_channel + 0.5 * proprioceptive
 
         # Parietal integration
-        combined = np.concatenate([
+        raw = np.concatenate([
             self.visual_channel,
             self.tactile_channel,
             self.proprioceptive_channel
-        ])[:self.params.n_features]
+        ])
+        combined = np.zeros(self.params.n_features)
+        n = min(len(raw), self.params.n_features)
+        combined[:n] = raw[:n]
 
         self.parietal_activation = np.tanh(
             self.parietal_activation * 0.3 + combined * 0.7
