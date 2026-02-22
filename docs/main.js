@@ -414,11 +414,20 @@ async function handleReplCommand(cmd) {
       }
     }
 
-    const apiResult = await apiRepl(cmd);
-    if (apiResult) {
-      if (apiResult.output) replAddOutput(esc(apiResult.output.replace(/\n$/, '')));
-      if (apiResult.error) replAddOutput('<span class="repl-error">' + esc(apiResult.error) + '</span>');
-      return;
+    // Don't send known client-side commands to the Python sandbox
+    const clientSideCommands = [
+      'help()', 'neuro_agi.info()', 'neuro_agi.__version__',
+      'neuro_agi.list_tiers()', 'neuro_agi.cognitive.list()',
+      'neuro_agi.benchmark.compare()', 'neuro_agi.demo()', 'demo()',
+      'neuro_agi.architecture()',
+    ];
+    if (!clientSideCommands.includes(cmd)) {
+      const apiResult = await apiRepl(cmd);
+      if (apiResult) {
+        if (apiResult.output) replAddOutput(esc(apiResult.output.replace(/\n$/, '')));
+        if (apiResult.error) replAddOutput('<span class="repl-error">' + esc(apiResult.error) + '</span>');
+        return;
+      }
     }
   }
 
