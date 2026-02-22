@@ -49,7 +49,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ezekaj.github.io", "http://localhost:3000"],
+    allow_origins=["https://eloagi.com", "https://ezekaj.github.io", "http://localhost:3000"],
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Accept", "X-API-Key"],

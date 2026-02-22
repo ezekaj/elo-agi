@@ -61,7 +61,7 @@ pip install -e .
 |-----------|-------------|
 | Python Library | Python 3.9+, numpy, scipy |
 | CLI (`neuro`) | Python 3.9+ and [Ollama](https://ollama.ai) with `ministral-3:8b` model |
-| Web REPL | Browser only -- [try it here](https://ezekaj.github.io/elo-agi/demo.html) |
+| Web REPL | Browser only -- [try it here](https://eloagi.com/demo.html) |
 
 ### Setup Ollama (for CLI)
 
