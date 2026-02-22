@@ -1,0 +1,16 @@
+title: "[Show & Tell] "
+labels: ["show-and-tell"]
+body:
+  - type: markdown
+    attributes:
+      value: "Share what you've built with ELO-AGI!"
+  - type: textarea
+    attributes:
+      label: What did you build?
+      description: Describe your project or use case
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Code or screenshots
+      description: Share relevant code snippets, screenshots, or links
