@@ -429,12 +429,12 @@ async function handleReplCommand(cmd) {
   }
 
   if (cmd === 'neuro_agi.info()') {
-    replAddOutput(esc(`\u2554${'═'.repeat(38)}\u2557\n\u2551   ELO-AGI Cognitive Framework v2.0  \u2551\n\u2551   38 Modules | 3 Tiers | 627 Tests \u2551\n\u2551   Type help() for available commands\u2551\n\u255A${'═'.repeat(38)}\u255D`));
+    replAddOutput(esc(`\u2554${'═'.repeat(38)}\u2557\n\u2551   ELO-AGI Cognitive Framework v0.9  \u2551\n\u2551   38 Modules | 3 Tiers | 627 Tests \u2551\n\u2551   Type help() for available commands\u2551\n\u255A${'═'.repeat(38)}\u255D`));
     return;
   }
 
   if (cmd === 'neuro_agi.__version__') {
-    replAddOutput('<span class="repl-string">\'2.0.0\'</span>');
+    replAddOutput('<span class="repl-string">\'0.9.0\'</span>');
     return;
   }
 
@@ -492,7 +492,7 @@ async function handleReplCommand(cmd) {
   }
 
   if (cmd === 'neuro_agi.architecture()') {
-    replAddOutput(esc(`\n  ┌─────────────────────────────────────────────┐\n  │           ELO-AGI Architecture v2.0         │\n  └─────────────────────────────────────────────┘\n\n  ┌─────────────────────────────────────────────┐\n  │  Tier 1: Cognitive Processing (23 modules)  │\n  │          Global Workspace (Attention Bus)    │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 2: Infrastructure (6 modules)         │\n  │  Core | LLM | Knowledge | Sensors | Scale   │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 3: Support (9 modules)                │\n  │  Benchmark | Perception | Env | Inference   │\n  └─────────────────────────────────────────────┘`));
+    replAddOutput(esc(`\n  ┌─────────────────────────────────────────────┐\n  │           ELO-AGI Architecture v0.9         │\n  └─────────────────────────────────────────────┘\n\n  ┌─────────────────────────────────────────────┐\n  │  Tier 1: Cognitive Processing (23 modules)  │\n  │          Global Workspace (Attention Bus)    │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 2: Infrastructure (6 modules)         │\n  │  Core | LLM | Knowledge | Sensors | Scale   │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 3: Support (9 modules)                │\n  │  Benchmark | Perception | Env | Inference   │\n  └─────────────────────────────────────────────┘`));
     return;
   }
 

@@ -9,7 +9,7 @@ Uses Playwright/Selenium to:
 5. Take screenshots
 6. Learn from web pages
 
-Ported from AGIELO for NEURO AGI v2.0
+Ported from AGIELO for NEURO AGI v0.9
 """
 
 import os

@@ -2,11 +2,11 @@
   <img src="assets/logo-full.svg" width="400" alt="NEURO">
 </p>
 
-<h3 align="center">Local AI That Learns From Your Code</h3>
+<h3 align="center">Neuroscience-Inspired AGI Framework</h3>
 
 <p align="center">
-  The only AI coding assistant that gets smarter the more you use it.<br>
-  No cloud. No API costs. 100% private.
+  38 cognitive modules implementing Free Energy Principle, Active Inference, and Global Workspace Theory.<br>
+  Runs locally. Zero API cost.
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@
 | Free forever | Yes | $20+/month |
 | Private & secure | Yes | Data sent to cloud |
 | Works offline | Yes | No |
-| Neuroscience-based | 26 cognitive modules | Black box |
+| Neuroscience-based | 38 cognitive modules | Black box |
 
 ## Installation
 

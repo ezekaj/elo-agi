@@ -46,7 +46,7 @@ def main():
     results = []
 
     print("Flags:")
-    results.append(test("--version", f"{venv}python -m neuro.cli --version", expect_contains="3.0.0"))
+    results.append(test("--version", f"{venv}python -m neuro.cli --version", expect_contains="0.9.0"))
     results.append(test("--help", f"{venv}python -m neuro.cli --help", expect_contains="NEURO"))
     results.append(test("-h", f"{venv}python -m neuro.cli -h", expect_contains="usage"))
 

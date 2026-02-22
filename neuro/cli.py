@@ -128,14 +128,14 @@ class Spinner:
 
 
 def get_version():
-    return "2.0.0"
+    return "0.9.0"
 
 
 def print_header():
     """Print the main header."""
     print()
     print(f"  {Colors.CYAN}{Colors.BOLD}╭{'─' * 50}╮{Colors.RESET}")
-    print(f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{'NEURO AGI v2.0':^50}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}")
+    print(f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{'NEURO AGI v0.9':^50}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}")
     print(f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{Colors.DIM}{'Local AI That Learns From Your Code':^50}{Colors.RESET}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}")
     print(f"  {Colors.CYAN}{Colors.BOLD}╰{'─' * 50}╯{Colors.RESET}")
     print()
@@ -855,7 +855,7 @@ def cmd_chat(args):
             continue
 
         if user_input == "/status":
-            print(f"\n  {Colors.BOLD}{Colors.CYAN}NEURO AGI v2.0 - STATUS{Colors.RESET}")
+            print(f"\n  {Colors.BOLD}{Colors.CYAN}NEURO AGI v0.9 - STATUS{Colors.RESET}")
             print(f"  {Colors.DIM}{'═' * 55}{Colors.RESET}")
 
             if ollama_available:
@@ -1471,7 +1471,7 @@ def cmd_info(args):
     """Show system information."""
     print_header()
 
-    print(f"  {Colors.BOLD}NEURO v2.0 Architecture{Colors.RESET}")
+    print(f"  {Colors.BOLD}NEURO v0.9 Architecture{Colors.RESET}")
     print(f"  {Colors.DIM}{'─' * 50}{Colors.RESET}")
     print()
 
@@ -1572,7 +1572,7 @@ def cmd_demo(args):
 
     print()
     print(f"  {Colors.GREEN}{'─' * 50}{Colors.RESET}")
-    print(f"  {Colors.GREEN}✓ NEURO v2.0 Engine components verified{Colors.RESET}")
+    print(f"  {Colors.GREEN}✓ NEURO v0.9 Engine components verified{Colors.RESET}")
     print()
 
     return 0
@@ -1601,7 +1601,7 @@ def cmd_check(args):
             checks.append(True)  # Optional deps don't fail
 
     print()
-    print(f"  {Colors.BOLD}NEURO v2.0 Engine{Colors.RESET}")
+    print(f"  {Colors.BOLD}NEURO v0.9 Engine{Colors.RESET}")
 
     components = [
         ("stream", "StreamHandler", "Streaming responses"),
@@ -1662,7 +1662,7 @@ def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
         prog="neuro",
-        description="NEURO AGI v2.0 - Local AI That Learns From Your Code",
+        description="NEURO AGI v0.9 - Local AI That Learns From Your Code",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

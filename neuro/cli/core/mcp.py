@@ -148,7 +148,7 @@ class MCPManager:
                     "capabilities": {},
                     "clientInfo": {
                         "name": "neuro",
-                        "version": "3.0.0"
+                        "version": "0.9.0"
                     }
                 }
             )

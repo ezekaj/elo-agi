@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 def get_version() -> str:
-    return "3.0.0"
+    return "0.9.0"
 
 
 def create_parser() -> argparse.ArgumentParser:

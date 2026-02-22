@@ -381,7 +381,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
         # Print beautiful welcome screen
         self.ui.print_welcome_screen(
-            version="3.0.0",
+            version="0.9.0",
             user_name=user_name,
             model=self.model,
             working_dir=working_dir,
