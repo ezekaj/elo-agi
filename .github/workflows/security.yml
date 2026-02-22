@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   bandit:
@@ -26,8 +27,8 @@ jobs:
       - name: Run Bandit on API (strict — high severity only)
         run: bandit -r api/ -lll --format json --output bandit-api-report.json
 
-      - name: Run Bandit on neuro (report only)
-        run: bandit -r neuro/ -ll -x "*/tests/*" --format json --output bandit-neuro-report.json || true
+      - name: Run Bandit on neuro (strict — medium+ severity)
+        run: bandit -r neuro/ -ll -x "*/tests/*" --format json --output bandit-neuro-report.json
 
       - name: Upload Bandit reports
         if: always()
@@ -35,3 +36,19 @@ jobs:
         with:
           name: bandit-reports
           path: bandit-*-report.json
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

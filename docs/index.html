@@ -128,7 +128,7 @@
             </a>
           </div>
           <p class="text-xs text-slate-500 mt-3">
-            Requires Python 3.9+ &bull; For CLI chat: also install <a href="https://ollama.ai" target="_blank" class="text-purple hover:underline">Ollama</a>
+            Requires Python 3.9+ &bull; For CLI chat: also install <a href="https://ollama.ai" target="_blank" rel="noopener noreferrer" class="text-purple hover:underline">Ollama</a>
           </p>
         </div>
         <div class="lg:col-span-2 flex justify-center relative">
@@ -207,19 +207,23 @@
       </div>
       <div class="flex flex-wrap justify-center gap-3 mb-10">
         <button class="tab-btn active" data-tab="cognitive" style="border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.1); color: #fff;" onclick="switchTab('cognitive', this)">
-          Cognitive <span class="ml-1 text-xs opacity-70">(23)</span>
+          Cognitive <span class="ml-1 text-xs opacity-70">(20)</span>
         </button>
         <button class="tab-btn" data-tab="infrastructure" onclick="switchTab('infrastructure', this)">
           Infrastructure <span class="ml-1 text-xs opacity-70">(6)</span>
         </button>
         <button class="tab-btn" data-tab="support" onclick="switchTab('support', this)">
-          Support <span class="ml-1 text-xs opacity-70">(9)</span>
+          Support <span class="ml-1 text-xs opacity-70">(5)</span>
+        </button>
+        <button class="tab-btn" data-tab="agi" onclick="switchTab('agi', this)">
+          AGI Extensions <span class="ml-1 text-xs opacity-70">(7)</span>
         </button>
       </div>
       <div id="moduleContainer">
         <div id="tab-cognitive" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 fade-in"></div>
         <div id="tab-infrastructure" class="module-grid grid grid-cols-2 sm:grid-cols-3 gap-3 hidden fade-in"></div>
         <div id="tab-support" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 hidden fade-in"></div>
+        <div id="tab-agi" class="module-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 hidden fade-in"></div>
       </div>
       <div class="text-center mt-8">
         <a href="features.html" class="btn-ghost">
@@ -238,7 +242,7 @@
       <div class="text-center mb-12">
         <p class="text-sm font-semibold text-purple tracking-wider uppercase mb-3">Evaluation</p>
         <h2 class="text-3xl lg:text-4xl font-extrabold text-white">Benchmark Performance</h2>
-        <p class="mt-3 text-slate-400">Internal consistency metrics across 5 evaluation categories. <a href="https://github.com/ezekaj/elo-agi/blob/main/BENCHMARKS.md" target="_blank" class="text-purple hover:underline">Full methodology</a></p>
+        <p class="mt-3 text-slate-400">Internal consistency metrics across 5 evaluation categories. <a href="https://github.com/ezekaj/elo-agi/blob/main/BENCHMARKS.md" target="_blank" rel="noopener noreferrer" class="text-purple hover:underline">Full methodology</a></p>
       </div>
       <div class="rounded-xl border border-white/5 overflow-hidden mb-12" style="background: rgba(17,19,39,0.6);">
         <div class="table-wrapper">
@@ -594,7 +598,7 @@
             <svg class="faq-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">ELO-AGI is fully open source under the MIT license. You can contribute on <a href="https://github.com/ezekaj/elo-agi" target="_blank" class="text-purple hover:underline">GitHub</a>, report issues, submit pull requests, or become a sponsor. For research collaboration, check the Research Partner tier on our <a href="pricing.html" class="text-purple hover:underline">pricing page</a>. Contact: <a href="mailto:elvizekaj@zedigital.tech" class="text-cyan hover:underline">elvizekaj@zedigital.tech</a></div>
+            <div class="faq-answer-inner">ELO-AGI is fully open source under the MIT license. You can contribute on <a href="https://github.com/ezekaj/elo-agi" target="_blank" rel="noopener noreferrer" class="text-purple hover:underline">GitHub</a>, report issues, submit pull requests, or become a sponsor. For research collaboration, check the Research Partner tier on our <a href="pricing.html" class="text-purple hover:underline">pricing page</a>. Contact: <a href="mailto:elvizekaj@zedigital.tech" class="text-cyan hover:underline">elvizekaj@zedigital.tech</a></div>
           </div>
         </div>
       </div>
@@ -617,7 +621,7 @@
             </svg>
             <span class="logo-gradient text-lg font-extrabold">ELO-AGI</span>
           </a>
-          <p class="text-slate-500 text-sm">Neuroscience-inspired AGI framework by Z.E Digital Tech.</p>
+          <p class="text-slate-500 text-sm">Neuroscience-inspired AGI framework by Elvi Zekaj.</p>
         </div>
         <div>
           <h4 class="text-white font-semibold text-sm mb-3">Product</h4>
@@ -655,7 +659,7 @@
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-cyan/30 bg-cyan/10 text-cyan">Open Source</span>
         </div>
         <div class="text-slate-600 text-sm">
-          &copy; <span data-year></span> <a href="https://zedigital.tech" target="_blank" rel="noopener" class="hover:text-slate-400 transition-colors">Z.E Digital Tech.</a>
+          &copy; <span data-year></span> <a href="https://github.com/ezekaj" target="_blank" rel="noopener noreferrer" class="hover:text-slate-400 transition-colors">Elvi Zekaj</a>
         </div>
       </div>
     </div>

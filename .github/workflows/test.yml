@@ -55,16 +55,16 @@ jobs:
           if [ $failed -gt 0 ]; then
             echo "Failed modules:$failed_modules"
           fi
-          if [ $failed -gt 2 ]; then
-            echo "Too many failures (>2), failing CI"
+          if [ $failed -gt 0 ]; then
+            echo "Test failures detected, failing CI"
             exit 1
           fi
-          echo "CI passed ($passed modules passed, $failed within tolerance)"
+          echo "CI passed ($passed modules passed, 0 failures)"
 
       - name: Run coverage report
         if: matrix.python-version == '3.11'
         run: |
-          python -m pytest neuro-*/tests/ --cov=neuro --cov-report=xml --cov-report=term-missing -q || true
+          python -m pytest neuro-*/tests/ --cov=neuro --cov-report=xml --cov-report=term-missing --cov-fail-under=70 -q
 
       - name: Upload coverage artifact
         if: matrix.python-version == '3.11'

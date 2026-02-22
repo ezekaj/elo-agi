@@ -12,25 +12,22 @@ const modules = {
     { name: 'Global Workspace', desc: 'Global Workspace Theory implementation with attention-gated broadcasting and competition dynamics across cognitive modules.', algorithms: ['Attention Competition', 'Broadcast Protocol', 'Ignition Threshold'], inputs: 'Module activations', outputs: 'Broadcast signals' },
     { name: 'Predictive Coding', desc: 'Free Energy Principle with hierarchical predictions, prediction errors, and belief updating via variational inference.', algorithms: ['Free Energy Minimization', 'Hierarchical Prediction', 'Variational Inference'], inputs: 'Sensory data', outputs: 'Predictions, prediction errors' },
     { name: 'Dual-Process', desc: 'System 1/2 emergence from cognitive geometry. Fast intuitive responses vs slow deliberate reasoning.', algorithms: ['Type 1 Heuristics', 'Type 2 Deliberation', 'Override Detection'], inputs: 'Problem context', outputs: 'Decision pathway' },
-    { name: 'Reasoning Types', desc: 'Dimensional, interactive, logical, and perceptual reasoning pathways inspired by dual-process theory.', algorithms: ['Logical Inference', 'Analogical Reasoning', 'Spatial Reasoning'], inputs: 'Problem representation', outputs: 'Reasoning chains' },
     { name: 'Memory', desc: 'Sensory, working, and long-term memory systems with hippocampal replay for consolidation and retrieval.', algorithms: ['Hippocampal Replay', 'Working Memory Buffer', 'Long-term Consolidation'], inputs: 'Experiences', outputs: 'Retrieved memories' },
-    { name: 'Sleep Consolidation', desc: 'Replay, systems consolidation, and homeostatic regulation during offline processing periods.', algorithms: ['Memory Replay', 'Systems Consolidation', 'Synaptic Homeostasis'], inputs: 'Recent memories', outputs: 'Consolidated knowledge' },
-    { name: 'Motivation', desc: 'Path entropy, dopamine-inspired reward signals, and curiosity-driven exploration.', algorithms: ['Reward Prediction', 'Curiosity Signal', 'Path Entropy'], inputs: 'State, goals', outputs: 'Drive signals' },
-    { name: 'Emotion', desc: 'Appraisal-based emotional processing that modulates decision-making, attention, and memory encoding.', algorithms: ['Appraisal Theory', 'Somatic Markers', 'Affect Spectrum'], inputs: 'Stimuli context', outputs: 'Emotional state, modulation signals' },
     { name: 'Language', desc: 'Natural language understanding and generation with semantic parsing, pragmatics, and discourse modeling.', algorithms: ['Semantic Parsing', 'Pragmatic Inference', 'Discourse Modeling'], inputs: 'Text/speech', outputs: 'Semantic representations' },
+    { name: 'Reasoning', desc: 'Dimensional, interactive, logical, and perceptual reasoning pathways inspired by dual-process theory.', algorithms: ['Logical Inference', 'Analogical Reasoning', 'Spatial Reasoning'], inputs: 'Problem representation', outputs: 'Reasoning chains' },
     { name: 'Creativity', desc: 'Divergent thinking, conceptual blending, and novelty generation using stochastic recombination.', algorithms: ['Conceptual Blending', 'Divergent Search', 'Novelty Detection'], inputs: 'Problem space', outputs: 'Novel solutions' },
+    { name: 'Executive Control', desc: 'Top-down attention regulation, task switching, inhibition, and goal management for coherent behavior.', algorithms: ['Task Switching', 'Inhibitory Control', 'Goal Stack Management'], inputs: 'Goals, context', outputs: 'Control signals' },
     { name: 'Spatial Cognition', desc: 'Allocentric and egocentric spatial representations with cognitive mapping and mental rotation.', algorithms: ['Cognitive Mapping', 'Mental Rotation', 'Path Integration'], inputs: 'Spatial data', outputs: 'Spatial representations' },
     { name: 'Time Perception', desc: 'Embodied temporal cognition modeling interval timing, sequence learning, and temporal prediction.', algorithms: ['Interval Timing', 'Sequence Learning', 'Temporal Prediction'], inputs: 'Event sequences', outputs: 'Temporal estimates' },
     { name: 'Learning', desc: 'Adaptive learning mechanisms including meta-learning, curriculum learning, and learning rate modulation.', algorithms: ['Meta-Learning', 'Curriculum Learning', 'Adaptive LR'], inputs: 'Training signal', outputs: 'Updated weights' },
-    { name: 'Executive Control', desc: 'Top-down attention regulation, task switching, inhibition, and goal management for coherent behavior.', algorithms: ['Task Switching', 'Inhibitory Control', 'Goal Stack Management'], inputs: 'Goals, context', outputs: 'Control signals' },
     { name: 'Embodied Cognition', desc: 'Grounding abstract concepts in simulated sensorimotor experience and body-based representations.', algorithms: ['Sensorimotor Grounding', 'Body Schema', 'Affordance Detection'], inputs: 'Body state', outputs: 'Grounded concepts' },
     { name: 'Social Cognition', desc: 'Theory of mind, social inference, shared intentionality, and multi-agent social modeling.', algorithms: ['Theory of Mind', 'Social Inference', 'Shared Intentionality'], inputs: 'Social context', outputs: 'Social predictions' },
     { name: 'Consciousness', desc: 'Global workspace broadcasting, metacognitive monitoring, and self-model maintenance.', algorithms: ['Global Broadcast', 'Self-Model', 'Metacognitive Loop'], inputs: 'All module states', outputs: 'Unified experience' },
     { name: 'World Modeling', desc: 'Internal generative world model for prediction, simulation, counterfactual reasoning, and planning.', algorithms: ['Generative Model', 'Counterfactual Simulation', 'Model-based Planning'], inputs: 'Observations', outputs: 'World state predictions' },
-    { name: 'Self-Improvement', desc: 'Self-directed improvement through performance monitoring, architecture search, and capability expansion.', algorithms: ['Performance Monitoring', 'Architecture Search', 'Capability Expansion'], inputs: 'Performance metrics', outputs: 'Improvement plans' },
-    { name: 'Multi-Agent', desc: 'Multi-agent coordination with negotiation, consensus building, and distributed problem solving.', algorithms: ['Negotiation Protocol', 'Consensus Building', 'Task Distribution'], inputs: 'Agent states', outputs: 'Coordination signals' },
+    { name: 'Emotion', desc: 'Appraisal-based emotional processing that modulates decision-making, attention, and memory encoding.', algorithms: ['Appraisal Theory', 'Somatic Markers', 'Affect Spectrum'], inputs: 'Stimuli context', outputs: 'Emotional state, modulation signals' },
     { name: 'Attention', desc: 'Selective, sustained, and divided attention mechanisms with priority-based resource allocation.', algorithms: ['Priority Queue', 'Salience Map', 'Resource Allocation'], inputs: 'All stimuli', outputs: 'Filtered focus' },
     { name: 'Perception', desc: 'Hierarchical feature extraction and integration across visual, auditory, and multimodal streams.', algorithms: ['Feature Extraction', 'Multimodal Integration', 'Object Recognition'], inputs: 'Sensor data', outputs: 'Percepts' },
+    { name: 'Motor Control', desc: 'Motor planning and execution with forward models, inverse kinematics, and adaptive control.', algorithms: ['Forward Model', 'Inverse Kinematics', 'Adaptive Control'], inputs: 'Action goals', outputs: 'Motor commands' },
     { name: 'Decision Making', desc: 'Evidence accumulation, value-based choice, and satisficing strategies under uncertainty.', algorithms: ['Evidence Accumulation', 'Value Computation', 'Satisficing'], inputs: 'Options, evidence', outputs: 'Decisions' }
   ],
   infrastructure: [
@@ -45,19 +42,25 @@ const modules = {
     { name: 'Benchmarking', desc: 'Comprehensive test suites for reasoning, memory, language, and planning evaluation.', algorithms: ['Test Generation', 'Metric Computation', 'Comparison Analysis'], inputs: 'Module outputs', outputs: 'Performance scores' },
     { name: 'Perception Pipeline', desc: 'End-to-end sensory processing pipeline with feature extraction, integration, and filtering.', algorithms: ['Feature Pipeline', 'Attention Gating', 'Stream Integration'], inputs: 'Raw input', outputs: 'Processed percepts' },
     { name: 'Environment Manager', desc: 'Context and environment management for simulation, testing, and deployment configuration.', algorithms: ['Context Switching', 'State Management', 'Config Resolution'], inputs: 'Environment config', outputs: 'Managed context' },
-    { name: 'Inference Engine', desc: 'Bayesian, analogical, and causal reasoning engines for probabilistic inference.', algorithms: ['Bayesian Inference', 'Analogical Reasoning', 'Causal Inference'], inputs: 'Evidence', outputs: 'Inferred beliefs' },
-    { name: 'Integration Layer', desc: 'Advanced integration layer connecting perception, cognition, and action subsystems.', algorithms: ['Cross-module Bridge', 'State Synchronization', 'Event Bus'], inputs: 'Module outputs', outputs: 'Integrated state' },
     { name: 'Data Loader', desc: 'Efficient data loading, preprocessing, and batching for training and inference workloads.', algorithms: ['Batch Scheduling', 'Prefetch Pipeline', 'Format Conversion'], inputs: 'Raw data', outputs: 'Preprocessed batches' },
-    { name: 'Logger', desc: 'Structured logging, telemetry, and cognitive state tracing for debugging and analysis.', algorithms: ['Structured Logging', 'Telemetry Collection', 'State Tracing'], inputs: 'System events', outputs: 'Log streams' },
-    { name: 'Perception Module', desc: 'Visual, auditory, and multimodal perception with hierarchical processing.', algorithms: ['Visual Processing', 'Auditory Processing', 'Multimodal Binding'], inputs: 'Sensory streams', outputs: 'Unified percepts' },
-    { name: 'Transfer Learning', desc: 'Cross-domain knowledge transfer, domain adaptation, and few-shot generalization mechanisms.', algorithms: ['Domain Adaptation', 'Few-shot Transfer', 'Knowledge Distillation'], inputs: 'Source knowledge', outputs: 'Adapted representations' }
+    { name: 'Logger', desc: 'Structured logging, telemetry, and cognitive state tracing for debugging and analysis.', algorithms: ['Structured Logging', 'Telemetry Collection', 'State Tracing'], inputs: 'System events', outputs: 'Log streams' }
+  ],
+  agi: [
+    { name: 'Causal Reasoning', desc: 'Differentiable causal reasoning with structural causal models, intervention calculus, and counterfactual inference.', algorithms: ['SCM', 'Do-Calculus', 'Counterfactual Inference'], inputs: 'Observations, interventions', outputs: 'Causal effects' },
+    { name: 'Compositional Abstraction', desc: 'Neuro-symbolic binding with holographic reduced representations for compositional generalization.', algorithms: ['HRR Binding', 'Concept Composition', 'ARC Generalization'], inputs: 'Symbolic structures', outputs: 'Abstract representations' },
+    { name: 'Continual Learning', desc: 'Catastrophic forgetting prevention with elastic weight consolidation, hippocampal replay, and meta-learning.', algorithms: ['EWC', 'PackNet', 'Synaptic Intelligence'], inputs: 'Task sequences', outputs: 'Updated model without forgetting' },
+    { name: 'Robustness', desc: 'Uncertainty quantification, out-of-distribution detection, adversarial defense, and probability calibration.', algorithms: ['Ensemble Methods', 'OOD Detection', 'Calibration'], inputs: 'Uncertain inputs', outputs: 'Calibrated predictions' },
+    { name: 'AGI Planning', desc: 'Hierarchical task planning with Monte Carlo tree search, temporal abstraction, and option frameworks.', algorithms: ['MCTS', 'HTN Planning', 'Option Framework'], inputs: 'Goals, world state', outputs: 'Action plans' },
+    { name: 'Transfer Learning', desc: 'Cross-domain knowledge transfer, domain adaptation, and few-shot generalization mechanisms.', algorithms: ['Domain Adaptation', 'Few-shot Transfer', 'Knowledge Distillation'], inputs: 'Source knowledge', outputs: 'Adapted representations' },
+    { name: 'Integration', desc: 'Advanced integration layer connecting perception, cognition, and action subsystems.', algorithms: ['Cross-module Bridge', 'State Synchronization', 'Event Bus'], inputs: 'Module outputs', outputs: 'Integrated state' }
   ]
 };
 
 const tierColors = {
   cognitive: { border: 'rgba(124,58,237,0.25)', bg: 'rgba(124,58,237,0.06)', text: '#7C3AED', hoverBg: 'rgba(124,58,237,0.12)' },
   infrastructure: { border: 'rgba(6,182,212,0.25)', bg: 'rgba(6,182,212,0.06)', text: '#06B6D4', hoverBg: 'rgba(6,182,212,0.12)' },
-  support: { border: 'rgba(139,92,246,0.25)', bg: 'rgba(139,92,246,0.06)', text: '#8B5CF6', hoverBg: 'rgba(139,92,246,0.12)' }
+  support: { border: 'rgba(139,92,246,0.25)', bg: 'rgba(139,92,246,0.06)', text: '#8B5CF6', hoverBg: 'rgba(139,92,246,0.12)' },
+  agi: { border: 'rgba(20,184,166,0.25)', bg: 'rgba(20,184,166,0.06)', text: '#14B8A6', hoverBg: 'rgba(20,184,166,0.12)' }
 };
 
 // ---- Benchmark Data ----
@@ -75,25 +78,22 @@ const allModulesTable = [
   ['Global Workspace','Cognitive','GWT attention-gated broadcasting'],
   ['Predictive Coding','Cognitive','Free Energy Principle, hierarchical predictions'],
   ['Dual-Process','Cognitive','System 1/2 fast/slow reasoning'],
-  ['Reasoning Types','Cognitive','Dimensional, logical, perceptual reasoning'],
   ['Memory','Cognitive','Sensory, working, and long-term memory'],
-  ['Sleep Consolidation','Cognitive','Replay and systems consolidation'],
-  ['Motivation','Cognitive','Path entropy and curiosity signals'],
-  ['Emotion','Cognitive','Appraisal-based emotional processing'],
   ['Language','Cognitive','NLU and generation with semantic parsing'],
+  ['Reasoning','Cognitive','Logical, analogical, and spatial reasoning'],
   ['Creativity','Cognitive','Divergent thinking and conceptual blending'],
+  ['Executive Control','Cognitive','Task switching, inhibition, goal management'],
   ['Spatial Cognition','Cognitive','Cognitive mapping and mental rotation'],
   ['Time Perception','Cognitive','Interval timing and temporal prediction'],
   ['Learning','Cognitive','Meta-learning and curriculum learning'],
-  ['Executive Control','Cognitive','Task switching, inhibition, goal management'],
   ['Embodied Cognition','Cognitive','Sensorimotor grounding of concepts'],
   ['Social Cognition','Cognitive','Theory of mind and social inference'],
   ['Consciousness','Cognitive','Global workspace and self-model'],
   ['World Modeling','Cognitive','Internal generative world model'],
-  ['Self-Improvement','Cognitive','Performance monitoring and capability expansion'],
-  ['Multi-Agent','Cognitive','Multi-agent coordination and negotiation'],
+  ['Emotion','Cognitive','Appraisal-based emotional processing'],
   ['Attention','Cognitive','Selective and divided attention'],
   ['Perception','Cognitive','Hierarchical feature extraction'],
+  ['Motor Control','Cognitive','Forward models and adaptive motor control'],
   ['Decision Making','Cognitive','Evidence accumulation under uncertainty'],
   ['Core System','Infrastructure','Active inference loop and orchestration'],
   ['LLM Integration','Infrastructure','Semantic bridge to language models'],
@@ -104,12 +104,15 @@ const allModulesTable = [
   ['Benchmarking','Support','Test suites for cognitive evaluation'],
   ['Perception Pipeline','Support','End-to-end sensory processing'],
   ['Environment Manager','Support','Simulation and deployment config'],
-  ['Inference Engine','Support','Bayesian and causal reasoning engines'],
-  ['Integration Layer','Support','Cross-module state synchronization'],
   ['Data Loader','Support','Efficient data preprocessing'],
   ['Logger','Support','Structured logging and telemetry'],
-  ['Perception Module','Support','Visual and auditory perception'],
-  ['Transfer Learning','Support','Cross-domain knowledge transfer']
+  ['Causal Reasoning','AGI','Differentiable SCMs and counterfactual inference'],
+  ['Compositional Abstraction','AGI','Neuro-symbolic binding with HRR'],
+  ['Continual Learning','AGI','EWC, PackNet, synaptic intelligence'],
+  ['Robustness','AGI','Uncertainty quantification and OOD detection'],
+  ['AGI Planning','AGI','Hierarchical MCTS and option frameworks'],
+  ['Transfer Learning','AGI','Cross-domain knowledge transfer'],
+  ['Integration','AGI','Cross-module state synchronization']
 ];
 
 // ================================================================
@@ -438,7 +441,7 @@ async function handleReplCommand(cmd) {
   }
 
   if (cmd === 'neuro_agi.info()') {
-    replAddOutput(esc(`\u2554${'═'.repeat(38)}\u2557\n\u2551   ELO-AGI Cognitive Framework v0.9  \u2551\n\u2551   38 Modules | 3 Tiers | 627 Tests \u2551\n\u2551   Type help() for available commands\u2551\n\u255A${'═'.repeat(38)}\u255D`));
+    replAddOutput(esc(`\u2554${'═'.repeat(38)}\u2557\n\u2551   ELO-AGI Cognitive Framework v0.9  \u2551\n\u2551   38 Modules | 4 Tiers | 627 Tests \u2551\n\u2551   Type help() for available commands\u2551\n\u255A${'═'.repeat(38)}\u255D`));
     return;
   }
 
@@ -456,7 +459,7 @@ async function handleReplCommand(cmd) {
   }
 
   if (cmd === 'neuro_agi.list_tiers()') {
-    replAddOutput(esc(`Tier 1: Cognitive Processing   (23 modules)\nTier 2: Infrastructure          (6 modules)\nTier 3: Support                 (9 modules)`));
+    replAddOutput(esc(`Tier 1: Cognitive Processing   (20 modules)\nTier 2: Infrastructure          (6 modules)\nTier 3: Support                 (5 modules)\nTier 4: AGI Extensions          (7 modules)`));
     return;
   }
 
@@ -534,7 +537,7 @@ async function handleReplCommand(cmd) {
 
 
   if (cmd === 'neuro_agi.architecture()') {
-    replAddOutput(esc(`\n  ┌─────────────────────────────────────────────┐\n  │           ELO-AGI Architecture v0.9         │\n  └─────────────────────────────────────────────┘\n\n  ┌─────────────────────────────────────────────┐\n  │  Tier 1: Cognitive Processing (23 modules)  │\n  │          Global Workspace (Attention Bus)    │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 2: Infrastructure (6 modules)         │\n  │  Core | LLM | Knowledge | Sensors | Scale   │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 3: Support (9 modules)                │\n  │  Benchmark | Perception | Env | Inference   │\n  └─────────────────────────────────────────────┘`));
+    replAddOutput(esc(`\n  ┌─────────────────────────────────────────────┐\n  │           ELO-AGI Architecture v0.9         │\n  └─────────────────────────────────────────────┘\n\n  ┌─────────────────────────────────────────────┐\n  │  Tier 1: Cognitive Processing (20 modules)  │\n  │          Global Workspace (Attention Bus)    │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 2: Infrastructure (6 modules)         │\n  │  Core | LLM | Knowledge | Sensors | Scale   │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 3: Support (5 modules)                │\n  │  Benchmark | Perception | Env | Data | Log  │\n  └─────────────────────┼───────────────────────┘\n                        │\n  ┌─────────────────────┼───────────────────────┐\n  │  Tier 4: AGI Extensions (7 modules)         │\n  │  Causal | Abstract | Continual | Robust     │\n  └─────────────────────────────────────────────┘`));
     return;
   }
 
@@ -578,11 +581,12 @@ function createBrainSVG(containerId, opts) {
   opts = opts || {};
   const size = opts.size || 400;
   const cx = size / 2, cy = size / 2;
-  const r1 = size * 0.42, r2 = size * 0.3, r3 = size * 0.18;
+  const r1 = size * 0.44, r2 = size * 0.33, r3 = size * 0.22, r4 = size * 0.13;
 
-  const cognitiveModules = ['GW','PC','DP','RT','Mem','SC','Mot','Emo','Lang','Cre','Spa','TP','Lrn','EC','Emb','Soc','Con','WM','SI','MA','Att','Per','DM'];
+  const cognitiveModules = ['GW','PC','DP','Mem','Lang','Rea','Cre','EC','Spa','TP','Lrn','Emb','Soc','Con','WM','Emo','Att','Per','MC','DM'];
   const infraModules = ['Core','LLM','KG','Sen','Act','Dist'];
-  const supportModules = ['Bench','PPipe','Env','Inf','Int','DL','Log','PMod','TL'];
+  const supportModules = ['Bench','PPipe','Env','DL','Log'];
+  const agiModules = ['Caus','Abs','CL','Rob','Plan','TL','Int'];
 
   let svg = `<svg viewBox="0 0 ${size} ${size}" class="brain-svg" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<defs>
@@ -594,6 +598,7 @@ function createBrainSVG(containerId, opts) {
   svg += `<circle cx="${cx}" cy="${cy}" r="${r1}" fill="none" stroke="rgba(124,58,237,0.08)" stroke-width="1"/>`;
   svg += `<circle cx="${cx}" cy="${cy}" r="${r2}" fill="none" stroke="rgba(6,182,212,0.08)" stroke-width="1"/>`;
   svg += `<circle cx="${cx}" cy="${cy}" r="${r3}" fill="none" stroke="rgba(139,92,246,0.08)" stroke-width="1"/>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r4}" fill="none" stroke="rgba(20,184,166,0.08)" stroke-width="1"/>`;
 
   // Cognitive tier (outer ring)
   cognitiveModules.forEach((mod, i) => {
@@ -625,6 +630,17 @@ function createBrainSVG(containerId, opts) {
     svg += `<g class="brain-node" data-module="${mod}" data-tier="support">
       <circle cx="${x}" cy="${y}" r="8" fill="rgba(139,92,246,0.15)" stroke="#8B5CF6" stroke-width="1.5" style="color:#8B5CF6"/>
       <text x="${x}" y="${y+3}" fill="#8B5CF6" font-size="5" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">${mod}</text>
+    </g>`;
+  });
+
+  // AGI tier (innermost ring)
+  agiModules.forEach((mod, i) => {
+    const angle = (2 * Math.PI * i / agiModules.length) - Math.PI / 2;
+    const x = cx + r4 * Math.cos(angle);
+    const y = cy + r4 * Math.sin(angle);
+    svg += `<g class="brain-node" data-module="${mod}" data-tier="agi">
+      <circle cx="${x}" cy="${y}" r="7" fill="rgba(20,184,166,0.15)" stroke="#14B8A6" stroke-width="1.5" style="color:#14B8A6"/>
+      <text x="${x}" y="${y+2.5}" fill="#14B8A6" font-size="4.5" font-weight="700" text-anchor="middle" font-family="Inter,sans-serif">${mod}</text>
     </g>`;
   });
 
