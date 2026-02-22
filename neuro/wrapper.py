@@ -43,6 +43,55 @@ class SmartResponse:
     latency: float = 0.0
     provider: str = "mock"
 
+    def _repr_html_(self) -> str:
+        """Rich HTML representation for Jupyter notebooks."""
+        import html as html_mod
+
+        conf_pct = int(self.confidence * 100)
+        conf_color = "#4caf50" if conf_pct >= 70 else "#ff9800" if conf_pct >= 40 else "#f44336"
+
+        modules_html = " ".join(
+            f'<span style="display:inline-block;background:#e3f2fd;color:#1565c0;'
+            f'padding:2px 8px;border-radius:12px;font-size:12px;margin:2px;">'
+            f'{html_mod.escape(m)}</span>'
+            for m in self.modules_used
+        )
+
+        steps_html = "\n".join(
+            f"<li style='margin:2px 0;font-size:13px;color:#555;'>"
+            f"{html_mod.escape(s)}</li>"
+            for s in self.processing_steps
+        )
+
+        escaped_text = html_mod.escape(self.text).replace("\n", "<br>")
+
+        return (
+            f'<div style="font-family:system-ui,sans-serif;border:1px solid #e0e0e0;'
+            f'border-radius:8px;padding:16px;margin:8px 0;max-width:800px;">'
+            f'  <div style="font-size:15px;line-height:1.6;margin-bottom:12px;">'
+            f'{escaped_text}</div>'
+            f'  <div style="margin-bottom:8px;">'
+            f'    <span style="font-size:12px;color:#888;margin-right:8px;">Modules:</span>'
+            f'{modules_html}</div>'
+            f'  <div style="margin-bottom:8px;">'
+            f'    <span style="font-size:12px;color:#888;margin-right:8px;">'
+            f'Confidence: {conf_pct}%</span>'
+            f'    <div style="display:inline-block;width:120px;height:8px;'
+            f'background:#eee;border-radius:4px;vertical-align:middle;">'
+            f'      <div style="width:{conf_pct}%;height:100%;background:{conf_color};'
+            f'border-radius:4px;"></div>'
+            f'    </div>'
+            f'  </div>'
+            f'  <div style="font-size:12px;color:#999;margin-bottom:4px;">'
+            f'{self.provider} | {self.latency:.2f}s</div>'
+            f'  <details style="margin-top:8px;">'
+            f'    <summary style="cursor:pointer;font-size:12px;color:#888;">'
+            f'Processing steps ({len(self.processing_steps)})</summary>'
+            f'    <ol style="margin:4px 0;padding-left:20px;">{steps_html}</ol>'
+            f'  </details>'
+            f'</div>'
+        )
+
 
 class OllamaLLM(LLMOracle):
     """LLM Oracle using Ollama's local API."""
