@@ -9,6 +9,7 @@ Provides REST endpoints for:
 - Cognitive analysis (dual-process, emotion, reasoning)
 """
 
+import hashlib
 import logging
 import os
 import sys
@@ -72,6 +73,15 @@ async def add_security_headers(request: Request, call_next):
 # ---- SmartWrapper + API Key ----
 
 _API_KEY = os.environ.get("ELO_AGI_API_KEY")
+
+
+def _check_api_key(raw_request: Request):
+    """Verify API key if one is configured. No-op when ELO_AGI_API_KEY is unset."""
+    if _API_KEY:
+        provided = raw_request.headers.get("X-API-Key")
+        if provided != _API_KEY:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+
 
 try:
     _wrapper = SmartWrapper()
@@ -244,10 +254,7 @@ async def list_modules(request: Request):
 @app.post("/api/repl", response_model=REPLResponse)
 @limiter.limit("10/minute")
 async def repl(request: REPLRequest, raw_request: Request):
-    if _API_KEY:
-        provided_key = raw_request.headers.get("X-API-Key")
-        if provided_key != _API_KEY:
-            raise HTTPException(status_code=401, detail="Invalid API key")
+    _check_api_key(raw_request)
 
     command = request.command.strip()
     if not command:
@@ -269,6 +276,7 @@ async def repl(request: REPLRequest, raw_request: Request):
 @app.post("/api/chat", response_model=ChatResponse)
 @limiter.limit("30/minute")
 async def chat(request: ChatRequest, raw_request: Request):
+    _check_api_key(raw_request)
     message = request.message.strip()
     if not message:
         raise HTTPException(status_code=400, detail="Empty message")
@@ -309,6 +317,7 @@ async def chat(request: ChatRequest, raw_request: Request):
 @app.post("/api/benchmark", response_model=BenchmarkResponse)
 @limiter.limit("10/minute")
 async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
+    _check_api_key(raw_request)
     start = time.time()
 
     if request and request.categories:
@@ -376,6 +385,7 @@ async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
 @app.post("/api/analyze", response_model=AnalyzeResponse)
 @limiter.limit("30/minute")
 async def analyze(request: AnalyzeRequest, raw_request: Request):
+    _check_api_key(raw_request)
     start = time.time()
     text = request.text.strip()
     if not text:
@@ -461,7 +471,7 @@ def _generate_cognitive_response(message: str, history=None) -> str:
 
 def _dual_process_analysis(text: str) -> Dict[str, Any]:
     import random
-    random.seed(hash(text) % 2**32)
+    random.seed(int(hashlib.sha256(text.encode()).hexdigest(), 16) % 2**32)
 
     s1_confidence = round(random.uniform(0.55, 0.85), 2)
     s2_confidence = round(random.uniform(0.70, 0.95), 2)

@@ -23,6 +23,14 @@ BLOCKED_IMPORTS = {
     "ctypes", "multiprocessing", "signal", "resource",
     "os", "pathlib", "importlib", "code", "codeop",
     "pickle", "shelve", "marshal", "tempfile",
+    "webbrowser", "antigravity", "turtle", "tkinter",
+    "gc", "inspect", "ast", "dis", "sys",
+}
+
+BLOCKED_ATTRIBUTES = {
+    "__class__", "__bases__", "__subclasses__", "__globals__",
+    "__code__", "__closure__", "__func__", "__self__",
+    "__dict__", "__module__", "__mro__", "__init_subclass__",
 }
 
 SAFE_BUILTINS = {
@@ -109,6 +117,14 @@ def execute_code(code: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any]:
             "error": "Input too long (max 5000 characters)",
             "execution_time": 0.0,
         }
+
+    for attr in BLOCKED_ATTRIBUTES:
+        if attr in code:
+            return {
+                "output": "",
+                "error": f"Access to '{attr}' is restricted in the sandbox",
+                "execution_time": 0.0,
+            }
 
     start_time = time.time()
     stdout_capture = io.StringIO()
