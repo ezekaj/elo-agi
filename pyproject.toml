@@ -48,8 +48,11 @@ dev = [
     "black>=23.0.0",
     "ruff>=0.1.0",
 ]
+langchain = [
+    "langchain-core>=0.1.0",
+]
 all = [
-    "neuro-agi[llm,viz,dev]",
+    "neuro-agi[llm,viz,dev,langchain]",
 ]
 
 [project.scripts]
