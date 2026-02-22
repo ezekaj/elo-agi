@@ -23,6 +23,9 @@
   <img src="https://img.shields.io/pypi/pyversions/neuro-agi?style=flat-square" alt="Python">
   <img src="https://img.shields.io/github/license/ezekaj/elo-agi?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/modules-38-00d4ff?style=flat-square" alt="Modules">
+  <a href="https://github.com/ezekaj/elo-agi/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/ezekaj/elo-agi/test.yml?branch=main&style=flat-square&label=tests" alt="Tests"></a>
+  <a href="https://github.com/ezekaj/elo-agi/actions/workflows/lint.yml"><img src="https://img.shields.io/github/actions/workflow/status/ezekaj/elo-agi/lint.yml?branch=main&style=flat-square&label=lint" alt="Lint"></a>
+  <a href="https://github.com/ezekaj/elo-agi"><img src="https://img.shields.io/github/stars/ezekaj/elo-agi?style=flat-square" alt="Stars"></a>
 </p>
 
 ---
@@ -212,9 +215,9 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## Community
 
-- [Report a bug](https://github.com/ezekaj/elo-agi/issues)
-- [Request a feature](https://github.com/ezekaj/elo-agi/issues)
-- [Contributing guide](CONTRIBUTING.md)
+- [GitHub Discussions](https://github.com/ezekaj/elo-agi/discussions) — Ask questions, share ideas
+- [Issues](https://github.com/ezekaj/elo-agi/issues) — Report bugs, request features
+- [Contributing](CONTRIBUTING.md) — How to contribute
 
 ## License
 

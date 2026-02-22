@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0B0D17"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1200" y2="630">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  <!-- Logo -->
+  <circle cx="600" cy="240" r="60" stroke="url(#g)" stroke-width="4" fill="none"/>
+  <circle cx="600" cy="224" r="12" fill="url(#g)"/>
+  <path d="M568 264 Q600 284 632 264" stroke="url(#g)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Title -->
+  <text x="600" y="360" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="56" font-weight="800">ELO-AGI</text>
+  <!-- Subtitle -->
+  <text x="600" y="410" text-anchor="middle" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="24">38 Cognitive Modules. One Brain.</text>
+  <!-- Tag -->
+  <text x="600" y="460" text-anchor="middle" fill="#7C3AED" font-family="system-ui, sans-serif" font-size="18">Neuroscience-Inspired AGI Framework</text>
+</svg>
