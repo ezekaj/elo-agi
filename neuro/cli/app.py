@@ -148,6 +148,11 @@ class NeuroApp:
         self._evolution_running = False
         self._evolution_thread = None
 
+        # Feature modes (opt-in via slash commands)
+        self._think_mode = False  # /think — cognitive pipeline
+        self._knowledge_mode = False  # /knowledge — knowledge injection
+        self._evolve_mode = False  # /evolve — self-evolution loop
+
         # Cognitive Pipeline (38+ modules - the brain!)
         self.cognitive_pipeline = None
         if COGNITIVE_PIPELINE_AVAILABLE:
@@ -492,53 +497,34 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
             self.ui.print_error(f"Blocked: {hook_result.get('reason', 'Hook rejected')}")
             return
 
-        # Use NeuroAgent for full PERCEIVE -> THINK -> ACT -> LEARN -> IMPROVE workflow
-        if self.neuro_agent:
+        # NeuroAgent (opt-in via /think mode)
+        if self.neuro_agent and self._think_mode:
             await self._process_with_agent(user_input, ultrathink)
             return
 
-        # Full cognitive processing (skip for short/casual messages)
-        cognitive_context = ""
+        # Cognitive pipeline and knowledge injection (opt-in via /think or /knowledge)
+        augmented_input = user_input
 
-        if self.cognitive_pipeline and len(user_input.split()) > 3:
+        if self._think_mode and self.cognitive_pipeline:
             try:
-                # Process through full cognitive pipeline (38+ modules)
                 result = self.cognitive_pipeline.process(
                     query=user_input, use_deep_thinking=ultrathink
                 )
-
-                # Show cognitive activity
+                if result.content:
+                    augmented_input = f"{user_input}\n\n{result.content}"
                 if result.cognitive_analysis:
                     analysis_type = result.cognitive_analysis.get("type", "general")
                     confidence = result.cognitive_analysis.get("confidence", 0.5)
-                    self.ui.print_dim(
-                        f"Cognitive analysis: {analysis_type} ({confidence:.0%} confidence)"
-                    )
+                    self.ui.print_dim(f"Cognitive: {analysis_type} ({confidence:.0%})")
+            except Exception:
+                pass
 
-                if result.knowledge_used:
-                    self.ui.print_dim(f"Retrieved {len(result.knowledge_used)} knowledge items")
-
-                if result.memory_used:
-                    self.ui.print_dim(f"Found {len(result.memory_used)} relevant memories")
-
-                if result.surprise_level > 0.3:
-                    self.ui.print_dim(f"Novelty detected: {result.surprise_level:.0%}")
-
-                # Build cognitive context for the LLM
-                cognitive_context = result.content
-
-            except Exception as e:
-                if self.verbose:
-                    self.ui.print_dim(f"Cognitive pipeline error: {e}")
-
-        # Only inject knowledge for substantive queries (not greetings/short messages)
-        augmented_input = user_input
-        if len(user_input.split()) > 3:
+        if self._knowledge_mode:
             learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
-            if cognitive_context:
-                augmented_input = f"{user_input}\n\n{cognitive_context}"
             if learned_knowledge:
                 augmented_input = f"{augmented_input}\n\n{learned_knowledge}"
+                fact_count = learned_knowledge.count("\n") - 1
+                self.ui.print_dim(f"Injected {fact_count} knowledge facts")
 
         # Add to session (original input, not augmented)
         self._current_session.add_message("user", user_input)
@@ -599,22 +585,20 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
             # Continue with tool results
             await self._process_input("Continue with the tool results above.")
 
-        # Learn from this conversation silently
-        self._record_learning(user_input, full_response)
-
-        # Also learn through cognitive pipeline if available
-        if self.cognitive_pipeline:
-            try:
-                # Extract main topic from the conversation
-                topic = user_input.split()[0] if user_input.split() else "general"
-                self.cognitive_pipeline.learn(
-                    topic=topic,
-                    content=f"Q: {user_input[:200]} A: {full_response[:500]}",
-                    source="conversation",
-                    importance=0.6,
-                )
-            except Exception:
-                pass
+        # Learn from conversation only when knowledge mode is on
+        if self._knowledge_mode:
+            self._record_learning(user_input, full_response)
+            if self.cognitive_pipeline:
+                try:
+                    topic = user_input.split()[0] if user_input.split() else "general"
+                    self.cognitive_pipeline.learn(
+                        topic=topic,
+                        content=f"Q: {user_input[:200]} A: {full_response[:500]}",
+                        source="conversation",
+                        importance=0.6,
+                    )
+                except Exception:
+                    pass
 
         # Save session
         if not self.no_session_persistence:
@@ -779,7 +763,31 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
         elif cmd == "/hooks":
             self._print_hooks()
 
-        elif cmd == "/learn" or cmd == "/knowledge":
+        elif cmd == "/think":
+            self._think_mode = not self._think_mode
+            state = "ON" if self._think_mode else "OFF"
+            self.ui.print_dim(f"Cognitive pipeline: {state}")
+            if self._think_mode:
+                self.ui.print_dim("  Messages will be processed through 38 cognitive modules")
+
+        elif cmd == "/knowledge":
+            self._knowledge_mode = not self._knowledge_mode
+            state = "ON" if self._knowledge_mode else "OFF"
+            fact_count = len(self.self_trainer.facts) if hasattr(self.self_trainer, "facts") else 0
+            self.ui.print_dim(f"Knowledge injection: {state} ({fact_count} facts available)")
+
+        elif cmd == "/evolve":
+            if self._evolution_running:
+                self.ui.print_dim("Evolution already running")
+            else:
+                self._start_evolution_thread()
+                self.ui.print_dim("Self-evolution started (benchmarks, learning, training)")
+
+        elif cmd == "/bench":
+            self.ui.print_dim("Running benchmarks...")
+            self._run_benchmark_and_report("MANUAL")
+
+        elif cmd == "/learn":
             await self._print_learning_stats()
 
         elif cmd == "/evolution":
@@ -1188,23 +1196,22 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         """Print help message."""
         commands = [
             ("/help", "Show this help"),
-            ("/status", "System status"),
-            ("/learn", "View learning & knowledge stats"),
-            ("/evolution", "Self-evolution stats (cycles, training, improvement)"),
+            ("/think", "Toggle cognitive pipeline (38 modules)"),
+            ("/knowledge", "Toggle knowledge injection"),
+            ("/evolve", "Start self-evolution loop"),
+            ("/bench", "Run benchmarks"),
             ("/ultrathink", "Deep reasoning mode (max tokens)"),
+            ("/learn", "View learning & knowledge stats"),
+            ("/evolution", "Self-evolution stats"),
             ("/model [name]", "View/switch model"),
             ("/tools", "List available tools"),
             ("/skills", "List available skills"),
             ("/agents", "List available agents"),
-            ("/mcp [cmd]", "MCP server management"),
-            ("/hooks", "View configured hooks"),
-            ("/ide [cmd]", "IDE integration"),
+            ("/status", "System status"),
             ("/compact", "Compress context"),
             ("/cost", "Token usage"),
-            ("/context", "Context usage bar"),
-            ("/permissions", "View permissions"),
             ("/clear", "Clear conversation"),
-            ("/exit", "Exit NEURO"),
+            ("/exit", "Exit"),
         ]
 
         self.ui.print_help(commands, title="Commands")

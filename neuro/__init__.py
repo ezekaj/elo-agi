@@ -22,7 +22,7 @@ try:
 
     __version__ = _pkg_version("elo-agi")
 except Exception:
-    __version__ = "0.9.4"
+    __version__ = "0.9.5"
 __author__ = "Elvi Zekaj"
 
 # Lazy imports to avoid loading everything at startup
