@@ -10,17 +10,15 @@ Key 2025 finding: Broca's area selectively inhibits impossible
 
 import numpy as np
 import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
+
+sys.path.insert(0, str(__file__).rsplit("/", 2)[0])
 
 from src.grammar_manifold import (
     GrammarConstraintManifold,
     UniversalGrammar,
-    ImpossibleGrammarGenerator
+    ImpossibleGrammarGenerator,
 )
-from src.predictive_language import (
-    PredictiveLanguageProcessor,
-    LanguageAcquisitionSimulator
-)
+from src.predictive_language import PredictiveLanguageProcessor, LanguageAcquisitionSimulator
 
 
 def demo_grammar_constraints():
@@ -61,17 +59,21 @@ def demo_possible_vs_impossible():
         params = gen.generate_possible()
         state = manifold.evaluate(params)
         inhibition = manifold.inhibition_signal(params)
-        print(f"  Grammar {i+1}: violation={state.violation_score:.3f}, "
-              f"possible={state.is_possible}, inhibition={inhibition:.3f}")
+        print(
+            f"  Grammar {i + 1}: violation={state.violation_score:.3f}, "
+            f"possible={state.is_possible}, inhibition={inhibition:.3f}"
+        )
 
     # Impossible grammars
     print("\nImpossible grammars (violate UG constraints):")
-    for violation_type in ['random', 'structure', 'unbounded']:
+    for violation_type in ["random", "structure", "unbounded"]:
         params = gen.generate_impossible(violation_type)
         state = manifold.evaluate(params)
         inhibition = manifold.inhibition_signal(params)
-        print(f"  {violation_type}: violation={state.violation_score:.3f}, "
-              f"possible={state.is_possible}, inhibition={inhibition:.3f}")
+        print(
+            f"  {violation_type}: violation={state.violation_score:.3f}, "
+            f"possible={state.is_possible}, inhibition={inhibition:.3f}"
+        )
 
 
 def demo_universal_grammar():
@@ -96,7 +98,7 @@ def demo_universal_grammar():
         params = np.random.randn(32) * 0.5
         results = ug.evaluate(params)
         compatible = ug.is_ug_compatible(params)
-        print(f"\n  Grammar {i+1}: UG-compatible={compatible}")
+        print(f"\n  Grammar {i + 1}: UG-compatible={compatible}")
         print(f"    Overall score: {results['overall']:.3f}")
         for principle in ug.principles:
             print(f"    {principle}: {results[principle]:.3f}")
@@ -174,12 +176,16 @@ def demo_acquisition_simulation():
 
     print("\n--- Comparison ---")
     comparison = simulator.compare_possible_vs_impossible(possible_samples, impossible_samples)
-    print(f"  Possible grammar - final inhibition: {comparison['possible']['final_inhibition']:.3f}")
-    print(f"  Impossible grammar - final inhibition: {comparison['impossible']['final_inhibition']:.3f}")
+    print(
+        f"  Possible grammar - final inhibition: {comparison['possible']['final_inhibition']:.3f}"
+    )
+    print(
+        f"  Impossible grammar - final inhibition: {comparison['impossible']['final_inhibition']:.3f}"
+    )
     print(f"  Selective inhibition: {comparison['selective_inhibition']:.3f}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_grammar_constraints()
     demo_possible_vs_impossible()
     demo_universal_grammar()

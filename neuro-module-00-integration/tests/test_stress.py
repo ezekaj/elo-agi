@@ -27,9 +27,13 @@ from neuro.modules.m00_integration.global_workspace import (
     WorkspaceParams,
     WorkspaceMode,
 )
-from neuro.modules.m00_integration.attention_competition import AttentionCompetition, CompetitionParams
+from neuro.modules.m00_integration.attention_competition import (
+    AttentionCompetition,
+    CompetitionParams,
+)
 from neuro.modules.m00_integration.broadcast_system import BroadcastSystem, BroadcastParams
 from neuro.modules.m00_integration.ignition import IgnitionDetector, IgnitionParams, IgnitionState
+
 
 class StressModule(DummyModule):
     """Module that generates many proposals for stress testing."""
@@ -63,6 +67,7 @@ class StressModule(DummyModule):
         super().receive_broadcast(proposal)
         self.broadcast_count += 1
 
+
 class TestHighVolume:
     """Tests with high volume of proposals and modules."""
 
@@ -73,7 +78,11 @@ class TestHighVolume:
         # Register all 16 module types
         module_types = list(ModuleType)
         for mod_type in module_types:
-            if mod_type not in [ModuleType.INTEGRATION, ModuleType.WORLD_MODEL, ModuleType.SELF_IMPROVEMENT]:
+            if mod_type not in [
+                ModuleType.INTEGRATION,
+                ModuleType.WORLD_MODEL,
+                ModuleType.SELF_IMPROVEMENT,
+            ]:
                 module = DummyModule(module_type=mod_type, name=mod_type.name)
                 workspace.register_module(module)
 
@@ -82,8 +91,8 @@ class TestHighVolume:
             winners, broadcast = workspace.run_cycle(np.random.randn(64))
 
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 50
-        assert stats['module_count'] >= 10
+        assert stats["step_count"] == 50
+        assert stats["module_count"] >= 10
 
     def test_high_proposal_volume(self):
         """Test with modules generating many proposals each."""
@@ -101,7 +110,7 @@ class TestHighVolume:
             assert len(workspace._buffer) <= workspace.params.buffer_capacity
 
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 100
+        assert stats["step_count"] == 100
 
     def test_rapid_fire_cycles(self):
         """Test rapid consecutive cycles."""
@@ -117,6 +126,7 @@ class TestHighVolume:
         # Should complete 1000 cycles in reasonable time
         assert elapsed < 10.0  # Less than 10 seconds
         assert workspace.get_state().step_count == 1000
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -205,6 +215,7 @@ class TestEdgeCases:
             winners, broadcast = workspace.run_cycle(np.random.randn(size))
             assert isinstance(winners, list)
 
+
 class TestIgnitionDynamics:
     """Tests for ignition behavior under various conditions."""
 
@@ -222,7 +233,10 @@ class TestIgnitionDynamics:
 
         # Should have ignited at some point
         ignited_any = any(r.ignited for r in results)
-        assert ignited_any or detector.get_state() in [IgnitionState.THRESHOLD, IgnitionState.IGNITED]
+        assert ignited_any or detector.get_state() in [
+            IgnitionState.THRESHOLD,
+            IgnitionState.IGNITED,
+        ]
 
     def test_ignition_hysteresis(self):
         """Test that hysteresis prevents oscillation."""
@@ -243,7 +257,11 @@ class TestIgnitionDynamics:
         # Or if still at threshold, that's acceptable
         # The point is the hysteresis should provide some buffer
         if state_before in [IgnitionState.IGNITED, IgnitionState.SUSTAINED]:
-            assert result.state in [IgnitionState.FADING, IgnitionState.SUSTAINED, IgnitionState.IGNITED]
+            assert result.state in [
+                IgnitionState.FADING,
+                IgnitionState.SUSTAINED,
+                IgnitionState.IGNITED,
+            ]
         else:
             # If never reached ignition, test hysteresis at threshold level
             assert True  # Pass - ignition dynamics depend on timing
@@ -266,7 +284,12 @@ class TestIgnitionDynamics:
         result = detector.detect(activation=0.9, buffer=[])
 
         # Should be fading
-        assert result.state in [IgnitionState.FADING, IgnitionState.SUSTAINED, IgnitionState.IGNITED]
+        assert result.state in [
+            IgnitionState.FADING,
+            IgnitionState.SUSTAINED,
+            IgnitionState.IGNITED,
+        ]
+
 
 class TestCompetitionDynamics:
     """Tests for attention competition edge cases."""
@@ -323,10 +346,12 @@ class TestCompetitionDynamics:
 
     def test_lateral_inhibition_effect(self):
         """Test that lateral inhibition affects similar proposals."""
-        competition = AttentionCompetition(CompetitionParams(
-            inhibition_strength=0.5,
-            recurrent_iterations=5,
-        ))
+        competition = AttentionCompetition(
+            CompetitionParams(
+                inhibition_strength=0.5,
+                recurrent_iterations=5,
+            )
+        )
 
         # Create two very similar proposals
         base_content = np.ones(64)
@@ -352,6 +377,7 @@ class TestCompetitionDynamics:
         # Stronger one should inhibit weaker
         assert len(result.winners) >= 1
 
+
 class TestMemoryAndStability:
     """Tests for memory usage and numerical stability."""
 
@@ -359,10 +385,7 @@ class TestMemoryAndStability:
         """Test numerical stability over many cycles."""
         workspace = GlobalWorkspace()
         for i in range(5):
-            module = DummyModule(
-                module_type=list(ModuleType)[i % 16],
-                name=f"LongRun{i}"
-            )
+            module = DummyModule(module_type=list(ModuleType)[i % 16], name=f"LongRun{i}")
             workspace.register_module(module)
 
         # Run many cycles
@@ -376,7 +399,7 @@ class TestMemoryAndStability:
             assert not np.any(np.isinf(state.buffer[0].content)) if state.buffer else True
 
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 500
+        assert stats["step_count"] == 500
 
     def test_buffer_memory_bounded(self):
         """Test that buffer doesn't grow unbounded."""
@@ -416,6 +439,7 @@ class TestMemoryAndStability:
         assert len(detector._history) <= 100
         assert len(broadcast._history) <= 50
 
+
 class TestConcurrentAccess:
     """Tests for behavior under rapid state changes."""
 
@@ -433,7 +457,7 @@ class TestConcurrentAccess:
 
         # Should still be functioning
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 100
+        assert stats["step_count"] == 100
 
     def test_module_activation_toggling(self):
         """Test rapidly enabling/disabling modules."""
@@ -441,10 +465,7 @@ class TestConcurrentAccess:
         modules = []
 
         for i in range(5):
-            module = DummyModule(
-                module_type=list(ModuleType)[i],
-                name=f"Toggle{i}"
-            )
+            module = DummyModule(module_type=list(ModuleType)[i], name=f"Toggle{i}")
             workspace.register_module(module)
             modules.append(module)
 
@@ -456,7 +477,7 @@ class TestConcurrentAccess:
             workspace.run_cycle(np.random.randn(64))
 
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 100
+        assert stats["step_count"] == 100
 
     def test_reset_during_operation(self):
         """Test resetting workspace at various points."""
@@ -470,6 +491,7 @@ class TestConcurrentAccess:
                 workspace.reset()
                 # Should work after reset
                 workspace.run_cycle(np.random.randn(64))
+
 
 class TestBroadcastSystem:
     """Additional broadcast system tests."""
@@ -488,10 +510,7 @@ class TestBroadcastSystem:
             relevance=0.7,
         )
 
-        event = system.broadcast(
-            proposal,
-            [ModuleType.MEMORY, ModuleType.LANGUAGE]
-        )
+        event = system.broadcast(proposal, [ModuleType.MEMORY, ModuleType.LANGUAGE])
 
         # MEMORY should be filtered out for EMOTION content
         assert ModuleType.MEMORY not in event.recipients
@@ -513,21 +532,24 @@ class TestBroadcastSystem:
 
         # First broadcast should work
         event1 = system.broadcast(proposal, [ModuleType.EMOTION])
-        assert 'skipped' not in event1.metadata
+        assert "skipped" not in event1.metadata
 
         # Immediate second broadcast should be rate limited
         event2 = system.broadcast(proposal, [ModuleType.EMOTION])
-        assert event2.metadata.get('skipped') == True
+        assert event2.metadata.get("skipped") == True
+
 
 class TestFullIntegration:
     """Full system integration tests."""
 
     def test_complete_cognitive_cycle(self):
         """Test a complete cognitive processing cycle."""
-        workspace = GlobalWorkspace(WorkspaceParams(
-            buffer_capacity=5,
-            ignition_threshold=0.6,
-        ))
+        workspace = GlobalWorkspace(
+            WorkspaceParams(
+                buffer_capacity=5,
+                ignition_threshold=0.6,
+            )
+        )
 
         # Register diverse modules
         module_configs = [
@@ -558,8 +580,8 @@ class TestFullIntegration:
             winners, broadcast = workspace.run_cycle(input_state)
 
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 100
-        assert stats['module_count'] == 5
+        assert stats["step_count"] == 100
+        assert stats["module_count"] == 5
 
         # All modules should have received some broadcasts
         total_broadcasts = sum(broadcast_counts.values())
@@ -585,5 +607,6 @@ class TestFullIntegration:
         # Winners should exist
         assert len(winners) >= 1
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--tb=short'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

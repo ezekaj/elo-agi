@@ -13,16 +13,18 @@ import numpy as np
 
 class PruningStrategy(Enum):
     """Pruning strategies."""
-    MAGNITUDE = "magnitude"          # Prune smallest weights
-    RANDOM = "random"                # Random pruning
-    STRUCTURED = "structured"        # Prune entire structures
-    GRADIENT = "gradient"            # Gradient-based importance
-    SENSITIVITY = "sensitivity"      # Layer sensitivity
+
+    MAGNITUDE = "magnitude"  # Prune smallest weights
+    RANDOM = "random"  # Random pruning
+    STRUCTURED = "structured"  # Prune entire structures
+    GRADIENT = "gradient"  # Gradient-based importance
+    SENSITIVITY = "sensitivity"  # Layer sensitivity
 
 
 @dataclass
 class PruningResult:
     """Result of pruning operation."""
+
     original_params: int
     pruned_params: int
     sparsity: float
@@ -33,6 +35,7 @@ class PruningResult:
 @dataclass
 class PruningConfig:
     """Configuration for pruning."""
+
     target_sparsity: float = 0.5
     strategy: PruningStrategy = PruningStrategy.MAGNITUDE
     granularity: str = "unstructured"  # unstructured, structured, channel
@@ -262,10 +265,7 @@ class NetworkPruner:
             layer_sparsity_results[name] = 1.0 - np.mean(mask)
 
         # Compute overall stats
-        pruned_params = sum(
-            np.sum(self._masks[name].mask)
-            for name in weights
-        )
+        pruned_params = sum(np.sum(self._masks[name].mask) for name in weights)
         overall_sparsity = 1.0 - pruned_params / original_params
 
         result = PruningResult(
@@ -336,8 +336,5 @@ class NetworkPruner:
             "strategy": self.config.strategy.value,
             "target_sparsity": self.config.target_sparsity,
             "n_layers_masked": len(self._masks),
-            "layer_sparsities": {
-                name: mask.sparsity
-                for name, mask in self._masks.items()
-            },
+            "layer_sparsities": {name: mask.sparsity for name, mask in self._masks.items()},
         }

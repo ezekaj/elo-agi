@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class GroundingParams:
     """Parameters for concept grounding"""
+
     n_features: int = 50
     n_modalities: int = 5  # visual, auditory, motor, tactile, proprioceptive
     similarity_threshold: float = 0.5
@@ -93,7 +94,7 @@ class GroundedConcept:
             "auditory": np.zeros(features_per),
             "motor": np.zeros(features_per),
             "tactile": np.zeros(features_per),
-            "proprioceptive": np.zeros(features_per)
+            "proprioceptive": np.zeros(features_per),
         }
 
         # Activation level
@@ -111,10 +112,7 @@ class GroundedConcept:
 
         # Update modal representation
         if modality in self.modal_features:
-            self.modal_features[modality] = (
-                0.7 * self.modal_features[modality] +
-                0.3 * experience
-            )
+            self.modal_features[modality] = 0.7 * self.modal_features[modality] + 0.3 * experience
 
         self.experiences.append(experience.copy())
 
@@ -124,7 +122,7 @@ class GroundedConcept:
     def _update_abstract_features(self):
         """Update abstract features from modal representations"""
         all_modal = np.concatenate(list(self.modal_features.values()))
-        self.features = all_modal[:self.params.n_features]
+        self.features = all_modal[: self.params.n_features]
 
     def activate(self, strength: float = 1.0):
         """Activate concept"""
@@ -140,9 +138,9 @@ class GroundedConcept:
 
     def decay(self, dt: float = 1.0):
         """Decay activation"""
-        self.activation *= (1 - self.params.activation_decay * dt)
+        self.activation *= 1 - self.params.activation_decay * dt
 
-    def get_similarity(self, other: 'GroundedConcept') -> float:
+    def get_similarity(self, other: "GroundedConcept") -> float:
         """Compute similarity to another concept"""
         return np.dot(self.features, other.features) / (
             np.linalg.norm(self.features) * np.linalg.norm(other.features) + 1e-8
@@ -158,8 +156,7 @@ class ConceptGrounding:
         # Concept storage
         self.concepts: Dict[str, GroundedConcept] = {}
         self.bindings = ModalityBindings(
-            self.params.n_modalities,
-            self.params.n_features // self.params.n_modalities
+            self.params.n_modalities, self.params.n_features // self.params.n_modalities
         )
 
         # Current simulation state
@@ -218,8 +215,7 @@ class ConceptGrounding:
 
         # Remove inactive concepts from active list
         self.active_concepts = [
-            name for name in self.active_concepts
-            if self.concepts[name].activation > 0.1
+            name for name in self.active_concepts if self.concepts[name].activation > 0.1
         ]
 
     def get_concept_features(self, name: str) -> Optional[np.ndarray]:

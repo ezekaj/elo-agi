@@ -12,6 +12,7 @@ from neuro.modules.planning.goal_hierarchy import (
     CompletionFunction,
 )
 
+
 class TestGoal:
     """Tests for Goal class."""
 
@@ -41,6 +42,7 @@ class TestGoal:
     def test_goal_with_deadline(self):
         goal = Goal(name="deadline_goal", deadline=100.0)
         assert goal.deadline == 100.0
+
 
 class TestGoalNode:
     """Tests for GoalNode class."""
@@ -99,6 +101,7 @@ class TestGoalNode:
 
         descendants = root.get_descendants()
         assert len(descendants) == 3
+
 
 class TestGoalTree:
     """Tests for GoalTree class."""
@@ -163,6 +166,7 @@ class TestGoalTree:
         assert stats["total_nodes"] == 2
         assert stats["primitive_goals"] == 1
 
+
 class TestCompletionFunction:
     """Tests for CompletionFunction class."""
 
@@ -173,6 +177,7 @@ class TestCompletionFunction:
         )
         assert cf.evaluate(5) == pytest.approx(0.5)
         assert cf.evaluate(10) == pytest.approx(1.0)
+
 
 class TestMAXQDecomposition:
     """Tests for MAXQDecomposition class."""
@@ -238,10 +243,13 @@ class TestMAXQDecomposition:
     def test_get_hierarchical_policy(self):
         decomp = MAXQDecomposition(random_seed=42)
         root_goal = Goal(name="root")
-        decomp.decompose(root_goal, {
-            "root": ["level1"],
-            "level1": ["action"],
-        })
+        decomp.decompose(
+            root_goal,
+            {
+                "root": ["level1"],
+                "level1": ["action"],
+            },
+        )
 
         policy = decomp.get_hierarchical_policy({})
         assert len(policy) == 2
@@ -265,6 +273,7 @@ class TestMAXQDecomposition:
         stats = decomp.statistics()
         assert stats["total_decompositions"] == 1
         assert stats["tree_nodes"] == 2
+
 
 class TestMAXQValueDecomposition:
     """Tests for MAXQ value function decomposition."""
@@ -297,9 +306,12 @@ class TestMAXQValueDecomposition:
     def test_causal_path_reasoning(self):
         decomp = MAXQDecomposition(random_seed=42)
         root_goal = Goal(name="navigate")
-        decomp.decompose(root_goal, {
-            "navigate": ["get_passenger", "go_to_dest", "put_passenger"],
-        })
+        decomp.decompose(
+            root_goal,
+            {
+                "navigate": ["get_passenger", "go_to_dest", "put_passenger"],
+            },
+        )
 
         tree = decomp.get_goal_tree()
         assert tree.get_node("get_passenger") is not None

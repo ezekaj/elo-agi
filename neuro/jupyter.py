@@ -14,6 +14,7 @@ Usage:
 try:
     from IPython.core.magic import Magics, magics_class, line_magic, cell_magic
     from IPython.display import display, HTML
+
     HAS_IPYTHON = True
 except ImportError:
     HAS_IPYTHON = False
@@ -126,6 +127,7 @@ def _info_html() -> str:
 
 
 if HAS_IPYTHON:
+
     @magics_class
     class NeuroMagic(Magics):
         """IPython magics for NEURO cognitive architecture."""
@@ -137,6 +139,7 @@ if HAS_IPYTHON:
         def _get_brain(self):
             if self._brain is None:
                 from neuro.brain import Brain
+
                 self._brain = Brain()
             return self._brain
 
@@ -152,13 +155,15 @@ if HAS_IPYTHON:
             """
             line = line.strip()
             if not line:
-                display(HTML(
-                    "<div style='font-family:system-ui,sans-serif;color:#888;'>"
-                    "Usage: <code>%neuro think &lt;query&gt;</code> | "
-                    "<code>%neuro modules</code> | "
-                    "<code>%neuro info</code> | "
-                    "<code>%neuro benchmark</code></div>"
-                ))
+                display(
+                    HTML(
+                        "<div style='font-family:system-ui,sans-serif;color:#888;'>"
+                        "Usage: <code>%neuro think &lt;query&gt;</code> | "
+                        "<code>%neuro modules</code> | "
+                        "<code>%neuro info</code> | "
+                        "<code>%neuro benchmark</code></div>"
+                    )
+                )
                 return
 
             parts = line.split(None, 1)
@@ -167,10 +172,12 @@ if HAS_IPYTHON:
 
             if cmd == "think":
                 if not args:
-                    display(HTML(
-                        "<div style='color:#c62828;'>Provide a query: "
-                        "<code>%neuro think What is consciousness?</code></div>"
-                    ))
+                    display(
+                        HTML(
+                            "<div style='color:#c62828;'>Provide a query: "
+                            "<code>%neuro think What is consciousness?</code></div>"
+                        )
+                    )
                     return
                 brain = self._get_brain()
                 result = brain.think(args)
@@ -183,29 +190,32 @@ if HAS_IPYTHON:
                 display(HTML(_info_html()))
 
             elif cmd == "benchmark":
-                display(HTML(
-                    "<div style='font-family:system-ui,sans-serif;color:#888;'>"
-                    "Running benchmarks...</div>"
-                ))
+                display(
+                    HTML(
+                        "<div style='font-family:system-ui,sans-serif;color:#888;'>"
+                        "Running benchmarks...</div>"
+                    )
+                )
                 try:
                     from neuro.wrapper import smart_query
+
                     result = smart_query(
                         "Run a quick self-assessment: rate your reasoning, "
                         "memory, and planning capabilities on a 0-10 scale."
                     )
                     display(HTML(result._repr_html_()))
                 except Exception as e:
-                    display(HTML(
-                        f"<div style='color:#c62828;'>Benchmark error: {e}</div>"
-                    ))
+                    display(HTML(f"<div style='color:#c62828;'>Benchmark error: {e}</div>"))
 
             else:
-                display(HTML(
-                    f"<div style='color:#c62828;'>Unknown subcommand: "
-                    f"<code>{cmd}</code>. "
-                    f"Try <code>think</code>, <code>modules</code>, "
-                    f"<code>info</code>, or <code>benchmark</code>.</div>"
-                ))
+                display(
+                    HTML(
+                        f"<div style='color:#c62828;'>Unknown subcommand: "
+                        f"<code>{cmd}</code>. "
+                        f"Try <code>think</code>, <code>modules</code>, "
+                        f"<code>info</code>, or <code>benchmark</code>.</div>"
+                    )
+                )
 
         @cell_magic
         def neuro(self, line: str, cell: str) -> None:
@@ -218,10 +228,12 @@ if HAS_IPYTHON:
             """
             query = cell.strip()
             if not query:
-                display(HTML(
-                    "<div style='color:#c62828;'>Cell body is empty. "
-                    "Write your query in the cell.</div>"
-                ))
+                display(
+                    HTML(
+                        "<div style='color:#c62828;'>Cell body is empty. "
+                        "Write your query in the cell.</div>"
+                    )
+                )
                 return
             brain = self._get_brain()
             result = brain.think(query)

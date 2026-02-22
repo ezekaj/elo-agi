@@ -12,15 +12,17 @@ import numpy as np
 
 class SkillType(Enum):
     """Types of skills."""
-    PRIMITIVE = "primitive"    # Basic atomic skills
-    COMPOSITE = "composite"    # Composed from other skills
-    LEARNED = "learned"        # Learned from experience
-    ADAPTED = "adapted"        # Adapted from another domain
+
+    PRIMITIVE = "primitive"  # Basic atomic skills
+    COMPOSITE = "composite"  # Composed from other skills
+    LEARNED = "learned"  # Learned from experience
+    ADAPTED = "adapted"  # Adapted from another domain
 
 
 @dataclass
 class SkillPrimitive:
     """A basic skill primitive."""
+
     id: str
     name: str
     parameters: Dict[str, Any]
@@ -32,6 +34,7 @@ class SkillPrimitive:
 @dataclass
 class Skill:
     """A skill that can be executed."""
+
     id: str
     name: str
     skill_type: SkillType
@@ -47,16 +50,22 @@ class Skill:
 @dataclass
 class CompositeSkill:
     """A skill composed of other skills."""
+
     id: str
     name: str
     components: List[str]  # Skill IDs in execution order
-    parallel_groups: List[List[str]] = field(default_factory=list)  # Groups that can run in parallel
-    conditional_branches: Dict[str, List[str]] = field(default_factory=dict)  # condition -> skill sequence
+    parallel_groups: List[List[str]] = field(
+        default_factory=list
+    )  # Groups that can run in parallel
+    conditional_branches: Dict[str, List[str]] = field(
+        default_factory=dict
+    )  # condition -> skill sequence
 
 
 @dataclass
 class SkillExecution:
     """Result of executing a skill."""
+
     skill_id: str
     success: bool
     result: Any
@@ -314,6 +323,7 @@ class SkillLibrary:
             SkillExecution result
         """
         import time
+
         start_time = time.time()
 
         errors = []
@@ -377,9 +387,8 @@ class SkillLibrary:
             # Update skill statistics
             skill.execution_count += 1
             skill.success_rate = (
-                (skill.success_rate * (skill.execution_count - 1) + (1 if success else 0))
-                / skill.execution_count
-            )
+                skill.success_rate * (skill.execution_count - 1) + (1 if success else 0)
+            ) / skill.execution_count
 
         else:
             errors.append(f"Unknown skill: {skill_id}")

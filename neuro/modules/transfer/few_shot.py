@@ -13,8 +13,9 @@ import numpy as np
 @dataclass
 class SupportSet:
     """Support set for few-shot learning."""
+
     examples: List[np.ndarray]  # Feature vectors
-    labels: List[str]           # Class labels
+    labels: List[str]  # Class labels
     embeddings: Optional[np.ndarray] = None  # Computed embeddings
 
     @property
@@ -33,6 +34,7 @@ class SupportSet:
 @dataclass
 class QueryResult:
     """Result of a few-shot query."""
+
     query: np.ndarray
     predicted_label: str
     confidence: float
@@ -75,7 +77,7 @@ class EmbeddingNetwork:
             if len(x) < self.input_dim:
                 x = np.pad(x, (0, self.input_dim - len(x)))
             else:
-                x = x[:self.input_dim]
+                x = x[: self.input_dim]
 
         h = x
         for i, (w, b) in enumerate(zip(self._weights, self._biases)):

@@ -3,16 +3,14 @@
 import pytest
 from neuro.modules.m02_dual_process.logic_network import LogicNetwork, Proposition, PropositionType
 
+
 class TestRelationalProcessing:
     """Tests for relational information handling"""
 
     def test_represent_relation(self):
         ln = LogicNetwork()
 
-        rel = ln.represent_relation(
-            ["Socrates", "mortal"],
-            "is_a"
-        )
+        rel = ln.represent_relation(["Socrates", "mortal"], "is_a")
 
         assert rel.name == "is_a"
         assert rel.arity == 2
@@ -30,6 +28,7 @@ class TestRelationalProcessing:
 
         assert len(results) == 2
 
+
 class TestConstraintComputation:
     """Tests for constraint-based reasoning"""
 
@@ -42,7 +41,7 @@ class TestConstraintComputation:
             "not_Q",
             PropositionType.NEGATION,
             "Q is false",
-            components=[Proposition("Q", PropositionType.ATOMIC, "Q")]
+            components=[Proposition("Q", PropositionType.ATOMIC, "Q")],
         )
 
         constraints = ln.compute_constraints([p, not_q])
@@ -70,12 +69,13 @@ class TestConstraintComputation:
             "not_P",
             PropositionType.NEGATION,
             "not P",
-            components=[Proposition("P", PropositionType.ATOMIC, "P")]
+            components=[Proposition("P", PropositionType.ATOMIC, "P")],
         )
 
         consistent, contradictions = ln.check_consistency([p, not_p])
         assert not consistent
         assert len(contradictions) > 0
+
 
 class TestInferenceRules:
     """Tests for logical inference"""
@@ -88,10 +88,7 @@ class TestInferenceRules:
         p = Proposition("P", PropositionType.ATOMIC, "it is raining")
         q = Proposition("Q", PropositionType.ATOMIC, "ground is wet")
         if_p_then_q = Proposition(
-            "impl_P_Q",
-            PropositionType.IMPLICATION,
-            "if raining then wet",
-            components=[p, q]
+            "impl_P_Q", PropositionType.IMPLICATION, "if raining then wet", components=[p, q]
         )
 
         inferences = ln.derive_inferences([if_p_then_q, p])
@@ -107,17 +104,9 @@ class TestInferenceRules:
         p = Proposition("P", PropositionType.ATOMIC, "it is raining")
         q = Proposition("Q", PropositionType.ATOMIC, "ground is wet")
         if_p_then_q = Proposition(
-            "impl_P_Q",
-            PropositionType.IMPLICATION,
-            "if raining then wet",
-            components=[p, q]
+            "impl_P_Q", PropositionType.IMPLICATION, "if raining then wet", components=[p, q]
         )
-        not_q = Proposition(
-            "not_Q",
-            PropositionType.NEGATION,
-            "ground is not wet",
-            components=[q]
-        )
+        not_q = Proposition("not_Q", PropositionType.NEGATION, "ground is not wet", components=[q])
 
         inferences = ln.derive_inferences([if_p_then_q, not_q])
 
@@ -134,25 +123,16 @@ class TestInferenceRules:
         r = Proposition("R", PropositionType.ATOMIC, "R")
 
         p_implies_q = Proposition(
-            "impl_P_Q",
-            PropositionType.IMPLICATION,
-            "P implies Q",
-            components=[p, q]
+            "impl_P_Q", PropositionType.IMPLICATION, "P implies Q", components=[p, q]
         )
         q_implies_r = Proposition(
-            "impl_Q_R",
-            PropositionType.IMPLICATION,
-            "Q implies R",
-            components=[q, r]
+            "impl_Q_R", PropositionType.IMPLICATION, "Q implies R", components=[q, r]
         )
 
         inferences = ln.derive_inferences([p_implies_q, q_implies_r])
 
         # Should derive P implies R
-        p_implies_r = any(
-            inf.rule_applied == "hypothetical_syllogism"
-            for inf in inferences
-        )
+        p_implies_r = any(inf.rule_applied == "hypothetical_syllogism" for inf in inferences)
         assert p_implies_r
 
     def test_disjunctive_syllogism(self):
@@ -162,24 +142,15 @@ class TestInferenceRules:
         p = Proposition("P", PropositionType.ATOMIC, "P")
         q = Proposition("Q", PropositionType.ATOMIC, "Q")
 
-        p_or_q = Proposition(
-            "disj_P_Q",
-            PropositionType.DISJUNCTION,
-            "P or Q",
-            components=[p, q]
-        )
-        not_p = Proposition(
-            "not_P",
-            PropositionType.NEGATION,
-            "not P",
-            components=[p]
-        )
+        p_or_q = Proposition("disj_P_Q", PropositionType.DISJUNCTION, "P or Q", components=[p, q])
+        not_p = Proposition("not_P", PropositionType.NEGATION, "not P", components=[p])
 
         inferences = ln.derive_inferences([p_or_q, not_p])
 
         # Should derive Q
         q_derived = any(inf.conclusion.id == "Q" for inf in inferences)
         assert q_derived
+
 
 class TestStructureUpdating:
     """Tests for mental model revision"""
@@ -198,8 +169,7 @@ class TestStructureUpdating:
         ln = LogicNetwork()
 
         # Set up implication: A -> B
-        ln.represent_relation(["A", "B"], "implies",
-                              properties={"type": "implication"})
+        ln.represent_relation(["A", "B"], "implies", properties={"type": "implication"})
 
         model = {"A": False, "B": None}
 
@@ -208,6 +178,7 @@ class TestStructureUpdating:
 
         assert updated["A"] is True
         assert updated["B"] is True  # Propagated
+
 
 class TestValidityChecking:
     """Tests for argument validity"""
@@ -219,10 +190,7 @@ class TestValidityChecking:
         p = Proposition("P", PropositionType.ATOMIC, "Socrates is a man")
         q = Proposition("Q", PropositionType.ATOMIC, "Socrates is mortal")
         if_p_then_q = Proposition(
-            "impl",
-            PropositionType.IMPLICATION,
-            "if man then mortal",
-            components=[p, q]
+            "impl", PropositionType.IMPLICATION, "if man then mortal", components=[p, q]
         )
 
         valid, reason = ln.is_valid_argument([if_p_then_q, p], q)
@@ -238,6 +206,7 @@ class TestValidityChecking:
         valid, reason = ln.is_valid_argument([p], q)
         assert not valid
 
+
 class TestSyllogism:
     """Classic syllogism tests"""
 
@@ -251,16 +220,14 @@ class TestSyllogism:
         x_is_a = Proposition("X_A", PropositionType.ATOMIC, "Socrates is man")
 
         all_a_are_b = Proposition(
-            "all_A_B",
-            PropositionType.IMPLICATION,
-            "all men are mortal",
-            components=[a, b]
+            "all_A_B", PropositionType.IMPLICATION, "all men are mortal", components=[a, b]
         )
 
         # The syllogism should derive that X is B
         valid, _ = ln.is_valid_argument([all_a_are_b, x_is_a], b)
         # Note: Full syllogism requires more sophisticated premise matching
         # This test verifies the basic inference mechanism
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -21,9 +21,9 @@ from agent import IntegratedAGIAgent, AgentConfig
 
 def demo_medical_diagnosis():
     """Demonstrate medical reasoning scenario."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCENARIO 1: Medical Diagnosis Reasoning")
-    print("="*60)
+    print("=" * 60)
 
     agent = IntegratedAGIAgent(AgentConfig(random_seed=42))
 
@@ -31,20 +31,22 @@ def demo_medical_diagnosis():
     print("\n1. Learning medical concepts...")
 
     # Symptoms
-    fever_examples = [np.random.randn(256) + np.array([1.0] + [0]*255) for _ in range(5)]
+    fever_examples = [np.random.randn(256) + np.array([1.0] + [0] * 255) for _ in range(5)]
     agent.learn_concept("fever", fever_examples, category="semantic")
 
-    cough_examples = [np.random.randn(256) + np.array([0, 1.0] + [0]*254) for _ in range(5)]
+    cough_examples = [np.random.randn(256) + np.array([0, 1.0] + [0] * 254) for _ in range(5)]
     agent.learn_concept("cough", cough_examples, category="semantic")
 
-    fatigue_examples = [np.random.randn(256) + np.array([0, 0, 1.0] + [0]*253) for _ in range(5)]
+    fatigue_examples = [np.random.randn(256) + np.array([0, 0, 1.0] + [0] * 253) for _ in range(5)]
     agent.learn_concept("fatigue", fatigue_examples, category="semantic")
 
     # Diseases
-    flu_examples = [np.random.randn(256) + np.array([1.0, 0.8, 0.6] + [0]*253) for _ in range(10)]
+    flu_examples = [np.random.randn(256) + np.array([1.0, 0.8, 0.6] + [0] * 253) for _ in range(10)]
     agent.learn_concept("flu", flu_examples, category="semantic")
 
-    cold_examples = [np.random.randn(256) + np.array([0.3, 1.0, 0.2] + [0]*253) for _ in range(10)]
+    cold_examples = [
+        np.random.randn(256) + np.array([0.3, 1.0, 0.2] + [0] * 253) for _ in range(10)
+    ]
     agent.learn_concept("cold", cold_examples, category="semantic")
 
     print(f"   Learned {len(agent.list_concepts())} concepts")
@@ -98,9 +100,9 @@ def demo_medical_diagnosis():
 
 def demo_physics_learning():
     """Demonstrate physics concept learning scenario."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCENARIO 2: Physics Concept Learning")
-    print("="*60)
+    print("=" * 60)
 
     agent = IntegratedAGIAgent(AgentConfig(random_seed=123))
 
@@ -144,7 +146,7 @@ def demo_physics_learning():
     # Build causal model (Newton's laws)
     print("\n2. Building causal model (Newton's laws)...")
     agent.add_causal_relation("force", "acceleration", strength=1.0)  # F = ma
-    agent.add_causal_relation("mass", "acceleration", strength=0.8)   # Inverse relation
+    agent.add_causal_relation("mass", "acceleration", strength=0.8)  # Inverse relation
     agent.add_causal_relation("acceleration", "velocity", strength=1.0)  # a = dv/dt
     agent.add_causal_relation("velocity", "position", strength=1.0)  # v = dx/dt
 
@@ -171,7 +173,7 @@ def demo_physics_learning():
     for day in range(5):
         agent.advance_time(1.0)
         force_concept = agent.get_concept("force")
-        print(f"   Day {day+1}: force concept strength = {force_concept.strength:.3f}")
+        print(f"   Day {day + 1}: force concept strength = {force_concept.strength:.3f}")
 
     # Consolidation restores strength
     print("\n5. Sleep consolidation to restore memories...")
@@ -184,14 +186,16 @@ def demo_physics_learning():
 
 def demo_language_concepts():
     """Demonstrate language concept learning scenario."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCENARIO 3: Language Understanding")
-    print("="*60)
+    print("=" * 60)
 
-    agent = IntegratedAGIAgent(AgentConfig(
-        random_seed=456,
-        uncertainty_threshold=0.4,  # More lenient
-    ))
+    agent = IntegratedAGIAgent(
+        AgentConfig(
+            random_seed=456,
+            uncertainty_threshold=0.4,  # More lenient
+        )
+    )
 
     np.random.seed(456)
 
@@ -231,8 +235,8 @@ def demo_language_concepts():
     print("\n2. Building semantic relations...")
     agent.add_causal_relation("dog", "chase", strength=0.8)  # Dogs often chase
     agent.add_causal_relation("chase", "cat", strength=0.7)  # Chase targets cats
-    agent.add_causal_relation("dog", "eat", strength=0.9)    # Dogs eat
-    agent.add_causal_relation("eat", "food", strength=1.0)   # Eating involves food
+    agent.add_causal_relation("dog", "eat", strength=0.9)  # Dogs eat
+    agent.add_causal_relation("eat", "food", strength=1.0)  # Eating involves food
 
     # Query semantic relationships
     print("\n3. Semantic reasoning...")
@@ -293,13 +297,13 @@ def main():
         "--scenario",
         choices=["medical", "physics", "language", "all"],
         default="all",
-        help="Which scenario to run"
+        help="Which scenario to run",
     )
     args = parser.parse_args()
 
-    print("\n" + "#"*60)
-    print("#" + " "*18 + "AGI INTEGRATION DEMO" + " "*18 + "#")
-    print("#"*60)
+    print("\n" + "#" * 60)
+    print("#" + " " * 18 + "AGI INTEGRATION DEMO" + " " * 18 + "#")
+    print("#" * 60)
     print("\nThis demo shows how neuro-causal, neuro-abstract, neuro-robust,")
     print("and sleep-consolidation modules work together in an integrated agent.")
 
@@ -312,9 +316,9 @@ def main():
     if args.scenario in ["language", "all"]:
         demo_language_concepts()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Demo complete!")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 if __name__ == "__main__":

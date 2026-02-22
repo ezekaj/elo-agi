@@ -10,6 +10,7 @@ from neuro.modules.credit.policy_gradient import (
     PolicyGradientResult,
 )
 
+
 class TestGAEConfig:
     """Tests for GAEConfig class."""
 
@@ -23,6 +24,7 @@ class TestGAEConfig:
         config = GAEConfig(gamma=0.9, normalize_advantages=False)
         assert config.gamma == 0.9
         assert not config.normalize_advantages
+
 
 class TestCrossModulePolicyGradient:
     """Tests for CrossModulePolicyGradient class."""
@@ -101,9 +103,7 @@ class TestCrossModulePolicyGradient:
         old_log_probs = np.array([-0.6, -0.4, -0.3])
         advantages = np.array([1.0, 0.5, 0.2])
 
-        loss = pg.compute_policy_loss(
-            log_probs, advantages, old_log_probs, clip_epsilon=0.2
-        )
+        loss = pg.compute_policy_loss(log_probs, advantages, old_log_probs, clip_epsilon=0.2)
 
         assert isinstance(loss, float)
 
@@ -204,11 +204,13 @@ class TestCrossModulePolicyGradient:
             "rewards": [1.0, 1.0, 1.0],
             "values": [0.5, 0.5, 0.5],
             "log_probs": np.array([-0.5, -0.5, -0.5]),
-            "action_probs": np.array([
-                [0.25, 0.25, 0.25, 0.25],
-                [0.25, 0.25, 0.25, 0.25],
-                [0.25, 0.25, 0.25, 0.25],
-            ]),
+            "action_probs": np.array(
+                [
+                    [0.25, 0.25, 0.25, 0.25],
+                    [0.25, 0.25, 0.25, 0.25],
+                    [0.25, 0.25, 0.25, 0.25],
+                ]
+            ),
         }
 
         result = pg.compute_full_result(trajectory, "module1")
@@ -233,6 +235,7 @@ class TestCrossModulePolicyGradient:
 
         assert "total_trajectories" in stats
         assert stats["total_trajectories"] == 1
+
 
 class TestAdvantage:
     """Tests for Advantage dataclass."""

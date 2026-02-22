@@ -5,7 +5,11 @@ from .deductive import DeductiveReasoner, Proposition, Syllogism
 from .abductive import AbductiveReasoner, Explanation
 
 __all__ = [
-    'InductiveReasoner', 'Hypothesis',
-    'DeductiveReasoner', 'Proposition', 'Syllogism',
-    'AbductiveReasoner', 'Explanation'
+    "InductiveReasoner",
+    "Hypothesis",
+    "DeductiveReasoner",
+    "Proposition",
+    "Syllogism",
+    "AbductiveReasoner",
+    "Explanation",
 ]

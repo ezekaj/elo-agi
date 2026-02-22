@@ -7,6 +7,8 @@ def cmd_mcp(args):
     print(f"  {'─' * 50}")
     print(f"  MCP integration coming soon.")
     print(f"\n  To configure MCP servers, create ~/.neuro/mcp.json:")
-    print(f'  {{"mcpServers": {{"memory": {{"command": "npx", "args": ["-y", "@anthropic-ai/mcp-server-memory"]}}}}}}')
+    print(
+        f'  {{"mcpServers": {{"memory": {{"command": "npx", "args": ["-y", "@anthropic-ai/mcp-server-memory"]}}}}}}'
+    )
     print()
     return 0

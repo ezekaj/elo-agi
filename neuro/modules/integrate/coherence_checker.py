@@ -15,16 +15,18 @@ from .shared_space import SemanticEmbedding, ModalityType
 
 class InconsistencyType(Enum):
     """Types of inconsistencies."""
-    CONTRADICTION = "contradiction"     # Direct logical contradiction
-    TENSION = "tension"                 # Soft conflict, not full contradiction
-    OUTDATED = "outdated"              # Belief based on old information
-    CIRCULAR = "circular"              # Circular dependency
-    INCOMPLETE = "incomplete"          # Missing required beliefs
-    IMPLAUSIBLE = "implausible"        # Statistically unlikely combination
+
+    CONTRADICTION = "contradiction"  # Direct logical contradiction
+    TENSION = "tension"  # Soft conflict, not full contradiction
+    OUTDATED = "outdated"  # Belief based on old information
+    CIRCULAR = "circular"  # Circular dependency
+    INCOMPLETE = "incomplete"  # Missing required beliefs
+    IMPLAUSIBLE = "implausible"  # Statistically unlikely combination
 
 
 class InconsistencySeverity(Enum):
     """Severity levels for inconsistencies."""
+
     LOW = 1
     MEDIUM = 2
     HIGH = 3
@@ -34,6 +36,7 @@ class InconsistencySeverity(Enum):
 @dataclass
 class Belief:
     """A belief held by the system."""
+
     belief_id: str
     content: SemanticEmbedding
     source_module: str
@@ -43,7 +46,7 @@ class Belief:
     contradicting_beliefs: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def similarity(self, other: 'Belief') -> float:
+    def similarity(self, other: "Belief") -> float:
         """Compute similarity with another belief."""
         return self.content.similarity(other.content)
 
@@ -51,6 +54,7 @@ class Belief:
 @dataclass
 class Inconsistency:
     """An inconsistency detected in the belief network."""
+
     inconsistency_id: int
     inconsistency_type: InconsistencyType
     severity: InconsistencySeverity
@@ -65,6 +69,7 @@ class Inconsistency:
 @dataclass
 class CoherenceReport:
     """Report on overall belief coherence."""
+
     timestamp: float
     n_beliefs: int
     n_inconsistencies: int
@@ -89,8 +94,8 @@ class BeliefNetwork:
         self._beliefs: Dict[str, Belief] = {}
 
         # Adjacency for support/contradiction relationships
-        self._supports: Dict[str, Set[str]] = {}      # A supports B
-        self._contradicts: Dict[str, Set[str]] = {}   # A contradicts B
+        self._supports: Dict[str, Set[str]] = {}  # A supports B
+        self._contradicts: Dict[str, Set[str]] = {}  # A contradicts B
 
         # Belief counter
         self._belief_counter = 0
@@ -456,7 +461,7 @@ class CoherenceChecker:
         total_similarity = 0.0
         n_pairs = 0
         for i, b1 in enumerate(beliefs):
-            for b2 in beliefs[i+1:]:
+            for b2 in beliefs[i + 1 :]:
                 total_similarity += b1.similarity(b2)
                 n_pairs += 1
 
@@ -468,11 +473,7 @@ class CoherenceChecker:
             similarity_factor = 1.0
 
         # Combine factors
-        coherence = (
-            0.4 * support_ratio +
-            0.4 * inconsistency_factor +
-            0.2 * similarity_factor
-        )
+        coherence = 0.4 * support_ratio + 0.4 * inconsistency_factor + 0.2 * similarity_factor
 
         self._coherence_history.append(coherence)
 
@@ -521,9 +522,7 @@ class CoherenceChecker:
         # Count inconsistency types
         type_counts: Dict[InconsistencyType, int] = {}
         for inc in inconsistencies:
-            type_counts[inc.inconsistency_type] = type_counts.get(
-                inc.inconsistency_type, 0
-            ) + 1
+            type_counts[inc.inconsistency_type] = type_counts.get(inc.inconsistency_type, 0) + 1
 
         if type_counts.get(InconsistencyType.CONTRADICTION, 0) > 2:
             recommendations.append(
@@ -531,14 +530,10 @@ class CoherenceChecker:
             )
 
         if type_counts.get(InconsistencyType.OUTDATED, 0) > 5:
-            recommendations.append(
-                "Many beliefs are outdated. Schedule belief refresh cycle."
-            )
+            recommendations.append("Many beliefs are outdated. Schedule belief refresh cycle.")
 
         if type_counts.get(InconsistencyType.CIRCULAR, 0) > 0:
-            recommendations.append(
-                "Circular dependencies found. Review belief support structure."
-            )
+            recommendations.append("Circular dependencies found. Review belief support structure.")
 
         # Check for module-specific issues
         module_issues: Dict[str, int] = {}
@@ -546,9 +541,9 @@ class CoherenceChecker:
             for bid in inc.beliefs_involved:
                 belief = self.network.get_belief(bid)
                 if belief:
-                    module_issues[belief.source_module] = module_issues.get(
-                        belief.source_module, 0
-                    ) + 1
+                    module_issues[belief.source_module] = (
+                        module_issues.get(belief.source_module, 0) + 1
+                    )
 
         for module, count in module_issues.items():
             if count > 3:
@@ -582,7 +577,7 @@ class CoherenceChecker:
         n_pairs = 0
 
         for i, b1 in enumerate(beliefs):
-            for b2 in beliefs[i+1:]:
+            for b2 in beliefs[i + 1 :]:
                 total_similarity += b1.similarity(b2)
                 n_pairs += 1
 

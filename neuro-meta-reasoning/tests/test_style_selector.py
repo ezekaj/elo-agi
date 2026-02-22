@@ -10,7 +10,12 @@ from neuro.modules.meta_reasoning.style_selector import (
     ReasoningStyle,
     StyleFeedback,
 )
-from neuro.modules.meta_reasoning.problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
+from neuro.modules.meta_reasoning.problem_classifier import (
+    ProblemAnalysis,
+    ProblemType,
+    ProblemDifficulty,
+)
+
 
 class TestStyleSelectorConfig:
     """Tests for StyleSelectorConfig class."""
@@ -25,6 +30,7 @@ class TestStyleSelectorConfig:
         config = StyleSelectorConfig(exploration_rate=0.2, max_combined_styles=2)
         assert config.exploration_rate == 0.2
         assert config.max_combined_styles == 2
+
 
 class TestStyleSelector:
     """Tests for StyleSelector class."""
@@ -208,6 +214,7 @@ class TestStyleSelector:
         assert "exploration_rate" in stats
         assert stats["total_selections"] == 1
 
+
 class TestReasoningStyle:
     """Tests for ReasoningStyle enum."""
 
@@ -217,6 +224,7 @@ class TestReasoningStyle:
         assert ReasoningStyle.ABDUCTIVE.value == "abductive"
         assert ReasoningStyle.ANALOGICAL.value == "analogical"
         assert ReasoningStyle.CAUSAL.value == "causal"
+
 
 class TestStyleSelection:
     """Tests for StyleSelection dataclass."""

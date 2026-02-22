@@ -12,6 +12,7 @@ from typing import Optional, List, Any, Tuple
 @dataclass
 class WMParams:
     """Parameters for working memory"""
+
     capacity: int = 4  # Cowan's magical number
     n_units: int = 100
     decay_rate: float = 0.05
@@ -89,8 +90,9 @@ class CapacityLimitedStore:
                 norm_cue = np.linalg.norm(cue)
                 norm_slot = np.linalg.norm(self.slots[i])
                 if norm_cue > 0 and norm_slot > 0:
-                    similarities[i] = (np.dot(cue, self.slots[i]) /
-                                      (norm_cue * norm_slot)) * self.activation[i]
+                    similarities[i] = (
+                        np.dot(cue, self.slots[i]) / (norm_cue * norm_slot)
+                    ) * self.activation[i]
 
         best_slot = np.argmax(similarities)
         if similarities[best_slot] > 0.1:  # Minimum threshold
@@ -105,7 +107,7 @@ class CapacityLimitedStore:
         self.time_since_encoding += dt
 
         # Activation decays over time
-        self.activation *= (1 - decay_rate * dt)
+        self.activation *= 1 - decay_rate * dt
 
         # Items with very low activation are forgotten
         forgotten = self.activation < 0.1
@@ -174,9 +176,11 @@ class DLPFCNetwork:
             maintenance_signal += pattern * self.params.maintenance_strength
 
         # Update activity
-        d_activity = (-self.params.decay_rate * self.activity +
-                     0.5 * np.tanh(input_current + maintenance_signal) +
-                     np.random.randn(self.n_units) * self.params.noise_level)
+        d_activity = (
+            -self.params.decay_rate * self.activity
+            + 0.5 * np.tanh(input_current + maintenance_signal)
+            + np.random.randn(self.n_units) * self.params.noise_level
+        )
 
         self.activity = np.clip(self.activity + d_activity * dt, 0, 1)
 
@@ -201,8 +205,7 @@ class WorkingMemory:
 
         # Components
         self.store = CapacityLimitedStore(
-            capacity=self.params.capacity,
-            item_dim=self.params.n_units
+            capacity=self.params.capacity, item_dim=self.params.n_units
         )
         self.dlpfc = DLPFCNetwork(self.params.n_units, self.params)
 
@@ -229,7 +232,7 @@ class WorkingMemory:
         load = self.store.get_load()
         if load > 1:
             interference = self.params.interference_strength * (load - 1) / self.params.capacity
-            self.store.activation *= (1 - interference * dt)
+            self.store.activation *= 1 - interference * dt
 
     def get_load(self) -> int:
         """Get current WM load"""

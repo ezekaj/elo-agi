@@ -15,15 +15,15 @@ from .logic_network import LogicNetwork
 from .dual_process_controller import DualProcessController
 
 __all__ = [
-    'PatternRecognition',
-    'HabitExecutor',
-    'EmotionalValuation',
-    'WorkingMemory',
-    'CognitiveControl',
-    'RelationalReasoning',
-    'Hippocampus',
-    'PrefrontalCortex',
-    'HPCPFCComplex',
-    'LogicNetwork',
-    'DualProcessController',
+    "PatternRecognition",
+    "HabitExecutor",
+    "EmotionalValuation",
+    "WorkingMemory",
+    "CognitiveControl",
+    "RelationalReasoning",
+    "Hippocampus",
+    "PrefrontalCortex",
+    "HPCPFCComplex",
+    "LogicNetwork",
+    "DualProcessController",
 ]

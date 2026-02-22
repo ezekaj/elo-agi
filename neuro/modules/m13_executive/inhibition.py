@@ -12,6 +12,7 @@ from typing import Optional, Tuple, List
 @dataclass
 class InhibitionParams:
     """Parameters for inhibition system"""
+
     n_units: int = 50
     stop_threshold: float = 0.6
     go_threshold: float = 0.4
@@ -122,7 +123,7 @@ class ResponseInhibitor:
             "reaction_time": reaction_time,
             "stop_time": stop_time,
             "go_activation": self.go_activation,
-            "stop_activation": self.stop_activation
+            "stop_activation": self.stop_activation,
         }
 
 
@@ -178,7 +179,7 @@ class ImpulseController:
                 executed[i] = 1
 
         # Decay urge
-        self.urge *= (1 - self.params.decay_rate * dt)
+        self.urge *= 1 - self.params.decay_rate * dt
 
         return executed
 
@@ -198,7 +199,7 @@ class ImpulseController:
             "inhibition": self.inhibition.copy(),
             "urge": self.urge.copy(),
             "allowed": self.allowed.copy(),
-            "net_activation": self.urge - self.inhibition
+            "net_activation": self.urge - self.inhibition,
         }
 
 
@@ -233,8 +234,9 @@ class InhibitionSystem:
         self.presma_activation = np.clip(self.presma_activation, 0, 1)
 
         # Combined inhibition signal
-        inhibition_signal = (np.mean(self.rifg_activation) * 0.7 +
-                           np.mean(self.presma_activation) * 0.3)
+        inhibition_signal = (
+            np.mean(self.rifg_activation) * 0.7 + np.mean(self.presma_activation) * 0.3
+        )
 
         return inhibition_signal
 
@@ -249,7 +251,7 @@ class InhibitionSystem:
         """
         self.response_inhibitor.reset()
 
-        is_nogo = stimulus_type == 'nogo'
+        is_nogo = stimulus_type == "nogo"
 
         dt = 1.0
         max_time = 500.0
@@ -264,21 +266,22 @@ class InhibitionSystem:
             if self.response_inhibitor.response_made:
                 break
 
-        correct = (not is_nogo and self.response_inhibitor.response_made) or \
-                  (is_nogo and not self.response_inhibitor.response_made)
+        correct = (not is_nogo and self.response_inhibitor.response_made) or (
+            is_nogo and not self.response_inhibitor.response_made
+        )
 
         return {
             "stimulus_type": stimulus_type,
             "response_made": self.response_inhibitor.response_made,
             "correct": correct,
-            "reaction_time": t if self.response_inhibitor.response_made else None
+            "reaction_time": t if self.response_inhibitor.response_made else None,
         }
 
     def update(self, dt: float = 1.0):
         """Update system state"""
         # Decay activations
-        self.rifg_activation *= (1 - self.params.decay_rate * dt)
-        self.presma_activation *= (1 - self.params.decay_rate * dt)
+        self.rifg_activation *= 1 - self.params.decay_rate * dt
+        self.presma_activation *= 1 - self.params.decay_rate * dt
 
     def get_inhibition_strength(self) -> float:
         """Get current overall inhibition strength"""

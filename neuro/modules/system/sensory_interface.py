@@ -22,6 +22,7 @@ from .config import SystemConfig
 
 class InputType(Enum):
     """Types of sensory input."""
+
     VECTOR = "vector"
     TEXT = "text"
     IMAGE = "image"
@@ -32,6 +33,7 @@ class InputType(Enum):
 @dataclass
 class SensoryInput:
     """A single sensory input."""
+
     input_type: InputType
     raw_data: Any
     processed: Optional[np.ndarray] = None
@@ -46,6 +48,7 @@ class SensoryInput:
 @dataclass
 class SensoryBuffer:
     """Buffer for recent sensory inputs."""
+
     capacity: int = 10
     inputs: List[SensoryInput] = field(default_factory=list)
 
@@ -176,7 +179,7 @@ class SensoryInterface:
         # In production, would use sentence transformers or similar
         vec = np.zeros(self.config.input_dim, dtype=np.float32)
 
-        for i, char in enumerate(data[:self.config.input_dim]):
+        for i, char in enumerate(data[: self.config.input_dim]):
             vec[i % self.config.input_dim] += ord(char) / 256.0
 
         # Normalize
@@ -303,10 +306,10 @@ class SensoryInterface:
     def get_statistics(self) -> Dict[str, Any]:
         """Get interface statistics."""
         return {
-            'input_count': self._input_count,
-            'buffer_size': len(self.buffer.inputs),
-            'input_dim': self.config.input_dim,
-            'normalization': self.config.input_normalization,
+            "input_count": self._input_count,
+            "buffer_size": len(self.buffer.inputs),
+            "input_dim": self.config.input_dim,
+            "normalization": self.config.input_normalization,
         }
 
     def reset(self) -> None:

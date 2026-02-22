@@ -7,16 +7,22 @@ from neuro.modules.m05_sleep_consolidation.sleep_stages import (
     StageProperties,
     SleepStageController,
     OscillationGenerator,
-    OscillationEvent
+    OscillationEvent,
 )
+
 
 class TestSleepStage:
     """Tests for sleep stage enum and properties"""
 
     def test_all_stages_exist(self):
         """Test all expected stages exist"""
-        stages = [SleepStage.WAKE, SleepStage.NREM1, SleepStage.NREM2,
-                  SleepStage.SWS, SleepStage.REM]
+        stages = [
+            SleepStage.WAKE,
+            SleepStage.NREM1,
+            SleepStage.NREM2,
+            SleepStage.SWS,
+            SleepStage.REM,
+        ]
         assert len(stages) == 5
 
     def test_stage_properties(self):
@@ -42,6 +48,7 @@ class TestSleepStage:
 
         assert wake_props.plasticity_mode == "encoding"
         assert wake_props.arousal_threshold == 0.0
+
 
 class TestOscillationGenerator:
     """Tests for neural oscillation generation"""
@@ -131,6 +138,7 @@ class TestOscillationGenerator:
 
         gen.theta_wave(duration=2.0)
         assert gen.current_time == 3.0
+
 
 class TestSleepStageController:
     """Tests for sleep stage controller"""
@@ -243,6 +251,7 @@ class TestSleepStageController:
         assert controller.total_time == 0.0
         assert controller.cycle_count == 0
 
+
 class TestSleepCycleArchitecture:
     """Tests for sleep architecture patterns"""
 
@@ -284,5 +293,6 @@ class TestSleepCycleArchitecture:
         # Default cycle duration
         assert controller.cycle_duration == 90.0
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -19,6 +19,7 @@ import numpy as np
 
 class TypeKind(Enum):
     """Kinds of types in the system."""
+
     ATOMIC = "atomic"
     FUNCTION = "function"
     STRUCTURED = "structured"
@@ -40,7 +41,7 @@ class CompositionType(ABC):
     kind: TypeKind
 
     @abstractmethod
-    def compose(self, *args: 'CompositionType') -> 'CompositionType':
+    def compose(self, *args: "CompositionType") -> "CompositionType":
         """Compose this type with other types."""
         pass
 
@@ -69,11 +70,11 @@ class CompositionType(ABC):
         """String representation."""
         pass
 
-    def is_subtype_of(self, other: 'CompositionType') -> bool:
+    def is_subtype_of(self, other: "CompositionType") -> bool:
         """Check if this type is a subtype of another."""
         return self == other
 
-    def unify(self, other: 'CompositionType') -> Optional['CompositionType']:
+    def unify(self, other: "CompositionType") -> Optional["CompositionType"]:
         """Attempt to unify two types, returning the unified type or None."""
         if self == other:
             return self
@@ -87,11 +88,12 @@ class AtomicType(CompositionType):
 
     Examples: int, str, bool, float
     """
+
     name: str
     python_type: Optional[type] = None
 
     def __post_init__(self):
-        object.__setattr__(self, 'kind', TypeKind.ATOMIC)
+        object.__setattr__(self, "kind", TypeKind.ATOMIC)
 
     def compose(self, *args: CompositionType) -> CompositionType:
         """Atomic types don't compose directly."""
@@ -151,11 +153,12 @@ class FunctionType(CompositionType):
 
     Represents callable functions with typed inputs and outputs.
     """
+
     input_types: Tuple[CompositionType, ...]
     output_type: CompositionType
 
     def __post_init__(self):
-        object.__setattr__(self, 'kind', TypeKind.FUNCTION)
+        object.__setattr__(self, "kind", TypeKind.FUNCTION)
 
     def compose(self, *args: CompositionType) -> CompositionType:
         """
@@ -164,15 +167,11 @@ class FunctionType(CompositionType):
         Returns output type if arguments match input types.
         """
         if len(args) != len(self.input_types):
-            raise TypeError(
-                f"Expected {len(self.input_types)} arguments, got {len(args)}"
-            )
+            raise TypeError(f"Expected {len(self.input_types)} arguments, got {len(args)}")
 
         for i, (arg, expected) in enumerate(zip(args, self.input_types)):
             if not arg.is_subtype_of(expected):
-                raise TypeError(
-                    f"Argument {i}: expected {expected}, got {arg}"
-                )
+                raise TypeError(f"Argument {i}: expected {expected}, got {arg}")
 
         return self.output_type
 
@@ -200,10 +199,7 @@ class FunctionType(CompositionType):
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, FunctionType):
-            return (
-                self.input_types == other.input_types and
-                self.output_type == other.output_type
-            )
+            return self.input_types == other.input_types and self.output_type == other.output_type
         return False
 
     def __hash__(self) -> int:
@@ -218,7 +214,7 @@ class FunctionType(CompositionType):
         """Number of input arguments."""
         return len(self.input_types)
 
-    def curry(self) -> 'FunctionType':
+    def curry(self) -> "FunctionType":
         """Convert to curried form: (A, B) -> C becomes A -> (B -> C)."""
         if len(self.input_types) <= 1:
             return self
@@ -236,11 +232,12 @@ class StructuredType(CompositionType):
 
     Represents types with named fields.
     """
+
     name: str
     fields: Tuple[Tuple[str, CompositionType], ...]  # Immutable field list
 
     def __post_init__(self):
-        object.__setattr__(self, 'kind', TypeKind.STRUCTURED)
+        object.__setattr__(self, "kind", TypeKind.STRUCTURED)
 
     def compose(self, *args: CompositionType) -> CompositionType:
         """Compose structured types (merge fields)."""
@@ -254,16 +251,11 @@ class StructuredType(CompositionType):
                     if field_name in all_fields:
                         # Type must match
                         if all_fields[field_name] != field_type:
-                            raise TypeError(
-                                f"Conflicting types for field {field_name}"
-                            )
+                            raise TypeError(f"Conflicting types for field {field_name}")
                     else:
                         all_fields[field_name] = field_type
 
-        return StructuredType(
-            f"{self.name}_composed",
-            tuple(all_fields.items())
-        )
+        return StructuredType(f"{self.name}_composed", tuple(all_fields.items()))
 
     def validate(self, value: Any) -> bool:
         """Validate that value has required fields with correct types."""
@@ -328,7 +320,7 @@ class StructuredType(CompositionType):
         """Check if field exists."""
         return any(name == field_name for name, _ in self.fields)
 
-    def is_subtype_of(self, other: 'CompositionType') -> bool:
+    def is_subtype_of(self, other: "CompositionType") -> bool:
         """Structural subtyping: more fields is a subtype."""
         if not isinstance(other, StructuredType):
             return False
@@ -356,10 +348,11 @@ class ListType(CompositionType):
 
     Represents homogeneous collections.
     """
+
     element_type: CompositionType
 
     def __post_init__(self):
-        object.__setattr__(self, 'kind', TypeKind.LIST)
+        object.__setattr__(self, "kind", TypeKind.LIST)
 
     def compose(self, *args: CompositionType) -> CompositionType:
         """Compose list types (unify element types)."""
@@ -415,10 +408,11 @@ class UnionType(CompositionType):
 
     Value can be any of the member types.
     """
+
     types: Tuple[CompositionType, ...]
 
     def __post_init__(self):
-        object.__setattr__(self, 'kind', TypeKind.UNION)
+        object.__setattr__(self, "kind", TypeKind.UNION)
 
     def compose(self, *args: CompositionType) -> CompositionType:
         """Compose union types."""
@@ -466,6 +460,7 @@ class TypeVariable(CompositionType):
 
     Example: In map: (A -> B) -> [A] -> [B], A and B are type variables.
     """
+
     name: str
     bound: Optional[CompositionType] = None  # Upper bound
 
@@ -542,9 +537,7 @@ class TypeInferencer:
             return ListType(unified)
 
         if isinstance(value, dict):
-            fields = tuple(
-                (k, self.infer(v)) for k, v in value.items()
-            )
+            fields = tuple((k, self.infer(v)) for k, v in value.items())
             return StructuredType("inferred", fields)
 
         if callable(value):

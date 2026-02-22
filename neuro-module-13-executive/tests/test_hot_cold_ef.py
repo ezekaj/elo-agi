@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m13_executive.hot_cold_ef import (
-    HotExecutiveFunction, ColdExecutiveFunction, EmotionalRegulator, HotColdParams
+    HotExecutiveFunction,
+    ColdExecutiveFunction,
+    EmotionalRegulator,
+    HotColdParams,
 )
+
 
 class TestHotExecutiveFunction:
     """Tests for hot EF"""
@@ -21,11 +25,7 @@ class TestHotExecutiveFunction:
         hot = HotExecutiveFunction()
 
         stimulus = np.random.rand(50)
-        result = hot.process_emotional_stimulus(
-            stimulus,
-            emotional_intensity=0.8,
-            valence=0.5
-        )
+        result = hot.process_emotional_stimulus(stimulus, emotional_intensity=0.8, valence=0.5)
 
         assert "ofc_activity" in result
         assert "emotional_arousal" in result
@@ -46,7 +46,7 @@ class TestHotExecutiveFunction:
 
         result = hot.make_risky_decision(
             safe_option=50,
-            risky_option=(100, 0, 0.5)  # 50% chance of 100 or 0
+            risky_option=(100, 0, 0.5),  # 50% chance of 100 or 0
         )
 
         assert "choice" in result
@@ -90,6 +90,7 @@ class TestHotExecutiveFunction:
         assert "emotional_arousal" in state
         assert "valence" in state
         assert "expected_reward" in state
+
 
 class TestColdExecutiveFunction:
     """Tests for cold EF"""
@@ -136,10 +137,7 @@ class TestColdExecutiveFunction:
         simple_load = cold.cognitive_load
 
         # Complex (many premises)
-        cold.reason_logically(
-            [np.random.rand(50) for _ in range(5)],
-            np.random.rand(50)
-        )
+        cold.reason_logically([np.random.rand(50) for _ in range(5)], np.random.rand(50))
         complex_load = cold.cognitive_load
 
         assert complex_load > simple_load
@@ -176,6 +174,7 @@ class TestColdExecutiveFunction:
         assert "active_rules" in state
         assert "rule_strengths" in state
 
+
 class TestEmotionalRegulator:
     """Tests for emotional regulation"""
 
@@ -190,10 +189,7 @@ class TestEmotionalRegulator:
         """Test cognitive reappraisal"""
         regulator = EmotionalRegulator()
 
-        result = regulator.regulate_emotion(
-            emotional_intensity=0.8,
-            strategy="reappraisal"
-        )
+        result = regulator.regulate_emotion(emotional_intensity=0.8, strategy="reappraisal")
 
         assert result["strategy"] == "reappraisal"
         assert result["regulated_intensity"] < result["initial_intensity"]
@@ -202,10 +198,7 @@ class TestEmotionalRegulator:
         """Test response suppression"""
         regulator = EmotionalRegulator()
 
-        result = regulator.regulate_emotion(
-            emotional_intensity=0.8,
-            strategy="suppression"
-        )
+        result = regulator.regulate_emotion(emotional_intensity=0.8, strategy="suppression")
 
         assert result["strategy"] == "suppression"
         assert result["regulated_intensity"] <= result["initial_intensity"]
@@ -226,9 +219,7 @@ class TestEmotionalRegulator:
         regulator = EmotionalRegulator()
 
         result = regulator.make_hybrid_decision(
-            stimulus=np.random.rand(50),
-            emotional_content=0.7,
-            logical_content=0.3
+            stimulus=np.random.rand(50), emotional_content=0.7, logical_content=0.3
         )
 
         assert "hot_contribution" in result
@@ -240,9 +231,7 @@ class TestEmotionalRegulator:
         regulator = EmotionalRegulator()
 
         result = regulator.make_hybrid_decision(
-            stimulus=np.random.rand(50),
-            emotional_content=0.9,
-            logical_content=0.1
+            stimulus=np.random.rand(50), emotional_content=0.9, logical_content=0.1
         )
 
         assert result["hot_weight"] > result["cold_weight"]
@@ -252,9 +241,7 @@ class TestEmotionalRegulator:
         regulator = EmotionalRegulator()
 
         result = regulator.make_hybrid_decision(
-            stimulus=np.random.rand(50),
-            emotional_content=0.1,
-            logical_content=0.9
+            stimulus=np.random.rand(50), emotional_content=0.1, logical_content=0.9
         )
 
         assert result["cold_weight"] > result["hot_weight"]
@@ -269,5 +256,6 @@ class TestEmotionalRegulator:
         assert "cold" in state
         assert "regulation_strategy" in state
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

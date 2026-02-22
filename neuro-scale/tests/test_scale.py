@@ -88,6 +88,7 @@ from neuro.modules.scale.efficiency import (
 # DISTRIBUTED TESTS
 # =============================================================================
 
+
 class TestTaskQueue:
     """Tests for TaskQueue."""
 
@@ -144,6 +145,7 @@ class TestTaskQueue:
         assert peeked.id == "task_1"
         assert queue.size() == 1  # Still there
 
+
 class TestLoadBalancer:
     """Tests for LoadBalancer."""
 
@@ -177,6 +179,7 @@ class TestLoadBalancer:
         balancer.update_load("worker_1", 0.5)
         balancer.remove_worker("worker_1")
         assert "worker_1" not in balancer.get_worker_loads()
+
 
 class TestTaskCoordinator:
     """Tests for TaskCoordinator."""
@@ -272,6 +275,7 @@ class TestTaskCoordinator:
         stats = coordinator.get_task_stats()
         assert stats["total_tasks"] == 2
 
+
 class TestWorker:
     """Tests for Worker."""
 
@@ -292,12 +296,7 @@ class TestWorker:
     def test_worker_execute_with_kwargs(self):
         """Test executing with keyword arguments."""
         worker = Worker()
-        result = worker.execute(
-            "task_1",
-            lambda x, y=1: x + y,
-            (5,),
-            {"y": 10}
-        )
+        result = worker.execute("task_1", lambda x, y=1: x + y, (5,), {"y": 10})
         assert result.result == 15
 
     def test_worker_execute_failure(self):
@@ -334,6 +333,7 @@ class TestWorker:
 
         stats = worker.statistics()
         assert stats["tasks_completed"] == 2
+
 
 class TestWorkerPool:
     """Tests for WorkerPool."""
@@ -384,6 +384,7 @@ class TestWorkerPool:
         assert stats["n_workers"] == 2
         assert stats["completed_tasks"] == 1
 
+
 class TestWeightedAverage:
     """Tests for WeightedAverage aggregator."""
 
@@ -415,6 +416,7 @@ class TestWeightedAverage:
         agg = WeightedAverage()
         aggregated = agg.aggregate([])
         assert aggregated.n_inputs == 0
+
 
 class TestVoting:
     """Tests for Voting aggregator."""
@@ -451,6 +453,7 @@ class TestVoting:
         aggregated = voter.aggregate(results, weights)
         assert aggregated.value == "B"
 
+
 class TestConcatAggregator:
     """Tests for ConcatAggregator."""
 
@@ -470,6 +473,7 @@ class TestConcatAggregator:
         aggregated = agg.aggregate(results)
         # ConcatAggregator tries numpy first, then falls back to list concat
         np.testing.assert_array_equal(aggregated.value, [1, 2, 3, 4])
+
 
 class TestResultAggregator:
     """Tests for ResultAggregator."""
@@ -508,11 +512,7 @@ class TestResultAggregator:
         agg = ResultAggregator()
         agg.register_custom("product", lambda x: np.prod(x))
 
-        aggregated = agg.aggregate(
-            [2, 3, 4],
-            AggregationStrategy.CUSTOM,
-            custom_name="product"
-        )
+        aggregated = agg.aggregate([2, 3, 4], AggregationStrategy.CUSTOM, custom_name="product")
         assert aggregated.value == 24
 
     def test_result_aggregator_dict(self):
@@ -527,9 +527,11 @@ class TestResultAggregator:
         assert "accuracy" in aggregated
         assert "loss" in aggregated
 
+
 # =============================================================================
 # GPU KERNEL TESTS
 # =============================================================================
+
 
 class TestMatMulKernel:
     """Tests for MatMulKernel."""
@@ -570,6 +572,7 @@ class TestMatMulKernel:
         with pytest.raises(ValueError):
             kernel.execute(A, B)
 
+
 class TestConvolutionKernel:
     """Tests for ConvolutionKernel."""
 
@@ -596,6 +599,7 @@ class TestConvolutionKernel:
         result = kernel.execute(input, conv_filter)
         assert result.shape == (3, 8, 8)
 
+
 class TestSoftmaxKernel:
     """Tests for SoftmaxKernel."""
 
@@ -612,9 +616,7 @@ class TestSoftmaxKernel:
         result = kernel.execute(x)
 
         # Should sum to 1 along last axis
-        np.testing.assert_array_almost_equal(
-            result.sum(axis=-1), np.ones(5)
-        )
+        np.testing.assert_array_almost_equal(result.sum(axis=-1), np.ones(5))
 
     def test_softmax_numerical_stability(self):
         """Test numerical stability with large values."""
@@ -626,6 +628,7 @@ class TestSoftmaxKernel:
         # Should not produce NaN or Inf
         assert np.all(np.isfinite(result))
         np.testing.assert_almost_equal(result.sum(), 1.0)
+
 
 class TestReductionKernel:
     """Tests for ReductionKernel."""
@@ -662,6 +665,7 @@ class TestReductionKernel:
         result = kernel.execute(x, axis=1)
         np.testing.assert_array_equal(result, [3, 7])
 
+
 class TestKernelManager:
     """Tests for KernelManager."""
 
@@ -694,9 +698,11 @@ class TestKernelManager:
         stats = manager.statistics()
         assert stats["n_kernels"] == 6
 
+
 # =============================================================================
 # BATCH INFERENCE TESTS
 # =============================================================================
+
 
 class TestInferenceCache:
     """Tests for InferenceCache."""
@@ -736,6 +742,7 @@ class TestInferenceCache:
         # First entry should be evicted
         assert cache.size == 2
 
+
 class TestBatchBuilder:
     """Tests for BatchBuilder."""
 
@@ -770,11 +777,13 @@ class TestBatchBuilder:
         assert batch is not None
         assert batch.size == 1
 
+
 class TestBatchInference:
     """Tests for BatchInference."""
 
     def test_batch_inference_creation(self):
         """Test BatchInference creation."""
+
         def model_fn(x):
             return x * 2
 
@@ -783,6 +792,7 @@ class TestBatchInference:
 
     def test_batch_inference_single(self):
         """Test single inference."""
+
         def model_fn(x):
             return x * 2
 
@@ -793,6 +803,7 @@ class TestBatchInference:
 
     def test_batch_inference_batch(self):
         """Test batch inference."""
+
         def model_fn(x):
             return x * 2
 
@@ -821,6 +832,7 @@ class TestBatchInference:
 
     def test_batch_inference_statistics(self):
         """Test statistics collection."""
+
         def model_fn(x):
             return x * 2
 
@@ -830,9 +842,11 @@ class TestBatchInference:
         stats = batch_inf.statistics()
         assert stats["total_requests"] == 1
 
+
 # =============================================================================
 # SPARSE PRUNING TESTS
 # =============================================================================
+
 
 class TestPruningMask:
     """Tests for PruningMask."""
@@ -858,6 +872,7 @@ class TestPruningMask:
         mask.update(np.array([True, True, False, False]))
 
         assert mask.sparsity == 0.5
+
 
 class TestMagnitudePruning:
     """Tests for MagnitudePruning."""
@@ -893,6 +908,7 @@ class TestMagnitudePruning:
         mask = pruner.compute_mask(weights, sparsity=1.0)
         assert not mask.any()  # All zeros
 
+
 class TestRandomPruning:
     """Tests for RandomPruning."""
 
@@ -912,6 +928,7 @@ class TestRandomPruning:
         actual_sparsity = 1.0 - mask.mean()
         assert 0.3 < actual_sparsity < 0.7
 
+
 class TestStructuredPruning:
     """Tests for StructuredPruning."""
 
@@ -923,18 +940,21 @@ class TestStructuredPruning:
     def test_structured_pruning_mask(self):
         """Test structured mask computation."""
         pruner = StructuredPruning(axis=0)
-        weights = np.array([
-            [0.1, 0.1, 0.1],
-            [0.5, 0.5, 0.5],
-            [0.2, 0.2, 0.2],
-            [0.8, 0.8, 0.8],
-        ])
+        weights = np.array(
+            [
+                [0.1, 0.1, 0.1],
+                [0.5, 0.5, 0.5],
+                [0.2, 0.2, 0.2],
+                [0.8, 0.8, 0.8],
+            ]
+        )
 
         mask = pruner.compute_mask(weights, sparsity=0.5)
 
         # Entire channels should be pruned/kept
         for i in range(4):
             assert mask[i].all() or not mask[i].any()
+
 
 class TestNetworkPruner:
     """Tests for NetworkPruner."""
@@ -946,9 +966,7 @@ class TestNetworkPruner:
 
     def test_network_pruner_prune(self):
         """Test pruning a network."""
-        pruner = NetworkPruner(PruningConfig(
-            strategy=PruningStrategy.MAGNITUDE
-        ))
+        pruner = NetworkPruner(PruningConfig(strategy=PruningStrategy.MAGNITUDE))
 
         weights = {
             "layer1": np.random.randn(100),
@@ -984,9 +1002,11 @@ class TestNetworkPruner:
         stats = pruner.statistics()
         assert "strategy" in stats
 
+
 # =============================================================================
 # QUANTIZATION TESTS
 # =============================================================================
+
 
 class TestQuantizer:
     """Tests for Quantizer."""
@@ -1052,6 +1072,7 @@ class TestQuantizer:
         assert "mae" in error
         assert "snr_db" in error
 
+
 class TestQuantizedTensor:
     """Tests for QuantizedTensor."""
 
@@ -1069,9 +1090,11 @@ class TestQuantizedTensor:
         expected = np.array([0.0, 0.64, 1.27])
         np.testing.assert_array_almost_equal(result, expected, decimal=2)
 
+
 # =============================================================================
 # EFFICIENCY TESTS
 # =============================================================================
+
 
 class TestProfiler:
     """Tests for Profiler."""
@@ -1122,6 +1145,7 @@ class TestProfiler:
         assert "op1" in summary
         assert "op2" in summary
 
+
 class TestOperationFuser:
     """Tests for OperationFuser."""
 
@@ -1151,6 +1175,7 @@ class TestOperationFuser:
 
         # Should have fewer operations due to fusion
         assert len(optimized) < len(operations)
+
 
 class TestMemoryOptimizer:
     """Tests for MemoryOptimizer."""
@@ -1185,6 +1210,7 @@ class TestMemoryOptimizer:
 
         peak = optimizer.compute_peak_memory(lifetimes, sizes, n_ops=5)
         assert peak > 0
+
 
 class TestEfficiencyOptimizer:
     """Tests for EfficiencyOptimizer."""
@@ -1255,9 +1281,11 @@ class TestEfficiencyOptimizer:
         stats = optimizer.statistics()
         assert "n_optimizations_applied" in stats
 
+
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for neuro-scale."""
@@ -1342,9 +1370,7 @@ class TestIntegration:
 
     def test_efficiency_analysis(self):
         """Test efficiency analysis workflow."""
-        optimizer = EfficiencyOptimizer(OptimizationConfig(
-            target_latency_ms=5.0
-        ))
+        optimizer = EfficiencyOptimizer(OptimizationConfig(target_latency_ms=5.0))
 
         # Profile operation - use a function that accepts input_data
         def matrix_op(x):
@@ -1365,6 +1391,7 @@ class TestIntegration:
 
         assert profile.n_samples == 5
         assert "n_optimizations_applied" in stats
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

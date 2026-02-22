@@ -78,6 +78,7 @@ from neuro.modules.ground.calibration import (
 # CAMERA TESTS
 # =============================================================================
 
+
 class TestCamera:
     """Tests for Camera."""
 
@@ -150,6 +151,7 @@ class TestCamera:
         stats = camera.statistics()
         assert stats["frame_count"] == 1
 
+
 class TestVisionProcessor:
     """Tests for VisionProcessor."""
 
@@ -215,9 +217,11 @@ class TestVisionProcessor:
         histograms = processor.compute_histogram(frame)
         assert "red" in histograms or "gray" in histograms
 
+
 # =============================================================================
 # MICROPHONE TESTS
 # =============================================================================
+
 
 class TestMicrophone:
     """Tests for Microphone."""
@@ -274,6 +278,7 @@ class TestMicrophone:
 
         stats = mic.statistics()
         assert stats["buffer_count"] == 2
+
 
 class TestAudioProcessor:
     """Tests for AudioProcessor."""
@@ -334,9 +339,11 @@ class TestAudioProcessor:
         pitch = processor.compute_pitch(buffer)
         # May or may not detect pitch depending on test signal
 
+
 # =============================================================================
 # PROPRIOCEPTION TESTS
 # =============================================================================
+
 
 class TestProprioceptionSensor:
     """Tests for ProprioceptionSensor."""
@@ -396,6 +403,7 @@ class TestProprioceptionSensor:
         ee_positions = sensor.forward_kinematics(positions)
         assert "hand" in ee_positions
 
+
 class TestProprioceptionProcessor:
     """Tests for ProprioceptionProcessor."""
 
@@ -443,9 +451,11 @@ class TestProprioceptionProcessor:
         assert "kinetic_energy" in energy
         assert "potential_energy" in energy
 
+
 # =============================================================================
 # MOTOR CONTROLLER TESTS
 # =============================================================================
+
 
 class TestMotorController:
     """Tests for MotorController."""
@@ -483,10 +493,12 @@ class TestMotorController:
         controller.register_motor("motor_0", initial_position=0.0)
 
         # Send position command
-        controller.send_command(MotorCommand(
-            motor_id="motor_0",
-            target_position=0.5,
-        ))
+        controller.send_command(
+            MotorCommand(
+                motor_id="motor_0",
+                target_position=0.5,
+            )
+        )
 
         state = controller.get_state("motor_0")
         assert state.is_moving or abs(state.error) > 0
@@ -500,10 +512,12 @@ class TestMotorController:
         assert controller.is_emergency_stopped()
 
         # Commands should fail
-        success = controller.send_command(MotorCommand(
-            motor_id="motor_0",
-            target_position=1.0,
-        ))
+        success = controller.send_command(
+            MotorCommand(
+                motor_id="motor_0",
+                target_position=1.0,
+            )
+        )
         assert not success
 
         controller.reset_emergency_stop()
@@ -516,6 +530,7 @@ class TestMotorController:
 
         stats = controller.statistics()
         assert stats["n_motors"] == 1
+
 
 class TestTrajectoryPlanner:
     """Tests for TrajectoryPlanner."""
@@ -607,9 +622,11 @@ class TestTrajectoryPlanner:
         # Should exceed limits
         assert not valid or error is not None
 
+
 # =============================================================================
 # SPEECH SYNTHESIZER TESTS
 # =============================================================================
+
 
 class TestSpeechSynthesizer:
     """Tests for SpeechSynthesizer."""
@@ -652,6 +669,7 @@ class TestSpeechSynthesizer:
 
         stats = synth.statistics()
         assert stats["utterances_generated"] == 2
+
 
 class TestProsodyController:
     """Tests for ProsodyController."""
@@ -705,9 +723,11 @@ class TestProsodyController:
         emotion = controller.analyze_text_sentiment("I am sad")
         assert emotion == EmotionType.SAD
 
+
 # =============================================================================
 # SIM2REAL TESTS
 # =============================================================================
+
 
 class TestDomainRandomization:
     """Tests for DomainRandomization."""
@@ -758,6 +778,7 @@ class TestDomainRandomization:
         history = rand.get_history()
         assert len(history) == 2
 
+
 class TestRealityGap:
     """Tests for RealityGap."""
 
@@ -800,6 +821,7 @@ class TestRealityGap:
         reward_gap = gap.compute_reward_gap()
         assert abs(reward_gap - 0.3) < 0.1
 
+
 class TestSimToRealTransfer:
     """Tests for SimToRealTransfer."""
 
@@ -837,9 +859,11 @@ class TestSimToRealTransfer:
         assert "distribution_distance" in eval_result
         assert "reward_gap" in eval_result
 
+
 # =============================================================================
 # CALIBRATION TESTS
 # =============================================================================
+
 
 class TestSensorCalibrator:
     """Tests for SensorCalibrator."""
@@ -854,10 +878,7 @@ class TestSensorCalibrator:
         calibrator = SensorCalibrator()
 
         # Static samples (should measure gravity)
-        samples = [
-            np.array([0.1, 0.1, 9.9, 0.01, 0.01, -0.01])
-            for _ in range(50)
-        ]
+        samples = [np.array([0.1, 0.1, 9.9, 0.01, 0.01, -0.01]) for _ in range(50)]
 
         result = calibrator.calibrate_imu("imu_0", samples)
 
@@ -872,9 +893,7 @@ class TestSensorCalibrator:
         readings = [0, 100, 200, 300, 400]
         positions = [0.0, 0.5, 1.0, 1.5, 2.0]
 
-        result = calibrator.calibrate_joint_encoder(
-            "encoder_0", readings, positions
-        )
+        result = calibrator.calibrate_joint_encoder("encoder_0", readings, positions)
 
         assert result.status == CalibrationStatus.CALIBRATED
         assert "scale" in result.parameters
@@ -887,9 +906,7 @@ class TestSensorCalibrator:
         readings = [np.array([i * 10]) for i in range(10)]
         forces = [np.array([i * 1.0]) for i in range(10)]
 
-        result = calibrator.calibrate_force_sensor(
-            "force_0", readings, forces
-        )
+        result = calibrator.calibrate_force_sensor("force_0", readings, forces)
 
         assert result.status == CalibrationStatus.CALIBRATED
 
@@ -917,9 +934,11 @@ class TestSensorCalibrator:
         calibrator.calibrate_joint_encoder("enc_0", [0, 100], [0.0, 1.0])
         assert calibrator.get_status("enc_0") == CalibrationStatus.CALIBRATED
 
+
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for neuro-ground."""
@@ -1004,9 +1023,10 @@ class TestIntegration:
 
         # Calibrate multiple sensors
         calibrator.calibrate_joint_encoder("enc_0", [0, 500, 1000], [0.0, 0.5, 1.0])
-        calibrator.calibrate_force_sensor("force_0",
+        calibrator.calibrate_force_sensor(
+            "force_0",
             [np.array([i * 100]) for i in range(5)],
-            [np.array([i * 1.0]) for i in range(5)]
+            [np.array([i * 1.0]) for i in range(5)],
         )
 
         # Apply calibrations
@@ -1020,6 +1040,7 @@ class TestIntegration:
 
         stats = calibrator.statistics()
         assert stats["n_calibrations"] == 2
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

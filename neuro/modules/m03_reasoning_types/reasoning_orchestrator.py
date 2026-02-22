@@ -31,6 +31,7 @@ class ReasoningType(Enum):
 @dataclass
 class TaskAnalysis:
     """Analysis of what reasoning types a task requires"""
+
     task_description: str
     required_types: Set[ReasoningType]
     primary_type: ReasoningType
@@ -42,6 +43,7 @@ class TaskAnalysis:
 @dataclass
 class ReasoningResult:
     """Result from a reasoning operation"""
+
     reasoning_type: ReasoningType
     result: Any
     confidence: float
@@ -84,7 +86,7 @@ class ReasoningOrchestrator:
             ReasoningType.ABDUCTIVE: ["why", "cause", "explain", "reason", "because"],
             ReasoningType.FEEDBACK: ["try", "adapt", "improve", "feedback", "reward"],
             ReasoningType.SOCIAL: ["think", "believe", "want", "intend", "feel"],
-            ReasoningType.COLLABORATIVE: ["together", "share", "coordinate", "team", "help"]
+            ReasoningType.COLLABORATIVE: ["together", "share", "coordinate", "team", "help"],
         }
 
     def analyze_task(self, task_description: str) -> TaskAnalysis:
@@ -116,13 +118,12 @@ class ReasoningOrchestrator:
             primary_type=primary,
             complexity=complexity,
             suggested_sequence=sequence,
-            confidence=min(1.0, confidence)
+            confidence=min(1.0, confidence),
         )
 
-    def _determine_sequence(self,
-                            required: Set[ReasoningType],
-                            primary: ReasoningType
-                            ) -> List[ReasoningType]:
+    def _determine_sequence(
+        self, required: Set[ReasoningType], primary: ReasoningType
+    ) -> List[ReasoningType]:
         """Determine optimal sequence of reasoning types"""
         order = [
             ReasoningType.PERCEPTUAL,
@@ -134,7 +135,7 @@ class ReasoningOrchestrator:
             ReasoningType.HIERARCHICAL,
             ReasoningType.SOCIAL,
             ReasoningType.COLLABORATIVE,
-            ReasoningType.FEEDBACK
+            ReasoningType.FEEDBACK,
         ]
 
         sequence = [r for r in order if r in required]
@@ -145,18 +146,16 @@ class ReasoningOrchestrator:
 
         return sequence
 
-    def activate_reasoners(self,
-                           task_analysis: TaskAnalysis
-                           ) -> Dict[ReasoningType, Any]:
+    def activate_reasoners(self, task_analysis: TaskAnalysis) -> Dict[ReasoningType, Any]:
         """Activate and return relevant reasoners"""
         active = {}
 
         for rtype in task_analysis.required_types:
             if rtype == ReasoningType.PERCEPTUAL:
                 active[rtype] = {
-                    'visual': self.visual_extractor,
-                    'multimodal': self.multimodal,
-                    'recognition': self.object_recognizer
+                    "visual": self.visual_extractor,
+                    "multimodal": self.multimodal,
+                    "recognition": self.object_recognizer,
                 }
             elif rtype == ReasoningType.SPATIAL:
                 active[rtype] = self.spatial
@@ -179,11 +178,9 @@ class ReasoningOrchestrator:
 
         return active
 
-    def reason(self,
-               task_description: str,
-               input_data: Any = None,
-               context: Dict[str, Any] = None
-               ) -> List[ReasoningResult]:
+    def reason(
+        self, task_description: str, input_data: Any = None, context: Dict[str, Any] = None
+    ) -> List[ReasoningResult]:
         """
         Main reasoning interface.
         Analyzes task, activates reasoners, and returns results.
@@ -206,133 +203,123 @@ class ReasoningOrchestrator:
 
         return results
 
-    def _apply_reasoner(self,
-                        rtype: ReasoningType,
-                        reasoner: Any,
-                        input_data: Any,
-                        context: Dict[str, Any]
-                        ) -> Optional[ReasoningResult]:
+    def _apply_reasoner(
+        self, rtype: ReasoningType, reasoner: Any, input_data: Any, context: Dict[str, Any]
+    ) -> Optional[ReasoningResult]:
         """Apply a specific reasoner to input"""
         try:
             if rtype == ReasoningType.PERCEPTUAL:
                 if isinstance(input_data, np.ndarray):
-                    features = reasoner['visual'].extract_all(input_data)
+                    features = reasoner["visual"].extract_all(input_data)
                     return ReasoningResult(
                         reasoning_type=rtype,
-                        result={'features': features},
+                        result={"features": features},
                         confidence=0.8,
-                        reasoning_chain=['extract_features']
+                        reasoning_chain=["extract_features"],
                     )
 
             elif rtype == ReasoningType.SPATIAL:
-                if context and 'objects' in context:
-                    for obj in context['objects']:
+                if context and "objects" in context:
+                    for obj in context["objects"]:
                         reasoner.add_object(obj)
                 return ReasoningResult(
                     reasoning_type=rtype,
-                    result={'spatial_state': reasoner.objects},
+                    result={"spatial_state": reasoner.objects},
                     confidence=0.9,
-                    reasoning_chain=['spatial_encoding']
+                    reasoning_chain=["spatial_encoding"],
                 )
 
             elif rtype == ReasoningType.TEMPORAL:
-                if context and 'events' in context:
-                    for event in context['events']:
+                if context and "events" in context:
+                    for event in context["events"]:
                         reasoner.add_event(event)
-                    ordered = reasoner.order_events(
-                        [e.event_id for e in context['events']]
-                    )
+                    ordered = reasoner.order_events([e.event_id for e in context["events"]])
                     return ReasoningResult(
                         reasoning_type=rtype,
-                        result={'ordered_events': ordered},
+                        result={"ordered_events": ordered},
                         confidence=0.9,
-                        reasoning_chain=['temporal_ordering']
+                        reasoning_chain=["temporal_ordering"],
                     )
 
             elif rtype == ReasoningType.INDUCTIVE:
-                if context and 'observations' in context:
-                    for obs in context['observations']:
+                if context and "observations" in context:
+                    for obs in context["observations"]:
                         reasoner.observe(obs)
                     hypotheses = reasoner.hypothesize()
                     return ReasoningResult(
                         reasoning_type=rtype,
-                        result={'hypotheses': hypotheses},
+                        result={"hypotheses": hypotheses},
                         confidence=hypotheses[0].confidence if hypotheses else 0.5,
-                        reasoning_chain=['observe', 'hypothesize']
+                        reasoning_chain=["observe", "hypothesize"],
                     )
 
             elif rtype == ReasoningType.DEDUCTIVE:
-                if context and 'premises' in context:
-                    for premise in context['premises']:
+                if context and "premises" in context:
+                    for premise in context["premises"]:
                         reasoner.add_premise(premise)
-                    inferences = reasoner.derive(context['premises'])
+                    inferences = reasoner.derive(context["premises"])
                     return ReasoningResult(
                         reasoning_type=rtype,
-                        result={'inferences': inferences},
+                        result={"inferences": inferences},
                         confidence=1.0 if inferences else 0.0,
-                        reasoning_chain=['derive']
+                        reasoning_chain=["derive"],
                     )
 
             elif rtype == ReasoningType.ABDUCTIVE:
-                if context and 'effect' in context:
+                if context and "effect" in context:
                     explanation = reasoner.explain(
-                        context['effect'],
-                        context.get('effect_features', {})
+                        context["effect"], context.get("effect_features", {})
                     )
                     return ReasoningResult(
                         reasoning_type=rtype,
-                        result={'explanation': explanation},
+                        result={"explanation": explanation},
                         confidence=explanation.probability if explanation else 0.0,
-                        reasoning_chain=['explain']
+                        reasoning_chain=["explain"],
                     )
 
             elif rtype == ReasoningType.SOCIAL:
-                if context and 'agent' in context:
-                    predicted = reasoner.predict_action(context['agent'])
+                if context and "agent" in context:
+                    predicted = reasoner.predict_action(context["agent"])
                     return ReasoningResult(
                         reasoning_type=rtype,
-                        result={'predicted_action': predicted},
+                        result={"predicted_action": predicted},
                         confidence=predicted[1] if predicted else 0.0,
-                        reasoning_chain=['predict_action']
+                        reasoning_chain=["predict_action"],
                     )
 
             return ReasoningResult(
                 reasoning_type=rtype,
-                result={'status': 'activated'},
+                result={"status": "activated"},
                 confidence=0.5,
-                reasoning_chain=['activate']
+                reasoning_chain=["activate"],
             )
 
         except Exception as e:
             return ReasoningResult(
                 reasoning_type=rtype,
-                result={'error': str(e)},
+                result={"error": str(e)},
                 confidence=0.0,
-                reasoning_chain=['error']
+                reasoning_chain=["error"],
             )
 
-    def combine_outputs(self,
-                        results: List[ReasoningResult]
-                        ) -> Dict[str, Any]:
+    def combine_outputs(self, results: List[ReasoningResult]) -> Dict[str, Any]:
         """Combine outputs from multiple reasoners"""
         combined = {
-            'reasoning_types_used': [r.reasoning_type.value for r in results],
-            'overall_confidence': np.mean([r.confidence for r in results]) if results else 0.0,
-            'results': {}
+            "reasoning_types_used": [r.reasoning_type.value for r in results],
+            "overall_confidence": np.mean([r.confidence for r in results]) if results else 0.0,
+            "results": {},
         }
 
         for result in results:
-            combined['results'][result.reasoning_type.value] = {
-                'output': result.result,
-                'confidence': result.confidence,
-                'chain': result.reasoning_chain
+            combined["results"][result.reasoning_type.value] = {
+                "output": result.result,
+                "confidence": result.confidence,
+                "chain": result.reasoning_chain,
             }
 
         return combined
 
-    def resolve_conflicts(self,
-                          results: List[ReasoningResult]
-                          ) -> ReasoningResult:
+    def resolve_conflicts(self, results: List[ReasoningResult]) -> ReasoningResult:
         """Resolve conflicts when reasoners disagree"""
         if not results:
             return None
@@ -345,7 +332,7 @@ class ReasoningOrchestrator:
             ReasoningType.PERCEPTUAL,
             ReasoningType.ABDUCTIVE,
             ReasoningType.INDUCTIVE,
-            ReasoningType.SOCIAL
+            ReasoningType.SOCIAL,
         ]
 
         for priority_type in priority_order:
@@ -355,37 +342,34 @@ class ReasoningOrchestrator:
 
         return max(results, key=lambda r: r.confidence)
 
-    def meta_reason(self,
-                    task_description: str,
-                    previous_results: List[ReasoningResult] = None
-                    ) -> Dict[str, Any]:
+    def meta_reason(
+        self, task_description: str, previous_results: List[ReasoningResult] = None
+    ) -> Dict[str, Any]:
         """Meta-level reasoning about the reasoning process itself"""
         analysis = self.analyze_task(task_description)
 
         meta_analysis = {
-            'task_analysis': {
-                'primary_type': analysis.primary_type.value,
-                'required_types': [t.value for t in analysis.required_types],
-                'complexity': analysis.complexity
+            "task_analysis": {
+                "primary_type": analysis.primary_type.value,
+                "required_types": [t.value for t in analysis.required_types],
+                "complexity": analysis.complexity,
             },
-            'strategy': analysis.suggested_sequence,
-            'recommendations': []
+            "strategy": analysis.suggested_sequence,
+            "recommendations": [],
         }
 
         if analysis.complexity > 0.5:
-            meta_analysis['recommendations'].append(
-                "Complex task: consider breaking into subtasks"
-            )
+            meta_analysis["recommendations"].append("Complex task: consider breaking into subtasks")
 
         if ReasoningType.SOCIAL in analysis.required_types:
-            meta_analysis['recommendations'].append(
+            meta_analysis["recommendations"].append(
                 "Social reasoning needed: consider perspective-taking"
             )
 
         if previous_results:
             avg_confidence = np.mean([r.confidence for r in previous_results])
             if avg_confidence < 0.5:
-                meta_analysis['recommendations'].append(
+                meta_analysis["recommendations"].append(
                     "Low confidence: consider gathering more information"
                 )
 

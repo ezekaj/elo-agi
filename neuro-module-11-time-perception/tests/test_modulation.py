@@ -9,8 +9,9 @@ from neuro.modules.m11_time_perception.time_modulation import (
     AgeModulator,
     TimeModulationSystem,
     EmotionalState,
-    ModulationEffect
+    ModulationEffect,
 )
+
 
 class TestEmotionalModulator:
     """Tests for emotional modulation of time"""
@@ -65,12 +66,10 @@ class TestEmotionalModulator:
         modulator = EmotionalModulator()
 
         # Negative intense event should increase arousal
-        new_arousal = modulator.process_event(
-            event_valence=-0.8,
-            event_intensity=0.9
-        )
+        new_arousal = modulator.process_event(event_valence=-0.8, event_intensity=0.9)
 
         assert new_arousal > 0.5
+
 
 class TestAttentionalModulator:
     """Tests for attentional modulation of time"""
@@ -112,6 +111,7 @@ class TestAttentionalModulator:
         hard = modulator.dual_task_effect(task_difficulty=0.9)
 
         assert hard < easy
+
 
 class TestDopamineModulator:
     """Tests for dopamine modulation of time"""
@@ -160,6 +160,7 @@ class TestDopamineModulator:
 
         assert modulator.current_level < 0.5
 
+
 class TestAgeModulator:
     """Tests for age modulation of time"""
 
@@ -197,6 +198,7 @@ class TestAgeModulator:
 
         assert subjective < 1.0
 
+
 class TestTimeModulationSystem:
     """Tests for integrated modulation system"""
 
@@ -218,47 +220,41 @@ class TestTimeModulationSystem:
             emotional_state=EmotionalState.FEAR,
             attention=0.8,
             dopamine_level=1.2,
-            age=30
+            age=30,
         )
 
         assert perceived > 0
-        assert 'emotion' in effects
-        assert 'attention' in effects
-        assert 'dopamine' in effects
-        assert 'age' in effects
+        assert "emotion" in effects
+        assert "attention" in effects
+        assert "dopamine" in effects
+        assert "age" in effects
 
     def test_set_state(self):
         """Test setting system state"""
         system = TimeModulationSystem()
 
         system.set_state(
-            emotional_state=EmotionalState.EXCITEMENT,
-            attention=0.7,
-            dopamine=1.3,
-            age=25
+            emotional_state=EmotionalState.EXCITEMENT, attention=0.7, dopamine=1.3, age=25
         )
 
         state = system.get_current_state()
 
-        assert state['emotional_state'] == 'excitement'
-        assert state['attention'] == 0.7
-        assert state['age'] == 25
+        assert state["emotional_state"] == "excitement"
+        assert state["attention"] == 0.7
+        assert state["age"] == 25
 
     def test_fear_lengthens_perception(self):
         """Test that fear lengthens time perception"""
         system = TimeModulationSystem()
 
         neutral_perceived, _ = system.modulate_duration(
-            10.0,
-            emotional_state=EmotionalState.NEUTRAL
+            10.0, emotional_state=EmotionalState.NEUTRAL
         )
 
-        fear_perceived, _ = system.modulate_duration(
-            10.0,
-            emotional_state=EmotionalState.FEAR
-        )
+        fear_perceived, _ = system.modulate_duration(10.0, emotional_state=EmotionalState.FEAR)
 
         assert fear_perceived > neutral_perceived
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

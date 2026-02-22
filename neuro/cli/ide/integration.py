@@ -19,6 +19,7 @@ import asyncio
 
 class IDEType(Enum):
     """Supported IDE types."""
+
     VSCODE = "vscode"
     CURSOR = "cursor"
     NEOVIM = "neovim"
@@ -30,6 +31,7 @@ class IDEType(Enum):
 @dataclass
 class EditorContext:
     """Current editor context from IDE."""
+
     file_path: Optional[str] = None
     line_number: Optional[int] = None
     column: Optional[int] = None
@@ -45,6 +47,7 @@ class EditorContext:
 @dataclass
 class IDECommand:
     """Command to execute in IDE."""
+
     action: str  # "open", "goto", "edit", "save", "close"
     file_path: Optional[str] = None
     line_number: Optional[int] = None
@@ -178,10 +181,12 @@ def create_integration(
 
     if ide_type == IDEType.VSCODE:
         from .vscode import VSCodeIntegration
+
         return VSCodeIntegration(workspace_root)
 
     elif ide_type == IDEType.CURSOR:
         from .cursor import CursorIntegration
+
         return CursorIntegration(workspace_root)
 
     elif ide_type == IDEType.NEOVIM:

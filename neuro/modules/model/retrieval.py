@@ -17,6 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class Document:
     """A retrievable document."""
+
     id: str
     content: str
     embedding: Optional[np.ndarray] = None
@@ -116,7 +117,7 @@ class TwoStageRetriever:
         """Create embedding for text."""
         h = hashlib.sha256(text.encode()).digest()
         full_hash = h * (self.embedding_dim // len(h) + 1)
-        return np.array([b / 255.0 for b in full_hash[:self.embedding_dim]]) * 2 - 1
+        return np.array([b / 255.0 for b in full_hash[: self.embedding_dim]]) * 2 - 1
 
     def _cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
         """Compute cosine similarity."""
@@ -130,28 +131,19 @@ class TwoStageRetriever:
         doc_id: str,
         content: str,
         embedding: np.ndarray = None,
-        metadata: Dict[str, Any] = None
+        metadata: Dict[str, Any] = None,
     ) -> None:
         """Add a document to the retriever."""
         if embedding is None:
             embedding = self._create_embedding(content)
 
-        doc = Document(
-            id=doc_id,
-            content=content,
-            embedding=embedding,
-            metadata=metadata
-        )
+        doc = Document(id=doc_id, content=content, embedding=embedding, metadata=metadata)
 
         self.documents[doc_id] = doc
         self.bm25.add_document(doc_id, content)
 
     def retrieve(
-        self,
-        query: str,
-        k: int = 10,
-        stage1_k: int = 100,
-        stage2_weight: float = 0.6
+        self, query: str, k: int = 10, stage1_k: int = 100, stage2_weight: float = 0.6
     ) -> List[Tuple[Document, float]]:
         """
         Two-stage retrieval.
@@ -178,10 +170,7 @@ class TwoStageRetriever:
 
         # Normalize stage 1 scores
         max_bm25 = max(score for _, score in stage1_results) if stage1_results else 1
-        stage1_scores = {
-            doc_id: score / max(max_bm25, 1e-10)
-            for doc_id, score in stage1_results
-        }
+        stage1_scores = {doc_id: score / max(max_bm25, 1e-10) for doc_id, score in stage1_results}
 
         # Stage 2: Dense re-ranking
         query_embedding = self._create_embedding(query)
@@ -208,10 +197,10 @@ class TwoStageRetriever:
     def get_stats(self) -> Dict[str, Any]:
         """Get retriever statistics."""
         return {
-            'num_documents': len(self.documents),
-            'vocabulary_size': len(self.bm25.doc_freqs),
-            'avg_doc_length': self.bm25.avg_doc_len,
-            'embedding_dim': self.embedding_dim
+            "num_documents": len(self.documents),
+            "vocabulary_size": len(self.bm25.doc_freqs),
+            "avg_doc_length": self.bm25.avg_doc_len,
+            "embedding_dim": self.embedding_dim,
         }
 
 

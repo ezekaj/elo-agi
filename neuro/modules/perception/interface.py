@@ -12,15 +12,21 @@ from .visual.retina import Retina, RetinaOutput
 from .visual.v1_v2 import V1Processor, V2Processor, V1Output, V2Output
 from .visual.v4_it import V4Processor, ITProcessor, V4Output, ITOutput
 from .visual.dorsal_ventral import (
-    DorsalStream, VentralStream, VisualPathways,
-    DorsalOutput, VentralOutput
+    DorsalStream,
+    VentralStream,
+    VisualPathways,
+    DorsalOutput,
+    VentralOutput,
 )
 from .auditory.cochlea import Cochlea, CochleaOutput
 from .auditory.a1 import A1Processor, A1Output
 from .auditory.speech import SpeechProcessor, SpeechOutput
 from .multimodal.binding import (
-    CrossModalBinder, BindingOutput, BoundPercept,
-    Modality, ModalityInput
+    CrossModalBinder,
+    BindingOutput,
+    BoundPercept,
+    Modality,
+    ModalityInput,
 )
 from .multimodal.attention import SelectiveAttention, AttentionOutput
 
@@ -28,6 +34,7 @@ from .multimodal.attention import SelectiveAttention, AttentionOutput
 @dataclass
 class VisualPercept:
     """Complete visual perception output."""
+
     retina: RetinaOutput
     v1: V1Output
     v2: V2Output
@@ -50,6 +57,7 @@ class VisualPercept:
 @dataclass
 class AuditoryPercept:
     """Complete auditory perception output."""
+
     cochlea: CochleaOutput
     a1: A1Output
     speech: Optional[SpeechOutput] = None
@@ -65,6 +73,7 @@ class AuditoryPercept:
 @dataclass
 class MultimodalPercept:
     """Integrated multimodal perception."""
+
     visual: Optional[VisualPercept] = None
     auditory: Optional[AuditoryPercept] = None
     binding: Optional[BindingOutput] = None
@@ -121,9 +130,7 @@ class VisualPipeline:
         it_out = self.it.process(v4_out)
 
         # Dual streams
-        dorsal_out, ventral_out = self.pathways.process(
-            v1_out, v2_out, v4_out, it_out
-        )
+        dorsal_out, ventral_out = self.pathways.process(v1_out, v2_out, v4_out, it_out)
 
         return VisualPercept(
             retina=retina_out,
@@ -217,10 +224,12 @@ class AuditoryPipeline:
         # Use A1 modulation spectrum
         mod_spec = self.a1.get_modulation_spectrum(percept.a1)
 
-        features = np.concatenate([
-            mod_spec["rate_spectrum"],
-            mod_spec["scale_spectrum"],
-        ])
+        features = np.concatenate(
+            [
+                mod_spec["rate_spectrum"],
+                mod_spec["scale_spectrum"],
+            ]
+        )
 
         return features / (np.linalg.norm(features) + 1e-8)
 
@@ -303,26 +312,30 @@ class PerceptionSystem:
 
             # Create modality input for binding
             visual_features = self.visual.get_features(visual_percept)
-            modality_inputs.append(ModalityInput(
-                modality=Modality.VISUAL,
-                features=visual_features,
-                spatial_location=(0.0, 0.0, 1.0),  # Center, medium depth
-                timestamp=timestamp,
-                confidence=1.0,
-            ))
+            modality_inputs.append(
+                ModalityInput(
+                    modality=Modality.VISUAL,
+                    features=visual_features,
+                    spatial_location=(0.0, 0.0, 1.0),  # Center, medium depth
+                    timestamp=timestamp,
+                    confidence=1.0,
+                )
+            )
 
         if auditory_input is not None:
             auditory_percept = self.auditory.process(auditory_input)
 
             # Create modality input for binding
             auditory_features = self.auditory.get_features(auditory_percept)
-            modality_inputs.append(ModalityInput(
-                modality=Modality.AUDITORY,
-                features=auditory_features,
-                spatial_location=None,  # No spatial location for audio
-                timestamp=timestamp,
-                confidence=1.0,
-            ))
+            modality_inputs.append(
+                ModalityInput(
+                    modality=Modality.AUDITORY,
+                    features=auditory_features,
+                    spatial_location=None,  # No spatial location for audio
+                    timestamp=timestamp,
+                    confidence=1.0,
+                )
+            )
 
         # Cross-modal binding
         binding_output = None

@@ -2,7 +2,11 @@
 
 import numpy as np
 import pytest
-from neuro.modules.m01_predictive_coding.predictive_hierarchy import PredictiveLayer, PredictiveHierarchy
+from neuro.modules.m01_predictive_coding.predictive_hierarchy import (
+    PredictiveLayer,
+    PredictiveHierarchy,
+)
+
 
 class TestPredictiveLayer:
     """Tests for single predictive layer"""
@@ -46,7 +50,7 @@ class TestPredictiveLayer:
         target = np.array([1.0, 0.5, -0.5])
 
         # Multiple update cycles
-        initial_error = float('inf')
+        initial_error = float("inf")
         for _ in range(50):
             prediction = layer.generate_prediction()
             error = target - prediction
@@ -54,7 +58,7 @@ class TestPredictiveLayer:
             layer.update_state(dt=0.1)
             layer.update_weights(dt=0.1)
 
-            current_error = np.sum(error ** 2)
+            current_error = np.sum(error**2)
             assert current_error <= initial_error + 0.1  # Allow small increase
             initial_error = current_error
 
@@ -89,6 +93,7 @@ class TestPredictiveLayer:
 
         assert np.allclose(layer.hidden_state, 0)
         assert len(layer.error_history) == 0
+
 
 class TestPredictiveHierarchy:
     """Tests for full hierarchy"""
@@ -130,16 +135,16 @@ class TestPredictiveHierarchy:
 
         result = hierarchy.step(observation)
 
-        assert 'errors' in result
-        assert 'predictions' in result
-        assert 'states' in result
-        assert 'total_error' in result
+        assert "errors" in result
+        assert "predictions" in result
+        assert "states" in result
+        assert "total_error" in result
 
     def test_learning_reduces_error(self):
         """Test that hierarchy learns to predict constant input"""
         hierarchy = PredictiveHierarchy(
             layer_dims=[5, 4, 3],
-            learning_rate=0.05  # Lower learning rate for stability
+            learning_rate=0.05,  # Lower learning rate for stability
         )
 
         # Constant input (smaller values for stability)
@@ -147,13 +152,13 @@ class TestPredictiveHierarchy:
 
         initial_error = None
         final_error = None
-        min_error = float('inf')
+        min_error = float("inf")
 
         for i in range(100):
             result = hierarchy.step(constant_input, dt=0.05, update_weights=True)
             if i == 0:
-                initial_error = result['total_error']
-            final_error = result['total_error']
+                initial_error = result["total_error"]
+            final_error = result["total_error"]
             min_error = min(min_error, final_error)
 
         # Either final or minimum error should improve
@@ -161,20 +166,14 @@ class TestPredictiveHierarchy:
 
     def test_temporal_hierarchy(self):
         """Test that higher layers change slower"""
-        hierarchy = PredictiveHierarchy(
-            layer_dims=[5, 4, 3],
-            timescale_factor=3.0
-        )
+        hierarchy = PredictiveHierarchy(layer_dims=[5, 4, 3], timescale_factor=3.0)
 
         # Higher layers should have larger timescales
         assert hierarchy.layers[1].timescale > hierarchy.layers[0].timescale
 
     def test_sequence_prediction(self):
         """Test hierarchy learns sequential patterns"""
-        hierarchy = PredictiveHierarchy(
-            layer_dims=[3, 4, 3],
-            learning_rate=0.3
-        )
+        hierarchy = PredictiveHierarchy(layer_dims=[3, 4, 3], learning_rate=0.3)
 
         # Simple alternating sequence
         sequence = [
@@ -213,6 +212,7 @@ class TestPredictiveHierarchy:
         for layer in hierarchy.layers:
             assert np.allclose(layer.hidden_state, 0)
 
+
 class TestHierarchyLesion:
     """Tests simulating lesion experiments"""
 
@@ -225,12 +225,12 @@ class TestHierarchyLesion:
         for _ in range(50):
             hierarchy.step(constant)
 
-        normal_error = hierarchy.step(constant)['total_error']
+        normal_error = hierarchy.step(constant)["total_error"]
 
         # "Lesion" top-down by zeroing top layer weights
         hierarchy.layers[-1].W_g = np.zeros_like(hierarchy.layers[-1].W_g)
 
-        lesioned_error = hierarchy.step(constant)['total_error']
+        lesioned_error = hierarchy.step(constant)["total_error"]
 
         # Error should increase after lesion (or at minimum not improve)
         # The exact behavior depends on the hierarchy structure
@@ -260,5 +260,6 @@ class TestHierarchyLesion:
             change = np.linalg.norm(final_states[i] - s)
             assert change < 1.0  # Bounded change
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

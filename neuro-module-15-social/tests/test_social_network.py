@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from neuro.modules.m15_social.social_network import SocialBrain, SocialCognitionNetwork
 
+
 class TestSocialBrain:
     """Tests for social brain model"""
 
@@ -42,6 +43,7 @@ class TestSocialBrain:
         assert "affective" in activations
         assert "integrated" in activations
 
+
 class TestSocialCognitionNetwork:
     """Tests for full social cognition network"""
 
@@ -68,9 +70,7 @@ class TestSocialCognitionNetwork:
         behavior = np.random.rand(50)
         emotion = np.random.rand(50)
         result = network.process_social_stimulus(
-            "agent1", behavior,
-            emotional_display=emotion,
-            is_distress=True
+            "agent1", behavior, emotional_display=emotion, is_distress=True
         )
         assert "empathy" in result
 
@@ -100,9 +100,7 @@ class TestSocialCognitionNetwork:
         """Test getting empathic response"""
         network = SocialCognitionNetwork()
         network.process_social_stimulus(
-            "agent1", np.random.rand(50),
-            emotional_display=np.ones(50),
-            is_distress=True
+            "agent1", np.random.rand(50), emotional_display=np.ones(50), is_distress=True
         )
         response = network.get_empathic_response("agent1")
         assert "empathy_level" in response
@@ -134,5 +132,6 @@ class TestSocialCognitionNetwork:
         assert "perspective" in state
         assert "social_brain" in state
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

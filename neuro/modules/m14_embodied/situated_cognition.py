@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Any
 @dataclass
 class SituatedParams:
     """Parameters for situated cognition"""
+
     n_features: int = 50
     context_influence: float = 0.5
     memory_decay: float = 0.05
@@ -58,8 +59,7 @@ class ExternalMemory:
             return self.storage[key]
         return None
 
-    def search_by_location(self, query_location: np.ndarray,
-                          threshold: float = 0.5) -> List[str]:
+    def search_by_location(self, query_location: np.ndarray, threshold: float = 0.5) -> List[str]:
         """Find items near a location"""
         matches = []
         for key, location in self.storage_locations.items():
@@ -71,7 +71,7 @@ class ExternalMemory:
     def decay_attention(self, dt: float = 1.0, decay_rate: float = 0.1):
         """Decay attention to external items"""
         for key in self.attention:
-            self.attention[key] *= (1 - decay_rate * dt)
+            self.attention[key] *= 1 - decay_rate * dt
 
     def get_attended_items(self, threshold: float = 0.3) -> List[str]:
         """Get items above attention threshold"""
@@ -121,11 +121,7 @@ class SituatedContext:
 
     def _update_combined(self):
         """Update combined context features"""
-        combined = np.concatenate([
-            self.physical_context,
-            self.social_context,
-            self.task_context
-        ])
+        combined = np.concatenate([self.physical_context, self.social_context, self.task_context])
         self.context_features = np.zeros(self.params.n_features)
         n = min(len(combined), self.params.n_features)
         self.context_features[:n] = combined[:n]
@@ -148,8 +144,7 @@ class SituatedContext:
             other_context = np.resize(other_context, len(self.context_features))
 
         return np.dot(self.context_features, other_context) / (
-            np.linalg.norm(self.context_features) *
-            np.linalg.norm(other_context) + 1e-8
+            np.linalg.norm(self.context_features) * np.linalg.norm(other_context) + 1e-8
         )
 
     def detect_context_change(self, threshold: float = 0.3) -> bool:
@@ -206,18 +201,22 @@ class ContextualReasoner:
 
         # Apply scaffolding from environment
         if external_support:
-            scaffolding = np.mean([
-                np.resize(s, self.params.n_features) if isinstance(s, np.ndarray)
-                else np.zeros(self.params.n_features)
-                for s in external_support
-            ], axis=0)
+            scaffolding = np.mean(
+                [
+                    np.resize(s, self.params.n_features)
+                    if isinstance(s, np.ndarray)
+                    else np.zeros(self.params.n_features)
+                    for s in external_support
+                ],
+                axis=0,
+            )
             solution = solution + scaffolding * self.params.scaffolding_strength
 
         return {
             "solution": solution,
             "context_influence": self.params.context_influence,
             "external_support_used": len(external_support),
-            "context_changed": self.context.detect_context_change()
+            "context_changed": self.context.detect_context_change(),
         }
 
     def store_knowledge(self, context_key: str, knowledge: np.ndarray):
@@ -230,8 +229,7 @@ class ContextualReasoner:
         """Retrieve knowledge for specific context"""
         return self.context_knowledge.get(context_key, [])
 
-    def offload_to_environment(self, key: str, value: Any,
-                              location: Optional[np.ndarray] = None):
+    def offload_to_environment(self, key: str, value: Any, location: Optional[np.ndarray] = None):
         """Offload cognitive load to environment"""
         self.external_memory.store(key, value, location)
 
@@ -245,5 +243,5 @@ class ContextualReasoner:
             "context_features": self.context.context_features.copy(),
             "external_memory_size": len(self.external_memory.storage),
             "attended_items": self.external_memory.get_attended_items(),
-            "context_knowledge_keys": list(self.context_knowledge.keys())
+            "context_knowledge_keys": list(self.context_knowledge.keys()),
         }

@@ -13,6 +13,7 @@ import numpy as np
 @dataclass
 class Intervention:
     """An intervention do(X=x)."""
+
     variable: str
     value: Any
     description: Optional[str] = None
@@ -29,21 +30,20 @@ class DoOperator:
     Represents the operation of setting a variable to a specific value
     by "surgically" removing all incoming edges.
     """
+
     variables: Dict[str, Any]  # Variables being intervened on
 
     def __str__(self):
-        interventions = ", ".join(
-            f"{v}={val}" for v, val in self.variables.items()
-        )
+        interventions = ", ".join(f"{v}={val}" for v, val in self.variables.items())
         return f"do({interventions})"
 
     @classmethod
-    def single(cls, variable: str, value: Any) -> 'DoOperator':
+    def single(cls, variable: str, value: Any) -> "DoOperator":
         """Create a single-variable intervention."""
         return cls({variable: value})
 
     @classmethod
-    def multiple(cls, interventions: Dict[str, Any]) -> 'DoOperator':
+    def multiple(cls, interventions: Dict[str, Any]) -> "DoOperator":
         """Create a multi-variable intervention."""
         return cls(interventions)
 
@@ -106,6 +106,7 @@ class InterventionEngine:
 
         # Count frequencies
         from collections import Counter
+
         counts = Counter(values)
         total = len(values)
 
@@ -341,10 +342,7 @@ class InterventionEngine:
 
         # Filter by evidence
         if evidence:
-            samples = [
-                s for s in samples
-                if all(s.get(k) == v for k, v in evidence.items())
-            ]
+            samples = [s for s in samples if all(s.get(k) == v for k, v in evidence.items())]
 
         return {
             "n_samples": len(samples),

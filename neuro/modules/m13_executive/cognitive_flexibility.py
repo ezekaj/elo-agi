@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple, Callable
 @dataclass
 class FlexibilityParams:
     """Parameters for cognitive flexibility"""
+
     n_rules: int = 4
     n_dimensions: int = 3
     switch_cost: float = 0.2  # RT increase on switch trials
@@ -48,11 +49,9 @@ class TaskSwitcher:
             return
 
         is_switch = True
-        self.switch_history.append({
-            "from": self.current_task,
-            "to": new_task,
-            "prepared": self.prepared
-        })
+        self.switch_history.append(
+            {"from": self.current_task, "to": new_task, "prepared": self.prepared}
+        )
 
         # Task-set reconfiguration
         self.task_activation[self.current_task] *= 0.5  # Decay old task
@@ -90,7 +89,7 @@ class TaskSwitcher:
         if is_switch:
             switch_cost = self.params.switch_cost * 1000  # Convert to ms
             if was_prepared:
-                switch_cost *= (1 - self.params.preparation_benefit)
+                switch_cost *= 1 - self.params.preparation_benefit
             base_rt += switch_cost
 
         # Add noise
@@ -109,7 +108,7 @@ class TaskSwitcher:
             "prepared": was_prepared,
             "rt": rt,
             "correct": correct,
-            "task_activation": self.task_activation[task]
+            "task_activation": self.task_activation[task],
         }
 
     def get_switch_cost(self) -> float:
@@ -199,7 +198,7 @@ class SetShifter:
             "correct_rule": self.current_rule,
             "chosen_rule": choice_dimension,
             "consecutive_correct": self.consecutive_correct,
-            "is_perseverative": not correct and self.rule_strength[choice_dimension] > 0.5
+            "is_perseverative": not correct and self.rule_strength[choice_dimension] > 0.5,
         }
 
     def model_response(self, card: Dict) -> int:
@@ -225,7 +224,7 @@ class SetShifter:
             "total_errors": self.total_errors,
             "perseverative_errors": self.perseverative_errors,
             "perseveration_rate": self.perseverative_errors / max(1, self.total_errors),
-            "current_rule_strength": self.rule_strength.copy()
+            "current_rule_strength": self.rule_strength.copy(),
         }
 
     def reset(self):
@@ -273,7 +272,7 @@ class CognitiveFlexibility:
             "current_task": self.task_switcher.current_task,
             "task_activations": self.task_switcher.task_activation.copy(),
             "rule_strengths": self.set_shifter.rule_strength.copy(),
-            "lpfc_mean_activity": np.mean(self.lpfc_activation)
+            "lpfc_mean_activity": np.mean(self.lpfc_activation),
         }
 
     def update(self, dt: float = 1.0):
@@ -283,7 +282,7 @@ class CognitiveFlexibility:
         self.lpfc_activation += 0.1 * (target - self.lpfc_activation) * dt
 
         # Decay task activations
-        self.task_switcher.task_activation *= (1 - 0.01 * dt)
+        self.task_switcher.task_activation *= 1 - 0.01 * dt
         # Keep current task active
         self.task_switcher.task_activation[self.task_switcher.current_task] = max(
             0.5, self.task_switcher.task_activation[self.task_switcher.current_task]

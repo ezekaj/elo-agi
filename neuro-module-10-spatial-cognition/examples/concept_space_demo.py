@@ -11,7 +11,8 @@ also encode abstract concepts:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 import numpy as np
 from src import ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap
@@ -28,15 +29,13 @@ def demo_conceptual_space():
 
     # Create concept cell for "democracy"
     democracy_cell = ConceptCell(
-        concept_center=np.array([0.8, 0.7, 0.6]),
-        concept_radius=0.3,
-        associated_concept="democracy"
+        concept_center=np.array([0.8, 0.7, 0.6]), concept_radius=0.3, associated_concept="democracy"
     )
 
     # Test activation for different concepts
     concepts = [
         ("democracy", np.array([0.8, 0.7, 0.6])),  # Same position
-        ("freedom", np.array([0.7, 0.8, 0.6])),    # Similar
+        ("freedom", np.array([0.7, 0.8, 0.6])),  # Similar
         ("autocracy", np.array([0.2, 0.3, 0.4])),  # Opposite
     ]
 

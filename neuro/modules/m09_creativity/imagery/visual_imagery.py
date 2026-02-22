@@ -17,6 +17,7 @@ from enum import Enum
 
 class VisualProperty(Enum):
     """Properties of visual images"""
+
     COLOR = "color"
     SHAPE = "shape"
     SIZE = "size"
@@ -30,18 +31,20 @@ class VisualProperty(Enum):
 @dataclass
 class VisualImage:
     """A mental visual image"""
+
     id: str
     description: str
     properties: Dict[VisualProperty, Any]
     vividness: float  # 0-1, how clear/vivid the image is
     stability: float  # 0-1, how well it holds in mind
-    components: List['VisualImage'] = field(default_factory=list)
+    components: List["VisualImage"] = field(default_factory=list)
     spatial_relations: Dict[str, Tuple[str, str]] = field(default_factory=dict)
 
 
 @dataclass
 class VisualTransformation:
     """A transformation applied to a visual image"""
+
     transformation_type: str  # "rotate", "scale", "translate", "morph"
     parameters: Dict[str, Any]
     difficulty: float  # How hard this transformation is
@@ -58,19 +61,19 @@ class VisualImagery:
     - Combining images into scenes
     """
 
-    def __init__(self,
-                 default_vividness: float = 0.7,
-                 decay_rate: float = 0.1):
+    def __init__(self, default_vividness: float = 0.7, decay_rate: float = 0.1):
         self.images: Dict[str, VisualImage] = {}
         self.default_vividness = default_vividness
         self.decay_rate = decay_rate
         self._active_image: Optional[str] = None
 
-    def create_image(self,
-                     image_id: str,
-                     description: str,
-                     properties: Optional[Dict[VisualProperty, Any]] = None,
-                     vividness: Optional[float] = None) -> VisualImage:
+    def create_image(
+        self,
+        image_id: str,
+        description: str,
+        properties: Optional[Dict[VisualProperty, Any]] = None,
+        vividness: Optional[float] = None,
+    ) -> VisualImage:
         """
         Create a new mental visual image.
 
@@ -81,7 +84,7 @@ class VisualImagery:
             description=description,
             properties=properties or {},
             vividness=vividness or self.default_vividness,
-            stability=0.8
+            stability=0.8,
         )
 
         self.images[image_id] = image
@@ -130,10 +133,7 @@ class VisualImagery:
 
         return properties
 
-    def rotate(self,
-               image_id: str,
-               angle: float,
-               axis: str = "z") -> VisualImage:
+    def rotate(self, image_id: str, angle: float, axis: str = "z") -> VisualImage:
         """
         Mentally rotate an image.
 
@@ -161,15 +161,13 @@ class VisualImagery:
             description=f"{image.description} (rotated {angle}°)",
             properties=new_properties,
             vividness=new_vividness,
-            stability=image.stability * 0.9
+            stability=image.stability * 0.9,
         )
 
         self.images[rotated_id] = rotated
         return rotated
 
-    def scale(self,
-              image_id: str,
-              factor: float) -> VisualImage:
+    def scale(self, image_id: str, factor: float) -> VisualImage:
         """Mentally resize an image"""
         if image_id not in self.images:
             raise ValueError(f"Image {image_id} not found")
@@ -190,15 +188,15 @@ class VisualImagery:
             description=f"{image.description} (scaled {factor}x)",
             properties=new_properties,
             vividness=image.vividness * 0.95,
-            stability=image.stability * 0.95
+            stability=image.stability * 0.95,
         )
 
         self.images[scaled_id] = scaled
         return scaled
 
-    def combine(self,
-                image_ids: List[str],
-                spatial_arrangement: Optional[Dict[str, Tuple[str, str]]] = None) -> VisualImage:
+    def combine(
+        self, image_ids: List[str], spatial_arrangement: Optional[Dict[str, Tuple[str, str]]] = None
+    ) -> VisualImage:
         """
         Combine multiple images into a scene.
 
@@ -226,16 +224,13 @@ class VisualImagery:
             vividness=avg_vividness * 0.9,  # Slight loss from complexity
             stability=0.7,  # Complex images less stable
             components=components,
-            spatial_relations=spatial_arrangement or {}
+            spatial_relations=spatial_arrangement or {},
         )
 
         self.images[combined_id] = combined
         return combined
 
-    def morph(self,
-              image1_id: str,
-              image2_id: str,
-              blend_factor: float = 0.5) -> VisualImage:
+    def morph(self, image1_id: str, image2_id: str, blend_factor: float = 0.5) -> VisualImage:
         """
         Morph between two images.
 
@@ -272,15 +267,15 @@ class VisualImagery:
             description=f"Morph of {img1.description} and {img2.description}",
             properties=blended_props,
             vividness=min(img1.vividness, img2.vividness) * 0.8,
-            stability=0.6  # Morphed images are unstable
+            stability=0.6,  # Morphed images are unstable
         )
 
         self.images[morphed_id] = morphed
         return morphed
 
-    def inspect(self,
-                image_id: str,
-                focus_property: Optional[VisualProperty] = None) -> Dict[str, Any]:
+    def inspect(
+        self, image_id: str, focus_property: Optional[VisualProperty] = None
+    ) -> Dict[str, Any]:
         """
         Inspect an image for details.
 
@@ -295,14 +290,14 @@ class VisualImagery:
             "description": image.description,
             "vividness": image.vividness,
             "stability": image.stability,
-            "properties": {p.value: v for p, v in image.properties.items()}
+            "properties": {p.value: v for p, v in image.properties.items()},
         }
 
         if focus_property and focus_property in image.properties:
             result["focused_property"] = {
                 "property": focus_property.value,
                 "value": image.properties[focus_property],
-                "detail_level": "high" if image.vividness > 0.7 else "low"
+                "detail_level": "high" if image.vividness > 0.7 else "low",
             }
 
         if image.components:

@@ -16,6 +16,7 @@ from .cognitive_flexibility import CognitiveFlexibility, FlexibilityParams
 @dataclass
 class ExecutiveParams:
     """Parameters for executive network"""
+
     n_units: int = 100
     conflict_threshold: float = 0.5
     control_strength: float = 0.7
@@ -112,7 +113,7 @@ class PFCController:
     def maintain_goals(self, dt: float = 1.0):
         """Active maintenance of goal representations"""
         # Goals decay over time
-        self.goal_activation *= (1 - self.params.goal_decay_rate * dt)
+        self.goal_activation *= 1 - self.params.goal_decay_rate * dt
 
         # Current goal gets maintenance boost
         self.goal_activation[self.current_goal] = min(
@@ -138,8 +139,7 @@ class PFCController:
         """Adjust control level based on conflict"""
         # High conflict -> increase control
         self.control_level = np.clip(
-            self.control_level + conflict_signal * self.params.learning_rate,
-            0.2, 1.0
+            self.control_level + conflict_signal * self.params.learning_rate, 0.2, 1.0
         )
 
     def get_state(self) -> dict:
@@ -147,7 +147,7 @@ class PFCController:
         return {
             "current_goal": self.current_goal,
             "goal_activation": self.goal_activation.copy(),
-            "control_level": self.control_level
+            "control_level": self.control_level,
         }
 
 
@@ -206,7 +206,7 @@ class ExecutiveNetwork:
         # 5. Apply inhibition if needed
         if self.conflict_monitor.needs_control():
             inhibition_strength = self.inhibition.get_inhibition_strength()
-            response_activation *= (1 - inhibition_strength * 0.5)
+            response_activation *= 1 - inhibition_strength * 0.5
             self.controller.adjust_control(self.conflict_monitor.get_control_signal())
 
         # 6. Select response (winner-take-all with noise)
@@ -226,7 +226,7 @@ class ExecutiveNetwork:
             "conflict": conflict,
             "control_level": self.controller.control_level,
             "wm_load": self.working_memory.get_load(),
-            "fatigue": self.fatigue
+            "fatigue": self.fatigue,
         }
 
     def update(self, dt: float = 1.0):
@@ -260,7 +260,7 @@ class ExecutiveNetwork:
             "wm_load": self.working_memory.get_load(),
             "inhibition_strength": self.inhibition.get_inhibition_strength(),
             "arousal": self.arousal,
-            "fatigue": self.fatigue
+            "fatigue": self.fatigue,
         }
 
     def run_stroop_trial(self, word: str, color: str, task: str = "color") -> dict:

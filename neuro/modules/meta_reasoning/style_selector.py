@@ -20,6 +20,7 @@ except ImportError:
 
 class ReasoningStyle(Enum):
     """Available reasoning styles."""
+
     DEDUCTIVE = "deductive"
     INDUCTIVE = "inductive"
     ABDUCTIVE = "abductive"
@@ -35,6 +36,7 @@ class ReasoningStyle(Enum):
 @dataclass
 class StyleSelectorConfig:
     """Configuration for style selection."""
+
     exploration_rate: float = 0.1
     learning_rate: float = 0.1
     min_fitness_threshold: float = 0.3
@@ -45,6 +47,7 @@ class StyleSelectorConfig:
 @dataclass
 class StyleSelection:
     """Result of style selection."""
+
     primary_style: ReasoningStyle
     primary_fitness: float
     secondary_styles: List[Tuple[ReasoningStyle, float]]
@@ -55,6 +58,7 @@ class StyleSelection:
 @dataclass
 class StyleFeedback:
     """Feedback on style effectiveness."""
+
     style: ReasoningStyle
     problem_type: ProblemType
     success: bool
@@ -158,9 +162,7 @@ class StyleSelector:
             primary_fitness, [f for _, f in secondary_styles]
         )
 
-        rationale = self._generate_rationale(
-            primary_style, analysis.problem_type, primary_fitness
-        )
+        rationale = self._generate_rationale(primary_style, analysis.problem_type, primary_fitness)
 
         self._total_selections += 1
 

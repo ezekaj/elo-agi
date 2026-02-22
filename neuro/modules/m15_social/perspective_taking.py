@@ -12,6 +12,7 @@ from typing import Optional, Dict, List
 @dataclass
 class PerspectiveParams:
     """Parameters for perspective taking"""
+
     n_features: int = 50
     self_other_separation: float = 0.7
     switching_cost: float = 0.2
@@ -64,8 +65,7 @@ class SelfOtherDistinction:
 
         # Calculate similarity (low similarity = high distinction)
         similarity = np.dot(self.self_representation, other) / (
-            np.linalg.norm(self.self_representation) *
-            np.linalg.norm(other) + 1e-8
+            np.linalg.norm(self.self_representation) * np.linalg.norm(other) + 1e-8
         )
 
         distinction = (1 - similarity) / 2
@@ -107,10 +107,10 @@ class TPJNetwork:
             return {"success": False, "reason": "unknown agent"}
 
         # TPJ activation during switch
-        old_perspective = self.perspectives.get(self.current_perspective,
-                                                np.zeros(self.params.n_features))
-        new_perspective = self.perspectives.get(to_agent,
-                                               np.zeros(self.params.n_features))
+        old_perspective = self.perspectives.get(
+            self.current_perspective, np.zeros(self.params.n_features)
+        )
+        new_perspective = self.perspectives.get(to_agent, np.zeros(self.params.n_features))
 
         # Switch cost (cognitive effort)
         switch_cost = self.params.switching_cost
@@ -119,8 +119,7 @@ class TPJNetwork:
 
         # Update TPJ
         self.tpj_activation = np.tanh(
-            self.tpj_activation * 0.3 +
-            (new_perspective - old_perspective) * 0.7
+            self.tpj_activation * 0.3 + (new_perspective - old_perspective) * 0.7
         )
 
         self.current_perspective = to_agent
@@ -130,7 +129,7 @@ class TPJNetwork:
             "from": self.current_perspective,
             "to": to_agent,
             "switch_cost": switch_cost,
-            "tpj_activity": np.mean(self.tpj_activation)
+            "tpj_activity": np.mean(self.tpj_activation),
         }
 
     def view_from_perspective(self, stimulus: np.ndarray) -> np.ndarray:
@@ -138,8 +137,7 @@ class TPJNetwork:
         if len(stimulus) != self.params.n_features:
             stimulus = np.resize(stimulus, self.params.n_features)
 
-        current = self.perspectives.get(self.current_perspective,
-                                       np.zeros(self.params.n_features))
+        current = self.perspectives.get(self.current_perspective, np.zeros(self.params.n_features))
 
         # Stimulus filtered through current perspective
         viewed = stimulus * 0.5 + current * 0.5
@@ -165,8 +163,7 @@ class PerspectiveTaking:
         # Affective perspective (feel what they feel)
         self.affective_active = False
 
-    def take_visual_perspective(self, agent: str, scene: np.ndarray,
-                               level: int = 1) -> Dict:
+    def take_visual_perspective(self, agent: str, scene: np.ndarray, level: int = 1) -> Dict:
         """Take visual perspective of another
 
         Level 1: What do they see?
@@ -187,8 +184,7 @@ class PerspectiveTaking:
             their_view = occluded
         else:
             # Level 2: How they interpret what they see
-            their_perspective = self.tpj.perspectives.get(agent,
-                                                          np.zeros(self.params.n_features))
+            their_perspective = self.tpj.perspectives.get(agent, np.zeros(self.params.n_features))
             their_view = self.tpj.view_from_perspective(scene)
 
         return {
@@ -196,11 +192,10 @@ class PerspectiveTaking:
             "level": level,
             "their_view": their_view,
             "self_other_distinction": self.self_other.distinguish(agent),
-            "tpj_activity": np.mean(self.tpj.tpj_activation)
+            "tpj_activity": np.mean(self.tpj.tpj_activation),
         }
 
-    def take_affective_perspective(self, agent: str,
-                                  their_situation: np.ndarray) -> Dict:
+    def take_affective_perspective(self, agent: str, their_situation: np.ndarray) -> Dict:
         """Take affective perspective - how would they feel?"""
         if len(their_situation) != self.params.n_features:
             their_situation = np.resize(their_situation, self.params.n_features)
@@ -211,8 +206,7 @@ class PerspectiveTaking:
         self.tpj.switch_perspective(agent)
 
         # Infer their emotional response to situation
-        their_perspective = self.tpj.perspectives.get(agent,
-                                                      np.zeros(self.params.n_features))
+        their_perspective = self.tpj.perspectives.get(agent, np.zeros(self.params.n_features))
 
         # Their feeling = situation × their perspective
         inferred_feeling = np.tanh(their_situation * 0.5 + their_perspective * 0.5)
@@ -222,8 +216,7 @@ class PerspectiveTaking:
         self_influence = self.self_other.get_self_influence(agent)
 
         # Some self-projection (egocentric bias)
-        own_response = np.tanh(their_situation * 0.5 +
-                              self.self_other.self_representation * 0.5)
+        own_response = np.tanh(their_situation * 0.5 + self.self_other.self_representation * 0.5)
 
         blended = inferred_feeling * distinction + own_response * self_influence
 
@@ -233,7 +226,7 @@ class PerspectiveTaking:
             "pure_inference": inferred_feeling,
             "self_projection": own_response,
             "distinction": distinction,
-            "egocentric_bias": self_influence
+            "egocentric_bias": self_influence,
         }
 
     def return_to_self(self):
@@ -248,7 +241,7 @@ class PerspectiveTaking:
 
     def update(self, dt: float = 1.0):
         """Update perspective taking system"""
-        self.tpj.tpj_activation *= (1 - 0.1 * dt)
+        self.tpj.tpj_activation *= 1 - 0.1 * dt
 
     def get_state(self) -> Dict:
         """Get perspective taking state"""
@@ -258,5 +251,5 @@ class PerspectiveTaking:
             "affective_active": self.affective_active,
             "tpj_activity": np.mean(self.tpj.tpj_activation),
             "known_perspectives": list(self.tpj.perspectives.keys()),
-            "boundary_strength": self.self_other.boundary_strength
+            "boundary_strength": self.self_other.boundary_strength,
         }

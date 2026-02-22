@@ -15,6 +15,7 @@ from enum import Enum
 
 class MemoryType(Enum):
     """Types of memories"""
+
     EPISODIC = "episodic"
     SEMANTIC = "semantic"
     PROCEDURAL = "procedural"
@@ -27,21 +28,22 @@ class MemoryTrace:
     Memories are stored as activation patterns that can be
     replayed during sleep for consolidation.
     """
-    content: np.ndarray                    # Memory encoding (pattern)
-    strength: float = 1.0                  # Connection strength
-    hippocampal_index: bool = True         # Indexed in hippocampus
-    cortical_index: bool = False           # Transferred to cortex
-    encoding_time: float = 0.0             # When originally encoded
-    last_replay: float = 0.0               # Time of last reactivation
-    replay_count: int = 0                  # Number of replays
-    emotional_salience: float = 0.0        # -1 to 1 (negative to positive)
+
+    content: np.ndarray  # Memory encoding (pattern)
+    strength: float = 1.0  # Connection strength
+    hippocampal_index: bool = True  # Indexed in hippocampus
+    cortical_index: bool = False  # Transferred to cortex
+    encoding_time: float = 0.0  # When originally encoded
+    last_replay: float = 0.0  # Time of last reactivation
+    replay_count: int = 0  # Number of replays
+    emotional_salience: float = 0.0  # -1 to 1 (negative to positive)
     memory_type: MemoryType = MemoryType.EPISODIC
-    learning_complete: float = 0.0         # 0-1, how well learned
+    learning_complete: float = 0.0  # 0-1, how well learned
 
     # Context information
     context: Optional[Dict] = None
 
-    def similarity_to(self, other: 'MemoryTrace') -> float:
+    def similarity_to(self, other: "MemoryTrace") -> float:
         """Compute similarity to another memory trace."""
         if self.content.shape != other.content.shape:
             return 0.0
@@ -65,17 +67,13 @@ class ReplayPrioritizer:
         self,
         recency_weight: float = 0.4,
         emotion_weight: float = 0.3,
-        incompleteness_weight: float = 0.3
+        incompleteness_weight: float = 0.3,
     ):
         self.recency_weight = recency_weight
         self.emotion_weight = emotion_weight
         self.incompleteness_weight = incompleteness_weight
 
-    def compute_priority(
-        self,
-        memory: MemoryTrace,
-        current_time: float
-    ) -> float:
+    def compute_priority(self, memory: MemoryTrace, current_time: float) -> float:
         """Compute replay priority for a memory.
 
         Args:
@@ -96,18 +94,15 @@ class ReplayPrioritizer:
         incompleteness_score = 1.0 - memory.learning_complete
 
         priority = (
-            self.recency_weight * recency_score +
-            self.emotion_weight * emotion_score +
-            self.incompleteness_weight * incompleteness_score
+            self.recency_weight * recency_score
+            + self.emotion_weight * emotion_score
+            + self.incompleteness_weight * incompleteness_score
         )
 
         return priority
 
     def select_for_replay(
-        self,
-        memories: List[MemoryTrace],
-        current_time: float,
-        n_select: int = 5
+        self, memories: List[MemoryTrace], current_time: float, n_select: int = 5
     ) -> List[Tuple[MemoryTrace, float]]:
         """Select memories for replay based on priority.
 
@@ -148,7 +143,7 @@ class HippocampalReplay:
         self,
         compression_factor: float = 20.0,
         replay_strength_boost: float = 0.1,
-        learning_rate: float = 0.05
+        learning_rate: float = 0.05,
     ):
         """Initialize hippocampal replay system.
 
@@ -185,7 +180,7 @@ class HippocampalReplay:
         pattern: np.ndarray,
         emotional_salience: float = 0.0,
         context: Optional[Dict] = None,
-        memory_type: MemoryType = MemoryType.EPISODIC
+        memory_type: MemoryType = MemoryType.EPISODIC,
     ) -> MemoryTrace:
         """Encode a new experience as a memory trace.
 
@@ -206,7 +201,7 @@ class HippocampalReplay:
             encoding_time=self.current_time,
             emotional_salience=emotional_salience,
             memory_type=memory_type,
-            context=context
+            context=context,
         )
         self.add_memory(memory)
         return memory
@@ -221,17 +216,11 @@ class HippocampalReplay:
             List of selected memories
         """
         selected = self.prioritizer.select_for_replay(
-            self.memory_traces,
-            self.current_time,
-            n_select
+            self.memory_traces, self.current_time, n_select
         )
         return [mem for mem, _ in selected]
 
-    def replay_memory(
-        self,
-        memory: MemoryTrace,
-        ripple_present: bool = False
-    ) -> np.ndarray:
+    def replay_memory(self, memory: MemoryTrace, ripple_present: bool = False) -> np.ndarray:
         """Replay a single memory in compressed time.
 
         Args:
@@ -251,8 +240,7 @@ class HippocampalReplay:
 
         # Improve learning completion
         memory.learning_complete = min(
-            1.0,
-            memory.learning_complete + self.learning_rate * boost_multiplier
+            1.0, memory.learning_complete + self.learning_rate * boost_multiplier
         )
 
         self.total_replays += 1
@@ -261,9 +249,7 @@ class HippocampalReplay:
         return memory.content.copy()
 
     def replay_sequence(
-        self,
-        memories: List[MemoryTrace],
-        ripple_times: Optional[List[float]] = None
+        self, memories: List[MemoryTrace], ripple_times: Optional[List[float]] = None
     ) -> List[np.ndarray]:
         """Replay a sequence of memories in compressed time.
 
@@ -360,9 +346,7 @@ class HippocampalReplay:
         }
 
     def find_similar_memories(
-        self,
-        pattern: np.ndarray,
-        threshold: float = 0.5
+        self, pattern: np.ndarray, threshold: float = 0.5
     ) -> List[Tuple[MemoryTrace, float]]:
         """Find memories similar to a given pattern.
 
@@ -410,9 +394,7 @@ class ReplayScheduler:
         self.rem_replays_per_minute = 2
 
     def run_sws_replay(
-        self,
-        duration_minutes: float,
-        slow_oscillation_phase: str = "up"
+        self, duration_minutes: float, slow_oscillation_phase: str = "up"
     ) -> List[MemoryTrace]:
         """Run replay during slow-wave sleep.
 
@@ -435,9 +417,7 @@ class ReplayScheduler:
 
         for _ in range(n_replays):
             # Simulate ripple-coordinated replay
-            memories = self.replay_system.coordinate_with_ripple(
-                self.replay_system.current_time
-            )
+            memories = self.replay_system.coordinate_with_ripple(self.replay_system.current_time)
             all_replayed.extend(memories)
             self.replay_system.advance_time(60.0 / self.sws_replays_per_minute)
 
@@ -470,8 +450,7 @@ class ReplayScheduler:
 
         # Prioritize emotional memories during REM
         emotional_memories = [
-            m for m in self.replay_system.memory_traces
-            if np.abs(m.emotional_salience) > 0.3
+            m for m in self.replay_system.memory_traces if np.abs(m.emotional_salience) > 0.3
         ]
 
         for _ in range(n_replays):

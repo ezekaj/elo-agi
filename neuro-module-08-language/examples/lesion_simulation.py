@@ -10,7 +10,8 @@ is oversimplified. Language function requires distributed network integrity.
 
 import numpy as np
 import sys
-sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
+
+sys.path.insert(0, str(__file__).rsplit("/", 2)[0])
 
 from src.language_network import DistributedLanguageNetwork
 from src.predictive_language import PredictiveLanguageProcessor
@@ -56,7 +57,7 @@ def demo_broca_lesion():
     print(f"  Combined output norm: {np.linalg.norm(baseline['combined']):.3f}")
 
     print(f"\n--- After Broca's Lesion (100% damage) ---")
-    network.lesion('broca', 1.0)
+    network.lesion("broca", 1.0)
     print(f"  Broca active: {network.broca.is_active}")
     print(f"  Broca damage level: {network.broca.damage_level}")
 
@@ -84,9 +85,9 @@ def demo_progressive_lesion():
 
     for damage in damage_levels:
         network = DistributedLanguageNetwork(dim=32)
-        network.lesion('broca', damage)
+        network.lesion("broca", damage)
         result = network.process(test_input)
-        output_norm = np.linalg.norm(result['combined'])
+        output_norm = np.linalg.norm(result["combined"])
         print(f"{damage:>10.0%} {str(network.is_functional()):>12} {output_norm:>12.3f}")
 
     print(f"\n--- Wernicke's Progressive Damage ---")
@@ -95,9 +96,9 @@ def demo_progressive_lesion():
 
     for damage in damage_levels:
         network = DistributedLanguageNetwork(dim=32)
-        network.lesion('wernicke', damage)
+        network.lesion("wernicke", damage)
         result = network.process(test_input)
-        output_norm = np.linalg.norm(result['combined'])
+        output_norm = np.linalg.norm(result["combined"])
         print(f"{damage:>10.0%} {str(network.is_functional()):>12} {output_norm:>12.3f}")
 
 
@@ -126,9 +127,9 @@ def demo_double_lesion():
     for name, broca_dmg, wernicke_dmg in conditions:
         network = DistributedLanguageNetwork(dim=32)
         if broca_dmg > 0:
-            network.lesion('broca', broca_dmg)
+            network.lesion("broca", broca_dmg)
         if wernicke_dmg > 0:
-            network.lesion('wernicke', wernicke_dmg)
+            network.lesion("wernicke", wernicke_dmg)
 
         functional = network.is_functional()
         print(f"{name:<20} {broca_dmg:>7.0%} {wernicke_dmg:>10.0%} {str(functional):>12}")
@@ -147,22 +148,18 @@ def demo_full_lesion_experiment():
 
     processor = PredictiveLanguageProcessor(input_dim=64, hidden_dim=32)
 
-    test_sentences = [
-        ["the", "cat", "sat"],
-        ["a", "dog", "ran"],
-        ["she", "thinks", "that"]
-    ]
+    test_sentences = [["the", "cat", "sat"], ["a", "dog", "ran"], ["she", "thinks", "that"]]
 
     print(f"\n--- Baseline Processing ---")
     baseline_results = []
     for sentence in test_sentences:
         result = processor.process_utterance(sentence)
-        baseline_results.append(result['total_error'])
+        baseline_results.append(result["total_error"])
     baseline_error = np.mean(baseline_results)
     print(f"  Mean error: {baseline_error:.3f}")
 
     print(f"\n--- Broca's Lesion Experiment ---")
-    result = processor.lesion_experiment('broca', test_sentences, damage_level=1.0)
+    result = processor.lesion_experiment("broca", test_sentences, damage_level=1.0)
 
     print(f"  Region: {result['region']}")
     print(f"  Baseline error: {result['baseline']['mean_error']:.3f}")
@@ -170,7 +167,7 @@ def demo_full_lesion_experiment():
     print(f"  Broca alone functional: {result['broca_alone_functional']}")
 
     print(f"\n--- Wernicke's Lesion Experiment ---")
-    result = processor.lesion_experiment('wernicke', test_sentences, damage_level=1.0)
+    result = processor.lesion_experiment("wernicke", test_sentences, damage_level=1.0)
 
     print(f"  Region: {result['region']}")
     print(f"  Baseline error: {result['baseline']['mean_error']:.3f}")
@@ -193,14 +190,14 @@ def demo_recovery_simulation():
     print(f"  Output norm: {np.linalg.norm(result['combined']):.3f}")
 
     print(f"\n--- After Broca's Lesion ---")
-    network.lesion('broca', 0.8)
+    network.lesion("broca", 0.8)
     result = network.process(test_input)
     print(f"  Broca damage: {network.broca.damage_level:.0%}")
     print(f"  Functional: {network.is_functional()}")
     print(f"  Output norm: {np.linalg.norm(result['combined']):.3f}")
 
     print(f"\n--- After Recovery (Restore) ---")
-    network.restore('broca')
+    network.restore("broca")
     result = network.process(test_input)
     damage_levels = network.get_damage_levels()
     print(f"  Broca damage: {damage_levels['broca']:.0%}")
@@ -208,7 +205,7 @@ def demo_recovery_simulation():
     print(f"  Output norm: {np.linalg.norm(result['combined']):.3f}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_distributed_network()
     demo_broca_lesion()
     demo_progressive_lesion()

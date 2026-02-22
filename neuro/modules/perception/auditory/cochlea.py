@@ -14,6 +14,7 @@ import numpy as np
 @dataclass
 class HairCellResponse:
     """Response from inner hair cells."""
+
     firing_rate: np.ndarray  # (n_channels,) firing rates
     phase_locked: np.ndarray  # Phase-locked timing information
     adaptation_state: np.ndarray  # Current adaptation level
@@ -22,11 +23,12 @@ class HairCellResponse:
 @dataclass
 class CochleaOutput:
     """Output from cochlear processing."""
+
     basilar_membrane: np.ndarray  # (n_channels, n_time) displacement
     inner_hair_cells: np.ndarray  # IHC responses
-    auditory_nerve: np.ndarray    # AN fiber firing rates
+    auditory_nerve: np.ndarray  # AN fiber firing rates
     center_frequencies: np.ndarray  # CF for each channel
-    time_axis: np.ndarray         # Time points
+    time_axis: np.ndarray  # Time points
 
 
 class GammatoneFilterbank:
@@ -90,11 +92,13 @@ class GammatoneFilterbank:
             # Gammatone parameters
             b = 1.019 * 2 * np.pi * erb
 
-            coefficients.append({
-                'cf': cf,
-                'b': b,
-                'erb': erb,
-            })
+            coefficients.append(
+                {
+                    "cf": cf,
+                    "b": b,
+                    "erb": erb,
+                }
+            )
 
         return coefficients
 
@@ -115,8 +119,8 @@ class GammatoneFilterbank:
         t = np.arange(n_samples) / self.sample_rate
 
         for i, coef in enumerate(self._coefficients):
-            cf = coef['cf']
-            b = coef['b']
+            cf = coef["cf"]
+            b = coef["b"]
 
             # Gammatone impulse response (simplified)
             # h(t) = t^(n-1) * exp(-2*pi*b*t) * cos(2*pi*cf*t)
@@ -125,10 +129,10 @@ class GammatoneFilterbank:
 
             ir = (t_ir ** (n_order - 1)) * np.exp(-2 * np.pi * b * t_ir)
             ir = ir * np.cos(2 * np.pi * cf * t_ir)
-            ir = ir / (np.sum(ir ** 2) + 1e-8) ** 0.5  # Normalize
+            ir = ir / (np.sum(ir**2) + 1e-8) ** 0.5  # Normalize
 
             # Convolve
-            filtered = np.convolve(signal, ir, mode='same')
+            filtered = np.convolve(signal, ir, mode="same")
             output[i, :] = filtered
 
         return output
@@ -230,9 +234,8 @@ class Cochlea:
         # Update adaptation state
         mean_response = np.mean(np.abs(smoothed), axis=1)
         self._adaptation = (
-            (1 - self._adaptation_rate) * self._adaptation +
-            self._adaptation_rate / (1 + mean_response)
-        )
+            1 - self._adaptation_rate
+        ) * self._adaptation + self._adaptation_rate / (1 + mean_response)
 
         return adapted
 
@@ -266,9 +269,7 @@ class Cochlea:
         for i in range(n_frames):
             start = i * hop_size
             end = start + frame_size
-            spectrogram[:, i] = np.mean(
-                cochlea_output.auditory_nerve[:, start:end], axis=1
-            )
+            spectrogram[:, i] = np.mean(cochlea_output.auditory_nerve[:, start:end], axis=1)
 
         return spectrogram
 

@@ -16,17 +16,19 @@ from enum import Enum
 
 class EmotionalState(Enum):
     """Emotional states affecting time perception"""
+
     NEUTRAL = "neutral"
-    FEAR = "fear"           # High arousal, time slows
+    FEAR = "fear"  # High arousal, time slows
     EXCITEMENT = "excitement"  # High arousal, time slows
-    BOREDOM = "boredom"     # Low arousal, time drags
-    FLOW = "flow"           # Absorbed, time flies
-    ANXIETY = "anxiety"     # High arousal, time distortion
+    BOREDOM = "boredom"  # Low arousal, time drags
+    FLOW = "flow"  # Absorbed, time flies
+    ANXIETY = "anxiety"  # High arousal, time distortion
 
 
 @dataclass
 class ModulationEffect:
     """Effect of a modulation factor on time perception"""
+
     factor_name: str
     distortion_ratio: float  # >1 = time feels longer, <1 = time feels shorter
     confidence_modifier: float  # How it affects confidence
@@ -43,12 +45,12 @@ class EmotionalModulator:
     def __init__(self):
         # Arousal-time mapping: high arousal = slower perceived time
         self.arousal_effects = {
-            EmotionalState.NEUTRAL: (0.5, 1.0),      # (arousal, time_ratio)
-            EmotionalState.FEAR: (0.9, 1.4),         # Time slows 40%
-            EmotionalState.EXCITEMENT: (0.8, 1.3),   # Time slows 30%
-            EmotionalState.BOREDOM: (0.2, 1.2),      # Time drags 20%
-            EmotionalState.FLOW: (0.6, 0.7),         # Time flies, 30% faster
-            EmotionalState.ANXIETY: (0.85, 1.35),    # Time slows 35%
+            EmotionalState.NEUTRAL: (0.5, 1.0),  # (arousal, time_ratio)
+            EmotionalState.FEAR: (0.9, 1.4),  # Time slows 40%
+            EmotionalState.EXCITEMENT: (0.8, 1.3),  # Time slows 30%
+            EmotionalState.BOREDOM: (0.2, 1.2),  # Time drags 20%
+            EmotionalState.FLOW: (0.6, 0.7),  # Time flies, 30% faster
+            EmotionalState.ANXIETY: (0.85, 1.35),  # Time slows 35%
         }
 
         self.current_state = EmotionalState.NEUTRAL
@@ -62,11 +64,7 @@ class EmotionalModulator:
         """Get current arousal level."""
         return self.arousal_effects[self.current_state][0]
 
-    def modulate(
-        self,
-        duration: float,
-        state: Optional[EmotionalState] = None
-    ) -> ModulationEffect:
+    def modulate(self, duration: float, state: Optional[EmotionalState] = None) -> ModulationEffect:
         """Modulate perceived duration based on emotion.
 
         Args:
@@ -95,20 +93,20 @@ class EmotionalModulator:
             EmotionalState.EXCITEMENT: "Time slowed due to excitement",
             EmotionalState.BOREDOM: "Time dragging due to boredom",
             EmotionalState.FLOW: "Time flying in flow state",
-            EmotionalState.ANXIETY: "Time distorted by anxiety"
+            EmotionalState.ANXIETY: "Time distorted by anxiety",
         }
 
         return ModulationEffect(
             factor_name="emotion",
             distortion_ratio=ratio,
             confidence_modifier=1.0 - 0.3 * arousal,  # High arousal = less confidence
-            description=descriptions[state]
+            description=descriptions[state],
         )
 
     def process_event(
         self,
         event_valence: float,  # -1 to 1
-        event_intensity: float  # 0 to 1
+        event_intensity: float,  # 0 to 1
     ) -> float:
         """Process an emotional event and return arousal change.
 
@@ -159,11 +157,7 @@ class AttentionalModulator:
         self.attention_capacity = 1.0
         self.attention_allocated_to_time = 0.0
 
-    def allocate_attention(
-        self,
-        to_time: float,
-        to_task: float = 0.0
-    ) -> float:
+    def allocate_attention(self, to_time: float, to_task: float = 0.0) -> float:
         """Allocate attention between time and task.
 
         Args:
@@ -186,9 +180,7 @@ class AttentionalModulator:
         return to_time
 
     def modulate(
-        self,
-        duration: float,
-        attention_to_time: Optional[float] = None
+        self, duration: float, attention_to_time: Optional[float] = None
     ) -> ModulationEffect:
         """Modulate perceived duration based on attention.
 
@@ -217,13 +209,10 @@ class AttentionalModulator:
             factor_name="attention",
             distortion_ratio=ratio,
             confidence_modifier=confidence_mod,
-            description=f"Attention level: {attention_to_time:.2f}"
+            description=f"Attention level: {attention_to_time:.2f}",
         )
 
-    def dual_task_effect(
-        self,
-        task_difficulty: float
-    ) -> float:
+    def dual_task_effect(self, task_difficulty: float) -> float:
         """Calculate time perception effect of dual-task condition.
 
         When doing a demanding task, less attention for time = shorter perceived duration.
@@ -269,11 +258,7 @@ class DopamineModulator:
         self.current_level = max(0.1, min(3.0, level))
         self.level_history.append(self.current_level)
 
-    def modulate(
-        self,
-        duration: float,
-        dopamine_level: Optional[float] = None
-    ) -> ModulationEffect:
+    def modulate(self, duration: float, dopamine_level: Optional[float] = None) -> ModulationEffect:
         """Modulate perceived duration based on dopamine.
 
         Args:
@@ -306,7 +291,7 @@ class DopamineModulator:
             factor_name="dopamine",
             distortion_ratio=ratio,
             confidence_modifier=1.0,  # Dopamine doesn't affect confidence
-            description=description
+            description=description,
         )
 
     def simulate_reward(self, reward_magnitude: float) -> None:
@@ -320,9 +305,7 @@ class DopamineModulator:
         self.current_level += dopamine_boost
 
         # Decay back toward baseline
-        self.current_level = self.baseline_level + (
-            self.current_level - self.baseline_level
-        ) * 0.9
+        self.current_level = self.baseline_level + (self.current_level - self.baseline_level) * 0.9
 
     def simulate_stimulant(self, dose: float) -> None:
         """Simulate stimulant drug effect.
@@ -360,11 +343,7 @@ class AgeModulator:
         """Set current age."""
         self.current_age = max(1, age)
 
-    def modulate(
-        self,
-        duration: float,
-        age: Optional[int] = None
-    ) -> ModulationEffect:
+    def modulate(self, duration: float, age: Optional[int] = None) -> ModulationEffect:
         """Modulate perceived duration based on age.
 
         Args:
@@ -404,7 +383,7 @@ class AgeModulator:
             factor_name="age",
             distortion_ratio=ratio,
             confidence_modifier=1.0 - (age - self.reference_age) * 0.005,
-            description=description
+            description=description,
         )
 
     def get_subjective_year_length(self, age: int) -> float:
@@ -432,7 +411,7 @@ class TimeModulationSystem:
         emotional: Optional[EmotionalModulator] = None,
         attentional: Optional[AttentionalModulator] = None,
         dopamine: Optional[DopamineModulator] = None,
-        age: Optional[AgeModulator] = None
+        age: Optional[AgeModulator] = None,
     ):
         self.emotional = emotional or EmotionalModulator()
         self.attentional = attentional or AttentionalModulator()
@@ -440,12 +419,7 @@ class TimeModulationSystem:
         self.age = age or AgeModulator()
 
         # Factor weights (importance in final calculation)
-        self.weights = {
-            'emotion': 0.35,
-            'attention': 0.30,
-            'dopamine': 0.25,
-            'age': 0.10
-        }
+        self.weights = {"emotion": 0.35, "attention": 0.30, "dopamine": 0.25, "age": 0.10}
 
     def modulate_duration(
         self,
@@ -453,7 +427,7 @@ class TimeModulationSystem:
         emotional_state: Optional[EmotionalState] = None,
         attention: Optional[float] = None,
         dopamine_level: Optional[float] = None,
-        age: Optional[int] = None
+        age: Optional[int] = None,
     ) -> Tuple[float, Dict[str, ModulationEffect]]:
         """Apply all modulation factors to get perceived duration.
 
@@ -470,16 +444,10 @@ class TimeModulationSystem:
         effects = {}
 
         # Get individual effects
-        effects['emotion'] = self.emotional.modulate(
-            actual_duration, emotional_state
-        )
-        effects['attention'] = self.attentional.modulate(
-            actual_duration, attention
-        )
-        effects['dopamine'] = self.dopamine.modulate(
-            actual_duration, dopamine_level
-        )
-        effects['age'] = self.age.modulate(actual_duration, age)
+        effects["emotion"] = self.emotional.modulate(actual_duration, emotional_state)
+        effects["attention"] = self.attentional.modulate(actual_duration, attention)
+        effects["dopamine"] = self.dopamine.modulate(actual_duration, dopamine_level)
+        effects["age"] = self.age.modulate(actual_duration, age)
 
         # Compute weighted distortion ratio
         total_ratio = 0.0
@@ -502,7 +470,7 @@ class TimeModulationSystem:
         emotional_state: Optional[EmotionalState] = None,
         attention: Optional[float] = None,
         dopamine: Optional[float] = None,
-        age: Optional[int] = None
+        age: Optional[int] = None,
     ) -> None:
         """Set current state for all modulators."""
         if emotional_state is not None:
@@ -517,9 +485,9 @@ class TimeModulationSystem:
     def get_current_state(self) -> Dict:
         """Get current state of all modulators."""
         return {
-            'emotional_state': self.emotional.current_state.value,
-            'arousal': self.emotional.get_arousal(),
-            'attention': self.attentional.current_attention,
-            'dopamine': self.dopamine.current_level,
-            'age': self.age.current_age
+            "emotional_state": self.emotional.current_state.value,
+            "arousal": self.emotional.get_arousal(),
+            "attention": self.attentional.current_attention,
+            "dopamine": self.dopamine.current_level,
+            "age": self.age.current_age,
         }

@@ -20,16 +20,18 @@ from enum import Enum
 @dataclass
 class BodyState:
     """Current state of body rhythms"""
-    heart_rate: float = 70.0       # BPM
-    breathing_rate: float = 15.0   # breaths/min
+
+    heart_rate: float = 70.0  # BPM
+    breathing_rate: float = 15.0  # breaths/min
     body_temperature: float = 37.0  # Celsius
-    metabolic_rate: float = 1.0    # Relative to baseline
-    movement_level: float = 0.0    # 0 = still, 1 = active
+    metabolic_rate: float = 1.0  # Relative to baseline
+    movement_level: float = 0.0  # 0 = still, 1 = active
 
 
 @dataclass
 class InteroceptiveSignal:
     """Signal from internal body monitoring"""
+
     source: str  # heartbeat, breathing, gut, etc.
     timestamp: float
     value: float
@@ -44,11 +46,7 @@ class InteroceptiveTimer:
     People with better interoceptive awareness are better at timing.
     """
 
-    def __init__(
-        self,
-        interoceptive_accuracy: float = 0.7,
-        body_state: Optional[BodyState] = None
-    ):
+    def __init__(self, interoceptive_accuracy: float = 0.7, body_state: Optional[BodyState] = None):
         self.interoceptive_accuracy = interoceptive_accuracy
         self.body_state = body_state or BodyState()
 
@@ -78,12 +76,14 @@ class InteroceptiveTimer:
 
         self.heartbeat_count += perceived_beats
 
-        self.signals.append(InteroceptiveSignal(
-            source="heartbeat",
-            timestamp=self.current_time,
-            value=perceived_beats,
-            count=self.heartbeat_count
-        ))
+        self.signals.append(
+            InteroceptiveSignal(
+                source="heartbeat",
+                timestamp=self.current_time,
+                value=perceived_beats,
+                count=self.heartbeat_count,
+            )
+        )
 
         return perceived_beats
 
@@ -103,19 +103,18 @@ class InteroceptiveTimer:
 
         self.breath_count += perceived_breaths
 
-        self.signals.append(InteroceptiveSignal(
-            source="breathing",
-            timestamp=self.current_time,
-            value=perceived_breaths,
-            count=self.breath_count
-        ))
+        self.signals.append(
+            InteroceptiveSignal(
+                source="breathing",
+                timestamp=self.current_time,
+                value=perceived_breaths,
+                count=self.breath_count,
+            )
+        )
 
         return perceived_breaths
 
-    def estimate_duration_from_heartbeats(
-        self,
-        actual_duration: float
-    ) -> float:
+    def estimate_duration_from_heartbeats(self, actual_duration: float) -> float:
         """Estimate duration by counting heartbeats.
 
         Args:
@@ -135,10 +134,7 @@ class InteroceptiveTimer:
 
         return max(0, estimated_duration)
 
-    def estimate_duration_from_breathing(
-        self,
-        actual_duration: float
-    ) -> float:
+    def estimate_duration_from_breathing(self, actual_duration: float) -> float:
         """Estimate duration by counting breaths.
 
         Args:
@@ -212,7 +208,7 @@ class MotorTimer:
     def __init__(
         self,
         motor_precision: float = 0.85,
-        base_tempo: float = 2.0  # Actions per second
+        base_tempo: float = 2.0,  # Actions per second
     ):
         self.motor_precision = motor_precision
         self.base_tempo = base_tempo
@@ -221,11 +217,7 @@ class MotorTimer:
         self.current_time = 0.0
         self.movement_history: List[Dict] = []
 
-    def time_through_action(
-        self,
-        duration: float,
-        action_rate: Optional[float] = None
-    ) -> float:
+    def time_through_action(self, duration: float, action_rate: Optional[float] = None) -> float:
         """Estimate duration through number of actions.
 
         Args:
@@ -251,17 +243,15 @@ class MotorTimer:
         self.action_count += int(perceived_actions)
         self.current_time += duration
 
-        self.movement_history.append({
-            'duration': duration,
-            'actions': perceived_actions,
-            'estimate': estimated_duration
-        })
+        self.movement_history.append(
+            {"duration": duration, "actions": perceived_actions, "estimate": estimated_duration}
+        )
 
         return max(0, estimated_duration)
 
     def time_movement_sequence(
         self,
-        movements: List[float]  # Duration of each movement
+        movements: List[float],  # Duration of each movement
     ) -> Tuple[float, float]:
         """Time a sequence of movements.
 
@@ -279,11 +269,7 @@ class MotorTimer:
 
         return estimated_total, actual_total
 
-    def tap_rhythm(
-        self,
-        target_interval: float,
-        n_taps: int
-    ) -> List[float]:
+    def tap_rhythm(self, target_interval: float, n_taps: int) -> List[float]:
         """Produce taps at a target rhythm.
 
         Args:
@@ -305,11 +291,7 @@ class MotorTimer:
 
         return intervals
 
-    def synchronize_to_beat(
-        self,
-        beat_interval: float,
-        n_beats: int
-    ) -> Tuple[List[float], float]:
+    def synchronize_to_beat(self, beat_interval: float, n_beats: int) -> Tuple[List[float], float]:
         """Attempt to synchronize taps to an external beat.
 
         Args:
@@ -389,7 +371,7 @@ class BodyEnvironmentCoupler:
         self,
         duration: float,
         body_rhythm: Optional[float] = None,
-        env_rhythm: Optional[float] = None
+        env_rhythm: Optional[float] = None,
     ) -> Tuple[float, float]:
         """Modulate time perception based on body-environment coupling.
 
@@ -415,11 +397,9 @@ class BodyEnvironmentCoupler:
 
         estimated_duration = duration + noise
 
-        self.entrainment_history.append({
-            'duration': duration,
-            'entrainment': entrainment,
-            'estimate': estimated_duration
-        })
+        self.entrainment_history.append(
+            {"duration": duration, "entrainment": entrainment, "estimate": estimated_duration}
+        )
 
         return max(0, estimated_duration), entrainment
 
@@ -441,7 +421,7 @@ class EmbodiedTimeSystem:
         interoceptive: Optional[InteroceptiveTimer] = None,
         motor: Optional[MotorTimer] = None,
         coupler: Optional[BodyEnvironmentCoupler] = None,
-        integration_weights: Tuple[float, float, float] = (0.4, 0.35, 0.25)
+        integration_weights: Tuple[float, float, float] = (0.4, 0.35, 0.25),
     ):
         self.interoceptive = interoceptive or InteroceptiveTimer()
         self.motor = motor or MotorTimer()
@@ -452,7 +432,7 @@ class EmbodiedTimeSystem:
         self,
         actual_duration: float,
         movement_present: bool = False,
-        external_rhythm: Optional[float] = None
+        external_rhythm: Optional[float] = None,
     ) -> Tuple[float, Dict]:
         """Estimate duration using embodied signals.
 
@@ -469,30 +449,29 @@ class EmbodiedTimeSystem:
 
         # Interoceptive estimate
         intero_estimate = self.interoceptive.combined_estimate(actual_duration)
-        estimates['interoceptive'] = intero_estimate
-        active_weights.append(('interoceptive', self.weights[0]))
+        estimates["interoceptive"] = intero_estimate
+        active_weights.append(("interoceptive", self.weights[0]))
 
         # Motor estimate (only if moving)
         if movement_present:
             motor_estimate = self.motor.time_through_action(actual_duration)
-            estimates['motor'] = motor_estimate
-            active_weights.append(('motor', self.weights[1]))
+            estimates["motor"] = motor_estimate
+            active_weights.append(("motor", self.weights[1]))
 
         # Coupling estimate (only if external rhythm)
         if external_rhythm is not None:
             coupling_estimate, entrainment = self.coupler.modulate_timing(
                 actual_duration, env_rhythm=external_rhythm
             )
-            estimates['coupling'] = coupling_estimate
-            estimates['entrainment'] = entrainment
-            active_weights.append(('coupling', self.weights[2]))
+            estimates["coupling"] = coupling_estimate
+            estimates["entrainment"] = entrainment
+            active_weights.append(("coupling", self.weights[2]))
 
         # Weighted combination
         total_weight = sum(w for _, w in active_weights)
         if total_weight > 0:
             final_estimate = sum(
-                estimates[name] * weight / total_weight
-                for name, weight in active_weights
+                estimates[name] * weight / total_weight for name, weight in active_weights
             )
         else:
             final_estimate = actual_duration
@@ -517,10 +496,10 @@ class EmbodiedTimeSystem:
     def get_statistics(self) -> Dict:
         """Get embodied timing statistics."""
         return {
-            'heartbeat_count': self.interoceptive.heartbeat_count,
-            'breath_count': self.interoceptive.breath_count,
-            'action_count': self.motor.action_count,
-            'n_entrainment_events': len(self.coupler.entrainment_history)
+            "heartbeat_count": self.interoceptive.heartbeat_count,
+            "breath_count": self.interoceptive.breath_count,
+            "action_count": self.motor.action_count,
+            "n_entrainment_events": len(self.coupler.entrainment_history),
         }
 
     def reset(self) -> None:

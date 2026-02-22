@@ -15,6 +15,7 @@ from pathlib import Path
 @dataclass
 class AgentConfig:
     """Configuration for the integrated agent."""
+
     embedding_dim: int = 256
     uncertainty_threshold: float = 0.3
     ood_threshold: float = 0.7
@@ -25,11 +26,14 @@ class AgentConfig:
 @dataclass
 class Concept:
     """A learned concept in the agent's knowledge base."""
+
     name: str
     embedding: np.ndarray
     strength: float  # Memory strength [0, 1]
     category: str  # "episodic", "semantic", "procedural"
-    causal_links: List[Tuple[str, str, float]] = field(default_factory=list)  # (cause, effect, strength)
+    causal_links: List[Tuple[str, str, float]] = field(
+        default_factory=list
+    )  # (cause, effect, strength)
     uncertainty: float = 0.0
     last_accessed: float = 0.0
 
@@ -37,6 +41,7 @@ class Concept:
 @dataclass
 class ReasoningResult:
     """Result of a reasoning operation."""
+
     answer: Any
     confidence: float
     uncertainty: float
@@ -47,6 +52,7 @@ class ReasoningResult:
 @dataclass
 class ConsolidationStats:
     """Statistics from a consolidation cycle."""
+
     memories_replayed: int
     memories_strengthened: int
     interference_resolved: int
@@ -82,10 +88,7 @@ class IntegratedAGIAgent:
         self._successful_predictions: int = 0
 
     def learn_concept(
-        self,
-        name: str,
-        examples: List[np.ndarray],
-        category: str = "semantic"
+        self, name: str, examples: List[np.ndarray], category: str = "semantic"
     ) -> Concept:
         """
         Learn a new concept from examples using abstraction.
@@ -129,12 +132,7 @@ class IntegratedAGIAgent:
         self._concepts[name] = concept
         return concept
 
-    def add_causal_relation(
-        self,
-        cause: str,
-        effect: str,
-        strength: float = 1.0
-    ) -> None:
+    def add_causal_relation(self, cause: str, effect: str, strength: float = 1.0) -> None:
         """
         Add a causal relation to the agent's world model.
 
@@ -158,11 +156,7 @@ class IntegratedAGIAgent:
         self._concepts[cause].causal_links.append((cause, effect, strength))
 
     def reason_causally(
-        self,
-        query_type: str,
-        cause: str,
-        effect: str,
-        intervention_value: Optional[float] = None
+        self, query_type: str, cause: str, effect: str, intervention_value: Optional[float] = None
     ) -> ReasoningResult:
         """
         Perform causal reasoning.
@@ -186,7 +180,7 @@ class IntegratedAGIAgent:
                 confidence=0.0,
                 uncertainty=1.0,
                 reasoning_trace=[f"Unknown concept: {cause}"],
-                abstained=True
+                abstained=True,
             )
 
         if effect not in self._concepts:
@@ -195,7 +189,7 @@ class IntegratedAGIAgent:
                 confidence=0.0,
                 uncertainty=1.0,
                 reasoning_trace=[f"Unknown concept: {effect}"],
-                abstained=True
+                abstained=True,
             )
 
         cause_concept = self._concepts[cause]
@@ -226,7 +220,7 @@ class IntegratedAGIAgent:
                 confidence=0.0,
                 uncertainty=combined_uncertainty,
                 reasoning_trace=trace,
-                abstained=True
+                abstained=True,
             )
 
         # Find causal strength
@@ -255,11 +249,7 @@ class IntegratedAGIAgent:
         else:
             trace.append(f"Unknown query type: {query_type}")
             return ReasoningResult(
-                answer=None,
-                confidence=0.0,
-                uncertainty=1.0,
-                reasoning_trace=trace,
-                abstained=True
+                answer=None, confidence=0.0, uncertainty=1.0, reasoning_trace=trace, abstained=True
             )
 
         self._successful_predictions += 1
@@ -302,9 +292,7 @@ class IntegratedAGIAgent:
         return total_stats
 
     def predict_with_uncertainty(
-        self,
-        query: str,
-        context: Optional[Dict[str, Any]] = None
+        self, query: str, context: Optional[Dict[str, Any]] = None
     ) -> Tuple[Any, float, bool]:
         """
         Make a prediction with uncertainty quantification.
@@ -427,7 +415,8 @@ class IntegratedAGIAgent:
 
         # Priority replay: focus on weak memories
         weak_memories = [
-            c for c in self._concepts.values()
+            c
+            for c in self._concepts.values()
             if c.strength < self.config.consolidation_strength_target
         ]
 
@@ -447,7 +436,7 @@ class IntegratedAGIAgent:
         # Check for interference between similar concepts
         concept_list = list(self._concepts.values())
         for i, c1 in enumerate(concept_list):
-            for c2 in concept_list[i+1:]:
+            for c2 in concept_list[i + 1 :]:
                 sim = self._concept_similarity(c1, c2)
                 if sim > 0.9 and c1.category == c2.category:
                     # High similarity - potential interference

@@ -16,6 +16,7 @@ from datetime import datetime
 
 # Import tools
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent))
 from .tools import Tools
 from .autonomous_learning import AutonomousLearner
@@ -24,6 +25,7 @@ from .autonomous_learning import AutonomousLearner
 @dataclass
 class LearningTarget:
     """A topic to learn about."""
+
     topic: str
     source: str  # arxiv, github, web, etc.
     priority: float
@@ -47,20 +49,42 @@ class CuriosityLoop:
     SOURCES = {
         "arxiv": {
             "url": "https://arxiv.org/search/?query={query}&searchtype=all",
-            "topics": ["AGI", "neural networks", "cognitive architecture", "machine learning",
-                      "reinforcement learning", "natural language processing", "computer vision",
-                      "reasoning", "memory systems", "attention mechanisms"]
+            "topics": [
+                "AGI",
+                "neural networks",
+                "cognitive architecture",
+                "machine learning",
+                "reinforcement learning",
+                "natural language processing",
+                "computer vision",
+                "reasoning",
+                "memory systems",
+                "attention mechanisms",
+            ],
         },
         "github": {
             "type": "api",
-            "topics": ["autonomous-agents", "agi", "cognitive-architecture", "self-improving-ai",
-                      "neural-symbolic", "llm-agents", "tool-use"]
+            "topics": [
+                "autonomous-agents",
+                "agi",
+                "cognitive-architecture",
+                "self-improving-ai",
+                "neural-symbolic",
+                "llm-agents",
+                "tool-use",
+            ],
         },
         "web": {
-            "topics": ["how to build AGI", "self-improving AI systems", "cognitive science",
-                      "neuroscience of learning", "artificial general intelligence 2024",
-                      "latest AI research", "machine consciousness"]
-        }
+            "topics": [
+                "how to build AGI",
+                "self-improving AI systems",
+                "cognitive science",
+                "neuroscience of learning",
+                "artificial general intelligence 2024",
+                "latest AI research",
+                "machine consciousness",
+            ]
+        },
     }
 
     def __init__(self, tools: Tools, learner: AutonomousLearner, verbose: bool = True):
@@ -97,11 +121,11 @@ class CuriosityLoop:
             for topic in config.get("topics", []):
                 key = f"{source}:{topic}"
                 if key not in self.explored:
-                    self.targets.append(LearningTarget(
-                        topic=topic,
-                        source=source,
-                        priority=random.uniform(0.5, 1.0)
-                    ))
+                    self.targets.append(
+                        LearningTarget(
+                            topic=topic, source=source, priority=random.uniform(0.5, 1.0)
+                        )
+                    )
 
     def start(self) -> None:
         """Start the autonomous learning loop."""
@@ -208,7 +232,9 @@ class CuriosityLoop:
         query = target.topic.replace(" ", "-")
 
         # Try GitHub API via gh CLI
-        result = self.tools.run_command(f"gh search repos {target.topic} --limit 5 --json name,description,stargazersCount 2>/dev/null || echo 'no results'")
+        result = self.tools.run_command(
+            f"gh search repos {target.topic} --limit 5 --json name,description,stargazersCount 2>/dev/null || echo 'no results'"
+        )
 
         if result.success and result.output and "no results" not in result.output:
             self._process_learning(target.topic, "github", result.output)
@@ -232,7 +258,12 @@ class CuriosityLoop:
 
         for query in queries:
             result = self.tools.web_search(query)
-            if result.success and result.output and "No results" not in result.output and len(result.output) > 50:
+            if (
+                result.success
+                and result.output
+                and "No results" not in result.output
+                and len(result.output) > 50
+            ):
                 self._process_learning(target.topic, "web", result.output)
                 self._log(f"  Learned from web about '{target.topic}'")
                 return
@@ -249,7 +280,7 @@ class CuriosityLoop:
         facts = []
 
         # Split by sentences and paragraphs
-        chunks = content.replace('. ', '.\n').replace('! ', '!\n').replace('? ', '?\n').split('\n')
+        chunks = content.replace(". ", ".\n").replace("! ", "!\n").replace("? ", "?\n").split("\n")
 
         for chunk in chunks:
             chunk = chunk.strip()
@@ -264,25 +295,66 @@ class CuriosityLoop:
                 continue
 
             # Keep informative sentences - broad keyword matching
-            keywords = ['is', 'are', 'was', 'were', 'can', 'could', 'uses', 'used',
-                       'provides', 'enables', 'allows', 'includes', 'contains',
-                       'research', 'study', 'paper', 'method', 'approach', 'system',
-                       'model', 'algorithm', 'learning', 'neural', 'cognitive', 'ai',
-                       'intelligence', 'data', 'process', 'function', 'theory',
-                       'developed', 'created', 'designed', 'built', 'works',
-                       'based', 'known', 'called', 'defined', 'refers', 'means',
-                       'example', 'such', 'like', 'including', 'also', 'however']
+            keywords = [
+                "is",
+                "are",
+                "was",
+                "were",
+                "can",
+                "could",
+                "uses",
+                "used",
+                "provides",
+                "enables",
+                "allows",
+                "includes",
+                "contains",
+                "research",
+                "study",
+                "paper",
+                "method",
+                "approach",
+                "system",
+                "model",
+                "algorithm",
+                "learning",
+                "neural",
+                "cognitive",
+                "ai",
+                "intelligence",
+                "data",
+                "process",
+                "function",
+                "theory",
+                "developed",
+                "created",
+                "designed",
+                "built",
+                "works",
+                "based",
+                "known",
+                "called",
+                "defined",
+                "refers",
+                "means",
+                "example",
+                "such",
+                "like",
+                "including",
+                "also",
+                "however",
+            ]
 
             if any(word in chunk.lower() for word in keywords):
                 # Clean up the chunk
-                clean = ' '.join(chunk.split())  # Normalize whitespace
+                clean = " ".join(chunk.split())  # Normalize whitespace
                 if len(clean) > 20 and clean not in facts:
                     facts.append(clean)
 
         # Also store the abstract/summary if available
         if len(content) > 100:
             # First paragraph often has the best summary
-            first_para = content[:500].split('\n\n')[0].strip()
+            first_para = content[:500].split("\n\n")[0].strip()
             if first_para and len(first_para) > 50 and first_para not in facts:
                 facts.insert(0, f"[{topic}] {first_para}")
 
@@ -291,27 +363,24 @@ class CuriosityLoop:
         for fact in facts:
             # Avoid duplicates by checking content hash
             fact_hash = hash(fact[:100])
-            if not hasattr(self, '_seen_facts'):
+            if not hasattr(self, "_seen_facts"):
                 self._seen_facts = set()
 
             if fact_hash not in self._seen_facts:
                 self._seen_facts.add(fact_hash)
-                self.learner.add_memory(
-                    content=fact,
-                    source=source,
-                    topic=topic,
-                    importance=0.8
-                )
+                self.learner.add_memory(content=fact, source=source, topic=topic, importance=0.8)
                 self.facts_learned += 1
                 stored += 1
 
         # Record learning
-        self.learnings.append({
-            "topic": topic,
-            "source": source,
-            "facts_count": stored,
-            "timestamp": datetime.now().isoformat()
-        })
+        self.learnings.append(
+            {
+                "topic": topic,
+                "source": source,
+                "facts_count": stored,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
         if stored > 0:
             self._log(f"  Stored {stored} facts about '{topic}'")
@@ -324,11 +393,13 @@ class CuriosityLoop:
         for gap in gaps[:5]:
             key = f"web:{gap}"
             if key not in self.explored:
-                self.targets.append(LearningTarget(
-                    topic=gap,
-                    source="web",
-                    priority=0.9  # High priority for gaps
-                ))
+                self.targets.append(
+                    LearningTarget(
+                        topic=gap,
+                        source="web",
+                        priority=0.9,  # High priority for gaps
+                    )
+                )
                 self._log(f"  New curiosity: '{gap}'")
 
         # Also add random expansion topics
@@ -339,11 +410,7 @@ class CuriosityLoop:
                 related = f"{learning['topic']} advanced techniques"
                 key = f"web:{related}"
                 if key not in self.explored:
-                    self.targets.append(LearningTarget(
-                        topic=related,
-                        source="web",
-                        priority=0.7
-                    ))
+                    self.targets.append(LearningTarget(topic=related, source="web", priority=0.7))
 
     def _save_state(self) -> None:
         """Save learning state to disk."""
@@ -356,11 +423,11 @@ class CuriosityLoop:
             "facts_learned": self.facts_learned,
             "explored": list(self.explored),
             "learnings": self.learnings[-100:],  # Keep last 100
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
         try:
-            with open(state_file, 'w') as f:
+            with open(state_file, "w") as f:
                 json.dump(state, f, indent=2)
         except Exception:
             pass
@@ -395,7 +462,7 @@ class CuriosityLoop:
             "facts_learned": self.facts_learned,
             "targets_remaining": len([t for t in self.targets if not t.learned]),
             "topics_explored": len(self.explored),
-            "recent_learnings": self.learnings[-5:] if self.learnings else []
+            "recent_learnings": self.learnings[-5:] if self.learnings else [],
         }
 
     def force_explore(self, topic: str, source: str = "web") -> str:
@@ -416,9 +483,9 @@ class CuriosityLoop:
 
 def main():
     """Test the curiosity loop."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("CURIOSITY LOOP TEST")
-    print("="*60)
+    print("=" * 60)
 
     tools = Tools()
     learner = AutonomousLearner()
@@ -434,15 +501,17 @@ def main():
             time.sleep(1)
             if i % 10 == 0:
                 stats = loop.get_stats()
-                print(f"\n[STATS] Cycles: {stats['cycles']}, Facts: {stats['facts_learned']}, Targets: {stats['targets_remaining']}")
+                print(
+                    f"\n[STATS] Cycles: {stats['cycles']}, Facts: {stats['facts_learned']}, Targets: {stats['targets_remaining']}"
+                )
     except KeyboardInterrupt:
         pass
 
     loop.stop()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("FINAL STATS")
-    print("="*60)
+    print("=" * 60)
     print(json.dumps(loop.get_stats(), indent=2))
 
 

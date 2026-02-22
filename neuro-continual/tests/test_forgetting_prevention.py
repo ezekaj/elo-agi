@@ -10,6 +10,7 @@ from neuro.modules.continual.forgetting_prevention import (
     TaskMemory,
 )
 
+
 class TestForgettingPreventionConfig:
     """Tests for ForgettingPreventionConfig class."""
 
@@ -26,6 +27,7 @@ class TestForgettingPreventionConfig:
         )
         assert config.method == ForgettingPreventionMethod.SYNAPTIC_INTELLIGENCE
         assert config.ewc_lambda == 500.0
+
 
 class TestCatastrophicForgettingPrevention:
     """Tests for CatastrophicForgettingPrevention class."""
@@ -204,6 +206,7 @@ class TestCatastrophicForgettingPrevention:
         assert "num_tasks" in stats
         assert "method" in stats
         assert stats["num_tasks"] == 1
+
 
 class TestForgettingPreventionMethod:
     """Tests for ForgettingPreventionMethod enum."""

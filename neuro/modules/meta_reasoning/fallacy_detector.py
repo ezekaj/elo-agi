@@ -16,6 +16,7 @@ import numpy as np
 
 class FallacyType(Enum):
     """Types of reasoning fallacies."""
+
     CONFIRMATION_BIAS = "confirmation_bias"
     ANCHORING = "anchoring"
     AVAILABILITY = "availability"
@@ -31,6 +32,7 @@ class FallacyType(Enum):
 @dataclass
 class FallacyDetectorConfig:
     """Configuration for fallacy detection."""
+
     confirmation_bias_threshold: float = 0.7
     circular_depth_limit: int = 5
     overfitting_threshold: float = 0.9
@@ -41,6 +43,7 @@ class FallacyDetectorConfig:
 @dataclass
 class FallacyDetection:
     """A detected fallacy."""
+
     fallacy_type: FallacyType
     confidence: float
     location: str
@@ -51,6 +54,7 @@ class FallacyDetection:
 @dataclass
 class ReasoningStep:
     """A step in a reasoning trace."""
+
     step_id: str
     content: str
     premises: List[str]
@@ -154,21 +158,46 @@ class FallacyDetector:
         # Patterns indicating universal claims (beyond just "all"/"always")
         universal_patterns = [
             # Universal quantifiers
-            "all ", "every ", "always ", "never ", "none ", "no one ",
-            "everyone ", "everything ", "everywhere ", "anybody ", "nobody ",
+            "all ",
+            "every ",
+            "always ",
+            "never ",
+            "none ",
+            "no one ",
+            "everyone ",
+            "everything ",
+            "everywhere ",
+            "anybody ",
+            "nobody ",
             # Strong generalizations
-            " must ", " will always ", " can never ", " is always ", " are always ",
+            " must ",
+            " will always ",
+            " can never ",
+            " is always ",
+            " are always ",
             # Categorical statements
-            "without exception", "in every case", "100%", "guaranteed",
+            "without exception",
+            "in every case",
+            "100%",
+            "guaranteed",
             # Implicit universals
-            " is a ", " are the ", " defines ", " characterizes ",
+            " is a ",
+            " are the ",
+            " defines ",
+            " characterizes ",
         ]
 
         # Patterns indicating limited evidence
         limited_evidence_patterns = [
-            "based on this example", "from this case", "this shows that",
-            "therefore all", "so every", "hence always",
-            "one ", "a single ", "this one ",
+            "based on this example",
+            "from this case",
+            "this shows that",
+            "therefore all",
+            "so every",
+            "hence always",
+            "one ",
+            "a single ",
+            "this one ",
         ]
 
         for step in trace:
@@ -176,9 +205,7 @@ class FallacyDetector:
             evidence_count = len(step.evidence_used)
 
             # Check for universal patterns
-            has_universal = any(
-                pattern in conclusion_lower for pattern in universal_patterns
-            )
+            has_universal = any(pattern in conclusion_lower for pattern in universal_patterns)
 
             # Check for limited evidence indicators in the conclusion itself
             has_limited_indicator = any(
@@ -201,7 +228,7 @@ class FallacyDetector:
                     location=step.step_id,
                     evidence=[
                         f"Universal claim with only {evidence_count} evidence items",
-                        "Pattern match: universal quantifier detected"
+                        "Pattern match: universal quantifier detected",
                     ],
                     severity=0.7,
                 )
@@ -213,19 +240,23 @@ class FallacyDetector:
                     location=step.step_id,
                     evidence=[
                         "Limited evidence indicator combined with universal claim",
-                        "Pattern match: limited evidence + generalization"
+                        "Pattern match: limited evidence + generalization",
                     ],
                     severity=0.7,
                 )
 
-            if premises_indicate_limited and has_universal and evidence_count < self.config.min_evidence_count * 2:
+            if (
+                premises_indicate_limited
+                and has_universal
+                and evidence_count < self.config.min_evidence_count * 2
+            ):
                 return FallacyDetection(
                     fallacy_type=FallacyType.HASTY_GENERALIZATION,
                     confidence=0.65,
                     location=step.step_id,
                     evidence=[
                         "Premises indicate limited scope but conclusion generalizes",
-                        f"Evidence count ({evidence_count}) insufficient for claim scope"
+                        f"Evidence count ({evidence_count}) insufficient for claim scope",
                     ],
                     severity=0.6,
                 )
@@ -277,7 +308,9 @@ class FallacyDetector:
 
         main_hypothesis = hypotheses[0]
         supporting = sum(1 for e in evidence if e.get("supports", "") == main_hypothesis.get("id"))
-        contradicting = sum(1 for e in evidence if e.get("contradicts", "") == main_hypothesis.get("id"))
+        contradicting = sum(
+            1 for e in evidence if e.get("contradicts", "") == main_hypothesis.get("id")
+        )
 
         total = supporting + contradicting
         if total < self.config.min_evidence_count:

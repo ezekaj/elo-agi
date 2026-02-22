@@ -20,7 +20,7 @@ from .memory_processes import (
     MemoryConsolidator,
     MemoryRetriever,
     MemoryReconsolidator,
-    Forgetter
+    Forgetter,
 )
 
 
@@ -33,10 +33,7 @@ class MemoryController:
     """
 
     def __init__(
-        self,
-        wm_capacity: int = 7,
-        iconic_decay: float = 0.250,
-        echoic_decay: float = 3.5
+        self, wm_capacity: int = 7, iconic_decay: float = 0.250, echoic_decay: float = 3.5
     ):
         """
         Initialize memory controller with all subsystems.
@@ -150,7 +147,7 @@ class MemoryController:
         self,
         experience: Any,
         context: Optional[Dict[str, Any]] = None,
-        emotional_valence: float = 0.0
+        emotional_valence: float = 0.0,
     ) -> Any:
         """
         Encode a new episodic memory.
@@ -164,9 +161,7 @@ class MemoryController:
             The created episode
         """
         episode = self.episodic.encode(
-            experience=experience,
-            context=context,
-            emotional_valence=emotional_valence
+            experience=experience, context=context, emotional_valence=emotional_valence
         )
 
         # Also store in working memory for immediate access
@@ -178,7 +173,7 @@ class MemoryController:
         self,
         name: str,
         features: Optional[Dict[str, float]] = None,
-        relations: Optional[List[tuple]] = None
+        relations: Optional[List[tuple]] = None,
     ) -> Any:
         """
         Add a concept to semantic memory.
@@ -194,10 +189,7 @@ class MemoryController:
         return self.semantic.create_concept(name, features, relations)
 
     def learn_skill(
-        self,
-        name: str,
-        trigger_features: Dict[str, Any],
-        action_names: List[str]
+        self, name: str, trigger_features: Dict[str, Any], action_names: List[str]
     ) -> Any:
         """
         Encode a new procedural memory.
@@ -212,11 +204,7 @@ class MemoryController:
         """
         return self.procedural.encode_simple(name, trigger_features, action_names)
 
-    def recall(
-        self,
-        cue: Any,
-        memory_types: Optional[List[str]] = None
-    ) -> Optional[Any]:
+    def recall(self, cue: Any, memory_types: Optional[List[str]] = None) -> Optional[Any]:
         """
         Unified recall interface.
 
@@ -339,7 +327,7 @@ class MemoryController:
             return True
         elif method == "suppress":
             return self.forgetter.active_forget(memory)
-        elif method == "prune" and hasattr(memory, 'engram'):
+        elif method == "prune" and hasattr(memory, "engram"):
             self.forgetter.prune(memory.engram)
             return True
         return False

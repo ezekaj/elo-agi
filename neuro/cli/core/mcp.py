@@ -19,6 +19,7 @@ import subprocess
 
 class MCPTransport(Enum):
     """MCP transport types."""
+
     STDIO = "stdio"
     HTTP = "http"
     SSE = "sse"
@@ -27,6 +28,7 @@ class MCPTransport(Enum):
 @dataclass
 class MCPServerConfig:
     """Configuration for an MCP server."""
+
     name: str
     command: str
     args: List[str] = field(default_factory=list)
@@ -37,6 +39,7 @@ class MCPServerConfig:
 @dataclass
 class MCPTool:
     """A tool exposed by an MCP server."""
+
     name: str
     server: str
     original_name: str
@@ -47,6 +50,7 @@ class MCPTool:
 @dataclass
 class MCPResource:
     """A resource exposed by an MCP server."""
+
     uri: str
     name: str
     server: str
@@ -146,11 +150,8 @@ class MCPManager:
                 {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {},
-                    "clientInfo": {
-                        "name": "neuro",
-                        "version": "0.9.0"
-                    }
-                }
+                    "clientInfo": {"name": "neuro", "version": "0.9.0"},
+                },
             )
 
             if not response:
@@ -173,11 +174,7 @@ class MCPManager:
 
     async def _discover_tools(self, server_name: str):
         """Discover tools from an MCP server."""
-        response = await self._send_request(
-            server_name,
-            "tools/list",
-            {}
-        )
+        response = await self._send_request(server_name, "tools/list", {})
 
         if response and "tools" in response:
             for tool_data in response["tools"]:
@@ -192,11 +189,7 @@ class MCPManager:
 
     async def _discover_resources(self, server_name: str):
         """Discover resources from an MCP server."""
-        response = await self._send_request(
-            server_name,
-            "resources/list",
-            {}
-        )
+        response = await self._send_request(server_name, "resources/list", {})
 
         if response and "resources" in response:
             for res_data in response["resources"]:
@@ -302,7 +295,7 @@ class MCPManager:
             {
                 "name": tool.original_name,
                 "arguments": args,
-            }
+            },
         )
 
         if response and "content" in response:
@@ -320,11 +313,7 @@ class MCPManager:
         if not resource:
             return None
 
-        response = await self._send_request(
-            resource.server,
-            "resources/read",
-            {"uri": uri}
-        )
+        response = await self._send_request(resource.server, "resources/read", {"uri": uri})
 
         if response and "contents" in response:
             for content in response["contents"]:

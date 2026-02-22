@@ -16,6 +16,7 @@ import numpy as np
 
 class DriveDirection(Enum):
     """Direction of motivational drive."""
+
     APPROACH = "approach"
     AVOID = "avoid"
 
@@ -28,6 +29,7 @@ class Drive:
     Represents a goal-directed tendency to obtain something (approach)
     or avoid something (avoid).
     """
+
     target: str
     intensity: float  # 0-1
     direction: DriveDirection
@@ -54,8 +56,9 @@ class IncentiveSignal:
     Distinguishes 'wanting' (motivational pull) from 'liking' (hedonic pleasure).
     These can be dissociated (e.g., addiction: high wanting, low liking).
     """
+
     wanting: float  # Motivational pull (dopaminergic)
-    liking: float   # Hedonic pleasure (opioid)
+    liking: float  # Hedonic pleasure (opioid)
     stimulus_id: str
 
 
@@ -76,18 +79,10 @@ class MotivationalSystem:
         self.base_arousal = base_arousal
         self.time_step = 0
 
-    def add_drive(
-        self,
-        target: str,
-        intensity: float,
-        direction: DriveDirection
-    ) -> Drive:
+    def add_drive(self, target: str, intensity: float, direction: DriveDirection) -> Drive:
         """Add a new motivational drive."""
         drive = Drive(
-            target=target,
-            intensity=intensity,
-            direction=direction,
-            created_at=self.time_step
+            target=target, intensity=intensity, direction=direction, created_at=self.time_step
         )
         self.active_drives.append(drive)
         return drive
@@ -122,8 +117,8 @@ class MotivationalSystem:
             history_motivation = 0.0
 
         # Current state modulation
-        deprivation = current_state.get('deprivation', 0.5)
-        satiation = current_state.get('satiation', 0.0)
+        deprivation = current_state.get("deprivation", 0.5)
+        satiation = current_state.get("satiation", 0.0)
 
         state_modulation = 1.0 + deprivation - satiation
 
@@ -143,11 +138,7 @@ class MotivationalSystem:
 
         return approach * self.base_arousal
 
-    def avoidance_tendency(
-        self,
-        punishment_magnitude: float,
-        probability: float = 1.0
-    ) -> float:
+    def avoidance_tendency(self, punishment_magnitude: float, probability: float = 1.0) -> float:
         """
         Compute strength of avoidance motivation.
 
@@ -162,9 +153,7 @@ class MotivationalSystem:
         return avoidance * self.base_arousal
 
     def resolve_conflict(
-        self,
-        approach_strength: float,
-        avoidance_strength: float
+        self, approach_strength: float, avoidance_strength: float
     ) -> Dict[str, Any]:
         """
         Resolve approach-avoidance conflict.
@@ -190,15 +179,15 @@ class MotivationalSystem:
             confidence = 0.5
 
         # High conflict reduces confidence
-        confidence *= (1 - conflict * 0.5)
+        confidence *= 1 - conflict * 0.5
 
         return {
-            'decision': decision,
-            'confidence': confidence,
-            'approach_strength': approach_strength,
-            'avoidance_strength': avoidance_strength,
-            'conflict_level': conflict,
-            'net_motivation': net
+            "decision": decision,
+            "confidence": confidence,
+            "approach_strength": approach_strength,
+            "avoidance_strength": avoidance_strength,
+            "conflict_level": conflict,
+            "net_motivation": net,
         }
 
     def record_reward(self, target: str, magnitude: float):
@@ -274,27 +263,20 @@ class IncentiveSalience:
         return IncentiveSignal(
             wanting=self.wanting(stimulus_id),
             liking=self.liking(stimulus_id),
-            stimulus_id=stimulus_id
+            stimulus_id=stimulus_id,
         )
 
     def learn_association(
-        self,
-        stimulus_id: str,
-        wanting_update: float = 0.0,
-        liking_update: float = 0.0
+        self, stimulus_id: str, wanting_update: float = 0.0, liking_update: float = 0.0
     ):
         """Learn wanting and/or liking association."""
         if wanting_update != 0:
             current = self.wanting_associations.get(stimulus_id, 0.0)
-            self.wanting_associations[stimulus_id] = np.clip(
-                current + wanting_update, 0.0, 1.0
-            )
+            self.wanting_associations[stimulus_id] = np.clip(current + wanting_update, 0.0, 1.0)
 
         if liking_update != 0:
             current = self.liking_associations.get(stimulus_id, 0.0)
-            self.liking_associations[stimulus_id] = np.clip(
-                current + liking_update, 0.0, 1.0
-            )
+            self.liking_associations[stimulus_id] = np.clip(current + liking_update, 0.0, 1.0)
 
     def sensitize(self, stimulus_id: str, amount: float = 0.1):
         """
@@ -343,5 +325,5 @@ class IncentiveSalience:
         High wanting, low liking, high sensitization.
         """
         self.wanting_associations[stimulus_id] = 0.3  # Base wanting
-        self.liking_associations[stimulus_id] = 0.2   # Low liking
-        self.sensitization_level[stimulus_id] = 2.5    # High sensitization
+        self.liking_associations[stimulus_id] = 0.2  # Low liking
+        self.sensitization_level[stimulus_id] = 2.5  # High sensitization

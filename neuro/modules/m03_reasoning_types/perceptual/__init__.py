@@ -5,7 +5,11 @@ from .multimodal_integration import MultimodalIntegrator, UnifiedPercept
 from .object_recognition import ObjectRecognizer, InvariantRecognition
 
 __all__ = [
-    'VisualFeatureExtractor', 'FeatureMap', 'Feature',
-    'MultimodalIntegrator', 'UnifiedPercept',
-    'ObjectRecognizer', 'InvariantRecognition'
+    "VisualFeatureExtractor",
+    "FeatureMap",
+    "Feature",
+    "MultimodalIntegrator",
+    "UnifiedPercept",
+    "ObjectRecognizer",
+    "InvariantRecognition",
 ]

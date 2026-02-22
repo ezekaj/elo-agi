@@ -12,8 +12,13 @@ from neuro.modules.meta_reasoning.orchestrator import (
     PlanStatus,
     CheckpointAction,
 )
-from neuro.modules.meta_reasoning.problem_classifier import ProblemAnalysis, ProblemType, ProblemDifficulty
+from neuro.modules.meta_reasoning.problem_classifier import (
+    ProblemAnalysis,
+    ProblemType,
+    ProblemDifficulty,
+)
 from neuro.modules.meta_reasoning.style_selector import StyleSelection, ReasoningStyle
+
 
 class TestOrchestratorConfig:
     """Tests for OrchestratorConfig class."""
@@ -28,6 +33,7 @@ class TestOrchestratorConfig:
         config = OrchestratorConfig(max_steps=50, checkpoint_frequency=10)
         assert config.max_steps == 50
         assert config.checkpoint_frequency == 10
+
 
 class TestDynamicOrchestrator:
     """Tests for DynamicOrchestrator class."""
@@ -76,7 +82,9 @@ class TestDynamicOrchestrator:
         assert plan.primary_style == ReasoningStyle.DEDUCTIVE
         assert len(plan.steps) > 0
 
-    @pytest.mark.skip(reason="Requires module registration - tested in test_execute_with_registered_module")
+    @pytest.mark.skip(
+        reason="Requires module registration - tested in test_execute_with_registered_module"
+    )
     def test_execute_plan(self):
         config = OrchestratorConfig(max_steps=5, checkpoint_frequency=2)
         orchestrator = DynamicOrchestrator(config=config, random_seed=42)
@@ -327,6 +335,7 @@ class TestDynamicOrchestrator:
         assert "total_executions" in stats
         assert "success_rate" in stats
 
+
 class TestPlanStatus:
     """Tests for PlanStatus enum."""
 
@@ -335,6 +344,7 @@ class TestPlanStatus:
         assert PlanStatus.IN_PROGRESS.value == "in_progress"
         assert PlanStatus.COMPLETED.value == "completed"
         assert PlanStatus.FAILED.value == "failed"
+
 
 class TestCheckpointAction:
     """Tests for CheckpointAction enum."""

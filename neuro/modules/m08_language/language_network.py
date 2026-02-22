@@ -18,6 +18,7 @@ from enum import Enum
 
 class RegionType(Enum):
     """Types of language regions"""
+
     BROCA = "broca"
     WERNICKE = "wernicke"
     ARCUATE = "arcuate"
@@ -26,6 +27,7 @@ class RegionType(Enum):
 @dataclass
 class RegionState:
     """State of a language region"""
+
     activation: np.ndarray
     output: np.ndarray
     is_active: bool = True
@@ -268,7 +270,7 @@ class ArcuateFasciculus:
             return np.zeros(self.dim)
 
         transmission = self.W_broca_to_wernicke @ broca_output
-        transmission *= (1.0 - self.damage_level)
+        transmission *= 1.0 - self.damage_level
         self.forward_buffer = transmission
 
         return transmission
@@ -279,12 +281,14 @@ class ArcuateFasciculus:
             return np.zeros(self.dim)
 
         transmission = self.W_wernicke_to_broca @ wernicke_output
-        transmission *= (1.0 - self.damage_level)
+        transmission *= 1.0 - self.damage_level
         self.backward_buffer = transmission
 
         return transmission
 
-    def synchronize(self, broca_state: np.ndarray, wernicke_state: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def synchronize(
+        self, broca_state: np.ndarray, wernicke_state: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Coordinate processing between regions
 
         Returns:
@@ -348,7 +352,7 @@ class DistributedLanguageNetwork:
         if len(input_signal) < self.dim:
             input_signal = np.pad(input_signal, (0, self.dim - len(input_signal)))
         elif len(input_signal) > self.dim:
-            input_signal = input_signal[:self.dim]
+            input_signal = input_signal[: self.dim]
 
         for _ in range(n_iterations):
             # Broca processes syntax
@@ -370,10 +374,10 @@ class DistributedLanguageNetwork:
         self.combined_state = 0.5 * broca_state + 0.5 * wernicke_state
 
         result = {
-            'broca': broca_state,
-            'wernicke': wernicke_state,
-            'combined': self.combined_state,
-            'broca_inhibition': self.broca.current_inhibition
+            "broca": broca_state,
+            "wernicke": wernicke_state,
+            "combined": self.combined_state,
+            "broca_inhibition": self.broca.current_inhibition,
         }
 
         self.processing_history.append(result)
@@ -389,11 +393,11 @@ class DistributedLanguageNetwork:
             region: 'broca', 'wernicke', or 'arcuate'
             damage_level: 0.0 (intact) to 1.0 (fully lesioned)
         """
-        if region == 'broca':
+        if region == "broca":
             self.broca.lesion(damage_level)
-        elif region == 'wernicke':
+        elif region == "wernicke":
             self.wernicke.lesion(damage_level)
-        elif region == 'arcuate':
+        elif region == "arcuate":
             self.arcuate.lesion(damage_level)
         else:
             raise ValueError(f"Unknown region: {region}")
@@ -404,27 +408,27 @@ class DistributedLanguageNetwork:
         Args:
             region: Specific region to restore, or None for all
         """
-        if region is None or region == 'broca':
+        if region is None or region == "broca":
             self.broca.restore()
-        if region is None or region == 'wernicke':
+        if region is None or region == "wernicke":
             self.wernicke.restore()
-        if region is None or region == 'arcuate':
+        if region is None or region == "arcuate":
             self.arcuate.restore()
 
     def get_region_states(self) -> Dict[str, np.ndarray]:
         """Get current state of all regions"""
         return {
-            'broca': self.broca.state.copy(),
-            'wernicke': self.wernicke.state.copy(),
-            'combined': self.combined_state.copy()
+            "broca": self.broca.state.copy(),
+            "wernicke": self.wernicke.state.copy(),
+            "combined": self.combined_state.copy(),
         }
 
     def get_damage_levels(self) -> Dict[str, float]:
         """Get damage level of each region"""
         return {
-            'broca': self.broca.damage_level,
-            'wernicke': self.wernicke.damage_level,
-            'arcuate': self.arcuate.damage_level
+            "broca": self.broca.damage_level,
+            "wernicke": self.wernicke.damage_level,
+            "arcuate": self.arcuate.damage_level,
         }
 
     def is_functional(self) -> bool:

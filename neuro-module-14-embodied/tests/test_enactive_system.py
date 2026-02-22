@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m14_embodied.enactive_system import (
-    AutopoieticSystem, SensoriMotorEnaction, EnactiveCognitiveSystem, EnactiveParams
+    AutopoieticSystem,
+    SensoriMotorEnaction,
+    EnactiveCognitiveSystem,
+    EnactiveParams,
 )
+
 
 class TestAutopoieticSystem:
     """Tests for autopoietic system"""
@@ -61,6 +65,7 @@ class TestAutopoieticSystem:
 
         assert not system.is_viable()
 
+
 class TestSensoriMotorEnaction:
     """Tests for sensorimotor enaction"""
 
@@ -113,6 +118,7 @@ class TestSensoriMotorEnaction:
         enaction.enact("grasp")
 
         assert len(enaction.interaction_history) == 2
+
 
 class TestEnactiveCognitiveSystem:
     """Tests for full enactive system"""
@@ -223,5 +229,6 @@ class TestEnactiveCognitiveSystem:
         assert not result["viable"]
         assert not system.viability
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -15,6 +15,7 @@ from dataclasses import dataclass
 @dataclass
 class HomeostaticParams:
     """Homeostatic regulation parameters"""
+
     target_activity: float = 0.1  # Target firing rate
     scaling_rate: float = 0.001  # Synaptic scaling rate
     intrinsic_rate: float = 0.01  # Intrinsic plasticity rate
@@ -27,11 +28,7 @@ class HomeostaticRegulation:
     Maintains stable activity levels through multiple mechanisms.
     """
 
-    def __init__(
-        self,
-        n_neurons: int,
-        params: Optional[HomeostaticParams] = None
-    ):
+    def __init__(self, n_neurons: int, params: Optional[HomeostaticParams] = None):
         self.n_neurons = n_neurons
         self.params = params or HomeostaticParams()
 
@@ -54,7 +51,7 @@ class HomeostaticRegulation:
         """
         # Scale inversely with activity
         ratio = self.params.target_activity / (self.activity_average + 1e-8)
-        return ratio ** self.params.scaling_rate
+        return ratio**self.params.scaling_rate
 
     def scale_weights(self, weights: np.ndarray) -> np.ndarray:
         """Apply synaptic scaling to weight matrix
@@ -83,11 +80,7 @@ class HomeostaticRegulation:
         self.excitability = np.clip(self.excitability, 0.1, 10.0)
         return self.excitability
 
-    def regulate(
-        self,
-        activity: np.ndarray,
-        weights: np.ndarray
-    ) -> np.ndarray:
+    def regulate(self, activity: np.ndarray, weights: np.ndarray) -> np.ndarray:
         """Full homeostatic regulation step
 
         Args:
@@ -108,11 +101,7 @@ class SynapticScaling:
     Scales all synapses proportionally to maintain total drive.
     """
 
-    def __init__(
-        self,
-        target_sum: float = 1.0,
-        scaling_rate: float = 0.01
-    ):
+    def __init__(self, target_sum: float = 1.0, scaling_rate: float = 0.01):
         self.target_sum = target_sum
         self.scaling_rate = scaling_rate
 
@@ -148,11 +137,7 @@ class MetaplasticityRegulation:
     BCM-style sliding threshold based on activity history.
     """
 
-    def __init__(
-        self,
-        n_neurons: int,
-        time_constant: float = 1000.0
-    ):
+    def __init__(self, n_neurons: int, time_constant: float = 1000.0):
         self.n_neurons = n_neurons
         self.time_constant = time_constant
 
@@ -174,10 +159,7 @@ class MetaplasticityRegulation:
         alpha = 1.0 / self.time_constant
 
         # Track average squared activity
-        self.activity_squared_avg = (
-            (1 - alpha) * self.activity_squared_avg +
-            alpha * activity ** 2
-        )
+        self.activity_squared_avg = (1 - alpha) * self.activity_squared_avg + alpha * activity**2
 
         # Threshold is related to recent activity
         self.threshold = self.activity_squared_avg
@@ -199,21 +181,14 @@ class MetaplasticityRegulation:
 class ActivityRegulator:
     """Combined activity regulation system"""
 
-    def __init__(
-        self,
-        n_neurons: int,
-        target_activity: float = 0.1
-    ):
-        self.homeostatic = HomeostaticRegulation(n_neurons,
-            HomeostaticParams(target_activity=target_activity))
+    def __init__(self, n_neurons: int, target_activity: float = 0.1):
+        self.homeostatic = HomeostaticRegulation(
+            n_neurons, HomeostaticParams(target_activity=target_activity)
+        )
         self.scaling = SynapticScaling()
         self.metaplasticity = MetaplasticityRegulation(n_neurons)
 
-    def regulate(
-        self,
-        activity: np.ndarray,
-        weights: np.ndarray
-    ) -> np.ndarray:
+    def regulate(self, activity: np.ndarray, weights: np.ndarray) -> np.ndarray:
         """Apply all regulation mechanisms
 
         Args:

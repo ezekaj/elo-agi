@@ -12,15 +12,17 @@ import numpy as np
 
 class ReasoningType(Enum):
     """Types of reasoning queries."""
+
     PROBABILISTIC = "probabilistic"  # P(Y | X)
-    CAUSAL = "causal"                # P(Y | do(X))
+    CAUSAL = "causal"  # P(Y | do(X))
     COUNTERFACTUAL = "counterfactual"  # P(Y_x | X', Y')
-    ANALOGICAL = "analogical"        # Inference by analogy
+    ANALOGICAL = "analogical"  # Inference by analogy
 
 
 @dataclass
 class InferenceResult:
     """Result of a reasoning query."""
+
     query_type: ReasoningType
     query: str
     result: Any
@@ -99,7 +101,7 @@ class ProbabilisticReasoner:
         intervention: Optional[Dict[str, Any]] = None,
         counterfactual: Optional[Dict[str, Any]] = None,
         analogy_query: Optional[Any] = None,
-        **kwargs
+        **kwargs,
     ) -> InferenceResult:
         """
         Execute a reasoning query.
@@ -134,10 +136,7 @@ class ProbabilisticReasoner:
             )
 
     def _probabilistic_query(
-        self,
-        query_vars: Optional[List[str]],
-        evidence: Optional[Dict[str, Any]],
-        **kwargs
+        self, query_vars: Optional[List[str]], evidence: Optional[Dict[str, Any]], **kwargs
     ) -> InferenceResult:
         """Execute a probabilistic query P(Y | X)."""
         if self._bayesian_network is None:
@@ -182,7 +181,7 @@ class ProbabilisticReasoner:
         query_vars: Optional[List[str]],
         intervention: Optional[Dict[str, Any]],
         evidence: Optional[Dict[str, Any]],
-        **kwargs
+        **kwargs,
     ) -> InferenceResult:
         """Execute a causal query P(Y | do(X))."""
         if self._causal_model is None:
@@ -204,9 +203,7 @@ class ProbabilisticReasoner:
 
         results = {}
         for var in query_vars:
-            dist = self._intervention_engine.interventional_distribution(
-                do_op, var, n_samples
-            )
+            dist = self._intervention_engine.interventional_distribution(do_op, var, n_samples)
             results[var] = dist
 
         query_str = f"P({', '.join(query_vars)} | {do_op})"
@@ -220,10 +217,7 @@ class ProbabilisticReasoner:
         )
 
     def _counterfactual_query(
-        self,
-        counterfactual: Optional[Dict[str, Any]],
-        evidence: Optional[Dict[str, Any]],
-        **kwargs
+        self, counterfactual: Optional[Dict[str, Any]], evidence: Optional[Dict[str, Any]], **kwargs
     ) -> InferenceResult:
         """Execute a counterfactual query."""
         if self._counterfactual_reasoner is None:
@@ -275,11 +269,7 @@ class ProbabilisticReasoner:
             metadata={"evidence": evidence, "counterfactual": counterfactual},
         )
 
-    def _analogical_query(
-        self,
-        analogy_query: Optional[Any],
-        **kwargs
-    ) -> InferenceResult:
+    def _analogical_query(self, analogy_query: Optional[Any], **kwargs) -> InferenceResult:
         """Execute an analogical reasoning query."""
         if self._analogy_retriever is None:
             return InferenceResult(
@@ -303,16 +293,12 @@ class ProbabilisticReasoner:
         top_k = kwargs.get("top_k", 5)
 
         # Retrieve similar cases
-        results = self._analogy_retriever.retrieve(
-            analogy_query, features, top_k
-        )
+        results = self._analogy_retriever.retrieve(analogy_query, features, top_k)
 
         if results:
             # Create analogy with best match
             best = results[0]
-            analogy = self._structure_mapper.make_analogy(
-                best.case.problem, analogy_query
-            )
+            analogy = self._structure_mapper.make_analogy(best.case.problem, analogy_query)
 
             return InferenceResult(
                 query_type=ReasoningType.ANALOGICAL,
@@ -321,8 +307,7 @@ class ProbabilisticReasoner:
                     "best_match": best.case.name,
                     "similarity": best.similarity,
                     "inferences": [
-                        f"{p.name}({', '.join(p.arguments)})"
-                        for p in analogy.inferences
+                        f"{p.name}({', '.join(p.arguments)})" for p in analogy.inferences
                     ],
                     "object_mappings": analogy.alignment.object_mappings,
                 },

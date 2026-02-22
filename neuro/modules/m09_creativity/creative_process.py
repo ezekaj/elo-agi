@@ -25,6 +25,7 @@ from .imagery import ImagerySystem, MultimodalImage
 @dataclass
 class Idea:
     """A creative idea"""
+
     id: str
     content: str
     source_concepts: List[str]
@@ -39,6 +40,7 @@ class Idea:
 @dataclass
 class CreativeOutput:
     """Final output of creative process"""
+
     best_ideas: List[Idea]
     total_generated: int
     total_evaluated: int
@@ -88,18 +90,22 @@ class CreativeProcess:
         for source, target, strength, assoc_type in associations:
             self.dmn.create_association(source, target, strength, assoc_type)
 
-    def set_creative_goal(self,
-                          goal_id: str,
-                          description: str,
-                          criteria_weights: Optional[Dict[EvaluationCriterion, float]] = None,
-                          constraints: Optional[List[str]] = None):
+    def set_creative_goal(
+        self,
+        goal_id: str,
+        description: str,
+        criteria_weights: Optional[Dict[EvaluationCriterion, float]] = None,
+        constraints: Optional[List[str]] = None,
+    ):
         """Set the goal for creative generation"""
         self.ecn.set_goal(goal_id, description, criteria_weights, constraints)
 
-    def generate_ideas(self,
-                       num_ideas: int = 5,
-                       seed_concepts: Optional[List[str]] = None,
-                       use_imagery: bool = True) -> List[Idea]:
+    def generate_ideas(
+        self,
+        num_ideas: int = 5,
+        seed_concepts: Optional[List[str]] = None,
+        use_imagery: bool = True,
+    ) -> List[Idea]:
         """
         Generate creative ideas.
 
@@ -135,7 +141,7 @@ class CreativeProcess:
                     f"imagery_{idea_id}",
                     content,
                     include_visual=True,
-                    include_tactile=True  # Tactile boosts creativity
+                    include_tactile=True,  # Tactile boosts creativity
                 )
 
             idea = Idea(
@@ -144,7 +150,7 @@ class CreativeProcess:
                 source_concepts=thought.concepts,
                 novelty=thought.novelty_score,
                 coherence=thought.coherence_score,
-                imagery=imagery
+                imagery=imagery,
             )
 
             self.ideas[idea_id] = idea
@@ -202,12 +208,7 @@ class CreativeProcess:
                 "goal_relevance": 0.6,  # Default moderate relevance
             }
 
-            evaluation = self.ecn.evaluate_idea(
-                idea_id,
-                idea.content,
-                features,
-                context
-            )
+            evaluation = self.ecn.evaluate_idea(idea_id, idea.content, features, context)
 
             idea.evaluation = evaluation
             evaluations.append(evaluation)
@@ -216,9 +217,9 @@ class CreativeProcess:
 
         return evaluations
 
-    def refine_ideas(self,
-                     idea_ids: Optional[List[str]] = None,
-                     target_score: float = 0.6) -> List[Idea]:
+    def refine_ideas(
+        self, idea_ids: Optional[List[str]] = None, target_score: float = 0.6
+    ) -> List[Idea]:
         """
         Refine ideas that need improvement.
 
@@ -227,10 +228,11 @@ class CreativeProcess:
         if idea_ids is None:
             # Find ideas that need refinement
             idea_ids = [
-                i for i, idea in self.ideas.items()
-                if idea.evaluation and
-                idea.evaluation.recommendation == "refine" and
-                idea.evaluation.overall_score < target_score
+                i
+                for i, idea in self.ideas.items()
+                if idea.evaluation
+                and idea.evaluation.recommendation == "refine"
+                and idea.evaluation.overall_score < target_score
             ]
 
         refined = []
@@ -245,9 +247,7 @@ class CreativeProcess:
 
             # Get refinement from ECN
             refined_id, refined_content, refinement = self.ecn.refine_idea(
-                idea_id,
-                idea.content,
-                idea.evaluation
+                idea_id, idea.content, idea.evaluation
             )
 
             # Create refined idea
@@ -258,7 +258,7 @@ class CreativeProcess:
                 novelty=idea.novelty * 0.9,  # Slight novelty loss from refinement
                 coherence=min(1.0, idea.coherence + refinement.improvement_score),
                 imagery=idea.imagery,
-                refinements=[idea_id]
+                refinements=[idea_id],
             )
 
             self.ideas[refined_id] = new_idea
@@ -267,10 +267,9 @@ class CreativeProcess:
 
         return refined
 
-    def creative_session(self,
-                         goal: str,
-                         duration_seconds: float = 30.0,
-                         target_good_ideas: int = 3) -> CreativeOutput:
+    def creative_session(
+        self, goal: str, duration_seconds: float = 30.0, target_good_ideas: int = 3
+    ) -> CreativeOutput:
         """
         Run a complete creative session.
 
@@ -294,7 +293,9 @@ class CreativeProcess:
                 metrics = {
                     "ideas_generated": total_generated,
                     "target_ideas": 5,
-                    "current_novelty": np.mean([i.novelty for i in new_ideas]) if new_ideas else 0.5,
+                    "current_novelty": np.mean([i.novelty for i in new_ideas])
+                    if new_ideas
+                    else 0.5,
                 }
 
                 should_switch, trigger = self.salience.should_switch(metrics)
@@ -307,10 +308,7 @@ class CreativeProcess:
                 total_evaluated += len(evaluations)
 
                 # Check if we have enough good ideas
-                good_ideas = [
-                    e for e in evaluations
-                    if e.overall_score >= 0.6
-                ]
+                good_ideas = [e for e in evaluations if e.overall_score >= 0.6]
 
                 if len(good_ideas) >= target_good_ideas:
                     break
@@ -334,14 +332,9 @@ class CreativeProcess:
         elapsed = time.time() - start_time
 
         # Get best ideas
-        evaluated_ideas = [
-            idea for idea in self.ideas.values()
-            if idea.evaluation is not None
-        ]
+        evaluated_ideas = [idea for idea in self.ideas.values() if idea.evaluation is not None]
         sorted_ideas = sorted(
-            evaluated_ideas,
-            key=lambda i: i.evaluation.overall_score,
-            reverse=True
+            evaluated_ideas, key=lambda i: i.evaluation.overall_score, reverse=True
         )
 
         best_ideas = sorted_ideas[:target_good_ideas]
@@ -360,7 +353,7 @@ class CreativeProcess:
             total_evaluated=total_evaluated,
             process_duration=elapsed,
             network_reconfigurations=len(self.salience.switch_history),
-            creativity_score=creativity_score
+            creativity_score=creativity_score,
         )
 
     def mind_wander_for_ideas(self, duration_steps: int = 10) -> List[Idea]:
@@ -382,16 +375,16 @@ class CreativeProcess:
                     content=self._thought_to_content(thought),
                     source_concepts=thought.concepts,
                     novelty=thought.novelty_score,
-                    coherence=thought.coherence_score
+                    coherence=thought.coherence_score,
                 )
                 self.ideas[idea_id] = idea
                 ideas.append(idea)
 
         return ideas
 
-    def find_distant_connections(self,
-                                  concept: str,
-                                  max_results: int = 5) -> List[Tuple[str, float, List[str]]]:
+    def find_distant_connections(
+        self, concept: str, max_results: int = 5
+    ) -> List[Tuple[str, float, List[str]]]:
         """
         Find distant but potentially creative connections.
 
@@ -399,9 +392,9 @@ class CreativeProcess:
         """
         return self.dmn.find_distant_associations(concept, min_distance=3, max_results=max_results)
 
-    def imagine_idea(self,
-                     idea_id: str,
-                     modalities: Optional[List[str]] = None) -> Optional[MultimodalImage]:
+    def imagine_idea(
+        self, idea_id: str, modalities: Optional[List[str]] = None
+    ) -> Optional[MultimodalImage]:
         """
         Create rich mental imagery for an idea.
 
@@ -425,9 +418,7 @@ class CreativeProcess:
         network_stats = self.salience.get_switch_statistics()
 
         idea_scores = [
-            idea.evaluation.overall_score
-            for idea in self.ideas.values()
-            if idea.evaluation
+            idea.evaluation.overall_score for idea in self.ideas.values() if idea.evaluation
         ]
 
         return {

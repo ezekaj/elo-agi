@@ -20,16 +20,18 @@ import yaml
 
 class SubagentType(Enum):
     """Built-in subagent types."""
-    EXPLORE = "Explore"       # Fast, read-only codebase exploration
-    PLAN = "Plan"             # Research for planning
-    GENERAL = "General"       # Full capabilities
-    BASH = "Bash"             # Shell command specialist
-    CUSTOM = "Custom"         # User-defined
+
+    EXPLORE = "Explore"  # Fast, read-only codebase exploration
+    PLAN = "Plan"  # Research for planning
+    GENERAL = "General"  # Full capabilities
+    BASH = "Bash"  # Shell command specialist
+    CUSTOM = "Custom"  # User-defined
 
 
 @dataclass
 class SubagentConfig:
     """Configuration for a subagent."""
+
     name: str
     description: str
     type: SubagentType = SubagentType.CUSTOM
@@ -52,6 +54,7 @@ class SubagentConfig:
 @dataclass
 class SubagentExecution:
     """A running or completed subagent."""
+
     id: str
     config: SubagentConfig
     task: str
@@ -92,9 +95,8 @@ RULES:
 - Only read files, never modify
 - Be fast and focused
 - Return concise findings
-- If you can't find something in 3 attempts, report what you did find"""
+- If you can't find something in 3 attempts, report what you did find""",
         ),
-
         "Plan": SubagentConfig(
             name="Plan",
             description="Research agent for gathering context before planning implementation. Analyzes codebase structure and patterns.",
@@ -110,9 +112,8 @@ TASKS:
 - Identify dependencies
 - Note potential issues
 
-Return structured findings that will help plan the implementation."""
+Return structured findings that will help plan the implementation.""",
         ),
-
         "General": SubagentConfig(
             name="General",
             description="General-purpose agent with full capabilities. Use for complex multi-step tasks.",
@@ -125,9 +126,8 @@ PRINCIPLES:
 - Work step by step
 - Verify your work
 - Report progress
-- Ask for clarification if needed"""
+- Ask for clarification if needed""",
         ),
-
         "Bash": SubagentConfig(
             name="Bash",
             description="Shell command specialist. Use for running commands, installations, builds.",
@@ -141,7 +141,7 @@ RULES:
 - Always explain what a command does before running
 - Check for errors in output
 - Never run destructive commands without confirmation
-- Use safe defaults"""
+- Use safe defaults""",
         ),
     }
 
@@ -291,10 +291,12 @@ CONSTRAINTS:
                     model=config.model if config.model != "inherit" else None,
                 )
 
-                execution.messages.append({
-                    "role": "assistant",
-                    "content": response,
-                })
+                execution.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": response,
+                    }
+                )
 
                 # Check for tool calls
                 tool_calls = self._extract_tool_calls(response)
@@ -303,17 +305,21 @@ CONSTRAINTS:
                     for tool_name, tool_args in tool_calls:
                         # Check if tool is allowed
                         if config.disallowed_tools and tool_name in config.disallowed_tools:
-                            execution.messages.append({
-                                "role": "tool",
-                                "content": f"Error: Tool {tool_name} is not allowed for this agent",
-                            })
+                            execution.messages.append(
+                                {
+                                    "role": "tool",
+                                    "content": f"Error: Tool {tool_name} is not allowed for this agent",
+                                }
+                            )
                             continue
 
                         if config.tools and tool_name not in config.tools:
-                            execution.messages.append({
-                                "role": "tool",
-                                "content": f"Error: Tool {tool_name} is not in allowed tools list",
-                            })
+                            execution.messages.append(
+                                {
+                                    "role": "tool",
+                                    "content": f"Error: Tool {tool_name} is not in allowed tools list",
+                                }
+                            )
                             continue
 
                         # Execute tool
@@ -323,10 +329,12 @@ CONSTRAINTS:
                             show_spinner=False,
                         )
 
-                        execution.messages.append({
-                            "role": "tool",
-                            "content": f"Tool {tool_name} result: {result.output or result.error}",
-                        })
+                        execution.messages.append(
+                            {
+                                "role": "tool",
+                                "content": f"Tool {tool_name} result: {result.output or result.error}",
+                            }
+                        )
                 else:
                     # No tool calls, check if done
                     if self._is_complete(response):
@@ -355,8 +363,8 @@ CONSTRAINTS:
         import re
 
         calls = []
-        tool_matches = re.findall(r'<tool>(\w+)</tool>', response)
-        args_matches = re.findall(r'<args>(.*?)</args>', response, re.DOTALL)
+        tool_matches = re.findall(r"<tool>(\w+)</tool>", response)
+        args_matches = re.findall(r"<args>(.*?)</args>", response, re.DOTALL)
 
         for i, tool_name in enumerate(tool_matches):
             args = {}

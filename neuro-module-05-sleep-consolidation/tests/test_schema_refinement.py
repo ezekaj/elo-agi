@@ -3,8 +3,12 @@
 import pytest
 import numpy as np
 from neuro.modules.m05_sleep_consolidation.schema_refinement import (
-    SchemaRefiner, Schema, SchemaUpdateType, SchemaUpdate,
+    SchemaRefiner,
+    Schema,
+    SchemaUpdateType,
+    SchemaUpdate,
 )
+
 
 class TestSchema:
     """Tests for Schema."""
@@ -65,6 +69,7 @@ class TestSchema:
         assert schema.similarity_to(same) == pytest.approx(1.0, abs=0.01)
         assert schema.similarity_to(orthogonal) == pytest.approx(0.0, abs=0.01)
 
+
 class TestSchemaRefiner:
     """Tests for SchemaRefiner."""
 
@@ -110,9 +115,7 @@ class TestSchemaRefiner:
 
         # Similar vector should assimilate
         similar = prototype + 0.1 * np.random.randn(64)
-        schema, update_type = refiner.update_schema(
-            "animals", "dog", similar, timestamp=1.0
-        )
+        schema, update_type = refiner.update_schema("animals", "dog", similar, timestamp=1.0)
 
         assert update_type == SchemaUpdateType.ASSIMILATE
         assert "dog" in schema.instances
@@ -128,9 +131,7 @@ class TestSchemaRefiner:
 
         # Very different vector should accommodate
         different = np.array([0.0] * 63 + [1.0])
-        schema, update_type = refiner.update_schema(
-            "animals", "alien", different, timestamp=1.0
-        )
+        schema, update_type = refiner.update_schema("animals", "alien", different, timestamp=1.0)
 
         assert update_type == SchemaUpdateType.ACCOMMODATE
         assert "alien" in schema.instances
@@ -303,4 +304,3 @@ class TestSchemaRefiner:
         assert len(all_schemas) == 2
         assert "a" in all_schemas
         assert "b" in all_schemas
-

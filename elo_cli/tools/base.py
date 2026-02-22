@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 @dataclass
 class ToolResult:
     """Result from tool execution."""
+
     success: bool
     output: str
     error: str = ""
@@ -27,11 +28,7 @@ class Tool(ABC):
     requires_permission: bool = False
 
     # JSON Schema for parameters (used by Ollama function calling)
-    parameters: dict = {
-        "type": "object",
-        "properties": {},
-        "required": []
-    }
+    parameters: dict = {"type": "object", "properties": {}, "required": []}
 
     @abstractmethod
     def execute(self, **kwargs) -> ToolResult:
@@ -45,8 +42,8 @@ class Tool(ABC):
             "function": {
                 "name": self.name,
                 "description": self.description,
-                "parameters": self.parameters
-            }
+                "parameters": self.parameters,
+            },
         }
 
     def validate_params(self, **kwargs) -> tuple[bool, str]:

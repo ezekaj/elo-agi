@@ -18,6 +18,7 @@ from .config import SystemConfig
 
 class OutputType(Enum):
     """Types of motor output."""
+
     VECTOR = "vector"
     DISCRETE = "discrete"
     TEXT = "text"
@@ -26,6 +27,7 @@ class OutputType(Enum):
 
 class ActionCategory(Enum):
     """Categories of discrete actions."""
+
     MOVE = "move"
     INTERACT = "interact"
     COMMUNICATE = "communicate"
@@ -36,6 +38,7 @@ class ActionCategory(Enum):
 @dataclass
 class MotorOutput:
     """A single motor output."""
+
     output_type: OutputType
     value: Any
     confidence: float = 0.5
@@ -47,6 +50,7 @@ class MotorOutput:
 @dataclass
 class ActionBuffer:
     """Buffer for recent actions."""
+
     capacity: int = 10
     actions: List[MotorOutput] = field(default_factory=list)
 
@@ -183,7 +187,7 @@ class MotorInterface:
             value=best_category,
             confidence=confidence,
             priority=confidence,
-            metadata={'scores': dict(zip([c.value for c in ActionCategory], category_scores))},
+            metadata={"scores": dict(zip([c.value for c in ActionCategory], category_scores))},
         )
 
         self._record_action(output)
@@ -199,8 +203,16 @@ class MotorInterface:
 
         # Map state activation to basic tokens
         tokens = [
-            "observe", "move", "wait", "think", "act",
-            "explore", "remember", "decide", "communicate", "learn"
+            "observe",
+            "move",
+            "wait",
+            "think",
+            "act",
+            "explore",
+            "remember",
+            "decide",
+            "communicate",
+            "learn",
         ]
 
         # Select tokens based on state
@@ -233,9 +245,9 @@ class MotorInterface:
         text = self._generate_text(state)
 
         composite = {
-            'vector': vector,
-            'discrete': discrete.value,
-            'text': text.value,
+            "vector": vector,
+            "discrete": discrete.value,
+            "text": text.value,
         }
 
         confidence = (discrete.confidence + text.confidence) / 2
@@ -254,7 +266,7 @@ class MotorInterface:
         """Transform cognitive state to action vector."""
         # Resize to output dimension
         if len(state) >= self.config.output_dim:
-            action = state[:self.config.output_dim]
+            action = state[: self.config.output_dim]
         else:
             action = np.pad(state, (0, self.config.output_dim - len(state)))
 
@@ -262,11 +274,7 @@ class MotorInterface:
         action = np.tanh(action)
 
         # Apply threshold
-        action = np.where(
-            np.abs(action) > self.config.action_threshold,
-            action,
-            0.0
-        )
+        action = np.where(np.abs(action) > self.config.action_threshold, action, 0.0)
 
         return action.astype(np.float32)
 
@@ -314,11 +322,11 @@ class MotorInterface:
     def get_statistics(self) -> Dict[str, Any]:
         """Get interface statistics."""
         return {
-            'action_count': self._action_count,
-            'pending_count': len(self._pending_actions),
-            'buffer_size': len(self.buffer.actions),
-            'output_dim': self.config.output_dim,
-            'action_threshold': self.config.action_threshold,
+            "action_count": self._action_count,
+            "pending_count": len(self._pending_actions),
+            "buffer_size": len(self.buffer.actions),
+            "output_dim": self.config.output_dim,
+            "action_threshold": self.config.action_threshold,
         }
 
     def reset(self) -> None:

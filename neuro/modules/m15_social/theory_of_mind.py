@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class ToMParams:
     """Parameters for Theory of Mind"""
+
     n_features: int = 50
     belief_decay: float = 0.05
     inference_threshold: float = 0.5
@@ -47,8 +48,7 @@ class BeliefTracker:
         self.own_beliefs[topic] = belief.copy()
         self.confidence[f"self_{topic}"] = confidence
 
-    def attribute_belief(self, agent: str, topic: str, belief: np.ndarray,
-                        confidence: float = 0.8):
+    def attribute_belief(self, agent: str, topic: str, belief: np.ndarray, confidence: float = 0.8):
         """Attribute a belief to another agent"""
         if len(belief) != self.params.n_features:
             belief = np.resize(belief, self.params.n_features)
@@ -59,8 +59,7 @@ class BeliefTracker:
         self.others_beliefs[agent][topic] = belief.copy()
         self.confidence[f"{agent}_{topic}"] = confidence
 
-    def attribute_second_order(self, agent1: str, agent2: str, topic: str,
-                              belief: np.ndarray):
+    def attribute_second_order(self, agent1: str, agent2: str, topic: str, belief: np.ndarray):
         """Attribute what agent1 thinks agent2 believes"""
         if len(belief) != self.params.n_features:
             belief = np.resize(belief, self.params.n_features)
@@ -86,16 +85,14 @@ class BeliefTracker:
         if own is None or other is None:
             return False
 
-        similarity = np.dot(own, other) / (
-            np.linalg.norm(own) * np.linalg.norm(other) + 1e-8
-        )
+        similarity = np.dot(own, other) / (np.linalg.norm(own) * np.linalg.norm(other) + 1e-8)
 
         return similarity < 0.5  # Different beliefs = false belief
 
     def decay_beliefs(self, dt: float = 1.0):
         """Decay confidence in beliefs over time"""
         for key in self.confidence:
-            self.confidence[key] *= (1 - self.params.belief_decay * dt)
+            self.confidence[key] *= 1 - self.params.belief_decay * dt
 
 
 class MentalStateAttribution:
@@ -143,7 +140,7 @@ class MentalStateAttribution:
             "intention": inferred_intention,
             "belief_strength": abs(belief_activation),
             "desire_strength": abs(desire_activation),
-            "intention_strength": abs(intention_activation)
+            "intention_strength": abs(intention_activation),
         }
 
     def get_attributed_state(self, agent: str, state_type: str) -> Optional[np.ndarray]:
@@ -204,15 +201,15 @@ class TheoryOfMind:
         # Track inferred belief
         if attribution["belief"] is not None:
             self.belief_tracker.attribute_belief(
-                agent, "current", attribution["belief"],
-                confidence=attribution["belief_strength"]
+                agent, "current", attribution["belief"], confidence=attribution["belief_strength"]
             )
 
         attribution["tpj_activity"] = np.mean(self.tpj_activation)
         return attribution
 
-    def run_false_belief_task(self, agent: str, reality: np.ndarray,
-                             agent_belief: np.ndarray) -> Dict:
+    def run_false_belief_task(
+        self, agent: str, reality: np.ndarray, agent_belief: np.ndarray
+    ) -> Dict:
         """Run Sally-Anne style false belief task"""
         # Update own belief (reality)
         self.belief_tracker.update_own_belief("location", reality)
@@ -231,7 +228,7 @@ class TheoryOfMind:
             "reality": reality,
             "agent_belief": agent_belief,
             "false_belief_detected": has_false_belief,
-            "predicted_behavior": predicted_behavior
+            "predicted_behavior": predicted_behavior,
         }
 
     def update(self, dt: float = 1.0):
@@ -239,8 +236,8 @@ class TheoryOfMind:
         self.belief_tracker.decay_beliefs(dt)
 
         # Decay neural activations
-        self.mpfc_activation *= (1 - 0.1 * dt)
-        self.tpj_activation *= (1 - 0.1 * dt)
+        self.mpfc_activation *= 1 - 0.1 * dt
+        self.tpj_activation *= 1 - 0.1 * dt
 
     def get_state(self) -> Dict:
         """Get ToM state"""
@@ -248,5 +245,5 @@ class TheoryOfMind:
             "mpfc_activity": np.mean(self.mpfc_activation),
             "tpj_activity": np.mean(self.tpj_activation),
             "own_beliefs": list(self.belief_tracker.own_beliefs.keys()),
-            "tracked_agents": list(self.belief_tracker.others_beliefs.keys())
+            "tracked_agents": list(self.belief_tracker.others_beliefs.keys()),
         }

@@ -17,14 +17,16 @@ import numpy as np
 
 class UncertaintyType(Enum):
     """Types of uncertainty."""
-    EPISTEMIC = "epistemic"      # Model uncertainty (reducible with more data)
-    ALEATORIC = "aleatoric"      # Data uncertainty (inherent noise)
-    TOTAL = "total"              # Combined uncertainty
+
+    EPISTEMIC = "epistemic"  # Model uncertainty (reducible with more data)
+    ALEATORIC = "aleatoric"  # Data uncertainty (inherent noise)
+    TOTAL = "total"  # Combined uncertainty
 
 
 @dataclass
 class UncertaintyEstimate:
     """Result of uncertainty quantification."""
+
     prediction: np.ndarray
     epistemic: float
     aleatoric: float
@@ -181,9 +183,9 @@ class UncertaintyQuantifier:
 
         # Mutual information = H[y|x] - E[H[y|x,w]]
         # = Total entropy - Mean sample entropy
-        mean_entropy = float(np.mean(
-            -np.sum(estimate.samples * np.log(estimate.samples + 1e-8), axis=1)
-        ))
+        mean_entropy = float(
+            np.mean(-np.sum(estimate.samples * np.log(estimate.samples + 1e-8), axis=1))
+        )
 
         return estimate.total - mean_entropy
 
@@ -218,7 +220,9 @@ class EnsembleUncertainty:
         for i in range(n_models):
             seed = None if random_seed is None else random_seed + i
             model = SimpleDropoutNN(
-                input_dim, hidden_dim, output_dim,
+                input_dim,
+                hidden_dim,
+                output_dim,
                 dropout_rate=0.0,  # No dropout, use ensemble instead
                 random_seed=seed,
             )
@@ -403,9 +407,8 @@ class EvidentialUncertainty:
 
         # Aleatoric: expected entropy under Dirichlet
         from scipy.special import digamma
-        aleatoric = float(
-            -np.sum(probs * (digamma(alpha + 1) - digamma(S + 1)))
-        )
+
+        aleatoric = float(-np.sum(probs * (digamma(alpha + 1) - digamma(S + 1))))
 
         # Total uncertainty
         total = epistemic + aleatoric
@@ -490,8 +493,10 @@ class EvidentialUncertainty:
         beta0 = np.sum(beta)
 
         kl = (
-            gammaln(alpha0) - gammaln(beta0)
-            - np.sum(gammaln(alpha)) + np.sum(gammaln(beta))
+            gammaln(alpha0)
+            - gammaln(beta0)
+            - np.sum(gammaln(alpha))
+            + np.sum(gammaln(beta))
             + np.sum((alpha - beta) * (digamma(alpha) - digamma(alpha0)))
         )
         return float(kl)

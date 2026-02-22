@@ -20,45 +20,48 @@ import time
 
 class ModuleType(Enum):
     """Types of cognitive modules in the system."""
-    PREDICTIVE_CODING = 1      # Module 01
-    DUAL_PROCESS = 2           # Module 02
-    REASONING = 3              # Module 03
-    MEMORY = 4                 # Module 04
-    SLEEP_CONSOLIDATION = 5    # Module 05
-    MOTIVATION = 6             # Module 06
-    EMOTION = 7                # Module 07
-    LANGUAGE = 8               # Module 08
-    CREATIVITY = 9             # Module 09
-    SPATIAL = 10               # Module 10
-    TEMPORAL = 11              # Module 11
-    LEARNING = 12              # Module 12
-    EXECUTIVE = 13             # Module 13
-    EMBODIED = 14              # Module 14
-    SOCIAL = 15                # Module 15
-    CONSCIOUSNESS = 16         # Module 16
-    INTEGRATION = 0            # Module 00 (this module)
-    WORLD_MODEL = 17           # Module 17
-    SELF_IMPROVEMENT = 18      # Module 18
+
+    PREDICTIVE_CODING = 1  # Module 01
+    DUAL_PROCESS = 2  # Module 02
+    REASONING = 3  # Module 03
+    MEMORY = 4  # Module 04
+    SLEEP_CONSOLIDATION = 5  # Module 05
+    MOTIVATION = 6  # Module 06
+    EMOTION = 7  # Module 07
+    LANGUAGE = 8  # Module 08
+    CREATIVITY = 9  # Module 09
+    SPATIAL = 10  # Module 10
+    TEMPORAL = 11  # Module 11
+    LEARNING = 12  # Module 12
+    EXECUTIVE = 13  # Module 13
+    EMBODIED = 14  # Module 14
+    SOCIAL = 15  # Module 15
+    CONSCIOUSNESS = 16  # Module 16
+    INTEGRATION = 0  # Module 00 (this module)
+    WORLD_MODEL = 17  # Module 17
+    SELF_IMPROVEMENT = 18  # Module 18
 
 
 class ContentType(Enum):
     """Types of content that can be broadcast in the workspace."""
-    PERCEPT = "percept"              # Sensory input
-    BELIEF = "belief"                # Belief state
-    INTENTION = "intention"          # Goal/intention
-    MEMORY = "memory"                # Retrieved memory
-    PREDICTION = "prediction"        # Predicted state
-    ERROR = "error"                  # Prediction error
-    EMOTION = "emotion"              # Emotional state
-    ACTION = "action"                # Motor command
-    QUERY = "query"                  # Information request
-    RESPONSE = "response"            # Query response
+
+    PERCEPT = "percept"  # Sensory input
+    BELIEF = "belief"  # Belief state
+    INTENTION = "intention"  # Goal/intention
+    MEMORY = "memory"  # Retrieved memory
+    PREDICTION = "prediction"  # Predicted state
+    ERROR = "error"  # Prediction error
+    EMOTION = "emotion"  # Emotional state
+    ACTION = "action"  # Motor command
+    QUERY = "query"  # Information request
+    RESPONSE = "response"  # Query response
     METACOGNITIVE = "metacognitive"  # Self-reflective content
 
 
 @dataclass
 class ModuleParams:
     """Parameters for a cognitive module."""
+
     module_type: ModuleType
     name: str
     n_features: int = 64
@@ -76,12 +79,13 @@ class ModuleProposal:
     Proposals compete for access to the workspace. The winning proposal
     is broadcast to all other modules, enabling global information sharing.
     """
+
     source_module: ModuleType
     content_type: ContentType
     content: np.ndarray
     activation: float  # Strength of proposal (0-1)
     confidence: float  # Module's confidence (0-1)
-    relevance: float   # Relevance to current context (0-1)
+    relevance: float  # Relevance to current context (0-1)
     timestamp: float = field(default_factory=time.time)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -116,6 +120,7 @@ class ModuleProposal:
 @dataclass
 class ModuleState:
     """Current state of a cognitive module."""
+
     module_type: ModuleType
     internal_state: np.ndarray
     activation_level: float
@@ -127,11 +132,11 @@ class ModuleState:
     def get_summary(self) -> Dict[str, Any]:
         """Get a summary of the module state."""
         return {
-            'type': self.module_type.name,
-            'activation': self.activation_level,
-            'active': self.is_active,
-            'pending_count': len(self.pending_proposals),
-            'load': self.processing_load,
+            "type": self.module_type.name,
+            "activation": self.activation_level,
+            "active": self.is_active,
+            "pending_count": len(self.pending_proposals),
+            "load": self.processing_load,
         }
 
 
@@ -318,12 +323,19 @@ class DummyModule(CognitiveModule):
 
         # Generate random content
         content = np.random.randn(self.n_features) * 0.1
-        content = content + input_state[:self.n_features] if len(input_state) >= self.n_features else content
+        content = (
+            content + input_state[: self.n_features]
+            if len(input_state) >= self.n_features
+            else content
+        )
 
         # Random activation based on input strength
         activation = float(np.clip(np.mean(np.abs(input_state)) + np.random.rand() * 0.3, 0, 1))
         confidence = float(np.random.rand() * 0.5 + 0.5)
-        relevance = self.compute_relevance(content, input_state[:self.n_features] if len(input_state) >= self.n_features else input_state)
+        relevance = self.compute_relevance(
+            content,
+            input_state[: self.n_features] if len(input_state) >= self.n_features else input_state,
+        )
 
         proposal = self._create_proposal(
             content_type=ContentType.PERCEPT,
@@ -343,7 +355,9 @@ class DummyModule(CognitiveModule):
         # Blend broadcast content into internal state
         if len(proposal.content) == len(self._internal_state):
             blend_rate = 0.3 * proposal.activation
-            self._internal_state = (1 - blend_rate) * self._internal_state + blend_rate * proposal.content
+            self._internal_state = (
+                1 - blend_rate
+            ) * self._internal_state + blend_rate * proposal.content
 
         # Update activation based on relevance to broadcast
         relevance = self.compute_relevance(self._internal_state, proposal.content)

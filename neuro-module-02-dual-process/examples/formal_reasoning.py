@@ -11,7 +11,8 @@ Based on research showing:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.logic_network import LogicNetwork, Proposition, PropositionType
 
@@ -33,7 +34,7 @@ def demo_modus_ponens():
         "impl_rain_wet",
         PropositionType.IMPLICATION,
         "If it is raining then the ground is wet",
-        components=[p, q]
+        components=[p, q],
     )
 
     print("Premises:")
@@ -66,17 +67,11 @@ def demo_modus_tollens():
     q = Proposition("wet", PropositionType.ATOMIC, "The ground is wet")
 
     if_rain_then_wet = Proposition(
-        "impl_rain_wet",
-        PropositionType.IMPLICATION,
-        "If raining then wet",
-        components=[p, q]
+        "impl_rain_wet", PropositionType.IMPLICATION, "If raining then wet", components=[p, q]
     )
 
     not_wet = Proposition(
-        "not_wet",
-        PropositionType.NEGATION,
-        "The ground is NOT wet",
-        components=[q]
+        "not_wet", PropositionType.NEGATION, "The ground is NOT wet", components=[q]
     )
 
     print("Premises:")
@@ -112,14 +107,10 @@ def demo_syllogism():
         "men_mortal",
         PropositionType.IMPLICATION,
         "All men are mortal",
-        components=[is_man, is_mortal]
+        components=[is_man, is_mortal],
     )
 
-    socrates_is_man = Proposition(
-        "socrates_man",
-        PropositionType.ATOMIC,
-        "Socrates is a man"
-    )
+    socrates_is_man = Proposition("socrates_man", PropositionType.ATOMIC, "Socrates is a man")
 
     print("Premises:")
     print("  Major: All men are mortal")
@@ -152,17 +143,11 @@ def demo_hypothetical_syllogism():
     r = Proposition("graduate", PropositionType.ATOMIC, "I graduate")
 
     study_implies_pass = Proposition(
-        "impl_study_pass",
-        PropositionType.IMPLICATION,
-        "If I study, I pass",
-        components=[p, q]
+        "impl_study_pass", PropositionType.IMPLICATION, "If I study, I pass", components=[p, q]
     )
 
     pass_implies_graduate = Proposition(
-        "impl_pass_grad",
-        PropositionType.IMPLICATION,
-        "If I pass, I graduate",
-        components=[q, r]
+        "impl_pass_grad", PropositionType.IMPLICATION, "If I pass, I graduate", components=[q, r]
     )
 
     print("Premises:")
@@ -194,18 +179,10 @@ def demo_disjunctive_syllogism():
     q = Proposition("coffee", PropositionType.ATOMIC, "I drink coffee")
 
     tea_or_coffee = Proposition(
-        "tea_or_coffee",
-        PropositionType.DISJUNCTION,
-        "I drink tea or coffee",
-        components=[p, q]
+        "tea_or_coffee", PropositionType.DISJUNCTION, "I drink tea or coffee", components=[p, q]
     )
 
-    not_tea = Proposition(
-        "not_tea",
-        PropositionType.NEGATION,
-        "I don't drink tea",
-        components=[p]
-    )
+    not_tea = Proposition("not_tea", PropositionType.NEGATION, "I don't drink tea", components=[p])
 
     print("Premises:")
     print("  1. I drink tea or coffee (at least one)")
@@ -248,10 +225,7 @@ def demo_consistency_check():
     # Inconsistent beliefs
     p = Proposition("raining", PropositionType.ATOMIC, "It is raining")
     not_p = Proposition(
-        "not_raining",
-        PropositionType.NEGATION,
-        "It is NOT raining",
-        components=[p]
+        "not_raining", PropositionType.NEGATION, "It is NOT raining", components=[p]
     )
     beliefs_inconsistent = [p, not_p]
 
@@ -283,14 +257,11 @@ def demo_constraint_propagation():
         "not_C",
         PropositionType.NEGATION,
         "C is false",
-        components=[Proposition("C", PropositionType.ATOMIC, "C")]
+        components=[Proposition("C", PropositionType.ATOMIC, "C")],
     )
 
     a_implies_b = Proposition(
-        "impl_A_B",
-        PropositionType.IMPLICATION,
-        "If A then B",
-        components=[a, b]
+        "impl_A_B", PropositionType.IMPLICATION, "If A then B", components=[a, b]
     )
 
     premises = [a, a_implies_b, not_c]
@@ -322,12 +293,7 @@ def demo_argument_validity():
     # Valid argument
     p = Proposition("P", PropositionType.ATOMIC, "P")
     q = Proposition("Q", PropositionType.ATOMIC, "Q")
-    p_implies_q = Proposition(
-        "impl",
-        PropositionType.IMPLICATION,
-        "P implies Q",
-        components=[p, q]
-    )
+    p_implies_q = Proposition("impl", PropositionType.IMPLICATION, "P implies Q", components=[p, q])
 
     print("Argument 1:")
     print("  Premises: P, If P then Q")

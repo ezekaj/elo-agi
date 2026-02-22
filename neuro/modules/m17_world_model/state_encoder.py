@@ -20,6 +20,7 @@ import time
 
 class Modality(Enum):
     """Sensory modalities for encoding."""
+
     VISUAL = "visual"
     AUDITORY = "auditory"
     PROPRIOCEPTIVE = "proprioceptive"
@@ -32,23 +33,25 @@ class Modality(Enum):
 @dataclass
 class EncoderParams:
     """Parameters for the state encoder."""
-    n_latent: int = 128              # Latent state dimensionality
+
+    n_latent: int = 128  # Latent state dimensionality
     n_features_per_modality: int = 64  # Features per modality
-    compression_ratio: float = 0.5    # How much to compress
-    noise_std: float = 0.01          # Noise for regularization
-    sparsity_target: float = 0.1     # Target activation sparsity
-    use_variational: bool = True     # Use VAE-style encoding
-    kl_weight: float = 0.001         # KL divergence weight
+    compression_ratio: float = 0.5  # How much to compress
+    noise_std: float = 0.01  # Noise for regularization
+    sparsity_target: float = 0.1  # Target activation sparsity
+    use_variational: bool = True  # Use VAE-style encoding
+    kl_weight: float = 0.001  # KL divergence weight
 
 
 @dataclass
 class EncodedState:
     """An encoded latent state representation."""
-    mean: np.ndarray           # Mean of latent distribution
-    log_var: np.ndarray        # Log variance (for variational)
-    sample: np.ndarray         # Sampled latent state
+
+    mean: np.ndarray  # Mean of latent distribution
+    log_var: np.ndarray  # Log variance (for variational)
+    sample: np.ndarray  # Sampled latent state
     modality_contributions: Dict[Modality, float]  # Per-modality contribution
-    uncertainty: float         # Overall encoding uncertainty
+    uncertainty: float  # Overall encoding uncertainty
     timestamp: float = field(default_factory=time.time)
 
     @property
@@ -86,30 +89,34 @@ class StateEncoder:
         self._encoder_biases: Dict[Modality, np.ndarray] = {}
 
         # Latent projection weights
-        self._mean_proj = np.random.randn(
-            self.params.n_latent,
-            len(Modality) * self.params.n_features_per_modality
-        ) * 0.01
-        self._logvar_proj = np.random.randn(
-            self.params.n_latent,
-            len(Modality) * self.params.n_features_per_modality
-        ) * 0.01
+        self._mean_proj = (
+            np.random.randn(
+                self.params.n_latent, len(Modality) * self.params.n_features_per_modality
+            )
+            * 0.01
+        )
+        self._logvar_proj = (
+            np.random.randn(
+                self.params.n_latent, len(Modality) * self.params.n_features_per_modality
+            )
+            * 0.01
+        )
 
         # Initialize modality encoders
         for modality in Modality:
             n_hidden = int(self.params.n_features_per_modality * self.params.compression_ratio)
-            self._encoder_weights[modality] = np.random.randn(
-                n_hidden, self.params.n_features_per_modality
-            ) * 0.1
+            self._encoder_weights[modality] = (
+                np.random.randn(n_hidden, self.params.n_features_per_modality) * 0.1
+            )
             self._encoder_biases[modality] = np.zeros(n_hidden)
 
         # Reconstruction weights (decoder)
         self._decoder_weights: Dict[Modality, np.ndarray] = {}
         for modality in Modality:
             n_hidden = int(self.params.n_features_per_modality * self.params.compression_ratio)
-            self._decoder_weights[modality] = np.random.randn(
-                self.params.n_features_per_modality, n_hidden
-            ) * 0.1
+            self._decoder_weights[modality] = (
+                np.random.randn(self.params.n_features_per_modality, n_hidden) * 0.1
+            )
 
         # Statistics
         self._encoding_history: List[EncodedState] = []
@@ -303,7 +310,7 @@ class StateEncoder:
                 dW = np.outer(error, z_slice)
                 self._decoder_weights[modality] += learning_rate * dW
 
-            total_loss += np.mean(error ** 2)
+            total_loss += np.mean(error**2)
 
         # Add KL loss if variational
         if self.params.use_variational:
@@ -344,18 +351,18 @@ class StateEncoder:
         """Get encoder statistics."""
         if not self._reconstruction_errors:
             return {
-                'n_encodings': 0,
-                'avg_reconstruction_error': 0.0,
-                'avg_uncertainty': 0.0,
+                "n_encodings": 0,
+                "avg_reconstruction_error": 0.0,
+                "avg_uncertainty": 0.0,
             }
 
         recent_states = self._encoding_history[-100:]
 
         return {
-            'n_encodings': len(self._encoding_history),
-            'avg_reconstruction_error': float(np.mean(self._reconstruction_errors[-100:])),
-            'avg_uncertainty': float(np.mean([s.uncertainty for s in recent_states])),
-            'avg_kl_divergence': float(np.mean([s.kl_divergence() for s in recent_states])),
+            "n_encodings": len(self._encoding_history),
+            "avg_reconstruction_error": float(np.mean(self._reconstruction_errors[-100:])),
+            "avg_uncertainty": float(np.mean([s.uncertainty for s in recent_states])),
+            "avg_kl_divergence": float(np.mean([s.kl_divergence() for s in recent_states])),
         }
 
     def reset(self) -> None:

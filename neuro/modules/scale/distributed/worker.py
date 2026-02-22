@@ -15,6 +15,7 @@ import traceback
 
 class WorkerStatus(Enum):
     """Worker status."""
+
     IDLE = "idle"
     BUSY = "busy"
     PAUSED = "paused"
@@ -25,6 +26,7 @@ class WorkerStatus(Enum):
 @dataclass
 class WorkResult:
     """Result from a worker execution."""
+
     task_id: str
     worker_id: str
     success: bool
@@ -37,6 +39,7 @@ class WorkResult:
 @dataclass
 class WorkerConfig:
     """Worker configuration."""
+
     name: Optional[str] = None
     max_concurrent: int = 1
     heartbeat_interval: float = 5.0
@@ -234,12 +237,14 @@ class WorkerPool:
     ) -> None:
         """Submit a task to the pool."""
         with self._lock:
-            self._pending_tasks.append({
-                "task_id": task_id,
-                "function": function,
-                "args": args,
-                "kwargs": kwargs or {},
-            })
+            self._pending_tasks.append(
+                {
+                    "task_id": task_id,
+                    "function": function,
+                    "args": args,
+                    "kwargs": kwargs or {},
+                }
+            )
 
     def execute_all(self) -> List[WorkResult]:
         """

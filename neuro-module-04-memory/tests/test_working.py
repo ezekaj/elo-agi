@@ -5,6 +5,7 @@ import time
 
 from neuro.modules.m04_memory.working_memory.working_memory import WorkingMemory, MemorySlot
 
+
 class TestWorkingMemory:
     """Tests for working memory capacity and decay"""
 
@@ -135,17 +136,13 @@ class TestWorkingMemory:
         assert "b" in items
         assert "c" in items
 
+
 class TestMemorySlot:
     """Tests for individual memory slots"""
 
     def test_slot_creation(self):
         """Test slot is created correctly"""
-        slot = MemorySlot(
-            content="test",
-            timestamp=0.0,
-            last_rehearsal=0.0,
-            activation=1.0
-        )
+        slot = MemorySlot(content="test", timestamp=0.0, last_rehearsal=0.0, activation=1.0)
 
         assert slot.content == "test"
         assert slot.activation == 1.0

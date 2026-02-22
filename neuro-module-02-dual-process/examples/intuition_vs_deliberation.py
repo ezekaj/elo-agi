@@ -12,7 +12,8 @@ Based on research showing:
 
 import numpy as np
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.dual_process_controller import DualProcessController
 from src.system1.habit_executor import Action
@@ -24,16 +25,22 @@ def setup_controller():
 
     # Learn some patterns
     # Pattern A: clear, familiar
-    controller.learn_pattern("familiar_A", [
-        np.array([1.0, 0.0, 0.0, 0.0, 0.0]),
-        np.array([0.9, 0.1, 0.0, 0.0, 0.0]),
-    ])
+    controller.learn_pattern(
+        "familiar_A",
+        [
+            np.array([1.0, 0.0, 0.0, 0.0, 0.0]),
+            np.array([0.9, 0.1, 0.0, 0.0, 0.0]),
+        ],
+    )
 
     # Pattern B: another clear pattern
-    controller.learn_pattern("familiar_B", [
-        np.array([0.0, 0.0, 1.0, 0.0, 0.0]),
-        np.array([0.0, 0.1, 0.9, 0.0, 0.0]),
-    ])
+    controller.learn_pattern(
+        "familiar_B",
+        [
+            np.array([0.0, 0.0, 1.0, 0.0, 0.0]),
+            np.array([0.0, 0.1, 0.9, 0.0, 0.0]),
+        ],
+    )
 
     # Train a habit
     stimulus = np.array([0.5, 0.5, 0.0, 0.0, 0.0])
@@ -42,9 +49,7 @@ def setup_controller():
 
     # Learn emotional associations
     controller.learn_emotional_association(
-        np.array([0.0, 0.0, 0.0, 1.0, 0.0]),
-        threat=0.8,
-        reward=0.1
+        np.array([0.0, 0.0, 0.0, 1.0, 0.0]), threat=0.8, reward=0.1
     )
 
     return controller
@@ -210,11 +215,11 @@ def demo_processing_statistics():
     inputs = [
         np.array([0.95, 0.05, 0.0, 0.0, 0.0]),  # Easy
         np.array([0.05, 0.05, 0.9, 0.0, 0.0]),  # Easy
-        np.array([0.5, 0.0, 0.5, 0.0, 0.0]),    # Conflict
-        np.array([0.5, 0.5, 0.0, 0.0, 0.0]),    # Habit
-        np.array([0.0, 0.0, 0.0, 0.9, 0.0]),    # Threat
-        np.array([0.9, 0.0, 0.1, 0.0, 0.0]),    # Easy
-        np.array([0.4, 0.0, 0.4, 0.2, 0.0]),    # Conflict
+        np.array([0.5, 0.0, 0.5, 0.0, 0.0]),  # Conflict
+        np.array([0.5, 0.5, 0.0, 0.0, 0.0]),  # Habit
+        np.array([0.0, 0.0, 0.0, 0.9, 0.0]),  # Threat
+        np.array([0.9, 0.0, 0.1, 0.0, 0.0]),  # Easy
+        np.array([0.4, 0.0, 0.4, 0.2, 0.0]),  # Conflict
     ]
 
     for inp in inputs:
@@ -226,9 +231,9 @@ def demo_processing_statistics():
     print(f"System 2 engagement rate: {stats['s2_engagement_rate']:.1%}")
     print(f"Conflict rate: {stats['conflict_rate']:.1%}")
     print(f"Override rate: {stats['override_rate']:.1%}")
-    print(f"Avg System 1 time: {stats['avg_s1_time']*1000:.2f}ms")
-    if stats['avg_s2_time'] > 0:
-        print(f"Avg System 2 time: {stats['avg_s2_time']*1000:.2f}ms")
+    print(f"Avg System 1 time: {stats['avg_s1_time'] * 1000:.2f}ms")
+    if stats["avg_s2_time"] > 0:
+        print(f"Avg System 2 time: {stats['avg_s2_time'] * 1000:.2f}ms")
 
     print()
     print("✓ System 1 is fast, System 2 is slower but more careful")

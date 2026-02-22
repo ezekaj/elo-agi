@@ -15,15 +15,17 @@ from .binding import Modality, ModalityInput, BoundPercept
 
 class AttentionType(Enum):
     """Types of attention."""
-    BOTTOM_UP = "bottom_up"      # Stimulus-driven
-    TOP_DOWN = "top_down"        # Goal-directed
-    EXOGENOUS = "exogenous"      # Involuntary capture
-    ENDOGENOUS = "endogenous"    # Voluntary control
+
+    BOTTOM_UP = "bottom_up"  # Stimulus-driven
+    TOP_DOWN = "top_down"  # Goal-directed
+    EXOGENOUS = "exogenous"  # Involuntary capture
+    ENDOGENOUS = "endogenous"  # Voluntary control
 
 
 @dataclass
 class AttentionFocus:
     """Current focus of attention."""
+
     location: Optional[Tuple[float, float, float]]
     modality: Optional[Modality]
     feature_template: Optional[np.ndarray]
@@ -34,8 +36,9 @@ class AttentionFocus:
 @dataclass
 class SaliencyMap:
     """Saliency map for a modality."""
+
     modality: Modality
-    map: np.ndarray       # Spatial saliency
+    map: np.ndarray  # Spatial saliency
     peak_location: Tuple[int, int]
     peak_value: float
 
@@ -43,6 +46,7 @@ class SaliencyMap:
 @dataclass
 class AttentionOutput:
     """Output from attention system."""
+
     focus: AttentionFocus
     saliency_maps: Dict[Modality, SaliencyMap]
     attended_percepts: List[BoundPercept]
@@ -115,7 +119,7 @@ class SaliencyComputer:
         contrast = np.zeros((h, w))
 
         for scale in range(1, self.n_scales + 1):
-            center_sigma = 2 ** scale
+            center_sigma = 2**scale
             surround_sigma = 2 ** (scale + 1)
 
             center = gaussian_filter(feature_map, center_sigma)
@@ -227,7 +231,7 @@ class TopDownController:
                 if len(features) < len(self._goal_template):
                     features = np.pad(features, (0, len(self._goal_template) - len(features)))
                 elif len(features) > len(self._goal_template):
-                    features = features[:len(self._goal_template)]
+                    features = features[: len(self._goal_template)]
 
                 features = features / (np.linalg.norm(features) + 1e-8)
                 similarity = np.dot(features, self._goal_template)
@@ -291,7 +295,7 @@ class AttentionGate:
         """Update attention strengths for percepts."""
         # Decay existing
         for pid in list(self._attention_strengths.keys()):
-            self._attention_strengths[pid] *= (1 - self.decay_rate)
+            self._attention_strengths[pid] *= 1 - self.decay_rate
             if self._attention_strengths[pid] < 0.01:
                 del self._attention_strengths[pid]
 
@@ -387,9 +391,9 @@ class SelectiveAttention:
         n_percepts = len(percepts)
         if n_percepts == 0:
             return AttentionOutput(
-                focus=self._current_focus or AttentionFocus(
-                    location=None, modality=None, feature_template=None,
-                    strength=0.0, duration=0.0
+                focus=self._current_focus
+                or AttentionFocus(
+                    location=None, modality=None, feature_template=None, strength=0.0, duration=0.0
                 ),
                 saliency_maps=saliency_maps,
                 attended_percepts=[],
@@ -407,19 +411,18 @@ class SelectiveAttention:
             if p.component_inputs:
                 percept_inputs.append(p.component_inputs[0])
             else:
-                percept_inputs.append(ModalityInput(
-                    modality=list(p.modalities)[0] if p.modalities else Modality.VISUAL,
-                    features=p.unified_features,
-                    spatial_location=p.spatial_location,
-                ))
+                percept_inputs.append(
+                    ModalityInput(
+                        modality=list(p.modalities)[0] if p.modalities else Modality.VISUAL,
+                        features=p.unified_features,
+                        spatial_location=p.spatial_location,
+                    )
+                )
 
         goal_scores = self.top_down.compute_goal_relevance(percept_inputs)
 
         # Combined attention score
-        attention_scores = (
-            self.saliency_weight * saliency_scores +
-            self.goal_weight * goal_scores
-        )
+        attention_scores = self.saliency_weight * saliency_scores + self.goal_weight * goal_scores
 
         # Normalize
         attention_scores = attention_scores / (attention_scores.max() + 1e-8)
@@ -442,9 +445,9 @@ class SelectiveAttention:
             self._focus_duration = 0.0
 
         return AttentionOutput(
-            focus=self._current_focus or AttentionFocus(
-                location=None, modality=None, feature_template=None,
-                strength=0.0, duration=0.0
+            focus=self._current_focus
+            or AttentionFocus(
+                location=None, modality=None, feature_template=None, strength=0.0, duration=0.0
             ),
             saliency_maps=saliency_maps,
             attended_percepts=attended,

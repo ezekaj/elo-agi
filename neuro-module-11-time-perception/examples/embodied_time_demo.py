@@ -17,7 +17,7 @@ from src.embodied_time import (
     MotorTimer,
     BodyEnvironmentCoupler,
     EmbodiedTimeSystem,
-    BodyState
+    BodyState,
 )
 from src.time_circuits import TimeCircuit
 
@@ -49,8 +49,10 @@ def demo_heartbeat_timing():
         good_error = abs(good_est - duration) / duration * 100
         poor_error = abs(poor_est - duration) / duration * 100
 
-        print(f"{duration:<15} {good_est:.1f}s ({good_error:.0f}% err)"
-              f"{'':5} {poor_est:.1f}s ({poor_error:.0f}% err)")
+        print(
+            f"{duration:<15} {good_est:.1f}s ({good_error:.0f}% err)"
+            f"{'':5} {poor_est:.1f}s ({poor_error:.0f}% err)"
+        )
 
 
 def demo_arousal_body_timing():
@@ -78,8 +80,7 @@ def demo_arousal_body_timing():
         diff = estimate - duration
         sign = "+" if diff > 0 else ""
 
-        print(f"{arousal:<12.1f} {hr:<15.0f} BPM"
-              f"{estimate:<10.1f}s ({sign}{diff:.1f}s)")
+        print(f"{arousal:<12.1f} {hr:<15.0f} BPM{estimate:<10.1f}s ({sign}{diff:.1f}s)")
 
 
 def demo_motor_timing():
@@ -131,7 +132,7 @@ def demo_body_environment_coupling():
         (1.0, "Same speed (1:1)"),
         (1.3, "Non-harmonic"),
         (2.0, "Double speed (2:1)"),
-        (3.0, "Triple speed (3:1)")
+        (3.0, "Triple speed (3:1)"),
     ]
 
     print(f"Body rhythm: {body_rhythm} Hz\n")
@@ -181,13 +182,11 @@ def demo_embodied_integration():
         system.set_body_state(body_state)
 
         estimate, components = system.estimate_duration(
-            duration,
-            movement_present=movement,
-            external_rhythm=ext_rhythm
+            duration, movement_present=movement, external_rhythm=ext_rhythm
         )
 
         comp_names = list(components.keys())
-        comp_str = ", ".join([c for c in comp_names if c != 'entrainment'])
+        comp_str = ", ".join([c for c in comp_names if c != "entrainment"])
 
         print(f"{name:<25} {estimate:<18.1f} {comp_str}")
 
@@ -254,10 +253,10 @@ def create_visualization():
             timer.reset()
         errors.append(np.mean(trial_errors))
 
-    axes[0, 0].plot(accuracies, errors, 'b-o')
-    axes[0, 0].set_xlabel('Interoceptive Accuracy')
-    axes[0, 0].set_ylabel('Timing Error (%)')
-    axes[0, 0].set_title('Better Body Awareness = Better Timing')
+    axes[0, 0].plot(accuracies, errors, "b-o")
+    axes[0, 0].set_xlabel("Interoceptive Accuracy")
+    axes[0, 0].set_ylabel("Timing Error (%)")
+    axes[0, 0].set_title("Better Body Awareness = Better Timing")
     axes[0, 0].grid(True, alpha=0.3)
 
     # 2. Heart rate and timing
@@ -270,11 +269,11 @@ def create_visualization():
         est = timer.estimate_duration_from_heartbeats(30.0)
         estimates.append(est)
 
-    axes[0, 1].plot(heart_rates, estimates, 'r-o')
-    axes[0, 1].axhline(y=30.0, color='black', linestyle='--', label='Actual')
-    axes[0, 1].set_xlabel('Heart Rate (BPM)')
-    axes[0, 1].set_ylabel('Perceived Duration (s)')
-    axes[0, 1].set_title('Heart Rate Affects Time Perception')
+    axes[0, 1].plot(heart_rates, estimates, "r-o")
+    axes[0, 1].axhline(y=30.0, color="black", linestyle="--", label="Actual")
+    axes[0, 1].set_xlabel("Heart Rate (BPM)")
+    axes[0, 1].set_ylabel("Perceived Duration (s)")
+    axes[0, 1].set_title("Heart Rate Affects Time Perception")
     axes[0, 1].legend()
     axes[0, 1].grid(True, alpha=0.3)
 
@@ -283,11 +282,11 @@ def create_visualization():
     target = 0.5
     intervals = motor.tap_rhythm(target, 50)
 
-    axes[1, 0].hist(np.array(intervals) * 1000, bins=20, color='green', alpha=0.7)
-    axes[1, 0].axvline(x=target * 1000, color='red', linestyle='--', label='Target')
-    axes[1, 0].set_xlabel('Inter-tap Interval (ms)')
-    axes[1, 0].set_ylabel('Count')
-    axes[1, 0].set_title('Motor Timing Variability')
+    axes[1, 0].hist(np.array(intervals) * 1000, bins=20, color="green", alpha=0.7)
+    axes[1, 0].axvline(x=target * 1000, color="red", linestyle="--", label="Target")
+    axes[1, 0].set_xlabel("Inter-tap Interval (ms)")
+    axes[1, 0].set_ylabel("Count")
+    axes[1, 0].set_title("Motor Timing Variability")
     axes[1, 0].legend()
 
     # 4. Entrainment effect
@@ -301,17 +300,17 @@ def create_visualization():
         coupler.set_environmental_rhythm(env)
         entrainments.append(coupler.compute_entrainment())
 
-    axes[1, 1].plot(env_rhythms, entrainments, 'purple')
-    axes[1, 1].set_xlabel('Environmental Rhythm (Hz)')
-    axes[1, 1].set_ylabel('Entrainment Factor')
-    axes[1, 1].set_title('Body-Environment Synchronization')
-    axes[1, 1].axvline(x=1.0, color='red', linestyle='--', alpha=0.5, label='1:1')
-    axes[1, 1].axvline(x=2.0, color='blue', linestyle='--', alpha=0.5, label='2:1')
+    axes[1, 1].plot(env_rhythms, entrainments, "purple")
+    axes[1, 1].set_xlabel("Environmental Rhythm (Hz)")
+    axes[1, 1].set_ylabel("Entrainment Factor")
+    axes[1, 1].set_title("Body-Environment Synchronization")
+    axes[1, 1].axvline(x=1.0, color="red", linestyle="--", alpha=0.5, label="1:1")
+    axes[1, 1].axvline(x=2.0, color="blue", linestyle="--", alpha=0.5, label="2:1")
     axes[1, 1].legend()
     axes[1, 1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('embodied_time.png', dpi=150)
+    plt.savefig("embodied_time.png", dpi=150)
     print("Figure saved: embodied_time.png")
 
 
@@ -336,5 +335,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

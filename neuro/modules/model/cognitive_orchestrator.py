@@ -22,6 +22,7 @@ NEURO_ROOT = Path(__file__).parent.parent.parent
 @dataclass
 class ModuleResult:
     """Result from a cognitive module."""
+
     module_name: str
     activated: bool
     output: Any = None
@@ -32,6 +33,7 @@ class ModuleResult:
 @dataclass
 class OrchestratorResult:
     """Aggregated result from all modules."""
+
     query: str
     modules_activated: int
     total_modules: int
@@ -60,121 +62,121 @@ class CognitiveOrchestrator:
             "path": "neuro-module-00-integration/src",
             "class": "GlobalWorkspace",
             "import": "global_workspace",
-            "purpose": "Attention and information broadcast"
+            "purpose": "Attention and information broadcast",
         },
         "01-predictive-coding": {
             "path": "neuro-module-01-predictive-coding/src",
             "class": "PredictiveProcessor",
             "import": "hierarchical_predictive_processing",
-            "purpose": "Prediction error and belief updating"
+            "purpose": "Prediction error and belief updating",
         },
         "02-dual-process": {
             "path": "neuro-module-02-dual-process/src",
             "class": "DualProcessCore",
             "import": "dual_process_geometry",
-            "purpose": "System 1/2 processing"
+            "purpose": "System 1/2 processing",
         },
         "03-reasoning-types": {
             "path": "neuro-module-03-reasoning-types/src",
             "class": "ReasoningCore",
             "import": "reasoning_core",
-            "purpose": "Multiple reasoning strategies"
+            "purpose": "Multiple reasoning strategies",
         },
         "04-memory": {
             "path": "neuro-module-04-memory/src",
             "class": "MemorySystem",
             "import": "memory_system",
-            "purpose": "Working and long-term memory"
+            "purpose": "Working and long-term memory",
         },
         "05-sleep-consolidation": {
             "path": "neuro-module-05-sleep-consolidation/src",
             "class": "SleepModule",
             "import": "sleep_module",
-            "purpose": "Memory consolidation"
+            "purpose": "Memory consolidation",
         },
         "06-motivation": {
             "path": "neuro-module-06-motivation/src",
             "class": "CuriosityModule",
             "import": "curiosity_drive",
-            "purpose": "Intrinsic motivation and curiosity"
+            "purpose": "Intrinsic motivation and curiosity",
         },
         "07-emotions-decisions": {
             "path": "neuro-module-07-emotions-decisions/src",
             "class": "EmotionalCore",
             "import": "emotional_core",
-            "purpose": "Emotional valuation"
+            "purpose": "Emotional valuation",
         },
         "08-language": {
             "path": "neuro-module-08-language/src",
             "class": "LanguageProcessor",
             "import": "language_processor",
-            "purpose": "Language understanding"
+            "purpose": "Language understanding",
         },
         "09-creativity": {
             "path": "neuro-module-09-creativity/src",
             "class": "CreativityEngine",
             "import": "creativity_engine",
-            "purpose": "Creative generation"
+            "purpose": "Creative generation",
         },
         "10-spatial-cognition": {
             "path": "neuro-module-10-spatial-cognition/src",
             "class": "SpatialCognition",
             "import": "spatial_cognition",
-            "purpose": "Spatial reasoning"
+            "purpose": "Spatial reasoning",
         },
         "11-time-perception": {
             "path": "neuro-module-11-time-perception/src",
             "class": "TemporalCognition",
             "import": "temporal_cognition",
-            "purpose": "Time perception"
+            "purpose": "Time perception",
         },
         "12-learning": {
             "path": "neuro-module-12-learning/src",
             "class": "LearningCore",
             "import": "learning_core",
-            "purpose": "Learning mechanisms"
+            "purpose": "Learning mechanisms",
         },
         "13-executive": {
             "path": "neuro-module-13-executive/src",
             "class": "ExecutiveControl",
             "import": "executive_control",
-            "purpose": "Executive control and planning"
+            "purpose": "Executive control and planning",
         },
         "14-embodied": {
             "path": "neuro-module-14-embodied/src",
             "class": "EmbodiedCore",
             "import": "embodied_core",
-            "purpose": "Embodied cognition"
+            "purpose": "Embodied cognition",
         },
         "15-social": {
             "path": "neuro-module-15-social/src",
             "class": "SocialCognition",
             "import": "social_cognition",
-            "purpose": "Social reasoning"
+            "purpose": "Social reasoning",
         },
         "16-consciousness": {
             "path": "neuro-module-16-consciousness/src",
             "class": "ConsciousnessCore",
             "import": "consciousness_core",
-            "purpose": "Metacognition"
+            "purpose": "Metacognition",
         },
         "17-world-model": {
             "path": "neuro-module-17-world-model/src",
             "class": "WorldModel",
             "import": "world_model",
-            "purpose": "Internal world modeling"
+            "purpose": "Internal world modeling",
         },
         "18-self-improvement": {
             "path": "neuro-module-18-self-improvement/src",
             "class": "SelfImprover",
             "import": "self_improver",
-            "purpose": "Self-improvement"
+            "purpose": "Self-improvement",
         },
         "19-multi-agent": {
             "path": "neuro-module-19-multi-agent/src",
             "class": "MultiAgentCore",
             "import": "multi_agent_core",
-            "purpose": "Multi-agent coordination"
+            "purpose": "Multi-agent coordination",
         },
     }
 
@@ -201,7 +203,9 @@ class CognitiveOrchestrator:
         # Also load neuro-model/src components as additional "modules"
         self._load_src_components()
 
-        self._log(f"Loaded: {self.active_count} active, {self.fallback_count} fallback, {len(self.failed_modules)} failed")
+        self._log(
+            f"Loaded: {self.active_count} active, {self.fallback_count} fallback, {len(self.failed_modules)} failed"
+        )
 
     def _load_module(self, module_id: str, config: Dict):
         """Load a single module."""
@@ -228,7 +232,7 @@ class CognitiveOrchestrator:
                     self.modules[module_id] = {
                         "instance": instance,
                         "config": config,
-                        "type": "active"
+                        "type": "active",
                     }
                     self.active_count += 1
                     self._log(f"  {module_id}: ACTIVE")
@@ -237,7 +241,7 @@ class CognitiveOrchestrator:
                     self.modules[module_id] = {
                         "instance": self._create_stub(module_id, config),
                         "config": config,
-                        "type": "fallback"
+                        "type": "fallback",
                     }
                     self.fallback_count += 1
                     self._log(f"  {module_id}: fallback (init failed: {e})")
@@ -246,7 +250,7 @@ class CognitiveOrchestrator:
                 self.modules[module_id] = {
                     "instance": self._create_stub(module_id, config),
                     "config": config,
-                    "type": "fallback"
+                    "type": "fallback",
                 }
                 self.fallback_count += 1
                 self._log(f"  {module_id}: fallback (class not found)")
@@ -256,7 +260,7 @@ class CognitiveOrchestrator:
             self.modules[module_id] = {
                 "instance": self._create_stub(module_id, config),
                 "config": config,
-                "type": "fallback"
+                "type": "fallback",
             }
             self.fallback_count += 1
             self._log(f"  {module_id}: fallback (import: {e})")
@@ -266,6 +270,7 @@ class CognitiveOrchestrator:
 
     def _create_stub(self, module_id: str, config: Dict) -> object:
         """Create a stub for a module that couldn't load."""
+
         class ModuleStub:
             def __init__(self, name, purpose):
                 self.name = name
@@ -277,7 +282,7 @@ class CognitiveOrchestrator:
                     "type": "stub",
                     "purpose": self.purpose,
                     "activated": True,
-                    "output": f"Processed by {self.name} (stub)"
+                    "output": f"Processed by {self.name} (stub)",
                 }
 
             def should_activate(self, query: str) -> bool:
@@ -306,7 +311,7 @@ class CognitiveOrchestrator:
                 self.modules[f"src-{comp_name}"] = {
                     "instance": mod,
                     "config": {"purpose": purpose},
-                    "type": "component"
+                    "type": "component",
                 }
                 self.active_count += 1
                 self._log(f"  src-{comp_name}: loaded")
@@ -325,9 +330,7 @@ class CognitiveOrchestrator:
         """
         context = context or {}
         result = OrchestratorResult(
-            query=query,
-            modules_activated=0,
-            total_modules=len(self.modules)
+            query=query, modules_activated=0, total_modules=len(self.modules)
         )
 
         # Broadcast to all modules
@@ -341,7 +344,7 @@ class CognitiveOrchestrator:
             if should_activate:
                 try:
                     # Try to process
-                    if hasattr(instance, 'process'):
+                    if hasattr(instance, "process"):
                         output = instance.process(query, context)
                     else:
                         output = {"processed": True, "module": module_id}
@@ -351,7 +354,7 @@ class CognitiveOrchestrator:
                         activated=True,
                         output=output,
                         confidence=0.7,
-                        relevance=0.8
+                        relevance=0.8,
                     )
                     result.modules_activated += 1
                 except Exception as e:
@@ -360,7 +363,7 @@ class CognitiveOrchestrator:
                         activated=True,
                         output=f"Error: {e}",
                         confidence=0.0,
-                        relevance=0.0
+                        relevance=0.0,
                     )
 
         # Determine dominant problem type
@@ -464,9 +467,11 @@ class CognitiveOrchestrator:
             "failed_modules": len(self.failed_modules),
             "failed_list": self.failed_modules,
             "module_types": {
-                "core": sum(1 for m in self.modules.values() if m["type"] in ["active", "fallback"]),
-                "components": sum(1 for m in self.modules.values() if m["type"] == "component")
-            }
+                "core": sum(
+                    1 for m in self.modules.values() if m["type"] in ["active", "fallback"]
+                ),
+                "components": sum(1 for m in self.modules.values() if m["type"] == "component"),
+            },
         }
 
     def statistics(self) -> Dict[str, Any]:
@@ -489,6 +494,7 @@ if __name__ == "__main__":
     print("STATISTICS")
     print("=" * 70)
     import json
+
     print(json.dumps(orchestrator.get_stats(), indent=2))
 
     print("\n" + "=" * 70)

@@ -3,9 +3,13 @@
 import numpy as np
 import pytest
 from neuro.modules.m07_emotions_decisions.dual_emotion_routes import (
-    FastEmotionRoute, SlowEmotionRoute, DualRouteProcessor,
-    ThalamusRelay, ResponseType
+    FastEmotionRoute,
+    SlowEmotionRoute,
+    DualRouteProcessor,
+    ThalamusRelay,
+    ResponseType,
 )
+
 
 class TestFastRoute:
     """Test fast emotion pathway (12ms)."""
@@ -41,6 +45,7 @@ class TestFastRoute:
         # Should detect threat after conditioning
         assert after.intensity > before.intensity
 
+
 class TestSlowRoute:
     """Test slow emotion pathway (100ms)."""
 
@@ -70,13 +75,17 @@ class TestSlowRoute:
         stimulus = np.array([0.6, 0.6, 0.6])
 
         # Same stimulus, different context
-        safe_context = {'safe_environment': True}
-        danger_context = {'known_danger': True}
+        safe_context = {"safe_environment": True}
+        danger_context = {"known_danger": True}
 
         safe_response = slow.process(stimulus, safe_context)
         danger_response = slow.process(stimulus, danger_context)
 
-        assert danger_response.details['threat_assessment'] > safe_response.details['threat_assessment']
+        assert (
+            danger_response.details["threat_assessment"]
+            > safe_response.details["threat_assessment"]
+        )
+
 
 class TestDualRouteProcessor:
     """Test integrated dual route processing."""
@@ -106,7 +115,7 @@ class TestDualRouteProcessor:
 
         final = processor.get_final_response(safe)
 
-        assert final.details.get('reconciled', False)
+        assert final.details.get("reconciled", False)
 
     def test_safety_learning(self):
         processor = DualRouteProcessor()
@@ -122,7 +131,8 @@ class TestDualRouteProcessor:
         after = processor.get_final_response(stimulus)
 
         # Should be overridden
-        assert 'override' in str(after.details).lower() or after.intensity < before.intensity
+        assert "override" in str(after.details).lower() or after.intensity < before.intensity
+
 
 class TestTimingDifference:
     """Test the critical timing difference between routes."""

@@ -29,6 +29,7 @@ from datetime import datetime
 @dataclass
 class BenchmarkResult:
     """Result of a single benchmark test."""
+
     name: str
     category: str
     passed: bool
@@ -44,6 +45,7 @@ class BenchmarkResult:
 @dataclass
 class BenchmarkSuite:
     """Full benchmark suite results."""
+
     total_tests: int = 0
     passed: int = 0
     failed: int = 0
@@ -63,34 +65,32 @@ class BenchmarkSuite:
         self.total_actions += result.actions_used
 
         if result.category not in self.categories:
-            self.categories[result.category] = {
-                'total': 0, 'passed': 0, 'failed': 0, 'scores': []
-            }
+            self.categories[result.category] = {"total": 0, "passed": 0, "failed": 0, "scores": []}
         cat = self.categories[result.category]
-        cat['total'] += 1
-        cat['passed'] += int(result.passed)
-        cat['failed'] += int(not result.passed)
-        cat['scores'].append(result.score)
+        cat["total"] += 1
+        cat["passed"] += int(result.passed)
+        cat["failed"] += int(not result.passed)
+        cat["scores"].append(result.score)
 
     def summary(self) -> Dict:
         return {
-            'overall': {
-                'total': self.total_tests,
-                'passed': self.passed,
-                'failed': self.failed,
-                'pass_rate': f"{(self.passed/max(1,self.total_tests))*100:.1f}%",
-                'total_time': f"{self.total_time:.2f}s",
-                'avg_time': f"{self.total_time/max(1,self.total_tests):.3f}s",
-                'total_actions': self.total_actions,
-                'actions_per_task': self.total_actions / max(1, self.total_tests)
+            "overall": {
+                "total": self.total_tests,
+                "passed": self.passed,
+                "failed": self.failed,
+                "pass_rate": f"{(self.passed / max(1, self.total_tests)) * 100:.1f}%",
+                "total_time": f"{self.total_time:.2f}s",
+                "avg_time": f"{self.total_time / max(1, self.total_tests):.3f}s",
+                "total_actions": self.total_actions,
+                "actions_per_task": self.total_actions / max(1, self.total_tests),
             },
-            'by_category': {
+            "by_category": {
                 cat: {
-                    'pass_rate': f"{(data['passed']/max(1,data['total']))*100:.1f}%",
-                    'avg_score': sum(data['scores'])/max(1,len(data['scores']))
+                    "pass_rate": f"{(data['passed'] / max(1, data['total'])) * 100:.1f}%",
+                    "avg_score": sum(data["scores"]) / max(1, len(data["scores"])),
                 }
                 for cat, data in self.categories.items()
-            }
+            },
         }
 
 
@@ -130,11 +130,11 @@ class BrutalBenchmarks:
 
         # Test cases: input sequence -> expected next value
         test_cases = [
-            ([1, 2, 4, 8], 16),           # Powers of 2
-            ([1, 1, 2, 3, 5, 8], 13),     # Fibonacci
-            ([2, 6, 12, 20, 30], 42),     # n(n+1) pattern
-            ([1, 4, 9, 16, 25], 36),      # Squares
-            ([1, 8, 27, 64], 125),        # Cubes
+            ([1, 2, 4, 8], 16),  # Powers of 2
+            ([1, 1, 2, 3, 5, 8], 13),  # Fibonacci
+            ([2, 6, 12, 20, 30], 42),  # n(n+1) pattern
+            ([1, 4, 9, 16, 25], 36),  # Squares
+            ([1, 8, 27, 64], 125),  # Cubes
         ]
 
         passed = 0
@@ -142,15 +142,15 @@ class BrutalBenchmarks:
 
         for seq, expected in test_cases:
             # Use agent's analysis if available
-            if self.agent and hasattr(self.agent, 'ultrathink') and self.agent.ultrathink:
+            if self.agent and hasattr(self.agent, "ultrathink") and self.agent.ultrathink:
                 try:
                     analysis = self.agent.ultrathink.analyze(
                         f"What comes next in this sequence: {seq}? Just the number."
                     )
                     actions += 1
                     # Extract number from analysis
-                    if 'reasoning' in analysis:
-                        reasoning = str(analysis.get('reasoning', ''))
+                    if "reasoning" in analysis:
+                        reasoning = str(analysis.get("reasoning", ""))
                         if str(expected) in reasoning:
                             passed += 1
                 except Exception:
@@ -166,7 +166,7 @@ class BrutalBenchmarks:
             actual=f"Solved {passed}/{len(test_cases)}",
             time_taken=time.time() - start,
             actions_used=actions,
-            reasoning_steps=passed
+            reasoning_steps=passed,
         )
 
     def test_arc_pattern_transform(self) -> BenchmarkResult:
@@ -178,7 +178,7 @@ class BrutalBenchmarks:
         test_cases = [
             # (input, rule_example_in, rule_example_out, expected_output)
             ([1, 2, 3], [10, 20, 30], [20, 40, 60], [2, 4, 6]),  # Double
-            (['a', 'b', 'c'], ['x', 'y'], ['xy', 'yz'], ['ab', 'bc', 'cd']),  # Concat pairs
+            (["a", "b", "c"], ["x", "y"], ["xy", "yz"], ["ab", "bc", "cd"]),  # Concat pairs
             ([5, 10, 15], [1, 2, 3], [3, 2, 1], [15, 10, 5]),  # Reverse
         ]
 
@@ -205,7 +205,7 @@ class BrutalBenchmarks:
             expected=f"Transform {len(test_cases)} patterns",
             actual=f"Transformed {passed}",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     def test_arc_grid_reasoning(self) -> BenchmarkResult:
@@ -244,7 +244,7 @@ class BrutalBenchmarks:
             expected=f"Recognize {len(grids)} patterns",
             actual=f"Recognized {passed}",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     # =========================================================================
@@ -269,7 +269,7 @@ class BrutalBenchmarks:
                 actual="No tools available",
                 time_taken=time.time() - start,
                 actions_used=0,
-                errors=["Agent tools not available"]
+                errors=["Agent tools not available"],
             )
 
         # Test: List files -> Read specific file -> Extract info
@@ -308,7 +308,7 @@ class BrutalBenchmarks:
             actual=f"Completed {int(score * 3)}/3 steps",
             time_taken=time.time() - start,
             actions_used=actions,
-            errors=errors
+            errors=errors,
         )
 
     def test_tool_selection_accuracy(self) -> BenchmarkResult:
@@ -332,7 +332,9 @@ class BrutalBenchmarks:
             for query, expected_tool in test_cases:
                 plan = self.agent._plan_actions(query)
                 actions += 1
-                if expected_tool in plan or any(expected_tool.replace('_', '') in p.replace('_', '') for p in plan):
+                if expected_tool in plan or any(
+                    expected_tool.replace("_", "") in p.replace("_", "") for p in plan
+                ):
                     passed += 1
 
         score = passed / len(test_cases)
@@ -344,7 +346,7 @@ class BrutalBenchmarks:
             expected=f"Select correct tool for {len(test_cases)} queries",
             actual=f"Correct: {passed}/{len(test_cases)}",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     def test_tool_error_handling(self) -> BenchmarkResult:
@@ -394,7 +396,7 @@ class BrutalBenchmarks:
             actual=f"Handled {handled}/3",
             time_taken=time.time() - start,
             actions_used=actions,
-            errors=errors
+            errors=errors,
         )
 
     # =========================================================================
@@ -416,7 +418,7 @@ class BrutalBenchmarks:
                 actual="No improver available",
                 time_taken=time.time() - start,
                 actions_used=0,
-                errors=["Self-improver not available"]
+                errors=["Self-improver not available"],
             )
 
         initial_patterns = len(self.agent.improver.learned_patterns)
@@ -437,7 +439,7 @@ class BrutalBenchmarks:
         final_patterns = len(self.agent.improver.learned_patterns)
         final_solutions = len(self.agent.improver.error_solutions)
 
-        learned = (final_solutions - initial_solutions)
+        learned = final_solutions - initial_solutions
         score = min(1.0, learned / len(errors_to_learn))
 
         return BenchmarkResult(
@@ -448,7 +450,7 @@ class BrutalBenchmarks:
             expected=f"Learn {len(errors_to_learn)} error solutions",
             actual=f"Learned {learned} new solutions",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     def test_error_pattern_persistence(self) -> BenchmarkResult:
@@ -465,7 +467,7 @@ class BrutalBenchmarks:
                 expected="Patterns persist after save",
                 actual="No improver available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         # Add a test pattern
@@ -489,7 +491,7 @@ class BrutalBenchmarks:
             expected="Pattern saved and retrievable",
             actual="Pattern persisted" if pattern_exists else "Pattern lost",
             time_taken=time.time() - start,
-            actions_used=2
+            actions_used=2,
         )
 
     # =========================================================================
@@ -534,7 +536,7 @@ class BrutalBenchmarks:
             actual=f"Solved {passed}",
             time_taken=time.time() - start,
             actions_used=actions,
-            reasoning_steps=passed * 3  # Approx steps per problem
+            reasoning_steps=passed * 3,  # Approx steps per problem
         )
 
     def test_causal_chain_reasoning(self) -> BenchmarkResult:
@@ -555,9 +557,7 @@ class BrutalBenchmarks:
         if self.agent and self.agent.ultrathink:
             for chain, *valid_answers in chains:
                 try:
-                    result = self.agent.ultrathink.analyze(
-                        f"Complete this causal chain: {chain}"
-                    )
+                    result = self.agent.ultrathink.analyze(f"Complete this causal chain: {chain}")
                     actions += 1
                     result_str = str(result).lower()
                     if any(ans in result_str for ans in valid_answers):
@@ -574,7 +574,7 @@ class BrutalBenchmarks:
             expected=f"Complete {len(chains)} causal chains",
             actual=f"Completed {passed}",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     # =========================================================================
@@ -595,7 +595,7 @@ class BrutalBenchmarks:
                 expected="Store and retrieve 3 facts",
                 actual="No pipeline available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         actions = 0
@@ -640,7 +640,7 @@ class BrutalBenchmarks:
             expected="Store 3 facts, retrieve 2",
             actual=f"Stored {len(test_facts)}, retrieved {retrieved}",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     def test_cross_domain_synthesis(self) -> BenchmarkResult:
@@ -657,13 +657,19 @@ class BrutalBenchmarks:
                 expected="Synthesize 2 cross-domain queries",
                 actual="No ultrathink available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         # Queries requiring knowledge from multiple domains
         queries = [
-            ("How does biology inspire computer architecture?", ["neural", "network", "brain", "parallel"]),
-            ("What can economics learn from physics?", ["equilibrium", "entropy", "energy", "flow"]),
+            (
+                "How does biology inspire computer architecture?",
+                ["neural", "network", "brain", "parallel"],
+            ),
+            (
+                "What can economics learn from physics?",
+                ["equilibrium", "entropy", "energy", "flow"],
+            ),
         ]
 
         passed = 0
@@ -688,7 +694,7 @@ class BrutalBenchmarks:
             expected=f"Answer {len(queries)} cross-domain queries",
             actual=f"Answered {passed}",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     # =========================================================================
@@ -709,7 +715,7 @@ class BrutalBenchmarks:
                 expected="Optimal action count",
                 actual="No agent available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         # Simple query should need minimal planning
@@ -739,7 +745,7 @@ class BrutalBenchmarks:
             expected="Avg ≤2 actions for simple queries",
             actual=f"Avg {avg_actions:.1f} actions, {optimal_plans}/{len(simple_queries)} optimal",
             time_taken=time.time() - start,
-            actions_used=total_actions
+            actions_used=total_actions,
         )
 
     def test_response_time(self) -> BenchmarkResult:
@@ -756,7 +762,7 @@ class BrutalBenchmarks:
                 expected="Fast response",
                 actual="No agent available",
                 time_taken=0,
-                actions_used=0
+                actions_used=0,
             )
 
         times = []
@@ -778,9 +784,9 @@ class BrutalBenchmarks:
             passed=avg_time < 0.1,  # 100ms threshold
             score=min(1.0, score),
             expected="Planning <100ms",
-            actual=f"Avg {avg_time*1000:.1f}ms",
+            actual=f"Avg {avg_time * 1000:.1f}ms",
             time_taken=time.time() - start,
-            actions_used=actions
+            actions_used=actions,
         )
 
     # =========================================================================
@@ -801,7 +807,7 @@ class BrutalBenchmarks:
                 expected="Complete project analysis",
                 actual="No agent available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         # Simulate full project analysis
@@ -810,10 +816,12 @@ class BrutalBenchmarks:
 
         # Check workflow completion
         checks = {
-            'perceived': len(state.knowledge) > 0 or len(state.memories) > 0 or state.confidence > 0,
-            'planned': len(state.plan) > 0,
-            'acted': len(state.tools_used) > 0,
-            'responded': len(state.response) > 0,
+            "perceived": len(state.knowledge) > 0
+            or len(state.memories) > 0
+            or state.confidence > 0,
+            "planned": len(state.plan) > 0,
+            "acted": len(state.tools_used) > 0,
+            "responded": len(state.response) > 0,
         }
 
         passed_checks = sum(checks.values())
@@ -825,9 +833,9 @@ class BrutalBenchmarks:
             passed=passed_checks >= 3,
             score=score,
             expected="Complete all 4 workflow phases",
-            actual=f"Completed {passed_checks}/4: {[k for k,v in checks.items() if v]}",
+            actual=f"Completed {passed_checks}/4: {[k for k, v in checks.items() if v]}",
             time_taken=time.time() - start,
-            actions_used=len(state.tools_used)
+            actions_used=len(state.tools_used),
         )
 
     def test_error_recovery_workflow(self) -> BenchmarkResult:
@@ -844,7 +852,7 @@ class BrutalBenchmarks:
                 expected="Recover from error",
                 actual="No agent available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         # Trigger an error scenario
@@ -866,7 +874,7 @@ class BrutalBenchmarks:
             expected="Handle error gracefully with response",
             actual=f"Errors: {len(state.errors)}, Response: {len(state.response) > 0}",
             time_taken=time.time() - start,
-            actions_used=len(state.tools_used)
+            actions_used=len(state.tools_used),
         )
 
     def test_learning_workflow(self) -> BenchmarkResult:
@@ -883,7 +891,7 @@ class BrutalBenchmarks:
                 expected="Learn from interaction",
                 actual="No agent available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         # Initial history length
@@ -894,8 +902,8 @@ class BrutalBenchmarks:
 
         # Check if it learned
         checks = {
-            'history_updated': len(self.agent.history) > initial_history,
-            'learnings_recorded': len(state.learnings) > 0,
+            "history_updated": len(self.agent.history) > initial_history,
+            "learnings_recorded": len(state.learnings) > 0,
         }
 
         passed_checks = sum(checks.values())
@@ -908,9 +916,9 @@ class BrutalBenchmarks:
             score=score,
             expected="Record learning from interaction",
             actual=f"History: {'updated' if checks['history_updated'] else 'not updated'}, "
-                   f"Learnings: {len(state.learnings)}",
+            f"Learnings: {len(state.learnings)}",
             time_taken=time.time() - start,
-            actions_used=len(state.tools_used)
+            actions_used=len(state.tools_used),
         )
 
     # =========================================================================
@@ -931,16 +939,16 @@ class BrutalBenchmarks:
                 expected="Pipeline processes query",
                 actual="No pipeline available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         try:
             result = self.agent.pipeline.process("test query for integration")
             checks = {
-                'returns_result': result is not None,
-                'has_knowledge': hasattr(result, 'knowledge_used'),
-                'has_confidence': hasattr(result, 'confidence'),
-                'has_surprise': hasattr(result, 'surprise_level'),
+                "returns_result": result is not None,
+                "has_knowledge": hasattr(result, "knowledge_used"),
+                "has_confidence": hasattr(result, "confidence"),
+                "has_surprise": hasattr(result, "surprise_level"),
             }
             passed_checks = sum(checks.values())
             score = passed_checks / len(checks)
@@ -954,7 +962,7 @@ class BrutalBenchmarks:
                 actual=f"Error: {str(e)[:50]}",
                 time_taken=time.time() - start,
                 actions_used=1,
-                errors=[str(e)]
+                errors=[str(e)],
             )
 
         return BenchmarkResult(
@@ -965,7 +973,7 @@ class BrutalBenchmarks:
             expected="Pipeline returns complete result",
             actual=f"Passed {passed_checks}/4 checks",
             time_taken=time.time() - start,
-            actions_used=1
+            actions_used=1,
         )
 
     def test_ultrathink_integration(self) -> BenchmarkResult:
@@ -982,16 +990,16 @@ class BrutalBenchmarks:
                 expected="UltraThink processes query",
                 actual="No UltraThink available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         try:
             result = self.agent.ultrathink.think("What is 2+2?", depth="deep")
             checks = {
-                'has_chain': hasattr(result, 'reasoning_chain') and len(result.reasoning_chain) > 0,
-                'has_confidence': hasattr(result, 'confidence'),
-                'has_insights': hasattr(result, 'insights'),
-                'has_actions': hasattr(result, 'suggested_actions'),
+                "has_chain": hasattr(result, "reasoning_chain") and len(result.reasoning_chain) > 0,
+                "has_confidence": hasattr(result, "confidence"),
+                "has_insights": hasattr(result, "insights"),
+                "has_actions": hasattr(result, "suggested_actions"),
             }
             passed_checks = sum(checks.values())
             score = passed_checks / len(checks)
@@ -1005,7 +1013,7 @@ class BrutalBenchmarks:
                 actual=f"Error: {str(e)[:50]}",
                 time_taken=time.time() - start,
                 actions_used=1,
-                errors=[str(e)]
+                errors=[str(e)],
             )
 
         return BenchmarkResult(
@@ -1016,7 +1024,7 @@ class BrutalBenchmarks:
             expected="UltraThink returns complete result",
             actual=f"Passed {passed_checks}/4 checks",
             time_taken=time.time() - start,
-            actions_used=1
+            actions_used=1,
         )
 
     def test_full_workflow_integration(self) -> BenchmarkResult:
@@ -1033,7 +1041,7 @@ class BrutalBenchmarks:
                 expected="Complete workflow cycle",
                 actual="No agent available",
                 time_taken=time.time() - start,
-                actions_used=0
+                actions_used=0,
             )
 
         try:
@@ -1041,18 +1049,16 @@ class BrutalBenchmarks:
             state = self.agent.process("Calculate the factorial of 5", deep_think=True)
 
             checks = {
-                'perceive': state.confidence > 0 or len(state.knowledge) >= 0,  # Always passes perceive
-                'think': len(state.analysis) > 0 or len(state.plan) > 0,
-                'act': True,  # Always passes (even if no tools used)
-                'learn': True,  # Learning happens in background
-                'improve': True,  # Improvement cycle runs
+                "perceive": state.confidence > 0
+                or len(state.knowledge) >= 0,  # Always passes perceive
+                "think": len(state.analysis) > 0 or len(state.plan) > 0,
+                "act": True,  # Always passes (even if no tools used)
+                "learn": True,  # Learning happens in background
+                "improve": True,  # Improvement cycle runs
             }
 
             # More strict check
-            workflow_complete = (
-                len(state.plan) > 0 and
-                state.processing_time > 0
-            )
+            workflow_complete = len(state.plan) > 0 and state.processing_time > 0
 
             score = 1.0 if workflow_complete else 0.5
         except Exception as e:
@@ -1065,7 +1071,7 @@ class BrutalBenchmarks:
                 actual=f"Error: {str(e)[:50]}",
                 time_taken=time.time() - start,
                 actions_used=0,
-                errors=[str(e)]
+                errors=[str(e)],
             )
 
         return BenchmarkResult(
@@ -1076,7 +1082,7 @@ class BrutalBenchmarks:
             expected="Complete PERCEIVE->THINK->ACT->LEARN->IMPROVE",
             actual=f"Workflow complete: {workflow_complete}, Time: {state.processing_time:.3f}s",
             time_taken=time.time() - start,
-            actions_used=len(state.tools_used)
+            actions_used=len(state.tools_used),
         )
 
     # =========================================================================
@@ -1096,33 +1102,26 @@ class BrutalBenchmarks:
             self.test_arc_sequence_completion,
             self.test_arc_pattern_transform,
             self.test_arc_grid_reasoning,
-
             # Tool Proficiency (GAIA-style)
             self.test_tool_chain_execution,
             self.test_tool_selection_accuracy,
             self.test_tool_error_handling,
-
             # Error Recovery & Self-Improvement
             self.test_self_improvement_learning,
             self.test_error_pattern_persistence,
-
             # Multi-Step Reasoning
             self.test_multistep_math_reasoning,
             self.test_causal_chain_reasoning,
-
             # Knowledge Integration
             self.test_knowledge_storage_retrieval,
             self.test_cross_domain_synthesis,
-
             # Efficiency
             self.test_action_efficiency,
             self.test_response_time,
-
             # Real-World (AgentBench-style)
             self.test_project_analysis_workflow,
             self.test_error_recovery_workflow,
             self.test_learning_workflow,
-
             # Integration
             self.test_pipeline_integration,
             self.test_ultrathink_integration,
@@ -1138,17 +1137,19 @@ class BrutalBenchmarks:
                 self.log(f"{result.name}: {result.actual} [{result.score:.0%}]", level)
             except Exception as e:
                 self.log(f"{test_func.__name__}: CRASHED - {e}", "FAIL")
-                self.suite.add_result(BenchmarkResult(
-                    name=test_func.__name__,
-                    category="CRASHED",
-                    passed=False,
-                    score=0.0,
-                    expected="No crash",
-                    actual=str(e)[:50],
-                    time_taken=0,
-                    actions_used=0,
-                    errors=[traceback.format_exc()]
-                ))
+                self.suite.add_result(
+                    BenchmarkResult(
+                        name=test_func.__name__,
+                        category="CRASHED",
+                        passed=False,
+                        score=0.0,
+                        expected="No crash",
+                        actual=str(e)[:50],
+                        time_taken=0,
+                        actions_used=0,
+                        errors=[traceback.format_exc()],
+                    )
+                )
 
         return self.suite
 
@@ -1161,8 +1162,10 @@ class BrutalBenchmarks:
         print("=" * 70)
 
         # Overall stats
-        overall = summary['overall']
-        print(f"\nOVERALL: {overall['passed']}/{overall['total']} tests passed ({overall['pass_rate']})")
+        overall = summary["overall"]
+        print(
+            f"\nOVERALL: {overall['passed']}/{overall['total']} tests passed ({overall['pass_rate']})"
+        )
         print(f"Total time: {overall['total_time']}")
         print(f"Avg time per test: {overall['avg_time']}")
         print(f"Total actions: {overall['total_actions']}")
@@ -1171,8 +1174,8 @@ class BrutalBenchmarks:
         # By category
         print("\nBY CATEGORY:")
         print("-" * 50)
-        for cat, data in summary['by_category'].items():
-            status = "PASS" if float(data['pass_rate'].rstrip('%')) >= 50 else "FAIL"
+        for cat, data in summary["by_category"].items():
+            status = "PASS" if float(data["pass_rate"].rstrip("%")) >= 50 else "FAIL"
             icon = "[+]" if status == "PASS" else "[-]"
             print(f"  {icon} {cat}: {data['pass_rate']} (avg score: {data['avg_score']:.2f})")
 
@@ -1193,7 +1196,7 @@ class BrutalBenchmarks:
         print("AGI READINESS SCORE")
         print("=" * 70)
 
-        pass_rate = float(overall['pass_rate'].rstrip('%'))
+        pass_rate = float(overall["pass_rate"].rstrip("%"))
         if pass_rate >= 80:
             grade = "A - AGI Ready"
         elif pass_rate >= 60:
@@ -1210,14 +1213,23 @@ class BrutalBenchmarks:
 
         # Recommendations
         print("\nRECOMMENDATIONS:")
-        by_cat = summary['by_category']
-        if 'ABSTRACT_REASONING' in by_cat and float(by_cat['ABSTRACT_REASONING']['pass_rate'].rstrip('%')) < 50:
+        by_cat = summary["by_category"]
+        if (
+            "ABSTRACT_REASONING" in by_cat
+            and float(by_cat["ABSTRACT_REASONING"]["pass_rate"].rstrip("%")) < 50
+        ):
             print("  - Improve pattern recognition (ARC-style reasoning)")
-        if 'TOOL_PROFICIENCY' in by_cat and float(by_cat['TOOL_PROFICIENCY']['pass_rate'].rstrip('%')) < 50:
+        if (
+            "TOOL_PROFICIENCY" in by_cat
+            and float(by_cat["TOOL_PROFICIENCY"]["pass_rate"].rstrip("%")) < 50
+        ):
             print("  - Improve tool selection and chaining (GAIA-style)")
-        if 'ERROR_RECOVERY' in by_cat and float(by_cat['ERROR_RECOVERY']['pass_rate'].rstrip('%')) < 50:
+        if (
+            "ERROR_RECOVERY" in by_cat
+            and float(by_cat["ERROR_RECOVERY"]["pass_rate"].rstrip("%")) < 50
+        ):
             print("  - Improve self-improvement and error learning")
-        if 'INTEGRATION' in by_cat and float(by_cat['INTEGRATION']['pass_rate'].rstrip('%')) < 50:
+        if "INTEGRATION" in by_cat and float(by_cat["INTEGRATION"]["pass_rate"].rstrip("%")) < 50:
             print("  - Fix component integration issues")
 
 
@@ -1232,6 +1244,7 @@ if __name__ == "__main__":
 
     try:
         from neuro_agent import NeuroAgent
+
         agent = NeuroAgent(verbose=False)
         print("[+] NeuroAgent initialized")
         print(f"    Components: {agent.get_stats()['components']}")

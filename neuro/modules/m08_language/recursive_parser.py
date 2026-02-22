@@ -17,15 +17,16 @@ from enum import Enum
 
 class PhraseType(Enum):
     """Types of syntactic phrases"""
-    S = "S"       # Sentence
-    NP = "NP"     # Noun Phrase
-    VP = "VP"     # Verb Phrase
-    PP = "PP"     # Prepositional Phrase
-    AP = "AP"     # Adjective Phrase
-    ADVP = "ADVP" # Adverb Phrase
-    CP = "CP"     # Complementizer Phrase
-    IP = "IP"     # Inflectional Phrase
-    DP = "DP"     # Determiner Phrase
+
+    S = "S"  # Sentence
+    NP = "NP"  # Noun Phrase
+    VP = "VP"  # Verb Phrase
+    PP = "PP"  # Prepositional Phrase
+    AP = "AP"  # Adjective Phrase
+    ADVP = "ADVP"  # Adverb Phrase
+    CP = "CP"  # Complementizer Phrase
+    IP = "IP"  # Inflectional Phrase
+    DP = "DP"  # Determiner Phrase
 
 
 @dataclass
@@ -34,9 +35,10 @@ class Constituent:
 
     Represents a syntactic constituent with hierarchical structure.
     """
+
     label: str
-    children: List['Constituent'] = field(default_factory=list)
-    head: Optional[Union[str, 'Constituent']] = None
+    children: List["Constituent"] = field(default_factory=list)
+    head: Optional[Union[str, "Constituent"]] = None
     features: Dict[str, any] = field(default_factory=dict)
 
     def is_terminal(self) -> bool:
@@ -90,29 +92,29 @@ class RecursiveGrammar:
     def __init__(self):
         # CFG-style rules: LHS -> [RHS options]
         self.rules: Dict[str, List[List[str]]] = {
-            'S': [['NP', 'VP'], ['CP']],
-            'NP': [['Det', 'N'], ['Det', 'AP', 'N'], ['N'], ['NP', 'PP']],
-            'VP': [['V'], ['V', 'NP'], ['V', 'NP', 'PP'], ['V', 'CP']],
-            'PP': [['P', 'NP']],
-            'AP': [['Adj'], ['Adv', 'Adj']],
-            'CP': [['C', 'S']],
+            "S": [["NP", "VP"], ["CP"]],
+            "NP": [["Det", "N"], ["Det", "AP", "N"], ["N"], ["NP", "PP"]],
+            "VP": [["V"], ["V", "NP"], ["V", "NP", "PP"], ["V", "CP"]],
+            "PP": [["P", "NP"]],
+            "AP": [["Adj"], ["Adv", "Adj"]],
+            "CP": [["C", "S"]],
         }
 
         # Terminal categories
-        self.terminals = {'Det', 'N', 'V', 'P', 'Adj', 'Adv', 'C'}
+        self.terminals = {"Det", "N", "V", "P", "Adj", "Adv", "C"}
 
         # Sample lexicon
         self.lexicon: Dict[str, List[str]] = {
-            'Det': ['the', 'a', 'this', 'that'],
-            'N': ['cat', 'dog', 'man', 'woman', 'book', 'idea'],
-            'V': ['saw', 'likes', 'thinks', 'said', 'believes'],
-            'P': ['in', 'on', 'with', 'to', 'from'],
-            'Adj': ['big', 'small', 'happy', 'sad', 'interesting'],
-            'Adv': ['very', 'quite', 'extremely'],
-            'C': ['that', 'if', 'whether'],
+            "Det": ["the", "a", "this", "that"],
+            "N": ["cat", "dog", "man", "woman", "book", "idea"],
+            "V": ["saw", "likes", "thinks", "said", "believes"],
+            "P": ["in", "on", "with", "to", "from"],
+            "Adj": ["big", "small", "happy", "sad", "interesting"],
+            "Adv": ["very", "quite", "extremely"],
+            "C": ["that", "if", "whether"],
         }
 
-    def generate(self, start: str = 'S', max_depth: int = 5) -> Constituent:
+    def generate(self, start: str = "S", max_depth: int = 5) -> Constituent:
         """Generate a random sentence structure
 
         Uses recursive expansion of grammar rules.
@@ -218,7 +220,7 @@ class ConstituentParser:
             return self.stack[0]
 
         # Partial parse
-        return Constituent(label='S', children=self.stack)
+        return Constituent(label="S", children=self.stack)
 
     def _shift(self) -> None:
         """Move token from buffer to stack"""
@@ -252,11 +254,7 @@ class ConstituentParser:
                     if labels == rule:
                         # Reduce!
                         self.stack = self.stack[:-length]
-                        new_constituent = Constituent(
-                            label=lhs,
-                            children=items,
-                            head=items[0]
-                        )
+                        new_constituent = Constituent(label=lhs, children=items, head=items[0])
                         self.stack.append(new_constituent)
                         return True
 
@@ -307,7 +305,7 @@ class LinearPredictor:
             Tuple of (predicted token, probability distribution)
         """
         # Encode context
-        context_ids = [self._get_token_id(t) for t in context[-self.context_size:]]
+        context_ids = [self._get_token_id(t) for t in context[-self.context_size :]]
 
         # Pad if needed
         while len(context_ids) < self.context_size:
@@ -330,7 +328,7 @@ class LinearPredictor:
 
         # Sample or take argmax
         predicted_id = np.argmax(probs)
-        predicted_token = self.id_to_token.get(predicted_id, '<unk>')
+        predicted_token = self.id_to_token.get(predicted_id, "<unk>")
 
         return predicted_token, probs
 
@@ -368,21 +366,21 @@ def compare_human_vs_llm(sentence: str) -> Dict[str, any]:
     parser = ConstituentParser(grammar)
 
     # Generate a tree (for demonstration)
-    tree = grammar.generate('S', max_depth=4)
+    tree = grammar.generate("S", max_depth=4)
 
     # LLM-like: linear prediction
     linear = LinearPredictor()
     predictions = []
     for i in range(len(tokens)):
-        pred, probs = linear.predict_next(tokens[:i+1])
+        pred, probs = linear.predict_next(tokens[: i + 1])
         predictions.append(pred)
 
     return {
-        'input': sentence,
-        'human_structure': tree,
-        'human_has_hierarchy': True,
-        'human_depth': tree.depth(),
-        'llm_predictions': predictions,
-        'llm_has_hierarchy': False,
-        'key_difference': "Human language builds recursive tree structures; LLMs predict next token linearly"
+        "input": sentence,
+        "human_structure": tree,
+        "human_has_hierarchy": True,
+        "human_depth": tree.depth(),
+        "llm_predictions": predictions,
+        "llm_has_hierarchy": False,
+        "key_difference": "Human language builds recursive tree structures; LLMs predict next token linearly",
     }

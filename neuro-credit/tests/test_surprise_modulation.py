@@ -10,6 +10,7 @@ from neuro.modules.credit.surprise_modulation import (
     SurpriseModulatedLearning,
 )
 
+
 class TestSurpriseConfig:
     """Tests for SurpriseConfig class."""
 
@@ -25,6 +26,7 @@ class TestSurpriseConfig:
         )
         assert config.base_learning_rate == 0.1
         assert config.consolidation_threshold == 0.9
+
 
 class TestSurpriseModulatedLearning:
     """Tests for SurpriseModulatedLearning class."""
@@ -121,9 +123,7 @@ class TestSurpriseModulatedLearning:
         sml.compute_surprise(1.0, 2.0, surprise_type=SurpriseType.STATE)
         sml.compute_surprise(1.0, 2.0, surprise_type=SurpriseType.REWARD)
 
-        reward_surprises = sml.get_recent_surprises(
-            n=10, surprise_type=SurpriseType.REWARD
-        )
+        reward_surprises = sml.get_recent_surprises(n=10, surprise_type=SurpriseType.REWARD)
         assert len(reward_surprises) == 2
 
     def test_get_average_surprise(self):
@@ -162,15 +162,14 @@ class TestSurpriseModulatedLearning:
         assert stats["total_surprises"] == 5
         assert "consolidation_rate" in stats
 
+
 class TestSurpriseTypes:
     """Tests for different surprise types."""
 
     def test_reward_surprise(self):
         sml = SurpriseModulatedLearning(random_seed=42)
 
-        metrics = sml.compute_surprise(
-            0.0, 1.0, surprise_type=SurpriseType.REWARD
-        )
+        metrics = sml.compute_surprise(0.0, 1.0, surprise_type=SurpriseType.REWARD)
         assert metrics.surprise_type == SurpriseType.REWARD
 
     def test_state_surprise(self):

@@ -9,14 +9,20 @@ Demonstrates effects of VMPFC damage on moral reasoning based on lesion studies:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.moral_reasoning import (
-    MoralDilemmaProcessor, VMPFCLesionModel,
-    create_trolley_switch, create_trolley_push, create_crying_baby
+    MoralDilemmaProcessor,
+    VMPFCLesionModel,
+    create_trolley_switch,
+    create_trolley_push,
+    create_crying_baby,
 )
 from src.emotion_decision_integrator import (
-    EmotionDecisionSystem, create_threat_situation, create_moral_situation
+    EmotionDecisionSystem,
+    create_threat_situation,
+    create_moral_situation,
 )
 
 
@@ -43,16 +49,26 @@ def demo_lesion_vs_healthy():
         print(f"Personal involvement: {scenario.personal_involvement}")
 
         comparison = lesion_model.compare_with_healthy(scenario)
-        healthy = comparison['healthy']
-        lesioned = comparison['lesioned']
+        healthy = comparison["healthy"]
+        lesioned = comparison["lesioned"]
 
         print(f"\n{'':20} {'HEALTHY':>15} {'VMPFC LESION':>15}")
         print(f"{'-' * 50}")
-        print(f"{'Would act:':<20} {'Yes' if healthy.action_taken else 'No':>15} {'Yes' if lesioned.action_taken else 'No':>15}")
-        print(f"{'Deont weight:':<20} {healthy.deontological_weight:>15.2f} {lesioned.deontological_weight:>15.2f}")
-        print(f"{'Util weight:':<20} {healthy.utilitarian_weight:>15.2f} {lesioned.utilitarian_weight:>15.2f}")
-        print(f"{'Emotional resp:':<20} {healthy.emotional_response:>15.2f} {lesioned.emotional_response:>15.2f}")
-        print(f"{'Framework:':<20} {healthy.framework_used.value:>15} {lesioned.framework_used.value:>15}")
+        print(
+            f"{'Would act:':<20} {'Yes' if healthy.action_taken else 'No':>15} {'Yes' if lesioned.action_taken else 'No':>15}"
+        )
+        print(
+            f"{'Deont weight:':<20} {healthy.deontological_weight:>15.2f} {lesioned.deontological_weight:>15.2f}"
+        )
+        print(
+            f"{'Util weight:':<20} {healthy.utilitarian_weight:>15.2f} {lesioned.utilitarian_weight:>15.2f}"
+        )
+        print(
+            f"{'Emotional resp:':<20} {healthy.emotional_response:>15.2f} {lesioned.emotional_response:>15.2f}"
+        )
+        print(
+            f"{'Framework:':<20} {healthy.framework_used.value:>15} {lesioned.framework_used.value:>15}"
+        )
 
 
 def demo_emotional_blunting():
@@ -65,7 +81,7 @@ def demo_emotional_blunting():
 
     healthy_system = EmotionDecisionSystem()
     lesioned_system = EmotionDecisionSystem()
-    lesioned_system.simulate_lesion('vmpfc')
+    lesioned_system.simulate_lesion("vmpfc")
 
     # Process threatening situation
     threat = create_threat_situation(intensity=0.8)
@@ -77,8 +93,12 @@ def demo_emotional_blunting():
 
     print(f"\n{'':25} {'HEALTHY':>15} {'VMPFC LESION':>15}")
     print(f"{'-' * 55}")
-    print(f"{'Emotional valence:':<25} {healthy_decision.emotional_state.valence:>15.2f} {lesioned_decision.emotional_state.valence:>15.2f}")
-    print(f"{'Emotional arousal:':<25} {healthy_decision.emotional_state.arousal:>15.2f} {lesioned_decision.emotional_state.arousal:>15.2f}")
+    print(
+        f"{'Emotional valence:':<25} {healthy_decision.emotional_state.valence:>15.2f} {lesioned_decision.emotional_state.valence:>15.2f}"
+    )
+    print(
+        f"{'Emotional arousal:':<25} {healthy_decision.emotional_state.arousal:>15.2f} {lesioned_decision.emotional_state.arousal:>15.2f}"
+    )
 
     print("\n   Lesioned patient shows 'emotional blunting' -")
     print("   reduced emotional response despite intact perception.")
@@ -160,7 +180,7 @@ def demo_all_lesion_types():
 
     scenario = create_trolley_push()
 
-    regions = ['none', 'vmpfc', 'amygdala', 'acc']
+    regions = ["none", "vmpfc", "amygdala", "acc"]
 
     print(f"\nScenario: {scenario.name}")
     print(f"{'':15} {'Action':>10} {'Emotion':>10} {'Confidence':>12}")
@@ -168,20 +188,20 @@ def demo_all_lesion_types():
 
     for region in regions:
         system = EmotionDecisionSystem()
-        if region != 'none':
+        if region != "none":
             system.simulate_lesion(region)
 
         situation = create_moral_situation(scenario)
         decision = system.process_situation(situation)
 
-        action = 'PUSH' if decision.action == 'act' else "DON'T"
+        action = "PUSH" if decision.action == "act" else "DON'T"
         emotion = decision.emotional_state.valence
         conf = decision.confidence
 
-        label = f"{region.upper():15}" if region != 'none' else "HEALTHY        "
+        label = f"{region.upper():15}" if region != "none" else "HEALTHY        "
         print(f"{label} {action:>10} {emotion:>10.2f} {conf:>12.2f}")
 
-        if region != 'none':
+        if region != "none":
             system.restore_all()
 
     print("\nObservations:")

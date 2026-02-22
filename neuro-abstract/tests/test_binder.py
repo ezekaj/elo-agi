@@ -20,6 +20,7 @@ from neuro.modules.abstract.symbolic_binder import (
     TPROperations,
 )
 
+
 class TestHRROperations:
     """Test Holographic Reduced Representation operations."""
 
@@ -68,6 +69,7 @@ class TestHRROperations:
         normalized = HRROperations.normalize(v)
         np.testing.assert_array_equal(normalized, v)
 
+
 class TestTPROperations:
     """Test Tensor Product Representation operations."""
 
@@ -88,6 +90,7 @@ class TestTPROperations:
         """Sum of empty list should be empty."""
         result = TPROperations.sum_tpr([])
         assert len(result) == 0
+
 
 class TestSymbolicBinder:
     """Test SymbolicBinder class."""
@@ -137,7 +140,7 @@ class TestSymbolicBinder:
             roles={
                 RoleType.AGENT: ("dog", None),
                 RoleType.PATIENT: ("cat", None),
-            }
+            },
         )
 
         assert binding.symbol == "chase"
@@ -153,7 +156,7 @@ class TestSymbolicBinder:
             args={
                 "agent": ("john", None),
                 "patient": ("mary", None),
-            }
+            },
         )
 
         assert binding.symbol == "loves"
@@ -183,7 +186,7 @@ class TestSymbolicBinder:
             roles={
                 RoleType.AGENT: ("dog", None),
                 RoleType.PATIENT: ("cat", None),
-            }
+            },
         )
 
         composed = binder.compose([binding])
@@ -206,7 +209,7 @@ class TestSymbolicBinder:
             roles={
                 RoleType.AGENT: ("john", None),
                 RoleType.PATIENT: ("mary", None),
-            }
+            },
         )
 
         composed = binder.compose([binding])
@@ -238,7 +241,7 @@ class TestSymbolicBinder:
             roles={
                 RoleType.AGENT: ("dog", None),
                 RoleType.PATIENT: ("cat", None),
-            }
+            },
         )
 
         unbound = binder.unbind(binding)
@@ -270,7 +273,7 @@ class TestSymbolicBinder:
             roles={
                 RoleType.AGENT: ("dog", None),
                 RoleType.PATIENT: ("cat", None),
-            }
+            },
         )
 
         # Create analogy: dog -> wolf, cat -> lion
@@ -290,7 +293,7 @@ class TestSymbolicBinder:
             roles={
                 RoleType.AGENT: ("john", None),
                 RoleType.THEME: ("ball", None),
-            }
+            },
         )
 
         is_consistent, avg_sim = binder.verify_binding_consistency(binding)
@@ -323,6 +326,7 @@ class TestSymbolicBinder:
         assert stats["n_symbols"] > 0
         assert stats["n_bindings"] == 1
 
+
 class TestHRRVsTPR:
     """Compare HRR and TPR binding methods."""
 
@@ -335,14 +339,12 @@ class TestHRRVsTPR:
                 random_seed=42,
             )
 
-            binding = binder.bind(
-                "test",
-                roles={RoleType.AGENT: ("subject", None)}
-            )
+            binding = binder.bind("test", roles={RoleType.AGENT: ("subject", None)})
 
             composed = binder.compose([binding])
             assert composed.shape == (128,)
             assert np.linalg.norm(composed) > 0.99
+
 
 class TestEdgeCases:
     """Test edge cases."""

@@ -19,6 +19,7 @@ import traceback
 
 class ToolStatus(Enum):
     """Status of a tool execution."""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -30,6 +31,7 @@ class ToolStatus(Enum):
 @dataclass
 class ToolCall:
     """A tool call request."""
+
     name: str
     args: Dict[str, Any]
     description: str = ""
@@ -41,6 +43,7 @@ class ToolCall:
 @dataclass
 class ToolResult:
     """Result of a tool execution."""
+
     name: str
     status: ToolStatus
     output: Any = None
@@ -52,6 +55,7 @@ class ToolResult:
 @dataclass
 class ExecutionPlan:
     """A plan for executing multiple tools."""
+
     tools: List[ToolCall]
     parallel_groups: List[List[str]] = field(default_factory=list)
     total_timeout: float = 120.0
@@ -74,7 +78,7 @@ class ParallelExecutor:
         tools_instance: Any = None,
         max_parallel: int = 5,
         default_timeout: float = 30.0,
-        default_retries: int = 3
+        default_retries: int = 3,
     ):
         self.tools = tools_instance
         self.max_parallel = max_parallel
@@ -105,7 +109,7 @@ class ParallelExecutor:
         self,
         tool: ToolCall,
         context: Optional[Dict[str, Any]] = None,
-        on_progress: Optional[Callable[[str, str], None]] = None
+        on_progress: Optional[Callable[[str, str], None]] = None,
     ) -> ToolResult:
         """
         Execute a single tool with retries and timeout.
@@ -133,7 +137,7 @@ class ParallelExecutor:
                         name=tool.name,
                         status=ToolStatus.FAILED,
                         error=f"Tool not found: {tool.name}",
-                        duration=time.time() - start_time
+                        duration=time.time() - start_time,
                     )
 
                 # Merge context into args
@@ -146,17 +150,14 @@ class ParallelExecutor:
                     on_progress(tool.name, f"attempt {attempt + 1}")
 
                 # Execute with timeout
-                result = await asyncio.wait_for(
-                    self._run_tool(func, args),
-                    timeout=tool.timeout
-                )
+                result = await asyncio.wait_for(self._run_tool(func, args), timeout=tool.timeout)
 
                 return ToolResult(
                     name=tool.name,
                     status=ToolStatus.SUCCESS,
                     output=result,
                     duration=time.time() - start_time,
-                    retries_used=retries_used
+                    retries_used=retries_used,
                 )
 
             except asyncio.TimeoutError:
@@ -167,10 +168,10 @@ class ParallelExecutor:
                         status=ToolStatus.TIMEOUT,
                         error=f"Timeout after {tool.timeout}s",
                         duration=time.time() - start_time,
-                        retries_used=retries_used
+                        retries_used=retries_used,
                     )
                 # Exponential backoff before retry
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
 
             except Exception as e:
                 retries_used += 1
@@ -180,17 +181,17 @@ class ParallelExecutor:
                         status=ToolStatus.FAILED,
                         error=str(e),
                         duration=time.time() - start_time,
-                        retries_used=retries_used
+                        retries_used=retries_used,
                     )
                 # Exponential backoff before retry
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
 
         # Should not reach here
         return ToolResult(
             name=tool.name,
             status=ToolStatus.FAILED,
             error="Unknown error",
-            duration=time.time() - start_time
+            duration=time.time() - start_time,
         )
 
     async def _run_tool(self, func: Callable, args: Dict[str, Any]) -> Any:
@@ -206,9 +207,7 @@ class ParallelExecutor:
             return await loop.run_in_executor(None, lambda: func(**clean_args))
 
     async def execute_parallel(
-        self,
-        tools: List[ToolCall],
-        on_progress: Optional[Callable[[str, str], None]] = None
+        self, tools: List[ToolCall], on_progress: Optional[Callable[[str, str], None]] = None
     ) -> List[ToolResult]:
         """
         Execute multiple tools in parallel.
@@ -223,9 +222,7 @@ class ParallelExecutor:
         # Create tasks for all tools
         tasks = []
         for tool in tools:
-            task = asyncio.create_task(
-                self.execute_one(tool, on_progress=on_progress)
-            )
+            task = asyncio.create_task(self.execute_one(tool, on_progress=on_progress))
             tasks.append(task)
 
         # Wait for all with semaphore to limit parallelism
@@ -235,29 +232,22 @@ class ParallelExecutor:
             async with semaphore:
                 return await task
 
-        results = await asyncio.gather(
-            *[limited_execute(t) for t in tasks],
-            return_exceptions=True
-        )
+        results = await asyncio.gather(*[limited_execute(t) for t in tasks], return_exceptions=True)
 
         # Convert exceptions to ToolResults
         final_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                final_results.append(ToolResult(
-                    name=tools[i].name,
-                    status=ToolStatus.FAILED,
-                    error=str(result)
-                ))
+                final_results.append(
+                    ToolResult(name=tools[i].name, status=ToolStatus.FAILED, error=str(result))
+                )
             else:
                 final_results.append(result)
 
         return final_results
 
     async def execute_chain(
-        self,
-        tools: List[ToolCall],
-        on_progress: Optional[Callable[[str, str], None]] = None
+        self, tools: List[ToolCall], on_progress: Optional[Callable[[str, str], None]] = None
     ) -> ToolResult:
         """
         Execute tools in sequence, passing outputs.
@@ -296,9 +286,7 @@ class ParallelExecutor:
         return last_result
 
     async def execute_plan(
-        self,
-        plan: ExecutionPlan,
-        on_progress: Optional[Callable[[str, str], None]] = None
+        self, plan: ExecutionPlan, on_progress: Optional[Callable[[str, str], None]] = None
     ) -> Dict[str, ToolResult]:
         """
         Execute a full execution plan with dependency resolution.
@@ -336,9 +324,7 @@ class ParallelExecutor:
                     # Circular dependency or missing dependency
                     for tool in pending:
                         results[tool.name] = ToolResult(
-                            name=tool.name,
-                            status=ToolStatus.SKIPPED,
-                            error="Dependency not met"
+                            name=tool.name, status=ToolStatus.SKIPPED, error="Dependency not met"
                         )
                     break
 
@@ -356,10 +342,9 @@ class ParallelExecutor:
 
 # Convenience functions
 
+
 async def run_parallel(
-    tools_instance: Any,
-    calls: List[Dict[str, Any]],
-    max_parallel: int = 5
+    tools_instance: Any, calls: List[Dict[str, Any]], max_parallel: int = 5
 ) -> List[ToolResult]:
     """
     Run multiple tool calls in parallel.
@@ -373,17 +358,11 @@ async def run_parallel(
         List of ToolResults
     """
     executor = ParallelExecutor(tools_instance, max_parallel=max_parallel)
-    tool_calls = [
-        ToolCall(name=c["name"], args=c.get("args", {}))
-        for c in calls
-    ]
+    tool_calls = [ToolCall(name=c["name"], args=c.get("args", {})) for c in calls]
     return await executor.execute_parallel(tool_calls)
 
 
-async def run_chain(
-    tools_instance: Any,
-    calls: List[Dict[str, Any]]
-) -> ToolResult:
+async def run_chain(tools_instance: Any, calls: List[Dict[str, Any]]) -> ToolResult:
     """
     Run tool calls in sequence, passing outputs.
 
@@ -395,10 +374,7 @@ async def run_chain(
         Final ToolResult
     """
     executor = ParallelExecutor(tools_instance)
-    tool_calls = [
-        ToolCall(name=c["name"], args=c.get("args", {}))
-        for c in calls
-    ]
+    tool_calls = [ToolCall(name=c["name"], args=c.get("args", {})) for c in calls]
     return await executor.execute_chain(tool_calls)
 
 

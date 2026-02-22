@@ -4,9 +4,14 @@ Tests for Creative Networks (DMN, ECN, Salience)
 
 import pytest
 import numpy as np
-from neuro.modules.m09_creativity.networks import DefaultModeNetwork, ExecutiveControlNetwork, SalienceNetwork
+from neuro.modules.m09_creativity.networks import (
+    DefaultModeNetwork,
+    ExecutiveControlNetwork,
+    SalienceNetwork,
+)
 from neuro.modules.m09_creativity.networks.salience_network import NetworkState, SwitchTrigger
 from neuro.modules.m09_creativity.networks.executive_control_network import EvaluationCriterion
+
 
 class TestDefaultModeNetwork:
     """Tests for Default Mode Network"""
@@ -37,8 +42,7 @@ class TestDefaultModeNetwork:
 
         # Check associations list contains the association
         assoc_found = any(
-            a.source_id == "tree" and a.target_id == "forest"
-            for a in dmn.associations
+            a.source_id == "tree" and a.target_id == "forest" for a in dmn.associations
         )
         assert assoc_found
 
@@ -74,8 +78,8 @@ class TestDefaultModeNetwork:
 
         assert len(thoughts) == 5
         for thought in thoughts:
-            assert hasattr(thought, 'novelty_score')
-            assert hasattr(thought, 'coherence_score')
+            assert hasattr(thought, "novelty_score")
+            assert hasattr(thought, "coherence_score")
 
     def test_find_distant_associations(self):
         """Test finding distant conceptual connections"""
@@ -105,11 +109,12 @@ class TestDefaultModeNetwork:
 
         # Fire and ice are semantically distant
         dmn.create_association("fire", "water", 0.3)  # Weak
-        dmn.create_association("ice", "water", 0.9)   # Strong
+        dmn.create_association("ice", "water", 0.9)  # Strong
 
         thought1 = dmn.generate_spontaneous_thought(seed="water")
 
         assert thought1.novelty_score >= 0
+
 
 class TestExecutiveControlNetwork:
     """Tests for Executive Control Network"""
@@ -138,7 +143,7 @@ class TestExecutiveControlNetwork:
             "idea_1",
             "A painting of a sunset",
             idea_features={"novelty": 0.6, "coherence": 0.8},
-            context={"goal_relevance": 0.7}
+            context={"goal_relevance": 0.7},
         )
 
         assert evaluation is not None
@@ -149,10 +154,7 @@ class TestExecutiveControlNetwork:
         """Test evaluation with custom criteria weights"""
         ecn = ExecutiveControlNetwork()
 
-        custom_weights = {
-            EvaluationCriterion.NOVELTY: 0.8,
-            EvaluationCriterion.USEFULNESS: 0.2
-        }
+        custom_weights = {EvaluationCriterion.NOVELTY: 0.8, EvaluationCriterion.USEFULNESS: 0.2}
 
         ecn.set_goal("innovate", "Create novel solution", criteria_weights=custom_weights)
 
@@ -160,14 +162,12 @@ class TestExecutiveControlNetwork:
         eval1 = ecn.evaluate_idea(
             "novel_idea",
             "Very novel but impractical",
-            idea_features={"novelty": 0.9, "usefulness": 0.2}
+            idea_features={"novelty": 0.9, "usefulness": 0.2},
         )
 
         # Low novelty, high usefulness idea
         eval2 = ecn.evaluate_idea(
-            "useful_idea",
-            "Practical but boring",
-            idea_features={"novelty": 0.2, "usefulness": 0.9}
+            "useful_idea", "Practical but boring", idea_features={"novelty": 0.2, "usefulness": 0.9}
         )
 
         # With novelty weighted higher, novel_idea should score higher
@@ -180,16 +180,12 @@ class TestExecutiveControlNetwork:
 
         # First evaluate
         evaluation = ecn.evaluate_idea(
-            "initial_idea",
-            "Basic design concept",
-            idea_features={"novelty": 0.4, "coherence": 0.5}
+            "initial_idea", "Basic design concept", idea_features={"novelty": 0.4, "coherence": 0.5}
         )
 
         # Then refine
         refined_id, refined_content, refinement = ecn.refine_idea(
-            "initial_idea",
-            "Basic design concept",
-            evaluation
+            "initial_idea", "Basic design concept", evaluation
         )
 
         assert "initial_idea_refined" in refined_id
@@ -202,26 +198,25 @@ class TestExecutiveControlNetwork:
         ecn.set_goal(
             "constrained_goal",
             "Create within constraints",
-            constraints=["must be simple", "no complexity"]
+            constraints=["must be simple", "no complexity"],
         )
 
         # Simple idea should pass constraints
         eval_simple = ecn.evaluate_idea(
-            "simple_idea",
-            "Simple straightforward solution",
-            idea_features={"complexity": 0.2}
+            "simple_idea", "Simple straightforward solution", idea_features={"complexity": 0.2}
         )
 
         # Complex idea should be penalized
         eval_complex = ecn.evaluate_idea(
             "complex_idea",
             "Complex intricate sophisticated elaborate solution",
-            idea_features={"complexity": 0.9}
+            idea_features={"complexity": 0.9},
         )
 
         # Both should have evaluations
         assert eval_simple is not None
         assert eval_complex is not None
+
 
 class TestSalienceNetwork:
     """Tests for Salience Network"""
@@ -268,11 +263,7 @@ class TestSalienceNetwork:
         salience = SalienceNetwork()
 
         # In DMN, should switch when many ideas generated
-        metrics = {
-            "ideas_generated": 10,
-            "target_ideas": 5,
-            "current_novelty": 0.3
-        }
+        metrics = {"ideas_generated": 10, "target_ideas": 5, "current_novelty": 0.3}
 
         should_switch, trigger = salience.should_switch(metrics)
         # May or may not switch based on thresholds and time
@@ -338,6 +329,7 @@ class TestSalienceNetwork:
         assert high_novelty_reconfig >= 0
         assert low_novelty_reconfig >= 0
 
+
 class TestNetworkIntegration:
     """Tests for network integration"""
 
@@ -366,7 +358,7 @@ class TestNetworkIntegration:
         evaluation = ecn.evaluate_idea(
             "thought_idea",
             thought.concepts[0] if thought.concepts else "idea",
-            idea_features={"novelty": thought.novelty_score, "coherence": thought.coherence_score}
+            idea_features={"novelty": thought.novelty_score, "coherence": thought.coherence_score},
         )
 
         # Switch back to DMN
@@ -416,7 +408,7 @@ class TestNetworkIntegration:
                 eval_result = ecn.evaluate_idea(
                     f"idea_{len(evaluations)}",
                     str(thought.concepts),
-                    idea_features={"novelty": thought.novelty_score}
+                    idea_features={"novelty": thought.novelty_score},
                 )
                 evaluations.append(eval_result)
 

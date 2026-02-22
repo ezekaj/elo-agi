@@ -20,20 +20,22 @@ import time
 
 class ActionType(Enum):
     """Types of actions the model can predict effects for."""
-    MOTOR = "motor"             # Physical movement
-    COGNITIVE = "cognitive"     # Internal cognitive action
-    PERCEPTUAL = "perceptual"   # Attention shift
-    SOCIAL = "social"           # Social action
-    VERBAL = "verbal"           # Language production
+
+    MOTOR = "motor"  # Physical movement
+    COGNITIVE = "cognitive"  # Internal cognitive action
+    PERCEPTUAL = "perceptual"  # Attention shift
+    SOCIAL = "social"  # Social action
+    VERBAL = "verbal"  # Language production
 
 
 @dataclass
 class TransitionParams:
     """Parameters for the transition model."""
-    n_latent: int = 128           # Latent state dimensionality
-    n_action: int = 32            # Action vector dimensionality
-    n_hidden: int = 256           # Hidden layer size
-    n_ensemble: int = 5           # Number of ensemble models
+
+    n_latent: int = 128  # Latent state dimensionality
+    n_action: int = 32  # Action vector dimensionality
+    n_hidden: int = 256  # Hidden layer size
+    n_ensemble: int = 5  # Number of ensemble models
     uncertainty_threshold: float = 0.5  # Above this, predictions are uncertain
     learning_rate: float = 0.001
     momentum: float = 0.9
@@ -43,12 +45,13 @@ class TransitionParams:
 @dataclass
 class Transition:
     """A predicted state transition."""
+
     current_state: np.ndarray
     action: np.ndarray
     predicted_state: np.ndarray
     predicted_reward: float
-    uncertainty: float           # Epistemic uncertainty
-    ensemble_variance: float     # Variance across ensemble
+    uncertainty: float  # Epistemic uncertainty
+    ensemble_variance: float  # Variance across ensemble
     timestamp: float = field(default_factory=time.time)
 
     def is_reliable(self, threshold: float = 0.5) -> bool:
@@ -81,36 +84,26 @@ class TransitionModel:
 
         for _ in range(self.params.n_ensemble):
             weights = {
-                'input_hidden': np.random.randn(
-                    self.params.n_hidden,
-                    self.params.n_latent + self.params.n_action
-                ) * 0.01,
-                'hidden_hidden': np.random.randn(
-                    self.params.n_hidden,
-                    self.params.n_hidden
-                ) * 0.01,
-                'hidden_output': np.random.randn(
-                    self.params.n_latent,
-                    self.params.n_hidden
-                ) * 0.01,
-                'hidden_reward': np.random.randn(
-                    1,
-                    self.params.n_hidden
-                ) * 0.01,
+                "input_hidden": np.random.randn(
+                    self.params.n_hidden, self.params.n_latent + self.params.n_action
+                )
+                * 0.01,
+                "hidden_hidden": np.random.randn(self.params.n_hidden, self.params.n_hidden) * 0.01,
+                "hidden_output": np.random.randn(self.params.n_latent, self.params.n_hidden) * 0.01,
+                "hidden_reward": np.random.randn(1, self.params.n_hidden) * 0.01,
             }
             biases = {
-                'input_hidden': np.zeros(self.params.n_hidden),
-                'hidden_hidden': np.zeros(self.params.n_hidden),
-                'hidden_output': np.zeros(self.params.n_latent),
-                'hidden_reward': np.zeros(1),
+                "input_hidden": np.zeros(self.params.n_hidden),
+                "hidden_hidden": np.zeros(self.params.n_hidden),
+                "hidden_output": np.zeros(self.params.n_latent),
+                "hidden_reward": np.zeros(1),
             }
             self._ensemble_weights.append(weights)
             self._ensemble_biases.append(biases)
 
         # Momentum terms for SGD
         self._momentum_weights: List[Dict[str, np.ndarray]] = [
-            {k: np.zeros_like(v) for k, v in w.items()}
-            for w in self._ensemble_weights
+            {k: np.zeros_like(v) for k, v in w.items()} for w in self._ensemble_weights
         ]
 
         # History
@@ -182,17 +175,17 @@ class TransitionModel:
         x = np.concatenate([state, action])
 
         # Hidden layer 1
-        h1 = np.tanh(W['input_hidden'] @ x + b['input_hidden'])
+        h1 = np.tanh(W["input_hidden"] @ x + b["input_hidden"])
 
         # Hidden layer 2
-        h2 = np.tanh(W['hidden_hidden'] @ h1 + b['hidden_hidden'])
+        h2 = np.tanh(W["hidden_hidden"] @ h1 + b["hidden_hidden"])
 
         # Output (next state delta)
-        delta = W['hidden_output'] @ h2 + b['hidden_output']
+        delta = W["hidden_output"] @ h2 + b["hidden_output"]
         next_state = state + delta  # Residual prediction
 
         # Reward prediction
-        reward_raw = W['hidden_reward'] @ h2 + b['hidden_reward']
+        reward_raw = W["hidden_reward"] @ h2 + b["hidden_reward"]
         reward = float(np.tanh(reward_raw[0]))  # Extract scalar and bound
 
         return next_state, reward
@@ -250,19 +243,19 @@ class TransitionModel:
 
         # Forward pass (with intermediate values)
         x = np.concatenate([state, action])
-        h1_pre = W['input_hidden'] @ x + b['input_hidden']
+        h1_pre = W["input_hidden"] @ x + b["input_hidden"]
         h1 = np.tanh(h1_pre)
-        h2_pre = W['hidden_hidden'] @ h1 + b['hidden_hidden']
+        h2_pre = W["hidden_hidden"] @ h1 + b["hidden_hidden"]
         h2 = np.tanh(h2_pre)
-        delta = W['hidden_output'] @ h2 + b['hidden_output']
+        delta = W["hidden_output"] @ h2 + b["hidden_output"]
         pred_next = state + delta
-        pred_reward = float((W['hidden_reward'] @ h2 + b['hidden_reward'])[0])
+        pred_reward = float((W["hidden_reward"] @ h2 + b["hidden_reward"])[0])
 
         # Compute errors
         state_error = next_state - pred_next
         reward_error = reward - pred_reward
-        state_loss = 0.5 * np.sum(state_error ** 2)
-        reward_loss = 0.5 * reward_error ** 2
+        state_loss = 0.5 * np.sum(state_error**2)
+        reward_loss = 0.5 * reward_error**2
         total_loss = state_loss + reward_loss
 
         # Backprop
@@ -271,26 +264,25 @@ class TransitionModel:
         d_reward = -reward_error
 
         # Hidden layer 2 gradients
-        d_h2 = (W['hidden_output'].T @ d_delta +
-                W['hidden_reward'].T.flatten() * d_reward)
-        d_h2 *= (1 - h2 ** 2)  # tanh derivative
+        d_h2 = W["hidden_output"].T @ d_delta + W["hidden_reward"].T.flatten() * d_reward
+        d_h2 *= 1 - h2**2  # tanh derivative
 
         # Hidden layer 1 gradients
-        d_h1 = W['hidden_hidden'].T @ d_h2
-        d_h1 *= (1 - h1 ** 2)
+        d_h1 = W["hidden_hidden"].T @ d_h2
+        d_h1 *= 1 - h1**2
 
         # Weight gradients
         dW = {
-            'input_hidden': np.outer(d_h1, x),
-            'hidden_hidden': np.outer(d_h2, h1),
-            'hidden_output': np.outer(d_delta, h2),
-            'hidden_reward': np.outer([d_reward], h2),
+            "input_hidden": np.outer(d_h1, x),
+            "hidden_hidden": np.outer(d_h2, h1),
+            "hidden_output": np.outer(d_delta, h2),
+            "hidden_reward": np.outer([d_reward], h2),
         }
         db = {
-            'input_hidden': d_h1,
-            'hidden_hidden': d_h2,
-            'hidden_output': d_delta,
-            'hidden_reward': np.array([d_reward]),
+            "input_hidden": d_h1,
+            "hidden_hidden": d_h2,
+            "hidden_output": d_delta,
+            "hidden_reward": np.array([d_reward]),
         }
 
         # Update with momentum
@@ -345,32 +337,32 @@ class TransitionModel:
     def get_prediction_error_stats(self) -> Dict[str, float]:
         """Get statistics about prediction errors."""
         if not self._prediction_errors:
-            return {'mean': 0.0, 'std': 0.0, 'min': 0.0, 'max': 0.0}
+            return {"mean": 0.0, "std": 0.0, "min": 0.0, "max": 0.0}
 
         recent = self._prediction_errors[-1000:]
         return {
-            'mean': float(np.mean(recent)),
-            'std': float(np.std(recent)),
-            'min': float(np.min(recent)),
-            'max': float(np.max(recent)),
+            "mean": float(np.mean(recent)),
+            "std": float(np.std(recent)),
+            "min": float(np.min(recent)),
+            "max": float(np.max(recent)),
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get model statistics."""
         if not self._transition_history:
             return {
-                'n_predictions': 0,
-                'avg_uncertainty': 0.0,
-                'prediction_errors': self.get_prediction_error_stats(),
+                "n_predictions": 0,
+                "avg_uncertainty": 0.0,
+                "prediction_errors": self.get_prediction_error_stats(),
             }
 
         recent = self._transition_history[-1000:]
         return {
-            'n_predictions': len(self._transition_history),
-            'avg_uncertainty': float(np.mean([t.uncertainty for t in recent])),
-            'avg_reward': float(np.mean([t.predicted_reward for t in recent])),
-            'prediction_errors': self.get_prediction_error_stats(),
-            'n_ensemble': self.params.n_ensemble,
+            "n_predictions": len(self._transition_history),
+            "avg_uncertainty": float(np.mean([t.uncertainty for t in recent])),
+            "avg_reward": float(np.mean([t.predicted_reward for t in recent])),
+            "prediction_errors": self.get_prediction_error_stats(),
+            "n_ensemble": self.params.n_ensemble,
         }
 
     def reset(self) -> None:

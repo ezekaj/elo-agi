@@ -22,6 +22,7 @@ from .config import SystemConfig
 @dataclass
 class Policy:
     """A sequence of actions (a policy)."""
+
     actions: List[np.ndarray]
     efe: float = 0.0  # Expected Free Energy
     epistemic_value: float = 0.0  # Information gain
@@ -35,6 +36,7 @@ class Policy:
 @dataclass
 class EFEResult:
     """Result of EFE computation."""
+
     total_efe: float
     epistemic: float  # Ambiguity reduction
     pragmatic: float  # Risk/goal-related
@@ -44,6 +46,7 @@ class EFEResult:
 @dataclass
 class BeliefState:
     """Current belief state for inference."""
+
     state: np.ndarray  # Current state estimate
     precision: np.ndarray  # Confidence in each state dimension
     goals: np.ndarray  # Desired/preferred states
@@ -139,9 +142,9 @@ class ActiveInferenceController:
             epistemic=epistemic,
             pragmatic=pragmatic,
             components={
-                'information_gain': epistemic,
-                'goal_alignment': pragmatic,
-            }
+                "information_gain": epistemic,
+                "goal_alignment": pragmatic,
+            },
         )
 
         policy.efe = total_efe
@@ -231,9 +234,9 @@ class ActiveInferenceController:
         for action in policy.actions:
             try:
                 # Use world model to predict next state
-                if hasattr(self.world_model, 'predict'):
+                if hasattr(self.world_model, "predict"):
                     next_state = self.world_model.predict(current, action)
-                elif hasattr(self.world_model, 'imagine'):
+                elif hasattr(self.world_model, "imagine"):
                     trajectory = self.world_model.imagine([action], horizon=1)
                     if trajectory:
                         next_state = trajectory[-1].next_state
@@ -364,14 +367,18 @@ class ActiveInferenceController:
         recent_efes = self._efe_history[-10:] if self._efe_history else []
 
         return {
-            'action_count': self._action_count,
-            'current_policy_step': self._policy_step,
-            'n_policies_evaluated': len(self._policies),
-            'exploration_weight': self.config.exploration_weight,
-            'temperature': self.config.temperature,
-            'mean_efe': float(np.mean([e.total_efe for e in recent_efes])) if recent_efes else 0.0,
-            'mean_epistemic': float(np.mean([e.epistemic for e in recent_efes])) if recent_efes else 0.0,
-            'mean_pragmatic': float(np.mean([e.pragmatic for e in recent_efes])) if recent_efes else 0.0,
+            "action_count": self._action_count,
+            "current_policy_step": self._policy_step,
+            "n_policies_evaluated": len(self._policies),
+            "exploration_weight": self.config.exploration_weight,
+            "temperature": self.config.temperature,
+            "mean_efe": float(np.mean([e.total_efe for e in recent_efes])) if recent_efes else 0.0,
+            "mean_epistemic": float(np.mean([e.epistemic for e in recent_efes]))
+            if recent_efes
+            else 0.0,
+            "mean_pragmatic": float(np.mean([e.pragmatic for e in recent_efes]))
+            if recent_efes
+            else 0.0,
         }
 
     def reset(self) -> None:

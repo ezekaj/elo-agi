@@ -15,26 +15,29 @@ from .shared_space import SemanticEmbedding, ModalityType
 
 class ConflictType(Enum):
     """Types of conflicts between modules."""
-    BELIEF = "belief"           # Conflicting beliefs about world state
-    ACTION = "action"           # Different action recommendations
-    ATTENTION = "attention"     # Competition for attention
-    GOAL = "goal"               # Conflicting goals
+
+    BELIEF = "belief"  # Conflicting beliefs about world state
+    ACTION = "action"  # Different action recommendations
+    ATTENTION = "attention"  # Competition for attention
+    GOAL = "goal"  # Conflicting goals
     INTERPRETATION = "interpretation"  # Different interpretations of input
 
 
 class ResolutionStrategy(Enum):
     """Strategies for resolving conflicts."""
-    WEIGHTED_AVERAGE = "weighted_average"   # Blend based on confidence
-    WINNER_TAKE_ALL = "winner_take_all"     # Highest confidence wins
-    VOTING = "voting"                       # Majority/plurality
-    ARBITRATION = "arbitration"             # Meta-module decides
-    NEGOTIATION = "negotiation"             # Iterative refinement
-    CONTEXT_DEPENDENT = "context_dependent" # Based on current context
+
+    WEIGHTED_AVERAGE = "weighted_average"  # Blend based on confidence
+    WINNER_TAKE_ALL = "winner_take_all"  # Highest confidence wins
+    VOTING = "voting"  # Majority/plurality
+    ARBITRATION = "arbitration"  # Meta-module decides
+    NEGOTIATION = "negotiation"  # Iterative refinement
+    CONTEXT_DEPENDENT = "context_dependent"  # Based on current context
 
 
 @dataclass
 class Conflict:
     """Represents a conflict between modules."""
+
     conflict_id: int
     conflict_type: ConflictType
     modules: List[str]
@@ -58,7 +61,7 @@ class Conflict:
             for j in range(i + 1, len(embeddings)):
                 # Higher similarity = lower disagreement
                 similarity = embeddings[i].similarity(embeddings[j])
-                total_disagreement += (1 - similarity)
+                total_disagreement += 1 - similarity
                 n_pairs += 1
 
         if n_pairs == 0:
@@ -70,6 +73,7 @@ class Conflict:
 @dataclass
 class Resolution:
     """Result of conflict resolution."""
+
     conflict: Conflict
     strategy_used: ResolutionStrategy
     resolved_embedding: SemanticEmbedding
@@ -167,10 +171,7 @@ class ConflictResolver:
     ) -> Resolution:
         """Resolve a conflict using the specified strategy."""
         if strategy is None:
-            strategy = self._type_strategies.get(
-                conflict.conflict_type,
-                self.default_strategy
-            )
+            strategy = self._type_strategies.get(conflict.conflict_type, self.default_strategy)
 
         if strategy == ResolutionStrategy.WEIGHTED_AVERAGE:
             resolution = self._resolve_weighted_average(conflict)
@@ -242,9 +243,9 @@ class ConflictResolver:
         confidences = conflict.confidences
 
         # Find winner
-        winner = max(confidences.keys(), key=lambda m: (
-            confidences[m] * self._reliability.get(m, 1.0)
-        ))
+        winner = max(
+            confidences.keys(), key=lambda m: confidences[m] * self._reliability.get(m, 1.0)
+        )
 
         resolved = SemanticEmbedding(
             vector=embeddings[winner].vector.copy(),
@@ -326,10 +327,7 @@ class ConflictResolver:
         if conflict.conflict_type == ConflictType.ACTION:
             # For actions, prefer safer/more cautious option
             # (represented by lower norm activation)
-            safest = min(
-                embeddings.keys(),
-                key=lambda m: np.linalg.norm(embeddings[m].vector)
-            )
+            safest = min(embeddings.keys(), key=lambda m: np.linalg.norm(embeddings[m].vector))
             winner = safest
         elif conflict.conflict_type == ConflictType.GOAL:
             # For goals, prefer higher-level goal (if detectable)
@@ -484,10 +482,7 @@ class ConflictResolver:
         conflict_type: ConflictType,
     ) -> ResolutionStrategy:
         """Get best strategy based on historical performance."""
-        best_strategy = self._type_strategies.get(
-            conflict_type,
-            self.default_strategy
-        )
+        best_strategy = self._type_strategies.get(conflict_type, self.default_strategy)
         best_success_rate = 0.0
 
         for strategy, history in self._strategy_history.items():

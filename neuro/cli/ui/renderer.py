@@ -28,18 +28,20 @@ from rich.style import Style
 from rich.theme import Theme
 
 # Custom theme matching modern CLI aesthetics
-NEURO_THEME = Theme({
-    "info": "cyan",
-    "success": "green",
-    "warning": "yellow",
-    "error": "red",
-    "dim": "dim white",
-    "highlight": "bold cyan",
-    "user": "bold cyan",
-    "assistant": "bold green",
-    "tool": "bold yellow",
-    "code": "bright_white on grey15",
-})
+NEURO_THEME = Theme(
+    {
+        "info": "cyan",
+        "success": "green",
+        "warning": "yellow",
+        "error": "red",
+        "dim": "dim white",
+        "highlight": "bold cyan",
+        "user": "bold cyan",
+        "assistant": "bold green",
+        "tool": "bold yellow",
+        "code": "bright_white on grey15",
+    }
+)
 
 
 class UIRenderer:
@@ -129,6 +131,7 @@ class UIRenderer:
 
         if recent_sessions and len(recent_sessions) > 0:
             from datetime import datetime
+
             for sess in recent_sessions[:3]:
                 created = datetime.fromisoformat(sess.get("created_at", datetime.now().isoformat()))
                 age = datetime.now() - created
@@ -150,10 +153,12 @@ class UIRenderer:
 
         # Knowledge stats if available
         if knowledge_stats:
-            facts = knowledge_stats.get('total_facts', 0)
-            modules = knowledge_stats.get('cognitive_modules', 0)
+            facts = knowledge_stats.get("total_facts", 0)
+            modules = knowledge_stats.get("cognitive_modules", 0)
             if facts > 0 or modules > 0:
-                activity_content.append(f"\n  Brain: {modules} modules, {facts} facts\n", style="dim green")
+                activity_content.append(
+                    f"\n  Brain: {modules} modules, {facts} facts\n", style="dim green"
+                )
 
         # Combine right panel
         right_text = Text()
@@ -212,8 +217,12 @@ class UIRenderer:
 
     def print_status(self, label: str, value: str, style: str = "success"):
         """Print a status indicator."""
-        icon = {"success": "[green]●[/green]", "warning": "[yellow]●[/yellow]",
-                "error": "[red]●[/red]", "info": "[cyan]●[/cyan]"}.get(style, "[dim]●[/dim]")
+        icon = {
+            "success": "[green]●[/green]",
+            "warning": "[yellow]●[/yellow]",
+            "error": "[red]●[/red]",
+            "info": "[cyan]●[/cyan]",
+        }.get(style, "[dim]●[/dim]")
         self.console.print(f"  {icon} {label}: [dim]{value}[/dim]")
 
     def print_dim(self, text: str):
@@ -273,12 +282,12 @@ class UIRenderer:
 
     def print_diff(self, diff_text: str):
         """Print a colored diff."""
-        for line in diff_text.split('\n'):
-            if line.startswith('+') and not line.startswith('+++'):
+        for line in diff_text.split("\n"):
+            if line.startswith("+") and not line.startswith("+++"):
                 self.console.print(f"[green]{line}[/green]")
-            elif line.startswith('-') and not line.startswith('---'):
+            elif line.startswith("-") and not line.startswith("---"):
                 self.console.print(f"[red]{line}[/red]")
-            elif line.startswith('@@'):
+            elif line.startswith("@@"):
                 self.console.print(f"[cyan]{line}[/cyan]")
             else:
                 self.console.print(f"[dim]{line}[/dim]")
@@ -461,7 +470,7 @@ class UIRenderer:
 
         if not response:
             return default
-        return response in ('y', 'yes')
+        return response in ("y", "yes")
 
     def select(self, message: str, options: List[str]) -> int:
         """Present options and get selection."""
@@ -493,7 +502,7 @@ class UIRenderer:
         self.console.print(f"  {icon} [bold]{tool_name}[/bold]")
         if output:
             # Truncate long output
-            lines = output.split('\n')
+            lines = output.split("\n")
             if len(lines) > 5:
                 for line in lines[:5]:
                     self.console.print(f"    [dim]{line}[/dim]")

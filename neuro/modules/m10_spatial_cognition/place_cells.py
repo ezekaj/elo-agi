@@ -16,6 +16,7 @@ import hashlib
 @dataclass
 class PlaceField:
     """Receptive field of a place cell - defines where it fires"""
+
     center: np.ndarray  # (x, y) center of firing field
     radius: float  # Field size (standard deviation of Gaussian)
     peak_rate: float = 20.0  # Maximum firing rate (Hz)
@@ -35,17 +36,8 @@ class PlaceCell:
     with Gaussian falloff as distance increases.
     """
 
-    def __init__(
-        self,
-        center: np.ndarray,
-        radius: float = 0.3,
-        peak_rate: float = 20.0
-    ):
-        self.place_field = PlaceField(
-            center=np.array(center),
-            radius=radius,
-            peak_rate=peak_rate
-        )
+    def __init__(self, center: np.ndarray, radius: float = 0.3, peak_rate: float = 20.0):
+        self.place_field = PlaceField(center=np.array(center), radius=radius, peak_rate=peak_rate)
         self.firing_rate = 0.0
         self._last_position = None
 
@@ -60,7 +52,7 @@ class PlaceCell:
 
         # Gaussian firing profile
         self.firing_rate = self.place_field.peak_rate * np.exp(
-            -distance**2 / (2 * self.place_field.radius**2)
+            -(distance**2) / (2 * self.place_field.radius**2)
         )
         self._last_position = position
         return self.firing_rate
@@ -88,7 +80,7 @@ class PlaceCellPopulation:
         n_cells: int = 100,
         environment_size: Tuple[float, float] = (1.0, 1.0),
         field_radius: float = 0.15,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ):
         self.n_cells = n_cells
         self.environment_size = environment_size
@@ -106,10 +98,12 @@ class PlaceCellPopulation:
 
         for _ in range(self.n_cells):
             # Random center within environment
-            center = np.array([
-                np.random.uniform(0, self.environment_size[0]),
-                np.random.uniform(0, self.environment_size[1])
-            ])
+            center = np.array(
+                [
+                    np.random.uniform(0, self.environment_size[0]),
+                    np.random.uniform(0, self.environment_size[1]),
+                ]
+            )
 
             # Some variation in field size
             radius = self.field_radius * np.random.uniform(0.8, 1.2)
@@ -134,10 +128,7 @@ class PlaceCellPopulation:
         total_activity = np.sum(activity)
         if total_activity < 1e-6:
             # No activity - return center of environment
-            return np.array([
-                self.environment_size[0] / 2,
-                self.environment_size[1] / 2
-            ])
+            return np.array([self.environment_size[0] / 2, self.environment_size[1] / 2])
 
         # Weighted average of place field centers
         weighted_pos = np.zeros(2)
@@ -146,19 +137,12 @@ class PlaceCellPopulation:
 
         return weighted_pos / total_activity
 
-    def get_active_cells(
-        self,
-        position: np.ndarray,
-        threshold: float = 0.1
-    ) -> List[PlaceCell]:
+    def get_active_cells(self, position: np.ndarray, threshold: float = 0.1) -> List[PlaceCell]:
         """Get cells firing above threshold at position"""
         activity = self.get_population_activity(position)
         max_rate = max(cell.place_field.peak_rate for cell in self.cells)
 
-        return [
-            cell for cell, rate in zip(self.cells, activity)
-            if rate > threshold * max_rate
-        ]
+        return [cell for cell, rate in zip(self.cells, activity) if rate > threshold * max_rate]
 
     def remap(self, preserve_fraction: float = 0.0) -> None:
         """
@@ -171,16 +155,15 @@ class PlaceCellPopulation:
         indices = np.random.choice(self.n_cells, n_remap, replace=False)
 
         for idx in indices:
-            new_center = np.array([
-                np.random.uniform(0, self.environment_size[0]),
-                np.random.uniform(0, self.environment_size[1])
-            ])
+            new_center = np.array(
+                [
+                    np.random.uniform(0, self.environment_size[0]),
+                    np.random.uniform(0, self.environment_size[1]),
+                ]
+            )
             self.cells[idx].place_field.center = new_center
 
-    def get_activity_map(
-        self,
-        resolution: int = 50
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_activity_map(self, resolution: int = 50) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate 2D activity map for visualization.
 

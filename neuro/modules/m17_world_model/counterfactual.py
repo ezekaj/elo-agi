@@ -22,17 +22,19 @@ from .transition_model import TransitionModel, Transition
 
 class CounterfactualType(Enum):
     """Types of counterfactual queries."""
-    ACTION = "action"           # What if different action?
-    STATE = "state"             # What if different initial state?
+
+    ACTION = "action"  # What if different action?
+    STATE = "state"  # What if different initial state?
     INTERVENTION = "intervention"  # What if we intervene on a variable?
-    POLICY = "policy"           # What if different policy?
+    POLICY = "policy"  # What if different policy?
 
 
 @dataclass
 class CounterfactualParams:
     """Parameters for counterfactual reasoning."""
-    n_samples: int = 10           # Samples for uncertainty estimation
-    horizon: int = 20             # How far to project counterfactual
+
+    n_samples: int = 10  # Samples for uncertainty estimation
+    horizon: int = 20  # How far to project counterfactual
     causal_strength_threshold: float = 0.1  # Below this, effect is weak
     significance_threshold: float = 0.05  # Statistical significance
 
@@ -40,14 +42,15 @@ class CounterfactualParams:
 @dataclass
 class Counterfactual:
     """A counterfactual query result."""
+
     query_type: CounterfactualType
     actual_trajectory: List[Transition]
     counterfactual_trajectory: List[Transition]
-    intervention_point: int       # When intervention occurred
-    actual_outcome: float         # Actual cumulative reward
+    intervention_point: int  # When intervention occurred
+    actual_outcome: float  # Actual cumulative reward
     counterfactual_outcome: float  # Counterfactual cumulative reward
-    effect_size: float            # Difference in outcomes
-    confidence: float             # Confidence in the estimate
+    effect_size: float  # Difference in outcomes
+    confidence: float  # Confidence in the estimate
     causal_attribution: Dict[str, float]  # Attribution to factors
     timestamp: float = field(default_factory=time.time)
 
@@ -132,9 +135,7 @@ class CounterfactualEngine:
         confidence = self._compute_confidence(actual_trajectory, cf_trajectory)
 
         # Causal attribution
-        attribution = self._attribute_causes(
-            actual_trajectory, cf_trajectory, intervention_index
-        )
+        attribution = self._attribute_causes(actual_trajectory, cf_trajectory, intervention_index)
 
         result = Counterfactual(
             query_type=CounterfactualType.ACTION,
@@ -225,9 +226,7 @@ class CounterfactualEngine:
         effect_size = cf_outcome - actual_outcome
         confidence = self._compute_confidence(actual_trajectory, cf_trajectory)
 
-        attribution = {
-            f'intervention_var_{intervention_variable}': abs(effect_size)
-        }
+        attribution = {f"intervention_var_{intervention_variable}": abs(effect_size)}
 
         return Counterfactual(
             query_type=CounterfactualType.INTERVENTION,
@@ -265,7 +264,7 @@ class CounterfactualEngine:
         """Compute discounted cumulative reward."""
         total = 0.0
         for i, t in enumerate(trajectory):
-            total += (discount ** i) * t.predicted_reward
+            total += (discount**i) * t.predicted_reward
         return total
 
     def _compute_confidence(
@@ -306,24 +305,20 @@ class CounterfactualEngine:
         # Action effect
         if intervention_point < len(actual):
             action_diff = np.linalg.norm(
-                actual[intervention_point].action -
-                counterfactual[intervention_point].action
+                actual[intervention_point].action - counterfactual[intervention_point].action
             )
-            attribution['action_difference'] = float(action_diff)
+            attribution["action_difference"] = float(action_diff)
 
         # State divergence over time
         divergences = []
         for i in range(min(len(actual), len(counterfactual))):
-            div = np.linalg.norm(
-                actual[i].predicted_state -
-                counterfactual[i].predicted_state
-            )
+            div = np.linalg.norm(actual[i].predicted_state - counterfactual[i].predicted_state)
             divergences.append(div)
 
         if divergences:
-            attribution['state_divergence'] = float(np.mean(divergences))
-            attribution['max_divergence'] = float(np.max(divergences))
-            attribution['divergence_growth'] = float(
+            attribution["state_divergence"] = float(np.mean(divergences))
+            attribution["max_divergence"] = float(np.max(divergences))
+            attribution["divergence_growth"] = float(
                 divergences[-1] - divergences[0] if len(divergences) > 1 else 0
             )
 
@@ -345,10 +340,10 @@ class CounterfactualEngine:
 
         for dim in top_dims:
             if diff[dim] > 0.01:
-                attribution[f'dim_{dim}'] = float(diff[dim])
+                attribution[f"dim_{dim}"] = float(diff[dim])
 
-        attribution['total_state_change'] = float(np.sum(diff))
-        attribution['outcome_sensitivity'] = float(
+        attribution["total_state_change"] = float(np.sum(diff))
+        attribution["outcome_sensitivity"] = float(
             abs(cf_outcome - actual_outcome) / max(0.01, np.sum(diff))
         )
 
@@ -376,9 +371,7 @@ class CounterfactualEngine:
             # Random alternative action
             alt_action = np.random.randn(len(actions[cause_index]))
 
-            cf = self.what_if_action(
-                initial_state, actions, alt_action, cause_index
-            )
+            cf = self.what_if_action(initial_state, actions, alt_action, cause_index)
 
             # Compare states at effect_index
             if effect_index < len(cf.actual_trajectory):
@@ -401,14 +394,12 @@ class CounterfactualEngine:
         for initial_state, actions in trajectories:
             for i in range(len(actions)):
                 for j in range(i + 1, min(i + 5, len(actions))):
-                    strength = self.compute_causal_strength(
-                        initial_state, actions, i, j
-                    )
+                    strength = self.compute_causal_strength(initial_state, actions, i, j)
                     key = f"t{i}_to_t{j}"
                     if key not in self._causal_model:
-                        self._causal_model[key] = {'strength': 0, 'count': 0}
-                    self._causal_model[key]['strength'] += strength
-                    self._causal_model[key]['count'] += 1
+                        self._causal_model[key] = {"strength": 0, "count": 0}
+                    self._causal_model[key]["strength"] += strength
+                    self._causal_model[key]["count"] += 1
 
     def regret_analysis(
         self,
@@ -438,32 +429,32 @@ class CounterfactualEngine:
         regret = best_cf_outcome - actual_outcome
 
         return {
-            'actual_outcome': actual_outcome,
-            'best_counterfactual_outcome': best_cf_outcome,
-            'regret': regret,
-            'regret_percentage': regret / max(0.01, abs(actual_outcome)) * 100,
-            'best_actions': best_cf_actions,
-            'could_have_improved': regret > 0,
+            "actual_outcome": actual_outcome,
+            "best_counterfactual_outcome": best_cf_outcome,
+            "regret": regret,
+            "regret_percentage": regret / max(0.01, abs(actual_outcome)) * 100,
+            "best_actions": best_cf_actions,
+            "could_have_improved": regret > 0,
         }
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get counterfactual engine statistics."""
         if not self._counterfactual_history:
             return {
-                'n_counterfactuals': 0,
-                'avg_effect_size': 0.0,
-                'avg_confidence': 0.0,
+                "n_counterfactuals": 0,
+                "avg_effect_size": 0.0,
+                "avg_confidence": 0.0,
             }
 
         recent = self._counterfactual_history[-100:]
 
         return {
-            'n_counterfactuals': len(self._counterfactual_history),
-            'avg_effect_size': float(np.mean([c.effect_size for c in recent])),
-            'avg_confidence': float(np.mean([c.confidence for c in recent])),
-            'improvement_rate': sum(1 for c in recent if c.improved) / len(recent),
-            'significant_rate': sum(1 for c in recent if c.is_significant) / len(recent),
-            'causal_model_size': len(self._causal_model),
+            "n_counterfactuals": len(self._counterfactual_history),
+            "avg_effect_size": float(np.mean([c.effect_size for c in recent])),
+            "avg_confidence": float(np.mean([c.confidence for c in recent])),
+            "improvement_rate": sum(1 for c in recent if c.improved) / len(recent),
+            "significant_rate": sum(1 for c in recent if c.is_significant) / len(recent),
+            "causal_model_size": len(self._causal_model),
         }
 
     def reset(self) -> None:

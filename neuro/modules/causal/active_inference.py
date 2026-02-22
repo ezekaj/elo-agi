@@ -19,9 +19,10 @@ from .counterfactual import NestedCounterfactual
 
 class InferenceMode(Enum):
     """Modes of active inference."""
-    PERCEPTUAL = "perceptual"    # Update beliefs from observations
-    ACTIVE = "active"            # Select actions to minimize EFE
-    PLANNING = "planning"        # Multi-step planning via imagination
+
+    PERCEPTUAL = "perceptual"  # Update beliefs from observations
+    ACTIVE = "active"  # Select actions to minimize EFE
+    PLANNING = "planning"  # Multi-step planning via imagination
 
 
 @dataclass
@@ -34,6 +35,7 @@ class CausalBelief:
     - Causal graph structure
     - Mechanism parameters
     """
+
     # State beliefs (mean and precision for each variable)
     state_means: Dict[str, float] = field(default_factory=dict)
     state_precisions: Dict[str, float] = field(default_factory=dict)
@@ -80,13 +82,14 @@ class CausalBelief:
         """Predict variable value with uncertainty."""
         mean = self.state_means.get(var, 0.0)
         prec = self.state_precisions.get(var, 1.0)
-        std = 1.0 / np.sqrt(prec) if prec > 0 else float('inf')
+        std = 1.0 / np.sqrt(prec) if prec > 0 else float("inf")
         return mean, std
 
 
 @dataclass
 class ActionOutcome:
     """Predicted outcome of an action."""
+
     action: Dict[str, float]  # Intervention specification
     predicted_state: Dict[str, float]
     expected_free_energy: float
@@ -178,7 +181,12 @@ class CausalActiveInference:
             prior_prec = 1.0
 
             # KL between Gaussians
-            kl = 0.5 * (prior_prec / post_prec + post_mean ** 2 * prior_prec - 1 + np.log(post_prec / prior_prec))
+            kl = 0.5 * (
+                prior_prec / post_prec
+                + post_mean**2 * prior_prec
+                - 1
+                + np.log(post_prec / prior_prec)
+            )
             complexity += max(0, kl)
 
         free_energy = prediction_error + complexity
@@ -297,7 +305,7 @@ class CausalActiveInference:
 
             # Evaluate each action
             best_action = None
-            best_efe = float('inf')
+            best_efe = float("inf")
 
             for action in actions:
                 # Imagine outcome
@@ -324,8 +332,7 @@ class CausalActiveInference:
 
             # Check if goal reached
             goal_reached = all(
-                abs(state.get(var, 0) - val) < 0.1
-                for var, val in goal_state.items()
+                abs(state.get(var, 0) - val) < 0.1 for var, val in goal_state.items()
             )
             if goal_reached:
                 break
@@ -420,7 +427,7 @@ class CausalActiveInference:
         # Evaluate each action
         best_action = None
         best_outcome = None
-        best_efe = float('inf')
+        best_efe = float("inf")
 
         for action in actions:
             efe, epistemic, pragmatic = self.expected_free_energy(action, belief)
@@ -431,7 +438,9 @@ class CausalActiveInference:
 
                 # Predict outcome
                 predicted = self.scm.forward(interventions=action)
-                risk = sum(1.0 / (belief.state_precisions.get(v, 1.0) + 1e-8) for v in self.scm._variables)
+                risk = sum(
+                    1.0 / (belief.state_precisions.get(v, 1.0) + 1e-8) for v in self.scm._variables
+                )
 
                 best_outcome = ActionOutcome(
                     action=action,

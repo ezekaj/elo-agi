@@ -19,6 +19,7 @@ from enum import Enum
 
 class ValenceType(Enum):
     """Basic emotional valences"""
+
     THREAT = "threat"
     REWARD = "reward"
     NEUTRAL = "neutral"
@@ -27,6 +28,7 @@ class ValenceType(Enum):
 @dataclass
 class Valence:
     """Emotional valuation of a stimulus"""
+
     threat: float  # 0-1, danger level
     reward: float  # 0-1, reward potential
     arousal: float  # 0-1, activation level
@@ -47,6 +49,7 @@ class Valence:
 @dataclass
 class EmotionalMemory:
     """Stored emotional association"""
+
     features: np.ndarray
     valence: Valence
     strength: float = 1.0
@@ -64,9 +67,11 @@ class EmotionalValuation:
     - Modulates other systems (attention, memory, arousal)
     """
 
-    def __init__(self,
-                 threat_bias: float = 1.2,  # Negativity bias
-                 generalization_threshold: float = 0.5):
+    def __init__(
+        self,
+        threat_bias: float = 1.2,  # Negativity bias
+        generalization_threshold: float = 0.5,
+    ):
         self.memories: List[EmotionalMemory] = []
         self.threat_bias = threat_bias  # Threats weighted more heavily
         self.generalization_threshold = generalization_threshold
@@ -75,10 +80,7 @@ class EmotionalValuation:
         # Some features are inherently threatening/rewarding
         self.innate_valences: Dict[int, Tuple[float, float]] = {}
 
-    def set_innate_valence(self,
-                           feature_index: int,
-                           threat: float,
-                           reward: float):
+    def set_innate_valence(self, feature_index: int, threat: float, reward: float):
         """
         Set innate emotional response to specific features.
 
@@ -87,9 +89,7 @@ class EmotionalValuation:
         """
         self.innate_valences[feature_index] = (threat, reward)
 
-    def evaluate(self,
-                 stimulus: np.ndarray,
-                 fast_mode: bool = True) -> Valence:
+    def evaluate(self, stimulus: np.ndarray, fast_mode: bool = True) -> Valence:
         """
         Rapidly evaluate stimulus for threat/reward.
 
@@ -148,11 +148,13 @@ class EmotionalValuation:
 
         return Valence(threat=threat, reward=reward, arousal=arousal)
 
-    def learn_association(self,
-                          stimulus: np.ndarray,
-                          outcome_threat: float,
-                          outcome_reward: float,
-                          outcome_arousal: Optional[float] = None):
+    def learn_association(
+        self,
+        stimulus: np.ndarray,
+        outcome_threat: float,
+        outcome_reward: float,
+        outcome_arousal: Optional[float] = None,
+    ):
         """
         Learn emotional association from experience.
 
@@ -165,7 +167,7 @@ class EmotionalValuation:
         valence = Valence(
             threat=np.clip(outcome_threat, 0, 1),
             reward=np.clip(outcome_reward, 0, 1),
-            arousal=np.clip(outcome_arousal, 0, 1)
+            arousal=np.clip(outcome_arousal, 0, 1),
         )
 
         # Check for existing similar memory
@@ -186,10 +188,7 @@ class EmotionalValuation:
                 return
 
         # New memory
-        self.memories.append(EmotionalMemory(
-            features=stimulus.copy(),
-            valence=valence
-        ))
+        self.memories.append(EmotionalMemory(features=stimulus.copy(), valence=valence))
 
     def generalize(self, novel_stimulus: np.ndarray) -> Valence:
         """
@@ -227,9 +226,7 @@ class EmotionalValuation:
         valence = self.evaluate(stimulus)
         return valence.reward - valence.threat * self.threat_bias
 
-    def extinction(self,
-                   stimulus: np.ndarray,
-                   extinction_rate: float = 0.1):
+    def extinction(self, stimulus: np.ndarray, extinction_rate: float = 0.1):
         """
         Reduce emotional association through repeated non-reinforcement.
 
@@ -245,9 +242,9 @@ class EmotionalValuation:
                 # Reduce strength
                 memory.strength = max(0.0, memory.strength - extinction_rate)
                 # Move valence toward neutral
-                memory.valence.threat *= (1 - extinction_rate)
-                memory.valence.reward *= (1 - extinction_rate)
-                memory.valence.arousal *= (1 - extinction_rate * 0.5)
+                memory.valence.threat *= 1 - extinction_rate
+                memory.valence.reward *= 1 - extinction_rate
+                memory.valence.arousal *= 1 - extinction_rate * 0.5
 
         # Remove very weak memories
         self.memories = [m for m in self.memories if m.strength > 0.05]

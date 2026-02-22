@@ -12,6 +12,7 @@ import numpy as np
 @dataclass
 class MotionVector:
     """Motion information at a location."""
+
     dx: float
     dy: float
     magnitude: float
@@ -21,6 +22,7 @@ class MotionVector:
 @dataclass
 class SpatialInfo:
     """Spatial information about objects."""
+
     location: Tuple[float, float]
     depth: float
     size: Tuple[float, float]
@@ -30,20 +32,22 @@ class SpatialInfo:
 @dataclass
 class DorsalOutput:
     """Output from dorsal (where/how) stream."""
-    motion_map: np.ndarray          # Optical flow
-    depth_map: np.ndarray           # Depth estimation
-    spatial_map: np.ndarray         # Spatial locations
+
+    motion_map: np.ndarray  # Optical flow
+    depth_map: np.ndarray  # Depth estimation
+    spatial_map: np.ndarray  # Spatial locations
     action_affordances: Dict[str, float]  # Possible actions
-    egocentric_coords: np.ndarray   # Self-relative coordinates
+    egocentric_coords: np.ndarray  # Self-relative coordinates
 
 
 @dataclass
 class VentralOutput:
     """Output from ventral (what) stream."""
-    object_map: np.ndarray          # Object identity map
-    category_map: np.ndarray        # Category assignments
-    feature_map: np.ndarray         # Detailed features
-    object_identities: List[str]    # Recognized identities
+
+    object_map: np.ndarray  # Object identity map
+    category_map: np.ndarray  # Category assignments
+    feature_map: np.ndarray  # Detailed features
+    object_identities: List[str]  # Recognized identities
 
 
 class DorsalStream:
@@ -101,19 +105,20 @@ class DorsalStream:
         depth_map = self._estimate_depth(v2_output.depth_cues, motion_map)
 
         # Spatial map (2D location + depth)
-        spatial_map = np.stack([
-            np.arange(w)[None, :].repeat(h, axis=0),  # x
-            np.arange(h)[:, None].repeat(w, axis=1),  # y
-            depth_map,
-        ], axis=-1).astype(float)
+        spatial_map = np.stack(
+            [
+                np.arange(w)[None, :].repeat(h, axis=0),  # x
+                np.arange(h)[:, None].repeat(w, axis=1),  # y
+                depth_map,
+            ],
+            axis=-1,
+        ).astype(float)
 
         # Egocentric coordinates (relative to center)
         egocentric = self._to_egocentric(spatial_map)
 
         # Action affordances
-        affordances = self._compute_affordances(
-            motion_map, depth_map, v1_output.edge_map
-        )
+        affordances = self._compute_affordances(motion_map, depth_map, v1_output.edge_map)
 
         return DorsalOutput(
             motion_map=motion_map,
@@ -139,11 +144,11 @@ class DorsalStream:
 
         for y in range(0, h - block_size, block_size):
             for x in range(0, w - block_size, block_size):
-                block = edge_map[y:y+block_size, x:x+block_size]
+                block = edge_map[y : y + block_size, x : x + block_size]
 
                 # Search in neighborhood
                 best_match = (0, 0)
-                best_score = float('inf')
+                best_score = float("inf")
 
                 search_range = 3
                 for dy in range(-search_range, search_range + 1):
@@ -151,15 +156,15 @@ class DorsalStream:
                         ny, nx = y + dy, x + dx
                         if 0 <= ny < h - block_size and 0 <= nx < w - block_size:
                             prev_block = self._previous_frame[
-                                ny:ny+block_size, nx:nx+block_size
+                                ny : ny + block_size, nx : nx + block_size
                             ]
                             score = np.sum(np.abs(block - prev_block))
                             if score < best_score:
                                 best_score = score
                                 best_match = (dx, dy)
 
-                motion[y:y+block_size, x:x+block_size, 0] = best_match[0]
-                motion[y:y+block_size, x:x+block_size, 1] = best_match[1]
+                motion[y : y + block_size, x : x + block_size, 0] = best_match[0]
+                motion[y : y + block_size, x : x + block_size, 1] = best_match[1]
 
         self._previous_frame = edge_map.copy()
         return motion
@@ -173,7 +178,7 @@ class DorsalStream:
         Estimate depth from monocular cues and motion.
         """
         # Motion parallax: faster motion = closer
-        motion_magnitude = np.sqrt(motion[:, :, 0]**2 + motion[:, :, 1]**2)
+        motion_magnitude = np.sqrt(motion[:, :, 0] ** 2 + motion[:, :, 1] ** 2)
         motion_depth = 1.0 / (motion_magnitude + 0.1)
         motion_depth = motion_depth / motion_depth.max()
 
@@ -219,7 +224,7 @@ class DorsalStream:
         """Estimate graspability of objects in view."""
         # Nearby, stationary objects with edges are graspable
         near = depth < 0.5
-        stationary = np.sqrt(motion[:, :, 0]**2 + motion[:, :, 1]**2) < 0.5
+        stationary = np.sqrt(motion[:, :, 0] ** 2 + motion[:, :, 1] ** 2) < 0.5
         has_form = edges > edges.mean()
 
         graspable = near & stationary & has_form
@@ -244,7 +249,7 @@ class DorsalStream:
     ) -> float:
         """Estimate need for avoidance (approaching objects)."""
         # Objects moving towards viewer (increasing size/decreasing depth)
-        motion_magnitude = np.sqrt(motion[:, :, 0]**2 + motion[:, :, 1]**2)
+        motion_magnitude = np.sqrt(motion[:, :, 0] ** 2 + motion[:, :, 1] ** 2)
         approaching = (motion_magnitude > 1.0) & (depth < 0.5)
         return float(approaching.sum()) / approaching.size
 
@@ -255,7 +260,7 @@ class DorsalStream:
         edges: np.ndarray,
     ) -> float:
         """Estimate trackability of moving objects."""
-        motion_magnitude = np.sqrt(motion[:, :, 0]**2 + motion[:, :, 1]**2)
+        motion_magnitude = np.sqrt(motion[:, :, 0] ** 2 + motion[:, :, 1] ** 2)
         moving = motion_magnitude > 0.5
         return float(moving.sum()) / moving.size
 
@@ -310,11 +315,14 @@ class VentralStream:
         category_map = np.argmax(object_map, axis=2)
 
         # Feature map
-        feature_map = np.stack([
-            v4_output.shape_map,
-            v4_output.curvature_map,
-            v4_output.color_shape,
-        ], axis=-1)
+        feature_map = np.stack(
+            [
+                v4_output.shape_map,
+                v4_output.curvature_map,
+                v4_output.color_shape,
+            ],
+            axis=-1,
+        )
 
         # Collect recognized identities
         identities = [obj.identity for obj in it_output.detected_objects]
@@ -369,10 +377,12 @@ class VisualPathways:
                 {
                     "identity": identity,
                     "depth": float(dorsal_output.depth_map.mean()),
-                    "motion": float(np.sqrt(
-                        dorsal_output.motion_map[:, :, 0].mean()**2 +
-                        dorsal_output.motion_map[:, :, 1].mean()**2
-                    )),
+                    "motion": float(
+                        np.sqrt(
+                            dorsal_output.motion_map[:, :, 0].mean() ** 2
+                            + dorsal_output.motion_map[:, :, 1].mean() ** 2
+                        )
+                    ),
                 }
                 for identity in ventral_output.object_identities
             ],

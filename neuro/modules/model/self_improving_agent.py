@@ -21,6 +21,7 @@ from datetime import datetime
 
 # Import tools
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent))
 from .tools import Tools, ToolResult
 from .autonomous_learning import AutonomousLearner
@@ -50,10 +51,7 @@ class SelfImprovingAgent:
     """
 
     def __init__(
-        self,
-        model: str = "ministral-3:8b",
-        max_retries: int = 3,
-        max_tool_calls: int = 10
+        self, model: str = "ministral-3:8b", max_retries: int = 3, max_tool_calls: int = 10
     ):
         self.model = model
         self.max_retries = max_retries
@@ -77,7 +75,7 @@ class SelfImprovingAgent:
 
     def _build_system_prompt(self) -> str:
         """Build system prompt including learned patterns."""
-        base = '''You are Neuro, a self-improving AGI. You have real tools and can fix yourself.
+        base = """You are Neuro, a self-improving AGI. You have real tools and can fix yourself.
 
 ## Your Capabilities
 You can use tools to interact with the real world. When you encounter errors, you analyze them and find solutions.
@@ -112,7 +110,7 @@ When you encounter an error:
 2. Search the web for solutions if needed
 3. Try an alternative approach
 4. Remember the solution for next time
-'''
+"""
 
         # Add learned patterns
         if self.learned_patterns:
@@ -130,9 +128,9 @@ When you encounter an error:
 
     def execute_task(self, task: str) -> TaskResult:
         """Execute a task with self-improvement capabilities."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"TASK: {task}")
-        print('='*60)
+        print("=" * 60)
 
         tools_used = []
         self_fixes = 0
@@ -146,10 +144,7 @@ When you encounter an error:
                 # Store successful approach
                 self._learn_from_success(task, result)
                 return TaskResult(
-                    success=True,
-                    output=result.output,
-                    tools_used=tools_used,
-                    self_fixes=self_fixes
+                    success=True, output=result.output, tools_used=tools_used, self_fixes=self_fixes
                 )
 
             # Task failed - try to self-improve
@@ -169,14 +164,14 @@ When you encounter an error:
             output="",
             error=f"Failed after {self.max_retries} attempts",
             tools_used=tools_used,
-            self_fixes=self_fixes
+            self_fixes=self_fixes,
         )
 
     def _try_task(self, task: str, tools_used: List[str]) -> TaskResult:
         """Try to accomplish a task using the agentic loop."""
         messages = [
             {"role": "system", "content": self.base_system_prompt},
-            {"role": "user", "content": task}
+            {"role": "user", "content": task},
         ]
 
         final_response = ""
@@ -186,7 +181,7 @@ When you encounter an error:
                 r = requests.post(
                     f"{self.base_url}/api/chat",
                     json={"model": self.model, "messages": messages, "stream": False},
-                    timeout=120
+                    timeout=120,
                 )
                 response = r.json()["message"]["content"]
             except Exception as e:
@@ -218,10 +213,20 @@ When you encounter an error:
                     fix = self._handle_tool_error(tool_name, args, result.error)
                     if fix:
                         messages.append({"role": "assistant", "content": response})
-                        messages.append({"role": "user", "content": f"Tool failed: {result.error}\n\nSuggested fix: {fix}\n\nTry again with the fix."})
+                        messages.append(
+                            {
+                                "role": "user",
+                                "content": f"Tool failed: {result.error}\n\nSuggested fix: {fix}\n\nTry again with the fix.",
+                            }
+                        )
                     else:
                         messages.append({"role": "assistant", "content": response})
-                        messages.append({"role": "user", "content": f"Tool failed: {result.error}\n\nAnalyze the error and try a different approach."})
+                        messages.append(
+                            {
+                                "role": "user",
+                                "content": f"Tool failed: {result.error}\n\nAnalyze the error and try a different approach.",
+                            }
+                        )
             else:
                 # No tool call - this is the final response
                 final_response = response
@@ -235,7 +240,7 @@ When you encounter an error:
             return TaskResult(
                 success=not is_failure,
                 output=final_response,
-                error="Task may have failed" if is_failure else None
+                error="Task may have failed" if is_failure else None,
             )
 
         return TaskResult(False, "", "No final response generated")
@@ -271,7 +276,9 @@ When you encounter an error:
             return f"The {tool_name} tool requires all arguments. Check the tool signature and provide all required parameters."
 
         if "timeout" in error.lower():
-            return "The operation timed out. Try with a simpler query or break it into smaller steps."
+            return (
+                "The operation timed out. Try with a simpler query or break it into smaller steps."
+            )
 
         if "not found" in error.lower():
             return "The resource was not found. Verify the path/name is correct, or search for alternatives."
@@ -284,9 +291,9 @@ When you encounter an error:
     def _extract_solution(self, search_results: str, error: str) -> Optional[str]:
         """Extract a solution from search results."""
         # Simple extraction - in reality would use LLM to analyze
-        lines = search_results.split('\n')
+        lines = search_results.split("\n")
         for line in lines:
-            if any(word in line.lower() for word in ['solution', 'fix', 'resolve', 'try', 'use']):
+            if any(word in line.lower() for word in ["solution", "fix", "resolve", "try", "use"]):
                 return line.strip()[:200]
         return None
 
@@ -305,23 +312,23 @@ When you encounter an error:
         """Classify the type of task."""
         task_lower = task.lower()
 
-        if any(w in task_lower for w in ['github', 'repo', 'repository']):
+        if any(w in task_lower for w in ["github", "repo", "repository"]):
             return "GitHub"
-        if any(w in task_lower for w in ['search', 'find', 'look up']):
+        if any(w in task_lower for w in ["search", "find", "look up"]):
             return "Search"
-        if any(w in task_lower for w in ['file', 'read', 'write', 'list']):
+        if any(w in task_lower for w in ["file", "read", "write", "list"]):
             return "File"
-        if any(w in task_lower for w in ['python', 'code', 'calculate', 'compute']):
+        if any(w in task_lower for w in ["python", "code", "calculate", "compute"]):
             return "Code"
-        if any(w in task_lower for w in ['command', 'run', 'execute']):
+        if any(w in task_lower for w in ["command", "run", "execute"]):
             return "Shell"
 
         return None
 
     def _parse_tool_call(self, response: str) -> Optional[tuple]:
         """Parse a tool call from response."""
-        tool_match = re.search(r'<tool>(\w+)</tool>', response)
-        args_match = re.search(r'<args>({.*?})</args>', response, re.DOTALL)
+        tool_match = re.search(r"<tool>(\w+)</tool>", response)
+        args_match = re.search(r"<args>({.*?})</args>", response, re.DOTALL)
 
         if tool_match:
             tool_name = tool_match.group(1)
@@ -336,8 +343,8 @@ When you encounter an error:
 
     def _clean_response(self, response: str) -> str:
         """Clean response for display."""
-        clean = re.sub(r'<tool>.*?</tool>', '[TOOL]', response)
-        clean = re.sub(r'<args>.*?</args>', '', clean, flags=re.DOTALL)
+        clean = re.sub(r"<tool>.*?</tool>", "[TOOL]", response)
+        clean = re.sub(r"<args>.*?</args>", "", clean, flags=re.DOTALL)
         return clean.strip()
 
     def _save_improvements(self) -> None:
@@ -349,11 +356,11 @@ When you encounter an error:
             "learned_patterns": self.learned_patterns,
             "error_solutions": self.error_solutions,
             "fixes_applied": self.fixes_applied[-100:],  # Keep last 100
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
         try:
-            with open(improvements_file, 'w') as f:
+            with open(improvements_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception:
             pass
@@ -373,7 +380,9 @@ When you encounter an error:
             self.error_solutions = data.get("error_solutions", {})
             self.fixes_applied = data.get("fixes_applied", [])
 
-            print(f"[LOADED] {len(self.learned_patterns)} patterns, {len(self.error_solutions)} solutions")
+            print(
+                f"[LOADED] {len(self.learned_patterns)} patterns, {len(self.error_solutions)} solutions"
+            )
         except Exception:
             pass
 
@@ -383,7 +392,7 @@ When you encounter an error:
             "learned_patterns": len(self.learned_patterns),
             "error_solutions": len(self.error_solutions),
             "fixes_applied": len(self.fixes_applied),
-            "learner_state": self.learner.get_state()
+            "learner_state": self.learner.get_state(),
         }
 
 
@@ -400,16 +409,16 @@ def main():
 
     for task in tests:
         result = agent.execute_task(task)
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"RESULT: {'SUCCESS' if result.success else 'FAILED'}")
         print(f"Tools used: {result.tools_used}")
         print(f"Self-fixes: {result.self_fixes}")
         if result.output:
             print(f"Output: {result.output[:300]}...")
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("AGENT STATS")
-    print('='*60)
+    print("=" * 60)
     print(json.dumps(agent.get_stats(), indent=2, default=str))
 
 

@@ -18,6 +18,7 @@ from .contribution_accounting import ContributionAccountant, ShapleyConfig
 @dataclass
 class CreditConfig:
     """Configuration for the integrated credit assignment system."""
+
     trace_lambda: float = 0.9
     gamma: float = 0.99
     gae_lambda: float = 0.95
@@ -145,6 +146,7 @@ class CreditAssignmentSystem:
         self._traces.decay_traces()
 
         if self.config.use_shapley and len(self._active_modules) > 1:
+
             def value_fn(coalition: Set[str]) -> float:
                 if not coalition:
                     return 0.0
@@ -210,14 +212,11 @@ class CreditAssignmentSystem:
 
         blame_results = {}
         for module_id in self._active_modules:
-            result = self._blame.compute_blame(
-                failure, self._action_history, module_id
-            )
+            result = self._blame.compute_blame(failure, self._action_history, module_id)
             blame_results[module_id] = result
 
         blame_distribution = {
-            module_id: result.blame_score
-            for module_id, result in blame_results.items()
+            module_id: result.blame_score for module_id, result in blame_results.items()
         }
         self._blame.propagate_blame(failure, blame_distribution)
 

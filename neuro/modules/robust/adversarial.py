@@ -19,15 +19,17 @@ from abc import ABC, abstractmethod
 
 class AttackType(Enum):
     """Types of adversarial attacks."""
-    FGSM = "fgsm"                    # Fast Gradient Sign Method
-    PGD = "pgd"                      # Projected Gradient Descent
+
+    FGSM = "fgsm"  # Fast Gradient Sign Method
+    PGD = "pgd"  # Projected Gradient Descent
     CARLINI_WAGNER = "carlini_wagner"  # C&W attack
-    DEEPFOOL = "deepfool"            # DeepFool
-    BOUNDARY = "boundary"            # Decision boundary attack
+    DEEPFOOL = "deepfool"  # DeepFool
+    BOUNDARY = "boundary"  # Decision boundary attack
 
 
 class DefenseType(Enum):
     """Types of adversarial defenses."""
+
     ADVERSARIAL_TRAINING = "adversarial_training"
     INPUT_DENOISING = "input_denoising"
     RANDOMIZATION = "randomization"
@@ -38,6 +40,7 @@ class DefenseType(Enum):
 @dataclass
 class AttackResult:
     """Result of an adversarial attack."""
+
     original: np.ndarray
     adversarial: np.ndarray
     perturbation: np.ndarray
@@ -52,6 +55,7 @@ class AttackResult:
 @dataclass
 class DefenseResult:
     """Result of applying a defense."""
+
     defended_input: np.ndarray
     detected_attack: bool
     confidence: float
@@ -335,7 +339,7 @@ class AdversarialAttack:
         w = np.arctanh(2 * np.clip(x, 0.001, 0.999) - 1)
 
         best_x_adv = None
-        best_l2 = float('inf')
+        best_l2 = float("inf")
 
         for step in range(n_steps):
             # Convert to input space
@@ -348,19 +352,19 @@ class AdversarialAttack:
             if targeted:
                 # Want logits[y] to be highest
                 target_logit = logits[y]
-                other_logits = np.concatenate([logits[:y], logits[y + 1:]])
+                other_logits = np.concatenate([logits[:y], logits[y + 1 :]])
                 max_other = np.max(other_logits)
                 f_loss = max(max_other - target_logit, -1)
             else:
                 # Want any class except y
                 target_logit = logits[y]
-                other_logits = np.concatenate([logits[:y], logits[y + 1:]])
+                other_logits = np.concatenate([logits[:y], logits[y + 1 :]])
                 max_other = np.max(other_logits)
                 f_loss = max(target_logit - max_other, -1)
 
             # L2 loss
             perturbation = x_adv - x
-            l2_loss = np.sum(perturbation ** 2)
+            l2_loss = np.sum(perturbation**2)
 
             # Total loss
             total_loss = l2_loss + c * f_loss
@@ -386,9 +390,17 @@ class AdversarialAttack:
                 logits_plus = self.model.forward(x_plus)
 
                 if targeted:
-                    f_plus = max(np.max(np.concatenate([logits_plus[:y], logits_plus[y + 1:]])) - logits_plus[y], -1)
+                    f_plus = max(
+                        np.max(np.concatenate([logits_plus[:y], logits_plus[y + 1 :]]))
+                        - logits_plus[y],
+                        -1,
+                    )
                 else:
-                    f_plus = max(logits_plus[y] - np.max(np.concatenate([logits_plus[:y], logits_plus[y + 1:]])), -1)
+                    f_plus = max(
+                        logits_plus[y]
+                        - np.max(np.concatenate([logits_plus[:y], logits_plus[y + 1 :]])),
+                        -1,
+                    )
 
                 l2_plus = np.sum((x_plus - x) ** 2)
                 loss_plus = l2_plus + c * f_plus
@@ -612,11 +624,11 @@ class AdversarialDefense:
     def _gaussian_smooth(self, x: np.ndarray, sigma: float) -> np.ndarray:
         """Apply Gaussian smoothing."""
         kernel_size = int(6 * sigma) | 1  # Ensure odd
-        kernel = np.exp(-np.arange(-kernel_size // 2, kernel_size // 2 + 1) ** 2 / (2 * sigma ** 2))
+        kernel = np.exp(-(np.arange(-kernel_size // 2, kernel_size // 2 + 1) ** 2) / (2 * sigma**2))
         kernel = kernel / np.sum(kernel)
 
         # Convolve
-        result = np.convolve(x, kernel, mode='same')
+        result = np.convolve(x, kernel, mode="same")
         return result
 
     def randomization(
@@ -796,6 +808,7 @@ class AdversarialDefense:
         if p_lower > 0.5:
             # Can certify
             from scipy.stats import norm
+
             radius = sigma * norm.ppf(p_lower)
             return top_class, max(0, radius)
         else:
@@ -810,6 +823,7 @@ class AdversarialDefense:
     ) -> float:
         """Compute lower confidence bound for binomial proportion."""
         from scipy.stats import beta
+
         return beta.ppf(alpha, k, n - k + 1)
 
     def defend(

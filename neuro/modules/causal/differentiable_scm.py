@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 
 class ActivationType(Enum):
     """Activation functions for causal mechanisms."""
+
     LINEAR = "linear"
     TANH = "tanh"
     RELU = "relu"
@@ -55,6 +56,7 @@ def activation_gradient(x: np.ndarray, activation: ActivationType) -> np.ndarray
 @dataclass
 class MLPLayer:
     """Single layer of an MLP."""
+
     weights: np.ndarray
     bias: np.ndarray
     activation: ActivationType = ActivationType.TANH
@@ -163,6 +165,7 @@ class CausalMechanism:
     Represents how a variable is determined by its parents
     and an exogenous noise term, with a learnable neural network.
     """
+
     variable: str
     parents: List[str]
     noise_dim: int = 1
@@ -234,6 +237,7 @@ class CausalMechanism:
 @dataclass
 class InterventionSpec:
     """Specification of a causal intervention."""
+
     variable: str
     value: float
     soft: bool = False  # If True, use soft intervention (shift instead of fix)
@@ -323,6 +327,7 @@ class DifferentiableSCM:
         noise_std: float = 1.0,
     ) -> None:
         """Add a variable with linear mechanism."""
+
         def linear_fn(parent_values: Dict[str, float], noise: float) -> float:
             result = intercept
             for p, coef in coefficients.items():
@@ -408,7 +413,7 @@ class DifferentiableSCM:
     def intervene(
         self,
         interventions: Dict[str, float],
-    ) -> 'DifferentiableSCM':
+    ) -> "DifferentiableSCM":
         """
         Create an intervened model do(X=x).
 
@@ -493,10 +498,7 @@ class DifferentiableSCM:
                     noise[var] = noise.get(var, 0.0) + 0.5 * error
 
             # Check convergence
-            max_error = max(
-                abs(evidence.get(v, values[v]) - values[v])
-                for v in evidence.keys()
-            )
+            max_error = max(abs(evidence.get(v, values[v]) - values[v]) for v in evidence.keys())
             if max_error < 1e-6:
                 break
 
@@ -585,7 +587,7 @@ class DifferentiableSCM:
                         # Compute loss and gradient
                         target = sample.get(var, 0.0)
                         error = pred - target
-                        epoch_loss[var] += error ** 2
+                        epoch_loss[var] += error**2
 
                         # Backward pass
                         mechanism.backward(error)

@@ -6,6 +6,7 @@ import time
 
 from neuro.modules.m04_memory.sensory_memory import IconicBuffer, EchoicBuffer
 
+
 class TestIconicBuffer:
     """Tests for visual sensory memory"""
 
@@ -60,6 +61,7 @@ class TestIconicBuffer:
         buffer.clear()
 
         assert buffer.read() is None
+
 
 class TestEchoicBuffer:
     """Tests for auditory sensory memory"""
@@ -123,6 +125,7 @@ class TestEchoicBuffer:
         result = buffer.read_window(duration=1.5)
         # Should only include chunks from t=1.0 and t=2.0
         assert len(result) == 4  # [3, 4, 5, 6]
+
 
 class TestSensoryIntegration:
     """Integration tests for sensory memory"""

@@ -9,33 +9,63 @@ import numpy as np
 import os
 
 from neuro.modules.transfer.abstraction import (
-    AbstractionEngine, AbstractionLevel, AbstractConcept,
-    StructuralAnalogy, DomainPrinciple, RelationExtractor,
-    StructureMapper, PrincipleExtractor
+    AbstractionEngine,
+    AbstractionLevel,
+    AbstractConcept,
+    StructuralAnalogy,
+    DomainPrinciple,
+    RelationExtractor,
+    StructureMapper,
+    PrincipleExtractor,
 )
 from neuro.modules.transfer.curriculum import (
-    CurriculumLearner, Task, TaskDifficulty, LearningPath,
-    ProgressTracker, DifficultyEstimator, TaskSelector, LearnerState
+    CurriculumLearner,
+    Task,
+    TaskDifficulty,
+    LearningPath,
+    ProgressTracker,
+    DifficultyEstimator,
+    TaskSelector,
+    LearnerState,
 )
 from neuro.modules.transfer.few_shot import (
-    FewShotLearner, PrototypeNetwork, MatchingNetwork,
-    SupportSet, QueryResult, EmbeddingNetwork
+    FewShotLearner,
+    PrototypeNetwork,
+    MatchingNetwork,
+    SupportSet,
+    QueryResult,
+    EmbeddingNetwork,
 )
 from neuro.modules.transfer.meta_learner import (
-    MetaLearner, MAML, LearningStrategy, TaskDistribution,
-    AdaptationResult, SimpleNN
+    MetaLearner,
+    MAML,
+    LearningStrategy,
+    TaskDistribution,
+    AdaptationResult,
+    SimpleNN,
 )
 from neuro.modules.transfer.domain_adapter import (
-    DomainAdapter, DomainEmbedding, DomainAlignment,
-    TransferMapping, AdaptedRepresentation,
-    SubspaceAlignment, CorrelationAlignment
+    DomainAdapter,
+    DomainEmbedding,
+    DomainAlignment,
+    TransferMapping,
+    AdaptedRepresentation,
+    SubspaceAlignment,
+    CorrelationAlignment,
 )
 from neuro.modules.transfer.skill_library import (
-    SkillLibrary, Skill, SkillPrimitive, CompositeSkill,
-    SkillExecution, SkillType, SkillComposer, SkillMatcher
+    SkillLibrary,
+    Skill,
+    SkillPrimitive,
+    CompositeSkill,
+    SkillExecution,
+    SkillType,
+    SkillComposer,
+    SkillMatcher,
 )
 
 # ============== Abstraction Tests ==============
+
 
 class TestAbstraction:
     """Tests for abstraction engine."""
@@ -122,13 +152,11 @@ class TestAbstraction:
             {"id": "patient", "type": "person"},
         ]
 
-        analogy = engine.find_analogy(
-            "education", "medicine",
-            source_examples, target_examples
-        )
+        analogy = engine.find_analogy("education", "medicine", source_examples, target_examples)
 
         assert analogy.source_domain == "education"
         assert analogy.target_domain == "medicine"
+
 
 class TestCurriculum:
     """Tests for curriculum learning."""
@@ -188,7 +216,14 @@ class TestCurriculum:
 
         tasks = [
             Task("easy", "Easy", "math", TaskDifficulty.EASY, skills_taught=["basic"]),
-            Task("medium", "Medium", "math", TaskDifficulty.MEDIUM, prerequisites=["easy"], skills_taught=["intermediate"]),
+            Task(
+                "medium",
+                "Medium",
+                "math",
+                TaskDifficulty.MEDIUM,
+                prerequisites=["easy"],
+                skills_taught=["intermediate"],
+            ),
         ]
 
         state = LearnerState()
@@ -221,7 +256,14 @@ class TestCurriculum:
 
         tasks = [
             Task("add", "Addition", "math", TaskDifficulty.EASY, skills_taught=["addition"]),
-            Task("mult", "Multiplication", "math", TaskDifficulty.MEDIUM, prerequisites=["add"], skills_taught=["multiplication"]),
+            Task(
+                "mult",
+                "Multiplication",
+                "math",
+                TaskDifficulty.MEDIUM,
+                prerequisites=["add"],
+                skills_taught=["multiplication"],
+            ),
         ]
         curriculum.register_tasks(tasks)
 
@@ -229,6 +271,7 @@ class TestCurriculum:
 
         assert len(path.tasks) > 0
         assert "addition" in path.skills_progression or "multiplication" in path.skills_progression
+
 
 class TestFewShot:
     """Tests for few-shot learning."""
@@ -316,6 +359,7 @@ class TestFewShot:
         assert "accuracy" in metrics
         assert 0 <= metrics["accuracy"] <= 1
 
+
 class TestMetaLearner:
     """Tests for meta-learning."""
 
@@ -375,6 +419,7 @@ class TestMetaLearner:
 
         assert isinstance(strategy, LearningStrategy)
         assert "classification" in strategy.applicable_tasks
+
 
 class TestDomainAdapter:
     """Tests for domain adaptation."""
@@ -453,6 +498,7 @@ class TestDomainAdapter:
 
         dist = adapter.compute_domain_distance("d1", "d2")
         assert dist > 0
+
 
 class TestSkillLibrary:
     """Tests for skill library."""
@@ -576,7 +622,9 @@ class TestSkillLibrary:
         math_skills = library.get_skills_by_domain("math")
         assert len(math_skills) == 2
 
+
 # ============== Integration Tests ==============
+
 
 class TestTransferIntegration:
     """Integration tests for transfer learning."""
@@ -615,10 +663,7 @@ class TestTransferIntegration:
 
         # Adapt support set
         source_examples = [np.random.randn(64) for _ in range(10)]
-        adapted_examples = [
-            adapter.adapt(ex, "source", "target").adapted
-            for ex in source_examples
-        ]
+        adapted_examples = [adapter.adapt(ex, "source", "target").adapted for ex in source_examples]
 
         # Use in few-shot
         learner = FewShotLearner(input_dim=64)
@@ -660,16 +705,26 @@ class TestTransferIntegration:
         library.register_skill("algebra", "math", "Algebra")
 
         # Register tasks that teach skills
-        curriculum.register_task(Task(
-            "t1", "Learn Basics", "math", TaskDifficulty.EASY,
-            skills_taught=["basic_math"],
-        ))
-        curriculum.register_task(Task(
-            "t2", "Learn Algebra", "math", TaskDifficulty.MEDIUM,
-            prerequisites=["t1"],
-            skills_required=["basic_math"],
-            skills_taught=["algebra"],
-        ))
+        curriculum.register_task(
+            Task(
+                "t1",
+                "Learn Basics",
+                "math",
+                TaskDifficulty.EASY,
+                skills_taught=["basic_math"],
+            )
+        )
+        curriculum.register_task(
+            Task(
+                "t2",
+                "Learn Algebra",
+                "math",
+                TaskDifficulty.MEDIUM,
+                prerequisites=["t1"],
+                skills_required=["basic_math"],
+                skills_taught=["algebra"],
+            )
+        )
 
         # Complete first task
         curriculum.complete_task("t1", 0.9)
@@ -682,10 +737,7 @@ class TestTransferIntegration:
         """Test complete transfer learning pipeline."""
         # 1. Abstract from source domain
         engine = AbstractionEngine()
-        source_examples = [
-            {"id": f"ex{i}", "type": "example", "value": i}
-            for i in range(10)
-        ]
+        source_examples = [{"id": f"ex{i}", "type": "example", "value": i} for i in range(10)]
         concepts = engine.abstract(source_examples, "source")
 
         # 2. Adapt to target domain
@@ -696,8 +748,7 @@ class TestTransferIntegration:
         # 3. Few-shot learn in target domain
         learner = FewShotLearner()
         adapted_examples = [
-            adapter.adapt(np.random.randn(128), "source", "target").adapted
-            for _ in range(10)
+            adapter.adapt(np.random.randn(128), "source", "target").adapted for _ in range(10)
         ]
         learner.register_support_set("target_task", adapted_examples, ["A"] * 5 + ["B"] * 5)
 
@@ -711,6 +762,7 @@ class TestTransferIntegration:
 
         assert len(concepts) > 0
         assert skill.domain == "target"
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

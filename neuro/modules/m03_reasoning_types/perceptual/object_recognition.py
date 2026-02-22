@@ -22,6 +22,7 @@ class CategoryLevel(Enum):
 @dataclass
 class CategoryPrototype:
     """Prototype representation of a category"""
+
     category_id: str
     level: CategoryLevel
     parent_category: Optional[str] = None
@@ -81,8 +82,11 @@ class CategoryPrototype:
                     new_mean = old_mean + (value - old_mean) / n
 
                     if n > 1:
-                        values = [e.get(feat_name, old_mean) for e in self.exemplars
-                                 if isinstance(e.get(feat_name), (int, float))]
+                        values = [
+                            e.get(feat_name, old_mean)
+                            for e in self.exemplars
+                            if isinstance(e.get(feat_name), (int, float))
+                        ]
                         new_std = np.std(values) if len(values) > 1 else 0.1
                     else:
                         new_std = old_std
@@ -95,6 +99,7 @@ class CategoryPrototype:
 @dataclass
 class RecognitionResult:
     """Result of object recognition"""
+
     category_id: str
     confidence: float
     level: CategoryLevel
@@ -108,31 +113,31 @@ class InvariantRecognition:
     def __init__(self):
         self.canonical_views: Dict[str, np.ndarray] = {}
 
-    def viewpoint_invariance(self,
-                             features: Dict[str, float],
-                             estimated_viewpoint: Optional[Tuple[float, float, float]] = None
-                             ) -> Dict[str, float]:
+    def viewpoint_invariance(
+        self,
+        features: Dict[str, float],
+        estimated_viewpoint: Optional[Tuple[float, float, float]] = None,
+    ) -> Dict[str, float]:
         """Normalize features to canonical viewpoint"""
         normalized = features.copy()
 
         if estimated_viewpoint is not None:
             azimuth, elevation, roll = estimated_viewpoint
 
-            if 'aspect_ratio' in normalized:
+            if "aspect_ratio" in normalized:
                 correction = np.cos(elevation) * np.cos(azimuth)
                 if abs(correction) > 0.1:
-                    normalized['aspect_ratio'] /= correction
+                    normalized["aspect_ratio"] /= correction
 
         return normalized
 
-    def scale_invariance(self,
-                         features: Dict[str, float],
-                         reference_size: Optional[float] = None
-                         ) -> Dict[str, float]:
+    def scale_invariance(
+        self, features: Dict[str, float], reference_size: Optional[float] = None
+    ) -> Dict[str, float]:
         """Normalize features to canonical scale"""
         normalized = features.copy()
 
-        size_features = ['width', 'height', 'area', 'perimeter']
+        size_features = ["width", "height", "area", "perimeter"]
         current_size = None
 
         for sf in size_features:
@@ -149,32 +154,31 @@ class InvariantRecognition:
 
         return normalized
 
-    def lighting_invariance(self,
-                            features: Dict[str, float]
-                            ) -> Dict[str, float]:
+    def lighting_invariance(self, features: Dict[str, float]) -> Dict[str, float]:
         """Normalize features to canonical lighting"""
         normalized = features.copy()
 
-        if 'brightness' in normalized:
-            brightness = normalized['brightness']
+        if "brightness" in normalized:
+            brightness = normalized["brightness"]
 
             if brightness > 0:
-                for key in ['color_r', 'color_g', 'color_b']:
+                for key in ["color_r", "color_g", "color_b"]:
                     if key in normalized:
                         normalized[key] /= brightness
 
-                normalized['brightness'] = 1.0
+                normalized["brightness"] = 1.0
 
-        if 'contrast' in normalized and normalized['contrast'] > 0:
+        if "contrast" in normalized and normalized["contrast"] > 0:
             pass
 
         return normalized
 
-    def apply_all_invariances(self,
-                               features: Dict[str, float],
-                               viewpoint: Optional[Tuple[float, float, float]] = None,
-                               reference_size: Optional[float] = None
-                               ) -> Dict[str, float]:
+    def apply_all_invariances(
+        self,
+        features: Dict[str, float],
+        viewpoint: Optional[Tuple[float, float, float]] = None,
+        reference_size: Optional[float] = None,
+    ) -> Dict[str, float]:
         """Apply all invariance transformations"""
         result = features.copy()
         result = self.viewpoint_invariance(result, viewpoint)
@@ -189,9 +193,7 @@ class ObjectRecognizer:
     Simulates temporal lobe object recognition.
     """
 
-    def __init__(self,
-                 recognition_threshold: float = 0.5,
-                 use_invariance: bool = True):
+    def __init__(self, recognition_threshold: float = 0.5, use_invariance: bool = True):
         self.categories: Dict[str, CategoryPrototype] = {}
         self.recognition_threshold = recognition_threshold
         self.use_invariance = use_invariance
@@ -201,30 +203,29 @@ class ObjectRecognizer:
 
     def _initialize_basic_categories(self):
         """Initialize with some basic category structure"""
-        self.categories['object'] = CategoryPrototype(
-            category_id='object',
+        self.categories["object"] = CategoryPrototype(
+            category_id="object",
             level=CategoryLevel.SUPERORDINATE,
-            child_categories=['living', 'artifact']
+            child_categories=["living", "artifact"],
         )
 
-        self.categories['living'] = CategoryPrototype(
-            category_id='living',
+        self.categories["living"] = CategoryPrototype(
+            category_id="living",
             level=CategoryLevel.SUPERORDINATE,
-            parent_category='object',
-            child_categories=['animal', 'plant']
+            parent_category="object",
+            child_categories=["animal", "plant"],
         )
 
-        self.categories['artifact'] = CategoryPrototype(
-            category_id='artifact',
+        self.categories["artifact"] = CategoryPrototype(
+            category_id="artifact",
             level=CategoryLevel.SUPERORDINATE,
-            parent_category='object',
-            child_categories=['tool', 'vehicle', 'furniture']
+            parent_category="object",
+            child_categories=["tool", "vehicle", "furniture"],
         )
 
-    def recognize(self,
-                  features: Dict[str, float],
-                  level: CategoryLevel = CategoryLevel.BASIC
-                  ) -> Optional[RecognitionResult]:
+    def recognize(
+        self, features: Dict[str, float], level: CategoryLevel = CategoryLevel.BASIC
+    ) -> Optional[RecognitionResult]:
         """Recognize object category from features"""
         if self.use_invariance:
             features = self.invariant_processor.apply_all_invariances(features)
@@ -252,13 +253,12 @@ class ObjectRecognizer:
             confidence=best_score,
             level=self.categories[best_cat].level,
             alternative_categories=candidates[1:4],
-            features_used=list(features.keys())
+            features_used=list(features.keys()),
         )
 
-    def categorize(self,
-                   features: Dict[str, float],
-                   target_level: CategoryLevel
-                   ) -> Optional[RecognitionResult]:
+    def categorize(
+        self, features: Dict[str, float], target_level: CategoryLevel
+    ) -> Optional[RecognitionResult]:
         """Categorize at a specific level of abstraction"""
         basic_result = self.recognize(features, CategoryLevel.BASIC)
 
@@ -274,14 +274,17 @@ class ObjectRecognizer:
                 parent = self.categories[current].parent_category
                 if parent is None:
                     break
-                if self.categories.get(parent, CategoryPrototype(
-                    category_id='', level=CategoryLevel.BASIC
-                )).level == CategoryLevel.SUPERORDINATE:
+                if (
+                    self.categories.get(
+                        parent, CategoryPrototype(category_id="", level=CategoryLevel.BASIC)
+                    ).level
+                    == CategoryLevel.SUPERORDINATE
+                ):
                     return RecognitionResult(
                         category_id=parent,
                         confidence=basic_result.confidence * 0.9,
                         level=CategoryLevel.SUPERORDINATE,
-                        features_used=basic_result.features_used
+                        features_used=basic_result.features_used,
                     )
                 current = parent
 
@@ -303,22 +306,22 @@ class ObjectRecognizer:
                         category_id=best_child,
                         confidence=best_score,
                         level=CategoryLevel.SUBORDINATE,
-                        features_used=basic_result.features_used
+                        features_used=basic_result.features_used,
                     )
 
         return basic_result
 
-    def learn_category(self,
-                       category_id: str,
-                       examples: List[Dict[str, float]],
-                       level: CategoryLevel = CategoryLevel.BASIC,
-                       parent_category: Optional[str] = None):
+    def learn_category(
+        self,
+        category_id: str,
+        examples: List[Dict[str, float]],
+        level: CategoryLevel = CategoryLevel.BASIC,
+        parent_category: Optional[str] = None,
+    ):
         """Learn a new category from examples"""
         if category_id not in self.categories:
             self.categories[category_id] = CategoryPrototype(
-                category_id=category_id,
-                level=level,
-                parent_category=parent_category
+                category_id=category_id, level=level, parent_category=parent_category
             )
 
             if parent_category and parent_category in self.categories:
@@ -339,7 +342,8 @@ class ObjectRecognizer:
             return
 
         other_categories = [
-            c for c_id, c in self.categories.items()
+            c
+            for c_id, c in self.categories.items()
             if c_id != category_id and c.level == prototype.level
         ]
 
@@ -356,9 +360,7 @@ class ObjectRecognizer:
 
             prototype.feature_weights[feat_name] = min(discriminability, 3.0)
 
-    def recognize_from_feature_map(self,
-                                    feature_map: FeatureMap
-                                    ) -> List[RecognitionResult]:
+    def recognize_from_feature_map(self, feature_map: FeatureMap) -> List[RecognitionResult]:
         """Recognize objects from a visual feature map"""
         results = []
 
@@ -366,10 +368,10 @@ class ObjectRecognizer:
 
         for shape in shapes:
             features = {
-                'x': float(shape.location[0]),
-                'y': float(shape.location[1]),
-                'magnitude': shape.magnitude,
-                'orientation': shape.orientation
+                "x": float(shape.location[0]),
+                "y": float(shape.location[1]),
+                "magnitude": shape.magnitude,
+                "orientation": shape.orientation,
             }
             features.update(shape.properties)
 

@@ -10,11 +10,14 @@ Demonstrates key findings from https://pmc.ncbi.nlm.nih.gov/articles/PMC11602011
 
 import numpy as np
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.dopamine_system import (
-    DopamineSystem, PredictionErrorComputer, IncentiveSalience,
-    BenefitCostEvaluator
+    DopamineSystem,
+    PredictionErrorComputer,
+    IncentiveSalience,
+    BenefitCostEvaluator,
 )
 
 
@@ -36,9 +39,7 @@ def demo_prediction_error():
     print("\n1. Learning phase - building expectations:")
     for _ in range(10):
         pe = pe_computer.compute_prediction_error(
-            actual_reward=1.0,
-            current_state=state,
-            next_state=next_state
+            actual_reward=1.0, current_state=state, next_state=next_state
         )
         pe_computer.update_values(state, pe)
         print(f"   TD error: {pe:.3f}")
@@ -48,9 +49,7 @@ def demo_prediction_error():
     # Scenario 2: Now reward is expected
     print("\n2. After learning (reward expected):")
     pe = pe_computer.compute_prediction_error(
-        actual_reward=1.0,
-        current_state=state,
-        next_state=next_state
+        actual_reward=1.0, current_state=state, next_state=next_state
     )
     print(f"   Same reward, PE now: {pe:.3f}")
     print("   -> No dopamine burst (no surprise)")
@@ -60,7 +59,7 @@ def demo_prediction_error():
     pe = pe_computer.compute_prediction_error(
         actual_reward=2.0,  # Double!
         current_state=state,
-        next_state=next_state
+        next_state=next_state,
     )
     print(f"   Double reward, PE: {pe:.3f}")
     print("   -> LARGE positive PE (pleasant surprise)")
@@ -68,9 +67,7 @@ def demo_prediction_error():
     # Scenario 4: Expected reward omitted
     print("\n4. Expected reward NOT received:")
     pe = pe_computer.compute_prediction_error(
-        actual_reward=0.0,
-        current_state=state,
-        next_state=next_state
+        actual_reward=0.0, current_state=state, next_state=next_state
     )
     print(f"   No reward, PE: {pe:.3f}")
     print("   -> Negative PE (disappointment)")
@@ -108,11 +105,11 @@ def demo_wanting_vs_liking():
     # Hungry state increases wanting for food cues
     wanting_hungry = salience.compute_salience(
         cue,
-        internal_state={'energy': 0.1}  # Very hungry
+        internal_state={"energy": 0.1},  # Very hungry
     )
     wanting_full = salience.compute_salience(
         cue,
-        internal_state={'energy': 0.9}  # Full
+        internal_state={"energy": 0.9},  # Full
     )
     print(f"   Wanting when hungry: {wanting_hungry:.3f}")
     print(f"   Wanting when full: {wanting_full:.3f}")
@@ -200,35 +197,27 @@ def demo_full_dopamine_system():
     for i in range(3):
         next_state = state + np.random.randn(2) * 0.1
         signal = system.process_transition(
-            state=state,
-            action=np.array([0.5, 0.5]),
-            reward=1.0,
-            next_state=next_state,
-            cue=cue
+            state=state, action=np.array([0.5, 0.5]), reward=1.0, next_state=next_state, cue=cue
         )
-        print(f"     Trial {i+1}: PE={signal.prediction_error:.3f}, salience={signal.incentive_salience:.3f}")
+        print(
+            f"     Trial {i + 1}: PE={signal.prediction_error:.3f}, salience={signal.incentive_salience:.3f}"
+        )
         state = next_state
 
     print("\n2. After learning (rewards become expected):")
     for i in range(5):
         next_state = state + np.random.randn(2) * 0.1
         signal = system.process_transition(
-            state=state,
-            action=np.array([0.5, 0.5]),
-            reward=1.0,
-            next_state=next_state,
-            cue=cue
+            state=state, action=np.array([0.5, 0.5]), reward=1.0, next_state=next_state, cue=cue
         )
         state = next_state
 
     signal = system.process_transition(
-        state=state,
-        action=np.array([0.5, 0.5]),
-        reward=1.0,
-        next_state=state,
-        cue=cue
+        state=state, action=np.array([0.5, 0.5]), reward=1.0, next_state=state, cue=cue
     )
-    print(f"   After learning: PE={signal.prediction_error:.3f}, salience={signal.incentive_salience:.3f}")
+    print(
+        f"   After learning: PE={signal.prediction_error:.3f}, salience={signal.incentive_salience:.3f}"
+    )
     print("   -> Prediction error diminishes as cue salience increases!")
 
     print("\n3. System state:")
@@ -237,7 +226,7 @@ def demo_full_dopamine_system():
     print(f"   Motivation level: {system.get_motivation_level():.3f}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_prediction_error()
     demo_wanting_vs_liking()
     demo_benefit_cost_ratio()

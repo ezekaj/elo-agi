@@ -21,6 +21,7 @@ from .config import SystemConfig, ModuleConfig
 
 class ModuleStatus(Enum):
     """Status of a loaded module."""
+
     NOT_LOADED = "not_loaded"
     LOADING = "loading"
     LOADED = "loaded"
@@ -31,6 +32,7 @@ class ModuleStatus(Enum):
 @dataclass
 class LoadedModule:
     """Represents a loaded cognitive module."""
+
     module_id: str
     name: str
     status: ModuleStatus
@@ -169,10 +171,7 @@ class ModuleLoader:
         return ModuleStub(module_id)
 
     def _import_class(
-        self,
-        src_path: Path,
-        file_name: str,
-        class_name: Optional[str]
+        self, src_path: Path, file_name: str, class_name: Optional[str]
     ) -> Optional[Any]:
         """Import a class from a module file."""
         try:
@@ -197,7 +196,7 @@ class ModuleLoader:
                 # Try to find main class
                 for name in dir(module):
                     obj = getattr(module, name)
-                    if isinstance(obj, type) and name != 'ABC':
+                    if isinstance(obj, type) and name != "ABC":
                         try:
                             return obj()
                         except:
@@ -275,11 +274,11 @@ class ModuleLoader:
         """Get loader statistics."""
         statuses = self.get_status()
         return {
-            'total_modules': len(self._modules),
-            'loaded': sum(1 for s in statuses.values() if s == ModuleStatus.LOADED),
-            'failed': sum(1 for s in statuses.values() if s == ModuleStatus.FAILED),
-            'disabled': sum(1 for s in statuses.values() if s == ModuleStatus.DISABLED),
-            'load_order': self._load_order.copy(),
+            "total_modules": len(self._modules),
+            "loaded": sum(1 for s in statuses.values() if s == ModuleStatus.LOADED),
+            "failed": sum(1 for s in statuses.values() if s == ModuleStatus.FAILED),
+            "disabled": sum(1 for s in statuses.values() if s == ModuleStatus.DISABLED),
+            "load_order": self._load_order.copy(),
         }
 
 

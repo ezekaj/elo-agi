@@ -15,6 +15,7 @@ from collections import deque
 @dataclass
 class CPT:
     """Conditional Probability Table."""
+
     variable: str
     parents: List[str]
     probabilities: Dict[Tuple, Dict[str, float]]  # (parent_values) -> {value: prob}
@@ -58,6 +59,7 @@ class CPT:
 @dataclass
 class DiscreteNode:
     """A discrete random variable node in a Bayesian network."""
+
     name: str
     values: List[str]  # Possible values
     parents: List[str] = field(default_factory=list)
@@ -75,6 +77,7 @@ class DiscreteNode:
 @dataclass
 class ContinuousNode:
     """A continuous random variable node (Gaussian)."""
+
     name: str
     parents: List[str] = field(default_factory=list)
     mean: float = 0.0
@@ -102,6 +105,7 @@ class ContinuousNode:
 @dataclass
 class NetworkQuery:
     """A query to the Bayesian network."""
+
     query_variables: List[str]  # Variables to query
     evidence: Dict[str, str] = field(default_factory=dict)  # Observed values
     method: str = "variable_elimination"  # Inference method
@@ -298,8 +302,7 @@ class BayesianNetwork:
 
         # For discrete nodes only
         discrete_nodes = {
-            n: node for n, node in self._nodes.items()
-            if isinstance(node, DiscreteNode)
+            n: node for n, node in self._nodes.items() if isinstance(node, DiscreteNode)
         }
 
         result = {}
@@ -309,9 +312,7 @@ class BayesianNetwork:
                 continue
 
             # Variable elimination
-            distribution = self._variable_elimination(
-                query_var, evidence, discrete_nodes
-            )
+            distribution = self._variable_elimination(query_var, evidence, discrete_nodes)
             result[query_var] = distribution
 
         return result
@@ -327,7 +328,8 @@ class BayesianNetwork:
         topo_order = self.get_topological_order()
 
         elim_order = [
-            n for n in reversed(topo_order)
+            n
+            for n in reversed(topo_order)
             if n != query_var and n not in evidence and n in discrete_nodes
         ]
 
@@ -405,9 +407,7 @@ class BayesianNetwork:
 
             # Check if consistent with evidence
             consistent = all(
-                var_assignment.get(e) == v
-                for e, v in evidence.items()
-                if e in var_assignment
+                var_assignment.get(e) == v for e, v in evidence.items() if e in var_assignment
             )
 
             if consistent:

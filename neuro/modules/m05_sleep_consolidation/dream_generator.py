@@ -19,6 +19,7 @@ from .memory_replay import MemoryTrace, MemoryType
 
 class DreamEmotionTone(Enum):
     """Emotional tone of dreams"""
+
     NEUTRAL = "neutral"
     POSITIVE = "positive"
     NEGATIVE = "negative"
@@ -29,23 +30,25 @@ class DreamEmotionTone(Enum):
 @dataclass
 class DreamElement:
     """Single element/fragment in a dream"""
+
     source_memory: MemoryTrace
     content_fragment: np.ndarray
-    vividness: float            # 0-1, how vivid this element is
-    distortion: float           # 0-1, how distorted from original
+    vividness: float  # 0-1, how vivid this element is
+    distortion: float  # 0-1, how distorted from original
     emotional_contribution: float
 
 
 @dataclass
 class DreamReport:
     """Output of dream generation - the "dream" itself"""
+
     source_memories: List[MemoryTrace]
     elements: List[DreamElement]
-    narrative_coherence: float      # 0-1, how coherent the narrative
+    narrative_coherence: float  # 0-1, how coherent the narrative
     emotional_tone: DreamEmotionTone
-    bizarreness_index: float        # 0-1, how bizarre
-    duration: float                 # Subjective dream duration
-    timestamp: float                # When dream occurred
+    bizarreness_index: float  # 0-1, how bizarre
+    duration: float  # Subjective dream duration
+    timestamp: float  # When dream occurred
 
     def get_summary(self) -> Dict:
         """Get summary statistics."""
@@ -66,18 +69,11 @@ class NarrativeAssembler:
     simultaneously activated memory fragments.
     """
 
-    def __init__(
-        self,
-        coherence_threshold: float = 0.3,
-        association_strength: float = 0.5
-    ):
+    def __init__(self, coherence_threshold: float = 0.3, association_strength: float = 0.5):
         self.coherence_threshold = coherence_threshold
         self.association_strength = association_strength
 
-    def find_associations(
-        self,
-        memories: List[MemoryTrace]
-    ) -> List[Tuple[int, int, float]]:
+    def find_associations(self, memories: List[MemoryTrace]) -> List[Tuple[int, int, float]]:
         """Find associations between memories.
 
         Args:
@@ -89,15 +85,12 @@ class NarrativeAssembler:
         associations = []
 
         for i, mem1 in enumerate(memories):
-            for j, mem2 in enumerate(memories[i+1:], i+1):
+            for j, mem2 in enumerate(memories[i + 1 :], i + 1):
                 # Compute similarity
                 sim = mem1.similarity_to(mem2)
 
                 # Check for shared emotional tone
-                emotion_match = (
-                    np.sign(mem1.emotional_salience) ==
-                    np.sign(mem2.emotional_salience)
-                )
+                emotion_match = np.sign(mem1.emotional_salience) == np.sign(mem2.emotional_salience)
 
                 # Stronger association if similar or same emotion
                 strength = sim
@@ -110,9 +103,7 @@ class NarrativeAssembler:
         return associations
 
     def generate_visual_scene(
-        self,
-        memories: List[MemoryTrace],
-        blend_weights: Optional[List[float]] = None
+        self, memories: List[MemoryTrace], blend_weights: Optional[List[float]] = None
     ) -> np.ndarray:
         """Generate visual scene from memory blend.
 
@@ -159,9 +150,7 @@ class NarrativeAssembler:
         return blended
 
     def fill_gaps(
-        self,
-        elements: List[DreamElement],
-        gap_fill_creativity: float = 0.5
+        self, elements: List[DreamElement], gap_fill_creativity: float = 0.5
     ) -> List[DreamElement]:
         """Fill narrative gaps with creative content.
 
@@ -190,29 +179,23 @@ class NarrativeAssembler:
                 next_content = next_elem.content_fragment
 
                 if current_content.shape == next_content.shape:
-                    similarity = np.corrcoef(
-                        current_content.flatten(),
-                        next_content.flatten()
-                    )[0, 1]
+                    similarity = np.corrcoef(current_content.flatten(), next_content.flatten())[
+                        0, 1
+                    ]
 
                     if np.isnan(similarity):
                         similarity = 0
 
                     # Add bridge element if gap is large
                     if similarity < 0.3:
-                        bridge = self._create_bridge_element(
-                            elem, next_elem, gap_fill_creativity
-                        )
+                        bridge = self._create_bridge_element(elem, next_elem, gap_fill_creativity)
                         if bridge is not None:
                             filled.append(bridge)
 
         return filled
 
     def _create_bridge_element(
-        self,
-        elem1: DreamElement,
-        elem2: DreamElement,
-        creativity: float
+        self, elem1: DreamElement, elem2: DreamElement, creativity: float
     ) -> Optional[DreamElement]:
         """Create a bridging element between two elements."""
         if elem1.content_fragment.shape != elem2.content_fragment.shape:
@@ -229,9 +212,7 @@ class NarrativeAssembler:
         bridge_memory = MemoryTrace(
             content=bridge_content,
             strength=0.5,
-            emotional_salience=(
-                elem1.emotional_contribution + elem2.emotional_contribution
-            ) / 2
+            emotional_salience=(elem1.emotional_contribution + elem2.emotional_contribution) / 2,
         )
 
         return DreamElement(
@@ -239,15 +220,11 @@ class NarrativeAssembler:
             content_fragment=bridge_content,
             vividness=(elem1.vividness + elem2.vividness) / 2,
             distortion=0.7,  # Bridge elements are more distorted
-            emotional_contribution=(
-                elem1.emotional_contribution + elem2.emotional_contribution
-            ) / 2
+            emotional_contribution=(elem1.emotional_contribution + elem2.emotional_contribution)
+            / 2,
         )
 
-    def compute_coherence(
-        self,
-        elements: List[DreamElement]
-    ) -> float:
+    def compute_coherence(self, elements: List[DreamElement]) -> float:
         """Compute narrative coherence of dream elements.
 
         Args:
@@ -282,11 +259,7 @@ class DreamGenerator:
     3. Accept bizarre logic (PFC is suppressed during REM)
     """
 
-    def __init__(
-        self,
-        bizarreness_tolerance: float = 0.7,
-        pfc_suppression: float = 0.6
-    ):
+    def __init__(self, bizarreness_tolerance: float = 0.7, pfc_suppression: float = 0.6):
         """Initialize dream generator.
 
         Args:
@@ -309,9 +282,7 @@ class DreamGenerator:
         self.current_time = 0.0
 
     def sample_concurrent_replays(
-        self,
-        replaying_memories: List[MemoryTrace],
-        n_sample: int = 3
+        self, replaying_memories: List[MemoryTrace], n_sample: int = 3
     ) -> List[MemoryTrace]:
         """Sample from currently replaying memories.
 
@@ -330,27 +301,16 @@ class DreamGenerator:
         n_sample = min(n_sample, len(replaying_memories))
 
         # Weight by emotional salience (emotional memories more likely in dreams)
-        weights = [
-            1.0 + np.abs(m.emotional_salience)
-            for m in replaying_memories
-        ]
+        weights = [1.0 + np.abs(m.emotional_salience) for m in replaying_memories]
         total = sum(weights)
         probs = [w / total for w in weights]
 
         # Sample without replacement
-        indices = np.random.choice(
-            len(replaying_memories),
-            size=n_sample,
-            replace=False,
-            p=probs
-        )
+        indices = np.random.choice(len(replaying_memories), size=n_sample, replace=False, p=probs)
 
         return [replaying_memories[i] for i in indices]
 
-    def create_dream_elements(
-        self,
-        memories: List[MemoryTrace]
-    ) -> List[DreamElement]:
+    def create_dream_elements(self, memories: List[MemoryTrace]) -> List[DreamElement]:
         """Create dream elements from memories.
 
         Each memory contributes an element, potentially distorted.
@@ -382,15 +342,14 @@ class DreamGenerator:
                 content_fragment=distorted_content,
                 vividness=vividness,
                 distortion=distortion,
-                emotional_contribution=memory.emotional_salience
+                emotional_contribution=memory.emotional_salience,
             )
             elements.append(element)
 
         return elements
 
     def bizarre_logic_filter(
-        self,
-        elements: List[DreamElement]
+        self, elements: List[DreamElement]
     ) -> Tuple[List[DreamElement], float]:
         """Apply reduced logical filtering (accept bizarre content).
 
@@ -423,10 +382,7 @@ class DreamGenerator:
 
         return filtered if filtered else elements, bizarreness
 
-    def determine_emotional_tone(
-        self,
-        elements: List[DreamElement]
-    ) -> DreamEmotionTone:
+    def determine_emotional_tone(self, elements: List[DreamElement]) -> DreamEmotionTone:
         """Determine overall emotional tone of dream.
 
         Args:
@@ -457,9 +413,7 @@ class DreamGenerator:
         return DreamEmotionTone.NEUTRAL
 
     def generate_dream(
-        self,
-        replaying_memories: List[MemoryTrace],
-        duration: float = 10.0
+        self, replaying_memories: List[MemoryTrace], duration: float = 10.0
     ) -> DreamReport:
         """Generate a dream from replaying memories.
 
@@ -497,7 +451,7 @@ class DreamGenerator:
             emotional_tone=tone,
             bizarreness_index=bizarreness,
             duration=duration,
-            timestamp=self.current_time
+            timestamp=self.current_time,
         )
 
         self.dream_history.append(dream)

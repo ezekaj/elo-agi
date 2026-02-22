@@ -28,6 +28,7 @@ import time
 
 class BasicEmotion(Enum):
     """Ekman's basic emotions + extensions."""
+
     # Basic 6
     JOY = auto()
     SADNESS = auto()
@@ -39,12 +40,12 @@ class BasicEmotion(Enum):
     ANTICIPATION = auto()
     TRUST = auto()
     # Complex (combinations)
-    LOVE = auto()        # joy + trust
-    GUILT = auto()       # fear + sadness
-    PRIDE = auto()       # joy + anger (assertive)
-    SHAME = auto()       # fear + disgust
-    CURIOSITY = auto()   # surprise + anticipation
-    CONTEMPT = auto()    # anger + disgust
+    LOVE = auto()  # joy + trust
+    GUILT = auto()  # fear + sadness
+    PRIDE = auto()  # joy + anger (assertive)
+    SHAME = auto()  # fear + disgust
+    CURIOSITY = auto()  # surprise + anticipation
+    CONTEMPT = auto()  # anger + disgust
 
 
 # Emotion parameters: (valence, arousal, dominance/approach)
@@ -78,8 +79,7 @@ class EmotionBlender:
     def __init__(self):
         # Convert emotions to numpy vectors for efficient blending
         self.emotion_vectors = {
-            emotion: np.array(coords)
-            for emotion, coords in EMOTION_COORDS.items()
+            emotion: np.array(coords) for emotion, coords in EMOTION_COORDS.items()
         }
 
     def blend_emotions(self, emotion_weights: Dict[BasicEmotion, float]) -> np.ndarray:
@@ -144,8 +144,9 @@ class EmotionBlender:
             e1, e2 = sorted_emotions[0][0].name.lower(), sorted_emotions[1][0].name.lower()
             return f"{e1} with {e2}"
 
-    def interpolate(self, emotion1: BasicEmotion, emotion2: BasicEmotion,
-                   ratio: float = 0.5) -> np.ndarray:
+    def interpolate(
+        self, emotion1: BasicEmotion, emotion2: BasicEmotion, ratio: float = 0.5
+    ) -> np.ndarray:
         """
         Interpolate between two emotions.
 
@@ -168,14 +169,15 @@ class CoreAffect:
     Russell's Circumplex Model of Affect.
     Two dimensions: valence (pleasant-unpleasant) and arousal (activated-deactivated)
     """
-    valence: float = 0.0    # -1 (unpleasant) to +1 (pleasant)
-    arousal: float = 0.0    # -1 (deactivated) to +1 (activated)
+
+    valence: float = 0.0  # -1 (unpleasant) to +1 (pleasant)
+    arousal: float = 0.0  # -1 (deactivated) to +1 (activated)
 
     def to_vector(self) -> np.ndarray:
         return np.array([self.valence, self.arousal])
 
     @classmethod
-    def from_vector(cls, vec: np.ndarray) -> 'CoreAffect':
+    def from_vector(cls, vec: np.ndarray) -> "CoreAffect":
         return cls(valence=float(vec[0]), arousal=float(vec[1]))
 
     def magnitude(self) -> float:
@@ -195,10 +197,11 @@ class SomaticMarker:
     These are 'gut feelings' that guide rapid decision-making without
     conscious deliberation. Stored from past emotional experiences.
     """
+
     situation_embedding: np.ndarray  # What situation triggers this
-    body_state: np.ndarray           # Associated body feelings
-    valence: float                   # Good or bad feeling
-    intensity: float                 # How strong
+    body_state: np.ndarray  # Associated body feelings
+    valence: float  # Good or bad feeling
+    intensity: float  # How strong
     associated_emotion: Optional[BasicEmotion] = None
     created_at: float = field(default_factory=time.time)
     access_count: int = 0
@@ -214,6 +217,7 @@ class SomaticMarker:
 @dataclass
 class EmotionalMemory:
     """Memory of an emotional experience for learning."""
+
     stimulus_embedding: np.ndarray
     response_embedding: np.ndarray
     emotion: BasicEmotion
@@ -237,20 +241,29 @@ class AppraisalSystem:
     def __init__(self):
         # Appraisal dimension weights for each emotion
         self.emotion_profiles = {
-            BasicEmotion.JOY: {'relevance': 0.8, 'congruence': 0.9, 'coping': 0.7},
-            BasicEmotion.SADNESS: {'relevance': 0.8, 'congruence': -0.8, 'coping': -0.6},
-            BasicEmotion.FEAR: {'relevance': 0.9, 'congruence': -0.7, 'coping': -0.8, 'certainty': -0.5},
-            BasicEmotion.ANGER: {'relevance': 0.9, 'congruence': -0.8, 'coping': 0.7, 'other_agency': 0.9},
-            BasicEmotion.SURPRISE: {'relevance': 0.5, 'certainty': -0.9},
-            BasicEmotion.DISGUST: {'relevance': 0.6, 'congruence': -0.7, 'norm_violation': 0.9},
-            BasicEmotion.ANTICIPATION: {'relevance': 0.7, 'congruence': 0.5, 'certainty': -0.3},
-            BasicEmotion.TRUST: {'relevance': 0.5, 'congruence': 0.6, 'certainty': 0.7},
+            BasicEmotion.JOY: {"relevance": 0.8, "congruence": 0.9, "coping": 0.7},
+            BasicEmotion.SADNESS: {"relevance": 0.8, "congruence": -0.8, "coping": -0.6},
+            BasicEmotion.FEAR: {
+                "relevance": 0.9,
+                "congruence": -0.7,
+                "coping": -0.8,
+                "certainty": -0.5,
+            },
+            BasicEmotion.ANGER: {
+                "relevance": 0.9,
+                "congruence": -0.8,
+                "coping": 0.7,
+                "other_agency": 0.9,
+            },
+            BasicEmotion.SURPRISE: {"relevance": 0.5, "certainty": -0.9},
+            BasicEmotion.DISGUST: {"relevance": 0.6, "congruence": -0.7, "norm_violation": 0.9},
+            BasicEmotion.ANTICIPATION: {"relevance": 0.7, "congruence": 0.5, "certainty": -0.3},
+            BasicEmotion.TRUST: {"relevance": 0.5, "congruence": 0.6, "certainty": 0.7},
         }
 
-    def appraise(self,
-                 situation: Dict[str, float],
-                 goals: List[np.ndarray],
-                 situation_embedding: np.ndarray) -> Dict[BasicEmotion, float]:
+    def appraise(
+        self, situation: Dict[str, float], goals: List[np.ndarray], situation_embedding: np.ndarray
+    ) -> Dict[BasicEmotion, float]:
         """
         Appraise a situation and return emotion intensities.
 
@@ -311,11 +324,13 @@ class FearConditioningSystem:
         # Generalization gradient
         self.generalization_width = 0.3
 
-    def condition(self,
-                  stimulus_key: str,
-                  stimulus_embedding: np.ndarray,
-                  emotion: BasicEmotion,
-                  intensity: float):
+    def condition(
+        self,
+        stimulus_key: str,
+        stimulus_embedding: np.ndarray,
+        emotion: BasicEmotion,
+        intensity: float,
+    ):
         """Create or strengthen association."""
         if stimulus_key in self.associations:
             old_embedding, old_intensity, old_emotion = self.associations[stimulus_key]
@@ -325,10 +340,9 @@ class FearConditioningSystem:
         else:
             self.associations[stimulus_key] = (stimulus_embedding, intensity, emotion)
 
-    def extinguish(self,
-                   stimulus_key: str,
-                   context_embedding: np.ndarray,
-                   extinction_rate: float = 0.1):
+    def extinguish(
+        self, stimulus_key: str, context_embedding: np.ndarray, extinction_rate: float = 0.1
+    ):
         """Reduce association (context-dependent)."""
         if stimulus_key not in self.associations:
             return
@@ -340,9 +354,9 @@ class FearConditioningSystem:
         # Store extinction context
         self.extinction_contexts[stimulus_key] = context_embedding
 
-    def get_response(self,
-                     stimulus_embedding: np.ndarray,
-                     current_context: Optional[np.ndarray] = None) -> Dict[BasicEmotion, float]:
+    def get_response(
+        self, stimulus_embedding: np.ndarray, current_context: Optional[np.ndarray] = None
+    ) -> Dict[BasicEmotion, float]:
         """Get conditioned emotional response to stimulus."""
         responses = {}
 
@@ -354,7 +368,7 @@ class FearConditioningSystem:
 
             # Generalization gradient (Gaussian-like falloff)
             generalized_intensity = intensity * np.exp(
-                -(1 - similarity)**2 / (2 * self.generalization_width**2)
+                -((1 - similarity) ** 2) / (2 * self.generalization_width**2)
             )
 
             # Context-dependent renewal
@@ -391,16 +405,18 @@ class EmotionRegulationSystem:
 
         # Strategy effectiveness (learned)
         self.strategy_effectiveness = {
-            'reappraisal': 0.7,
-            'suppression': 0.3,
-            'distraction': 0.5,
-            'acceptance': 0.6,
+            "reappraisal": 0.7,
+            "suppression": 0.3,
+            "distraction": 0.5,
+            "acceptance": 0.6,
         }
 
-    def regulate(self,
-                 current_emotion: Dict[BasicEmotion, float],
-                 target_valence: float,
-                 strategy: str = 'reappraisal') -> Dict[BasicEmotion, float]:
+    def regulate(
+        self,
+        current_emotion: Dict[BasicEmotion, float],
+        target_valence: float,
+        strategy: str = "reappraisal",
+    ) -> Dict[BasicEmotion, float]:
         """Apply emotion regulation strategy."""
         if self.regulation_capacity < 0.1:
             return current_emotion  # Too depleted
@@ -421,7 +437,7 @@ class EmotionRegulationSystem:
                 regulated[emotion] = intensity
 
         # Deplete capacity (suppression depletes more)
-        depletion = 0.1 if strategy == 'suppression' else 0.05
+        depletion = 0.1 if strategy == "suppression" else 0.05
         self.regulation_capacity = max(0, self.regulation_capacity - depletion)
 
         return regulated
@@ -477,10 +493,12 @@ class EmotionSystem:
         # Decay rates
         self.emotion_decay = 0.1
 
-    def process_situation(self,
-                          situation_embedding: np.ndarray,
-                          appraisal_input: Dict[str, float],
-                          goals: Optional[List[np.ndarray]] = None) -> Dict[str, Any]:
+    def process_situation(
+        self,
+        situation_embedding: np.ndarray,
+        appraisal_input: Dict[str, float],
+        goals: Optional[List[np.ndarray]] = None,
+    ) -> Dict[str, Any]:
         """
         Process a situation and generate emotional response.
         """
@@ -504,7 +522,9 @@ class EmotionSystem:
         for emotion in BasicEmotion:
             old = self.current_emotions.get(emotion, 0.0)
             new = integrated_emotions.get(emotion, 0.0)
-            self.current_emotions[emotion] = old * (1 - self.emotion_decay) + new * self.emotion_decay
+            self.current_emotions[emotion] = (
+                old * (1 - self.emotion_decay) + new * self.emotion_decay
+            )
 
         # 6. Update core affect
         self._update_core_affect()
@@ -519,18 +539,21 @@ class EmotionSystem:
         self.regulation.recover()
 
         return {
-            'current_emotions': dict(self.current_emotions),
-            'core_affect': {'valence': self.core_affect.valence, 'arousal': self.core_affect.arousal},
-            'mood': {'valence': self.mood.valence, 'arousal': self.mood.arousal},
-            'dominant_emotion': self.get_dominant_emotion(),
-            'body_state': self.body_state.copy(),
-            'somatic_signal': marker_response
+            "current_emotions": dict(self.current_emotions),
+            "core_affect": {
+                "valence": self.core_affect.valence,
+                "arousal": self.core_affect.arousal,
+            },
+            "mood": {"valence": self.mood.valence, "arousal": self.mood.arousal},
+            "dominant_emotion": self.get_dominant_emotion(),
+            "body_state": self.body_state.copy(),
+            "somatic_signal": marker_response,
         }
 
     def _check_somatic_markers(self, situation_embedding: np.ndarray) -> Dict[str, float]:
         """Check for matching somatic markers (gut feelings)."""
         if not self.somatic_markers:
-            return {'valence': 0.0, 'intensity': 0.0}
+            return {"valence": 0.0, "intensity": 0.0}
 
         best_match = None
         best_score = 0.3  # Threshold
@@ -544,17 +567,19 @@ class EmotionSystem:
         if best_match:
             best_match.access_count += 1
             return {
-                'valence': best_match.valence * best_score,
-                'intensity': best_match.intensity * best_score,
-                'emotion': best_match.associated_emotion
+                "valence": best_match.valence * best_score,
+                "intensity": best_match.intensity * best_score,
+                "emotion": best_match.associated_emotion,
             }
 
-        return {'valence': 0.0, 'intensity': 0.0}
+        return {"valence": 0.0, "intensity": 0.0}
 
-    def _integrate_emotions(self,
-                            appraised: Dict[BasicEmotion, float],
-                            conditioned: Dict[BasicEmotion, float],
-                            somatic: Dict[str, float]) -> Dict[BasicEmotion, float]:
+    def _integrate_emotions(
+        self,
+        appraised: Dict[BasicEmotion, float],
+        conditioned: Dict[BasicEmotion, float],
+        somatic: Dict[str, float],
+    ) -> Dict[BasicEmotion, float]:
         """Integrate emotions from multiple sources."""
         integrated = {}
 
@@ -571,13 +596,13 @@ class EmotionSystem:
             score += w_conditioned * conditioned.get(emotion, 0.0)
 
             # Somatic influences specific emotions
-            if somatic.get('emotion') == emotion:
-                score += w_somatic * somatic.get('intensity', 0.0)
+            if somatic.get("emotion") == emotion:
+                score += w_somatic * somatic.get("intensity", 0.0)
 
             integrated[emotion] = score
 
         # Modulate by somatic valence
-        somatic_valence = somatic.get('valence', 0.0)
+        somatic_valence = somatic.get("valence", 0.0)
         if somatic_valence != 0:
             for emotion in integrated:
                 emotion_valence = EMOTION_COORDS.get(emotion, (0, 0, 0))[0]
@@ -607,10 +632,14 @@ class EmotionSystem:
 
     def _update_mood(self):
         """Update mood (slow integration of affect)."""
-        self.mood.valence = (self.mood_inertia * self.mood.valence +
-                            (1 - self.mood_inertia) * self.core_affect.valence)
-        self.mood.arousal = (self.mood_inertia * self.mood.arousal +
-                            (1 - self.mood_inertia) * self.core_affect.arousal)
+        self.mood.valence = (
+            self.mood_inertia * self.mood.valence
+            + (1 - self.mood_inertia) * self.core_affect.valence
+        )
+        self.mood.arousal = (
+            self.mood_inertia * self.mood.arousal
+            + (1 - self.mood_inertia) * self.core_affect.arousal
+        )
 
     def _update_body_state(self):
         """Update body state based on emotions."""
@@ -664,30 +693,32 @@ class EmotionSystem:
             marker_response = self._check_somatic_markers(embedding)
 
             # Base signal from marker
-            signal = marker_response.get('valence', 0.0) * marker_response.get('intensity', 0.0)
+            signal = marker_response.get("valence", 0.0) * marker_response.get("intensity", 0.0)
 
             # Modulate by current mood
             signal += self.mood.valence * 0.1
 
             # Modulate by arousal (higher arousal = more extreme signals)
-            signal *= (1 + abs(self.core_affect.arousal) * 0.5)
+            signal *= 1 + abs(self.core_affect.arousal) * 0.5
 
             signals.append(signal)
 
         return signals
 
-    def create_somatic_marker(self,
-                              situation_embedding: np.ndarray,
-                              outcome_valence: float,
-                              outcome_intensity: float,
-                              associated_emotion: Optional[BasicEmotion] = None):
+    def create_somatic_marker(
+        self,
+        situation_embedding: np.ndarray,
+        outcome_valence: float,
+        outcome_intensity: float,
+        associated_emotion: Optional[BasicEmotion] = None,
+    ):
         """Create a new somatic marker from experience."""
         marker = SomaticMarker(
             situation_embedding=situation_embedding.copy(),
             body_state=self.body_state.copy(),
             valence=outcome_valence,
             intensity=outcome_intensity,
-            associated_emotion=associated_emotion or self.get_dominant_emotion()[0]
+            associated_emotion=associated_emotion or self.get_dominant_emotion()[0],
         )
 
         self.somatic_markers.append(marker)
@@ -698,15 +729,17 @@ class EmotionSystem:
             self.somatic_markers.sort(key=lambda m: m.access_count, reverse=True)
             self.somatic_markers = self.somatic_markers[:300]
 
-    def condition_emotion(self,
-                          stimulus_key: str,
-                          stimulus_embedding: np.ndarray,
-                          emotion: BasicEmotion,
-                          intensity: float):
+    def condition_emotion(
+        self,
+        stimulus_key: str,
+        stimulus_embedding: np.ndarray,
+        emotion: BasicEmotion,
+        intensity: float,
+    ):
         """Learn emotional association to stimulus."""
         self.conditioning.condition(stimulus_key, stimulus_embedding, emotion, intensity)
 
-    def regulate_emotion(self, target_valence: float, strategy: str = 'reappraisal'):
+    def regulate_emotion(self, target_valence: float, strategy: str = "reappraisal"):
         """Apply emotion regulation."""
         self.current_emotions = self.regulation.regulate(
             self.current_emotions, target_valence, strategy
@@ -748,12 +781,13 @@ class EmotionSystem:
         """
         # Get current negative emotions
         negative_emotions = {
-            e: v for e, v in self.current_emotions.items()
-            if v > 0.1 and EMOTION_COORDS.get(e, (0,0,0))[0] < 0
+            e: v
+            for e, v in self.current_emotions.items()
+            if v > 0.1 and EMOTION_COORDS.get(e, (0, 0, 0))[0] < 0
         }
 
         if not negative_emotions:
-            return {'reappraisal': 'not_needed', 'negative_emotions': 0}
+            return {"reappraisal": "not_needed", "negative_emotions": 0}
 
         # Apply reappraisal - reduce negative, boost positive
         reappraisal_strength = self.regulation.regulation_capacity * 0.7
@@ -778,10 +812,10 @@ class EmotionSystem:
         self.regulation.regulation_capacity = max(0, self.regulation.regulation_capacity - 0.15)
 
         return {
-            'reappraisal': 'applied',
-            'reductions': reductions,
-            'new_valence': self.core_affect.valence,
-            'regulation_remaining': self.regulation.regulation_capacity
+            "reappraisal": "applied",
+            "reductions": reductions,
+            "new_valence": self.core_affect.valence,
+            "regulation_remaining": self.regulation.regulation_capacity,
         }
 
     def learn_association(self, stimulus_embedding: np.ndarray, valence: float):
@@ -807,36 +841,37 @@ class EmotionSystem:
             situation_embedding=stimulus_embedding,
             outcome_valence=valence * 1.2,  # Amplify for stronger learning
             outcome_intensity=intensity,
-            associated_emotion=emotion
+            associated_emotion=emotion,
         )
 
         # Condition the fear system for negative associations
         if valence < -0.2:
             stimulus_key = f"learned_{hash(stimulus_embedding.tobytes()) % 10000}"
-            self.conditioning.condition(stimulus_key, stimulus_embedding, BasicEmotion.FEAR, intensity)
+            self.conditioning.condition(
+                stimulus_key, stimulus_embedding, BasicEmotion.FEAR, intensity
+            )
 
         # Also condition positive associations
         if valence > 0.2:
             stimulus_key = f"reward_{hash(stimulus_embedding.tobytes()) % 10000}"
-            self.conditioning.condition(stimulus_key, stimulus_embedding, BasicEmotion.JOY, intensity)
+            self.conditioning.condition(
+                stimulus_key, stimulus_embedding, BasicEmotion.JOY, intensity
+            )
 
     def get_state(self) -> Dict[str, Any]:
         """Get complete emotional state."""
         dominant, intensity = self.get_dominant_emotion()
         return {
-            'core_affect': {
-                'valence': self.core_affect.valence,
-                'arousal': self.core_affect.arousal,
-                'magnitude': self.core_affect.magnitude()
+            "core_affect": {
+                "valence": self.core_affect.valence,
+                "arousal": self.core_affect.arousal,
+                "magnitude": self.core_affect.magnitude(),
             },
-            'mood': {
-                'valence': self.mood.valence,
-                'arousal': self.mood.arousal
-            },
-            'dominant_emotion': dominant.name,
-            'dominant_intensity': intensity,
-            'all_emotions': {e.name: v for e, v in self.current_emotions.items() if v > 0.01},
-            'body_state': self.body_state.tolist(),
-            'regulation_capacity': self.regulation.regulation_capacity,
-            'somatic_markers_count': len(self.somatic_markers)
+            "mood": {"valence": self.mood.valence, "arousal": self.mood.arousal},
+            "dominant_emotion": dominant.name,
+            "dominant_intensity": intensity,
+            "all_emotions": {e.name: v for e, v in self.current_emotions.items() if v > 0.01},
+            "body_state": self.body_state.tolist(),
+            "regulation_capacity": self.regulation.regulation_capacity,
+            "somatic_markers_count": len(self.somatic_markers),
         }

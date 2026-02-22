@@ -25,6 +25,7 @@ import numpy as np
 
 class EmotionType(Enum):
     """Basic emotion categories."""
+
     FEAR = "fear"
     ANGER = "anger"
     JOY = "joy"
@@ -37,6 +38,7 @@ class EmotionType(Enum):
 @dataclass
 class EmotionalEvaluation:
     """Result of emotional processing."""
+
     valence: float  # -1 (negative) to 1 (positive)
     arousal: float  # 0 (calm) to 1 (excited)
     emotion_type: EmotionType
@@ -49,6 +51,7 @@ class EmotionalEvaluation:
 @dataclass
 class BodyState:
     """Interoceptive body state representation."""
+
     heart_rate: float = 0.5  # 0-1 normalized
     skin_conductance: float = 0.0
     muscle_tension: float = 0.0
@@ -59,6 +62,7 @@ class BodyState:
 @dataclass
 class EmotionalMemory:
     """Memory tagged with emotional valence."""
+
     content: np.ndarray
     valence: float
     arousal: float
@@ -96,9 +100,7 @@ class VMPFC:
         return (base_value + intrinsic) * self.context_modulation
 
     def integrate_emotion_cognition(
-        self,
-        emotion: EmotionalEvaluation,
-        context: Dict[str, Any]
+        self, emotion: EmotionalEvaluation, context: Dict[str, Any]
     ) -> float:
         """Combine emotional and cognitive information for decision-making."""
         if not self.intact:
@@ -109,8 +111,8 @@ class VMPFC:
         emotional_weight = emotion.arousal * emotion.valence
 
         # Context modulates the integration
-        context_factor = context.get('importance', 1.0)
-        social_factor = context.get('social_relevance', 1.0)
+        context_factor = context.get("importance", 1.0)
+        social_factor = context.get("social_relevance", 1.0)
 
         return emotional_weight * context_factor * social_factor
 
@@ -124,8 +126,8 @@ class VMPFC:
             return (0.0, 0.0)  # No gut feelings without VMPFC
 
         # Aggregate past experiences with similar situations
-        familiarity = situation.get('familiarity', 0.5)
-        past_outcomes = situation.get('past_outcomes', [])
+        familiarity = situation.get("familiarity", 0.5)
+        past_outcomes = situation.get("past_outcomes", [])
 
         if past_outcomes:
             avg_outcome = np.mean(past_outcomes)
@@ -140,9 +142,7 @@ class VMPFC:
         """Learn value association from experience."""
         stimulus_hash = hash(stimulus.tobytes())
         current = self.value_associations.get(stimulus_hash, 0.0)
-        self.value_associations[stimulus_hash] = (
-            current + self.learning_rate * (outcome - current)
-        )
+        self.value_associations[stimulus_hash] = current + self.learning_rate * (outcome - current)
 
     def lesion(self):
         """Simulate VMPFC damage."""
@@ -168,7 +168,7 @@ class Amygdala:
         self,
         threat_threshold: float = 0.5,
         reward_threshold: float = 0.5,
-        learning_rate: float = 0.2
+        learning_rate: float = 0.2,
     ):
         self.threat_threshold = threat_threshold
         self.reward_threshold = reward_threshold
@@ -227,11 +227,7 @@ class Amygdala:
         return min(1.0, (variance + extremity) / 2)
 
     def store_emotional_memory(
-        self,
-        content: np.ndarray,
-        valence: float,
-        arousal: float,
-        context: Dict[str, Any] = None
+        self, content: np.ndarray, valence: float, arousal: float, context: Dict[str, Any] = None
     ):
         """Tag memory with emotional valence for storage."""
         memory = EmotionalMemory(
@@ -239,7 +235,7 @@ class Amygdala:
             valence=valence,
             arousal=arousal,
             timestamp=len(self.emotional_memories),
-            context=context or {}
+            context=context or {},
         )
         self.emotional_memories.append(memory)
 
@@ -258,9 +254,7 @@ class Amygdala:
             self.reward_associations[content_hash] = min(1.0, current + 0.2)
 
     def fear_conditioning(
-        self,
-        conditioned_stimulus: np.ndarray,
-        unconditioned_stimulus_threat: float
+        self, conditioned_stimulus: np.ndarray, unconditioned_stimulus_threat: float
     ):
         """
         Classical fear conditioning.
@@ -270,9 +264,7 @@ class Amygdala:
         cs_hash = hash(conditioned_stimulus.tobytes())
         current = self.conditioned_responses.get(cs_hash, (0.0, 0.0))
 
-        new_threat = current[0] + self.learning_rate * (
-            unconditioned_stimulus_threat - current[0]
-        )
+        new_threat = current[0] + self.learning_rate * (unconditioned_stimulus_threat - current[0])
         self.conditioned_responses[cs_hash] = (new_threat, current[1])
 
     def extinction(self, stimulus: np.ndarray, rate: float = 0.1):
@@ -309,7 +301,7 @@ class Amygdala:
             emotion_type=emotion_type,
             threat_level=threat,
             reward_level=reward,
-            source="amygdala"
+            source="amygdala",
         )
 
 
@@ -416,10 +408,10 @@ class Insula:
 
         # Body-emotion mappings (simplified)
         self.body_emotion_map = {
-            'high_heart_high_tension': EmotionType.FEAR,
-            'high_heart_low_tension': EmotionType.JOY,
-            'low_heart_high_tension': EmotionType.ANGER,
-            'low_heart_low_tension': EmotionType.SADNESS,
+            "high_heart_high_tension": EmotionType.FEAR,
+            "high_heart_low_tension": EmotionType.JOY,
+            "low_heart_high_tension": EmotionType.ANGER,
+            "low_heart_low_tension": EmotionType.SADNESS,
         }
 
     def read_body_state(self) -> BodyState:
@@ -432,7 +424,7 @@ class Insula:
         skin_conductance: Optional[float] = None,
         muscle_tension: Optional[float] = None,
         respiration_rate: Optional[float] = None,
-        temperature: Optional[float] = None
+        temperature: Optional[float] = None,
     ):
         """Update body state readings."""
         if heart_rate is not None:
@@ -451,15 +443,19 @@ class Insula:
         state = body_state or self.current_body_state
 
         # Simplified mapping based on heart rate and muscle tension
-        hr_level = 'high' if state.heart_rate > 0.6 else 'low'
-        tension_level = 'high' if state.muscle_tension > 0.5 else 'low'
+        hr_level = "high" if state.heart_rate > 0.6 else "low"
+        tension_level = "high" if state.muscle_tension > 0.5 else "low"
 
-        key = f'{hr_level}_heart_{tension_level}_tension'
+        key = f"{hr_level}_heart_{tension_level}_tension"
         emotion_type = self.body_emotion_map.get(key, EmotionType.NEUTRAL)
 
         # Compute arousal from overall activation
-        arousal = (state.heart_rate + state.skin_conductance +
-                   state.muscle_tension + state.respiration_rate) / 4
+        arousal = (
+            state.heart_rate
+            + state.skin_conductance
+            + state.muscle_tension
+            + state.respiration_rate
+        ) / 4
 
         # Valence derived from emotion type
         valence_map = {
@@ -472,10 +468,7 @@ class Insula:
         valence = valence_map.get(emotion_type, 0.0)
 
         return EmotionalEvaluation(
-            valence=valence,
-            arousal=arousal,
-            emotion_type=emotion_type,
-            source="insula"
+            valence=valence, arousal=arousal, emotion_type=emotion_type, source="insula"
         )
 
     def disgust_response(self, stimulus: np.ndarray) -> float:
@@ -490,10 +483,7 @@ class Insula:
 
         # Disgust often accompanied by nausea-like body response
         if pattern_irregularity > 0.5:
-            self.update_body_state(
-                skin_conductance=0.7,
-                muscle_tension=0.6
-            )
+            self.update_body_state(skin_conductance=0.7, muscle_tension=0.6)
             return min(1.0, pattern_irregularity)
         return 0.0
 
@@ -507,15 +497,15 @@ class Insula:
         mirror_strength = 0.3
 
         mirrored = BodyState(
-            heart_rate=self.current_body_state.heart_rate * (1 - mirror_strength) +
-                       other_body_state.heart_rate * mirror_strength,
-            skin_conductance=self.current_body_state.skin_conductance * (1 - mirror_strength) +
-                            other_body_state.skin_conductance * mirror_strength,
-            muscle_tension=self.current_body_state.muscle_tension * (1 - mirror_strength) +
-                          other_body_state.muscle_tension * mirror_strength,
-            respiration_rate=self.current_body_state.respiration_rate * (1 - mirror_strength) +
-                            other_body_state.respiration_rate * mirror_strength,
-            temperature=self.current_body_state.temperature
+            heart_rate=self.current_body_state.heart_rate * (1 - mirror_strength)
+            + other_body_state.heart_rate * mirror_strength,
+            skin_conductance=self.current_body_state.skin_conductance * (1 - mirror_strength)
+            + other_body_state.skin_conductance * mirror_strength,
+            muscle_tension=self.current_body_state.muscle_tension * (1 - mirror_strength)
+            + other_body_state.muscle_tension * mirror_strength,
+            respiration_rate=self.current_body_state.respiration_rate * (1 - mirror_strength)
+            + other_body_state.respiration_rate * mirror_strength,
+            temperature=self.current_body_state.temperature,
         )
 
         return self.map_to_emotion(mirrored)
@@ -553,11 +543,9 @@ class EmotionCircuit:
         gut_feeling, gut_confidence = self.vmpfc.generate_gut_feeling(context)
 
         # ACC: check for conflicts
-        conflict = self.acc.conflict_detection([
-            ('amygdala', amygdala_eval.valence),
-            ('body', body_eval.valence),
-            ('value', value)
-        ])
+        conflict = self.acc.conflict_detection(
+            [("amygdala", amygdala_eval.valence), ("body", body_eval.valence), ("value", value)]
+        )
 
         # Integrate evaluations
         # Amygdala dominates when threat is high
@@ -571,9 +559,9 @@ class EmotionCircuit:
             weight_value = 0.3
 
         integrated_valence = (
-            amygdala_eval.valence * weight_amygdala +
-            body_eval.valence * weight_body +
-            value * weight_value
+            amygdala_eval.valence * weight_amygdala
+            + body_eval.valence * weight_body
+            + value * weight_value
         )
 
         integrated_arousal = max(amygdala_eval.arousal, body_eval.arousal)
@@ -593,16 +581,11 @@ class EmotionCircuit:
             threat_level=amygdala_eval.threat_level,
             reward_level=amygdala_eval.reward_level,
             confidence=1.0 - conflict * 0.5,
-            source="emotion_circuit"
+            source="emotion_circuit",
         )
 
     def learn_from_outcome(
-        self,
-        stimulus: np.ndarray,
-        action: str,
-        outcome: float,
-        valence: float,
-        arousal: float
+        self, stimulus: np.ndarray, action: str, outcome: float, valence: float, arousal: float
     ):
         """Update all components based on experienced outcome."""
         # VMPFC learns value
@@ -612,11 +595,7 @@ class EmotionCircuit:
         self.acc.monitor_outcomes(action, outcome)
 
         # Amygdala stores emotional memory
-        self.amygdala.store_emotional_memory(
-            content=stimulus,
-            valence=valence,
-            arousal=arousal
-        )
+        self.amygdala.store_emotional_memory(content=stimulus, valence=valence, arousal=arousal)
 
     def lesion_vmpfc(self):
         """Simulate VMPFC damage (as in lesion studies)."""

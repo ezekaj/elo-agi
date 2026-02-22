@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m13_executive.inhibition import (
-    ResponseInhibitor, ImpulseController, InhibitionSystem, InhibitionParams
+    ResponseInhibitor,
+    ImpulseController,
+    InhibitionSystem,
+    InhibitionParams,
 )
+
 
 class TestResponseInhibitor:
     """Tests for response inhibition"""
@@ -80,6 +84,7 @@ class TestResponseInhibitor:
         assert inhibitor.stop_activation == 0.0
         assert not inhibitor.response_made
 
+
 class TestImpulseController:
     """Tests for impulse control"""
 
@@ -149,6 +154,7 @@ class TestImpulseController:
 
         assert controller.inhibition[0] == controller.params.inhibition_strength
 
+
 class TestInhibitionSystem:
     """Tests for integrated inhibition system"""
 
@@ -194,5 +200,6 @@ class TestInhibitionSystem:
 
         assert 0 <= strength <= 1
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

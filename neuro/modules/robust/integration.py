@@ -11,7 +11,9 @@ from enum import Enum
 import numpy as np
 
 from .uncertainty import (
-    SimpleDropoutNN, UncertaintyQuantifier, UncertaintyEstimate,
+    SimpleDropoutNN,
+    UncertaintyQuantifier,
+    UncertaintyEstimate,
 )
 from .ood_detection import OODDetector, OODMethod, OODResult
 from .calibration import ConfidenceCalibrator, CalibrationMethod
@@ -20,15 +22,17 @@ from .adversarial import AdversarialDefense, DefenseType
 
 class RobustnessLevel(Enum):
     """Levels of robustness checking."""
+
     NONE = "none"
-    BASIC = "basic"           # Just uncertainty
-    STANDARD = "standard"     # Uncertainty + OOD
-    FULL = "full"             # All checks including adversarial
+    BASIC = "basic"  # Just uncertainty
+    STANDARD = "standard"  # Uncertainty + OOD
+    FULL = "full"  # All checks including adversarial
 
 
 @dataclass
 class RobustnessMetadata:
     """Robustness metadata for embeddings."""
+
     uncertainty: float = 0.0
     epistemic: float = 0.0
     aleatoric: float = 0.0
@@ -49,6 +53,7 @@ class RobustEmbedding:
     Extends the concept of SemanticEmbedding to include
     uncertainty quantification, OOD detection, and calibration.
     """
+
     vector: np.ndarray
     modality: str
     source_module: str
@@ -57,7 +62,7 @@ class RobustEmbedding:
     metadata: Dict[str, Any] = field(default_factory=dict)
     robustness: RobustnessMetadata = field(default_factory=RobustnessMetadata)
 
-    def similarity(self, other: 'RobustEmbedding') -> float:
+    def similarity(self, other: "RobustEmbedding") -> float:
         """Compute cosine similarity with another embedding."""
         norm_self = np.linalg.norm(self.vector)
         norm_other = np.linalg.norm(other.vector)
@@ -72,8 +77,8 @@ class RobustEmbedding:
 
         # Reduce confidence based on uncertainty and OOD score
         adjusted = self.confidence
-        adjusted *= (1.0 - self.robustness.uncertainty)
-        adjusted *= (1.0 - self.robustness.ood_score)
+        adjusted *= 1.0 - self.robustness.uncertainty
+        adjusted *= 1.0 - self.robustness.ood_score
 
         if self.robustness.is_calibrated:
             adjusted = self.robustness.calibrated_confidence
@@ -119,11 +124,15 @@ class SharedSpaceRobustness:
 
         # Initialize robustness components
         self._uncertainty_model = SimpleDropoutNN(
-            embedding_dim, hidden_dim, n_classes,
-            dropout_rate=0.3, random_seed=random_seed,
+            embedding_dim,
+            hidden_dim,
+            n_classes,
+            dropout_rate=0.3,
+            random_seed=random_seed,
         )
         self._uncertainty_quantifier = UncertaintyQuantifier(
-            self._uncertainty_model, n_samples=uncertainty_samples,
+            self._uncertainty_model,
+            n_samples=uncertainty_samples,
         )
 
         self._ood_detector = OODDetector(
@@ -210,17 +219,18 @@ class SharedSpaceRobustness:
         )
 
         # Compute uncertainty if enabled
-        if self.robustness_level in [RobustnessLevel.BASIC,
-                                      RobustnessLevel.STANDARD,
-                                      RobustnessLevel.FULL]:
+        if self.robustness_level in [
+            RobustnessLevel.BASIC,
+            RobustnessLevel.STANDARD,
+            RobustnessLevel.FULL,
+        ]:
             estimate = self._uncertainty_quantifier.monte_carlo_dropout(vector)
             robustness.uncertainty = estimate.total
             robustness.epistemic = estimate.epistemic
             robustness.aleatoric = estimate.aleatoric
 
         # Compute OOD score if enabled
-        if self.robustness_level in [RobustnessLevel.STANDARD,
-                                      RobustnessLevel.FULL]:
+        if self.robustness_level in [RobustnessLevel.STANDARD, RobustnessLevel.FULL]:
             if self._is_fitted:
                 ood_result = self._ood_detector.detect(vector)
                 robustness.ood_score = ood_result.score
@@ -306,7 +316,7 @@ class SharedSpaceRobustness:
             score = emb.effective_confidence()
 
             # Penalize high uncertainty
-            score *= (1.0 - 0.5 * emb.robustness.uncertainty)
+            score *= 1.0 - 0.5 * emb.robustness.uncertainty
 
             # Penalize OOD
             if emb.robustness.is_ood:
@@ -366,22 +376,10 @@ class SharedSpaceRobustness:
             agg_vector = agg_vector / norm
 
         # Aggregate uncertainty (weighted average)
-        agg_uncertainty = sum(
-            w * emb.robustness.uncertainty
-            for emb, w in zip(embeddings, weights)
-        )
-        agg_epistemic = sum(
-            w * emb.robustness.epistemic
-            for emb, w in zip(embeddings, weights)
-        )
-        agg_aleatoric = sum(
-            w * emb.robustness.aleatoric
-            for emb, w in zip(embeddings, weights)
-        )
-        agg_ood = sum(
-            w * emb.robustness.ood_score
-            for emb, w in zip(embeddings, weights)
-        )
+        agg_uncertainty = sum(w * emb.robustness.uncertainty for emb, w in zip(embeddings, weights))
+        agg_epistemic = sum(w * emb.robustness.epistemic for emb, w in zip(embeddings, weights))
+        agg_aleatoric = sum(w * emb.robustness.aleatoric for emb, w in zip(embeddings, weights))
+        agg_ood = sum(w * emb.robustness.ood_score for emb, w in zip(embeddings, weights))
 
         robustness = RobustnessMetadata(
             uncertainty=agg_uncertainty,
@@ -434,15 +432,11 @@ class SharedSpaceRobustness:
             "n_rejected_ood": self._n_rejected_ood,
             "n_rejected_adversarial": self._n_rejected_adversarial,
             "n_low_confidence": self._n_low_confidence,
-            "rejection_rate_ood": (
-                self._n_rejected_ood / max(1, self._n_processed)
-            ),
+            "rejection_rate_ood": (self._n_rejected_ood / max(1, self._n_processed)),
             "rejection_rate_adversarial": (
                 self._n_rejected_adversarial / max(1, self._n_processed)
             ),
-            "low_confidence_rate": (
-                self._n_low_confidence / max(1, self._n_processed)
-            ),
+            "low_confidence_rate": (self._n_low_confidence / max(1, self._n_processed)),
             "is_fitted": self._is_fitted,
             "robustness_level": self.robustness_level.value,
             "embedding_dim": self.embedding_dim,
@@ -456,8 +450,11 @@ def _patch_simple_dropout_nn():
     def _to_classifier(self):
         """Convert to SimpleClassifier interface."""
         from .ood_detection import SimpleClassifier
+
         classifier = SimpleClassifier(
-            self.input_dim, self.hidden_dim, self.output_dim,
+            self.input_dim,
+            self.hidden_dim,
+            self.output_dim,
             random_seed=None,
         )
         classifier.W1 = self.W1.copy()
@@ -469,8 +466,11 @@ def _patch_simple_dropout_nn():
     def _to_simple_nn(self):
         """Convert to SimpleNN interface."""
         from .adversarial import SimpleNN
+
         nn = SimpleNN(
-            self.input_dim, self.hidden_dim, self.output_dim,
+            self.input_dim,
+            self.hidden_dim,
+            self.output_dim,
             random_seed=None,
         )
         nn.W1 = self.W1.copy()
@@ -482,13 +482,14 @@ def _patch_simple_dropout_nn():
     SimpleDropoutNN._to_classifier = _to_classifier
     SimpleDropoutNN._to_simple_nn = _to_simple_nn
 
+
 # Apply patch on import
 _patch_simple_dropout_nn()
 
 
 __all__ = [
-    'RobustnessLevel',
-    'RobustnessMetadata',
-    'RobustEmbedding',
-    'SharedSpaceRobustness',
+    "RobustnessLevel",
+    "RobustnessMetadata",
+    "RobustEmbedding",
+    "SharedSpaceRobustness",
 ]

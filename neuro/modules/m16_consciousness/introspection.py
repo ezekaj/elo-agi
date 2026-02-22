@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Any
 @dataclass
 class IntrospectionParams:
     """Parameters for introspection"""
+
     n_features: int = 50
     access_threshold: float = 0.4
     report_detail: float = 0.7
@@ -56,7 +57,7 @@ class MentalStateAccessor:
             return {
                 "success": False,
                 "reason": "state too weak to access",
-                "activation": activation_strength
+                "activation": activation_strength,
             }
 
         # Successful access
@@ -64,7 +65,7 @@ class MentalStateAccessor:
             "state_name": state_name,
             "activation": activation_strength,
             "label": self.state_labels.get(state_name, ""),
-            "time": len(self.access_history)
+            "time": len(self.access_history),
         }
         self.access_history.append(access_record)
 
@@ -72,7 +73,7 @@ class MentalStateAccessor:
             "success": True,
             "state": state.copy(),
             "activation": activation_strength,
-            "label": self.state_labels.get(state_name, "")
+            "label": self.state_labels.get(state_name, ""),
         }
 
     def scan_accessible_states(self) -> List[str]:
@@ -114,11 +115,13 @@ class SelfReflection:
         if len(evidence) != self.params.n_features:
             evidence = np.resize(evidence, self.params.n_features)
 
-        self.reflection_buffer.append({
-            "observation": observation,
-            "evidence": evidence.copy(),
-            "depth": len(self.reflection_buffer)
-        })
+        self.reflection_buffer.append(
+            {
+                "observation": observation,
+                "evidence": evidence.copy(),
+                "depth": len(self.reflection_buffer),
+            }
+        )
 
     def synthesize_reflection(self) -> Dict:
         """Synthesize reflection into insight"""
@@ -141,7 +144,7 @@ class SelfReflection:
             "confidence": confidence,
             "observations_count": len(observations),
             "focus": self.reflection_focus,
-            "evidence_summary": np.mean(evidence)
+            "evidence_summary": np.mean(evidence),
         }
 
     def get_insights(self) -> List[str]:
@@ -176,10 +179,7 @@ class IntrospectionSystem:
         report = self._generate_report(state_name, access_result)
         self.reports.append(report)
 
-        return {
-            "access": access_result,
-            "report": report
-        }
+        return {"access": access_result, "report": report}
 
     def _generate_report(self, state_name: str, access_result: Dict) -> Dict:
         """Generate introspective report"""
@@ -196,7 +196,7 @@ class IntrospectionSystem:
             "valence": "positive" if valence > 0 else "negative",
             "intensity": "high" if intensity > 0.5 else "low",
             "complexity": "complex" if complexity > 0.3 else "simple",
-            "detail_level": self.params.report_detail
+            "detail_level": self.params.report_detail,
         }
 
         return report
@@ -211,10 +211,7 @@ class IntrospectionSystem:
         for state_name in accessible[:3]:  # Reflect on up to 3 states
             access = self.accessor.access_state(state_name)
             if access["success"]:
-                self.reflection.add_observation(
-                    f"Observed {state_name}",
-                    access["state"]
-                )
+                self.reflection.add_observation(f"Observed {state_name}", access["state"])
 
         return self.reflection.synthesize_reflection()
 
@@ -228,13 +225,10 @@ class IntrospectionSystem:
             if result["success"]:
                 contents[name] = {
                     "label": result.get("label", ""),
-                    "activation": result["activation"]
+                    "activation": result["activation"],
                 }
 
-        return {
-            "accessible_states": contents,
-            "count": len(contents)
-        }
+        return {"accessible_states": contents, "count": len(contents)}
 
     def get_introspection_state(self) -> Dict:
         """Get introspection system state"""
@@ -243,5 +237,5 @@ class IntrospectionSystem:
             "accessible_count": len(self.accessor.scan_accessible_states()),
             "reports_generated": len(self.reports),
             "insights": self.reflection.get_insights(),
-            "current_reflection_focus": self.reflection.reflection_focus
+            "current_reflection_focus": self.reflection.reflection_focus,
         }

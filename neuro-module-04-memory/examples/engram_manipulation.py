@@ -9,7 +9,8 @@ Based on experimental breakthroughs that can:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 import numpy as np
 from src.engram import Engram, EngramState
@@ -34,9 +35,9 @@ def demo_engram_manipulation():
     # Pattern: "Memory of seeing a red apple"
     memory_pattern = np.zeros(100)
     # Activate specific "neurons" for this memory
-    memory_pattern[0:20] = 1.0    # "Visual" neurons
-    memory_pattern[20:30] = 0.8   # "Color" neurons (red)
-    memory_pattern[40:50] = 0.9   # "Object" neurons (apple)
+    memory_pattern[0:20] = 1.0  # "Visual" neurons
+    memory_pattern[20:30] = 0.8  # "Color" neurons (red)
+    memory_pattern[40:50] = 0.9  # "Object" neurons (apple)
 
     # Encode the memory
     engram.encode(memory_pattern)
@@ -56,7 +57,7 @@ def demo_engram_manipulation():
 
     # Create partial cue (only visual and color info)
     partial_cue = np.zeros(100)
-    partial_cue[0:20] = 1.0   # Visual neurons
+    partial_cue[0:20] = 1.0  # Visual neurons
     partial_cue[20:30] = 0.8  # Color neurons
 
     print("Providing partial cue (visual + color only)...")
@@ -67,7 +68,9 @@ def demo_engram_manipulation():
     object_activation = np.mean(recalled[40:50])
     print(f"Similarity to original: {similarity:.2f}")
     print(f"Object neurons activation: {object_activation:.2f}")
-    print("Pattern completion successful!" if object_activation > 0.3 else "Pattern completion weak")
+    print(
+        "Pattern completion successful!" if object_activation > 0.3 else "Pattern completion weak"
+    )
 
     # 3. ERASE MEMORY (Selective Forgetting)
     print("\n3. ERASE MEMORY (Selective Forgetting)")
@@ -138,9 +141,9 @@ def demo_engram_manipulation():
     # Create synthetic pattern (a memory that never happened)
     # "Memory of seeing a blue elephant"
     synthetic_pattern = np.zeros(100)
-    synthetic_pattern[0:20] = 1.0    # Visual neurons
-    synthetic_pattern[30:40] = 0.9   # Different color neurons (blue instead of red)
-    synthetic_pattern[60:70] = 0.9   # Different object neurons (elephant instead of apple)
+    synthetic_pattern[0:20] = 1.0  # Visual neurons
+    synthetic_pattern[30:40] = 0.9  # Different color neurons (blue instead of red)
+    synthetic_pattern[60:70] = 0.9  # Different object neurons (elephant instead of apple)
 
     print("Implanting synthetic memory pattern...")
 
@@ -194,7 +197,7 @@ def demo_engram_manipulation():
 
     # Modify during labile window
     modification = np.zeros(100)
-    modification[0:30] = 1.0   # Keep original
+    modification[0:30] = 1.0  # Keep original
     modification[50:70] = 0.8  # Add new content
 
     print("Modifying memory during labile window...")

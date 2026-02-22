@@ -17,6 +17,7 @@ from neuro.modules.abstract.program_synthesis import ProgramSynthesizer, Example
 from neuro.modules.abstract.abstraction_engine import AbstractionEngine, AbstractionLevel
 from neuro.modules.abstract.integration import SharedSpaceIntegration, SemanticModalityType
 
+
 class TestBinderWithTypes:
     """Test symbolic binder with type system."""
 
@@ -41,6 +42,7 @@ class TestBinderWithTypes:
         binding = binder.bind("add_function", neural_rep=func_rep)
         assert binding is not None
 
+
 class TestBinderWithSynthesis:
     """Test symbolic binding with program synthesis."""
 
@@ -61,6 +63,7 @@ class TestBinderWithSynthesis:
 
         program = synthesizer.synthesize_auto(examples)
         assert program is not None
+
 
 class TestAbstractionWithBinding:
     """Test abstraction engine with symbolic binding."""
@@ -84,10 +87,7 @@ class TestAbstractionWithBinding:
         # Bind each abstraction
         for abstraction in abstractions:
             if abstraction.embedding is not None:
-                binding = binder.bind(
-                    abstraction.name,
-                    neural_rep=abstraction.embedding
-                )
+                binding = binder.bind(abstraction.name, neural_rep=abstraction.embedding)
                 assert binding is not None
 
     def test_transfer_with_binding(self):
@@ -105,7 +105,7 @@ class TestAbstractionWithBinding:
             roles={
                 RoleType.AGENT: ("dog", None),
                 RoleType.PATIENT: ("cat", None),
-            }
+            },
         )
 
         # Analogical transfer
@@ -118,6 +118,7 @@ class TestAbstractionWithBinding:
         assert target.get_filler(RoleType.AGENT) == "lion"
         assert target.get_filler(RoleType.PATIENT) == "gazelle"
 
+
 class TestSharedSpaceIntegration:
     """Test SharedSpaceIntegration class."""
 
@@ -127,10 +128,7 @@ class TestSharedSpaceIntegration:
 
     def test_project_binding(self, integration):
         """Should project binding to shared space."""
-        binding = integration.binder.bind(
-            "concept",
-            roles={RoleType.AGENT: ("subject", None)}
-        )
+        binding = integration.binder.bind("concept", roles={RoleType.AGENT: ("subject", None)})
 
         embedding = integration.project_binding(binding)
 
@@ -145,9 +143,7 @@ class TestSharedSpaceIntegration:
             {"type": "animal", "name": "cat"},
         ]
 
-        abstractions = integration.abstraction_engine.abstract(
-            examples, AbstractionLevel.CONCEPT
-        )
+        abstractions = integration.abstraction_engine.abstract(examples, AbstractionLevel.CONCEPT)
 
         for abstraction in abstractions:
             embedding = integration.project_abstraction(abstraction)
@@ -187,14 +183,8 @@ class TestSharedSpaceIntegration:
 
     def test_query_by_role(self, integration):
         """Should query by role-filler."""
-        integration.bind_to_shared_space(
-            "action1",
-            roles={RoleType.AGENT: "john"}
-        )
-        integration.bind_to_shared_space(
-            "action2",
-            roles={RoleType.AGENT: "mary"}
-        )
+        integration.bind_to_shared_space("action1", roles={RoleType.AGENT: "john"})
+        integration.bind_to_shared_space("action2", roles={RoleType.AGENT: "mary"})
 
         results = integration.query_by_role(RoleType.AGENT, "john")
         assert len(results) > 0
@@ -241,9 +231,7 @@ class TestSharedSpaceIntegration:
             {"type": "vehicle", "wheels": 2},
         ]
 
-        embeddings = integration.abstract_and_project(
-            examples, AbstractionLevel.CONCEPT
-        )
+        embeddings = integration.abstract_and_project(examples, AbstractionLevel.CONCEPT)
 
         assert len(embeddings) > 0
         for e in embeddings:
@@ -257,6 +245,7 @@ class TestSharedSpaceIntegration:
         assert stats["n_projections"] > 0
         assert "binder_stats" in stats
         assert "abstraction_stats" in stats
+
 
 class TestEndToEndPipeline:
     """Test end-to-end pipelines."""
@@ -273,9 +262,7 @@ class TestEndToEndPipeline:
         ]
 
         # 2. Abstract
-        abstractions = integration.abstraction_engine.abstract(
-            examples, AbstractionLevel.CONCEPT
-        )
+        abstractions = integration.abstraction_engine.abstract(examples, AbstractionLevel.CONCEPT)
 
         # 3. Project to shared space
         for abs in abstractions:
@@ -288,7 +275,7 @@ class TestEndToEndPipeline:
                 roles={
                     RoleType.AGENT: (ex["agent"], None),
                     RoleType.PATIENT: (ex["patient"], None),
-                }
+                },
             )
             integration.project_binding(binding)
 
@@ -346,6 +333,7 @@ class TestEndToEndPipeline:
 
             assert embedding.modality == SemanticModalityType.GROUNDED
 
+
 class TestCrossModuleConsistency:
     """Test consistency across modules."""
 
@@ -354,20 +342,11 @@ class TestCrossModuleConsistency:
         integration = SharedSpaceIntegration()
 
         # Similar concepts
-        e1 = integration.bind_to_shared_space(
-            "runs",
-            roles={RoleType.AGENT: "dog"}
-        )
-        e2 = integration.bind_to_shared_space(
-            "runs",
-            roles={RoleType.AGENT: "cat"}
-        )
+        e1 = integration.bind_to_shared_space("runs", roles={RoleType.AGENT: "dog"})
+        e2 = integration.bind_to_shared_space("runs", roles={RoleType.AGENT: "cat"})
 
         # Different concept
-        e3 = integration.bind_to_shared_space(
-            "sleeps",
-            roles={RoleType.AGENT: "fish"}
-        )
+        e3 = integration.bind_to_shared_space("sleeps", roles={RoleType.AGENT: "fish"})
 
         sim_similar = e1.similarity(e2)
         sim_different = e1.similarity(e3)

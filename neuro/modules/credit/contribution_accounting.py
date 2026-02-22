@@ -17,6 +17,7 @@ import numpy as np
 @dataclass
 class ShapleyConfig:
     """Configuration for Shapley value computation."""
+
     use_approximation: bool = True
     num_samples: int = 100
     min_contribution: float = 1e-6
@@ -26,6 +27,7 @@ class ShapleyConfig:
 @dataclass
 class Contribution:
     """A module's contribution record."""
+
     module_id: str
     shapley_value: float
     marginal_contributions: List[float]
@@ -82,13 +84,9 @@ class ContributionAccountant:
         n = len(active_modules)
 
         if self.config.use_approximation and n > 5:
-            shapley_values = self._approximate_shapley(
-                active_modules, value_function
-            )
+            shapley_values = self._approximate_shapley(active_modules, value_function)
         else:
-            shapley_values = self._exact_shapley(
-                active_modules, value_function
-            )
+            shapley_values = self._exact_shapley(active_modules, value_function)
 
         total_shapley = sum(shapley_values.values())
         if abs(total_shapley) > 1e-8 and abs(total_shapley - outcome) > 1e-4:
@@ -147,10 +145,7 @@ class ContributionAccountant:
                 shapley_values[module] += marginal
                 coalition.add(module)
 
-        shapley_values = {
-            k: v / self.config.num_samples
-            for k, v in shapley_values.items()
-        }
+        shapley_values = {k: v / self.config.num_samples for k, v in shapley_values.items()}
 
         return shapley_values
 
@@ -204,10 +199,7 @@ class ContributionAccountant:
             share = reward / len(active_modules)
             return {m: share for m in active_modules}
 
-        distribution = {
-            m: reward * w / total_weight
-            for m, w in weights.items()
-        }
+        distribution = {m: reward * w / total_weight for m, w in weights.items()}
 
         for module_id, value in distribution.items():
             if module_id not in self._cumulative_contributions:

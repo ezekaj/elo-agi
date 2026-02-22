@@ -17,6 +17,7 @@ from pathlib import Path
 @dataclass
 class BenchmarkConfig:
     """Configuration for a benchmark."""
+
     name: str = "benchmark"
     description: str = ""
     n_trials: int = 100
@@ -30,6 +31,7 @@ class BenchmarkConfig:
 @dataclass
 class TrialResult:
     """Result of a single benchmark trial."""
+
     trial_id: int
     success: bool
     score: float  # 0.0 to 1.0
@@ -44,6 +46,7 @@ class TrialResult:
 @dataclass
 class BenchmarkResult:
     """Aggregate result of a benchmark run."""
+
     benchmark_name: str
     config: BenchmarkConfig
     trials: List[TrialResult]
@@ -85,19 +88,19 @@ class BenchmarkResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            'benchmark_name': self.benchmark_name,
-            'n_trials': self.n_trials,
-            'success_rate': self.success_rate,
-            'mean_score': self.mean_score,
-            'std_score': self.std_score,
-            'mean_latency': self.mean_latency,
-            'error_count': self.error_count,
-            'total_time': self.total_time,
-            'timestamp': self.timestamp,
-            'config': {
-                'name': self.config.name,
-                'difficulty': self.config.difficulty,
-                'n_trials': self.config.n_trials,
+            "benchmark_name": self.benchmark_name,
+            "n_trials": self.n_trials,
+            "success_rate": self.success_rate,
+            "mean_score": self.mean_score,
+            "std_score": self.std_score,
+            "mean_latency": self.mean_latency,
+            "error_count": self.error_count,
+            "total_time": self.total_time,
+            "timestamp": self.timestamp,
+            "config": {
+                "name": self.config.name,
+                "difficulty": self.config.difficulty,
+                "n_trials": self.config.n_trials,
             },
         }
 
@@ -248,7 +251,7 @@ class Benchmark(ABC):
         filename = f"{self.name}_{int(result.timestamp)}.json"
         filepath = output_dir / filename
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(result.to_dict(), f, indent=2, default=str)
 
 
@@ -348,14 +351,11 @@ class BenchmarkSuite:
 
         # Save summary
         summary_path = output_dir / f"{self.name}_summary.txt"
-        with open(summary_path, 'w') as f:
+        with open(summary_path, "w") as f:
             f.write(self.summary())
 
         # Save detailed results
         results_path = output_dir / f"{self.name}_results.json"
-        results_dict = {
-            name: result.to_dict()
-            for name, result in self._results.items()
-        }
-        with open(results_path, 'w') as f:
+        results_dict = {name: result.to_dict() for name, result in self._results.items()}
+        with open(results_path, "w") as f:
             json.dump(results_dict, f, indent=2, default=str)

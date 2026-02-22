@@ -52,7 +52,7 @@ Always explain what you're doing. Be concise but helpful."""
 
 def parse_tool_calls(text: str) -> list[dict]:
     """Extract tool calls from response text."""
-    pattern = r'<tool>(.*?)</tool>'
+    pattern = r"<tool>(.*?)</tool>"
     matches = re.findall(pattern, text, re.DOTALL)
     tools = []
     for m in matches:
@@ -89,7 +89,7 @@ class Agent:
         req = urllib.request.Request(
             f"{self.ollama_url}/api/chat",
             data=json.dumps(data).encode(),
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         with urllib.request.urlopen(req, timeout=120) as r:
@@ -107,7 +107,7 @@ class Agent:
         req = urllib.request.Request(
             f"{self.ollama_url}/api/chat",
             data=json.dumps(data).encode(),
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         with urllib.request.urlopen(req, timeout=120) as r:
@@ -144,16 +144,10 @@ class Agent:
         """Run the agent with a prompt, yielding response chunks."""
         # Add system prompt if first message
         if not self.messages:
-            self.messages.append({
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            })
+            self.messages.append({"role": "system", "content": SYSTEM_PROMPT})
 
         # Add user message
-        self.messages.append({
-            "role": "user",
-            "content": prompt
-        })
+        self.messages.append({"role": "user", "content": prompt})
 
         max_iterations = 10
 
@@ -165,10 +159,7 @@ class Agent:
                 yield chunk
 
             # Add assistant response to history
-            self.messages.append({
-                "role": "assistant",
-                "content": full_response
-            })
+            self.messages.append({"role": "assistant", "content": full_response})
 
             # Parse tool calls from response
             tool_calls = parse_tool_calls(full_response)
@@ -205,31 +196,19 @@ class Agent:
                     results_content += f"[{name}] Error: {result.error}\n\n"
 
             # Add tool results as user message (so LLM continues)
-            self.messages.append({
-                "role": "user",
-                "content": results_content
-            })
+            self.messages.append({"role": "user", "content": results_content})
 
             yield "\n"
 
     def run_simple(self, prompt: str) -> str:
         """Run without streaming, return full response."""
         if not self.messages:
-            self.messages.append({
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            })
+            self.messages.append({"role": "system", "content": SYSTEM_PROMPT})
 
-        self.messages.append({
-            "role": "user",
-            "content": prompt
-        })
+        self.messages.append({"role": "user", "content": prompt})
 
         response = self._call_ollama(self.messages)
-        self.messages.append({
-            "role": "assistant",
-            "content": response
-        })
+        self.messages.append({"role": "assistant", "content": response})
 
         return response
 

@@ -13,23 +13,26 @@ import numpy as np
 
 class ResolutionStrategy(Enum):
     """Strategies for resolving memory interference."""
-    INTERLEAVE = "interleave"           # Alternate replay of conflicting memories
-    DIFFERENTIATE = "differentiate"     # Emphasize distinctive features
-    INHIBIT = "inhibit"                 # Temporarily suppress one memory
-    MERGE = "merge"                     # Combine into single memory
-    SEPARATE = "separate"               # Create distinct contexts
+
+    INTERLEAVE = "interleave"  # Alternate replay of conflicting memories
+    DIFFERENTIATE = "differentiate"  # Emphasize distinctive features
+    INHIBIT = "inhibit"  # Temporarily suppress one memory
+    MERGE = "merge"  # Combine into single memory
+    SEPARATE = "separate"  # Create distinct contexts
 
 
 class InterferenceType(Enum):
     """Types of memory interference."""
-    PROACTIVE = "proactive"     # Old memory interferes with new
-    RETROACTIVE = "retroactive" # New memory interferes with old
+
+    PROACTIVE = "proactive"  # Old memory interferes with new
+    RETROACTIVE = "retroactive"  # New memory interferes with old
     BIDIRECTIONAL = "bidirectional"
 
 
 @dataclass
 class MemoryVector:
     """Representation of a memory for interference analysis."""
+
     memory_id: str
     content: np.ndarray
     encoding_time: float
@@ -37,7 +40,7 @@ class MemoryVector:
     context: Optional[np.ndarray] = None
     distinctive_features: Optional[np.ndarray] = None
 
-    def similarity(self, other: 'MemoryVector') -> float:
+    def similarity(self, other: "MemoryVector") -> float:
         """Compute cosine similarity with another memory."""
         norm_self = np.linalg.norm(self.content)
         norm_other = np.linalg.norm(other.content)
@@ -49,11 +52,12 @@ class MemoryVector:
 @dataclass
 class InterferenceEvent:
     """Detected interference between memories."""
+
     memory_a: str
     memory_b: str
     similarity: float
     interference_type: InterferenceType
-    severity: float             # 0-1, how much interference
+    severity: float  # 0-1, how much interference
     resolution_strategy: ResolutionStrategy
     detected_at: float
     resolved: bool = False
@@ -63,8 +67,9 @@ class InterferenceEvent:
 @dataclass
 class InterleaveSchedule:
     """Schedule for interleaved replay of conflicting memories."""
+
     memories: List[str]
-    pattern: List[int]          # Indices into memories list
+    pattern: List[int]  # Indices into memories list
     current_position: int = 0
     repetitions: int = 3
 
@@ -175,7 +180,7 @@ class InterferenceResolver:
         events = []
 
         for i, mem_a in enumerate(memory_ids):
-            for mem_b in memory_ids[i + 1:]:
+            for mem_b in memory_ids[i + 1 :]:
                 similarity = self.compute_similarity(mem_a, mem_b)
 
                 if similarity >= self.similarity_threshold:
@@ -316,7 +321,7 @@ class InterferenceResolver:
 
             if similarity >= self.similarity_threshold:
                 # Reduce protection based on similarity
-                protection *= (1.0 - similarity * 0.3)
+                protection *= 1.0 - similarity * 0.3
 
                 # Strengthen distinctive features of existing memory
                 diff = existing.content - new_mem.content
@@ -435,8 +440,7 @@ class InterferenceResolver:
             del self._memories[memory_id]
             # Clear related cache entries
             self._similarity_cache = {
-                k: v for k, v in self._similarity_cache.items()
-                if memory_id not in k
+                k: v for k, v in self._similarity_cache.items() if memory_id not in k
             }
 
     def statistics(self) -> Dict[str, Any]:
@@ -464,10 +468,7 @@ class InterferenceResolver:
             type_counts[t] = type_counts.get(t, 0) + 1
 
         # Average similarity of interference events
-        avg_similarity = (
-            np.mean([e.similarity for e in self._events])
-            if self._events else 0.0
-        )
+        avg_similarity = np.mean([e.similarity for e in self._events]) if self._events else 0.0
 
         # Vulnerable memories
         vulnerable = self.get_vulnerable_memories(threshold=0.5)
@@ -478,8 +479,7 @@ class InterferenceResolver:
             "n_resolutions": self._n_resolutions,
             "n_successful": self._n_successful,
             "success_rate": (
-                self._n_successful / self._n_resolutions
-                if self._n_resolutions > 0 else 0.0
+                self._n_successful / self._n_resolutions if self._n_resolutions > 0 else 0.0
             ),
             "active_interference_events": len(active_events),
             "resolved_events": len(resolved_events),
@@ -492,10 +492,10 @@ class InterferenceResolver:
 
 
 __all__ = [
-    'ResolutionStrategy',
-    'InterferenceType',
-    'MemoryVector',
-    'InterferenceEvent',
-    'InterleaveSchedule',
-    'InterferenceResolver',
+    "ResolutionStrategy",
+    "InterferenceType",
+    "MemoryVector",
+    "InterferenceEvent",
+    "InterleaveSchedule",
+    "InterferenceResolver",
 ]

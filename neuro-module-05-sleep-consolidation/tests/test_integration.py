@@ -6,10 +6,14 @@ in realistic usage scenarios.
 
 import pytest
 import numpy as np
-from neuro.modules.m05_sleep_consolidation.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
+    SpacedRepetitionScheduler,
+    ReviewQuality,
+)
 from neuro.modules.m05_sleep_consolidation.meta_learning import MetaLearningController, MemoryType
 from neuro.modules.m05_sleep_consolidation.interference_resolution import InterferenceResolver
 from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner
+
 
 class TestFullConsolidationCycle:
     """Tests for complete consolidation cycles."""
@@ -45,9 +49,7 @@ class TestFullConsolidationCycle:
                     after_strength = 0.3
 
                 scheduler.schedule_review(mem_id, quality)
-                controller.track_consolidation_success(
-                    mem_id, 0.3, after_strength, 2
-                )
+                controller.track_consolidation_success(mem_id, 0.3, after_strength, 2)
 
         # Verify outcomes
         stats = controller.statistics()
@@ -86,6 +88,7 @@ class TestFullConsolidationCycle:
         for i in range(5):
             schedule = scheduler.get_schedule(f"mem{i}")
             assert schedule.interval > 1.0, "Interval should grow with success"
+
 
 class TestInterferenceWithConsolidation:
     """Tests for interference during consolidation."""
@@ -153,6 +156,7 @@ class TestInterferenceWithConsolidation:
         assert replayed.count("mem_a") >= 4
         assert replayed.count("mem_b") >= 4
 
+
 class TestSchemaEvolution:
     """Tests for schema evolution during consolidation."""
 
@@ -214,6 +218,7 @@ class TestSchemaEvolution:
         assert schema is not None
         assert len(schema.instances) >= 7
 
+
 class TestAdaptiveLearning:
     """Tests for adaptive learning behavior."""
 
@@ -229,13 +234,9 @@ class TestAdaptiveLearning:
         # Simulate: episodic memories consolidate well, semantic struggle
         for i in range(15):
             # Episodic: high success
-            controller.track_consolidation_success(
-                f"episodic_{i}", 0.2, 0.7, 3
-            )
+            controller.track_consolidation_success(f"episodic_{i}", 0.2, 0.7, 3)
             # Semantic: low success
-            controller.track_consolidation_success(
-                f"semantic_{i}", 0.2, 0.25, 5
-            )
+            controller.track_consolidation_success(f"semantic_{i}", 0.2, 0.25, 5)
 
         # Update learning rates
         controller.update_learning_rates(MemoryType.EPISODIC, 0.9)
@@ -250,10 +251,7 @@ class TestAdaptiveLearning:
 
     def test_replay_priority_adapts(self):
         """Replay weights should adapt based on outcomes."""
-        controller = MetaLearningController(
-            min_samples_for_adaptation=5,
-            random_seed=42
-        )
+        controller = MetaLearningController(min_samples_for_adaptation=5, random_seed=42)
 
         # Create enough samples for adaptation
         for i in range(20):
@@ -274,6 +272,7 @@ class TestAdaptiveLearning:
         # Weights should still be normalized
         total = sum(adapted_weights.values())
         assert total == pytest.approx(1.0, abs=0.01)
+
 
 class TestCrossComponentConsistency:
     """Tests for consistency across components."""
@@ -315,6 +314,7 @@ class TestCrossComponentConsistency:
 
         assert sched.repetition_count == 1
         assert len(curve.consolidation_history) == 2  # initial + review
+
 
 class TestRealisticScenarios:
     """Tests for realistic learning scenarios."""

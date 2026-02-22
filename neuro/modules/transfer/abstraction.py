@@ -13,16 +13,18 @@ import numpy as np
 
 class AbstractionLevel(Enum):
     """Levels of abstraction."""
-    CONCRETE = "concrete"        # Specific instances
+
+    CONCRETE = "concrete"  # Specific instances
     CATEGORICAL = "categorical"  # Categories/types
-    STRUCTURAL = "structural"    # Relational patterns
-    PRINCIPLED = "principled"    # Abstract rules
-    UNIVERSAL = "universal"      # Domain-invariant
+    STRUCTURAL = "structural"  # Relational patterns
+    PRINCIPLED = "principled"  # Abstract rules
+    UNIVERSAL = "universal"  # Domain-invariant
 
 
 @dataclass
 class AbstractConcept:
     """An abstract concept extracted from examples."""
+
     id: str
     name: str
     level: AbstractionLevel
@@ -35,6 +37,7 @@ class AbstractConcept:
 @dataclass
 class StructuralAnalogy:
     """A structural analogy between domains."""
+
     source_domain: str
     target_domain: str
     mappings: Dict[str, str]  # source_element -> target_element
@@ -45,6 +48,7 @@ class StructuralAnalogy:
 @dataclass
 class DomainPrinciple:
     """A domain-general principle."""
+
     id: str
     name: str
     description: str
@@ -61,8 +65,15 @@ class RelationExtractor:
 
     def __init__(self):
         self._relation_types = [
-            "is_a", "has_a", "part_of", "causes", "precedes",
-            "similar_to", "opposite_of", "requires", "produces"
+            "is_a",
+            "has_a",
+            "part_of",
+            "causes",
+            "precedes",
+            "similar_to",
+            "opposite_of",
+            "requires",
+            "produces",
         ]
 
     def extract(
@@ -82,41 +93,21 @@ class RelationExtractor:
             # Extract implicit relations from structure
             if "type" in example and "properties" in example:
                 # IS-A relation
-                relations.append((
-                    "is_a",
-                    example.get("id", "unknown"),
-                    example["type"],
-                    1.0
-                ))
+                relations.append(("is_a", example.get("id", "unknown"), example["type"], 1.0))
 
                 # HAS-A relations from properties
                 for prop in example.get("properties", {}):
-                    relations.append((
-                        "has_a",
-                        example.get("id", "unknown"),
-                        prop,
-                        0.8
-                    ))
+                    relations.append(("has_a", example.get("id", "unknown"), prop, 0.8))
 
             # Causal relations
             if "causes" in example:
                 for effect in example["causes"]:
-                    relations.append((
-                        "causes",
-                        example.get("id", "unknown"),
-                        effect,
-                        0.9
-                    ))
+                    relations.append(("causes", example.get("id", "unknown"), effect, 0.9))
 
             # Temporal relations
             if "precedes" in example:
                 for successor in example["precedes"]:
-                    relations.append((
-                        "precedes",
-                        example.get("id", "unknown"),
-                        successor,
-                        0.9
-                    ))
+                    relations.append(("precedes", example.get("id", "unknown"), successor, 0.9))
 
         return relations
 
@@ -176,15 +167,12 @@ class StructureMapper:
                 used_targets.add(best_match)
 
         # Find preserved relations
-        preserved = self._find_preserved_relations(
-            source_structure, target_structure, mappings
-        )
+        preserved = self._find_preserved_relations(source_structure, target_structure, mappings)
 
         # Compute overall similarity
         if mappings:
             similarity = len(preserved) / max(
-                sum(len(rels) for rels in source_structure.values()),
-                1
+                sum(len(rels) for rels in source_structure.values()), 1
             )
         else:
             similarity = 0.0
@@ -314,7 +302,9 @@ class PrincipleExtractor:
         for example in examples:
             # Extract condition-action patterns
             if "condition" in example and "action" in example:
-                pattern_key = f"{self._normalize(example['condition'])}=>{self._normalize(example['action'])}"
+                pattern_key = (
+                    f"{self._normalize(example['condition'])}=>{self._normalize(example['action'])}"
+                )
                 patterns[pattern_key] = patterns.get(pattern_key, 0) + 1
 
             # Extract feature patterns
@@ -350,7 +340,7 @@ class PrincipleExtractor:
             name=name,
             description=f"Principle extracted from {domain} with {support} examples",
             conditions=[lambda d, p=pattern: True],  # Placeholder
-            actions=[lambda d, p=pattern: None],     # Placeholder
+            actions=[lambda d, p=pattern: None],  # Placeholder
             source_domains={domain},
             generality_score=min(1.0, support / 10),
         )

@@ -19,6 +19,7 @@ from .head_direction_cells import HeadDirectionSystem
 @dataclass
 class PathIntegrationState:
     """Current state of path integration system"""
+
     position: np.ndarray
     heading: float
     uncertainty: float
@@ -40,12 +41,14 @@ class PathIntegrator:
         initial_position: Optional[np.ndarray] = None,
         initial_heading: float = 0.0,
         noise_scale: float = 0.01,
-        uncertainty_growth: float = 0.001
+        uncertainty_growth: float = 0.001,
     ):
         self.grid_cells = grid_cells or GridCellPopulation()
         self.head_direction = head_direction or HeadDirectionSystem()
 
-        self.position_estimate = np.array(initial_position) if initial_position is not None else np.zeros(2)
+        self.position_estimate = (
+            np.array(initial_position) if initial_position is not None else np.zeros(2)
+        )
         self.heading_estimate = initial_heading
         self.uncertainty = 0.0
 
@@ -87,10 +90,7 @@ class PathIntegrator:
         return self.position_estimate.copy()
 
     def integrate_with_heading(
-        self,
-        speed: float,
-        angular_velocity: float,
-        dt: float
+        self, speed: float, angular_velocity: float, dt: float
     ) -> Tuple[np.ndarray, float]:
         """
         Update position using speed and heading.
@@ -106,10 +106,7 @@ class PathIntegrator:
         self.head_direction.update_heading(angular_velocity, dt)
 
         # Convert speed + heading to velocity
-        velocity = speed * np.array([
-            np.cos(self.heading_estimate),
-            np.sin(self.heading_estimate)
-        ])
+        velocity = speed * np.array([np.cos(self.heading_estimate), np.sin(self.heading_estimate)])
 
         position = self.integrate(velocity, dt)
         return position, self.heading_estimate
@@ -134,19 +131,12 @@ class PathIntegrator:
         if heading is not None:
             self._heading_history = [heading]
 
-    def get_displacement(
-        self,
-        start_position: np.ndarray,
-        end_position: np.ndarray
-    ) -> np.ndarray:
+    def get_displacement(self, start_position: np.ndarray, end_position: np.ndarray) -> np.ndarray:
         """Compute displacement vector between two positions"""
         return np.array(end_position) - np.array(start_position)
 
     def correct_with_landmark(
-        self,
-        landmark_position: np.ndarray,
-        observed_distance: float,
-        observed_bearing: float
+        self, landmark_position: np.ndarray, observed_distance: float, observed_bearing: float
     ) -> None:
         """
         Correct position estimate using landmark observation.
@@ -156,21 +146,20 @@ class PathIntegrator:
         observed_bearing: measured bearing to landmark (radians)
         """
         # Compute expected position based on landmark
-        expected_position = landmark_position - observed_distance * np.array([
-            np.cos(self.heading_estimate + observed_bearing),
-            np.sin(self.heading_estimate + observed_bearing)
-        ])
+        expected_position = landmark_position - observed_distance * np.array(
+            [
+                np.cos(self.heading_estimate + observed_bearing),
+                np.sin(self.heading_estimate + observed_bearing),
+            ]
+        )
 
         # Blend current estimate with landmark-based estimate
         # Weight by uncertainty (high uncertainty = trust landmark more)
         alpha = min(0.8, self.uncertainty * 10)
-        self.position_estimate = (
-            (1 - alpha) * self.position_estimate +
-            alpha * expected_position
-        )
+        self.position_estimate = (1 - alpha) * self.position_estimate + alpha * expected_position
 
         # Reduce uncertainty after landmark correction
-        self.uncertainty *= (1 - alpha)
+        self.uncertainty *= 1 - alpha
 
     def get_state(self) -> PathIntegrationState:
         """Get current path integration state"""
@@ -178,7 +167,7 @@ class PathIntegrator:
             position=self.position_estimate.copy(),
             heading=self.heading_estimate,
             uncertainty=self.uncertainty,
-            time=self.time
+            time=self.time,
         )
 
     def get_trajectory(self) -> np.ndarray:
@@ -209,10 +198,7 @@ class VectorBasedNavigator:
     vectors to remembered goal locations.
     """
 
-    def __init__(
-        self,
-        path_integrator: Optional[PathIntegrator] = None
-    ):
+    def __init__(self, path_integrator: Optional[PathIntegrator] = None):
         self.integrator = path_integrator or PathIntegrator()
         self.goal_positions: dict = {}  # Named goal locations
 
@@ -244,12 +230,7 @@ class VectorBasedNavigator:
 
         return distance, bearing
 
-    def navigate_step(
-        self,
-        goal_name: str,
-        speed: float,
-        dt: float
-    ) -> Tuple[np.ndarray, bool]:
+    def navigate_step(self, goal_name: str, speed: float, dt: float) -> Tuple[np.ndarray, bool]:
         """
         Take one step toward goal.
 
@@ -261,7 +242,7 @@ class VectorBasedNavigator:
             return self.integrator.position_estimate.copy(), True
 
         # Turn toward goal
-        turn_rate = np.clip(bearing, -np.pi/4, np.pi/4) / dt
+        turn_rate = np.clip(bearing, -np.pi / 4, np.pi / 4) / dt
 
         # Move forward
         position, _ = self.integrator.integrate_with_heading(speed, turn_rate, dt)

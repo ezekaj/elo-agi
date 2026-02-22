@@ -13,15 +13,17 @@ import numpy as np
 
 class HierarchyType(Enum):
     """Types of hierarchical relationships."""
-    TAXONOMIC = "taxonomic"       # IS-A hierarchy (dog IS-A animal)
-    MERONOMIC = "meronomic"       # PART-OF hierarchy (wheel PART-OF car)
+
+    TAXONOMIC = "taxonomic"  # IS-A hierarchy (dog IS-A animal)
+    MERONOMIC = "meronomic"  # PART-OF hierarchy (wheel PART-OF car)
     COMPOSITIONAL = "compositional"  # HAS-A hierarchy (car HAS-A wheel)
-    FUNCTIONAL = "functional"     # USED-FOR hierarchy
+    FUNCTIONAL = "functional"  # USED-FOR hierarchy
 
 
 @dataclass
 class OntologyNode:
     """A node in the ontology."""
+
     name: str
     definition: Optional[str] = None
     properties: Dict[str, Any] = field(default_factory=dict)
@@ -41,6 +43,7 @@ class OntologyNode:
 @dataclass
 class OntologyRelation:
     """A hierarchical relation in the ontology."""
+
     parent: str
     child: str
     hierarchy_type: HierarchyType
@@ -52,6 +55,7 @@ class OntologyRelation:
 @dataclass
 class OntologyQuery:
     """A query against the ontology."""
+
     concept: Optional[str] = None
     hierarchy_type: Optional[HierarchyType] = None
     property_filter: Optional[Dict[str, Any]] = None
@@ -82,17 +86,13 @@ class Ontology:
         }
 
         # Inverse hierarchies (child -> parents)
-        self._inverse: Dict[HierarchyType, Dict[str, Set[str]]] = {
-            ht: {} for ht in HierarchyType
-        }
+        self._inverse: Dict[HierarchyType, Dict[str, Set[str]]] = {ht: {} for ht in HierarchyType}
 
         # All relations
         self._relations: List[OntologyRelation] = []
 
         # Root nodes per hierarchy
-        self._roots: Dict[HierarchyType, Set[str]] = {
-            ht: set() for ht in HierarchyType
-        }
+        self._roots: Dict[HierarchyType, Set[str]] = {ht: set() for ht in HierarchyType}
 
     def add_node(
         self,
@@ -331,9 +331,7 @@ class Ontology:
             # Check if properties match
             inherited_props = self.get_inherited_properties(name, hierarchy_type)
             matches = all(
-                inherited_props.get(k) == v
-                for k, v in properties.items()
-                if k in inherited_props
+                inherited_props.get(k) == v for k, v in properties.items() if k in inherited_props
             )
 
             if matches and node.depth > best_depth:
@@ -414,10 +412,7 @@ class Ontology:
                 else:
                     props = node.properties
 
-                matches = all(
-                    props.get(k) == v
-                    for k, v in query.property_filter.items()
-                )
+                matches = all(props.get(k) == v for k, v in query.property_filter.items())
                 if not matches:
                     continue
 

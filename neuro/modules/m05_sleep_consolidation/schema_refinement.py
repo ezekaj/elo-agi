@@ -13,12 +13,13 @@ import numpy as np
 
 class SchemaUpdateType(Enum):
     """Types of schema updates."""
-    ASSIMILATE = "assimilate"       # New instance fits schema
-    ACCOMMODATE = "accommodate"     # Schema adjusted for new instance
-    GENERALIZE = "generalize"       # Schema broadened
-    SPECIALIZE = "specialize"       # Schema narrowed
-    MERGE = "merge"                 # Schemas combined
-    SPLIT = "split"                 # Schema divided
+
+    ASSIMILATE = "assimilate"  # New instance fits schema
+    ACCOMMODATE = "accommodate"  # Schema adjusted for new instance
+    GENERALIZE = "generalize"  # Schema broadened
+    SPECIALIZE = "specialize"  # Schema narrowed
+    MERGE = "merge"  # Schemas combined
+    SPLIT = "split"  # Schema divided
 
 
 @dataclass
@@ -29,11 +30,12 @@ class Schema:
     Schemas are abstract knowledge structures that organize
     related memories and enable generalization.
     """
+
     name: str
-    prototype: np.ndarray           # Centroid/average representation
-    variance: np.ndarray            # Variance along each dimension
-    coverage: float                 # Proportion of domain covered
-    instances: List[str]            # Memory IDs that instantiate this schema
+    prototype: np.ndarray  # Centroid/average representation
+    variance: np.ndarray  # Variance along each dimension
+    coverage: float  # Proportion of domain covered
+    instances: List[str]  # Memory IDs that instantiate this schema
     sub_schemas: List[str] = field(default_factory=list)
     parent_schema: Optional[str] = None
     constraints: Dict[str, Any] = field(default_factory=dict)
@@ -54,7 +56,7 @@ class Schema:
         diff = vector - self.prototype
         # Simplified Mahalanobis using variance
         safe_var = np.maximum(self.variance, 1e-8)
-        distance = np.sqrt(np.sum(diff ** 2 / safe_var))
+        distance = np.sqrt(np.sum(diff**2 / safe_var))
 
         return distance <= threshold
 
@@ -70,6 +72,7 @@ class Schema:
 @dataclass
 class SchemaUpdate:
     """Record of a schema update."""
+
     schema_name: str
     update_type: SchemaUpdateType
     timestamp: float
@@ -201,10 +204,7 @@ class SchemaRefiner:
 
         # Update variance
         if schema.instances:
-            vectors = [
-                self._instance_vectors.get(i, schema.prototype)
-                for i in schema.instances
-            ]
+            vectors = [self._instance_vectors.get(i, schema.prototype) for i in schema.instances]
             vectors.append(instance_vector)
             schema.variance = np.var(vectors, axis=0)
 
@@ -217,14 +217,16 @@ class SchemaRefiner:
         schema.coverage = self.compute_coverage(schema_name)
 
         # Record update
-        self._updates.append(SchemaUpdate(
-            schema_name=schema_name,
-            update_type=update_type,
-            timestamp=timestamp,
-            old_prototype=old_prototype,
-            new_prototype=schema.prototype.copy(),
-            triggering_memory=new_instance,
-        ))
+        self._updates.append(
+            SchemaUpdate(
+                schema_name=schema_name,
+                update_type=update_type,
+                timestamp=timestamp,
+                old_prototype=old_prototype,
+                new_prototype=schema.prototype.copy(),
+                triggering_memory=new_instance,
+            )
+        )
 
         return schema, update_type
 
@@ -270,11 +272,7 @@ class SchemaRefiner:
         old_prototype = schema.prototype.copy()
 
         # Get all instance vectors
-        vectors = [
-            self._instance_vectors[i]
-            for i in instances
-            if i in self._instance_vectors
-        ]
+        vectors = [self._instance_vectors[i] for i in instances if i in self._instance_vectors]
 
         if not vectors:
             return schema
@@ -296,13 +294,15 @@ class SchemaRefiner:
         schema.n_updates += 1
         schema.coverage = self.compute_coverage(schema_name)
 
-        self._updates.append(SchemaUpdate(
-            schema_name=schema_name,
-            update_type=SchemaUpdateType.GENERALIZE,
-            timestamp=timestamp,
-            old_prototype=old_prototype,
-            new_prototype=new_prototype,
-        ))
+        self._updates.append(
+            SchemaUpdate(
+                schema_name=schema_name,
+                update_type=SchemaUpdateType.GENERALIZE,
+                timestamp=timestamp,
+                old_prototype=old_prototype,
+                new_prototype=new_prototype,
+            )
+        )
 
         return schema
 
@@ -325,9 +325,7 @@ class SchemaRefiner:
 
         # Separate exception vectors
         exception_vectors = [
-            self._instance_vectors[e]
-            for e in exceptions
-            if e in self._instance_vectors
+            self._instance_vectors[e] for e in exceptions if e in self._instance_vectors
         ]
 
         if not exception_vectors:
@@ -345,7 +343,11 @@ class SchemaRefiner:
             timestamp=timestamp,
         )
         sub_schema.parent_schema = schema_name
-        sub_schema.variance = np.var(exception_vectors, axis=0) if len(exception_vectors) > 1 else schema.variance * 0.5
+        sub_schema.variance = (
+            np.var(exception_vectors, axis=0)
+            if len(exception_vectors) > 1
+            else schema.variance * 0.5
+        )
 
         # Update parent
         schema.sub_schemas.append(sub_name)
@@ -355,13 +357,13 @@ class SchemaRefiner:
 
         # Recompute parent prototype
         remaining_vectors = [
-            self._instance_vectors[i]
-            for i in schema.instances
-            if i in self._instance_vectors
+            self._instance_vectors[i] for i in schema.instances if i in self._instance_vectors
         ]
         if remaining_vectors:
             schema.prototype = np.mean(remaining_vectors, axis=0)
-            schema.variance = np.var(remaining_vectors, axis=0) if len(remaining_vectors) > 1 else schema.variance
+            schema.variance = (
+                np.var(remaining_vectors, axis=0) if len(remaining_vectors) > 1 else schema.variance
+            )
 
         return [sub_schema]
 
@@ -392,9 +394,7 @@ class SchemaRefiner:
 
         # Get all vectors
         all_vectors = [
-            self._instance_vectors[i]
-            for i in all_instances
-            if i in self._instance_vectors
+            self._instance_vectors[i] for i in all_instances if i in self._instance_vectors
         ]
 
         if not all_vectors:
@@ -418,13 +418,15 @@ class SchemaRefiner:
 
         self._schemas[new_name] = merged
 
-        self._updates.append(SchemaUpdate(
-            schema_name=new_name,
-            update_type=SchemaUpdateType.MERGE,
-            timestamp=timestamp,
-            old_prototype=s_a.prototype,  # Arbitrary choice
-            new_prototype=new_prototype,
-        ))
+        self._updates.append(
+            SchemaUpdate(
+                schema_name=new_name,
+                update_type=SchemaUpdateType.MERGE,
+                timestamp=timestamp,
+                old_prototype=s_a.prototype,  # Arbitrary choice
+                new_prototype=new_prototype,
+            )
+        )
 
         return merged
 
@@ -511,7 +513,9 @@ class SchemaRefiner:
             cluster = [inst_id]
             cluster_vectors = [vector]
 
-            for j, (other_id, other_vector) in enumerate(zip(ids[i+1:], vectors[i+1:]), i+1):
+            for j, (other_id, other_vector) in enumerate(
+                zip(ids[i + 1 :], vectors[i + 1 :]), i + 1
+            ):
                 if other_id in assigned:
                     continue
 
@@ -574,8 +578,8 @@ class SchemaRefiner:
 
 
 __all__ = [
-    'SchemaUpdateType',
-    'Schema',
-    'SchemaUpdate',
-    'SchemaRefiner',
+    "SchemaUpdateType",
+    "Schema",
+    "SchemaUpdate",
+    "SchemaRefiner",
 ]

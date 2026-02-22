@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 
 class ModalityType(Enum):
     """Types of modalities that can project to shared space."""
+
     VISUAL = "visual"
     AUDITORY = "auditory"
     LINGUISTIC = "linguistic"
@@ -29,6 +30,7 @@ class ModalityType(Enum):
 @dataclass
 class SharedSpaceConfig:
     """Configuration for shared semantic space."""
+
     embedding_dim: int = 512
     n_attention_heads: int = 8
     temperature: float = 1.0
@@ -41,6 +43,7 @@ class SharedSpaceConfig:
 @dataclass
 class SemanticEmbedding:
     """A semantic embedding in shared space."""
+
     vector: np.ndarray
     modality: ModalityType
     source_module: str
@@ -48,7 +51,7 @@ class SemanticEmbedding:
     timestamp: float = 0.0
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def similarity(self, other: 'SemanticEmbedding') -> float:
+    def similarity(self, other: "SemanticEmbedding") -> float:
         """Compute cosine similarity with another embedding."""
         norm_self = np.linalg.norm(self.vector)
         norm_other = np.linalg.norm(other.vector)
@@ -56,11 +59,11 @@ class SemanticEmbedding:
             return 0.0
         return float(np.dot(self.vector, other.vector) / (norm_self * norm_other))
 
-    def distance(self, other: 'SemanticEmbedding') -> float:
+    def distance(self, other: "SemanticEmbedding") -> float:
         """Compute Euclidean distance to another embedding."""
         return float(np.linalg.norm(self.vector - other.vector))
 
-    def blend(self, other: 'SemanticEmbedding', weight: float = 0.5) -> 'SemanticEmbedding':
+    def blend(self, other: "SemanticEmbedding", weight: float = 0.5) -> "SemanticEmbedding":
         """Blend this embedding with another."""
         blended_vector = weight * self.vector + (1 - weight) * other.vector
         blended_vector = blended_vector / (np.linalg.norm(blended_vector) + 1e-8)
@@ -117,10 +120,10 @@ class ProjectionLayer:
             # Pad or truncate
             if input_vector.shape[0] < self.input_dim:
                 padded = np.zeros(self.input_dim)
-                padded[:input_vector.shape[0]] = input_vector
+                padded[: input_vector.shape[0]] = input_vector
                 input_vector = padded
             else:
-                input_vector = input_vector[:self.input_dim]
+                input_vector = input_vector[: self.input_dim]
 
         # Linear projection + tanh activation
         projected = np.tanh(input_vector @ self.weights + self.bias)
@@ -152,22 +155,24 @@ class ProjectionLayer:
         if input_vector.shape[0] != self.input_dim:
             if input_vector.shape[0] < self.input_dim:
                 padded = np.zeros(self.input_dim)
-                padded[:input_vector.shape[0]] = input_vector
+                padded[: input_vector.shape[0]] = input_vector
                 input_vector = padded
             else:
-                input_vector = input_vector[:self.input_dim]
+                input_vector = input_vector[: self.input_dim]
 
         # Gradient descent with momentum
         grad_weights = np.outer(input_vector, error)
         grad_bias = error
 
-        self.weight_momentum = self.momentum * self.weight_momentum - self.learning_rate * grad_weights
+        self.weight_momentum = (
+            self.momentum * self.weight_momentum - self.learning_rate * grad_weights
+        )
         self.bias_momentum = self.momentum * self.bias_momentum - self.learning_rate * grad_bias
 
         self.weights += self.weight_momentum
         self.bias += self.bias_momentum
 
-        self.total_error += np.sum(error ** 2)
+        self.total_error += np.sum(error**2)
 
 
 class SharedSpace:
@@ -255,10 +260,9 @@ class SharedSpace:
         if len(self._active_embeddings) > self.config.max_active_concepts:
             # Remove oldest/lowest confidence
             self._active_embeddings.sort(
-                key=lambda e: e.confidence * (1.0 / (1.0 + e.timestamp)),
-                reverse=True
+                key=lambda e: e.confidence * (1.0 / (1.0 + e.timestamp)), reverse=True
             )
-            self._active_embeddings = self._active_embeddings[:self.config.max_active_concepts]
+            self._active_embeddings = self._active_embeddings[: self.config.max_active_concepts]
 
     def query(
         self,
@@ -346,9 +350,7 @@ class SharedSpace:
         for embedding in self._active_embeddings:
             similarity = focus.similarity(embedding)
             # Softmax-like attention
-            attention[embedding.source_module] = np.exp(
-                similarity / self.config.temperature
-            )
+            attention[embedding.source_module] = np.exp(similarity / self.config.temperature)
 
         # Normalize
         total = sum(attention.values())
@@ -360,13 +362,10 @@ class SharedSpace:
     def decay(self) -> None:
         """Apply decay to active embeddings."""
         for embedding in self._active_embeddings:
-            embedding.confidence *= (1 - self.config.decay_rate)
+            embedding.confidence *= 1 - self.config.decay_rate
 
         # Remove very low confidence embeddings
-        self._active_embeddings = [
-            e for e in self._active_embeddings
-            if e.confidence > 0.01
-        ]
+        self._active_embeddings = [e for e in self._active_embeddings if e.confidence > 0.01]
 
     def clear_active(self) -> None:
         """Clear all active embeddings."""
@@ -406,9 +405,7 @@ class SharedSpace:
         """Get statistics about shared space usage."""
         modality_counts = {}
         for emb in self._active_embeddings:
-            modality_counts[emb.modality.value] = modality_counts.get(
-                emb.modality.value, 0
-            ) + 1
+            modality_counts[emb.modality.value] = modality_counts.get(emb.modality.value, 0) + 1
 
         return {
             "n_registered_modules": len(self._projections),

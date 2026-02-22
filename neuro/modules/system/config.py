@@ -17,6 +17,7 @@ import os
 @dataclass
 class ModuleConfig:
     """Configuration for a single cognitive module."""
+
     module_id: str
     enabled: bool = True
     priority: float = 1.0  # Higher = processed earlier
@@ -75,7 +76,7 @@ class SystemConfig:
     def _init_default_modules(self) -> None:
         """Set up default configurations for all 20 modules."""
         default_modules = [
-            ("00", "integration", 10.0),      # Highest priority - hub
+            ("00", "integration", 10.0),  # Highest priority - hub
             ("01", "predictive-coding", 9.0),
             ("02", "dual-process", 8.0),
             ("03", "reasoning-types", 7.0),
@@ -145,11 +146,7 @@ class SystemConfig:
 
     def get_enabled_modules(self) -> List[str]:
         """Get list of enabled module IDs, sorted by priority."""
-        enabled = [
-            (mid, cfg.priority)
-            for mid, cfg in self.module_configs.items()
-            if cfg.enabled
-        ]
+        enabled = [(mid, cfg.priority) for mid, cfg in self.module_configs.items() if cfg.enabled]
         enabled.sort(key=lambda x: x[1], reverse=True)
         return [mid for mid, _ in enabled]
 

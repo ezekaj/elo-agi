@@ -12,7 +12,8 @@ network reconfiguration than generating non-creative ideas"
 """
 
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from src.creative_process import CreativeProcess
 from src.networks.salience_network import NetworkState
@@ -32,22 +33,36 @@ def main():
 
     concepts = [
         # Technology
-        ("technology", "Digital tools and systems", {"artificial": 0.9, "logical": 0.8, "efficient": 0.7}),
-        ("algorithm", "Step-by-step procedure", {"logical": 1.0, "precise": 0.9, "artificial": 0.7}),
+        (
+            "technology",
+            "Digital tools and systems",
+            {"artificial": 0.9, "logical": 0.8, "efficient": 0.7},
+        ),
+        (
+            "algorithm",
+            "Step-by-step procedure",
+            {"logical": 1.0, "precise": 0.9, "artificial": 0.7},
+        ),
         ("network", "Connected system", {"connected": 0.9, "complex": 0.8, "dynamic": 0.7}),
         ("data", "Information units", {"structured": 0.8, "objective": 0.7, "digital": 0.9}),
         ("interface", "Connection point", {"interaction": 0.9, "visual": 0.6, "functional": 0.8}),
-
         # Nature
         ("nature", "Natural world", {"organic": 1.0, "complex": 0.9, "beautiful": 0.8}),
         ("ecosystem", "Living system", {"connected": 0.9, "complex": 1.0, "organic": 0.9}),
         ("growth", "Organic development", {"change": 0.8, "organic": 0.9, "positive": 0.7}),
         ("adaptation", "Environmental response", {"change": 0.9, "survival": 0.8, "organic": 0.7}),
         ("harmony", "Balanced coexistence", {"balance": 0.9, "peaceful": 0.8, "aesthetic": 0.7}),
-
         # Bridging concepts
-        ("emergence", "Complex from simple", {"complexity": 0.9, "surprising": 0.8, "natural": 0.7}),
-        ("pattern", "Recurring structure", {"structure": 0.9, "recognition": 0.8, "universal": 0.7}),
+        (
+            "emergence",
+            "Complex from simple",
+            {"complexity": 0.9, "surprising": 0.8, "natural": 0.7},
+        ),
+        (
+            "pattern",
+            "Recurring structure",
+            {"structure": 0.9, "recognition": 0.8, "universal": 0.7},
+        ),
         ("flow", "Continuous movement", {"dynamic": 0.9, "smooth": 0.8, "natural": 0.7}),
         ("connection", "Links between entities", {"relationship": 0.9, "network": 0.8}),
         ("beauty", "Aesthetic quality", {"aesthetic": 1.0, "subjective": 0.7, "emotional": 0.8}),
@@ -64,14 +79,12 @@ def main():
         ("technology", "data", 0.9, "processes"),
         ("algorithm", "data", 0.8, "processes"),
         ("network", "interface", 0.7, "has"),
-
         # Within nature
         ("nature", "ecosystem", 0.95, "contains"),
         ("nature", "growth", 0.8, "exhibits"),
         ("ecosystem", "adaptation", 0.9, "requires"),
         ("ecosystem", "harmony", 0.7, "achieves"),
         ("growth", "adaptation", 0.6, "enables"),
-
         # Cross-domain (creative connections)
         ("network", "ecosystem", 0.5, "analogous"),  # Key creative link
         ("algorithm", "adaptation", 0.4, "analogous"),  # Computational nature
@@ -81,7 +94,6 @@ def main():
         ("flow", "nature", 0.8, "characteristic"),
         ("emergence", "ecosystem", 0.8, "observed_in"),
         ("emergence", "network", 0.6, "observed_in"),
-
         # Aesthetic connections
         ("harmony", "beauty", 0.8, "creates"),
         ("pattern", "beauty", 0.6, "evokes"),
@@ -96,9 +108,7 @@ def main():
     print("\n--- Setting Creative Goal ---")
     goal_description = "Design technology that embodies natural principles"
     cp.set_creative_goal(
-        "biomimetic_tech",
-        goal_description,
-        constraints=["must be feasible", "should be elegant"]
+        "biomimetic_tech", goal_description, constraints=["must be feasible", "should be elegant"]
     )
     print(f"  Goal: {goal_description}")
 
@@ -108,14 +118,14 @@ def main():
     print("=" * 60)
 
     print(f"\nInitial network state: {cp.salience.current_state.value}")
-    print(f"Initial reconfiguration: {cp.salience.get_network_activity().reconfiguration_level:.3f}")
+    print(
+        f"Initial reconfiguration: {cp.salience.get_network_activity().reconfiguration_level:.3f}"
+    )
 
     # Generate ideas
     print("\n--- Generating Ideas ---")
     ideas = cp.generate_ideas(
-        num_ideas=5,
-        seed_concepts=["technology", "nature", "ecosystem"],
-        use_imagery=True
+        num_ideas=5, seed_concepts=["technology", "nature", "ecosystem"], use_imagery=True
     )
 
     for idea in ideas:
@@ -169,9 +179,7 @@ def main():
 
     print("\n--- Running 5-second creative session ---")
     output = cp.creative_session(
-        goal="Create biomimetic technology concept",
-        duration_seconds=5.0,
-        target_good_ideas=3
+        goal="Create biomimetic technology concept", duration_seconds=5.0, target_good_ideas=3
     )
 
     print(f"\n  Session Results:")
@@ -183,7 +191,7 @@ def main():
 
     print("\n  Best Ideas:")
     for i, idea in enumerate(output.best_ideas):
-        print(f"\n    #{i+1}: {idea.id}")
+        print(f"\n    #{i + 1}: {idea.id}")
         print(f"        Content: {idea.content}")
         if idea.evaluation:
             print(f"        Score: {idea.evaluation.overall_score:.3f}")

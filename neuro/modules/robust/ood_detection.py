@@ -17,20 +17,22 @@ import numpy as np
 
 class OODMethod(Enum):
     """OOD detection methods."""
-    MSP = "msp"                      # Maximum Softmax Probability
-    ENERGY = "energy"                # Energy-based
-    MAHALANOBIS = "mahalanobis"      # Mahalanobis distance
+
+    MSP = "msp"  # Maximum Softmax Probability
+    ENERGY = "energy"  # Energy-based
+    MAHALANOBIS = "mahalanobis"  # Mahalanobis distance
     LIKELIHOOD_RATIO = "likelihood_ratio"
     ISOLATION_FOREST = "isolation_forest"
-    ENSEMBLE = "ensemble"            # Combine multiple methods
+    ENSEMBLE = "ensemble"  # Combine multiple methods
 
 
 @dataclass
 class OODResult:
     """Result of OOD detection."""
+
     is_ood: bool
-    score: float                     # Higher = more likely OOD
-    confidence: float                # Confidence in detection
+    score: float  # Higher = more likely OOD
+    confidence: float  # Confidence in detection
     method: OODMethod
     details: Dict[str, Any] = field(default_factory=dict)
 
@@ -247,7 +249,7 @@ class OODDetector:
         features = self.model.get_features(x)
 
         # Find minimum Mahalanobis distance to any class
-        min_distance = float('inf')
+        min_distance = float("inf")
         for class_mean in self._class_means.values():
             diff = features - class_mean
             distance = float(diff @ self._feature_cov_inv @ diff)
@@ -271,7 +273,7 @@ class OODDetector:
         log_lik_in = -0.5 * float(diff_in @ self._feature_cov_inv @ diff_in)
 
         # Background: uniform/wide Gaussian
-        log_lik_bg = -0.5 * float(np.sum(features ** 2) / 100)  # Wide variance
+        log_lik_bg = -0.5 * float(np.sum(features**2) / 100)  # Wide variance
 
         # Log likelihood ratio (lower = more OOD)
         return float(log_lik_bg - log_lik_in)
@@ -289,10 +291,7 @@ class OODDetector:
         features = self.model.get_features(x)
 
         # Average path length across trees
-        path_lengths = [
-            self._path_length(features, tree)
-            for tree in self._isolation_trees
-        ]
+        path_lengths = [self._path_length(features, tree) for tree in self._isolation_trees]
         avg_path = np.mean(path_lengths)
 
         # Normalize to [0, 1]

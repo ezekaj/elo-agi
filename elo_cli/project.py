@@ -38,22 +38,17 @@ def detect_project(path: str = ".") -> dict:
                         "type": lang,
                         "marker": marker,
                         "path": str(p),
-                        "context": load_project_context(p, lang)
+                        "context": load_project_context(p, lang),
                     }
             elif (p / marker).exists():
                 return {
                     "type": lang,
                     "marker": marker,
                     "path": str(p),
-                    "context": load_project_context(p, lang)
+                    "context": load_project_context(p, lang),
                 }
 
-    return {
-        "type": "unknown",
-        "marker": None,
-        "path": str(p),
-        "context": load_generic_context(p)
-    }
+    return {"type": "unknown", "marker": None, "path": str(p), "context": load_generic_context(p)}
 
 
 def load_project_context(path: Path, lang: str) -> str:

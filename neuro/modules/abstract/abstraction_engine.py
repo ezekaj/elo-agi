@@ -17,11 +17,12 @@ from itertools import combinations
 
 class AbstractionLevel(Enum):
     """Levels of abstraction."""
-    INSTANCE = "instance"        # Concrete examples
-    CONCEPT = "concept"          # Categories
-    SCHEMA = "schema"            # Structural patterns
-    PRINCIPLE = "principle"      # Abstract rules
-    UNIVERSAL = "universal"      # Domain-invariant
+
+    INSTANCE = "instance"  # Concrete examples
+    CONCEPT = "concept"  # Categories
+    SCHEMA = "schema"  # Structural patterns
+    PRINCIPLE = "principle"  # Abstract rules
+    UNIVERSAL = "universal"  # Domain-invariant
 
 
 @dataclass
@@ -31,6 +32,7 @@ class Abstraction:
 
     Represents a generalized pattern that captures common structure.
     """
+
     id: str
     name: str
     level: AbstractionLevel
@@ -81,6 +83,7 @@ class StructureMapping:
 
     Implements Structure-Mapping Theory for analogical reasoning.
     """
+
     source_domain: str
     target_domain: str
     object_mappings: Dict[str, str]  # source_obj -> target_obj
@@ -109,6 +112,7 @@ class Principle:
 
     Principles are domain-general rules that apply across contexts.
     """
+
     id: str
     name: str
     preconditions: List[Callable[[Dict], bool]]
@@ -304,8 +308,7 @@ class AbstractionEngine:
 
         # Find examples with "condition" and "result" or similar
         conditional_examples = [
-            ex for ex in examples
-            if any(k in ex for k in ["condition", "if", "when", "given"])
+            ex for ex in examples if any(k in ex for k in ["condition", "if", "when", "given"])
         ]
 
         if not conditional_examples:
@@ -384,8 +387,10 @@ class AbstractionEngine:
             for s_rel, s_arg1, s_arg2 in source_relations:
                 for t_rel, t_arg1, t_arg2 in target_relations:
                     # Check if arguments map
-                    if (object_mappings.get(s_arg1) == t_arg1 and
-                        object_mappings.get(s_arg2) == t_arg2):
+                    if (
+                        object_mappings.get(s_arg1) == t_arg1
+                        and object_mappings.get(s_arg2) == t_arg2
+                    ):
                         relation_mappings[s_rel] = t_rel
 
         # Compute consistency and systematicity
@@ -423,10 +428,7 @@ class AbstractionEngine:
             new_structure[new_key] = value
 
         # Map variables
-        new_variables = [
-            mapping.object_mappings.get(v, v)
-            for v in concept.variables
-        ]
+        new_variables = [mapping.object_mappings.get(v, v) for v in concept.variables]
 
         return Abstraction(
             id=f"abs_{self._abstraction_counter}",
@@ -515,10 +517,7 @@ class AbstractionEngine:
             keys = set(v1.keys()) | set(v2.keys())
             if not keys:
                 return 1.0
-            sims = [
-                self._value_similarity(v1.get(k), v2.get(k))
-                for k in keys
-            ]
+            sims = [self._value_similarity(v1.get(k), v2.get(k)) for k in keys]
             return np.mean(sims)
 
         if isinstance(v1, list):
@@ -573,9 +572,7 @@ class AbstractionEngine:
             "n_analogies_found": self._n_analogies_found,
             "n_transfers": self._n_transfers,
             "abstraction_levels": {
-                level.value: sum(
-                    1 for a in self._abstractions.values() if a.level == level
-                )
+                level.value: sum(1 for a in self._abstractions.values() if a.level == level)
                 for level in AbstractionLevel
             },
         }

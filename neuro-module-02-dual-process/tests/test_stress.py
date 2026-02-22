@@ -18,10 +18,18 @@ from neuro.modules.m02_dual_process.system1.pattern_recognition import PatternRe
 from neuro.modules.m02_dual_process.system1.habit_executor import HabitExecutor, Action
 from neuro.modules.m02_dual_process.system1.emotional_valuation import EmotionalValuation
 from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory
-from neuro.modules.m02_dual_process.system2.cognitive_control import CognitiveControl, Response, ConflictLevel
-from neuro.modules.m02_dual_process.system2.relational_reasoning import RelationalReasoning, RelationType
+from neuro.modules.m02_dual_process.system2.cognitive_control import (
+    CognitiveControl,
+    Response,
+    ConflictLevel,
+)
+from neuro.modules.m02_dual_process.system2.relational_reasoning import (
+    RelationalReasoning,
+    RelationType,
+)
 from neuro.modules.m02_dual_process.hpc_pfc_complex import HPCPFCComplex
 from neuro.modules.m02_dual_process.logic_network import LogicNetwork, Proposition, PropositionType
+
 
 class TestWorkingMemoryStress:
     """Stress test working memory limits"""
@@ -94,6 +102,7 @@ class TestWorkingMemoryStress:
         nodes = wm.query_by_binding("type", "node")
         assert len(nodes) == 3
 
+
 class TestConflictResolutionStress:
     """Stress test conflict detection and resolution"""
 
@@ -143,8 +152,7 @@ class TestConflictResolutionStress:
         cc = CognitiveControl(inhibition_strength=0.6)
 
         responses = [
-            Response(id=f"r_{i}", activation=0.5 + i * 0.05, source="s1")
-            for i in range(10)
+            Response(id=f"r_{i}", activation=0.5 + i * 0.05, source="s1") for i in range(10)
         ]
 
         # Keep only the strongest
@@ -159,6 +167,7 @@ class TestConflictResolutionStress:
         others = [r for r in result if r.id != "r_9"]
         for r in others:
             assert r.activation < 0.5
+
 
 class TestRelationalReasoningStress:
     """Stress test compositional structures"""
@@ -212,10 +221,7 @@ class TestRelationalReasoningStress:
         ]
 
         structure = rr.create_action_structure(
-            action=action,
-            agent=agent,
-            patient=patient,
-            modifiers=modifiers
+            action=action, agent=agent, patient=patient, modifiers=modifiers
         )
 
         # 1 action + 1 agent + 1 patient + 5 modifiers = 8 elements
@@ -247,6 +253,7 @@ class TestRelationalReasoningStress:
         assert result is not None
         assert len(result.relations) >= 1
 
+
 class TestLogicNetworkStress:
     """Stress test logical inference"""
 
@@ -255,15 +262,17 @@ class TestLogicNetworkStress:
         ln = LogicNetwork()
 
         # P1 -> P2 -> P3 -> ... -> P10
-        props = [Proposition(f"P{i}", PropositionType.ATOMIC, f"Proposition {i}") for i in range(11)]
+        props = [
+            Proposition(f"P{i}", PropositionType.ATOMIC, f"Proposition {i}") for i in range(11)
+        ]
         implications = []
 
         for i in range(10):
             impl = Proposition(
-                f"impl_{i}_{i+1}",
+                f"impl_{i}_{i + 1}",
                 PropositionType.IMPLICATION,
-                f"P{i} implies P{i+1}",
-                components=[props[i], props[i + 1]]
+                f"P{i} implies P{i + 1}",
+                components=[props[i], props[i + 1]],
             )
             implications.append(impl)
 
@@ -299,7 +308,9 @@ class TestLogicNetworkStress:
 
         for i in range(25, 50):
             inner = Proposition(f"Q{i}", PropositionType.ATOMIC, f"Q{i}")
-            beliefs.append(Proposition(f"not_Q{i}", PropositionType.NEGATION, f"not Q{i}", components=[inner]))
+            beliefs.append(
+                Proposition(f"not_Q{i}", PropositionType.NEGATION, f"not Q{i}", components=[inner])
+            )
 
         consistent, contradictions = ln.check_consistency(beliefs)
         assert consistent
@@ -316,7 +327,9 @@ class TestLogicNetworkStress:
 
         # Add contradiction: P50 and not-P50
         inner = Proposition("P50", PropositionType.ATOMIC, "P50")
-        beliefs.append(Proposition("not_P50", PropositionType.NEGATION, "not P50", components=[inner]))
+        beliefs.append(
+            Proposition("not_P50", PropositionType.NEGATION, "not P50", components=[inner])
+        )
 
         consistent, contradictions = ln.check_consistency(beliefs)
         assert not consistent
@@ -328,7 +341,9 @@ class TestLogicNetworkStress:
 
         # Build implication network
         for i in range(10):
-            ln.represent_relation([f"N{i}", f"N{i + 1}"], "implies", properties={"type": "implication"})
+            ln.represent_relation(
+                [f"N{i}", f"N{i + 1}"], "implies", properties={"type": "implication"}
+            )
 
         model = {f"N{i}": None for i in range(11)}
         model["N0"] = True
@@ -340,6 +355,7 @@ class TestLogicNetworkStress:
         assert updated["N0"] is True
         assert updated["N1"] is True
 
+
 class TestHPCPFCStress:
     """Stress test episodic and schematic memory"""
 
@@ -350,8 +366,7 @@ class TestHPCPFCStress:
         start = time.time()
         for i in range(1000):
             complex.encode_and_abstract(
-                f"event_{i}",
-                {"index": i, "type": i % 10, "value": np.random.random()}
+                f"event_{i}", {"index": i, "type": i % 10, "value": np.random.random()}
             )
         elapsed = time.time() - start
 
@@ -368,7 +383,7 @@ class TestHPCPFCStress:
         for i in range(100):
             complex.encode_and_abstract(
                 f"meal_{i}",
-                {"type": "meal", "food": f"food_{i % 10}", "location": "restaurant", "cost": i}
+                {"type": "meal", "food": f"food_{i % 10}", "location": "restaurant", "cost": i},
             )
 
         # Should have extracted schema
@@ -415,6 +430,7 @@ class TestHPCPFCStress:
 
         # Should be fast (< 1 second for 100 retrievals)
         assert elapsed < 1.0
+
 
 class TestDualProcessIntegrationStress:
     """Full system integration stress tests"""
@@ -470,10 +486,13 @@ class TestDualProcessIntegrationStress:
         controller.train_habit(habit_trigger, Action(id="habit_action"), repetitions=50)
 
         # Learn conflicting pattern
-        controller.learn_pattern("pattern_action", [
-            np.array([1.0, 0.1, 0.0, 0.0, 0.0]),
-            np.array([0.9, 0.0, 0.0, 0.0, 0.0]),
-        ])
+        controller.learn_pattern(
+            "pattern_action",
+            [
+                np.array([1.0, 0.1, 0.0, 0.0, 0.0]),
+                np.array([0.9, 0.0, 0.0, 0.0, 0.0]),
+            ],
+        )
 
         # Input that triggers both
         conflict_input = np.array([0.95, 0.05, 0.0, 0.0, 0.0])
@@ -513,6 +532,7 @@ class TestDualProcessIntegrationStress:
         if result.s2_output:
             # Should have bounded deliberation
             assert result.s2_output.deliberation_steps <= 10
+
 
 class TestPatternRecognitionStress:
     """Stress test pattern matching at scale"""
@@ -569,6 +589,7 @@ class TestPatternRecognitionStress:
             matches = pr.match(test)
             # May or may not match depending on noise
 
+
 class TestEmotionalProcessingStress:
     """Stress test emotional valuation"""
 
@@ -607,6 +628,7 @@ class TestEmotionalProcessingStress:
         # Should still be somewhat threatening
         valence = ev.evaluate(stimulus)
         assert valence.threat > 0.3
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short", "-x"])

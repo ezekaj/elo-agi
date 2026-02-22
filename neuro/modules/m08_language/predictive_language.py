@@ -24,6 +24,7 @@ from .recursive_parser import RecursiveGrammar, ConstituentParser, Constituent
 @dataclass
 class ProcessingResult:
     """Result of language processing"""
+
     phonological: np.ndarray
     syntactic: np.ndarray
     semantic: np.ndarray
@@ -46,12 +47,7 @@ class PredictiveLanguageProcessor:
     - Broca's inhibition signals impossible structures
     """
 
-    def __init__(
-        self,
-        input_dim: int = 64,
-        hidden_dim: int = 48,
-        learning_rate: float = 0.1
-    ):
+    def __init__(self, input_dim: int = 64, hidden_dim: int = 48, learning_rate: float = 0.1):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.learning_rate = learning_rate
@@ -63,13 +59,10 @@ class PredictiveLanguageProcessor:
             syntactic_dim=hidden_dim,
             semantic_dim=hidden_dim,
             pragmatic_dim=hidden_dim // 2,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
         )
 
-        self.network = DistributedLanguageNetwork(
-            dim=hidden_dim,
-            learning_rate=learning_rate
-        )
+        self.network = DistributedLanguageNetwork(dim=hidden_dim, learning_rate=learning_rate)
 
         self.grammar_manifold = GrammarConstraintManifold(dim=hidden_dim)
         self.universal_grammar = UniversalGrammar(dim=hidden_dim)
@@ -92,10 +85,7 @@ class PredictiveLanguageProcessor:
         return self.embeddings[token]
 
     def process_token(
-        self,
-        token: str,
-        dt: float = 0.1,
-        update_weights: bool = True
+        self, token: str, dt: float = 0.1, update_weights: bool = True
     ) -> ProcessingResult:
         """Process a single token through the full system"""
         # Get embedding
@@ -108,7 +98,7 @@ class PredictiveLanguageProcessor:
         network_result = self.network.process(embedding)
 
         # Grammar evaluation
-        syntactic_state = hier_result['syntactic']
+        syntactic_state = hier_result["syntactic"]
         grammar_eval = self.universal_grammar.evaluate(syntactic_state)
 
         # Check grammar constraints
@@ -119,16 +109,16 @@ class PredictiveLanguageProcessor:
         is_grammatical = violation < 0.5 and broca_inhibition < 0.3
 
         result = ProcessingResult(
-            phonological=hier_result['phonological'],
-            syntactic=hier_result['syntactic'],
-            semantic=hier_result['semantic'],
-            pragmatic=hier_result['pragmatic'],
+            phonological=hier_result["phonological"],
+            syntactic=hier_result["syntactic"],
+            semantic=hier_result["semantic"],
+            pragmatic=hier_result["pragmatic"],
             network_state=network_result,
             grammar_evaluation=grammar_eval,
             parse_tree=None,
-            total_error=hier_result['total_error'],
+            total_error=hier_result["total_error"],
             broca_inhibition=broca_inhibition,
-            is_grammatical=is_grammatical
+            is_grammatical=is_grammatical,
         )
 
         self.current_state = result
@@ -139,10 +129,7 @@ class PredictiveLanguageProcessor:
         return result
 
     def process_utterance(
-        self,
-        tokens: List[str],
-        dt: float = 0.1,
-        update_weights: bool = True
+        self, tokens: List[str], dt: float = 0.1, update_weights: bool = True
     ) -> Dict[str, any]:
         """Process a complete utterance (multiple tokens)"""
         results = []
@@ -159,32 +146,28 @@ class PredictiveLanguageProcessor:
 
         # Aggregate results
         return {
-            'tokens': tokens,
-            'token_results': results,
-            'parse_tree': parse_tree,
-            'final_state': {
-                'phonological': results[-1].phonological if results else np.zeros(self.hidden_dim),
-                'syntactic': results[-1].syntactic if results else np.zeros(self.hidden_dim),
-                'semantic': results[-1].semantic if results else np.zeros(self.hidden_dim),
-                'pragmatic': results[-1].pragmatic if results else np.zeros(self.hidden_dim // 2),
+            "tokens": tokens,
+            "token_results": results,
+            "parse_tree": parse_tree,
+            "final_state": {
+                "phonological": results[-1].phonological if results else np.zeros(self.hidden_dim),
+                "syntactic": results[-1].syntactic if results else np.zeros(self.hidden_dim),
+                "semantic": results[-1].semantic if results else np.zeros(self.hidden_dim),
+                "pragmatic": results[-1].pragmatic if results else np.zeros(self.hidden_dim // 2),
             },
-            'total_error': sum(r.total_error for r in results),
-            'mean_broca_inhibition': np.mean([r.broca_inhibition for r in results]) if results else 0,
-            'grammaticality': all(r.is_grammatical for r in results),
-            'layer_timescales': self.hierarchy.get_timescales(),
+            "total_error": sum(r.total_error for r in results),
+            "mean_broca_inhibition": np.mean([r.broca_inhibition for r in results])
+            if results
+            else 0,
+            "grammaticality": all(r.is_grammatical for r in results),
+            "layer_timescales": self.hierarchy.get_timescales(),
         }
 
     def process_sequence(
-        self,
-        utterances: List[List[str]],
-        dt: float = 0.1,
-        update_weights: bool = True
+        self, utterances: List[List[str]], dt: float = 0.1, update_weights: bool = True
     ) -> List[Dict[str, any]]:
         """Process a sequence of utterances"""
-        return [
-            self.process_utterance(utt, dt, update_weights)
-            for utt in utterances
-        ]
+        return [self.process_utterance(utt, dt, update_weights) for utt in utterances]
 
     def test_grammar(self, grammar_params: np.ndarray) -> Dict[str, any]:
         """Test if grammar parameters represent a possible grammar
@@ -206,19 +189,16 @@ class PredictiveLanguageProcessor:
             nearest = grammar_params
 
         return {
-            'is_possible': is_possible,
-            'violation_score': violation,
-            'broca_inhibition': inhibition,
-            'ug_compatibility': ug_eval,
-            'nearest_possible': nearest,
-            'distance_to_boundary': self.grammar_manifold.distance_to_boundary(grammar_params)
+            "is_possible": is_possible,
+            "violation_score": violation,
+            "broca_inhibition": inhibition,
+            "ug_compatibility": ug_eval,
+            "nearest_possible": nearest,
+            "distance_to_boundary": self.grammar_manifold.distance_to_boundary(grammar_params),
         }
 
     def lesion_experiment(
-        self,
-        region: str,
-        test_utterances: List[List[str]],
-        damage_level: float = 1.0
+        self, region: str, test_utterances: List[List[str]], damage_level: float = 1.0
     ) -> Dict[str, any]:
         """Run lesion experiment
 
@@ -242,38 +222,38 @@ class PredictiveLanguageProcessor:
         self.network.restore()
 
         # Compare
-        baseline_errors = [r['total_error'] for r in baseline_results]
-        lesioned_errors = [r['total_error'] for r in lesioned_results]
+        baseline_errors = [r["total_error"] for r in baseline_results]
+        lesioned_errors = [r["total_error"] for r in lesioned_results]
 
-        baseline_grammatical = sum(1 for r in baseline_results if r['grammaticality'])
-        lesioned_grammatical = sum(1 for r in lesioned_results if r['grammaticality'])
+        baseline_grammatical = sum(1 for r in baseline_results if r["grammaticality"])
+        lesioned_grammatical = sum(1 for r in lesioned_results if r["grammaticality"])
 
         return {
-            'region': region,
-            'damage_level': damage_level,
-            'baseline': {
-                'mean_error': np.mean(baseline_errors),
-                'grammatical_count': baseline_grammatical,
-                'network_functional': True
+            "region": region,
+            "damage_level": damage_level,
+            "baseline": {
+                "mean_error": np.mean(baseline_errors),
+                "grammatical_count": baseline_grammatical,
+                "network_functional": True,
             },
-            'lesioned': {
-                'mean_error': np.mean(lesioned_errors),
-                'grammatical_count': lesioned_grammatical,
-                'network_functional': self.network.is_functional()
+            "lesioned": {
+                "mean_error": np.mean(lesioned_errors),
+                "grammatical_count": lesioned_grammatical,
+                "network_functional": self.network.is_functional(),
             },
-            'error_increase': np.mean(lesioned_errors) - np.mean(baseline_errors),
-            'grammaticality_drop': baseline_grammatical - lesioned_grammatical,
+            "error_increase": np.mean(lesioned_errors) - np.mean(baseline_errors),
+            "grammaticality_drop": baseline_grammatical - lesioned_grammatical,
             # Key finding: Broca's alone doesn't necessarily cause deficits
-            'broca_alone_functional': region == 'broca' and self.network.is_functional()
+            "broca_alone_functional": region == "broca" and self.network.is_functional(),
         }
 
     def get_layer_activations(self) -> Dict[str, np.ndarray]:
         """Get current activations at each hierarchy level"""
         return {
-            'phonological': self.hierarchy.phonological.state.copy(),
-            'syntactic': self.hierarchy.syntactic.state.copy(),
-            'semantic': self.hierarchy.semantic.state.copy(),
-            'pragmatic': self.hierarchy.pragmatic.state.copy(),
+            "phonological": self.hierarchy.phonological.state.copy(),
+            "syntactic": self.hierarchy.syntactic.state.copy(),
+            "semantic": self.hierarchy.semantic.state.copy(),
+            "pragmatic": self.hierarchy.pragmatic.state.copy(),
         }
 
     def get_network_states(self) -> Dict[str, np.ndarray]:
@@ -306,9 +286,7 @@ class LanguageAcquisitionSimulator:
         self.learning_history: List[Dict[str, any]] = []
 
     def attempt_grammar_learning(
-        self,
-        grammar_samples: List[np.ndarray],
-        n_epochs: int = 10
+        self, grammar_samples: List[np.ndarray], n_epochs: int = 10
     ) -> Dict[str, any]:
         """Attempt to learn a grammar from samples
 
@@ -326,48 +304,46 @@ class LanguageAcquisitionSimulator:
                 # Test grammar
                 result = self.processor.test_grammar(sample)
 
-                epoch_inhibitions.append(result['broca_inhibition'])
-                epoch_errors.append(result['violation_score'])
+                epoch_inhibitions.append(result["broca_inhibition"])
+                epoch_errors.append(result["violation_score"])
 
                 # High inhibition = learning blocked
-                if result['broca_inhibition'] > 0.7:
+                if result["broca_inhibition"] > 0.7:
                     learning_success = False
 
             inhibitions.append(np.mean(epoch_inhibitions))
             errors.append(np.mean(epoch_errors))
 
         result = {
-            'success': learning_success,
-            'final_inhibition': inhibitions[-1] if inhibitions else 0,
-            'final_error': errors[-1] if errors else 0,
-            'inhibition_history': inhibitions,
-            'error_history': errors,
-            'epochs': n_epochs
+            "success": learning_success,
+            "final_inhibition": inhibitions[-1] if inhibitions else 0,
+            "final_error": errors[-1] if errors else 0,
+            "inhibition_history": inhibitions,
+            "error_history": errors,
+            "epochs": n_epochs,
         }
 
         self.learning_history.append(result)
         return result
 
     def compare_possible_vs_impossible(
-        self,
-        possible_samples: List[np.ndarray],
-        impossible_samples: List[np.ndarray]
+        self, possible_samples: List[np.ndarray], impossible_samples: List[np.ndarray]
     ) -> Dict[str, any]:
         """Compare learning outcomes for possible vs impossible grammars"""
         possible_result = self.attempt_grammar_learning(possible_samples)
         impossible_result = self.attempt_grammar_learning(impossible_samples)
 
         return {
-            'possible': {
-                'success': possible_result['success'],
-                'final_inhibition': possible_result['final_inhibition'],
+            "possible": {
+                "success": possible_result["success"],
+                "final_inhibition": possible_result["final_inhibition"],
             },
-            'impossible': {
-                'success': impossible_result['success'],
-                'final_inhibition': impossible_result['final_inhibition'],
+            "impossible": {
+                "success": impossible_result["success"],
+                "final_inhibition": impossible_result["final_inhibition"],
             },
-            'selective_inhibition': (
-                impossible_result['final_inhibition'] > possible_result['final_inhibition']
+            "selective_inhibition": (
+                impossible_result["final_inhibition"] > possible_result["final_inhibition"]
             ),
-            'key_finding': "Broca's shows selective inhibition for impossible grammars only"
+            "key_finding": "Broca's shows selective inhibition for impossible grammars only",
         }

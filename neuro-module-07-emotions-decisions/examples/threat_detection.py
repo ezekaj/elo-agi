@@ -9,7 +9,8 @@ Demonstrates:
 
 import numpy as np
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.dual_emotion_routes import DualRouteProcessor, ResponseType
 
@@ -56,7 +57,7 @@ def demo_snake_vs_stick():
     print(f"   - Fast route still fires: {fast2.response_type.value}")
     print(f"   - Slow route override: {slow2.response_type.value}")
     print(f"   - Final response: {final.response_type.value}")
-    if 'override_reason' in final.details:
+    if "override_reason" in final.details:
         print(f"   - Override reason: {final.details['override_reason']}")
 
 

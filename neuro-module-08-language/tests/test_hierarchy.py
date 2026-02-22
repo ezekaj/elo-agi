@@ -8,8 +8,9 @@ from neuro.modules.m08_language.language_hierarchy import (
     SyntacticLayer,
     SemanticLayer,
     PragmaticLayer,
-    LanguageProcessingHierarchy
+    LanguageProcessingHierarchy,
 )
+
 
 class TestLanguageLayer:
     """Tests for base language layer"""
@@ -65,6 +66,7 @@ class TestLanguageLayer:
 
         assert conf_consistent > conf_variable
 
+
 class TestPhonologicalLayer:
     """Tests for phonological layer"""
 
@@ -82,6 +84,7 @@ class TestPhonologicalLayer:
 
         assert phonemes.shape == (24,)
         assert np.all(np.isfinite(phonemes))
+
 
 class TestSyntacticLayer:
     """Tests for syntactic layer"""
@@ -101,6 +104,7 @@ class TestSyntacticLayer:
 
         gram_score = layer.check_grammaticality()
         assert 0 <= gram_score <= 1
+
 
 class TestSemanticLayer:
     """Tests for semantic layer"""
@@ -126,6 +130,7 @@ class TestSemanticLayer:
         unknown = layer.lookup_word("xyz")
         assert unknown is None
 
+
 class TestPragmaticLayer:
     """Tests for pragmatic layer"""
 
@@ -146,17 +151,14 @@ class TestPragmaticLayer:
         assert output.shape == (24,)
         assert np.all(np.isfinite(output))
 
+
 class TestLanguageProcessingHierarchy:
     """Tests for full language hierarchy"""
 
     def test_initialization(self):
         """Test hierarchy initialization"""
         hierarchy = LanguageProcessingHierarchy(
-            input_dim=64,
-            phonological_dim=32,
-            syntactic_dim=48,
-            semantic_dim=64,
-            pragmatic_dim=32
+            input_dim=64, phonological_dim=32, syntactic_dim=48, semantic_dim=64, pragmatic_dim=32
         )
 
         assert len(hierarchy.layers) == 4
@@ -169,12 +171,12 @@ class TestLanguageProcessingHierarchy:
         acoustic_input = np.random.randn(64)
         result = hierarchy.forward(acoustic_input)
 
-        assert 'phonological' in result
-        assert 'syntactic' in result
-        assert 'semantic' in result
-        assert 'pragmatic' in result
-        assert 'errors' in result
-        assert 'total_error' in result
+        assert "phonological" in result
+        assert "syntactic" in result
+        assert "semantic" in result
+        assert "pragmatic" in result
+        assert "errors" in result
+        assert "total_error" in result
 
     def test_timescale_order(self):
         """Test timescales increase through hierarchy"""
@@ -193,11 +195,11 @@ class TestLanguageProcessingHierarchy:
         input_signal = np.random.randn(64)
         result = hierarchy.step(input_signal)
 
-        assert np.all(np.isfinite(result['phonological']))
-        assert np.all(np.isfinite(result['syntactic']))
-        assert np.all(np.isfinite(result['semantic']))
-        assert np.all(np.isfinite(result['pragmatic']))
-        assert np.isfinite(result['total_error'])
+        assert np.all(np.isfinite(result["phonological"]))
+        assert np.all(np.isfinite(result["syntactic"]))
+        assert np.all(np.isfinite(result["semantic"]))
+        assert np.all(np.isfinite(result["pragmatic"]))
+        assert np.isfinite(result["total_error"])
 
     def test_backward_predictions(self):
         """Test top-down prediction generation"""
@@ -222,13 +224,14 @@ class TestLanguageProcessingHierarchy:
 
         confidences = hierarchy.get_confidences()
 
-        assert 'phonological' in confidences
-        assert 'syntactic' in confidences
-        assert 'semantic' in confidences
-        assert 'pragmatic' in confidences
+        assert "phonological" in confidences
+        assert "syntactic" in confidences
+        assert "semantic" in confidences
+        assert "pragmatic" in confidences
 
         for conf in confidences.values():
             assert 0 <= conf <= 1
+
 
 class TestHierarchyLearning:
     """Tests for hierarchy learning dynamics"""
@@ -243,7 +246,7 @@ class TestHierarchyLearning:
         errors = []
         for _ in range(50):
             result = hierarchy.step(constant, update_weights=True)
-            errors.append(result['total_error'])
+            errors.append(result["total_error"])
 
         # Error should stay bounded (not explode)
         assert all(np.isfinite(e) for e in errors)
@@ -258,7 +261,8 @@ class TestHierarchyLearning:
 
         for inp in sequence:
             result = hierarchy.step(inp)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

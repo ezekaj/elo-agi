@@ -93,59 +93,77 @@ except Exception as e:
 
 # ---- Request/Response Models ----
 
+
 class REPLRequest(BaseModel):
     command: str = Field(..., max_length=5000, description="Python command to execute")
+
 
 class REPLResponse(BaseModel):
     output: str
     error: Optional[str] = None
     execution_time: float
 
+
 class ChatRequest(BaseModel):
     message: str = Field(..., max_length=10000)
     history: Optional[List[Dict[str, str]]] = None
+
 
 class ChatResponse(BaseModel):
     response: str
     cognitive_context: Optional[Dict[str, Any]] = None
 
+
 VALID_ANALYSIS_TYPES = {"dual_process", "emotion", "reasoning"}
 VALID_BENCHMARK_CATEGORIES = {
-    "causal_reasoning", "compositional", "continual_learning",
-    "robustness", "language", "memory", "planning", "reasoning",
+    "causal_reasoning",
+    "compositional",
+    "continual_learning",
+    "robustness",
+    "language",
+    "memory",
+    "planning",
+    "reasoning",
 }
+
 
 class BenchmarkRequest(BaseModel):
     categories: Optional[List[str]] = None
+
 
 class BenchmarkResponse(BaseModel):
     results: Dict[str, Any]
     execution_time: float
 
+
 class AnalyzeRequest(BaseModel):
     text: str = Field(..., max_length=5000)
     analysis_types: Optional[List[str]] = Field(
-        default=["dual_process", "emotion", "reasoning"],
-        description="Types of analysis to run"
+        default=["dual_process", "emotion", "reasoning"], description="Types of analysis to run"
     )
+
 
 class AnalyzeResponse(BaseModel):
     analyses: Dict[str, Any]
     execution_time: float
+
 
 class ModuleInfo(BaseModel):
     name: str
     category: str
     description: str
 
+
 class ModulesResponse(BaseModel):
     modules: List[ModuleInfo]
     total: int
+
 
 class HealthResponse(BaseModel):
     status: str
     uptime: float
     version: str
+
 
 class InfoResponse(BaseModel):
     name: str
@@ -161,48 +179,201 @@ class InfoResponse(BaseModel):
 _start_time = time.time()
 
 MODULE_DATA = [
-    {"name": "Memory", "category": "Cognitive", "description": "Sensory, working, and long-term memory systems with hippocampal replay for consolidation and retrieval."},
-    {"name": "Language", "category": "Cognitive", "description": "Natural language understanding and generation with semantic parsing, pragmatics, and discourse modeling."},
-    {"name": "Reasoning", "category": "Cognitive", "description": "Dimensional, interactive, logical, and perceptual reasoning pathways inspired by dual-process theory."},
-    {"name": "Creativity", "category": "Cognitive", "description": "Divergent thinking, conceptual blending, and novelty generation using stochastic recombination."},
-    {"name": "Executive Control", "category": "Cognitive", "description": "Top-down attention regulation, task switching, inhibition, and goal management."},
-    {"name": "Spatial", "category": "Cognitive", "description": "Allocentric and egocentric spatial representations with cognitive mapping and mental rotation."},
-    {"name": "Time Perception", "category": "Cognitive", "description": "Embodied temporal cognition modeling interval timing, sequence learning, and temporal prediction."},
-    {"name": "Learning", "category": "Cognitive", "description": "Adaptive learning mechanisms including meta-learning, curriculum learning, and learning rate modulation."},
-    {"name": "Embodied Cognition", "category": "Cognitive", "description": "Grounding abstract concepts in simulated sensorimotor experience and body-based representations."},
-    {"name": "Social Cognition", "category": "Cognitive", "description": "Theory of mind, social inference, shared intentionality, and multi-agent social modeling."},
-    {"name": "Consciousness", "category": "Cognitive", "description": "Global workspace broadcasting, metacognitive monitoring, and self-model maintenance."},
-    {"name": "World Modeling", "category": "Cognitive", "description": "Internal generative world model for prediction, simulation, counterfactual reasoning, and planning."},
-    {"name": "Emotion", "category": "Cognitive", "description": "Appraisal-based emotional processing that modulates decision-making, attention, and memory encoding."},
-    {"name": "Attention", "category": "Cognitive", "description": "Selective, sustained, and divided attention mechanisms with priority-based resource allocation."},
-    {"name": "Perception", "category": "Cognitive", "description": "Hierarchical feature extraction and integration across visual, auditory, and multimodal streams."},
-    {"name": "Motor Control", "category": "Cognitive", "description": "Motor planning, action selection, and forward-model-based movement prediction and correction."},
-    {"name": "Decision Making", "category": "Cognitive", "description": "Evidence accumulation, value-based choice, and satisficing strategies under uncertainty."},
-    {"name": "Metacognition", "category": "Cognitive", "description": "Self-monitoring of cognitive states, confidence estimation, and adaptive strategy selection."},
-    {"name": "Planning", "category": "Cognitive", "description": "Hierarchical task decomposition, forward search, and plan repair with temporal abstraction."},
-    {"name": "Communication", "category": "Cognitive", "description": "Multi-channel communication management including dialogue, gestures, and pragmatic inference."},
-    {"name": "Core System", "category": "Infrastructure", "description": "Unified cognitive core implementing active inference loop, free energy minimization, and module orchestration."},
-    {"name": "LLM Integration", "category": "Infrastructure", "description": "Semantic bridge to language models for grounding, dialogue generation, and knowledge extraction."},
-    {"name": "Knowledge Graph", "category": "Infrastructure", "description": "Structured fact store with ontological reasoning, graph-based inference, and dynamic knowledge updates."},
-    {"name": "Sensors", "category": "Infrastructure", "description": "Camera, microphone, and proprioception interfaces for multimodal sensory input processing."},
-    {"name": "Actuators", "category": "Infrastructure", "description": "Motor output, speech synthesis, and environment manipulation interfaces for embodied action."},
-    {"name": "Distributed Scaling", "category": "Infrastructure", "description": "Coordinator-worker architecture with GPU kernel fusion and gradient aggregation for scale-out."},
-    {"name": "Benchmarking", "category": "Support", "description": "Comprehensive test suites for reasoning, memory, language, and planning evaluation."},
-    {"name": "Perception Pipeline", "category": "Support", "description": "End-to-end sensory processing pipeline with feature extraction, integration, and attention-gated filtering."},
-    {"name": "Environment Manager", "category": "Support", "description": "Context and environment management for simulation, testing, and deployment configuration."},
-    {"name": "Data Loader", "category": "Support", "description": "Efficient data loading, preprocessing, and batching for training and inference workloads."},
-    {"name": "Logger", "category": "Support", "description": "Structured logging, telemetry, and cognitive state tracing for debugging and analysis."},
-    {"name": "Causal Reasoning", "category": "AGI", "description": "Counterfactual reasoning with structural causal models, intervention calculus, and causal DAG discovery."},
-    {"name": "Compositional Abstraction", "category": "AGI", "description": "Neuro-symbolic binding with hierarchical concept composition for ARC-style generalization tasks."},
-    {"name": "Continual Learning", "category": "AGI", "description": "Elastic weight consolidation, hippocampal replay, and meta-learning to prevent catastrophic forgetting."},
-    {"name": "Robustness", "category": "AGI", "description": "Uncertainty quantification, out-of-distribution detection, adversarial defense, and calibration."},
-    {"name": "AGI Planning", "category": "AGI", "description": "Advanced planning with causal model integration, hierarchical goal decomposition, and plan verification."},
-    {"name": "Transfer Learning", "category": "AGI", "description": "Cross-domain knowledge transfer, domain adaptation, and few-shot generalization mechanisms."},
-    {"name": "Integration", "category": "AGI", "description": "Advanced inter-module integration layer coordinating all AGI capabilities into unified processing."},
+    {
+        "name": "Memory",
+        "category": "Cognitive",
+        "description": "Sensory, working, and long-term memory systems with hippocampal replay for consolidation and retrieval.",
+    },
+    {
+        "name": "Language",
+        "category": "Cognitive",
+        "description": "Natural language understanding and generation with semantic parsing, pragmatics, and discourse modeling.",
+    },
+    {
+        "name": "Reasoning",
+        "category": "Cognitive",
+        "description": "Dimensional, interactive, logical, and perceptual reasoning pathways inspired by dual-process theory.",
+    },
+    {
+        "name": "Creativity",
+        "category": "Cognitive",
+        "description": "Divergent thinking, conceptual blending, and novelty generation using stochastic recombination.",
+    },
+    {
+        "name": "Executive Control",
+        "category": "Cognitive",
+        "description": "Top-down attention regulation, task switching, inhibition, and goal management.",
+    },
+    {
+        "name": "Spatial",
+        "category": "Cognitive",
+        "description": "Allocentric and egocentric spatial representations with cognitive mapping and mental rotation.",
+    },
+    {
+        "name": "Time Perception",
+        "category": "Cognitive",
+        "description": "Embodied temporal cognition modeling interval timing, sequence learning, and temporal prediction.",
+    },
+    {
+        "name": "Learning",
+        "category": "Cognitive",
+        "description": "Adaptive learning mechanisms including meta-learning, curriculum learning, and learning rate modulation.",
+    },
+    {
+        "name": "Embodied Cognition",
+        "category": "Cognitive",
+        "description": "Grounding abstract concepts in simulated sensorimotor experience and body-based representations.",
+    },
+    {
+        "name": "Social Cognition",
+        "category": "Cognitive",
+        "description": "Theory of mind, social inference, shared intentionality, and multi-agent social modeling.",
+    },
+    {
+        "name": "Consciousness",
+        "category": "Cognitive",
+        "description": "Global workspace broadcasting, metacognitive monitoring, and self-model maintenance.",
+    },
+    {
+        "name": "World Modeling",
+        "category": "Cognitive",
+        "description": "Internal generative world model for prediction, simulation, counterfactual reasoning, and planning.",
+    },
+    {
+        "name": "Emotion",
+        "category": "Cognitive",
+        "description": "Appraisal-based emotional processing that modulates decision-making, attention, and memory encoding.",
+    },
+    {
+        "name": "Attention",
+        "category": "Cognitive",
+        "description": "Selective, sustained, and divided attention mechanisms with priority-based resource allocation.",
+    },
+    {
+        "name": "Perception",
+        "category": "Cognitive",
+        "description": "Hierarchical feature extraction and integration across visual, auditory, and multimodal streams.",
+    },
+    {
+        "name": "Motor Control",
+        "category": "Cognitive",
+        "description": "Motor planning, action selection, and forward-model-based movement prediction and correction.",
+    },
+    {
+        "name": "Decision Making",
+        "category": "Cognitive",
+        "description": "Evidence accumulation, value-based choice, and satisficing strategies under uncertainty.",
+    },
+    {
+        "name": "Metacognition",
+        "category": "Cognitive",
+        "description": "Self-monitoring of cognitive states, confidence estimation, and adaptive strategy selection.",
+    },
+    {
+        "name": "Planning",
+        "category": "Cognitive",
+        "description": "Hierarchical task decomposition, forward search, and plan repair with temporal abstraction.",
+    },
+    {
+        "name": "Communication",
+        "category": "Cognitive",
+        "description": "Multi-channel communication management including dialogue, gestures, and pragmatic inference.",
+    },
+    {
+        "name": "Core System",
+        "category": "Infrastructure",
+        "description": "Unified cognitive core implementing active inference loop, free energy minimization, and module orchestration.",
+    },
+    {
+        "name": "LLM Integration",
+        "category": "Infrastructure",
+        "description": "Semantic bridge to language models for grounding, dialogue generation, and knowledge extraction.",
+    },
+    {
+        "name": "Knowledge Graph",
+        "category": "Infrastructure",
+        "description": "Structured fact store with ontological reasoning, graph-based inference, and dynamic knowledge updates.",
+    },
+    {
+        "name": "Sensors",
+        "category": "Infrastructure",
+        "description": "Camera, microphone, and proprioception interfaces for multimodal sensory input processing.",
+    },
+    {
+        "name": "Actuators",
+        "category": "Infrastructure",
+        "description": "Motor output, speech synthesis, and environment manipulation interfaces for embodied action.",
+    },
+    {
+        "name": "Distributed Scaling",
+        "category": "Infrastructure",
+        "description": "Coordinator-worker architecture with GPU kernel fusion and gradient aggregation for scale-out.",
+    },
+    {
+        "name": "Benchmarking",
+        "category": "Support",
+        "description": "Comprehensive test suites for reasoning, memory, language, and planning evaluation.",
+    },
+    {
+        "name": "Perception Pipeline",
+        "category": "Support",
+        "description": "End-to-end sensory processing pipeline with feature extraction, integration, and attention-gated filtering.",
+    },
+    {
+        "name": "Environment Manager",
+        "category": "Support",
+        "description": "Context and environment management for simulation, testing, and deployment configuration.",
+    },
+    {
+        "name": "Data Loader",
+        "category": "Support",
+        "description": "Efficient data loading, preprocessing, and batching for training and inference workloads.",
+    },
+    {
+        "name": "Logger",
+        "category": "Support",
+        "description": "Structured logging, telemetry, and cognitive state tracing for debugging and analysis.",
+    },
+    {
+        "name": "Causal Reasoning",
+        "category": "AGI",
+        "description": "Counterfactual reasoning with structural causal models, intervention calculus, and causal DAG discovery.",
+    },
+    {
+        "name": "Compositional Abstraction",
+        "category": "AGI",
+        "description": "Neuro-symbolic binding with hierarchical concept composition for ARC-style generalization tasks.",
+    },
+    {
+        "name": "Continual Learning",
+        "category": "AGI",
+        "description": "Elastic weight consolidation, hippocampal replay, and meta-learning to prevent catastrophic forgetting.",
+    },
+    {
+        "name": "Robustness",
+        "category": "AGI",
+        "description": "Uncertainty quantification, out-of-distribution detection, adversarial defense, and calibration.",
+    },
+    {
+        "name": "AGI Planning",
+        "category": "AGI",
+        "description": "Advanced planning with causal model integration, hierarchical goal decomposition, and plan verification.",
+    },
+    {
+        "name": "Transfer Learning",
+        "category": "AGI",
+        "description": "Cross-domain knowledge transfer, domain adaptation, and few-shot generalization mechanisms.",
+    },
+    {
+        "name": "Integration",
+        "category": "AGI",
+        "description": "Advanced inter-module integration layer coordinating all AGI capabilities into unified processing.",
+    },
 ]
 
 
 # ---- Endpoints ----
+
 
 @app.get("/api/health", response_model=HealthResponse)
 @limiter.limit("30/minute")
@@ -305,7 +476,10 @@ async def chat(request: ChatRequest, raw_request: Request):
         response_text = _generate_cognitive_response(message, request.history)
         return ChatResponse(
             response=response_text,
-            cognitive_context={"mode": "offline", "note": "LLM features require Ollama -- using offline mode"},
+            cognitive_context={
+                "mode": "offline",
+                "note": "LLM features require Ollama -- using offline mode",
+            },
         )
     except Exception as e:
         return ChatResponse(
@@ -330,6 +504,7 @@ async def run_benchmark(raw_request: Request, request: BenchmarkRequest = None):
 
     try:
         from neuro.benchmark import Benchmark
+
         bench = Benchmark("/tmp/elo_agi_bench")
 
         def simple_ai(question):
@@ -417,6 +592,7 @@ async def analyze(request: AnalyzeRequest, raw_request: Request):
 
 # ---- Internal Helpers ----
 
+
 def _generate_cognitive_response(message: str, history=None) -> str:
     keywords = message.lower().split()
 
@@ -471,6 +647,7 @@ def _generate_cognitive_response(message: str, history=None) -> str:
 
 def _dual_process_analysis(text: str) -> Dict[str, Any]:
     import random
+
     random.seed(int(hashlib.sha256(text.encode()).hexdigest(), 16) % 2**32)
 
     s1_confidence = round(random.uniform(0.55, 0.85), 2)
@@ -499,7 +676,9 @@ def _dual_process_analysis(text: str) -> Dict[str, Any]:
         "integration": {
             "override": override,
             "confidence_delta": round(s2_confidence - s1_confidence, 2),
-            "recommendation": "Defer to analytical reasoning" if override else "Intuitive judgment sufficient",
+            "recommendation": "Defer to analytical reasoning"
+            if override
+            else "Intuitive judgment sufficient",
             "complexity": complexity,
         },
     }
@@ -509,8 +688,34 @@ def _emotion_analysis(text: str) -> Dict[str, Any]:
     import numpy as np
 
     text_lower = text.lower()
-    positive_words = {"happy", "joy", "love", "great", "amazing", "wonderful", "excited", "beautiful", "good", "excellent", "fantastic", "glad"}
-    negative_words = {"sad", "angry", "hate", "terrible", "awful", "bad", "horrible", "fear", "scared", "worried", "upset", "depressed"}
+    positive_words = {
+        "happy",
+        "joy",
+        "love",
+        "great",
+        "amazing",
+        "wonderful",
+        "excited",
+        "beautiful",
+        "good",
+        "excellent",
+        "fantastic",
+        "glad",
+    }
+    negative_words = {
+        "sad",
+        "angry",
+        "hate",
+        "terrible",
+        "awful",
+        "bad",
+        "horrible",
+        "fear",
+        "scared",
+        "worried",
+        "upset",
+        "depressed",
+    }
     surprise_words = {"wow", "surprise", "unexpected", "sudden", "shock", "amazing", "incredible"}
 
     words = set(text_lower.split())
@@ -549,10 +754,16 @@ def _emotion_analysis(text: str) -> Dict[str, Any]:
         "valence": round(valence, 2),
         "arousal": round(arousal, 2),
         "dominance": round(dominance, 2),
-        "affect_spectrum": {k: round(v, 2) for k, v in sorted(emotions.items(), key=lambda x: -x[1])},
+        "affect_spectrum": {
+            k: round(v, 2) for k, v in sorted(emotions.items(), key=lambda x: -x[1])
+        },
         "cognitive_impact": {
             "memory_encoding": f"+{int(abs(valence) * 40)}%" if abs(valence) > 0.3 else "Baseline",
-            "attention_bias": "Broadened" if valence > 0.3 else "Narrowed" if valence < -0.3 else "Neutral",
+            "attention_bias": "Broadened"
+            if valence > 0.3
+            else "Narrowed"
+            if valence < -0.3
+            else "Neutral",
             "decision_weight": f"{'Optimistic' if valence > 0.2 else 'Pessimistic' if valence < -0.2 else 'Balanced'} shift ({valence:+.2f})",
         },
     }
@@ -562,8 +773,12 @@ def _reasoning_analysis(text: str) -> Dict[str, Any]:
     word_count = len(text.split())
     has_question = "?" in text
     has_conditional = any(w in text.lower() for w in ["if", "when", "unless", "assuming"])
-    has_causal = any(w in text.lower() for w in ["because", "therefore", "cause", "effect", "result"])
-    has_comparison = any(w in text.lower() for w in ["better", "worse", "compare", "versus", "than"])
+    has_causal = any(
+        w in text.lower() for w in ["because", "therefore", "cause", "effect", "result"]
+    )
+    has_comparison = any(
+        w in text.lower() for w in ["better", "worse", "compare", "versus", "than"]
+    )
 
     reasoning_types = []
     if has_conditional:
@@ -578,10 +793,7 @@ def _reasoning_analysis(text: str) -> Dict[str, Any]:
         reasoning_types.append("declarative")
 
     complexity_score = min(
-        0.2 + word_count * 0.02
-        + has_conditional * 0.15
-        + has_causal * 0.15
-        + has_comparison * 0.1,
+        0.2 + word_count * 0.02 + has_conditional * 0.15 + has_causal * 0.15 + has_comparison * 0.1,
         1.0,
     )
 
@@ -595,7 +807,9 @@ def _reasoning_analysis(text: str) -> Dict[str, Any]:
             "has_causal_structure": has_causal,
             "has_comparison": has_comparison,
         },
-        "recommended_pathway": "System 2 (Analytical)" if complexity_score > 0.5 else "System 1 (Heuristic)",
+        "recommended_pathway": "System 2 (Analytical)"
+        if complexity_score > 0.5
+        else "System 1 (Heuristic)",
     }
 
 
@@ -636,4 +850,5 @@ def _rule_based_answer(question: str) -> str:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)

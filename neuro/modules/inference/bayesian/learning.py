@@ -14,16 +14,18 @@ import math
 
 class BayesianScore(Enum):
     """Scoring functions for structure learning."""
-    BIC = "bic"           # Bayesian Information Criterion
-    AIC = "aic"           # Akaike Information Criterion
-    BDeu = "bdeu"         # Bayesian Dirichlet equivalent uniform
-    K2 = "k2"             # K2 score
-    LOG_LIKELIHOOD = "ll" # Log likelihood
+
+    BIC = "bic"  # Bayesian Information Criterion
+    AIC = "aic"  # Akaike Information Criterion
+    BDeu = "bdeu"  # Bayesian Dirichlet equivalent uniform
+    K2 = "k2"  # K2 score
+    LOG_LIKELIHOOD = "ll"  # Log likelihood
 
 
 @dataclass
 class LearnedCPT:
     """Learned conditional probability table."""
+
     variable: str
     parents: List[str]
     counts: Dict[Tuple, Counter]  # parent_values -> Counter of child values
@@ -81,9 +83,7 @@ class ParameterLearner:
             possible_values = {}
             all_vars = [variable] + parents
             for var in all_vars:
-                possible_values[var] = list(set(
-                    d.get(var) for d in data if d.get(var) is not None
-                ))
+                possible_values[var] = list(set(d.get(var) for d in data if d.get(var) is not None))
 
         var_values = possible_values.get(variable, [])
 
@@ -115,6 +115,7 @@ class ParameterLearner:
         # Generate all parent combinations
         if parents:
             from itertools import product
+
             parent_value_lists = [possible_values.get(p, []) for p in parents]
             parent_combos = list(product(*parent_value_lists))
         else:
@@ -148,9 +149,7 @@ class ParameterLearner:
         """Learn CPTs for all variables given structure."""
         cpts = {}
         for variable, parents in structure.items():
-            cpts[variable] = self.learn_cpt(
-                data, variable, parents, possible_values
-            )
+            cpts[variable] = self.learn_cpt(data, variable, parents, possible_values)
         return cpts
 
 
@@ -187,9 +186,7 @@ class StructureLearner:
         """
         if variables is None:
             # Infer from data
-            variables = list(set(
-                k for d in data for k in d.keys()
-            ))
+            variables = list(set(k for d in data for k in d.keys()))
 
         if method == "greedy":
             return self._greedy_search(data, variables)
@@ -210,9 +207,7 @@ class StructureLearner:
         # Get possible values
         possible_values = {}
         for var in variables:
-            possible_values[var] = list(set(
-                d.get(var) for d in data if d.get(var) is not None
-            ))
+            possible_values[var] = list(set(d.get(var) for d in data if d.get(var) is not None))
 
         current_score = self._score_structure(data, structure, possible_values)
 
@@ -237,9 +232,7 @@ class StructureLearner:
                     new_structure[child].append(parent)
 
                     if not self._has_cycle(new_structure, variables):
-                        score = self._score_structure(
-                            data, new_structure, possible_values
-                        )
+                        score = self._score_structure(data, new_structure, possible_values)
                         if score > best_score:
                             best_score = score
                             best_change = ("add", child, parent)
@@ -250,9 +243,7 @@ class StructureLearner:
                     new_structure = {k: list(v) for k, v in structure.items()}
                     new_structure[child].remove(parent)
 
-                    score = self._score_structure(
-                        data, new_structure, possible_values
-                    )
+                    score = self._score_structure(data, new_structure, possible_values)
                     if score > best_score:
                         best_score = score
                         best_change = ("remove", child, parent)
@@ -295,6 +286,7 @@ class StructureLearner:
 
                     if len(other_neighbors) >= d:
                         from itertools import combinations
+
                         for z in combinations(other_neighbors, d):
                             if self._conditional_independent(data, x, y, set(z)):
                                 adjacencies[x].discard(y)
@@ -427,9 +419,7 @@ class StructureLearner:
         possible_values: Dict[str, List[str]],
     ) -> float:
         """Compute log likelihood of data given structure."""
-        cpts = self._param_learner.learn_all_cpts(
-            data, structure, possible_values
-        )
+        cpts = self._param_learner.learn_all_cpts(data, structure, possible_values)
 
         ll = 0.0
         for obs in data:

@@ -10,6 +10,7 @@ from neuro.modules.continual.experience_replay import (
     Experience,
 )
 
+
 class TestReplayConfig:
     """Tests for ReplayConfig class."""
 
@@ -23,6 +24,7 @@ class TestReplayConfig:
         config = ReplayConfig(buffer_size=1000, strategy=ReplayStrategy.UNIFORM)
         assert config.buffer_size == 1000
         assert config.strategy == ReplayStrategy.UNIFORM
+
 
 class TestImportanceWeightedReplay:
     """Tests for ImportanceWeightedReplay class."""
@@ -209,6 +211,7 @@ class TestImportanceWeightedReplay:
         assert "strategy" in stats
         assert stats["buffer_size"] == 10
 
+
 class TestReplayStrategy:
     """Tests for ReplayStrategy enum."""
 
@@ -217,6 +220,7 @@ class TestReplayStrategy:
         assert ReplayStrategy.PRIORITIZED.value == "prioritized"
         assert ReplayStrategy.TASK_BALANCED.value == "task_balanced"
         assert ReplayStrategy.RESERVOIR.value == "reservoir"
+
 
 class TestExperience:
     """Tests for Experience dataclass."""

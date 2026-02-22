@@ -5,10 +5,10 @@ from .semantic_memory import SemanticMemory, Concept
 from .procedural_memory import ProceduralMemory, Procedure
 
 __all__ = [
-    'EpisodicMemory',
-    'Episode',
-    'SemanticMemory',
-    'Concept',
-    'ProceduralMemory',
-    'Procedure',
+    "EpisodicMemory",
+    "Episode",
+    "SemanticMemory",
+    "Concept",
+    "ProceduralMemory",
+    "Procedure",
 ]

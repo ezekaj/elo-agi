@@ -38,15 +38,18 @@ from datetime import datetime
 
 # Cognitive Pipeline and NeuroAgent (38+ modules)
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../neuro-model/src'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../neuro-model/src"))
 try:
     from cognitive_pipeline import CognitivePipeline
+
     COGNITIVE_PIPELINE_AVAILABLE = True
 except ImportError:
     COGNITIVE_PIPELINE_AVAILABLE = False
 
 try:
     from neuro_agent import NeuroAgent
+
     NEURO_AGENT_AVAILABLE = True
 except ImportError:
     NEURO_AGENT_AVAILABLE = False
@@ -165,7 +168,9 @@ class NeuroApp:
                 self.neuro_agent = NeuroAgent(model=model, verbose=verbose)
                 if verbose:
                     stats = self.neuro_agent.get_stats()
-                    print(f"[NEURO] Agent loaded with {len(stats.get('components', {}))} components")
+                    print(
+                        f"[NEURO] Agent loaded with {len(stats.get('components', {}))} components"
+                    )
             except Exception as e:
                 if verbose:
                     print(f"[NEURO] NeuroAgent init failed: {e}")
@@ -185,12 +190,10 @@ class NeuroApp:
                     "description": "Search the web for information",
                     "parameters": {
                         "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "Search query"}
-                        },
-                        "required": ["query"]
-                    }
-                }
+                        "properties": {"query": {"type": "string", "description": "Search query"}},
+                        "required": ["query"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -199,12 +202,10 @@ class NeuroApp:
                     "description": "Read contents of a file",
                     "parameters": {
                         "type": "object",
-                        "properties": {
-                            "path": {"type": "string", "description": "File path"}
-                        },
-                        "required": ["path"]
-                    }
-                }
+                        "properties": {"path": {"type": "string", "description": "File path"}},
+                        "required": ["path"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -215,11 +216,11 @@ class NeuroApp:
                         "type": "object",
                         "properties": {
                             "path": {"type": "string", "description": "File path"},
-                            "content": {"type": "string", "description": "Content to write"}
+                            "content": {"type": "string", "description": "Content to write"},
                         },
-                        "required": ["path", "content"]
-                    }
-                }
+                        "required": ["path", "content"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -231,9 +232,9 @@ class NeuroApp:
                         "properties": {
                             "command": {"type": "string", "description": "Command to run"}
                         },
-                        "required": ["command"]
-                    }
-                }
+                        "required": ["command"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -243,11 +244,14 @@ class NeuroApp:
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "area": {"type": "string", "description": "Area to improve: core, tools, learning, ui"}
+                            "area": {
+                                "type": "string",
+                                "description": "Area to improve: core, tools, learning, ui",
+                            }
                         },
-                        "required": ["area"]
-                    }
-                }
+                        "required": ["area"],
+                    },
+                },
             },
         ]
         self.stream_handler.set_tools(ollama_tools)
@@ -369,7 +373,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         if self.cognitive_pipeline:
             try:
                 cp_stats = self.cognitive_pipeline.get_stats()
-                knowledge_stats['cognitive_modules'] = cp_stats.get('num_components', 0)
+                knowledge_stats["cognitive_modules"] = cp_stats.get("num_components", 0)
             except Exception:
                 pass
 
@@ -377,7 +381,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         working_dir = self.project_dir
         home = os.path.expanduser("~")
         if working_dir.startswith(home):
-            working_dir = "~" + working_dir[len(home):]
+            working_dir = "~" + working_dir[len(home) :]
 
         # Print beautiful welcome screen
         self.ui.print_welcome_screen(
@@ -400,12 +404,16 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
             if self._current_session:
                 msg_count = len(self._current_session.messages)
-                self.ui.print_success(f"Resumed session: {self._current_session.id[:8]} ({msg_count} messages)")
+                self.ui.print_success(
+                    f"Resumed session: {self._current_session.id[:8]} ({msg_count} messages)"
+                )
                 # Show recent history
                 if msg_count > 0:
                     self.ui.print_dim("Recent history:")
                     for msg in self._current_session.messages[-4:]:
-                        role = "[cyan]You:[/cyan]" if msg.role == "user" else "[green]NEURO:[/green]"
+                        role = (
+                            "[cyan]You:[/cyan]" if msg.role == "user" else "[green]NEURO:[/green]"
+                        )
                         content = msg.content[:60] + "..." if len(msg.content) > 60 else msg.content
                         self.ui.print(f"  {role} {content}")
                     self.ui.print()
@@ -475,19 +483,18 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             self._first_prompt = False
             # Print placeholder hint
             self.ui.print_dim('Try "explain this code" or "help me fix a bug"')
-            self.ui.print_dim('? for shortcuts')
+            self.ui.print_dim("? for shortcuts")
             self.ui.print()
 
-        return await loop.run_in_executor(
-            None,
-            self.ui.print_user_prompt
-        )
+        return await loop.run_in_executor(None, self.ui.print_user_prompt)
 
     async def _process_input(self, user_input: str):
         """Process user input and generate response."""
         # Detect ultrathink mode
         ultrathink = False
-        if user_input.lower().startswith("ultrathink") or user_input.lower().startswith("/ultrathink"):
+        if user_input.lower().startswith("ultrathink") or user_input.lower().startswith(
+            "/ultrathink"
+        ):
             ultrathink = True
             # Remove the ultrathink prefix from the prompt
             if user_input.lower().startswith("/ultrathink"):
@@ -500,7 +507,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                 return
 
             self.ui.print()
-            self.ui.print("[bold magenta]ULTRATHINK MODE[/bold magenta] [dim]Deep reasoning enabled[/dim]")
+            self.ui.print(
+                "[bold magenta]ULTRATHINK MODE[/bold magenta] [dim]Deep reasoning enabled[/dim]"
+            )
 
         # Expand file references (@./file)
         user_input = await self._expand_file_refs(user_input)
@@ -527,15 +536,16 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             try:
                 # Process through full cognitive pipeline (38+ modules)
                 result = self.cognitive_pipeline.process(
-                    query=user_input,
-                    use_deep_thinking=ultrathink
+                    query=user_input, use_deep_thinking=ultrathink
                 )
 
                 # Show cognitive activity
                 if result.cognitive_analysis:
-                    analysis_type = result.cognitive_analysis.get('type', 'general')
-                    confidence = result.cognitive_analysis.get('confidence', 0.5)
-                    self.ui.print_dim(f"Cognitive analysis: {analysis_type} ({confidence:.0%} confidence)")
+                    analysis_type = result.cognitive_analysis.get("type", "general")
+                    confidence = result.cognitive_analysis.get("confidence", 0.5)
+                    self.ui.print_dim(
+                        f"Cognitive analysis: {analysis_type} ({confidence:.0%} confidence)"
+                    )
 
                 if result.knowledge_used:
                     self.ui.print_dim(f"Retrieved {len(result.knowledge_used)} knowledge items")
@@ -557,7 +567,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         self.ui.print_dim("Searching knowledge base...")
         learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
         if learned_knowledge:
-            fact_count = learned_knowledge.count('\n') - 1
+            fact_count = learned_knowledge.count("\n") - 1
             self.ui.print_dim(f"Found {fact_count} relevant facts")
 
         # Combine all context
@@ -646,7 +656,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                     topic=topic,
                     content=f"Q: {user_input[:200]} A: {full_response[:500]}",
                     source="conversation",
-                    importance=0.6
+                    importance=0.6,
                 )
             except Exception:
                 pass
@@ -668,31 +678,31 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         combined = f"{user_input} {response}"
 
         # Simple topic extraction - words that appear multiple times or are capitalized
-        words = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', combined)  # Proper nouns
-        words += re.findall(r'\b[a-z]{5,}\b', combined.lower())  # Meaningful words
+        words = re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", combined)  # Proper nouns
+        words += re.findall(r"\b[a-z]{5,}\b", combined.lower())  # Meaningful words
 
         # Count frequencies
         from collections import Counter
+
         word_freq = Counter(words)
 
         # Topics are frequent meaningful words
-        topics = [word for word, count in word_freq.items()
-                  if count >= 2 and len(word) > 4][:5]
+        topics = [word for word, count in word_freq.items() if count >= 2 and len(word) > 4][:5]
 
         for topic in topics:
             # Record exposure with success (AI answered)
             self.active_learner.record_exposure(
                 topic=topic,
                 was_successful=True,  # We answered the query
-                surprise_level=0.5,   # Neutral surprise
-                complexity=len(response) / 1000  # Rough complexity estimate
+                surprise_level=0.5,  # Neutral surprise
+                complexity=len(response) / 1000,  # Rough complexity estimate
             )
 
         # Store factual content as learned knowledge
         # Extract sentences that look like facts (contain "is", "are", "means", etc.)
         fact_patterns = [
-            r'([A-Z][^.!?]*(?:is|are|means|refers to|defined as)[^.!?]*\.)',
-            r'([A-Z][^.!?]*(?:can be|should be|must be)[^.!?]*\.)',
+            r"([A-Z][^.!?]*(?:is|are|means|refers to|defined as)[^.!?]*\.)",
+            r"([A-Z][^.!?]*(?:can be|should be|must be)[^.!?]*\.)",
         ]
 
         for pattern in fact_patterns:
@@ -700,13 +710,11 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             for fact in facts[:3]:  # Limit to 3 facts per response
                 if len(fact) > 20:  # Meaningful fact
                     # Determine topic from fact
-                    fact_words = re.findall(r'\b[A-Z][a-z]+\b', fact)
+                    fact_words = re.findall(r"\b[A-Z][a-z]+\b", fact)
                     topic = fact_words[0] if fact_words else "general"
 
                     self.self_trainer.learn(
-                        topic=topic,
-                        content=fact.strip(),
-                        source="conversation"
+                        topic=topic, content=fact.strip(), source="conversation"
                     )
 
         # Save periodically
@@ -722,13 +730,14 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                 result = self.tool_registry.tools["read_file"].func(tool_args.get("path", ""))
             elif tool_name == "write_file":
                 result = self.tool_registry.tools["write_file"].func(
-                    tool_args.get("path", ""),
-                    tool_args.get("content", "")
+                    tool_args.get("path", ""), tool_args.get("content", "")
                 )
             elif tool_name == "run_command":
                 result = self.tool_registry.tools["run_command"].func(tool_args.get("command", ""))
             elif tool_name == "improve_self":
-                result = self.tool_registry.tools["improve_self"].func(tool_args.get("area", "core"))
+                result = self.tool_registry.tools["improve_self"].func(
+                    tool_args.get("area", "core")
+                )
             else:
                 return None
 
@@ -744,8 +753,8 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         import re
 
         # Parse tool name and args
-        tool_match = re.search(r'<tool>(\w+)</tool>', content)
-        args_match = re.search(r'<args>(.*?)</args>', content, re.DOTALL)
+        tool_match = re.search(r"<tool>(\w+)</tool>", content)
+        args_match = re.search(r"<args>(.*?)</args>", content, re.DOTALL)
 
         if not tool_match:
             return None
@@ -770,7 +779,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
     async def _handle_command(self, command: str) -> bool:
         """Handle slash commands. Returns True if should exit."""
         cmd = command.lower().split()[0]
-        args = command[len(cmd):].strip()
+        args = command[len(cmd) :].strip()
 
         if cmd in ("/exit", "/quit"):
             return True
@@ -867,7 +876,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
         # Map of direct tool commands
         direct_tools = {
-            "improve_self": lambda: self.tool_registry.tools["improve_self"].func(tool_arg or "core"),
+            "improve_self": lambda: self.tool_registry.tools["improve_self"].func(
+                tool_arg or "core"
+            ),
             "web_search": lambda: self.tool_registry.tools["web_search"].func(tool_arg),
             "web_fetch": lambda: self.tool_registry.tools["web_fetch"].func(tool_arg),
             "read_file": lambda: self.tool_registry.tools["read_file"].func(tool_arg),
@@ -928,7 +939,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         self.neuro_agent.perceive(user_input)
 
         if self.neuro_agent.state.knowledge:
-            self.ui.print_dim(f"  Retrieved {len(self.neuro_agent.state.knowledge)} knowledge items")
+            self.ui.print_dim(
+                f"  Retrieved {len(self.neuro_agent.state.knowledge)} knowledge items"
+            )
         if self.neuro_agent.state.memories:
             self.ui.print_dim(f"  Found {len(self.neuro_agent.state.memories)} relevant memories")
         if self.neuro_agent.state.surprise > 0.3:
@@ -940,7 +953,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
 
         analysis = self.neuro_agent.state.analysis
         if analysis:
-            self.ui.print_dim(f"  Type: {analysis.get('type', 'general')}, Confidence: {analysis.get('confidence', 0.5):.0%}")
+            self.ui.print_dim(
+                f"  Type: {analysis.get('type', 'general')}, Confidence: {analysis.get('confidence', 0.5):.0%}"
+            )
         if self.neuro_agent.state.plan:
             self.ui.print_dim(f"  Plan: {', '.join(self.neuro_agent.state.plan)}")
 
@@ -994,7 +1009,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         if tool_context:
             final_prompt = f"{user_input}\n\n[Tool Results]:\n{tool_context}"
         if self.neuro_agent.state.knowledge:
-            final_prompt += "\n\n[Relevant Knowledge]:\n" + "\n".join(self.neuro_agent.state.knowledge[:3])
+            final_prompt += "\n\n[Relevant Knowledge]:\n" + "\n".join(
+                self.neuro_agent.state.knowledge[:3]
+            )
 
         # Stream the final response
         self.ui.print_assistant_label()
@@ -1033,7 +1050,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         self.ui.print_dim("IMPROVE: Self-improvement cycle...")
         improvements = self.neuro_agent.improve()
 
-        if improvements.get('patterns_learned', 0) > 0:
+        if improvements.get("patterns_learned", 0) > 0:
             self.ui.print_dim(f"  Learned {improvements['patterns_learned']} new patterns")
 
         # Save to session
@@ -1156,18 +1173,11 @@ Starting now..."""
         # Step 2: Store as knowledge
         self.ui.print()
         self.ui.print_dim("Storing knowledge...")
-        self.self_trainer.learn(
-            topic=topic,
-            content=search_results,
-            source="web_research"
-        )
+        self.self_trainer.learn(topic=topic, content=search_results, source="web_research")
 
         if self.cognitive_pipeline:
             self.cognitive_pipeline.learn(
-                topic=topic,
-                content=search_results,
-                source="web_research",
-                importance=0.8
+                topic=topic, content=search_results, source="web_research", importance=0.8
             )
 
         # Step 3: Let AI synthesize
@@ -1187,9 +1197,8 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print_dim(f"$ {cmd}")
         try:
             import subprocess
-            result = subprocess.run(
-                cmd, shell=True, capture_output=True, text=True, timeout=30
-            )
+
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
             if result.stdout:
                 print(f"  {result.stdout.rstrip()}")
             if result.stderr:
@@ -1201,7 +1210,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         """Expand @./file references in input."""
         import re
 
-        refs = re.findall(r'@(\.?/[^\s]+)', text)
+        refs = re.findall(r"@(\.?/[^\s]+)", text)
         for ref in refs:
             path = os.path.expanduser(ref)
             if os.path.exists(path):
@@ -1297,6 +1306,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             # List available models
             try:
                 import aiohttp
+
                 async with aiohttp.ClientSession() as session:
                     async with session.get("http://localhost:11434/api/tags") as r:
                         if r.status == 200:
@@ -1356,11 +1366,13 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print()
         self.ui.print("[bold]Permissions[/bold]")
         self.ui.print_divider()
-        self.ui.print_key_value({
-            "Mode": self.permission_manager.mode.value,
-            "Session allows": str(len(self.permission_manager._session_allows)),
-            "Session denies": str(len(self.permission_manager._session_denies)),
-        })
+        self.ui.print_key_value(
+            {
+                "Mode": self.permission_manager.mode.value,
+                "Session allows": str(len(self.permission_manager._session_allows)),
+                "Session denies": str(len(self.permission_manager._session_denies)),
+            }
+        )
         self.ui.print()
 
     def _print_hooks(self):
@@ -1373,7 +1385,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             self.ui.print_dim("No hooks configured")
             self.ui.print()
             self.ui.print_dim("Add hooks to ~/.neuro/settings.json:")
-            self.ui.print('[dim]{"hooks": {"PreToolUse": [{"type": "command", "command": "./script.sh"}]}}[/dim]')
+            self.ui.print(
+                '[dim]{"hooks": {"PreToolUse": [{"type": "command", "command": "./script.sh"}]}}[/dim]'
+            )
             self.ui.print()
             return
 
@@ -1398,23 +1412,27 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         # Active learning stats
         al_stats = self.active_learner.get_stats()
         self.ui.print("[cyan]Active Learning:[/cyan]")
-        self.ui.print_key_value({
-            "Topics tracked": str(al_stats.get('total_topics', 0)),
-            "Avg confidence": f"{al_stats.get('avg_confidence', 0):.1%}",
-            "Avg curiosity": f"{al_stats.get('avg_curiosity', 0):.1%}",
-            "Learning events": str(al_stats.get('total_learning_events', 0)),
-        })
+        self.ui.print_key_value(
+            {
+                "Topics tracked": str(al_stats.get("total_topics", 0)),
+                "Avg confidence": f"{al_stats.get('avg_confidence', 0):.1%}",
+                "Avg curiosity": f"{al_stats.get('avg_curiosity', 0):.1%}",
+                "Learning events": str(al_stats.get("total_learning_events", 0)),
+            }
+        )
         self.ui.print()
 
         # Knowledge base stats
         kb_stats = self.self_trainer.get_stats()
         self.ui.print("[cyan]Knowledge Base:[/cyan]")
-        self.ui.print_key_value({
-            "Facts stored": str(kb_stats.get('total_facts', 0)),
-            "Embeddings": str(kb_stats.get('total_embeddings', 0)),
-            "Session learned": str(kb_stats.get('session_learning', 0)),
-            "Storage": kb_stats.get('storage_path', 'Unknown'),
-        })
+        self.ui.print_key_value(
+            {
+                "Facts stored": str(kb_stats.get("total_facts", 0)),
+                "Embeddings": str(kb_stats.get("total_embeddings", 0)),
+                "Session learned": str(kb_stats.get("session_learning", 0)),
+                "Storage": kb_stats.get("storage_path", "Unknown"),
+            }
+        )
         self.ui.print()
 
         # Learning recommendations
@@ -1422,7 +1440,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         if recs:
             self.ui.print("[cyan]Learning Recommendations:[/cyan]")
             for topic, priority, reason in recs:
-                self.ui.print(f"  [yellow]●[/yellow] {topic} [dim](priority: {priority:.2f}, {reason})[/dim]")
+                self.ui.print(
+                    f"  [yellow]●[/yellow] {topic} [dim](priority: {priority:.2f}, {reason})[/dim]"
+                )
             self.ui.print()
 
         # Recent facts learned
@@ -1430,7 +1450,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         if recent:
             self.ui.print("[cyan]Recently Learned:[/cyan]")
             for fact in recent:
-                content = fact['content'][:60] + "..." if len(fact['content']) > 60 else fact['content']
+                content = (
+                    fact["content"][:60] + "..." if len(fact["content"]) > 60 else fact["content"]
+                )
                 self.ui.print(f"  [dim]●[/dim] [{fact['topic']}] {content}")
             self.ui.print()
 
@@ -1439,12 +1461,14 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             try:
                 cp_stats = self.cognitive_pipeline.get_stats()
                 self.ui.print("[cyan]Cognitive Pipeline:[/cyan]")
-                self.ui.print_key_value({
-                    "Total modules": str(cp_stats.get('num_components', 0)),
-                    "Cognitive modules": str(cp_stats.get('cognitive_modules', 0)),
-                    "Pipeline components": str(cp_stats.get('pipeline_components', 0)),
-                    "Active": ", ".join(cp_stats.get('active_components', [])[:5]),
-                })
+                self.ui.print_key_value(
+                    {
+                        "Total modules": str(cp_stats.get("num_components", 0)),
+                        "Cognitive modules": str(cp_stats.get("cognitive_modules", 0)),
+                        "Pipeline components": str(cp_stats.get("pipeline_components", 0)),
+                        "Active": ", ".join(cp_stats.get("active_components", [])[:5]),
+                    }
+                )
                 self.ui.print()
             except Exception:
                 pass
@@ -1462,33 +1486,39 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         # Basic stats
         self.ui.print("[cyan]Evolution Cycle:[/cyan]")
-        self.ui.print_key_value({
-            "Current cycle": str(stats['cycle']),
-            "Facts this cycle": f"{stats['facts_this_cycle']}/100",
-            "Total unique facts": str(stats['total_facts']),
-            "Training pairs": str(stats['training_pairs']),
-        })
+        self.ui.print_key_value(
+            {
+                "Current cycle": str(stats["cycle"]),
+                "Facts this cycle": f"{stats['facts_this_cycle']}/100",
+                "Total unique facts": str(stats["total_facts"]),
+                "Training pairs": str(stats["training_pairs"]),
+            }
+        )
         self.ui.print()
 
         # Benchmark performance
-        baseline = stats.get('baseline_score')
-        current = stats.get('current_score')
-        improvement = stats.get('improvement', 0)
+        baseline = stats.get("baseline_score")
+        current = stats.get("current_score")
+        improvement = stats.get("improvement", 0)
 
         self.ui.print("[cyan]Benchmark Performance:[/cyan]")
-        self.ui.print_key_value({
-            "Baseline score": f"{baseline:.1%}" if baseline is not None else "Not yet tested",
-            "Current score": f"{current:.1%}" if current is not None else "Not yet tested",
-            "Improvement": f"{improvement:+.1%}" if baseline is not None else "N/A",
-        })
+        self.ui.print_key_value(
+            {
+                "Baseline score": f"{baseline:.1%}" if baseline is not None else "Not yet tested",
+                "Current score": f"{current:.1%}" if current is not None else "Not yet tested",
+                "Improvement": f"{improvement:+.1%}" if baseline is not None else "N/A",
+            }
+        )
         self.ui.print()
 
         # Training status
         self.ui.print("[cyan]MLX Training:[/cyan]")
-        self.ui.print_key_value({
-            "Total trainings": str(stats['trainings']),
-            "Functions added": str(stats['functions_added']),
-        })
+        self.ui.print_key_value(
+            {
+                "Total trainings": str(stats["trainings"]),
+                "Functions added": str(stats["functions_added"]),
+            }
+        )
 
         # Check if ready to train
         should_train, reason = self.evolution.should_train()
@@ -1497,7 +1527,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print()
 
         # Weak areas
-        weak_areas = stats.get('weak_areas', [])
+        weak_areas = stats.get("weak_areas", [])
         if weak_areas:
             self.ui.print("[cyan]Weak Areas (learning focus):[/cyan]")
             for area, score in weak_areas[:5]:
@@ -1540,7 +1570,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         try:
             choice = self.ui.console.input("[dim]Select session:[/dim] ").strip().lower()
 
-            if choice == 'n' or choice == '':
+            if choice == "n" or choice == "":
                 return None
 
             idx = int(choice) - 1
@@ -1555,10 +1585,10 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         """Check if Ollama is available."""
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    "http://localhost:11434/api/tags",
-                    timeout=aiohttp.ClientTimeout(total=5)
+                    "http://localhost:11434/api/tags", timeout=aiohttp.ClientTimeout(total=5)
                 ) as r:
                     return r.status == 200
         except Exception:
@@ -1580,8 +1610,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self._focus_learned = 0
 
         self._evolution_thread = threading.Thread(
-            target=self._autonomous_evolution_loop,
-            daemon=True
+            target=self._autonomous_evolution_loop, daemon=True
         )
         self._evolution_thread.start()
 
@@ -1622,7 +1651,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                 continue
 
             # Step 3: After 100 unique facts → re-benchmark
-            print(f"\n[Evolution] Learned {self.evolution.state['facts_this_cycle']} unique facts! Re-benchmarking...")
+            print(
+                f"\n[Evolution] Learned {self.evolution.state['facts_this_cycle']} unique facts! Re-benchmarking..."
+            )
             self._run_benchmark_and_report("CYCLE")
 
             # Step 4: Check if should train
@@ -1632,7 +1663,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             if should_train:
                 print(f"[Evolution] Starting MLX fine-tuning...")
                 result = self.evolution.run_mlx_training(self.model)
-                if result['success']:
+                if result["success"]:
                     print(f"[Evolution] MLX TRAINING COMPLETE!")
                     self._add_evolved_capability()
                 else:
@@ -1653,13 +1684,48 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         try:
             # Benchmark tests
             tests = [
-                {"question": "A store sells apples for $2 each. If John buys 5 apples and pays with a $20 bill, how much change does he get?", "answer": "10", "keywords": ["10", "dollar", "change"], "category": "math"},
-                {"question": "A train travels at 60 mph. How far does it travel in 2.5 hours?", "answer": "150", "keywords": ["150", "miles"], "category": "math"},
-                {"question": "All cats are mammals. All mammals are animals. Is a cat an animal?", "answer": "yes", "keywords": ["yes", "mammal", "animal"], "category": "logic"},
-                {"question": "If it rains, the ground gets wet. The ground is wet. Can we conclude it rained?", "answer": "no", "keywords": ["no", "not necessarily"], "category": "logic"},
-                {"question": "A farmer has 17 sheep. All but 9 run away. How many sheep does he have left?", "answer": "9", "keywords": ["9"], "category": "trick"},
-                {"question": "If Alice is twice as old as Bob, and Bob is 15, how old will Alice be in 5 years?", "answer": "35", "keywords": ["35", "30"], "category": "chain_of_thought"},
-                {"question": "Sally puts a marble in her basket and leaves. Anne moves it to her box. Where will Sally LOOK for the marble?", "answer": "basket", "keywords": ["basket", "think"], "category": "theory_of_mind"},
+                {
+                    "question": "A store sells apples for $2 each. If John buys 5 apples and pays with a $20 bill, how much change does he get?",
+                    "answer": "10",
+                    "keywords": ["10", "dollar", "change"],
+                    "category": "math",
+                },
+                {
+                    "question": "A train travels at 60 mph. How far does it travel in 2.5 hours?",
+                    "answer": "150",
+                    "keywords": ["150", "miles"],
+                    "category": "math",
+                },
+                {
+                    "question": "All cats are mammals. All mammals are animals. Is a cat an animal?",
+                    "answer": "yes",
+                    "keywords": ["yes", "mammal", "animal"],
+                    "category": "logic",
+                },
+                {
+                    "question": "If it rains, the ground gets wet. The ground is wet. Can we conclude it rained?",
+                    "answer": "no",
+                    "keywords": ["no", "not necessarily"],
+                    "category": "logic",
+                },
+                {
+                    "question": "A farmer has 17 sheep. All but 9 run away. How many sheep does he have left?",
+                    "answer": "9",
+                    "keywords": ["9"],
+                    "category": "trick",
+                },
+                {
+                    "question": "If Alice is twice as old as Bob, and Bob is 15, how old will Alice be in 5 years?",
+                    "answer": "35",
+                    "keywords": ["35", "30"],
+                    "category": "chain_of_thought",
+                },
+                {
+                    "question": "Sally puts a marble in her basket and leaves. Anne moves it to her box. Where will Sally LOOK for the marble?",
+                    "answer": "basket",
+                    "keywords": ["basket", "think"],
+                    "category": "theory_of_mind",
+                },
             ]
 
             total_score = 0
@@ -1702,10 +1768,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                     self._weak_areas.append((cat, avg))
 
             # Record in evolution
-            self.evolution.record_benchmark(avg_score, {
-                'weak_areas': self._weak_areas,
-                'phase': phase
-            })
+            self.evolution.record_benchmark(
+                avg_score, {"weak_areas": self._weak_areas, "phase": phase}
+            )
 
             print(f"[Evolution] {phase} Benchmark: {avg_score:.0%}")
             if self._weak_areas:
@@ -1722,7 +1787,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         try:
             url = "http://localhost:11434/api/generate"
             data = {"model": self.model, "prompt": prompt, "stream": False}
-            req = urllib.request.Request(url, data=json.dumps(data).encode(), headers={"Content-Type": "application/json"})
+            req = urllib.request.Request(
+                url, data=json.dumps(data).encode(), headers={"Content-Type": "application/json"}
+            )
             with urllib.request.urlopen(req, timeout=60) as response:
                 result = json.loads(response.read().decode())
                 return result.get("response", "")
@@ -1734,7 +1801,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self._is_busy = True
 
         # Rotate through learning sources
-        learning_order = ['math', 'logic', 'arxiv', 'web', 'wikipedia']
+        learning_order = ["math", "logic", "arxiv", "web", "wikipedia"]
         source_type = learning_order[self._learning_order_idx % len(learning_order)]
         self._learning_order_idx += 1
 
@@ -1742,9 +1809,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             items = self._fetch_learning_items(source_type)
 
             for item in items[:3]:
-                content = item.get('snippet', '')
-                title = item.get('title', '')[:60]
-                source = item.get('source', source_type)
+                content = item.get("snippet", "")
+                title = item.get("title", "")[:60]
+                source = item.get("source", source_type)
 
                 if not content or len(content) < 50:
                     continue
@@ -1760,16 +1827,16 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                     continue
 
                 # Check duplicate on summary
-                if self.evolution.is_duplicate(analyzed.get('summary', content)):
+                if self.evolution.is_duplicate(analyzed.get("summary", content)):
                     continue
 
                 # Learn it!
-                if self.evolution.mark_learned(analyzed.get('summary', '')):
+                if self.evolution.mark_learned(analyzed.get("summary", "")):
                     # Save to knowledge base
                     self.self_trainer.learn(
-                        analyzed.get('topic', title),
-                        analyzed.get('knowledge', content[:1000]),
-                        source
+                        analyzed.get("topic", title),
+                        analyzed.get("knowledge", content[:1000]),
+                        source,
                     )
 
                     # Save Q&A pairs as training data
@@ -1790,56 +1857,69 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         """Fetch items from a specific source."""
         items = []
 
-        if source_type == 'math' or source_type == 'logic':
+        if source_type == "math" or source_type == "logic":
             items = self._learn_from_benchmark(source_type)
 
-        elif source_type == 'arxiv':
-            categories = ['cs.AI', 'cs.LG', 'cs.CL']
+        elif source_type == "arxiv":
+            categories = ["cs.AI", "cs.LG", "cs.CL"]
             cat = random.choice(categories)
             try:
-                url = f'http://export.arxiv.org/api/query?search_query=cat:{cat}&start={random.randint(0,30)}&max_results=3'
-                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                url = f"http://export.arxiv.org/api/query?search_query=cat:{cat}&start={random.randint(0, 30)}&max_results=3"
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, timeout=15) as response:
-                    data = response.read().decode('utf-8')
+                    data = response.read().decode("utf-8")
                 import re
-                entries = re.findall(r'<entry>(.*?)</entry>', data, re.DOTALL)
+
+                entries = re.findall(r"<entry>(.*?)</entry>", data, re.DOTALL)
                 for entry in entries:
-                    title = re.search(r'<title>(.*?)</title>', entry, re.DOTALL)
-                    summary = re.search(r'<summary>(.*?)</summary>', entry, re.DOTALL)
+                    title = re.search(r"<title>(.*?)</title>", entry, re.DOTALL)
+                    summary = re.search(r"<summary>(.*?)</summary>", entry, re.DOTALL)
                     if title and summary:
-                        items.append({
-                            'title': html.unescape(title.group(1).strip()[:100]),
-                            'snippet': html.unescape(summary.group(1).strip()[:800]),
-                            'source': f'ArXiv-{cat}'
-                        })
+                        items.append(
+                            {
+                                "title": html.unescape(title.group(1).strip()[:100]),
+                                "snippet": html.unescape(summary.group(1).strip()[:800]),
+                                "source": f"ArXiv-{cat}",
+                            }
+                        )
             except Exception:
                 pass
 
-        elif source_type == 'web':
+        elif source_type == "web":
             weak_areas = self.evolution.get_weak_areas()
             if weak_areas:
                 topic, _ = random.choice(weak_areas)
                 query = f"{topic} tutorial examples"
             else:
-                topics = ['machine learning', 'algorithms', 'neural networks', 'AI reasoning']
+                topics = ["machine learning", "algorithms", "neural networks", "AI reasoning"]
                 query = random.choice(topics)
             try:
                 result = self.tool_registry.tools["web_search"].func(query)
                 if result and len(result) > 100:
-                    items.append({'title': query, 'snippet': result[:800], 'source': 'Web'})
+                    items.append({"title": query, "snippet": result[:800], "source": "Web"})
             except Exception:
                 pass
 
-        elif source_type == 'wikipedia':
-            topics = ['Artificial intelligence', 'Machine learning', 'Neural network', 'Logic', 'Reasoning']
+        elif source_type == "wikipedia":
+            topics = [
+                "Artificial intelligence",
+                "Machine learning",
+                "Neural network",
+                "Logic",
+                "Reasoning",
+            ]
             topic = random.choice(topics)
             try:
-                url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(topic)}"
-                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                url = (
+                    f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(topic)}"
+                )
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, timeout=10) as response:
                     data = json.loads(response.read().decode())
-                if data.get('extract'):
-                    items.append({'title': topic, 'snippet': data['extract'][:800], 'source': 'Wikipedia'})
+                if data.get("extract"):
+                    items.append(
+                        {"title": topic, "snippet": data["extract"][:800], "source": "Wikipedia"}
+                    )
             except Exception:
                 pass
 
@@ -1850,29 +1930,49 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         items = []
 
         benchmark_qa = {
-            'math': [
-                ("If you buy 5 apples for $2 each, how much change from $20?", "Calculate: 5 × $2 = $10. Change: $20 - $10 = $10. Answer: 10"),
-                ("A train travels at 60 mph for 2.5 hours. How far?", "Distance = Speed × Time = 60 × 2.5 = 150 miles. Answer: 150"),
-                ("Rectangle with length 8 and width 5, what's the area?", "Area = length × width = 8 × 5 = 40. Answer: 40"),
+            "math": [
+                (
+                    "If you buy 5 apples for $2 each, how much change from $20?",
+                    "Calculate: 5 × $2 = $10. Change: $20 - $10 = $10. Answer: 10",
+                ),
+                (
+                    "A train travels at 60 mph for 2.5 hours. How far?",
+                    "Distance = Speed × Time = 60 × 2.5 = 150 miles. Answer: 150",
+                ),
+                (
+                    "Rectangle with length 8 and width 5, what's the area?",
+                    "Area = length × width = 8 × 5 = 40. Answer: 40",
+                ),
                 ("What is 15% of 80?", "15% of 80 = 0.15 × 80 = 12. Answer: 12"),
             ],
-            'logic': [
-                ("All cats are mammals. All mammals are animals. Is a cat an animal?", "Syllogism: cats→mammals→animals. Therefore cats ARE animals. Answer: yes"),
-                ("If it rains, ground is wet. Ground is wet. Did it rain?", "Affirming consequent fallacy. Wet ground ≠ rain (could be sprinklers). Answer: no"),
-                ("If A implies B, and B is false, what about A?", "Modus tollens: If A→B and ¬B, then ¬A. Answer: A is false"),
+            "logic": [
+                (
+                    "All cats are mammals. All mammals are animals. Is a cat an animal?",
+                    "Syllogism: cats→mammals→animals. Therefore cats ARE animals. Answer: yes",
+                ),
+                (
+                    "If it rains, ground is wet. Ground is wet. Did it rain?",
+                    "Affirming consequent fallacy. Wet ground ≠ rain (could be sprinklers). Answer: no",
+                ),
+                (
+                    "If A implies B, and B is false, what about A?",
+                    "Modus tollens: If A→B and ¬B, then ¬A. Answer: A is false",
+                ),
             ],
         }
 
-        qa_list = benchmark_qa.get(category, benchmark_qa['math'])
+        qa_list = benchmark_qa.get(category, benchmark_qa["math"])
         q, a = random.choice(qa_list)
 
         print(f"\n[Evolution] STUDYING [{category}]: {q[:50]}...")
 
-        items.append({
-            'title': f"[{category.upper()}] Benchmark",
-            'snippet': f"Question: {q}\n\nStep-by-step solution:\n{a}",
-            'source': f'Benchmark-{category}'
-        })
+        items.append(
+            {
+                "title": f"[{category.upper()}] Benchmark",
+                "snippet": f"Question: {q}\n\nStep-by-step solution:\n{a}",
+                "source": f"Benchmark-{category}",
+            }
+        )
 
         return items
 
@@ -1892,14 +1992,15 @@ JSON:"""
 
             # Extract JSON
             import re
+
             json_match = re.search(r'\{[^{}]*"topic"[^{}]*\}', response, re.DOTALL)
             if not json_match:
-                json_match = re.search(r'\{[\s\S]*?\}(?=\s*$|\s*```)', response)
+                json_match = re.search(r"\{[\s\S]*?\}(?=\s*$|\s*```)", response)
 
             if json_match:
-                json_str = json_match.group().replace('\n', ' ')
+                json_str = json_match.group().replace("\n", " ")
                 analyzed = json.loads(json_str)
-                analyzed['knowledge'] = content[:500]
+                analyzed["knowledge"] = content[:500]
                 return analyzed
 
         except (json.JSONDecodeError, Exception):
@@ -1907,11 +2008,11 @@ JSON:"""
 
         # Fallback
         return {
-            'topic': title[:50],
-            'summary': content[:200],
-            'facts': [content[:300]],
-            'qa_pairs': [{'q': f'What is {title}?', 'a': content[:200]}],
-            'knowledge': content[:500]
+            "topic": title[:50],
+            "summary": content[:200],
+            "facts": [content[:300]],
+            "qa_pairs": [{"q": f"What is {title}?", "a": content[:200]}],
+            "knowledge": content[:500],
         }
 
     def _save_analyzed_as_training(self, analyzed: Dict, source: str):
@@ -1921,29 +2022,29 @@ JSON:"""
 
         try:
             # Save Q&A pairs
-            for qa in analyzed.get('qa_pairs', []):
-                if qa.get('q') and qa.get('a'):
+            for qa in analyzed.get("qa_pairs", []):
+                if qa.get("q") and qa.get("a"):
                     pair = {
-                        "prompt": qa['q'],
-                        "completion": qa['a'],
+                        "prompt": qa["q"],
+                        "completion": qa["a"],
                         "source": source,
-                        "topic": analyzed.get('topic', ''),
-                        "timestamp": datetime.now().isoformat()
+                        "topic": analyzed.get("topic", ""),
+                        "timestamp": datetime.now().isoformat(),
                     }
-                    with open(training_file, 'a') as f:
-                        f.write(json.dumps(pair) + '\n')
+                    with open(training_file, "a") as f:
+                        f.write(json.dumps(pair) + "\n")
 
             # Save facts as questions
-            for fact in analyzed.get('facts', []):
+            for fact in analyzed.get("facts", []):
                 if fact:
                     pair = {
                         "prompt": f"What do you know about {analyzed.get('topic', 'this')}?",
                         "completion": fact,
                         "source": source,
-                        "timestamp": datetime.now().isoformat()
+                        "timestamp": datetime.now().isoformat(),
                     }
-                    with open(training_file, 'a') as f:
-                        f.write(json.dumps(pair) + '\n')
+                    with open(training_file, "a") as f:
+                        f.write(json.dumps(pair) + "\n")
 
         except Exception:
             pass
@@ -1956,17 +2057,24 @@ JSON:"""
         weak_topic, _ = self._weak_areas[0]
 
         capabilities = {
-            'math': ('solve_math', '''def solve_math(expr): return eval(expr) if all(c in '0123456789+-*/().% ' for c in expr) else "unsafe"''', 'Evaluate math'),
-            'logic': ('check_logic', '''def check_logic(p1, p2, c): return f"If {p1} and {p2}, then {c} by syllogism"''', 'Check logic'),
+            "math": (
+                "solve_math",
+                '''def solve_math(expr): return eval(expr) if all(c in '0123456789+-*/().% ' for c in expr) else "unsafe"''',
+                "Evaluate math",
+            ),
+            "logic": (
+                "check_logic",
+                '''def check_logic(p1, p2, c): return f"If {p1} and {p2}, then {c} by syllogism"''',
+                "Check logic",
+            ),
         }
 
         if weak_topic in capabilities:
             name, code, desc = capabilities[weak_topic]
-            existing = [f['name'] for f in self.evolution.state.get('added_functions', [])]
+            existing = [f["name"] for f in self.evolution.state.get("added_functions", [])]
             if name not in existing:
                 if self.evolution.add_function(name, code, desc):
                     print(f"[Evolution] Added capability: {name}")
-
 
     async def _cleanup(self):
         """Cleanup on exit."""
@@ -2013,9 +2121,7 @@ JSON:"""
         asyncio.set_event_loop(self._loop)
 
         try:
-            return self._loop.run_until_complete(
-                self._print_mode(prompt, output_format, stream)
-            )
+            return self._loop.run_until_complete(self._print_mode(prompt, output_format, stream))
         finally:
             self._loop.close()
 
@@ -2091,7 +2197,9 @@ JSON:"""
         if running:
             self.ui.print("[bold]Running Agents:[/bold]")
             for exec in running:
-                self.ui.print(f"  [yellow]●[/yellow] {exec.id}: {exec.config.name} - {exec.task[:40]}...")
+                self.ui.print(
+                    f"  [yellow]●[/yellow] {exec.id}: {exec.config.name} - {exec.task[:40]}..."
+                )
             self.ui.print()
 
     async def _handle_mcp_command(self, args: str):
@@ -2158,7 +2266,11 @@ JSON:"""
 
             self.ui.print(f"  Detected: {self.ide_type.value}")
             if self.ide_integration:
-                status = "[green]connected[/green]" if self.ide_integration.connected else "[dim]disconnected[/dim]"
+                status = (
+                    "[green]connected[/green]"
+                    if self.ide_integration.connected
+                    else "[dim]disconnected[/dim]"
+                )
                 self.ui.print(f"  Status: {status}")
 
                 if self.ide_integration.connected:
@@ -2190,6 +2302,7 @@ JSON:"""
             else:
                 # Fallback: just try the code command
                 import subprocess
+
                 cmd = ["code", "--goto", f"{file_path}:{line}" if line else file_path]
                 try:
                     subprocess.run(cmd, check=True)
@@ -2203,12 +2316,14 @@ JSON:"""
                 self.ui.print()
                 self.ui.print("[bold]Editor Context[/bold]")
                 self.ui.print_divider()
-                self.ui.print_key_value({
-                    "File": ctx.file_path or "None",
-                    "Line": str(ctx.line_number or "-"),
-                    "Column": str(ctx.column or "-"),
-                    "Language": ctx.language or "Unknown",
-                })
+                self.ui.print_key_value(
+                    {
+                        "File": ctx.file_path or "None",
+                        "Line": str(ctx.line_number or "-"),
+                        "Column": str(ctx.column or "-"),
+                        "Language": ctx.language or "Unknown",
+                    }
+                )
                 if ctx.selection:
                     sel = ctx.selection[:50] + "..." if len(ctx.selection) > 50 else ctx.selection
                     self.ui.print(f"  Selection: {sel}")
@@ -2308,8 +2423,13 @@ JSON:"""
 
         # Extract the main topic from the input
         words = user_input.lower().split()
-        topic_words = [w for w in words if len(w) > 4 and w not in
-                       {'what', 'why', 'how', 'when', 'where', 'about', 'could', 'would', 'should'}]
+        topic_words = [
+            w
+            for w in words
+            if len(w) > 4
+            and w
+            not in {"what", "why", "how", "when", "where", "about", "could", "would", "should"}
+        ]
         topic = topic_words[0] if topic_words else "topic"
 
         # Get current confidence for this topic
@@ -2318,7 +2438,9 @@ JSON:"""
         current_curiosity = topic_state.curiosity if topic_state else 0.8
 
         self.ui.print()
-        self.ui.print_dim(f"[CURIOSITY] Topic: {topic}, Confidence: {current_confidence:.0%}, Curiosity: {current_curiosity:.0%}")
+        self.ui.print_dim(
+            f"[CURIOSITY] Topic: {topic}, Confidence: {current_confidence:.0%}, Curiosity: {current_curiosity:.0%}"
+        )
 
         # Generate follow-up questions based on curiosity
         question_templates = [
@@ -2349,7 +2471,7 @@ JSON:"""
                     self.self_trainer.learn(
                         topic=topic,
                         content=f"Q: {question}\nA: {search_result[:500]}",
-                        source="curiosity_learning"
+                        source="curiosity_learning",
                     )
 
                     # Also store in cognitive pipeline if available
@@ -2359,7 +2481,8 @@ JSON:"""
                                 topic=topic,
                                 content=search_result[:500],
                                 source="curiosity_learning",
-                                importance=0.7 + (questions_asked * 0.05)  # Increase importance with depth
+                                importance=0.7
+                                + (questions_asked * 0.05),  # Increase importance with depth
                             )
                         except Exception:
                             pass
@@ -2371,14 +2494,22 @@ JSON:"""
                     self.active_learner.record_exposure(
                         topic=topic,
                         was_successful=True,
-                        surprise_level=max(0, 0.5 - questions_asked * 0.1),  # Less surprise as we learn more
-                        complexity=0.6
+                        surprise_level=max(
+                            0, 0.5 - questions_asked * 0.1
+                        ),  # Less surprise as we learn more
+                        complexity=0.6,
                     )
 
                     # Recalculate confidence
                     topic_state = self.active_learner.topics.get(topic)
-                    current_confidence = topic_state.confidence if topic_state else current_confidence + confidence_boost
-                    current_curiosity = topic_state.curiosity if topic_state else max(0.2, current_curiosity - 0.15)
+                    current_confidence = (
+                        topic_state.confidence
+                        if topic_state
+                        else current_confidence + confidence_boost
+                    )
+                    current_curiosity = (
+                        topic_state.curiosity if topic_state else max(0.2, current_curiosity - 0.15)
+                    )
 
                     self.ui.print_dim(f"  -> Learned! Confidence: {current_confidence:.0%}")
                 else:
@@ -2393,16 +2524,16 @@ JSON:"""
         # Summary
         if knowledge_gained:
             self.ui.print()
-            self.ui.print_dim(f"[CURIOSITY] Learned {len(knowledge_gained)} new facts about {topic}")
+            self.ui.print_dim(
+                f"[CURIOSITY] Learned {len(knowledge_gained)} new facts about {topic}"
+            )
             self.ui.print_dim(f"[CURIOSITY] Final confidence: {current_confidence:.0%}")
 
             # Store a summary fact
-            summary = f"Through curiosity-driven learning about {topic}: " + "; ".join([k[:50] for k in knowledge_gained[:3]])
-            self.self_trainer.learn(
-                topic=topic,
-                content=summary,
-                source="curiosity_summary"
+            summary = f"Through curiosity-driven learning about {topic}: " + "; ".join(
+                [k[:50] for k in knowledge_gained[:3]]
             )
+            self.self_trainer.learn(topic=topic, content=summary, source="curiosity_summary")
         else:
             self.ui.print_dim(f"[CURIOSITY] Could not find additional information about {topic}")
 

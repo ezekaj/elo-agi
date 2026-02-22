@@ -13,6 +13,7 @@ import numpy as np
 
 class GoalStatus(Enum):
     """Status of a goal in the hierarchy."""
+
     PENDING = "pending"
     ACTIVE = "active"
     COMPLETED = "completed"
@@ -23,6 +24,7 @@ class GoalStatus(Enum):
 @dataclass
 class Goal:
     """A goal with associated metadata."""
+
     name: str
     description: str = ""
     preconditions: List[Callable[[Any], bool]] = field(default_factory=list)
@@ -44,6 +46,7 @@ class Goal:
 @dataclass
 class GoalNode:
     """A node in the goal tree hierarchy."""
+
     goal: Goal
     children: List["GoalNode"] = field(default_factory=list)
     parent: Optional["GoalNode"] = None
@@ -96,6 +99,7 @@ class GoalNode:
 @dataclass
 class GoalTree:
     """A hierarchical goal tree."""
+
     root: GoalNode
     nodes: Dict[str, GoalNode] = field(default_factory=dict)
 
@@ -155,6 +159,7 @@ class GoalTree:
 @dataclass
 class CompletionFunction:
     """Completion function for a goal."""
+
     goal_name: str
     function: Callable[[Any], float]
     learned_params: Optional[np.ndarray] = None
@@ -368,9 +373,7 @@ class MAXQDecomposition:
         td_target = reward + self.discount * next_value
         td_error = td_target - current_value
 
-        self._value_functions[goal_name][state_key] = (
-            current_value + self.learning_rate * td_error
-        )
+        self._value_functions[goal_name][state_key] = current_value + self.learning_rate * td_error
 
         self._total_value_updates += 1
 

@@ -16,6 +16,7 @@ from pathlib import Path
 @dataclass
 class ToolResult:
     """Result from a tool execution."""
+
     success: bool
     output: str
     error: Optional[str] = None
@@ -76,34 +77,34 @@ class Tools:
             # DuckDuckGo Instant Answer API - returns JSON!
             url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(query)}&format=json&no_html=1"
 
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=15) as response:
-                data = json.loads(response.read().decode('utf-8'))
+                data = json.loads(response.read().decode("utf-8"))
 
             results = []
 
             # Abstract (main answer)
-            if data.get('Abstract'):
+            if data.get("Abstract"):
                 results.append(f"**{data.get('Heading', query)}**\n{data['Abstract']}")
-                if data.get('AbstractURL'):
+                if data.get("AbstractURL"):
                     results.append(f"Source: {data['AbstractURL']}")
 
             # Definition
-            if data.get('Definition'):
+            if data.get("Definition"):
                 results.append(f"Definition: {data['Definition']}")
 
             # Answer (direct answer)
-            if data.get('Answer'):
+            if data.get("Answer"):
                 results.append(f"Answer: {data['Answer']}")
 
             # Related topics
-            for topic in data.get('RelatedTopics', [])[:num_results]:
-                if isinstance(topic, dict) and topic.get('Text'):
+            for topic in data.get("RelatedTopics", [])[:num_results]:
+                if isinstance(topic, dict) and topic.get("Text"):
                     results.append(f"• {topic['Text']}")
 
             # Results
-            for result in data.get('Results', [])[:num_results]:
-                if isinstance(result, dict) and result.get('Text'):
+            for result in data.get("Results", [])[:num_results]:
+                if isinstance(result, dict) and result.get("Text"):
                     results.append(f"→ {result['Text']}")
 
             if results:
@@ -123,7 +124,7 @@ class Tools:
                 ["curl", "-s", f"https://html.duckduckgo.com/html/?q={query.replace(' ', '+')}"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             html = result.stdout
@@ -132,7 +133,7 @@ class Tools:
 
             results = []
             for i, (title, snippet) in enumerate(zip(titles[:num_results], snippets[:num_results])):
-                results.append(f"{i+1}. {title}\n   {snippet}")
+                results.append(f"{i + 1}. {title}\n   {snippet}")
 
             if results:
                 return ToolResult(True, "\n\n".join(results))
@@ -149,15 +150,15 @@ class Tools:
                 ["curl", "-s", "-L", "--max-time", "30", url],
                 capture_output=True,
                 text=True,
-                timeout=35
+                timeout=35,
             )
 
             content = result.stdout
             # Strip HTML tags for readability
-            text = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL)
-            text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
-            text = re.sub(r'<[^>]+>', ' ', text)
-            text = re.sub(r'\s+', ' ', text).strip()
+            text = re.sub(r"<script[^>]*>.*?</script>", "", content, flags=re.DOTALL)
+            text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL)
+            text = re.sub(r"<[^>]+>", " ", text)
+            text = re.sub(r"\s+", " ", text).strip()
 
             # Limit output
             if len(text) > 5000:
@@ -174,7 +175,7 @@ class Tools:
         action: str = "read",
         selector: str = None,
         text: str = None,
-        query: str = None
+        query: str = None,
     ) -> ToolResult:
         """
         Full browser automation - navigate, click, fill forms, search.
@@ -193,20 +194,22 @@ class Tools:
             # Lazy load browser agent
             if self._browser is None:
                 from browser_agent import BrowserAgent, BROWSER_AVAILABLE
+
                 if not BROWSER_AVAILABLE:
                     return ToolResult(
-                        False, "",
-                        "Browser not available. Install: pip install playwright && playwright install"
+                        False,
+                        "",
+                        "Browser not available. Install: pip install playwright && playwright install",
                     )
                 self._browser = BrowserAgent(headless=True)
 
             # Handle different actions
             if action == "goto" and url:
                 result = self._browser.goto(url)
-                if result.get('success'):
+                if result.get("success"):
                     content = self._browser.get_content(max_length=2000)
                     return ToolResult(True, f"Opened: {result['title']}\n\n{content}")
-                return ToolResult(False, "", result.get('error', 'Failed to open URL'))
+                return ToolResult(False, "", result.get("error", "Failed to open URL"))
 
             elif action == "read":
                 content = self._browser.get_content()
@@ -216,15 +219,15 @@ class Tools:
 
             elif action == "click" and selector:
                 result = self._browser.click(selector)
-                if result.get('success'):
+                if result.get("success"):
                     return ToolResult(True, f"Clicked: {selector}")
-                return ToolResult(False, "", result.get('error', 'Click failed'))
+                return ToolResult(False, "", result.get("error", "Click failed"))
 
             elif action == "fill" and selector and text:
                 result = self._browser.fill(selector, text)
-                if result.get('success'):
+                if result.get("success"):
                     return ToolResult(True, f"Filled '{selector}' with text")
-                return ToolResult(False, "", result.get('error', 'Fill failed'))
+                return ToolResult(False, "", result.get("error", "Fill failed"))
 
             elif action == "search" and query:
                 results = self._browser.search_google(query)
@@ -252,8 +255,9 @@ class Tools:
 
             else:
                 return ToolResult(
-                    False, "",
-                    "Invalid action. Use: goto, read, click, fill, search, links, screenshot"
+                    False,
+                    "",
+                    "Invalid action. Use: goto, read, click, fill, search, links, screenshot",
                 )
 
         except ImportError:
@@ -267,24 +271,21 @@ class Tools:
         """Get GitHub user info using gh CLI."""
         try:
             result = subprocess.run(
-                ["gh", "api", f"/users/{username}"],
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["gh", "api", f"/users/{username}"], capture_output=True, text=True, timeout=30
             )
 
             if result.returncode != 0:
                 return ToolResult(False, "", result.stderr)
 
             data = json.loads(result.stdout)
-            info = f"""GitHub User: {data.get('login')}
-Name: {data.get('name', 'N/A')}
-Bio: {data.get('bio', 'N/A')}
-Location: {data.get('location', 'N/A')}
-Public Repos: {data.get('public_repos', 0)}
-Followers: {data.get('followers', 0)}
-Following: {data.get('following', 0)}
-URL: {data.get('html_url')}"""
+            info = f"""GitHub User: {data.get("login")}
+Name: {data.get("name", "N/A")}
+Bio: {data.get("bio", "N/A")}
+Location: {data.get("location", "N/A")}
+Public Repos: {data.get("public_repos", 0)}
+Followers: {data.get("followers", 0)}
+Following: {data.get("following", 0)}
+URL: {data.get("html_url")}"""
 
             return ToolResult(True, info)
 
@@ -293,7 +294,9 @@ URL: {data.get('html_url')}"""
         except json.JSONDecodeError:
             return ToolResult(False, "", "Failed to parse GitHub response")
         except FileNotFoundError:
-            return ToolResult(False, "", "gh CLI not installed. Run: brew install gh && gh auth login")
+            return ToolResult(
+                False, "", "gh CLI not installed. Run: brew install gh && gh auth login"
+            )
         except Exception as e:
             return ToolResult(False, "", f"GitHub error: {e}")
 
@@ -304,7 +307,7 @@ URL: {data.get('html_url')}"""
                 ["gh", "api", f"/users/{username}/repos?sort=updated&per_page={limit}"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode != 0:
@@ -314,8 +317,8 @@ URL: {data.get('html_url')}"""
             lines = [f"Repositories for {username}:\n"]
 
             for repo in repos:
-                stars = repo.get('stargazers_count', 0)
-                desc = repo.get('description') or 'No description'
+                stars = repo.get("stargazers_count", 0)
+                desc = repo.get("description") or "No description"
                 desc = desc[:60] if len(desc) > 60 else desc
                 lines.append(f"  - {repo['name']} ({stars} stars)")
                 lines.append(f"    {desc}")
@@ -329,25 +332,22 @@ URL: {data.get('html_url')}"""
         """Get detailed info about a repository."""
         try:
             result = subprocess.run(
-                ["gh", "api", f"/repos/{owner}/{repo}"],
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["gh", "api", f"/repos/{owner}/{repo}"], capture_output=True, text=True, timeout=30
             )
 
             if result.returncode != 0:
                 return ToolResult(False, "", result.stderr)
 
             data = json.loads(result.stdout)
-            info = f"""Repository: {data.get('full_name')}
-Description: {data.get('description', 'N/A')}
-Language: {data.get('language', 'N/A')}
-Stars: {data.get('stargazers_count', 0)}
-Forks: {data.get('forks_count', 0)}
-Open Issues: {data.get('open_issues_count', 0)}
-Created: {data.get('created_at', 'N/A')[:10]}
-Updated: {data.get('updated_at', 'N/A')[:10]}
-URL: {data.get('html_url')}"""
+            info = f"""Repository: {data.get("full_name")}
+Description: {data.get("description", "N/A")}
+Language: {data.get("language", "N/A")}
+Stars: {data.get("stargazers_count", 0)}
+Forks: {data.get("forks_count", 0)}
+Open Issues: {data.get("open_issues_count", 0)}
+Created: {data.get("created_at", "N/A")[:10]}
+Updated: {data.get("updated_at", "N/A")[:10]}
+URL: {data.get("html_url")}"""
 
             return ToolResult(True, info)
 
@@ -423,7 +423,7 @@ URL: {data.get('html_url')}"""
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=self.work_dir
+                cwd=self.work_dir,
             )
 
             output = result.stdout
@@ -436,7 +436,7 @@ URL: {data.get('html_url')}"""
             return ToolResult(
                 result.returncode == 0,
                 output,
-                None if result.returncode == 0 else f"Exit code: {result.returncode}"
+                None if result.returncode == 0 else f"Exit code: {result.returncode}",
             )
 
         except subprocess.TimeoutExpired:
@@ -452,7 +452,7 @@ URL: {data.get('html_url')}"""
                 capture_output=True,
                 text=True,
                 timeout=60,
-                cwd=self.work_dir
+                cwd=self.work_dir,
             )
 
             output = result.stdout
@@ -462,7 +462,7 @@ URL: {data.get('html_url')}"""
             return ToolResult(
                 result.returncode == 0,
                 output,
-                None if result.returncode == 0 else f"Exit code: {result.returncode}"
+                None if result.returncode == 0 else f"Exit code: {result.returncode}",
             )
 
         except subprocess.TimeoutExpired:
@@ -522,8 +522,8 @@ To use a tool, respond with:
 
 def parse_tool_call(response: str) -> Optional[tuple]:
     """Parse a tool call from LLM response."""
-    tool_match = re.search(r'<tool>(\w+)</tool>', response)
-    args_match = re.search(r'<args>({.*?})</args>', response, re.DOTALL)
+    tool_match = re.search(r"<tool>(\w+)</tool>", response)
+    args_match = re.search(r"<args>({.*?})</args>", response, re.DOTALL)
 
     if tool_match:
         tool_name = tool_match.group(1)

@@ -17,7 +17,7 @@ import numpy as np
 from collections import defaultdict
 
 # Ensure we can import from src
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 
 from src import (
     MemoryController,
@@ -39,6 +39,7 @@ from src.memory_processes import (
 
 class TestResults:
     """Track test results"""
+
     def __init__(self):
         self.passed = 0
         self.failed = 0
@@ -55,13 +56,13 @@ class TestResults:
 
     def summary(self):
         total = self.passed + self.failed
-        print(f"\n{'='*60}")
-        print(f"RESULTS: {self.passed}/{total} passed ({100*self.passed/total:.1f}%)")
+        print(f"\n{'=' * 60}")
+        print(f"RESULTS: {self.passed}/{total} passed ({100 * self.passed / total:.1f}%)")
         if self.errors:
             print(f"\nFailed tests:")
             for name, error in self.errors:
                 print(f"  - {name}: {error}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         return self.failed == 0
 
 
@@ -69,14 +70,15 @@ results = TestResults()
 
 
 def test_section(name):
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"TEST: {name}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 # =============================================================================
 # 1. SENSORY MEMORY STRESS TESTS
 # =============================================================================
+
 
 def test_sensory_memory():
     test_section("SENSORY MEMORY STRESS TESTS")
@@ -95,7 +97,7 @@ def test_sensory_memory():
             (0.125, True, 0.606),  # e^(-0.5) ≈ 0.606
             (0.250, True, 0.368),  # e^(-1) ≈ 0.368
             (0.500, True, 0.135),  # e^(-2) ≈ 0.135
-            (1.250, False, 0.007), # e^(-5) ≈ 0.007
+            (1.250, False, 0.007),  # e^(-5) ≈ 0.007
         ]
 
         all_correct = True
@@ -105,8 +107,9 @@ def test_sensory_memory():
             if abs(strength - exp_strength) > 0.05:
                 all_correct = False
 
-        results.record("Iconic timing precision", all_correct,
-                      "Strength decay doesn't match exponential")
+        results.record(
+            "Iconic timing precision", all_correct, "Strength decay doesn't match exponential"
+        )
     except Exception as e:
         results.record("Iconic timing precision", False, str(e))
 
@@ -127,8 +130,7 @@ def test_sensory_memory():
 
         # Should have 7 chunks (from t=1.5 onwards)
         count = echoic.get_segment_count()
-        results.record("Echoic rolling window", count == 7,
-                      f"Expected 7 segments, got {count}")
+        results.record("Echoic rolling window", count == 7, f"Expected 7 segments, got {count}")
     except Exception as e:
         results.record("Echoic rolling window", False, str(e))
 
@@ -138,8 +140,10 @@ def test_sensory_memory():
         large_data = np.random.rand(1000, 1000)  # 1M elements
         iconic.capture(large_data)
         retrieved = iconic.read()
-        results.record("Large data handling (1M elements)",
-                      retrieved is not None and retrieved.shape == (1000, 1000))
+        results.record(
+            "Large data handling (1M elements)",
+            retrieved is not None and retrieved.shape == (1000, 1000),
+        )
     except Exception as e:
         results.record("Large data handling (1M elements)", False, str(e))
 
@@ -147,6 +151,7 @@ def test_sensory_memory():
 # =============================================================================
 # 2. WORKING MEMORY STRESS TESTS
 # =============================================================================
+
 
 def test_working_memory():
     test_section("WORKING MEMORY STRESS TESTS")
@@ -160,8 +165,7 @@ def test_working_memory():
             wm.store(f"item_{i}")
 
         # Must never exceed capacity
-        results.record("Capacity never exceeded (100 stores)",
-                      len(wm) == 7, f"Got {len(wm)} items")
+        results.record("Capacity never exceeded (100 stores)", len(wm) == 7, f"Got {len(wm)} items")
     except Exception as e:
         results.record("Capacity never exceeded (100 stores)", False, str(e))
 
@@ -184,9 +188,11 @@ def test_working_memory():
         sim_time[0] = 30.0
         gone_30 = len(wm) == 0
 
-        results.record("Decay timing (15s survive, 30s gone)",
-                      survived_15 and gone_30,
-                      f"15s: {survived_15}, 30s: {gone_30}")
+        results.record(
+            "Decay timing (15s survive, 30s gone)",
+            survived_15 and gone_30,
+            f"15s: {survived_15}, 30s: {gone_30}",
+        )
     except Exception as e:
         results.record("Decay timing (15s survive, 30s gone)", False, str(e))
 
@@ -219,13 +225,14 @@ def test_working_memory():
         # Should have 3 chunks, each containing 3 items = 9 effective items
         chunk_count = len(wm)
         effective_items = sum(
-            len(c[0].items) if hasattr(c[0], 'items') else 1
-            for c in wm.get_contents()
+            len(c[0].items) if hasattr(c[0], "items") else 1 for c in wm.get_contents()
         )
 
-        results.record("Chunking (9 items → 3 chunks)",
-                      chunk_count == 3 and effective_items == 9,
-                      f"Got {chunk_count} chunks, {effective_items} effective items")
+        results.record(
+            "Chunking (9 items → 3 chunks)",
+            chunk_count == 3 and effective_items == 9,
+            f"Got {chunk_count} chunks, {effective_items} effective items",
+        )
     except Exception as e:
         results.record("Chunking (9 items → 3 chunks)", False, str(e))
 
@@ -246,9 +253,11 @@ def test_working_memory():
         old_gone = wm.retrieve("old") is None
         new3_present = wm.retrieve("new3") is not None
 
-        results.record("Lowest activation displaced",
-                      old_gone and new3_present,
-                      f"old gone: {old_gone}, new3 present: {new3_present}")
+        results.record(
+            "Lowest activation displaced",
+            old_gone and new3_present,
+            f"old gone: {old_gone}, new3 present: {new3_present}",
+        )
     except Exception as e:
         results.record("Lowest activation displaced", False, str(e))
 
@@ -274,9 +283,11 @@ def test_working_memory():
         rehearsed_present = wm.retrieve("rehearsed") is not None
         forgotten_gone = wm.retrieve("forgotten") is None
 
-        results.record("Rehearsal prevents decay over 25s",
-                      rehearsed_present and forgotten_gone,
-                      f"rehearsed: {rehearsed_present}, forgotten: {forgotten_gone}")
+        results.record(
+            "Rehearsal prevents decay over 25s",
+            rehearsed_present and forgotten_gone,
+            f"rehearsed: {rehearsed_present}, forgotten: {forgotten_gone}",
+        )
     except Exception as e:
         results.record("Rehearsal prevents decay over 25s", False, str(e))
 
@@ -284,6 +295,7 @@ def test_working_memory():
 # =============================================================================
 # 3. LONG-TERM MEMORY STRESS TESTS
 # =============================================================================
+
 
 def test_long_term_memory():
     test_section("LONG-TERM MEMORY STRESS TESTS")
@@ -296,12 +308,11 @@ def test_long_term_memory():
         for i in range(1000):
             em.encode(
                 f"event_{i}",
-                context={"location": f"place_{i%10}", "category": i % 5},
-                emotional_valence=(i % 10) / 10 - 0.5
+                context={"location": f"place_{i % 10}", "category": i % 5},
+                emotional_valence=(i % 10) / 10 - 0.5,
             )
 
-        results.record("Episodic mass encoding (1000 episodes)",
-                      len(em) == 1000, f"Got {len(em)}")
+        results.record("Episodic mass encoding (1000 episodes)", len(em) == 1000, f"Got {len(em)}")
     except Exception as e:
         results.record("Episodic mass encoding (1000 episodes)", False, str(e))
 
@@ -311,14 +322,15 @@ def test_long_term_memory():
 
         # Create episodes with specific contexts
         for i in range(100):
-            em.encode(f"event_{i}", context={"location": f"place_{i%5}"})
+            em.encode(f"event_{i}", context={"location": f"place_{i % 5}"})
 
         # Retrieve by context
         place_0 = em.retrieve_by_context({"location": "place_0"})
 
         # Should get exactly 20 episodes (100/5)
-        results.record("Context retrieval accuracy",
-                      len(place_0) == 20, f"Expected 20, got {len(place_0)}")
+        results.record(
+            "Context retrieval accuracy", len(place_0) == 20, f"Expected 20, got {len(place_0)}"
+        )
     except Exception as e:
         results.record("Context retrieval accuracy", False, str(e))
 
@@ -335,9 +347,11 @@ def test_long_term_memory():
 
         path = sm.find_path("A", "E", max_depth=10)
 
-        results.record("Semantic path finding (A→E, 4 hops)",
-                      path is not None and len(path) == 4,
-                      f"Path: {path}")
+        results.record(
+            "Semantic path finding (A→E, 4 hops)",
+            path is not None and len(path) == 4,
+            f"Path: {path}",
+        )
     except Exception as e:
         results.record("Semantic path finding (A→E, 4 hops)", False, str(e))
 
@@ -346,13 +360,13 @@ def test_long_term_memory():
         sm = SemanticMemory()
 
         # Create star network
-        sm.create_concept("center", relations=[
-            ("related-to", f"spoke_{i}", 0.8) for i in range(10)
-        ])
+        sm.create_concept(
+            "center", relations=[("related-to", f"spoke_{i}", 0.8) for i in range(10)]
+        )
         for i in range(10):
-            sm.create_concept(f"spoke_{i}", relations=[
-                ("related-to", f"outer_{i}_{j}", 0.5) for j in range(5)
-            ])
+            sm.create_concept(
+                f"spoke_{i}", relations=[("related-to", f"outer_{i}_{j}", 0.5) for j in range(5)]
+            )
             for j in range(5):
                 sm.create_concept(f"outer_{i}_{j}")
 
@@ -363,9 +377,11 @@ def test_long_term_memory():
         center_active = activations.get("center", 0) > 0.9
         spokes_active = all(activations.get(f"spoke_{i}", 0) > 0.3 for i in range(10))
 
-        results.record("Spreading activation (61 nodes)",
-                      center_active and spokes_active,
-                      f"Center: {activations.get('center', 0):.2f}")
+        results.record(
+            "Spreading activation (61 nodes)",
+            center_active and spokes_active,
+            f"Center: {activations.get('center', 0):.2f}",
+        )
     except Exception as e:
         results.record("Spreading activation (61 nodes)", False, str(e))
 
@@ -375,20 +391,18 @@ def test_long_term_memory():
 
         # Create competing procedures with different strengths
         for i in range(10):
-            proc = pm.encode_simple(
-                f"proc_{i}",
-                {"trigger": "go"},
-                [f"action_{i}"]
-            )
+            proc = pm.encode_simple(f"proc_{i}", {"trigger": "go"}, [f"action_{i}"])
             proc.strength = i / 10  # 0.0 to 0.9
 
         # Execute - should pick highest strength
         matches = pm.get_matching({"trigger": "go"})
         winner = pm.compete(matches)
 
-        results.record("Procedural competition (10 competing)",
-                      winner.name == "proc_9",
-                      f"Winner: {winner.name}")
+        results.record(
+            "Procedural competition (10 competing)",
+            winner.name == "proc_9",
+            f"Winner: {winner.name}",
+        )
     except Exception as e:
         results.record("Procedural competition (10 competing)", False, str(e))
 
@@ -396,6 +410,7 @@ def test_long_term_memory():
 # =============================================================================
 # 4. ENGRAM STRESS TESTS
 # =============================================================================
+
 
 def test_engram():
     test_section("ENGRAM STRESS TESTS")
@@ -423,9 +438,11 @@ def test_engram():
         # Check if Region B activated
         region_b_activation = np.mean(recalled[100:150])
 
-        results.record("Pattern completion (25% cue → full recall)",
-                      region_b_activation > 0.3,
-                      f"Region B activation: {region_b_activation:.2f}")
+        results.record(
+            "Pattern completion (25% cue → full recall)",
+            region_b_activation > 0.3,
+            f"Region B activation: {region_b_activation:.2f}",
+        )
     except Exception as e:
         results.record("Pattern completion (25% cue → full recall)", False, str(e))
 
@@ -445,9 +462,11 @@ def test_engram():
 
         final_weight = engram.neurons[0].connections.get(1, 0)
 
-        results.record("Hebbian strengthening (20 co-activations)",
-                      final_weight > initial_weight,
-                      f"Initial: {initial_weight:.3f}, Final: {final_weight:.3f}")
+        results.record(
+            "Hebbian strengthening (20 co-activations)",
+            final_weight > initial_weight,
+            f"Initial: {initial_weight:.3f}, Final: {final_weight:.3f}",
+        )
     except Exception as e:
         results.record("Hebbian strengthening (20 co-activations)", False, str(e))
 
@@ -464,9 +483,11 @@ def test_engram():
         final_connections = sum(len(n.connections) for n in engram.neurons)
         reduction = (initial_connections - final_connections) / initial_connections
 
-        results.record("Pruning removes >50% of connections",
-                      reduction > 0.5,
-                      f"Removed {reduction*100:.1f}%")
+        results.record(
+            "Pruning removes >50% of connections",
+            reduction > 0.5,
+            f"Removed {reduction * 100:.1f}%",
+        )
     except Exception as e:
         results.record("Pruning removes >50% of connections", False, str(e))
 
@@ -491,11 +512,13 @@ def test_engram():
         engram.restabilize()
         consolidated_final = engram.state.value == "consolidated"
 
-        all_correct = all([labile_after_encode, consolidated_after,
-                          reactivated_after, consolidated_final])
+        all_correct = all(
+            [labile_after_encode, consolidated_after, reactivated_after, consolidated_final]
+        )
 
-        results.record("State transitions (labile→consolidated→reactivated→consolidated)",
-                      all_correct)
+        results.record(
+            "State transitions (labile→consolidated→reactivated→consolidated)", all_correct
+        )
     except Exception as e:
         results.record("State transitions", False, str(e))
 
@@ -508,7 +531,7 @@ def test_engram():
         patterns = []
         for i in range(5):
             p = np.zeros(200)
-            p[i*40:(i+1)*40] = 1.0  # Non-overlapping regions
+            p[i * 40 : (i + 1) * 40] = 1.0  # Non-overlapping regions
             patterns.append(p)
             engram.encode(p)
             engram.consolidate()
@@ -518,16 +541,18 @@ def test_engram():
         recalls_successful = 0
         for i, pattern in enumerate(patterns):
             cue = np.zeros(200)
-            cue[i*40:i*40+20] = 1.0  # 50% of pattern as cue
+            cue[i * 40 : i * 40 + 20] = 1.0  # 50% of pattern as cue
 
             recalled = engram.reactivate(cue, iterations=15)
             similarity = np.corrcoef(pattern, recalled)[0, 1]
             if similarity > 0.5:
                 recalls_successful += 1
 
-        results.record("Multiple pattern storage (5 patterns)",
-                      recalls_successful >= 3,
-                      f"Recalled {recalls_successful}/5 patterns")
+        results.record(
+            "Multiple pattern storage (5 patterns)",
+            recalls_successful >= 3,
+            f"Recalled {recalls_successful}/5 patterns",
+        )
     except Exception as e:
         results.record("Multiple pattern storage (5 patterns)", False, str(e))
 
@@ -535,6 +560,7 @@ def test_engram():
 # =============================================================================
 # 5. MEMORY PROCESSES STRESS TESTS
 # =============================================================================
+
 
 def test_memory_processes():
     test_section("MEMORY PROCESSES STRESS TESTS")
@@ -549,8 +575,7 @@ def test_memory_processes():
         episodic = encoder.encode_episodic("event", {"context": "test"})
 
         all_correct_size = all(
-            len(enc.pattern) == 100
-            for enc in [visual, auditory, semantic, episodic]
+            len(enc.pattern) == 100 for enc in [visual, auditory, semantic, episodic]
         )
 
         results.record("Encoder handles all modalities", all_correct_size)
@@ -579,8 +604,10 @@ def test_memory_processes():
         # All memories should be stronger
         all_stronger = all(m.strength > 0.3 for m in memories)
 
-        results.record("Consolidation processes 100 items",
-                      consolidated == 100 and queue_empty and all_stronger)
+        results.record(
+            "Consolidation processes 100 items",
+            consolidated == 100 and queue_empty and all_stronger,
+        )
     except Exception as e:
         results.record("Consolidation processes 100 items", False, str(e))
 
@@ -598,9 +625,11 @@ def test_memory_processes():
         forgetter.interfere(old, new, similarity=0.7)
 
         # Old memory should be weakened
-        results.record("Interference weakens old memory",
-                      old.strength < 0.8,
-                      f"Old strength: {old.strength:.2f}")
+        results.record(
+            "Interference weakens old memory",
+            old.strength < 0.8,
+            f"Old strength: {old.strength:.2f}",
+        )
     except Exception as e:
         results.record("Interference weakens old memory", False, str(e))
 
@@ -621,8 +650,9 @@ def test_memory_processes():
         # All competitors should be weakened
         all_weakened = all(c.strength < 0.8 for c in competitors)
 
-        results.record("Retrieval-induced forgetting (10 competitors)",
-                      affected == 10 and all_weakened)
+        results.record(
+            "Retrieval-induced forgetting (10 competitors)", affected == 10 and all_weakened
+        )
     except Exception as e:
         results.record("Retrieval-induced forgetting (10 competitors)", False, str(e))
 
@@ -630,6 +660,7 @@ def test_memory_processes():
 # =============================================================================
 # 6. MEMORY CONTROLLER INTEGRATION TESTS
 # =============================================================================
+
 
 def test_memory_controller():
     test_section("MEMORY CONTROLLER INTEGRATION TESTS")
@@ -650,9 +681,7 @@ def test_memory_controller():
         # Should have ~7 items in WM (capacity limit)
         wm_count = len(mc.working)
 
-        results.record("Pipeline handles 50 visual inputs",
-                      wm_count <= 7,
-                      f"WM items: {wm_count}")
+        results.record("Pipeline handles 50 visual inputs", wm_count <= 7, f"WM items: {wm_count}")
     except Exception as e:
         results.record("Pipeline handles 50 visual inputs", False, str(e))
 
@@ -670,8 +699,7 @@ def test_memory_controller():
         ep_recall = mc.recall("episodic", memory_types=["episodic"])
         sem_recall = mc.recall("semantic_item", memory_types=["semantic"])
 
-        all_found = all([wm_recall is not None, ep_recall is not None,
-                        sem_recall is not None])
+        all_found = all([wm_recall is not None, ep_recall is not None, sem_recall is not None])
 
         results.record("Cross-store retrieval", all_found)
     except Exception as e:
@@ -683,9 +711,7 @@ def test_memory_controller():
 
         # Learn skill
         skill = mc.learn_skill(
-            "test_skill",
-            {"situation": "test", "ready": True},
-            ["prepare", "execute", "finish"]
+            "test_skill", {"situation": "test", "ready": True}, ["prepare", "execute", "finish"]
         )
 
         # Practice to strengthen
@@ -696,9 +722,9 @@ def test_memory_controller():
         # Check automaticity
         is_automatic = skill.is_automatic(threshold=0.5)
 
-        results.record("Skill learning and automaticity",
-                      is_automatic,
-                      f"Strength: {skill.strength:.2f}")
+        results.record(
+            "Skill learning and automaticity", is_automatic, f"Strength: {skill.strength:.2f}"
+        )
     except Exception as e:
         results.record("Skill learning and automaticity", False, str(e))
 
@@ -714,9 +740,9 @@ def test_memory_controller():
         # Consolidate
         consolidated = mc.consolidate()
 
-        results.record("Consolidation cycle",
-                      consolidated > 0,
-                      f"Consolidated {consolidated} items")
+        results.record(
+            "Consolidation cycle", consolidated > 0, f"Consolidated {consolidated} items"
+        )
     except Exception as e:
         results.record("Consolidation cycle", False, str(e))
 
@@ -743,8 +769,7 @@ def test_memory_controller():
         iconic_decayed = initial_iconic and not final_iconic
         wm_decayed = initial_wm > final_wm
 
-        results.record("Time-based decay across systems",
-                      iconic_decayed and wm_decayed)
+        results.record("Time-based decay across systems", iconic_decayed and wm_decayed)
     except Exception as e:
         results.record("Time-based decay across systems", False, str(e))
 
@@ -752,6 +777,7 @@ def test_memory_controller():
 # =============================================================================
 # 7. EDGE CASES AND STRESS TESTS
 # =============================================================================
+
 
 def test_edge_cases():
     test_section("EDGE CASES AND STRESS TESTS")
@@ -787,8 +813,7 @@ def test_edge_cases():
         ep = em.encode("negative_event", emotional_valence=-0.9)
         retrieved = em.retrieve_by_emotion(-1.0, -0.5)
 
-        results.record("Negative emotional valence handling",
-                      len(retrieved) == 1)
+        results.record("Negative emotional valence handling", len(retrieved) == 1)
     except Exception as e:
         results.record("Negative emotional valence handling", False, str(e))
 
@@ -799,16 +824,18 @@ def test_edge_cases():
         # Create chain of 20 concepts
         for i in range(20):
             if i < 19:
-                sm.create_concept(f"node_{i}", relations=[("next", f"node_{i+1}", 1.0)])
+                sm.create_concept(f"node_{i}", relations=[("next", f"node_{i + 1}", 1.0)])
             else:
                 sm.create_concept(f"node_{i}")
 
         # Find path from start to end
         path = sm.find_path("node_0", "node_19", max_depth=25)
 
-        results.record("Long semantic path (20 hops)",
-                      path is not None and len(path) == 19,
-                      f"Path length: {len(path) if path else 0}")
+        results.record(
+            "Long semantic path (20 hops)",
+            path is not None and len(path) == 19,
+            f"Path length: {len(path) if path else 0}",
+        )
     except Exception as e:
         results.record("Long semantic path (20 hops)", False, str(e))
 
@@ -827,8 +854,7 @@ def test_edge_cases():
         # System should still be functional
         state = mc.get_state()
 
-        results.record("Rapid-fire operations (100 iterations)",
-                      state["episodic_count"] == 100)
+        results.record("Rapid-fire operations (100 iterations)", state["episodic_count"] == 100)
     except Exception as e:
         results.record("Rapid-fire operations (100 iterations)", False, str(e))
 
@@ -850,6 +876,7 @@ def test_edge_cases():
 # =============================================================================
 # RUN ALL TESTS
 # =============================================================================
+
 
 def run_all_tests():
     print("\n" + "=" * 60)

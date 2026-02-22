@@ -14,6 +14,7 @@ import time
 
 class CameraType(Enum):
     """Types of cameras."""
+
     RGB = "rgb"
     DEPTH = "depth"
     RGBD = "rgbd"
@@ -23,6 +24,7 @@ class CameraType(Enum):
 
 class ColorSpace(Enum):
     """Color spaces."""
+
     RGB = "rgb"
     BGR = "bgr"
     GRAY = "gray"
@@ -33,6 +35,7 @@ class ColorSpace(Enum):
 @dataclass
 class CameraConfig:
     """Configuration for camera."""
+
     camera_type: CameraType = CameraType.RGB
     width: int = 640
     height: int = 480
@@ -46,6 +49,7 @@ class CameraConfig:
 @dataclass
 class CameraFrame:
     """A single frame from a camera."""
+
     data: np.ndarray
     timestamp: float
     frame_id: int
@@ -65,6 +69,7 @@ class CameraFrame:
 @dataclass
 class CameraCalibration:
     """Camera calibration parameters."""
+
     intrinsic_matrix: np.ndarray  # 3x3
     distortion_coeffs: np.ndarray
     extrinsic_matrix: Optional[np.ndarray] = None  # 4x4
@@ -227,7 +232,9 @@ class Camera:
         # Simple conversions (full implementation would use OpenCV)
         if target_space == ColorSpace.GRAY and frame.color_space == ColorSpace.RGB:
             # RGB to grayscale
-            data = (0.299 * data[:, :, 0] + 0.587 * data[:, :, 1] + 0.114 * data[:, :, 2]).astype(np.uint8)
+            data = (0.299 * data[:, :, 0] + 0.587 * data[:, :, 1] + 0.114 * data[:, :, 2]).astype(
+                np.uint8
+            )
         elif target_space == ColorSpace.RGB and frame.color_space == ColorSpace.BGR:
             # BGR to RGB
             data = data[:, :, ::-1]
@@ -353,9 +360,11 @@ class VisionProcessor:
         """
         # Convert to grayscale if needed
         if frame.channels > 1:
-            gray = (0.299 * frame.data[:, :, 0] +
-                    0.587 * frame.data[:, :, 1] +
-                    0.114 * frame.data[:, :, 2])
+            gray = (
+                0.299 * frame.data[:, :, 0]
+                + 0.587 * frame.data[:, :, 1]
+                + 0.114 * frame.data[:, :, 2]
+            )
         else:
             gray = frame.data
 
@@ -394,9 +403,11 @@ class VisionProcessor:
         """
         # Convert to grayscale
         if frame.channels > 1:
-            gray = (0.299 * frame.data[:, :, 0] +
-                    0.587 * frame.data[:, :, 1] +
-                    0.114 * frame.data[:, :, 2]).astype(float)
+            gray = (
+                0.299 * frame.data[:, :, 0]
+                + 0.587 * frame.data[:, :, 1]
+                + 0.114 * frame.data[:, :, 2]
+            ).astype(float)
         else:
             gray = frame.data.astype(float)
 
@@ -406,6 +417,7 @@ class VisionProcessor:
 
         # Simple convolution
         from scipy.ndimage import convolve
+
         gx = convolve(gray, sobel_x)
         gy = convolve(gray, sobel_y)
 
@@ -434,15 +446,11 @@ class VisionProcessor:
         histograms = {}
 
         if frame.channels == 1:
-            histograms["gray"] = np.histogram(
-                frame.data, bins=bins, range=(0, 256)
-            )[0]
+            histograms["gray"] = np.histogram(frame.data, bins=bins, range=(0, 256))[0]
         else:
             channels = ["red", "green", "blue"]
             for i, name in enumerate(channels):
-                histograms[name] = np.histogram(
-                    frame.data[:, :, i], bins=bins, range=(0, 256)
-                )[0]
+                histograms[name] = np.histogram(frame.data[:, :, i], bins=bins, range=(0, 256))[0]
 
         return histograms
 
@@ -466,7 +474,7 @@ class VisionProcessor:
         if flow is None:
             return False, 0.0
 
-        magnitude = np.sqrt(flow[:, :, 0]**2 + flow[:, :, 1]**2)
+        magnitude = np.sqrt(flow[:, :, 0] ** 2 + flow[:, :, 1] ** 2)
         mean_magnitude = np.mean(magnitude)
 
         return mean_magnitude > motion_threshold, float(mean_magnitude)

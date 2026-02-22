@@ -21,6 +21,7 @@ import hashlib
 @dataclass
 class Episode:
     """An episodic memory - specific experience with context"""
+
     id: str
     content: Any
     context: Dict[str, Any]
@@ -33,6 +34,7 @@ class Episode:
 @dataclass
 class CognitiveMapNode:
     """A node in the cognitive map (place cell analog)"""
+
     id: str
     position: np.ndarray  # Abstract position in cognitive space
     associations: Dict[str, float]  # Connected nodes with weights
@@ -42,6 +44,7 @@ class CognitiveMapNode:
 @dataclass
 class Schema:
     """An abstracted pattern extracted from episodes"""
+
     id: str
     structure: Dict[str, Any]  # Abstract structure with slots
     slot_fillers: Dict[str, List[Any]]  # Examples of what fills each slot
@@ -58,9 +61,7 @@ class Hippocampus:
     episodes and creates cognitive maps of relationships.
     """
 
-    def __init__(self,
-                 max_episodes: int = 10000,
-                 decay_rate: float = 0.001):
+    def __init__(self, max_episodes: int = 10000, decay_rate: float = 0.001):
         self.episodes: Dict[str, Episode] = {}
         self.cognitive_map: Dict[str, CognitiveMapNode] = {}
         self.max_episodes = max_episodes
@@ -70,10 +71,9 @@ class Hippocampus:
         self._content_index: Dict[str, List[str]] = defaultdict(list)
         self._context_index: Dict[str, List[str]] = defaultdict(list)
 
-    def encode_episode(self,
-                       content: Any,
-                       context: Dict[str, Any],
-                       strength: float = 1.0) -> Episode:
+    def encode_episode(
+        self, content: Any, context: Dict[str, Any], strength: float = 1.0
+    ) -> Episode:
         """
         Rapidly encode an episodic memory.
 
@@ -88,7 +88,7 @@ class Hippocampus:
             content=content,
             context=context,
             timestamp=timestamp,
-            encoding_strength=strength
+            encoding_strength=strength,
         )
 
         self.episodes[episode_id] = episode
@@ -121,10 +121,9 @@ class Hippocampus:
             context_key = f"{key}:{value}"
             self._context_index[context_key].append(episode.id)
 
-    def retrieve_episode(self,
-                         cue: Any,
-                         context: Optional[Dict[str, Any]] = None,
-                         top_k: int = 5) -> List[Episode]:
+    def retrieve_episode(
+        self, cue: Any, context: Optional[Dict[str, Any]] = None, top_k: int = 5
+    ) -> List[Episode]:
         """
         Retrieve episodes by cue (pattern completion).
 
@@ -164,10 +163,9 @@ class Hippocampus:
 
         return results
 
-    def _compute_retrieval_score(self,
-                                  episode: Episode,
-                                  cue: Any,
-                                  context: Optional[Dict]) -> float:
+    def _compute_retrieval_score(
+        self, episode: Episode, cue: Any, context: Optional[Dict]
+    ) -> float:
         """Score episode match to cue"""
         score = episode.encoding_strength
 
@@ -177,13 +175,12 @@ class Hippocampus:
         score *= recency_factor
 
         # Retrieval strength bonus (frequently retrieved = stronger)
-        score *= (1.0 + 0.1 * min(episode.retrieval_count, 10))
+        score *= 1.0 + 0.1 * min(episode.retrieval_count, 10)
 
         # Context match bonus
         if context:
-            matches = sum(1 for k, v in context.items()
-                          if episode.context.get(k) == v)
-            score *= (1.0 + 0.2 * matches)
+            matches = sum(1 for k, v in context.items() if episode.context.get(k) == v)
+            score *= 1.0 + 0.2 * matches
 
         return score
 
@@ -194,10 +191,7 @@ class Hippocampus:
             # Position based on context features
             position = self._context_to_position(episode.context)
             self.cognitive_map[episode.id] = CognitiveMapNode(
-                id=episode.id,
-                position=position,
-                associations={},
-                content=episode.content
+                id=episode.id, position=position, associations={}, content=episode.content
             )
 
         # Link to nearby episodes in cognitive space
@@ -234,9 +228,7 @@ class Hippocampus:
         """
         if episodes is None:
             # Replay recent episodes
-            recent = sorted(self.episodes.values(),
-                            key=lambda e: e.timestamp,
-                            reverse=True)[:10]
+            recent = sorted(self.episodes.values(), key=lambda e: e.timestamp, reverse=True)[:10]
             episodes = recent
 
         for ep in episodes:
@@ -259,7 +251,7 @@ class Hippocampus:
         scored.sort(key=lambda x: x[1])
 
         # Remove bottom 10%
-        to_remove = scored[:len(scored) // 10]
+        to_remove = scored[: len(scored) // 10]
         for ep_id, _ in to_remove:
             del self.episodes[ep_id]
             if ep_id in self.cognitive_map:
@@ -345,7 +337,7 @@ class PrefrontalCortex:
             structure=structure,
             slot_fillers=slot_fillers,
             source_episodes=[ep.id for ep in episodes],
-            confidence=min(1.0, len(episodes) / 10.0)
+            confidence=min(1.0, len(episodes) / 10.0),
         )
 
         self.schemas[schema_id] = schema
@@ -360,9 +352,7 @@ class PrefrontalCortex:
         schema.confidence = min(1.0, schema.confidence + 0.1)
         schema.use_count += 1
 
-    def apply_schema(self,
-                     schema: Schema,
-                     slot_values: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_schema(self, schema: Schema, slot_values: Dict[str, Any]) -> Dict[str, Any]:
         """
         Apply schema to novel input by filling slots.
 
@@ -380,8 +370,7 @@ class PrefrontalCortex:
         schema.use_count += 1
         return result
 
-    def find_matching_schema(self,
-                              context: Dict[str, Any]) -> Optional[Tuple[Schema, float]]:
+    def find_matching_schema(self, context: Dict[str, Any]) -> Optional[Tuple[Schema, float]]:
         """Find schema that best matches given context"""
         best_schema = None
         best_score = 0.0
@@ -437,7 +426,7 @@ class PrefrontalCortex:
             structure=common_structure,
             slot_fillers={},
             source_episodes=schema1.source_episodes + schema2.source_episodes,
-            confidence=(schema1.confidence + schema2.confidence) / 2
+            confidence=(schema1.confidence + schema2.confidence) / 2,
         )
 
 
@@ -454,9 +443,9 @@ class HPCPFCComplex:
         self.pfc = PrefrontalCortex()
         self._consolidation_buffer: List[Episode] = []
 
-    def encode_and_abstract(self,
-                            content: Any,
-                            context: Dict[str, Any]) -> Tuple[Episode, Optional[Schema]]:
+    def encode_and_abstract(
+        self, content: Any, context: Dict[str, Any]
+    ) -> Tuple[Episode, Optional[Schema]]:
         """
         Full pipeline: encode episode and extract/update schemas.
 
@@ -483,9 +472,7 @@ class HPCPFCComplex:
 
         return episode, None
 
-    def compose_novel(self,
-                      concepts: List[Any],
-                      relation: str = "combined") -> Dict[str, Any]:
+    def compose_novel(self, concepts: List[Any], relation: str = "combined") -> Dict[str, Any]:
         """
         Combine known concepts into novel configuration.
 
@@ -499,11 +486,7 @@ class HPCPFCComplex:
                 all_contexts.append(ep.context)
 
         # Find or create schema that can combine them
-        combined_context = {
-            "components": concepts,
-            "relation": relation,
-            "novel": True
-        }
+        combined_context = {"components": concepts, "relation": relation, "novel": True}
 
         # Merge contexts from components
         for i, ctx in enumerate(all_contexts):
@@ -514,24 +497,18 @@ class HPCPFCComplex:
         episode = self.hippocampus.encode_episode(
             content={"composed": concepts, "relation": relation},
             context=combined_context,
-            strength=0.8  # Novel combinations start slightly weaker
+            strength=0.8,  # Novel combinations start slightly weaker
         )
 
         return combined_context
 
-    def retrieve_by_schema(self,
-                           schema: Schema,
-                           partial_context: Dict[str, Any]) -> List[Episode]:
+    def retrieve_by_schema(self, schema: Schema, partial_context: Dict[str, Any]) -> List[Episode]:
         """Retrieve episodes that match a schema with partial slot filling"""
         # Apply schema to get full context pattern
         filled = self.pfc.apply_schema(schema, partial_context)
 
         # Retrieve matching episodes
-        episodes = self.hippocampus.retrieve_episode(
-            cue=None,
-            context=filled,
-            top_k=10
-        )
+        episodes = self.hippocampus.retrieve_episode(cue=None, context=filled, top_k=10)
 
         return episodes
 

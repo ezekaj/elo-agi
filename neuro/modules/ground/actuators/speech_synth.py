@@ -13,6 +13,7 @@ import time
 
 class Voice(Enum):
     """Available voices."""
+
     MALE_1 = "male_1"
     MALE_2 = "male_2"
     FEMALE_1 = "female_1"
@@ -22,6 +23,7 @@ class Voice(Enum):
 
 class EmotionType(Enum):
     """Emotion types for prosody."""
+
     NEUTRAL = "neutral"
     HAPPY = "happy"
     SAD = "sad"
@@ -33,6 +35,7 @@ class EmotionType(Enum):
 @dataclass
 class SpeechConfig:
     """Configuration for speech synthesis."""
+
     voice: Voice = Voice.NEUTRAL
     sample_rate: int = 22050
     pitch_hz: float = 150.0  # Base pitch
@@ -43,6 +46,7 @@ class SpeechConfig:
 @dataclass
 class Phoneme:
     """A single phoneme."""
+
     symbol: str
     duration_ms: float
     pitch_contour: Optional[np.ndarray] = None
@@ -51,6 +55,7 @@ class Phoneme:
 @dataclass
 class Utterance:
     """A synthesized utterance."""
+
     text: str
     audio: np.ndarray
     sample_rate: int
@@ -62,6 +67,7 @@ class Utterance:
 @dataclass
 class ProsodyParams:
     """Prosody parameters for speech."""
+
     pitch_shift: float = 0.0  # Semitones
     pitch_range: float = 1.0  # Multiplier
     duration_scale: float = 1.0
@@ -193,10 +199,12 @@ class SpeechSynthesizer:
             if char in self._phoneme_dict:
                 for p_symbol in self._phoneme_dict[char]:
                     duration = 50.0 if p_symbol == "SIL" else 80.0
-                    phonemes.append(Phoneme(
-                        symbol=p_symbol,
-                        duration_ms=duration,
-                    ))
+                    phonemes.append(
+                        Phoneme(
+                            symbol=p_symbol,
+                            duration_ms=duration,
+                        )
+                    )
             else:
                 # Unknown character - skip
                 pass
@@ -223,7 +231,7 @@ class SpeechSynthesizer:
 
             # Emotion-based contour
             if prosody.emotion == EmotionType.HAPPY:
-                contour = base_pitch * (1 + 0.1 * np.sin(np.linspace(0, 2*np.pi, n_samples)))
+                contour = base_pitch * (1 + 0.1 * np.sin(np.linspace(0, 2 * np.pi, n_samples)))
             elif prosody.emotion == EmotionType.SAD:
                 contour = base_pitch * np.linspace(1.0, 0.9, n_samples)
             elif prosody.emotion == EmotionType.ANGRY:
@@ -246,18 +254,14 @@ class SpeechSynthesizer:
         audio_segments = []
 
         for phoneme in phonemes:
-            duration_samples = int(
-                phoneme.duration_ms * self.config.sample_rate / 1000
-            )
+            duration_samples = int(phoneme.duration_ms * self.config.sample_rate / 1000)
 
             if phoneme.symbol == "SIL":
                 # Silence
                 segment = np.zeros(duration_samples)
             else:
                 # Generate voiced/unvoiced sound
-                segment = self._generate_phoneme_audio(
-                    phoneme, duration_samples, prosody
-                )
+                segment = self._generate_phoneme_audio(phoneme, duration_samples, prosody)
 
             audio_segments.append(segment)
 
@@ -296,11 +300,7 @@ class SpeechSynthesizer:
 
             # Generate harmonics
             phase = np.cumsum(2 * np.pi * pitch / self.config.sample_rate)
-            audio = (
-                0.5 * np.sin(phase) +
-                0.3 * np.sin(2 * phase) +
-                0.2 * np.sin(3 * phase)
-            )
+            audio = 0.5 * np.sin(phase) + 0.3 * np.sin(2 * phase) + 0.2 * np.sin(3 * phase)
 
             # Apply formant envelope (simplified)
             envelope = np.exp(-t * 5) * (1 - np.exp(-t * 50))
@@ -313,10 +313,10 @@ class SpeechSynthesizer:
             # Shape noise based on phoneme
             if phoneme.symbol in ["S", "F", "HH"]:
                 # High-frequency noise
-                audio = np.convolve(audio, [0.1, 0.2, 0.4, 0.2, 0.1], mode='same')
+                audio = np.convolve(audio, [0.1, 0.2, 0.4, 0.2, 0.1], mode="same")
             elif phoneme.symbol in ["SH", "CH"]:
                 # Broader noise
-                audio = np.convolve(audio, np.ones(10) / 10, mode='same')
+                audio = np.convolve(audio, np.ones(10) / 10, mode="same")
 
             envelope = np.exp(-t * 3) * (1 - np.exp(-t * 30))
             audio = audio * envelope
@@ -337,9 +337,7 @@ class SpeechSynthesizer:
 
     def statistics(self) -> Dict[str, Any]:
         """Get synthesizer statistics."""
-        total_duration = sum(
-            u.duration_seconds for u in self._utterance_history
-        )
+        total_duration = sum(u.duration_seconds for u in self._utterance_history)
 
         return {
             "synth_id": self.synth_id,

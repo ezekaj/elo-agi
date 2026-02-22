@@ -161,7 +161,9 @@ class VSCodeIntegration(IDEIntegration):
                 line_number=data.get("line"),
                 column=data.get("column"),
                 selection=data.get("selection"),
-                selection_start=tuple(data["selectionStart"]) if data.get("selectionStart") else None,
+                selection_start=tuple(data["selectionStart"])
+                if data.get("selectionStart")
+                else None,
                 selection_end=tuple(data["selectionEnd"]) if data.get("selectionEnd") else None,
                 language=data.get("language"),
                 workspace_root=data.get("workspaceRoot", self.workspace_root),
@@ -204,16 +206,18 @@ class VSCodeIntegration(IDEIntegration):
         """Execute a command in VSCode."""
         # Try extension first
         if self._client_writer:
-            sent = await self._send_to_extension({
-                "type": "command",
-                "data": {
-                    "action": command.action,
-                    "filePath": command.file_path,
-                    "line": command.line_number,
-                    "column": command.column,
-                    "content": command.content,
+            sent = await self._send_to_extension(
+                {
+                    "type": "command",
+                    "data": {
+                        "action": command.action,
+                        "filePath": command.file_path,
+                        "line": command.line_number,
+                        "column": command.column,
+                        "content": command.content,
+                    },
                 }
-            })
+            )
             if sent:
                 return True
 
@@ -251,7 +255,9 @@ class VSCodeIntegration(IDEIntegration):
                         file_arg += f":{command.column}"
 
                     proc = await asyncio.create_subprocess_exec(
-                        self._code_path, "--goto", file_arg,
+                        self._code_path,
+                        "--goto",
+                        file_arg,
                         stdout=asyncio.subprocess.DEVNULL,
                         stderr=asyncio.subprocess.DEVNULL,
                     )
@@ -262,13 +268,15 @@ class VSCodeIntegration(IDEIntegration):
                 # Open diff view
                 if command.file_path and command.content:
                     # Create temp file for comparison
-                    with tempfile.NamedTemporaryFile(mode='w', suffix='.tmp', delete=False) as f:
+                    with tempfile.NamedTemporaryFile(mode="w", suffix=".tmp", delete=False) as f:
                         f.write(command.content)
                         temp_path = f.name
 
                     proc = await asyncio.create_subprocess_exec(
-                        self._code_path, "--diff",
-                        command.file_path, temp_path,
+                        self._code_path,
+                        "--diff",
+                        command.file_path,
+                        temp_path,
                         stdout=asyncio.subprocess.DEVNULL,
                         stderr=asyncio.subprocess.DEVNULL,
                     )

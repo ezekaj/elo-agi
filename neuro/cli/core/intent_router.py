@@ -12,6 +12,7 @@ from dataclasses import dataclass
 @dataclass
 class Intent:
     """A detected intent with confidence."""
+
     name: str
     confidence: float
     params: Dict[str, str]
@@ -42,7 +43,7 @@ class IntentRouter:
                 r"make\s*(your)?self\s*better",
                 r"self[- ]?improv",
                 r"fix\s*(your)?self",
-            ]
+            ],
         )
 
         # Research/learning intents
@@ -54,7 +55,7 @@ class IntentRouter:
                 r"study\s+(.+)",
                 r"find\s+out\s+about\s+(.+)",
                 r"what\s+is\s+(.+)",
-            ]
+            ],
         )
 
         # Web search intents
@@ -65,7 +66,7 @@ class IntentRouter:
                 r"google\s+(.+)",
                 r"look\s+up\s+(.+)",
                 r"find\s+online\s+(.+)",
-            ]
+            ],
         )
 
         # File operations
@@ -76,7 +77,7 @@ class IntentRouter:
                 r"show\s+(?:me\s+)?(?:the\s+)?(?:contents?\s+(?:of\s+)?)?(.+\.(?:py|js|ts|txt|md|json|yaml|yml))",
                 r"cat\s+(.+)",
                 r"open\s+(.+\.(?:py|js|ts|txt|md|json|yaml|yml))",
-            ]
+            ],
         )
 
         self.register(
@@ -86,7 +87,7 @@ class IntentRouter:
                 r"show\s+(?:the\s+)?directory",
                 r"ls\b",
                 r"what\s+files",
-            ]
+            ],
         )
 
         # Code operations
@@ -97,7 +98,7 @@ class IntentRouter:
                 r"review\s+(?:the\s+)?code",
                 r"check\s+(?:the\s+)?code",
                 r"code\s+review",
-            ]
+            ],
         )
 
         self.register(
@@ -107,7 +108,7 @@ class IntentRouter:
                 r"test\s+(?:the\s+)?code",
                 r"pytest",
                 r"execute\s+tests?",
-            ]
+            ],
         )
 
         # Git operations
@@ -117,7 +118,7 @@ class IntentRouter:
                 r"git\s+status",
                 r"show\s+(?:git\s+)?changes",
                 r"what\s+(?:has\s+)?changed",
-            ]
+            ],
         )
 
         self.register(
@@ -126,7 +127,7 @@ class IntentRouter:
                 r"commit\s+(?:the\s+)?changes?",
                 r"git\s+commit",
                 r"save\s+(?:the\s+)?changes?",
-            ]
+            ],
         )
 
         # System commands
@@ -136,7 +137,7 @@ class IntentRouter:
                 r"run\s+(?:the\s+)?command\s+(.+)",
                 r"execute\s+(.+)",
                 r"shell\s+(.+)",
-            ]
+            ],
         )
 
     def register(self, intent_name: str, patterns: List[str], action: Callable = None):
@@ -160,10 +161,7 @@ class IntentRouter:
                     confidence = 0.8 if len(pattern) > 20 else 0.6
 
                     return Intent(
-                        name=intent_name,
-                        confidence=confidence,
-                        params=params,
-                        action=action
+                        name=intent_name, confidence=confidence, params=params, action=action
                     )
 
         return None
@@ -173,11 +171,12 @@ class IntentRouter:
         examples = {}
         for intent_name, patterns, _ in self.intents:
             examples[intent_name] = [
-                p.replace(r"\s+", " ").replace(r"\s*", " ")
-                  .replace(r"(.+)", "<query>")
-                  .replace(r"(?:the\s+)?", "")
-                  .replace(r"(?:your)?", "")
-                  .replace(r"\b", "")
+                p.replace(r"\s+", " ")
+                .replace(r"\s*", " ")
+                .replace(r"(.+)", "<query>")
+                .replace(r"(?:the\s+)?", "")
+                .replace(r"(?:your)?", "")
+                .replace(r"\b", "")
                 for p in patterns[:3]
             ]
         return examples

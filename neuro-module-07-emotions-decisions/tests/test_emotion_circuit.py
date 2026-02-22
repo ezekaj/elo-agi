@@ -3,9 +3,15 @@
 import numpy as np
 import pytest
 from neuro.modules.m07_emotions_decisions.emotion_circuit import (
-    VMPFC, Amygdala, ACC, Insula, EmotionCircuit,
-    EmotionType, BodyState
+    VMPFC,
+    Amygdala,
+    ACC,
+    Insula,
+    EmotionCircuit,
+    EmotionType,
+    BodyState,
 )
+
 
 class TestAmygdala:
     """Test amygdala threat/reward detection."""
@@ -45,6 +51,7 @@ class TestAmygdala:
         assert len(amygdala.emotional_memories) == 1
         assert amygdala.emotional_memories[0].valence == -0.8
 
+
 class TestVMPFC:
     """Test VMPFC value computation."""
 
@@ -69,10 +76,11 @@ class TestVMPFC:
 
     def test_gut_feeling(self):
         vmpfc = VMPFC()
-        context = {'familiarity': 0.8, 'past_outcomes': [0.5, 0.7, 0.6]}
+        context = {"familiarity": 0.8, "past_outcomes": [0.5, 0.7, 0.6]}
         valence, confidence = vmpfc.generate_gut_feeling(context)
         assert valence > 0  # Positive past outcomes
         assert confidence > 0
+
 
 class TestACC:
     """Test ACC conflict monitoring."""
@@ -80,24 +88,25 @@ class TestACC:
     def test_conflict_detection(self):
         acc = ACC()
         # Two similarly strong responses = conflict
-        responses = [('option_a', 0.7), ('option_b', 0.65)]
+        responses = [("option_a", 0.7), ("option_b", 0.65)]
         conflict = acc.conflict_detection(responses)
         assert conflict > 0.5
 
     def test_no_conflict(self):
         acc = ACC()
         # One clear winner = no conflict
-        responses = [('winner', 0.9), ('loser', 0.2)]
+        responses = [("winner", 0.9), ("loser", 0.2)]
         conflict = acc.conflict_detection(responses)
         assert conflict < 0.3
 
     def test_outcome_monitoring(self):
         acc = ACC()
-        acc.monitor_outcomes('action_a', 0.5)
-        acc.monitor_outcomes('action_a', 0.7)
+        acc.monitor_outcomes("action_a", 0.5)
+        acc.monitor_outcomes("action_a", 0.7)
 
-        expected = acc.get_expected_value('action_a')
+        expected = acc.get_expected_value("action_a")
         assert 0.4 < expected < 0.8
+
 
 class TestInsula:
     """Test insula body state mapping."""
@@ -114,6 +123,7 @@ class TestInsula:
         emotion = insula.map_to_emotion()
         assert emotion.arousal < 0.5
 
+
 class TestEmotionCircuit:
     """Test integrated emotion circuit."""
 
@@ -122,9 +132,9 @@ class TestEmotionCircuit:
         stimulus = np.array([0.7, 0.3, 0.8, 0.2])
         result = circuit.process(stimulus)
 
-        assert hasattr(result, 'valence')
-        assert hasattr(result, 'arousal')
-        assert hasattr(result, 'emotion_type')
+        assert hasattr(result, "valence")
+        assert hasattr(result, "arousal")
+        assert hasattr(result, "emotion_type")
 
     def test_vmpfc_lesion_effect(self):
         circuit = EmotionCircuit()

@@ -14,6 +14,7 @@ from enum import Enum
 @dataclass
 class Effect:
     """An observed effect to be explained"""
+
     effect_id: str
     description: str
     features: Dict[str, Any] = field(default_factory=dict)
@@ -24,6 +25,7 @@ class Effect:
 @dataclass
 class Cause:
     """A potential cause/hypothesis"""
+
     cause_id: str
     description: str
     typical_effects: List[str] = field(default_factory=list)
@@ -35,6 +37,7 @@ class Cause:
 @dataclass
 class Explanation:
     """An explanation linking cause to effect"""
+
     explanation_id: str
     effect: Effect
     cause: Cause
@@ -47,9 +50,7 @@ class Explanation:
     @property
     def overall_score(self) -> float:
         """Combined score considering probability, power, and simplicity"""
-        return (self.probability * 0.4 +
-                self.explanatory_power * 0.4 +
-                self.simplicity_score * 0.2)
+        return self.probability * 0.4 + self.explanatory_power * 0.4 + self.simplicity_score * 0.2
 
 
 class CausalModel:
@@ -73,10 +74,7 @@ class CausalModel:
         if effect.effect_id not in self.effect_cause_links:
             self.effect_cause_links[effect.effect_id] = {}
 
-    def link_cause_effect(self,
-                          cause_id: str,
-                          effect_id: str,
-                          probability: float):
+    def link_cause_effect(self, cause_id: str, effect_id: str, probability: float):
         """Create a causal link with probability P(effect|cause)"""
         if cause_id not in self.cause_effect_links:
             self.cause_effect_links[cause_id] = {}
@@ -103,9 +101,7 @@ class AbductiveReasoner:
     Key: Prefers simpler explanations (Occam's razor)
     """
 
-    def __init__(self,
-                 simplicity_weight: float = 0.3,
-                 prior_weight: float = 0.2):
+    def __init__(self, simplicity_weight: float = 0.3, prior_weight: float = 0.2):
         self.causal_model = CausalModel()
         self.observed_effects: Dict[str, Effect] = {}
         self.explanations: Dict[str, Explanation] = {}
@@ -121,7 +117,7 @@ class AbductiveReasoner:
             description="It rained",
             typical_effects=["wet_grass", "wet_pavement", "puddles"],
             prior_probability=0.3,
-            complexity=1.0
+            complexity=1.0,
         )
         self.causal_model.add_cause(rain)
 
@@ -130,7 +126,7 @@ class AbductiveReasoner:
             description="Sprinkler was on",
             typical_effects=["wet_grass"],
             prior_probability=0.2,
-            complexity=1.0
+            complexity=1.0,
         )
         self.causal_model.add_cause(sprinkler)
 
@@ -139,7 +135,7 @@ class AbductiveReasoner:
             description="Morning dew formed",
             typical_effects=["wet_grass"],
             prior_probability=0.4,
-            complexity=1.0
+            complexity=1.0,
         )
         self.causal_model.add_cause(dew)
 
@@ -171,10 +167,7 @@ class AbductiveReasoner:
 
         return causes
 
-    def rank_hypotheses(self,
-                        effect: Effect,
-                        hypotheses: List[Cause]
-                        ) -> List[Explanation]:
+    def rank_hypotheses(self, effect: Effect, hypotheses: List[Cause]) -> List[Explanation]:
         """Rank hypotheses by explanatory power"""
         explanations = []
 
@@ -185,10 +178,7 @@ class AbductiveReasoner:
         explanations.sort(key=lambda e: e.overall_score, reverse=True)
         return explanations
 
-    def _evaluate_explanation(self,
-                              effect: Effect,
-                              cause: Cause
-                              ) -> Explanation:
+    def _evaluate_explanation(self, effect: Effect, cause: Cause) -> Explanation:
         """Evaluate how well a cause explains an effect"""
         if effect.effect_id in self.causal_model.effect_cause_links:
             likelihood = self.causal_model.effect_cause_links[effect.effect_id].get(
@@ -239,12 +229,10 @@ class AbductiveReasoner:
             explanatory_power=explanatory_power,
             simplicity_score=simplicity,
             supporting_evidence=supporting,
-            contradicting_evidence=contradicting
+            contradicting_evidence=contradicting,
         )
 
-    def select_best(self,
-                    effect_id: str
-                    ) -> Optional[Explanation]:
+    def select_best(self, effect_id: str) -> Optional[Explanation]:
         """Select the best explanation for an effect"""
         if effect_id not in self.observed_effects:
             return None
@@ -264,26 +252,27 @@ class AbductiveReasoner:
 
         return None
 
-    def explain(self,
-                effect_description: str,
-                effect_features: Dict[str, Any] = None
-                ) -> Explanation:
+    def explain(
+        self, effect_description: str, effect_features: Dict[str, Any] = None
+    ) -> Explanation:
         """High-level interface to explain an observation"""
         effect = Effect(
             effect_id=f"eff_{len(self.observed_effects)}",
             description=effect_description,
-            features=effect_features or {}
+            features=effect_features or {},
         )
         self.observe_effect(effect)
 
         return self.select_best(effect.effect_id)
 
-    def add_causal_knowledge(self,
-                             cause_description: str,
-                             effects: List[str],
-                             prior: float = 0.5,
-                             complexity: float = 1.0,
-                             cause_id: Optional[str] = None):
+    def add_causal_knowledge(
+        self,
+        cause_description: str,
+        effects: List[str],
+        prior: float = 0.5,
+        complexity: float = 1.0,
+        cause_id: Optional[str] = None,
+    ):
         """Add new causal knowledge to the model"""
         if cause_id is None:
             cause_id = f"cause_{len(self.causal_model.causes)}"
@@ -292,16 +281,14 @@ class AbductiveReasoner:
             description=cause_description,
             typical_effects=effects,
             prior_probability=prior,
-            complexity=complexity
+            complexity=complexity,
         )
         self.causal_model.add_cause(cause)
 
         for effect_id in effects:
             self.causal_model.link_cause_effect(cause_id, effect_id, 0.8)
 
-    def update_from_feedback(self,
-                             explanation_id: str,
-                             was_correct: bool):
+    def update_from_feedback(self, explanation_id: str, was_correct: bool):
         """Update model based on whether explanation was correct"""
         if explanation_id not in self.explanations:
             return
@@ -317,9 +304,7 @@ class AbductiveReasoner:
         else:
             cause.prior_probability = max(0.05, cause.prior_probability * 0.9)
 
-    def differential_diagnosis(self,
-                               effects: List[Effect]
-                               ) -> List[Tuple[Cause, float]]:
+    def differential_diagnosis(self, effects: List[Effect]) -> List[Tuple[Cause, float]]:
         """Find causes that best explain multiple effects together"""
         if not effects:
             return []
@@ -342,13 +327,18 @@ class AbductiveReasoner:
             coverage = explained_count / len(effects)
             avg_likelihood = total_likelihood / len(effects) if effects else 0
 
-            score = (coverage * 0.5 +
-                    avg_likelihood * 0.3 +
-                    cause.prior_probability * 0.1 +
-                    (1.0 / cause.complexity) * 0.1)
+            score = (
+                coverage * 0.5
+                + avg_likelihood * 0.3
+                + cause.prior_probability * 0.1
+                + (1.0 / cause.complexity) * 0.1
+            )
 
             cause_scores[cause.cause_id] = score
 
         ranked = sorted(cause_scores.items(), key=lambda x: x[1], reverse=True)
-        return [(self.causal_model.causes[cid], score) for cid, score in ranked
-                if cid in self.causal_model.causes]
+        return [
+            (self.causal_model.causes[cid], score)
+            for cid, score in ranked
+            if cid in self.causal_model.causes
+        ]

@@ -23,6 +23,7 @@ from .dream_generator import DreamGenerator, DreamReport
 @dataclass
 class CycleStatistics:
     """Statistics for one sleep cycle"""
+
     cycle_number: int
     duration_minutes: float
     sws_minutes: float
@@ -37,6 +38,7 @@ class CycleStatistics:
 @dataclass
 class NightStatistics:
     """Statistics for a full night of sleep"""
+
     total_cycles: int
     total_duration_minutes: float
     total_sws_minutes: float
@@ -59,11 +61,7 @@ class SleepArchitecture:
     - Cycle duration ~90 minutes
     """
 
-    def __init__(
-        self,
-        target_sleep_hours: float = 8.0,
-        cycle_duration_minutes: float = 90.0
-    ):
+    def __init__(self, target_sleep_hours: float = 8.0, cycle_duration_minutes: float = 90.0):
         self.target_sleep_hours = target_sleep_hours
         self.cycle_duration = cycle_duration_minutes
 
@@ -80,7 +78,7 @@ class SleepArchitecture:
 
         for cycle_num in range(self.n_cycles):
             # SWS proportion decreases across night
-            sws_factor = 0.8 ** cycle_num  # Exponential decrease
+            sws_factor = 0.8**cycle_num  # Exponential decrease
 
             # REM proportion increases across night
             rem_factor = 1.0 + 0.3 * cycle_num  # Linear increase
@@ -105,10 +103,7 @@ class SleepArchitecture:
 
         return cycles
 
-    def adjust_for_sleep_debt(
-        self,
-        debt_hours: float
-    ) -> List[Dict]:
+    def adjust_for_sleep_debt(self, debt_hours: float) -> List[Dict]:
         """Adjust sleep architecture for sleep debt.
 
         Sleep debt increases SWS pressure.
@@ -162,11 +157,7 @@ class SleepCycleOrchestrator:
     - Dream generation
     """
 
-    def __init__(
-        self,
-        n_neurons: int = 100,
-        memory_dim: int = 20
-    ):
+    def __init__(self, n_neurons: int = 100, memory_dim: int = 20):
         # Core components
         self.stage_controller = SleepStageController()
         self.replay_system = HippocampalReplay()
@@ -188,9 +179,7 @@ class SleepCycleOrchestrator:
         self.cycle_stats: List[CycleStatistics] = []
 
     def wake_encoding(
-        self,
-        experiences: List[np.ndarray],
-        emotional_saliences: Optional[List[float]] = None
+        self, experiences: List[np.ndarray], emotional_saliences: Optional[List[float]] = None
     ) -> List[MemoryTrace]:
         """Encode experiences during wake period.
 
@@ -206,10 +195,7 @@ class SleepCycleOrchestrator:
 
         memories = []
         for exp, emotion in zip(experiences, emotional_saliences):
-            trace = self.replay_system.encode_experience(
-                pattern=exp,
-                emotional_salience=emotion
-            )
+            trace = self.replay_system.encode_experience(pattern=exp, emotional_salience=emotion)
 
             # Also encode in hippocampus for consolidation
             self.consolidation.hippocampus.encode(trace)
@@ -222,9 +208,7 @@ class SleepCycleOrchestrator:
             pre = np.random.random(self.homeostasis.n_neurons) > 0.7
             post = np.random.random(self.homeostasis.n_neurons) > 0.7
             self.homeostasis.hebbian_potentiation(
-                pre.astype(float),
-                post.astype(float),
-                learning_rate=0.01
+                pre.astype(float), post.astype(float), learning_rate=0.01
             )
 
         return memories
@@ -238,11 +222,7 @@ class SleepCycleOrchestrator:
         # Tag important synapses before sleep
         self.selective_consolidation.tag_by_weight(percentile=90)
 
-    def process_stage(
-        self,
-        stage: SleepStage,
-        duration_minutes: float
-    ) -> Dict:
+    def process_stage(self, stage: SleepStage, duration_minutes: float) -> Dict:
         """Process a single sleep stage.
 
         Args:
@@ -265,20 +245,13 @@ class SleepCycleOrchestrator:
         if stage == SleepStage.SWS:
             # SWS: Maximum consolidation, replay with ripples
             replayed = self.replay_scheduler.run_sws_replay(
-                duration_minutes,
-                slow_oscillation_phase="up"
+                duration_minutes, slow_oscillation_phase="up"
             )
             stats["replayed"] = len(replayed)
 
             # Systems consolidation
-            self.consolidation.initiate_dialogue(
-                slow_osc_phase="up",
-                spindle=True,
-                ripple=True
-            )
-            consolidation_result = self.consolidation.run_consolidation_cycle(
-                duration_minutes * 60
-            )
+            self.consolidation.initiate_dialogue(slow_osc_phase="up", spindle=True, ripple=True)
+            consolidation_result = self.consolidation.run_consolidation_cycle(duration_minutes * 60)
             stats["consolidated"] = consolidation_result["consolidated"]
             stats["transferred"] = consolidation_result["transferred"]
 
@@ -294,14 +267,8 @@ class SleepCycleOrchestrator:
             stats["replayed"] = len(replayed)
 
             # Some consolidation
-            self.consolidation.initiate_dialogue(
-                slow_osc_phase="down",
-                spindle=True,
-                ripple=False
-            )
-            consolidation_result = self.consolidation.run_consolidation_cycle(
-                duration_minutes * 60
-            )
+            self.consolidation.initiate_dialogue(slow_osc_phase="down", spindle=True, ripple=False)
+            consolidation_result = self.consolidation.run_consolidation_cycle(duration_minutes * 60)
             stats["consolidated"] = consolidation_result["consolidated"]
 
             # Mild downscaling
@@ -314,10 +281,7 @@ class SleepCycleOrchestrator:
 
             # Generate dreams from replayed memories
             if replayed:
-                dream = self.dream_generator.generate_dream(
-                    replayed,
-                    duration=duration_minutes
-                )
+                dream = self.dream_generator.generate_dream(replayed, duration=duration_minutes)
                 stats["dreams"] = 1
 
             # Minimal synaptic change during REM
@@ -389,9 +353,7 @@ class SleepCycleOrchestrator:
         return cycle_stats
 
     def sleep_consolidation(
-        self,
-        sleep_hours: float = 8.0,
-        sleep_debt: float = 0.0
+        self, sleep_hours: float = 8.0, sleep_debt: float = 0.0
     ) -> NightStatistics:
         """Run complete night of sleep.
 
@@ -436,7 +398,7 @@ class SleepCycleOrchestrator:
             total_dreams=sum(c.dreams_generated for c in self.cycle_stats),
             wake_synaptic_strength=wake_strength,
             post_sleep_synaptic_strength=post_sleep_strength,
-            dreams=self.dream_generator.dream_history.copy()
+            dreams=self.dream_generator.dream_history.copy(),
         )
 
         return night_stats
@@ -449,10 +411,7 @@ class SleepCycleOrchestrator:
         # Clear synaptic tags
         self.selective_consolidation.clear_tags()
 
-    def simulate_sleep_deprivation(
-        self,
-        skip_stages: List[SleepStage]
-    ) -> NightStatistics:
+    def simulate_sleep_deprivation(self, skip_stages: List[SleepStage]) -> NightStatistics:
         """Simulate partial sleep with specific stages skipped.
 
         Args:
@@ -489,7 +448,7 @@ class SleepCycleOrchestrator:
             total_dreams=sum(c.dreams_generated for c in self.cycle_stats),
             wake_synaptic_strength=wake_strength,
             post_sleep_synaptic_strength=post_sleep_strength,
-            dreams=self.dream_generator.dream_history.copy()
+            dreams=self.dream_generator.dream_history.copy(),
         )
 
     def get_consolidation_statistics(self) -> Dict:

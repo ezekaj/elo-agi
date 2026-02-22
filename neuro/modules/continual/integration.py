@@ -39,6 +39,7 @@ from .capability_tracking import (
 @dataclass
 class ContinualLearningConfig:
     """Configuration for the continual learning controller."""
+
     task_change_threshold: float = 0.5
     consolidation_frequency: int = 100
     replay_batch_size: int = 32
@@ -142,9 +143,7 @@ class ContinualLearningController:
         }
 
         if self.config.auto_detect_tasks:
-            task_changed = self._task_inference.detect_task_change(
-                np.asarray(state)
-            )
+            task_changed = self._task_inference.detect_task_change(np.asarray(state))
 
             if task_changed:
                 new_task = self._task_inference.infer_task_id(np.asarray(state))
@@ -174,7 +173,10 @@ class ContinualLearningController:
             loss, _ = self._forgetting.compute_combined_loss(params)
             results["forgetting_loss"] = loss
 
-        if self.config.auto_consolidate and self._timestep % self.config.consolidation_frequency == 0:
+        if (
+            self.config.auto_consolidate
+            and self._timestep % self.config.consolidation_frequency == 0
+        ):
             plan = self.trigger_consolidation()
             if plan.task_priorities:
                 results["consolidation_triggered"] = True

@@ -11,6 +11,7 @@ from neuro.modules.meta_reasoning.fallacy_detector import (
     ReasoningStep,
 )
 
+
 class TestFallacyDetectorConfig:
     """Tests for FallacyDetectorConfig class."""
 
@@ -27,6 +28,7 @@ class TestFallacyDetectorConfig:
         )
         assert config.confirmation_bias_threshold == 0.8
         assert config.min_evidence_count == 5
+
 
 class TestFallacyDetector:
     """Tests for FallacyDetector class."""
@@ -246,6 +248,7 @@ class TestFallacyDetector:
         assert "total_detections" in stats
         assert "type_distribution" in stats
 
+
 class TestFallacyType:
     """Tests for FallacyType enum."""
 
@@ -254,6 +257,7 @@ class TestFallacyType:
         assert FallacyType.ANCHORING.value == "anchoring"
         assert FallacyType.CIRCULAR.value == "circular"
         assert FallacyType.BASE_RATE_NEGLECT.value == "base_rate_neglect"
+
 
 class TestReasoningStep:
     """Tests for ReasoningStep dataclass."""

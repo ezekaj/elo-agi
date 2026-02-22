@@ -9,8 +9,12 @@ from typing import Dict, List, Optional, Any, Tuple, Set
 import numpy as np
 
 from .mapping import (
-    RelationalStructure, Predicate, StructureMapper,
-    StructuralAlignment, Analogy, RelationOrder,
+    RelationalStructure,
+    Predicate,
+    StructureMapper,
+    StructuralAlignment,
+    Analogy,
+    RelationOrder,
 )
 
 
@@ -21,6 +25,7 @@ class Case:
 
     Contains a problem situation, solution, and outcome.
     """
+
     name: str
     problem: RelationalStructure
     solution: Optional[Any] = None
@@ -35,6 +40,7 @@ class Case:
 @dataclass
 class RetrievalResult:
     """Result of case retrieval."""
+
     case: Case
     similarity: float
     alignment: Optional[StructuralAlignment] = None
@@ -198,17 +204,17 @@ class AnalogyRetriever:
             # Basic structural similarity (predicate overlap)
             query_preds = {p.name for p in query.predicates}
             case_preds = {p.name for p in case.problem.predicates}
-            pred_overlap = len(query_preds & case_preds) / max(
-                len(query_preds | case_preds), 1
-            )
+            pred_overlap = len(query_preds & case_preds) / max(len(query_preds | case_preds), 1)
 
             similarity = 0.7 * feature_sim + 0.3 * pred_overlap
 
-            results.append(RetrievalResult(
-                case=case,
-                similarity=similarity,
-                feature_match=feature_sim,
-            ))
+            results.append(
+                RetrievalResult(
+                    case=case,
+                    similarity=similarity,
+                    feature_match=feature_sim,
+                )
+            )
 
         # Sort by similarity
         results.sort(key=lambda r: r.similarity, reverse=True)
@@ -231,12 +237,14 @@ class AnalogyRetriever:
             max_score = len(case.problem.predicates) * 3 * self.mapper.systematicity_weight
             similarity = alignment.score / max(max_score, 1)
 
-            results.append(RetrievalResult(
-                case=case,
-                similarity=similarity,
-                alignment=alignment,
-                structural_match=similarity,
-            ))
+            results.append(
+                RetrievalResult(
+                    case=case,
+                    similarity=similarity,
+                    alignment=alignment,
+                    structural_match=similarity,
+                )
+            )
 
         results.sort(key=lambda r: r.similarity, reverse=True)
         return results[:top_k]
@@ -270,13 +278,15 @@ class AnalogyRetriever:
             # Combine feature and structural similarity
             combined = 0.4 * result.feature_match + 0.6 * structural_sim
 
-            results.append(RetrievalResult(
-                case=result.case,
-                similarity=combined,
-                alignment=alignment,
-                feature_match=result.feature_match,
-                structural_match=structural_sim,
-            ))
+            results.append(
+                RetrievalResult(
+                    case=result.case,
+                    similarity=combined,
+                    alignment=alignment,
+                    feature_match=result.feature_match,
+                    structural_match=structural_sim,
+                )
+            )
 
         results.sort(key=lambda r: r.similarity, reverse=True)
         return results[:top_k]
@@ -299,10 +309,7 @@ class AnalogyRetriever:
             return 0.0
 
         # Count matches
-        matches = sum(
-            1 for k in shared_keys
-            if query_features[k] == case_features[k]
-        )
+        matches = sum(1 for k in shared_keys if query_features[k] == case_features[k])
 
         return matches / len(all_keys)
 
@@ -343,8 +350,7 @@ class AnalogyRetriever:
         if result.alignment:
             explanation["object_mappings"] = result.alignment.object_mappings
             explanation["matched_predicates"] = [
-                (s.name, t.name)
-                for s, t in result.alignment.matched_predicates
+                (s.name, t.name) for s, t in result.alignment.matched_predicates
             ]
 
         return explanation

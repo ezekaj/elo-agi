@@ -64,9 +64,7 @@ def demo_sequence_learning():
     # Create hierarchy
     input_dim = 5
     hierarchy = PredictiveHierarchy(
-        layer_dims=[input_dim, 8, 6, 4],
-        learning_rate=0.15,
-        timescale_factor=3.0
+        layer_dims=[input_dim, 8, 6, 4], learning_rate=0.15, timescale_factor=3.0
     )
 
     # Generate training sequence
@@ -80,7 +78,7 @@ def demo_sequence_learning():
         epoch_errors = []
         for t in range(len(sequence)):
             result = hierarchy.step(sequence[t], dt=0.1, update_weights=True)
-            epoch_errors.append(result['total_error'])
+            epoch_errors.append(result["total_error"])
 
         errors_over_time.append(np.mean(epoch_errors))
         print(f"  Epoch {epoch + 1}: Mean error = {errors_over_time[-1]:.4f}")
@@ -111,30 +109,30 @@ def demo_sequence_learning():
     fig, axes = plt.subplots(3, 1, figsize=(12, 8))
 
     # Learning curve
-    axes[0].plot(errors_over_time, 'b-o', linewidth=2)
-    axes[0].set_xlabel('Epoch')
-    axes[0].set_ylabel('Mean Error')
-    axes[0].set_title('Learning Curve')
+    axes[0].plot(errors_over_time, "b-o", linewidth=2)
+    axes[0].set_xlabel("Epoch")
+    axes[0].set_ylabel("Mean Error")
+    axes[0].set_title("Learning Curve")
     axes[0].grid(True)
 
     # Actual vs Predicted (first channel)
-    axes[1].plot(actuals[:50, 0], 'b-', label='Actual', linewidth=1.5)
-    axes[1].plot(predictions[:50, 0], 'r--', label='Predicted', linewidth=1.5)
-    axes[1].set_xlabel('Time')
-    axes[1].set_ylabel('Value')
-    axes[1].set_title('Prediction vs Actual (Channel 0)')
+    axes[1].plot(actuals[:50, 0], "b-", label="Actual", linewidth=1.5)
+    axes[1].plot(predictions[:50, 0], "r--", label="Predicted", linewidth=1.5)
+    axes[1].set_xlabel("Time")
+    axes[1].set_ylabel("Value")
+    axes[1].set_title("Prediction vs Actual (Channel 0)")
     axes[1].legend()
     axes[1].grid(True)
 
     # Layer activities
     layer_activities = [np.mean(np.abs(layer.hidden_state)) for layer in hierarchy.layers]
     axes[2].bar(range(len(layer_activities)), layer_activities)
-    axes[2].set_xlabel('Layer')
-    axes[2].set_ylabel('Mean Activation')
-    axes[2].set_title('Hierarchical Layer Activities')
+    axes[2].set_xlabel("Layer")
+    axes[2].set_ylabel("Mean Activation")
+    axes[2].set_title("Hierarchical Layer Activities")
 
     plt.tight_layout()
-    plt.savefig('sensory_prediction_results.png', dpi=150)
+    plt.savefig("sensory_prediction_results.png", dpi=150)
     print("\nFigure saved: sensory_prediction_results.png")
 
     return hierarchy, sequence
@@ -160,7 +158,7 @@ def demo_omission_response(hierarchy: PredictiveHierarchy, sequence: np.ndarray)
 
     # Normal response to expected stimulus
     normal_result = hierarchy.step(sequence[20], dt=0.1, update_weights=False)
-    normal_error = normal_result['total_error']
+    normal_error = normal_result["total_error"]
     print(f"\nNormal stimulus error: {normal_error:.4f}")
 
     # Now OMIT the expected stimulus (replace with zeros)
@@ -174,7 +172,7 @@ def demo_omission_response(hierarchy: PredictiveHierarchy, sequence: np.ndarray)
 
     # Omit the expected input (provide zeros instead)
     omission_result = hierarchy.step(np.zeros(input_dim), dt=0.1, update_weights=False)
-    omission_error = omission_result['total_error']
+    omission_error = omission_result["total_error"]
 
     # Check for omission
     omission_event = omission_detector.check_omissions(21 * 0.1)
@@ -191,28 +189,28 @@ def demo_omission_response(hierarchy: PredictiveHierarchy, sequence: np.ndarray)
     fig, axes = plt.subplots(2, 1, figsize=(10, 6))
 
     # Error comparison
-    errors = ['Normal\nStimulus', 'Omitted\nStimulus']
+    errors = ["Normal\nStimulus", "Omitted\nStimulus"]
     error_values = [normal_error, omission_error]
-    colors = ['green', 'red']
+    colors = ["green", "red"]
     axes[0].bar(errors, error_values, color=colors)
-    axes[0].set_ylabel('Prediction Error')
-    axes[0].set_title('Prediction Error: Normal vs Omission')
+    axes[0].set_ylabel("Prediction Error")
+    axes[0].set_title("Prediction Error: Normal vs Omission")
 
     # Per-layer errors
-    normal_layer_errors = [np.sum(e ** 2) for e in normal_result['errors']]
-    omission_layer_errors = [np.sum(e ** 2) for e in omission_result['errors']]
+    normal_layer_errors = [np.sum(e**2) for e in normal_result["errors"]]
+    omission_layer_errors = [np.sum(e**2) for e in omission_result["errors"]]
 
     x = np.arange(len(normal_layer_errors))
     width = 0.35
-    axes[1].bar(x - width/2, normal_layer_errors, width, label='Normal', color='green')
-    axes[1].bar(x + width/2, omission_layer_errors, width, label='Omission', color='red')
-    axes[1].set_xlabel('Layer')
-    axes[1].set_ylabel('Error')
-    axes[1].set_title('Per-Layer Errors')
+    axes[1].bar(x - width / 2, normal_layer_errors, width, label="Normal", color="green")
+    axes[1].bar(x + width / 2, omission_layer_errors, width, label="Omission", color="red")
+    axes[1].set_xlabel("Layer")
+    axes[1].set_ylabel("Error")
+    axes[1].set_title("Per-Layer Errors")
     axes[1].legend()
 
     plt.tight_layout()
-    plt.savefig('omission_response.png', dpi=150)
+    plt.savefig("omission_response.png", dpi=150)
     print("\nFigure saved: omission_response.png")
 
 
@@ -236,23 +234,17 @@ def demo_lesion_simulation(sequence: np.ndarray):
         errors = []
         for t in range(len(sequence)):
             result = hierarchy.step(sequence[t], dt=0.1, update_weights=False)
-            errors.append(result['total_error'])
+            errors.append(result["total_error"])
 
         return np.mean(errors)
 
     # Intact hierarchy
-    intact_hierarchy = PredictiveHierarchy(
-        layer_dims=[input_dim, 8, 6, 4],
-        learning_rate=0.15
-    )
+    intact_hierarchy = PredictiveHierarchy(layer_dims=[input_dim, 8, 6, 4], learning_rate=0.15)
     intact_error = train_and_evaluate("Intact", intact_hierarchy)
     print(f"\nIntact hierarchy error: {intact_error:.4f}")
 
     # Lesion: Remove top-down connections
-    topdown_lesioned = PredictiveHierarchy(
-        layer_dims=[input_dim, 8, 6, 4],
-        learning_rate=0.15
-    )
+    topdown_lesioned = PredictiveHierarchy(layer_dims=[input_dim, 8, 6, 4], learning_rate=0.15)
     # Zero out generative weights in higher layers
     for layer in topdown_lesioned.layers[1:]:
         layer.W_g = np.zeros_like(layer.W_g)
@@ -260,50 +252,47 @@ def demo_lesion_simulation(sequence: np.ndarray):
     print(f"Top-down lesioned error: {topdown_error:.4f}")
 
     # Lesion: Remove intrinsic connections (dynamics)
-    intrinsic_lesioned = PredictiveHierarchy(
-        layer_dims=[input_dim, 8, 6, 4],
-        learning_rate=0.15
-    )
+    intrinsic_lesioned = PredictiveHierarchy(layer_dims=[input_dim, 8, 6, 4], learning_rate=0.15)
     for layer in intrinsic_lesioned.layers:
         layer.W_f = np.zeros_like(layer.W_f)
     intrinsic_error = train_and_evaluate("Intrinsic lesioned", intrinsic_lesioned)
     print(f"Intrinsic lesioned error: {intrinsic_error:.4f}")
 
     # Lesion: Single layer only
-    single_layer = PredictiveHierarchy(
-        layer_dims=[input_dim, 8],
-        learning_rate=0.15
-    )
+    single_layer = PredictiveHierarchy(layer_dims=[input_dim, 8], learning_rate=0.15)
     single_error = train_and_evaluate("Single layer", single_layer)
     print(f"Single layer error: {single_error:.4f}")
 
     # Visualize
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    conditions = ['Intact\nHierarchy', 'Top-down\nLesioned', 'Intrinsic\nLesioned', 'Single\nLayer']
+    conditions = ["Intact\nHierarchy", "Top-down\nLesioned", "Intrinsic\nLesioned", "Single\nLayer"]
     errors = [intact_error, topdown_error, intrinsic_error, single_error]
-    colors = ['green', 'orange', 'red', 'purple']
+    colors = ["green", "orange", "red", "purple"]
 
     bars = ax.bar(conditions, errors, color=colors)
 
     # Add value labels
     for bar, error in zip(bars, errors):
         height = bar.get_height()
-        ax.annotate(f'{error:.3f}',
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),
-                    textcoords="offset points",
-                    ha='center', va='bottom')
+        ax.annotate(
+            f"{error:.3f}",
+            xy=(bar.get_x() + bar.get_width() / 2, height),
+            xytext=(0, 3),
+            textcoords="offset points",
+            ha="center",
+            va="bottom",
+        )
 
-    ax.set_ylabel('Prediction Error')
-    ax.set_title('Effect of Lesions on Predictive Processing')
+    ax.set_ylabel("Prediction Error")
+    ax.set_title("Effect of Lesions on Predictive Processing")
 
     # Add degradation percentages
     degradation = [(e / intact_error - 1) * 100 for e in errors[1:]]
-    ax.axhline(y=intact_error, color='gray', linestyle='--', alpha=0.5, label='Intact baseline')
+    ax.axhline(y=intact_error, color="gray", linestyle="--", alpha=0.5, label="Intact baseline")
 
     plt.tight_layout()
-    plt.savefig('lesion_simulation.png', dpi=150)
+    plt.savefig("lesion_simulation.png", dpi=150)
     print("\nFigure saved: lesion_simulation.png")
 
 
@@ -315,9 +304,7 @@ def demo_temporal_hierarchy():
 
     # Create temporal hierarchy
     temporal = TemporalHierarchy(
-        layer_dims=[5, 4, 3, 2],
-        base_timescale=0.01,
-        timescale_factor=10.0
+        layer_dims=[5, 4, 3, 2], base_timescale=0.01, timescale_factor=10.0
     )
 
     print(f"\nTimescales: {temporal.get_timescales()}")
@@ -350,20 +337,20 @@ def demo_temporal_hierarchy():
     time = np.arange(n_steps) * dt
 
     # Input signals
-    axes[0, 0].plot(time, fast_signal, 'b-', alpha=0.7, label='Fast (10 Hz)')
-    axes[0, 0].plot(time, slow_signal, 'r-', alpha=0.7, label='Slow (0.5 Hz)')
-    axes[0, 0].set_xlabel('Time (s)')
-    axes[0, 0].set_ylabel('Amplitude')
-    axes[0, 0].set_title('Input Signals')
+    axes[0, 0].plot(time, fast_signal, "b-", alpha=0.7, label="Fast (10 Hz)")
+    axes[0, 0].plot(time, slow_signal, "r-", alpha=0.7, label="Slow (0.5 Hz)")
+    axes[0, 0].set_xlabel("Time (s)")
+    axes[0, 0].set_ylabel("Amplitude")
+    axes[0, 0].set_title("Input Signals")
     axes[0, 0].legend()
     axes[0, 0].grid(True)
 
     # Layer responses
     for i, resp in enumerate(layer_responses):
-        axes[0, 1].plot(time, resp, label=f'Layer {i} (τ={temporal.get_timescales()[i]:.3f}s)')
-    axes[0, 1].set_xlabel('Time (s)')
-    axes[0, 1].set_ylabel('Mean Activity')
-    axes[0, 1].set_title('Layer Responses')
+        axes[0, 1].plot(time, resp, label=f"Layer {i} (τ={temporal.get_timescales()[i]:.3f}s)")
+    axes[0, 1].set_xlabel("Time (s)")
+    axes[0, 1].set_ylabel("Mean Activity")
+    axes[0, 1].set_title("Layer Responses")
     axes[0, 1].legend()
     axes[0, 1].grid(True)
 
@@ -372,25 +359,25 @@ def demo_temporal_hierarchy():
 
     for i, resp in enumerate(layer_responses):
         resp_arr = np.array(resp)
-        freqs, psd = sig.welch(resp_arr, fs=1/dt, nperseg=min(128, len(resp_arr)//2))
+        freqs, psd = sig.welch(resp_arr, fs=1 / dt, nperseg=min(128, len(resp_arr) // 2))
         n_freqs = min(50, len(freqs))
-        axes[1, 0].semilogy(freqs[:n_freqs], psd[:n_freqs], label=f'Layer {i}')
-    axes[1, 0].set_xlabel('Frequency (Hz)')
-    axes[1, 0].set_ylabel('Power')
-    axes[1, 0].set_title('Frequency Content per Layer')
+        axes[1, 0].semilogy(freqs[:n_freqs], psd[:n_freqs], label=f"Layer {i}")
+    axes[1, 0].set_xlabel("Frequency (Hz)")
+    axes[1, 0].set_ylabel("Power")
+    axes[1, 0].set_title("Frequency Content per Layer")
     axes[1, 0].legend()
     axes[1, 0].grid(True)
 
     # Timescale vs layer
     timescales = temporal.get_timescales()
-    axes[1, 1].semilogy(range(len(timescales)), timescales, 'bo-', markersize=10)
-    axes[1, 1].set_xlabel('Layer')
-    axes[1, 1].set_ylabel('Timescale (s)')
-    axes[1, 1].set_title('Timescale Hierarchy')
+    axes[1, 1].semilogy(range(len(timescales)), timescales, "bo-", markersize=10)
+    axes[1, 1].set_xlabel("Layer")
+    axes[1, 1].set_ylabel("Timescale (s)")
+    axes[1, 1].set_title("Timescale Hierarchy")
     axes[1, 1].grid(True)
 
     plt.tight_layout()
-    plt.savefig('temporal_hierarchy.png', dpi=150)
+    plt.savefig("temporal_hierarchy.png", dpi=150)
     print("\nFigure saved: temporal_hierarchy.png")
 
 
@@ -412,5 +399,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

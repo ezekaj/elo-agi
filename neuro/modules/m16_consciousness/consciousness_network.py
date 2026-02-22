@@ -33,8 +33,7 @@ class GlobalWorkspace:
         # Broadcasting state
         self.is_broadcasting = False
 
-    def submit_for_broadcast(self, name: str, content: np.ndarray,
-                            activation: float) -> bool:
+    def submit_for_broadcast(self, name: str, content: np.ndarray, activation: float) -> bool:
         """Submit content to compete for global broadcast"""
         if len(content) != self.n_features:
             content = np.resize(content, self.n_features)
@@ -78,7 +77,7 @@ class GlobalWorkspace:
         """Decay all activations"""
         to_remove = []
         for name in self.activations:
-            self.activations[name] *= (1 - rate)
+            self.activations[name] *= 1 - rate
             if self.activations[name] < 0.1:
                 to_remove.append(name)
 
@@ -120,9 +119,12 @@ class ConsciousnessNetwork:
         # Time tracking
         self.time = 0
 
-    def process_experience(self, sensory_input: np.ndarray,
-                          action: Optional[np.ndarray] = None,
-                          context: Optional[Dict] = None) -> Dict:
+    def process_experience(
+        self,
+        sensory_input: np.ndarray,
+        action: Optional[np.ndarray] = None,
+        context: Optional[Dict] = None,
+    ) -> Dict:
         """Process a conscious experience"""
         if len(sensory_input) != self.n_features:
             sensory_input = np.resize(sensory_input, self.n_features)
@@ -137,8 +139,8 @@ class ConsciousnessNetwork:
             # Create mock sensory channels
             features_per = self.n_features // 3
             visual = sensory_input[:features_per]
-            tactile = sensory_input[features_per:2*features_per]
-            proprio = sensory_input[2*features_per:3*features_per]
+            tactile = sensory_input[features_per : 2 * features_per]
+            proprio = sensory_input[2 * features_per : 3 * features_per]
 
             minimal_result = self.minimal_self.receive_feedback(
                 sensory_input, visual, tactile, proprio
@@ -190,9 +192,7 @@ class ConsciousnessNetwork:
 
         # Weighted combination (metacognition weighted heavily)
         self.consciousness_level = (
-            0.5 * metacognitive_contribution +
-            0.25 * self_integrity +
-            0.25 * narrative_coherence
+            0.5 * metacognitive_contribution + 0.25 * self_integrity + 0.25 * narrative_coherence
         )
 
     def introspect_current_state(self) -> Dict:
@@ -210,15 +210,14 @@ class ConsciousnessNetwork:
             "conscious_contents": contents,
             "reflection": reflection,
             "metacognitive_assessment": meta_state,
-            "consciousness_level": self.consciousness_level
+            "consciousness_level": self.consciousness_level,
         }
 
     def recall_autobiographical(self, cue: np.ndarray) -> Dict:
         """Recall autobiographical memories"""
         return self.narrative_self.recall_life_period(cue)
 
-    def make_decision(self, options: List[np.ndarray],
-                     evidence: np.ndarray) -> Dict:
+    def make_decision(self, options: List[np.ndarray], evidence: np.ndarray) -> Dict:
         """Make a conscious decision with metacognitive monitoring"""
         if len(evidence) != self.n_features:
             evidence = np.resize(evidence, self.n_features)
@@ -230,24 +229,19 @@ class ConsciousnessNetwork:
                 option = np.resize(option, self.n_features)
 
             eval_result = self.metacognition.evaluate_decision(evidence, option)
-            evaluations.append({
-                "option": i,
-                "confidence": eval_result["confidence"]["confidence"]
-            })
+            evaluations.append({"option": i, "confidence": eval_result["confidence"]["confidence"]})
 
         # Select highest confidence option
         best = max(evaluations, key=lambda x: x["confidence"])
 
         # Submit decision to workspace
-        self.workspace.submit_for_broadcast(
-            "decision", options[best["option"]], best["confidence"]
-        )
+        self.workspace.submit_for_broadcast("decision", options[best["option"]], best["confidence"])
 
         return {
             "selected_option": best["option"],
             "confidence": best["confidence"],
             "all_evaluations": evaluations,
-            "recommend_more_deliberation": best["confidence"] < 0.6
+            "recommend_more_deliberation": best["confidence"] < 0.6,
         }
 
     def update(self, dt: float = 1.0):
@@ -263,5 +257,5 @@ class ConsciousnessNetwork:
             "metacognition": self.metacognition.get_metacognitive_state(),
             "introspection": self.introspection.get_introspection_state(),
             "workspace_contents": self.workspace.get_workspace_contents(),
-            "time": self.time
+            "time": self.time,
         }

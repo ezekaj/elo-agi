@@ -15,6 +15,7 @@ import numpy as np
 
 class ReplayStrategy(Enum):
     """Replay sampling strategies."""
+
     UNIFORM = "uniform"
     PRIORITIZED = "prioritized"
     TASK_BALANCED = "task_balanced"
@@ -24,6 +25,7 @@ class ReplayStrategy(Enum):
 @dataclass
 class ReplayConfig:
     """Configuration for experience replay."""
+
     buffer_size: int = 10000
     strategy: ReplayStrategy = ReplayStrategy.PRIORITIZED
     priority_alpha: float = 0.6
@@ -35,6 +37,7 @@ class ReplayConfig:
 @dataclass
 class Experience:
     """A single experience in the replay buffer."""
+
     state: np.ndarray
     action: Any
     reward: float
@@ -172,7 +175,9 @@ class ImportanceWeightedReplay:
         prob = priority / (np.sum(self._priorities) + 1e-8)
         weight = (1.0 / (n * prob + 1e-8)) ** self.config.priority_beta
 
-        max_weight = (1.0 / (n * (self.config.priority_epsilon ** self.config.priority_alpha) + 1e-8)) ** self.config.priority_beta
+        max_weight = (
+            1.0 / (n * (self.config.priority_epsilon**self.config.priority_alpha) + 1e-8)
+        ) ** self.config.priority_beta
         normalized_weight = weight / (max_weight + 1e-8)
 
         return float(normalized_weight)
@@ -263,7 +268,9 @@ class ImportanceWeightedReplay:
         if remaining > 0 and len(self._buffer) > len(indices):
             available = [i for i in range(len(self._buffer)) if i not in indices]
             if available:
-                extra = self._rng.choice(available, size=min(remaining, len(available)), replace=False)
+                extra = self._rng.choice(
+                    available, size=min(remaining, len(available)), replace=False
+                )
                 indices.extend(extra.tolist())
 
         return indices

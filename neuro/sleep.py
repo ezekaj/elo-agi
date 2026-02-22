@@ -33,15 +33,17 @@ import time
 
 class SleepStage(Enum):
     """Sleep stages."""
+
     WAKE = auto()
-    N1 = auto()      # Light sleep
-    N2 = auto()      # True sleep
-    N3 = auto()      # Deep sleep (slow-wave)
-    REM = auto()     # Rapid eye movement
+    N1 = auto()  # Light sleep
+    N2 = auto()  # True sleep
+    N3 = auto()  # Deep sleep (slow-wave)
+    REM = auto()  # Rapid eye movement
 
 
 class MemoryType(Enum):
     """Types of memories for consolidation."""
+
     EPISODIC = auto()
     SEMANTIC = auto()
     PROCEDURAL = auto()
@@ -51,9 +53,10 @@ class MemoryType(Enum):
 @dataclass
 class MemoryTrace:
     """A memory trace for consolidation."""
+
     content: np.ndarray
     memory_type: MemoryType
-    strength: float            # 0-1
+    strength: float  # 0-1
     emotional_salience: float  # Emotional importance
     creation_time: float
     last_replay: float = 0.0
@@ -65,6 +68,7 @@ class MemoryTrace:
 @dataclass
 class SleepSession:
     """A sleep session with stages."""
+
     start_time: float
     duration: float
     stages: List[Tuple[SleepStage, float]]  # (stage, duration)
@@ -75,6 +79,7 @@ class SleepSession:
 @dataclass
 class Dream:
     """A dream experience."""
+
     content: np.ndarray
     narrative: List[str]
     source_memories: List[str]
@@ -153,10 +158,10 @@ class HippocampalReplay:
 
             # Combined probability score
             prob_score = (
-                emotional_weight * 0.35 +
-                strength_weight * 0.25 +
-                rehearsal_weight * 0.20 +
-                recency_weight * 0.20
+                emotional_weight * 0.35
+                + strength_weight * 0.25
+                + rehearsal_weight * 0.20
+                + recency_weight * 0.20
             )
 
             candidates.append(memory)
@@ -174,10 +179,7 @@ class HippocampalReplay:
 
         # Use numpy for weighted sampling
         indices = np.random.choice(
-            len(candidates),
-            size=num_to_select,
-            replace=False,
-            p=probabilities
+            len(candidates), size=num_to_select, replace=False, p=probabilities
         )
 
         selected = [candidates[i] for i in indices]
@@ -193,16 +195,15 @@ class HippocampalReplay:
             memory.replay_count += 1
             memory.last_replay = time.time()
 
-            replayed.append({
-                'type': memory.memory_type.name,
-                'strength_after': memory.strength,
-                'replay_count': memory.replay_count
-            })
+            replayed.append(
+                {
+                    "type": memory.memory_type.name,
+                    "strength_after": memory.strength,
+                    "replay_count": memory.replay_count,
+                }
+            )
 
-        return {
-            'num_replayed': len(replayed),
-            'memories': replayed
-        }
+        return {"num_replayed": len(replayed), "memories": replayed}
 
 
 class SynapticHomeostasis:
@@ -251,10 +252,9 @@ class SynapticHomeostasis:
 
         return scaled
 
-    def selective_downscale(self,
-                            weights: np.ndarray,
-                            importance: np.ndarray,
-                            duration: float = 1.0) -> np.ndarray:
+    def selective_downscale(
+        self, weights: np.ndarray, importance: np.ndarray, duration: float = 1.0
+    ) -> np.ndarray:
         """
         Selective downscaling - protect important connections.
 
@@ -321,48 +321,50 @@ class MemoryConsolidator:
 
         if best_similarity > 0.8 and best_match:
             # Update existing semantic memory
-            self.semantic_store[best_match] = 0.9 * self.semantic_store[best_match] + 0.1 * semantic_content
-            action = 'updated'
+            self.semantic_store[best_match] = (
+                0.9 * self.semantic_store[best_match] + 0.1 * semantic_content
+            )
+            action = "updated"
         else:
             # Create new semantic memory
             key = f"semantic_{len(self.semantic_store)}"
             self.semantic_store[key] = semantic_content
-            action = 'created'
+            action = "created"
             best_match = key
 
         memory.consolidated = True
 
         return {
-            'action': action,
-            'semantic_key': best_match,
-            'similarity_to_existing': best_similarity
+            "action": action,
+            "semantic_key": best_match,
+            "similarity_to_existing": best_similarity,
         }
 
     def _extract_semantic(self, memory: MemoryTrace) -> np.ndarray:
         """Extract semantic content from episodic memory."""
         semantic = memory.content.copy()
         semantic += np.random.randn(self.dim) * 0.1
-        semantic /= (np.linalg.norm(semantic) + 1e-8)
+        semantic /= np.linalg.norm(semantic) + 1e-8
         return semantic
 
     def consolidate_batch(self, memories: List[MemoryTrace]) -> Dict[str, Any]:
         """Consolidate a batch of memories."""
         results = {
-            'attempted': len(memories),
-            'consolidated': 0,
-            'relations_strengthened': 0,
-            'details': []
+            "attempted": len(memories),
+            "consolidated": 0,
+            "relations_strengthened": 0,
+            "details": [],
         }
 
         for memory in memories:
             result = self.attempt_consolidation(memory)
             if result:
-                results['consolidated'] += 1
-                results['details'].append(result)
+                results["consolidated"] += 1
+                results["details"].append(result)
 
         # Build knowledge graph from co-occurring memories
         relations = self._extract_relations_from_batch(memories)
-        results['relations_strengthened'] = relations
+        results["relations_strengthened"] = relations
 
         return results
 
@@ -380,7 +382,7 @@ class MemoryConsolidator:
         for i, key1 in enumerate(mem_keys):
             if key1 not in self.cooccurrence:
                 self.cooccurrence[key1] = {}
-            for key2 in mem_keys[i+1:]:
+            for key2 in mem_keys[i + 1 :]:
                 self.cooccurrence[key1][key2] = self.cooccurrence[key1].get(key2, 0) + 1
 
                 # If co-occurred enough times, create/strengthen relation
@@ -432,10 +434,9 @@ class DreamGenerator:
         """Add element to dream buffer."""
         self.dream_elements.append(element.copy())
 
-    def generate_dream(self,
-                       seed_memories: List[MemoryTrace],
-                       emotional_bias: float = 0.0,
-                       length: int = 5) -> Dream:
+    def generate_dream(
+        self, seed_memories: List[MemoryTrace], emotional_bias: float = 0.0, length: int = 5
+    ) -> Dream:
         """
         Generate a dream sequence.
 
@@ -449,7 +450,7 @@ class DreamGenerator:
                 narrative=["abstract_dream"],
                 source_memories=[],
                 emotional_tone=0.0,
-                bizarreness=1.0
+                bizarreness=1.0,
             )
 
         # Start with seed
@@ -471,7 +472,7 @@ class DreamGenerator:
                 current = current + noise
 
             # Normalize
-            current /= (np.linalg.norm(current) + 1e-8)
+            current /= np.linalg.norm(current) + 1e-8
 
             narrative.append(f"dream_segment_{i}")
 
@@ -487,21 +488,16 @@ class DreamGenerator:
             narrative=narrative,
             source_memories=sources,
             emotional_tone=float(np.clip(emotional_tone, -1, 1)),
-            bizarreness=float(bizarreness)
+            bizarreness=float(bizarreness),
         )
 
-    def _compute_bizarreness(self,
-                              dream_content: np.ndarray,
-                              sources: List[MemoryTrace]) -> float:
+    def _compute_bizarreness(self, dream_content: np.ndarray, sources: List[MemoryTrace]) -> float:
         """Compute how bizarre the dream is compared to sources."""
         if not sources:
             return 1.0
 
         # Distance from all source memories
-        distances = [
-            np.linalg.norm(dream_content - m.content)
-            for m in sources
-        ]
+        distances = [np.linalg.norm(dream_content - m.content) for m in sources]
 
         avg_distance = np.mean(distances)
         return float(np.clip(avg_distance, 0, 1))
@@ -521,7 +517,7 @@ class SleepCycle:
             SleepStage.N1: 0.05,
             SleepStage.N2: 0.50,
             SleepStage.N3: 0.20,
-            SleepStage.REM: 0.25
+            SleepStage.REM: 0.25,
         }
 
         # Current stage
@@ -569,7 +565,7 @@ class SleepCycle:
         session = SleepSession(
             start_time=self.stage_start_time - self.cycles_completed * self.cycle_duration,
             duration=self.cycles_completed * self.cycle_duration,
-            stages=[]  # Would track actual stages
+            stages=[],  # Would track actual stages
         )
 
         self.current_stage = SleepStage.WAKE
@@ -609,38 +605,35 @@ class SleepConsolidationSystem:
         self.is_sleeping = True
         stage = self.sleep_cycle.start_sleep()
 
-        return {
-            'status': 'sleep_started',
-            'initial_stage': stage.name
-        }
+        return {"status": "sleep_started", "initial_stage": stage.name}
 
     def sleep_step(self, duration: float = 1.0) -> Dict[str, Any]:
         """Execute one step of sleep processing."""
         if not self.is_sleeping:
-            return {'error': 'not_sleeping'}
+            return {"error": "not_sleeping"}
 
         results = {
-            'stage': self.sleep_cycle.current_stage.name,
-            'replay': None,
-            'consolidation': None,
-            'dream': None,
-            'downscaling': None
+            "stage": self.sleep_cycle.current_stage.name,
+            "replay": None,
+            "consolidation": None,
+            "dream": None,
+            "downscaling": None,
         }
 
         # Stage-specific processing
         if self.sleep_cycle.current_stage in [SleepStage.N2, SleepStage.N3]:
             # NREM: Memory replay and consolidation
             selected = self.replay.select_for_replay(num_memories=int(10 * duration))
-            results['replay'] = self.replay.replay(selected)
+            results["replay"] = self.replay.replay(selected)
 
             # Attempt consolidation
-            results['consolidation'] = self.consolidator.consolidate_batch(selected)
+            results["consolidation"] = self.consolidator.consolidate_batch(selected)
 
             # Synaptic downscaling
             if self.weights_to_process:
                 for i, weights in enumerate(self.weights_to_process):
                     self.weights_to_process[i] = self.homeostasis.downscale(weights, duration)
-                results['downscaling'] = {'processed': len(self.weights_to_process)}
+                results["downscaling"] = {"processed": len(self.weights_to_process)}
 
         elif self.sleep_cycle.current_stage == SleepStage.REM:
             # REM: Dreams and emotional processing
@@ -648,16 +641,16 @@ class SleepConsolidationSystem:
             if seed_memories:
                 dream = self.dream_gen.generate_dream(seed_memories, length=10)
                 self.dreams.append(dream)
-                results['dream'] = {
-                    'bizarreness': dream.bizarreness,
-                    'emotional_tone': dream.emotional_tone,
-                    'length': len(dream.narrative)
+                results["dream"] = {
+                    "bizarreness": dream.bizarreness,
+                    "emotional_tone": dream.emotional_tone,
+                    "length": len(dream.narrative),
                 }
 
         # Advance stage
         next_stage, stage_duration = self.sleep_cycle.advance_stage()
-        results['next_stage'] = next_stage.name
-        results['stage_duration'] = stage_duration
+        results["next_stage"] = next_stage.name
+        results["stage_duration"] = stage_duration
 
         self.total_sleep_time += duration
 
@@ -666,19 +659,19 @@ class SleepConsolidationSystem:
     def wake_up(self) -> Dict[str, Any]:
         """End sleep session."""
         if not self.is_sleeping:
-            return {'error': 'not_sleeping'}
+            return {"error": "not_sleeping"}
 
         session = self.sleep_cycle.wake_up()
         self.is_sleeping = False
 
         return {
-            'status': 'awake',
-            'session_duration': session.duration,
-            'cycles_completed': self.sleep_cycle.cycles_completed,
-            'dreams_count': len(self.dreams),
-            'memories_consolidated': len([
-                m for m in self.consolidator.episodic_store if m.consolidated
-            ])
+            "status": "awake",
+            "session_duration": session.duration,
+            "cycles_completed": self.sleep_cycle.cycles_completed,
+            "dreams_count": len(self.dreams),
+            "memories_consolidated": len(
+                [m for m in self.consolidator.episodic_store if m.consolidated]
+            ),
         }
 
     def quick_nap(self, duration: float = 20.0) -> Dict[str, Any]:
@@ -697,22 +690,22 @@ class SleepConsolidationSystem:
         wake_result = self.wake_up()
 
         return {
-            'nap_duration': duration,
-            'replay_summary': sum(r['replay']['num_replayed'] for r in results if r['replay']),
-            'wake_result': wake_result
+            "nap_duration": duration,
+            "replay_summary": sum(r["replay"]["num_replayed"] for r in results if r["replay"]),
+            "wake_result": wake_result,
         }
 
     def get_state(self) -> Dict[str, Any]:
         """Get sleep system state."""
         return {
-            'is_sleeping': self.is_sleeping,
-            'current_stage': self.sleep_cycle.current_stage.name,
-            'total_sleep_time': self.total_sleep_time,
-            'replay_buffer_size': len(self.replay.replay_buffer),
-            'episodic_memories': len(self.consolidator.episodic_store),
-            'semantic_memories': len(self.consolidator.semantic_store),
-            'dreams_recorded': len(self.dreams),
-            'cycles_completed': self.sleep_cycle.cycles_completed
+            "is_sleeping": self.is_sleeping,
+            "current_stage": self.sleep_cycle.current_stage.name,
+            "total_sleep_time": self.total_sleep_time,
+            "replay_buffer_size": len(self.replay.replay_buffer),
+            "episodic_memories": len(self.consolidator.episodic_store),
+            "semantic_memories": len(self.consolidator.semantic_store),
+            "dreams_recorded": len(self.dreams),
+            "cycles_completed": self.sleep_cycle.cycles_completed,
         }
 
     def get_consolidation_queue_size(self) -> int:
@@ -723,13 +716,13 @@ class SleepConsolidationSystem:
         """Get comprehensive stats for the sleep system."""
         consolidated = sum(1 for m in self.consolidator.episodic_store if m.consolidated)
         return {
-            'total_consolidated': consolidated,
-            'episodic_memories': len(self.consolidator.episodic_store),
-            'semantic_memories': len(self.consolidator.semantic_store),
-            'knowledge_graph_nodes': len(self.consolidator.knowledge_graph),
-            'replay_buffer': len(self.replay.replay_buffer),
-            'dreams_recorded': len(self.dreams),
-            'total_sleep_time': self.total_sleep_time
+            "total_consolidated": consolidated,
+            "episodic_memories": len(self.consolidator.episodic_store),
+            "semantic_memories": len(self.consolidator.semantic_store),
+            "knowledge_graph_nodes": len(self.consolidator.knowledge_graph),
+            "replay_buffer": len(self.replay.replay_buffer),
+            "dreams_recorded": len(self.dreams),
+            "total_sleep_time": self.total_sleep_time,
         }
 
     def run_consolidation_cycle(self, duration: float = 10.0):

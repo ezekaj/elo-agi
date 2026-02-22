@@ -19,6 +19,7 @@ from pathlib import Path
 @dataclass
 class TaskMemory:
     """Memory of a learned task."""
+
     task_id: str
     optimal_weights: Dict[str, np.ndarray]
     fisher_matrix: Dict[str, np.ndarray]
@@ -30,6 +31,7 @@ class TaskMemory:
 @dataclass
 class LearningState:
     """Current learning state."""
+
     weights: Dict[str, np.ndarray]
     gradients: Dict[str, np.ndarray]
     task_id: str
@@ -47,10 +49,7 @@ class EWCLearner:
     """
 
     def __init__(
-        self,
-        ewc_lambda: float = 1000.0,
-        learning_rate: float = 0.01,
-        storage_path: str = None
+        self, ewc_lambda: float = 1000.0, learning_rate: float = 0.01, storage_path: str = None
     ):
         self.ewc_lambda = ewc_lambda
         self.learning_rate = learning_rate
@@ -79,10 +78,7 @@ class EWCLearner:
                 self.weights[name] = np.random.randn(*shape) * 0.01
 
     def _compute_fisher(
-        self,
-        data_samples: List[np.ndarray],
-        forward_fn,
-        num_samples: int = 100
+        self, data_samples: List[np.ndarray], forward_fn, num_samples: int = 100
     ) -> Dict[str, np.ndarray]:
         """
         Compute Fisher information matrix.
@@ -106,11 +102,7 @@ class EWCLearner:
 
         return fisher
 
-    def _compute_gradients(
-        self,
-        sample: np.ndarray,
-        forward_fn
-    ) -> Dict[str, np.ndarray]:
+    def _compute_gradients(self, sample: np.ndarray, forward_fn) -> Dict[str, np.ndarray]:
         """
         Compute gradients using numerical differentiation.
 
@@ -164,7 +156,7 @@ class EWCLearner:
                 if name in memory.optimal_weights and name in memory.fisher_matrix:
                     diff = self.weights[name] - memory.optimal_weights[name]
                     fisher = memory.fisher_matrix[name]
-                    ewc_loss += np.sum(fisher * (diff ** 2))
+                    ewc_loss += np.sum(fisher * (diff**2))
 
         return self.ewc_lambda * ewc_loss / 2
 
@@ -175,7 +167,7 @@ class EWCLearner:
         forward_fn,
         loss_fn,
         epochs: int = 100,
-        batch_size: int = 32
+        batch_size: int = 32,
     ) -> float:
         """
         Learn a new task while preserving knowledge of old tasks.
@@ -201,7 +193,7 @@ class EWCLearner:
             # Mini-batch training
             np.random.shuffle(data_samples)
             for i in range(0, len(data_samples), batch_size):
-                batch = data_samples[i:i+batch_size]
+                batch = data_samples[i : i + batch_size]
 
                 # Compute task loss
                 task_loss = sum(loss_fn(sample, self.weights) for sample in batch)
@@ -248,7 +240,7 @@ class EWCLearner:
             optimal_weights={name: w.copy() for name, w in self.weights.items()},
             fisher_matrix=fisher,
             performance=1.0 - final_loss,
-            samples_seen=len(data_samples)
+            samples_seen=len(data_samples),
         )
 
         # Update global Fisher
@@ -259,22 +251,15 @@ class EWCLearner:
                 self.global_fisher[name] = 0.5 * self.global_fisher[name] + 0.5 * fisher[name]
 
         # Record history
-        self.training_history.append({
-            'task_id': task_id,
-            'final_loss': final_loss,
-            'timestamp': datetime.now().isoformat()
-        })
+        self.training_history.append(
+            {"task_id": task_id, "final_loss": final_loss, "timestamp": datetime.now().isoformat()}
+        )
 
         print(f"  [EWC] Completed task '{task_id}', performance={1.0 - final_loss:.2%}")
 
         return final_loss
 
-    def evaluate_task(
-        self,
-        task_id: str,
-        test_samples: List[np.ndarray],
-        loss_fn
-    ) -> float:
+    def evaluate_task(self, task_id: str, test_samples: List[np.ndarray], loss_fn) -> float:
         """Evaluate current performance on a task."""
         if not test_samples:
             return 0.0
@@ -283,9 +268,7 @@ class EWCLearner:
         return total_loss / len(test_samples)
 
     def evaluate_all_tasks(
-        self,
-        test_data: Dict[str, List[np.ndarray]],
-        loss_fn
+        self, test_data: Dict[str, List[np.ndarray]], loss_fn
     ) -> Dict[str, float]:
         """Evaluate performance on all learned tasks."""
         results = {}
@@ -300,33 +283,30 @@ class EWCLearner:
     def save(self) -> None:
         """Save learner state to disk."""
         # Save weights
-        np.savez(
-            self.storage_path / "weights.npz",
-            **{name: w for name, w in self.weights.items()}
-        )
+        np.savez(self.storage_path / "weights.npz", **{name: w for name, w in self.weights.items()})
 
         # Save Fisher matrices
         np.savez(
             self.storage_path / "global_fisher.npz",
-            **{name: f for name, f in self.global_fisher.items()}
+            **{name: f for name, f in self.global_fisher.items()},
         )
 
         # Save task memories (metadata only)
         memories_data = {
             task_id: {
-                'task_id': mem.task_id,
-                'performance': mem.performance,
-                'timestamp': mem.timestamp.isoformat(),
-                'samples_seen': mem.samples_seen
+                "task_id": mem.task_id,
+                "performance": mem.performance,
+                "timestamp": mem.timestamp.isoformat(),
+                "samples_seen": mem.samples_seen,
             }
             for task_id, mem in self.task_memories.items()
         }
 
-        with open(self.storage_path / "memories.json", 'w') as f:
+        with open(self.storage_path / "memories.json", "w") as f:
             json.dump(memories_data, f, indent=2)
 
         # Save history
-        with open(self.storage_path / "history.json", 'w') as f:
+        with open(self.storage_path / "history.json", "w") as f:
             json.dump(self.training_history, f, indent=2)
 
     def _load(self) -> None:
@@ -361,12 +341,12 @@ class EWCLearner:
     def get_stats(self) -> Dict[str, Any]:
         """Get learner statistics."""
         return {
-            'num_weights': len(self.weights),
-            'total_parameters': sum(w.size for w in self.weights.values()),
-            'tasks_learned': len(self.task_memories),
-            'ewc_lambda': self.ewc_lambda,
-            'training_iterations': len(self.training_history),
-            'storage_path': str(self.storage_path)
+            "num_weights": len(self.weights),
+            "total_parameters": sum(w.size for w in self.weights.values()),
+            "tasks_learned": len(self.task_memories),
+            "ewc_lambda": self.ewc_lambda,
+            "training_iterations": len(self.training_history),
+            "storage_path": str(self.storage_path),
         }
 
 
@@ -402,10 +382,7 @@ class SimpleContinualLearner:
 
     def get_important_knowledge(self, threshold: float = 0.7) -> Dict[str, Any]:
         """Get highly important knowledge."""
-        return {
-            k: v for k, v in self.knowledge.items()
-            if self.importance.get(k, 0) >= threshold
-        }
+        return {k: v for k, v in self.knowledge.items() if self.importance.get(k, 0) >= threshold}
 
     def consolidate(self) -> int:
         """Consolidate frequently accessed knowledge."""

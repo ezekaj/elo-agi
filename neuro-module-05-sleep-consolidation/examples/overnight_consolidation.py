@@ -38,7 +38,7 @@ def demo_basic_consolidation():
     for i in range(10):
         # Create distinct memory patterns
         pattern = np.zeros(20)
-        pattern[i * 2:(i * 2) + 2] = 1.0  # Each memory has unique signature
+        pattern[i * 2 : (i * 2) + 2] = 1.0  # Each memory has unique signature
         pattern += np.random.randn(20) * 0.1  # Add noise
         experiences.append(pattern)
 
@@ -73,7 +73,9 @@ def demo_basic_consolidation():
     print(f"\n5. Synaptic homeostasis:")
     print(f"   Pre-sleep strength: {night_stats.wake_synaptic_strength:.2f}")
     print(f"   Post-sleep strength: {night_stats.post_sleep_synaptic_strength:.2f}")
-    print(f"   Reduction: {(1 - night_stats.post_sleep_synaptic_strength / night_stats.wake_synaptic_strength) * 100:.1f}%")
+    print(
+        f"   Reduction: {(1 - night_stats.post_sleep_synaptic_strength / night_stats.wake_synaptic_strength) * 100:.1f}%"
+    )
 
     return orchestrator, night_stats
 
@@ -92,8 +94,7 @@ def demo_memory_strength_improvement():
     memories = []
     for i in range(5):
         trace = replay.encode_experience(
-            pattern=np.random.randn(20),
-            emotional_salience=np.random.uniform(-0.5, 0.5)
+            pattern=np.random.randn(20), emotional_salience=np.random.uniform(-0.5, 0.5)
         )
         memories.append(trace)
 
@@ -113,12 +114,14 @@ def demo_memory_strength_improvement():
     # Record final strengths
     final_strengths = [m.strength for m in memories]
     print(f"   Final mean strength: {np.mean(final_strengths):.3f}")
-    print(f"   Improvement: {(np.mean(final_strengths) / np.mean(initial_strengths) - 1) * 100:.1f}%")
+    print(
+        f"   Improvement: {(np.mean(final_strengths) / np.mean(initial_strengths) - 1) * 100:.1f}%"
+    )
 
     # Show individual memory changes
     print("\n3. Individual memory changes:")
     for i, (initial, final) in enumerate(zip(initial_strengths, final_strengths)):
-        print(f"   Memory {i}: {initial:.3f} -> {final:.3f} ({(final/initial - 1) * 100:.1f}%)")
+        print(f"   Memory {i}: {initial:.3f} -> {final:.3f} ({(final / initial - 1) * 100:.1f}%)")
 
     # Visualize
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -126,24 +129,24 @@ def demo_memory_strength_improvement():
     # Strength comparison
     x = np.arange(len(memories))
     width = 0.35
-    axes[0].bar(x - width/2, initial_strengths, width, label='Before Sleep', color='steelblue')
-    axes[0].bar(x + width/2, final_strengths, width, label='After Sleep', color='coral')
-    axes[0].set_xlabel('Memory')
-    axes[0].set_ylabel('Strength')
-    axes[0].set_title('Memory Strength: Before vs After Sleep')
+    axes[0].bar(x - width / 2, initial_strengths, width, label="Before Sleep", color="steelblue")
+    axes[0].bar(x + width / 2, final_strengths, width, label="After Sleep", color="coral")
+    axes[0].set_xlabel("Memory")
+    axes[0].set_ylabel("Strength")
+    axes[0].set_title("Memory Strength: Before vs After Sleep")
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
 
     # Replay counts
     replay_counts = [m.replay_count for m in memories]
-    axes[1].bar(x, replay_counts, color='green')
-    axes[1].set_xlabel('Memory')
-    axes[1].set_ylabel('Replay Count')
-    axes[1].set_title('Number of Replays per Memory')
+    axes[1].bar(x, replay_counts, color="green")
+    axes[1].set_xlabel("Memory")
+    axes[1].set_ylabel("Replay Count")
+    axes[1].set_title("Number of Replays per Memory")
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('memory_strength_improvement.png', dpi=150)
+    plt.savefig("memory_strength_improvement.png", dpi=150)
     print("\nFigure saved: memory_strength_improvement.png")
 
 
@@ -160,8 +163,7 @@ def demo_systems_consolidation():
     memory_ids = []
     for i in range(10):
         trace = MemoryTrace(
-            content=np.random.randn(20),
-            emotional_salience=np.random.uniform(-0.5, 0.5)
+            content=np.random.randn(20), emotional_salience=np.random.uniform(-0.5, 0.5)
         )
         mid = dialogue.hippocampus.encode(trace)
         memory_ids.append(mid)
@@ -175,23 +177,21 @@ def demo_systems_consolidation():
 
     for session in range(20):
         # Set optimal consolidation window
-        dialogue.initiate_dialogue(
-            slow_osc_phase="up",
-            spindle=True,
-            ripple=True
-        )
+        dialogue.initiate_dialogue(slow_osc_phase="up", spindle=True, ripple=True)
 
         # Consolidate each memory
         for mid in memory_ids:
             dialogue.consolidate_memory(mid, replay_strength=1.0)
 
         stats = dialogue.get_statistics()
-        consolidation_history.append({
-            'session': session,
-            'hippocampal': stats['hippocampal_memories'],
-            'cortical': stats['cortical_memories'],
-            'transferred': stats['total_transferred']
-        })
+        consolidation_history.append(
+            {
+                "session": session,
+                "hippocampal": stats["hippocampal_memories"],
+                "cortical": stats["cortical_memories"],
+                "transferred": stats["total_transferred"],
+            }
+        )
 
         if session % 5 == 4:
             print(f"   Session {session + 1}: {stats['total_transferred']} transferred to cortex")
@@ -204,13 +204,13 @@ def demo_systems_consolidation():
     # Visualize
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    sessions = [h['session'] for h in consolidation_history]
-    transferred = [h['transferred'] for h in consolidation_history]
+    sessions = [h["session"] for h in consolidation_history]
+    transferred = [h["transferred"] for h in consolidation_history]
 
-    axes[0].plot(sessions, transferred, 'b-o', linewidth=2)
-    axes[0].set_xlabel('Consolidation Session')
-    axes[0].set_ylabel('Memories Transferred to Cortex')
-    axes[0].set_title('Cumulative Memory Transfer')
+    axes[0].plot(sessions, transferred, "b-o", linewidth=2)
+    axes[0].set_xlabel("Consolidation Session")
+    axes[0].set_ylabel("Memories Transferred to Cortex")
+    axes[0].set_title("Cumulative Memory Transfer")
     axes[0].grid(True, alpha=0.3)
 
     # Consolidation levels
@@ -222,17 +222,21 @@ def demo_systems_consolidation():
         else:
             levels.append(0)
 
-    axes[1].bar(range(len(levels)), levels, color='purple')
-    axes[1].axhline(y=dialogue.transfer_threshold, color='red', linestyle='--',
-                    label=f'Transfer threshold ({dialogue.transfer_threshold})')
-    axes[1].set_xlabel('Memory')
-    axes[1].set_ylabel('Consolidation Level')
-    axes[1].set_title('Final Consolidation Levels')
+    axes[1].bar(range(len(levels)), levels, color="purple")
+    axes[1].axhline(
+        y=dialogue.transfer_threshold,
+        color="red",
+        linestyle="--",
+        label=f"Transfer threshold ({dialogue.transfer_threshold})",
+    )
+    axes[1].set_xlabel("Memory")
+    axes[1].set_ylabel("Consolidation Level")
+    axes[1].set_title("Final Consolidation Levels")
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('systems_consolidation.png', dpi=150)
+    plt.savefig("systems_consolidation.png", dpi=150)
     print("\nFigure saved: systems_consolidation.png")
 
 
@@ -259,38 +263,38 @@ def demo_sleep_architecture():
     fig, axes = plt.subplots(2, 1, figsize=(12, 8))
 
     # Stage durations per cycle
-    cycle_nums = [c['cycle_number'] + 1 for c in cycles]
-    sws_durations = [c['sws_duration'] for c in cycles]
-    rem_durations = [c['rem_duration'] for c in cycles]
-    nrem2_durations = [c['nrem2_duration'] for c in cycles]
+    cycle_nums = [c["cycle_number"] + 1 for c in cycles]
+    sws_durations = [c["sws_duration"] for c in cycles]
+    rem_durations = [c["rem_duration"] for c in cycles]
+    nrem2_durations = [c["nrem2_duration"] for c in cycles]
 
     width = 0.25
     x = np.arange(len(cycle_nums))
 
-    axes[0].bar(x - width, sws_durations, width, label='SWS', color='navy')
-    axes[0].bar(x, nrem2_durations, width, label='NREM2', color='steelblue')
-    axes[0].bar(x + width, rem_durations, width, label='REM', color='coral')
+    axes[0].bar(x - width, sws_durations, width, label="SWS", color="navy")
+    axes[0].bar(x, nrem2_durations, width, label="NREM2", color="steelblue")
+    axes[0].bar(x + width, rem_durations, width, label="REM", color="coral")
 
-    axes[0].set_xlabel('Sleep Cycle')
-    axes[0].set_ylabel('Duration (minutes)')
-    axes[0].set_title('Sleep Stage Durations by Cycle')
+    axes[0].set_xlabel("Sleep Cycle")
+    axes[0].set_ylabel("Duration (minutes)")
+    axes[0].set_title("Sleep Stage Durations by Cycle")
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(cycle_nums)
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
 
     # SWS vs REM trends
-    axes[1].plot(cycle_nums, sws_durations, 'b-o', linewidth=2, markersize=8, label='SWS')
-    axes[1].plot(cycle_nums, rem_durations, 'r-s', linewidth=2, markersize=8, label='REM')
+    axes[1].plot(cycle_nums, sws_durations, "b-o", linewidth=2, markersize=8, label="SWS")
+    axes[1].plot(cycle_nums, rem_durations, "r-s", linewidth=2, markersize=8, label="REM")
 
-    axes[1].set_xlabel('Sleep Cycle')
-    axes[1].set_ylabel('Duration (minutes)')
-    axes[1].set_title('SWS Decreases, REM Increases Across Night')
+    axes[1].set_xlabel("Sleep Cycle")
+    axes[1].set_ylabel("Duration (minutes)")
+    axes[1].set_title("SWS Decreases, REM Increases Across Night")
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('sleep_architecture.png', dpi=150)
+    plt.savefig("sleep_architecture.png", dpi=150)
     print("\nFigure saved: sleep_architecture.png")
 
 
@@ -311,9 +315,7 @@ def demo_dream_content():
     memories = []
     for label, emotion in zip(memory_labels, emotions):
         trace = replay.encode_experience(
-            pattern=np.random.randn(20),
-            emotional_salience=emotion,
-            context={"label": label}
+            pattern=np.random.randn(20), emotional_salience=emotion, context={"label": label}
         )
         memories.append(trace)
 
@@ -351,26 +353,26 @@ def demo_dream_content():
     x = np.arange(len(dreams))
     width = 0.35
 
-    axes[0].bar(x - width/2, bizarreness, width, label='Bizarreness', color='purple')
-    axes[0].bar(x + width/2, coherence, width, label='Coherence', color='green')
-    axes[0].set_xlabel('Dream')
-    axes[0].set_ylabel('Score')
-    axes[0].set_title('Dream Properties')
+    axes[0].bar(x - width / 2, bizarreness, width, label="Bizarreness", color="purple")
+    axes[0].bar(x + width / 2, coherence, width, label="Coherence", color="green")
+    axes[0].set_xlabel("Dream")
+    axes[0].set_ylabel("Score")
+    axes[0].set_title("Dream Properties")
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
 
     # Emotional tones
-    tones = dream_stats['tone_distribution']
+    tones = dream_stats["tone_distribution"]
     if tones:
-        axes[1].bar(tones.keys(), tones.values(), color='coral')
-        axes[1].set_xlabel('Emotional Tone')
-        axes[1].set_ylabel('Count')
-        axes[1].set_title('Dream Emotional Tone Distribution')
-        axes[1].tick_params(axis='x', rotation=45)
+        axes[1].bar(tones.keys(), tones.values(), color="coral")
+        axes[1].set_xlabel("Emotional Tone")
+        axes[1].set_ylabel("Count")
+        axes[1].set_title("Dream Emotional Tone Distribution")
+        axes[1].tick_params(axis="x", rotation=45)
         axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('dream_content.png', dpi=150)
+    plt.savefig("dream_content.png", dpi=150)
     print("\nFigure saved: dream_content.png")
 
 
@@ -392,5 +394,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

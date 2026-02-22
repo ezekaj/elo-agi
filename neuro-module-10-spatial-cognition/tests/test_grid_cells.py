@@ -2,7 +2,13 @@
 
 import numpy as np
 import pytest
-from neuro.modules.m10_spatial_cognition.grid_cells import GridCell, GridCellModule, GridCellPopulation, GridParameters
+from neuro.modules.m10_spatial_cognition.grid_cells import (
+    GridCell,
+    GridCellModule,
+    GridCellPopulation,
+    GridParameters,
+)
+
 
 class TestGridCell:
     """Test individual grid cell functionality."""
@@ -28,11 +34,9 @@ class TestGridCell:
 
     def test_grid_nodes_detection(self):
         cell = GridCell(spacing=0.3, orientation=0.0)
-        nodes = cell.get_grid_nodes(
-            environment_bounds=(0, 1, 0, 1),
-            threshold=0.5
-        )
+        nodes = cell.get_grid_nodes(environment_bounds=(0, 1, 0, 1), threshold=0.5)
         assert len(nodes) > 0
+
 
 class TestGridCellModule:
     """Test grid cell module functionality."""
@@ -58,24 +62,17 @@ class TestGridCellModule:
         assert len(activity) == 20
         assert np.all(activity >= 0)
 
+
 class TestGridCellPopulation:
     """Test multi-scale grid cell population."""
 
     def test_population_creation(self):
-        pop = GridCellPopulation(
-            n_modules=4,
-            cells_per_module=20,
-            base_spacing=0.2
-        )
+        pop = GridCellPopulation(n_modules=4, cells_per_module=20, base_spacing=0.2)
         assert len(pop.modules) == 4
         assert pop.total_cells == 80
 
     def test_increasing_spacing(self):
-        pop = GridCellPopulation(
-            n_modules=4,
-            base_spacing=0.2,
-            scale_ratio=1.5
-        )
+        pop = GridCellPopulation(n_modules=4, base_spacing=0.2, scale_ratio=1.5)
 
         spacings = [m.spacing for m in pop.modules]
         # Each module should have larger spacing
@@ -103,22 +100,18 @@ class TestGridCellPopulation:
     def test_firing_map_generation(self):
         pop = GridCellPopulation(n_modules=2, cells_per_module=5)
         X, Y, firing_map = pop.get_firing_map(
-            cell_idx=0,
-            environment_bounds=(0, 1, 0, 1),
-            resolution=20
+            cell_idx=0, environment_bounds=(0, 1, 0, 1), resolution=20
         )
         assert X.shape == (20, 20)
         assert firing_map.shape == (20, 20)
+
 
 class TestGridParameters:
     """Test grid parameters dataclass."""
 
     def test_parameters_creation(self):
         params = GridParameters(
-            spacing=0.3,
-            orientation=np.pi / 6,
-            phase=np.array([0.1, 0.1]),
-            scale=1
+            spacing=0.3, orientation=np.pi / 6, phase=np.array([0.1, 0.1]), scale=1
         )
         assert params.spacing == 0.3
         assert params.orientation == pytest.approx(np.pi / 6)

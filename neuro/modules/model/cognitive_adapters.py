@@ -52,6 +52,7 @@ for path in MODULE_PATHS:
 # ENUMS AND DATA CLASSES
 # =============================================================================
 
+
 class ProblemType(Enum):
     LOGICAL = "logical"
     MATHEMATICAL = "mathematical"
@@ -86,6 +87,7 @@ class ProblemDifficulty(Enum):
 @dataclass
 class ProblemAnalysis:
     """Analysis of a problem."""
+
     problem_type: ProblemType
     type_confidence: float
     complexity: float
@@ -99,6 +101,7 @@ class ProblemAnalysis:
 @dataclass
 class StyleSelection:
     """Selected thinking style."""
+
     primary_style: ThinkingStyle
     primary_fitness: float
     secondary_styles: List[Tuple[ThinkingStyle, float]] = field(default_factory=list)
@@ -108,6 +111,7 @@ class StyleSelection:
 @dataclass
 class ExecutionPlan:
     """Plan for executing reasoning."""
+
     steps: List[Dict[str, Any]] = field(default_factory=list)
     estimated_confidence: float = 0.5
     estimated_time: float = 1.0
@@ -116,6 +120,7 @@ class ExecutionPlan:
 # =============================================================================
 # ADAPTER BASE CLASS
 # =============================================================================
+
 
 class ModuleAdapter:
     """Base adapter that provides fallback functionality."""
@@ -142,6 +147,7 @@ class ModuleAdapter:
 # PROBLEM CLASSIFIER ADAPTER
 # =============================================================================
 
+
 class ProblemClassifierAdapter(ModuleAdapter):
     """Adapter for problem classification."""
 
@@ -149,6 +155,7 @@ class ProblemClassifierAdapter(ModuleAdapter):
         real = None
         try:
             from problem_classifier import ProblemClassifier
+
             real = ProblemClassifier(random_seed=42)
         except Exception as e:
             pass
@@ -167,10 +174,10 @@ class ProblemClassifierAdapter(ModuleAdapter):
                     type_confidence=result.type_confidence,
                     complexity=result.complexity,
                     difficulty=ProblemDifficulty(result.difficulty.value),
-                    features=getattr(result, 'features', {}),
-                    subproblems=getattr(result, 'subproblems', []),
-                    estimated_steps=getattr(result, 'estimated_steps', 3),
-                    requires_domain_knowledge=getattr(result, 'requires_domain_knowledge', False)
+                    features=getattr(result, "features", {}),
+                    subproblems=getattr(result, "subproblems", []),
+                    estimated_steps=getattr(result, "estimated_steps", 3),
+                    requires_domain_knowledge=getattr(result, "requires_domain_knowledge", False),
                 )
             except Exception:
                 pass
@@ -201,13 +208,14 @@ class ProblemClassifierAdapter(ModuleAdapter):
             complexity=complexity,
             difficulty=difficulty,
             estimated_steps=max(1, int(complexity * 5)),
-            requires_domain_knowledge=complexity > 0.5
+            requires_domain_knowledge=complexity > 0.5,
         )
 
 
 # =============================================================================
 # STYLE SELECTOR ADAPTER
 # =============================================================================
+
 
 class StyleSelectorAdapter(ModuleAdapter):
     """Adapter for thinking style selection."""
@@ -216,6 +224,7 @@ class StyleSelectorAdapter(ModuleAdapter):
         real = None
         try:
             from style_selector import StyleSelector
+
             real = StyleSelector(random_seed=42)
         except Exception:
             pass
@@ -232,9 +241,9 @@ class StyleSelectorAdapter(ModuleAdapter):
                     primary_fitness=result.primary_fitness,
                     secondary_styles=[
                         (ThinkingStyle(s[0].value), s[1])
-                        for s in getattr(result, 'secondary_styles', [])
+                        for s in getattr(result, "secondary_styles", [])
                     ],
-                    rationale=getattr(result, 'rationale', '')
+                    rationale=getattr(result, "rationale", ""),
                 )
             except Exception:
                 pass
@@ -256,13 +265,14 @@ class StyleSelectorAdapter(ModuleAdapter):
             primary_style=primary,
             primary_fitness=0.8,
             secondary_styles=[(ThinkingStyle.INTUITIVE, 0.5)],
-            rationale=f"Selected {primary.value} for {analysis.problem_type.value} problem"
+            rationale=f"Selected {primary.value} for {analysis.problem_type.value} problem",
         )
 
 
 # =============================================================================
 # ORCHESTRATOR ADAPTER
 # =============================================================================
+
 
 class OrchestratorAdapter(ModuleAdapter):
     """Adapter for reasoning orchestration."""
@@ -271,6 +281,7 @@ class OrchestratorAdapter(ModuleAdapter):
         real = None
         try:
             from orchestrator import DynamicOrchestrator
+
             real = DynamicOrchestrator(random_seed=42)
         except Exception:
             pass
@@ -283,10 +294,12 @@ class OrchestratorAdapter(ModuleAdapter):
             try:
                 result = self._real.create_plan(analysis, style)
                 return ExecutionPlan(
-                    steps=[{"name": s.name, "module": getattr(s, 'module', 'unknown')}
-                           for s in getattr(result, 'steps', [])],
-                    estimated_confidence=getattr(result, 'estimated_confidence', 0.7),
-                    estimated_time=getattr(result, 'estimated_time', 1.0)
+                    steps=[
+                        {"name": s.name, "module": getattr(s, "module", "unknown")}
+                        for s in getattr(result, "steps", [])
+                    ],
+                    estimated_confidence=getattr(result, "estimated_confidence", 0.7),
+                    estimated_time=getattr(result, "estimated_time", 1.0),
                 )
             except Exception:
                 pass
@@ -295,22 +308,21 @@ class OrchestratorAdapter(ModuleAdapter):
         steps = [
             {"name": "analyze", "module": "classifier"},
             {"name": "reason", "module": style.primary_style.value},
-            {"name": "synthesize", "module": "global_workspace"}
+            {"name": "synthesize", "module": "global_workspace"},
         ]
 
         if analysis.complexity > 0.5:
             steps.insert(1, {"name": "decompose", "module": "orchestrator"})
 
         return ExecutionPlan(
-            steps=steps,
-            estimated_confidence=0.7,
-            estimated_time=analysis.estimated_steps * 0.5
+            steps=steps, estimated_confidence=0.7, estimated_time=analysis.estimated_steps * 0.5
         )
 
 
 # =============================================================================
 # GLOBAL WORKSPACE ADAPTER
 # =============================================================================
+
 
 class GlobalWorkspaceAdapter(ModuleAdapter):
     """Adapter for global workspace (consciousness/attention)."""
@@ -319,6 +331,7 @@ class GlobalWorkspaceAdapter(ModuleAdapter):
         real = None
         try:
             from global_workspace import GlobalWorkspace
+
             real = GlobalWorkspace()
         except Exception:
             pass
@@ -339,7 +352,7 @@ class GlobalWorkspaceAdapter(ModuleAdapter):
             "content": content,
             "attention": self._attention.tolist(),
             "coherence": 0.7,
-            "broadcast_id": hash(str(content)) % 10000
+            "broadcast_id": hash(str(content)) % 10000,
         }
 
     def should_activate(self, broadcast: Dict) -> bool:
@@ -353,6 +366,7 @@ class GlobalWorkspaceAdapter(ModuleAdapter):
 # DUAL PROCESS ADAPTER
 # =============================================================================
 
+
 class DualProcessAdapter(ModuleAdapter):
     """Adapter for System 1/2 dual process thinking."""
 
@@ -360,6 +374,7 @@ class DualProcessAdapter(ModuleAdapter):
         real = None
         try:
             from dual_process_controller import DualProcessController
+
             real = DualProcessController()
         except Exception:
             pass
@@ -379,7 +394,7 @@ class DualProcessAdapter(ModuleAdapter):
         return {
             "response": "intuitive",
             "confidence": min(1.0, max(0.0, confidence)),
-            "processing_time": 0.01
+            "processing_time": 0.01,
         }
 
     def system2_response(self, embedding: np.ndarray) -> Dict[str, Any]:
@@ -396,13 +411,14 @@ class DualProcessAdapter(ModuleAdapter):
             "response": "deliberate",
             "confidence": 0.8,
             "processing_time": complexity * 0.5,
-            "reasoning_steps": max(1, int(complexity * 5))
+            "reasoning_steps": max(1, int(complexity * 5)),
         }
 
 
 # =============================================================================
 # PREDICTIVE CODING ADAPTER
 # =============================================================================
+
 
 class PredictiveCodingAdapter(ModuleAdapter):
     """Adapter for predictive coding / free energy principle."""
@@ -411,6 +427,7 @@ class PredictiveCodingAdapter(ModuleAdapter):
         real = None
         try:
             from predictive_hierarchy import PredictiveHierarchy
+
             real = PredictiveHierarchy()
         except Exception:
             pass
@@ -428,10 +445,7 @@ class PredictiveCodingAdapter(ModuleAdapter):
 
         prediction = self._prior * 0.8 + embedding * 0.2
         self._prior = prediction
-        return {
-            "prediction": prediction.tolist()[:10],
-            "confidence": 0.6
-        }
+        return {"prediction": prediction.tolist()[:10], "confidence": 0.6}
 
     def compute_free_energy(self, embedding: np.ndarray) -> float:
         """Compute free energy (prediction error)."""
@@ -450,6 +464,7 @@ class PredictiveCodingAdapter(ModuleAdapter):
 # MEMORY SYSTEM ADAPTER
 # =============================================================================
 
+
 class MemorySystemAdapter(ModuleAdapter):
     """Adapter for memory systems (episodic, semantic, working)."""
 
@@ -457,6 +472,7 @@ class MemorySystemAdapter(ModuleAdapter):
         real = None
         try:
             from memory_controller import MemoryController
+
             real = MemoryController()
         except Exception:
             pass
@@ -473,11 +489,9 @@ class MemorySystemAdapter(ModuleAdapter):
             except Exception:
                 pass
 
-        self._episodic.append({
-            "content": content,
-            "embedding": embedding,
-            "context": context or {}
-        })
+        self._episodic.append(
+            {"content": content, "embedding": embedding, "context": context or {}}
+        )
 
     def recall_episodic(self, query: str, k: int = 5) -> List[Dict]:
         """Recall episodic memories."""
@@ -504,6 +518,7 @@ class MemorySystemAdapter(ModuleAdapter):
 # CURIOSITY ADAPTER
 # =============================================================================
 
+
 class CuriosityAdapter(ModuleAdapter):
     """Adapter for curiosity-driven exploration."""
 
@@ -511,6 +526,7 @@ class CuriosityAdapter(ModuleAdapter):
         real = None
         try:
             from curiosity_drive import CuriosityModule
+
             real = CuriosityModule(state_dim=128, base_curiosity=1.0)
         except Exception:
             pass
@@ -531,7 +547,7 @@ class CuriosityAdapter(ModuleAdapter):
         return {
             "novelty": novelty,
             "curiosity_response": novelty * self.curiosity_level,
-            "explore": novelty > 0.3
+            "explore": novelty > 0.3,
         }
 
     def get_knowledge_gaps(self) -> List[str]:
@@ -554,6 +570,7 @@ class CuriosityAdapter(ModuleAdapter):
 # MOTIVATION ADAPTER
 # =============================================================================
 
+
 class MotivationAdapter(ModuleAdapter):
     """Adapter for intrinsic motivation / path entropy."""
 
@@ -561,6 +578,7 @@ class MotivationAdapter(ModuleAdapter):
         real = None
         try:
             from intrinsic_motivation import PathEntropyMaximizer
+
             real = PathEntropyMaximizer(state_dim=128, action_dim=32)
         except Exception:
             pass
@@ -584,6 +602,7 @@ class MotivationAdapter(ModuleAdapter):
 # EXECUTIVE FUNCTIONS ADAPTER
 # =============================================================================
 
+
 class ExecutiveFunctionsAdapter(ModuleAdapter):
     """Adapter for executive functions (inhibition, switching, planning)."""
 
@@ -591,6 +610,7 @@ class ExecutiveFunctionsAdapter(ModuleAdapter):
         real = None
         try:
             from executive_network import ExecutiveNetwork
+
             real = ExecutiveNetwork()
         except Exception:
             pass
@@ -622,6 +642,7 @@ class ExecutiveFunctionsAdapter(ModuleAdapter):
 # REASONING ADAPTER
 # =============================================================================
 
+
 class ReasoningAdapter(ModuleAdapter):
     """Adapter for multi-type reasoning (logical, analogical, etc.)."""
 
@@ -629,6 +650,7 @@ class ReasoningAdapter(ModuleAdapter):
         real = None
         try:
             from reasoning_orchestrator import ReasoningOrchestrator
+
             real = ReasoningOrchestrator()
         except Exception:
             pass
@@ -643,16 +665,13 @@ class ReasoningAdapter(ModuleAdapter):
             except Exception:
                 pass
 
-        return {
-            "conclusion": "reasoning_applied",
-            "confidence": 0.7,
-            "style": style.value
-        }
+        return {"conclusion": "reasoning_applied", "confidence": 0.7, "style": style.value}
 
 
 # =============================================================================
 # WORLD MODEL ADAPTER
 # =============================================================================
+
 
 class WorldModelAdapter(ModuleAdapter):
     """Adapter for world modeling and simulation."""
@@ -661,6 +680,7 @@ class WorldModelAdapter(ModuleAdapter):
         real = None
         try:
             from imagination import ImaginationEngine
+
             real = ImaginationEngine()
         except Exception:
             pass
@@ -693,6 +713,7 @@ class WorldModelAdapter(ModuleAdapter):
 # EMOTION ADAPTER
 # =============================================================================
 
+
 class EmotionAdapter(ModuleAdapter):
     """Adapter for emotional processing."""
 
@@ -700,6 +721,7 @@ class EmotionAdapter(ModuleAdapter):
         real = None
         try:
             from emotion_circuit import EmotionCircuit
+
             real = EmotionCircuit()
         except Exception:
             pass
@@ -717,16 +739,13 @@ class EmotionAdapter(ModuleAdapter):
         valence = float(np.mean(stimulus))
         arousal = float(np.std(stimulus))
 
-        return {
-            "valence": valence,
-            "arousal": arousal,
-            "dominance": 0.5
-        }
+        return {"valence": valence, "arousal": arousal, "dominance": 0.5}
 
 
 # =============================================================================
 # LANGUAGE ADAPTER
 # =============================================================================
+
 
 class LanguageAdapter(ModuleAdapter):
     """Adapter for language processing."""
@@ -735,6 +754,7 @@ class LanguageAdapter(ModuleAdapter):
         real = None
         try:
             from language_network import LanguageNetwork
+
             real = LanguageNetwork()
         except Exception:
             pass
@@ -751,6 +771,7 @@ class LanguageAdapter(ModuleAdapter):
 
         # Simple hash-based encoding
         import hashlib
+
         h = hashlib.sha256(text.encode()).digest()
         extended = h * 4
         return np.array([b / 255.0 for b in extended[:128]])
@@ -760,6 +781,7 @@ class LanguageAdapter(ModuleAdapter):
 # CREATIVITY ADAPTER
 # =============================================================================
 
+
 class CreativityAdapter(ModuleAdapter):
     """Adapter for creative processes."""
 
@@ -767,6 +789,7 @@ class CreativityAdapter(ModuleAdapter):
         real = None
         try:
             from creative_process import CreativeProcess
+
             real = CreativeProcess()
         except Exception:
             pass
@@ -789,6 +812,7 @@ class CreativityAdapter(ModuleAdapter):
 # SOCIAL COGNITION ADAPTER
 # =============================================================================
 
+
 class SocialCognitionAdapter(ModuleAdapter):
     """Adapter for theory of mind and social reasoning."""
 
@@ -796,6 +820,7 @@ class SocialCognitionAdapter(ModuleAdapter):
         real = None
         try:
             from theory_of_mind import TheoryOfMind
+
             real = TheoryOfMind()
         except Exception:
             pass
@@ -810,17 +835,13 @@ class SocialCognitionAdapter(ModuleAdapter):
             except Exception:
                 pass
 
-        return {
-            "agent": agent_id,
-            "beliefs": [],
-            "intentions": [],
-            "emotions": {}
-        }
+        return {"agent": agent_id, "beliefs": [], "intentions": [], "emotions": {}}
 
 
 # =============================================================================
 # CONSCIOUSNESS ADAPTER
 # =============================================================================
+
 
 class ConsciousnessAdapter(ModuleAdapter):
     """Adapter for metacognition and self-awareness."""
@@ -829,6 +850,7 @@ class ConsciousnessAdapter(ModuleAdapter):
         real = None
         try:
             from metacognition import MetacognitionModule
+
             real = MetacognitionModule()
         except Exception:
             pass
@@ -843,16 +865,13 @@ class ConsciousnessAdapter(ModuleAdapter):
             except Exception:
                 pass
 
-        return {
-            "state": "aware",
-            "confidence_in_reasoning": 0.7,
-            "uncertainty_areas": []
-        }
+        return {"state": "aware", "confidence_in_reasoning": 0.7, "uncertainty_areas": []}
 
 
 # =============================================================================
 # MODULE FACTORY
 # =============================================================================
+
 
 class CognitiveModuleFactory:
     """Factory for creating and managing all cognitive module adapters."""
@@ -919,7 +938,7 @@ class CognitiveModuleFactory:
             "active_modules": len(active),
             "fallback_modules": len(fallback),
             "active_list": active,
-            "fallback_list": fallback
+            "fallback_list": fallback,
         }
 
     def get_stats(self) -> Dict[str, Any]:

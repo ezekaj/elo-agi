@@ -16,21 +16,33 @@ import sys
 import time
 import numpy as np
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 
 from src import (
-    PlaceCell, PlaceCellPopulation,
-    GridCell, GridCellModule, GridCellPopulation,
-    HeadDirectionCell, HeadDirectionSystem,
-    BorderCell, BorderCellPopulation, WallDirection,
-    CognitiveMap, Environment, Landmark,
+    PlaceCell,
+    PlaceCellPopulation,
+    GridCell,
+    GridCellModule,
+    GridCellPopulation,
+    HeadDirectionCell,
+    HeadDirectionSystem,
+    BorderCell,
+    BorderCellPopulation,
+    WallDirection,
+    CognitiveMap,
+    Environment,
+    Landmark,
     PathIntegrator,
-    ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap,
+    ConceptCell,
+    ConceptualGrid,
+    SocialDistanceGrid,
+    ConceptualMap,
 )
 
 
 class TestResults:
     """Track test results"""
+
     def __init__(self):
         self.passed = 0
         self.failed = 0
@@ -47,13 +59,13 @@ class TestResults:
 
     def summary(self):
         total = self.passed + self.failed
-        print(f"\n{'='*60}")
-        print(f"RESULTS: {self.passed}/{total} passed ({100*self.passed/total:.1f}%)")
+        print(f"\n{'=' * 60}")
+        print(f"RESULTS: {self.passed}/{total} passed ({100 * self.passed / total:.1f}%)")
         if self.errors:
             print(f"\nFailed tests:")
             for name, error in self.errors:
                 print(f"  - {name}: {error}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         return self.failed == 0
 
 
@@ -61,14 +73,15 @@ results = TestResults()
 
 
 def test_section(name):
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"TEST: {name}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 # =============================================================================
 # 1. PLACE CELLS TESTS
 # =============================================================================
+
 
 def test_place_cells():
     test_section("PLACE CELLS")
@@ -82,9 +95,11 @@ def test_place_cells():
         # Away from center - should fire less
         rate_away = cell.compute_firing(np.array([0.8, 0.8]))
 
-        results.record("Place cell fires maximally at center",
-                      rate_center > rate_away and rate_center > 19.0,
-                      f"center: {rate_center:.2f}, away: {rate_away:.2f}")
+        results.record(
+            "Place cell fires maximally at center",
+            rate_center > rate_away and rate_center > 19.0,
+            f"center: {rate_center:.2f}, away: {rate_away:.2f}",
+        )
     except Exception as e:
         results.record("Place cell fires maximally at center", False, str(e))
 
@@ -93,16 +108,9 @@ def test_place_cells():
         pop = PlaceCellPopulation(n_cells=100, environment_size=(1.0, 1.0), random_seed=42)
 
         # Check coverage - every point should have some activity
-        positions = [
-            np.array([0.1, 0.1]),
-            np.array([0.5, 0.5]),
-            np.array([0.9, 0.9])
-        ]
+        positions = [np.array([0.1, 0.1]), np.array([0.5, 0.5]), np.array([0.9, 0.9])]
 
-        all_covered = all(
-            np.max(pop.get_population_activity(pos)) > 0
-            for pos in positions
-        )
+        all_covered = all(np.max(pop.get_population_activity(pos)) > 0 for pos in positions)
 
         results.record("Place cell population covers environment", all_covered)
     except Exception as e:
@@ -118,9 +126,7 @@ def test_place_cells():
 
         error = np.linalg.norm(decoded - test_pos)
 
-        results.record("Position decoding accuracy < 0.2",
-                      error < 0.2,
-                      f"error: {error:.3f}")
+        results.record("Position decoding accuracy < 0.2", error < 0.2, f"error: {error:.3f}")
     except Exception as e:
         results.record("Position decoding accuracy < 0.2", False, str(e))
 
@@ -136,13 +142,16 @@ def test_place_cells():
 
         # Check if centers changed
         changed = sum(
-            1 for i, cell in enumerate(pop.cells)
+            1
+            for i, cell in enumerate(pop.cells)
             if not np.allclose(cell.place_field.center, initial_centers[i])
         )
 
-        results.record("Remapping changes place fields",
-                      changed > 40,  # Most should change
-                      f"changed: {changed}/50")
+        results.record(
+            "Remapping changes place fields",
+            changed > 40,  # Most should change
+            f"changed: {changed}/50",
+        )
     except Exception as e:
         results.record("Remapping changes place fields", False, str(e))
 
@@ -150,6 +159,7 @@ def test_place_cells():
 # =============================================================================
 # 2. GRID CELLS TESTS
 # =============================================================================
+
 
 def test_grid_cells():
     test_section("GRID CELLS")
@@ -168,9 +178,9 @@ def test_grid_cells():
         # Should have peaks and valleys (not uniform)
         rate_range = max(rates) - min(rates)
 
-        results.record("Grid cell has hexagonal pattern",
-                      rate_range > 5.0,
-                      f"rate range: {rate_range:.2f}")
+        results.record(
+            "Grid cell has hexagonal pattern", rate_range > 5.0, f"rate range: {rate_range:.2f}"
+        )
     except Exception as e:
         results.record("Grid cell has hexagonal pattern", False, str(e))
 
@@ -181,11 +191,13 @@ def test_grid_cells():
         spacings = [m.spacing for m in pop.modules]
 
         # Check increasing spacing
-        increasing = all(spacings[i] < spacings[i+1] for i in range(len(spacings)-1))
+        increasing = all(spacings[i] < spacings[i + 1] for i in range(len(spacings) - 1))
 
-        results.record("Grid modules have increasing spacing",
-                      increasing,
-                      f"spacings: {[f'{s:.2f}' for s in spacings]}")
+        results.record(
+            "Grid modules have increasing spacing",
+            increasing,
+            f"spacings: {[f'{s:.2f}' for s in spacings]}",
+        )
     except Exception as e:
         results.record("Grid modules have increasing spacing", False, str(e))
 
@@ -203,9 +215,11 @@ def test_grid_cells():
         # Should be approximately at (1.0, 0.0)
         error = np.linalg.norm(final_pos - np.array([1.0, 0.0]))
 
-        results.record("Path integration tracks movement",
-                      error < 0.1,
-                      f"final: {final_pos}, error: {error:.3f}")
+        results.record(
+            "Path integration tracks movement",
+            error < 0.1,
+            f"final: {final_pos}, error: {error:.3f}",
+        )
     except Exception as e:
         results.record("Path integration tracks movement", False, str(e))
 
@@ -214,21 +228,24 @@ def test_grid_cells():
 # 3. HEAD DIRECTION TESTS
 # =============================================================================
 
+
 def test_head_direction():
     test_section("HEAD DIRECTION CELLS")
 
     # Test 1: Cell tuning
     try:
-        cell = HeadDirectionCell(preferred_direction=np.pi/2, tuning_width=2.0)
+        cell = HeadDirectionCell(preferred_direction=np.pi / 2, tuning_width=2.0)
 
         # At preferred - max firing
-        rate_pref = cell.compute_firing(np.pi/2)
+        rate_pref = cell.compute_firing(np.pi / 2)
         # Opposite - min firing
-        rate_opp = cell.compute_firing(3*np.pi/2)
+        rate_opp = cell.compute_firing(3 * np.pi / 2)
 
-        results.record("HD cell fires at preferred direction",
-                      rate_pref > rate_opp * 5,
-                      f"pref: {rate_pref:.2f}, opp: {rate_opp:.2f}")
+        results.record(
+            "HD cell fires at preferred direction",
+            rate_pref > rate_opp * 5,
+            f"pref: {rate_pref:.2f}, opp: {rate_opp:.2f}",
+        )
     except Exception as e:
         results.record("HD cell fires at preferred direction", False, str(e))
 
@@ -237,7 +254,7 @@ def test_head_direction():
         system = HeadDirectionSystem(n_cells=60)
 
         # Check all directions have representation
-        directions = [0, np.pi/4, np.pi/2, np.pi, 3*np.pi/2]
+        directions = [0, np.pi / 4, np.pi / 2, np.pi, 3 * np.pi / 2]
         all_covered = True
 
         for direction in directions:
@@ -263,9 +280,7 @@ def test_head_direction():
         if error > np.pi:
             error = 2 * np.pi - error
 
-        results.record("Heading decode accuracy < 0.2 rad",
-                      error < 0.2,
-                      f"error: {error:.3f} rad")
+        results.record("Heading decode accuracy < 0.2 rad", error < 0.2, f"error: {error:.3f} rad")
     except Exception as e:
         results.record("Heading decode accuracy < 0.2 rad", False, str(e))
 
@@ -276,13 +291,15 @@ def test_head_direction():
 
         # Rotate 90 degrees
         for _ in range(10):
-            system.update_heading(np.pi/20, dt=1.0)
+            system.update_heading(np.pi / 20, dt=1.0)
 
         final = system.get_current_heading()
 
-        results.record("Angular integration tracks rotation",
-                      abs(final - np.pi/2) < 0.1,
-                      f"final: {final:.3f}, expected: {np.pi/2:.3f}")
+        results.record(
+            "Angular integration tracks rotation",
+            abs(final - np.pi / 2) < 0.1,
+            f"final: {final:.3f}, expected: {np.pi / 2:.3f}",
+        )
     except Exception as e:
         results.record("Angular integration tracks rotation", False, str(e))
 
@@ -290,6 +307,7 @@ def test_head_direction():
 # =============================================================================
 # 4. BORDER CELLS TESTS
 # =============================================================================
+
 
 def test_border_cells():
     test_section("BORDER CELLS")
@@ -304,9 +322,11 @@ def test_border_cells():
         # Far from north wall
         rate_far = cell.compute_firing(np.array([0.5, 0.5]), bounds)
 
-        results.record("Border cell fires near preferred wall",
-                      rate_near > rate_far * 5,
-                      f"near: {rate_near:.2f}, far: {rate_far:.2f}")
+        results.record(
+            "Border cell fires near preferred wall",
+            rate_near > rate_far * 5,
+            f"near: {rate_near:.2f}, far: {rate_far:.2f}",
+        )
     except Exception as e:
         results.record("Border cell fires near preferred wall", False, str(e))
 
@@ -348,10 +368,7 @@ def test_border_cells():
             WallDirection.WEST: 0.3,
         }
 
-        all_correct = all(
-            abs(distances[wall] - expected[wall]) < 0.01
-            for wall in expected
-        )
+        all_correct = all(abs(distances[wall] - expected[wall]) < 0.01 for wall in expected)
 
         results.record("Distance to walls computed correctly", all_correct)
     except Exception as e:
@@ -361,6 +378,7 @@ def test_border_cells():
 # =============================================================================
 # 5. COGNITIVE MAP INTEGRATION TESTS
 # =============================================================================
+
 
 def test_cognitive_map():
     test_section("COGNITIVE MAP INTEGRATION")
@@ -376,9 +394,11 @@ def test_cognitive_map():
         goal = np.array([0.8, 0.8])
         velocity, distance = cmap.navigate_to(goal)
 
-        results.record("Navigation computes velocity to goal",
-                      np.linalg.norm(velocity) > 0 and distance > 0.5,
-                      f"velocity: {velocity}, distance: {distance:.2f}")
+        results.record(
+            "Navigation computes velocity to goal",
+            np.linalg.norm(velocity) > 0 and distance > 0.5,
+            f"velocity: {velocity}, distance: {distance:.2f}",
+        )
     except Exception as e:
         results.record("Navigation computes velocity to goal", False, str(e))
 
@@ -393,8 +413,7 @@ def test_cognitive_map():
 
         moved = np.linalg.norm(final - initial) > 0.05
 
-        results.record("Update moves position", moved,
-                      f"initial: {initial}, final: {final}")
+        results.record("Update moves position", moved, f"initial: {initial}, final: {final}")
     except Exception as e:
         results.record("Update moves position", False, str(e))
 
@@ -409,9 +428,11 @@ def test_cognitive_map():
 
         recalled = cmap.recall_location("home")
 
-        results.record("Location encoding and recall",
-                      recalled is not None and np.allclose(recalled, [0.3, 0.4]),
-                      f"recalled: {recalled}")
+        results.record(
+            "Location encoding and recall",
+            recalled is not None and np.allclose(recalled, [0.3, 0.4]),
+            f"recalled: {recalled}",
+        )
     except Exception as e:
         results.record("Location encoding and recall", False, str(e))
 
@@ -421,10 +442,10 @@ def test_cognitive_map():
         state = cmap.get_state()
 
         has_all = (
-            len(state.place_activity) > 0 and
-            len(state.grid_activity) > 0 and
-            len(state.head_direction_activity) > 0 and
-            len(state.border_activity) > 0
+            len(state.place_activity) > 0
+            and len(state.grid_activity) > 0
+            and len(state.head_direction_activity) > 0
+            and len(state.border_activity) > 0
         )
 
         results.record("State contains all cell activities", has_all)
@@ -456,6 +477,7 @@ def test_cognitive_map():
 # 6. PATH INTEGRATION TESTS
 # =============================================================================
 
+
 def test_path_integration():
     test_section("PATH INTEGRATION")
 
@@ -471,9 +493,9 @@ def test_path_integration():
 
         pos = integrator.position_estimate
 
-        results.record("Path integration tracks square path",
-                      pos[0] > 0.9 and pos[1] > 0.9,
-                      f"position: {pos}")
+        results.record(
+            "Path integration tracks square path", pos[0] > 0.9 and pos[1] > 0.9, f"position: {pos}"
+        )
     except Exception as e:
         results.record("Path integration tracks square path", False, str(e))
 
@@ -488,9 +510,11 @@ def test_path_integration():
 
         final_uncertainty = integrator.uncertainty
 
-        results.record("Uncertainty grows over time",
-                      final_uncertainty > initial_uncertainty,
-                      f"initial: {initial_uncertainty:.3f}, final: {final_uncertainty:.3f}")
+        results.record(
+            "Uncertainty grows over time",
+            final_uncertainty > initial_uncertainty,
+            f"initial: {initial_uncertainty:.3f}, final: {final_uncertainty:.3f}",
+        )
     except Exception as e:
         results.record("Uncertainty grows over time", False, str(e))
 
@@ -504,8 +528,7 @@ def test_path_integration():
 
         integrator.reset(np.array([0.5, 0.5]))
 
-        results.record("Reset clears uncertainty",
-                      integrator.uncertainty == 0.0)
+        results.record("Reset clears uncertainty", integrator.uncertainty == 0.0)
     except Exception as e:
         results.record("Reset clears uncertainty", False, str(e))
 
@@ -518,9 +541,11 @@ def test_path_integration():
 
         trajectory = integrator.get_trajectory()
 
-        results.record("Trajectory recorded correctly",
-                      len(trajectory) == 11,  # Initial + 10 steps
-                      f"trajectory length: {len(trajectory)}")
+        results.record(
+            "Trajectory recorded correctly",
+            len(trajectory) == 11,  # Initial + 10 steps
+            f"trajectory length: {len(trajectory)}",
+        )
     except Exception as e:
         results.record("Trajectory recorded correctly", False, str(e))
 
@@ -528,6 +553,7 @@ def test_path_integration():
 # =============================================================================
 # 7. CONCEPTUAL SPACE TESTS
 # =============================================================================
+
 
 def test_conceptual_space():
     test_section("CONCEPTUAL SPACE (2025 DISCOVERY)")
@@ -537,7 +563,7 @@ def test_conceptual_space():
         cell = ConceptCell(
             concept_center=np.array([0.5, 0.5, 0.5]),
             concept_radius=0.3,
-            associated_concept="democracy"
+            associated_concept="democracy",
         )
 
         # At center - max activation
@@ -545,9 +571,11 @@ def test_conceptual_space():
         # Away - less activation
         act_away = cell.compute_activation(np.array([0.9, 0.9, 0.9]))
 
-        results.record("Concept cell fires for associated concept",
-                      act_center > act_away * 2,
-                      f"center: {act_center:.3f}, away: {act_away:.3f}")
+        results.record(
+            "Concept cell fires for associated concept",
+            act_center > act_away * 2,
+            f"center: {act_center:.3f}, away: {act_away:.3f}",
+        )
     except Exception as e:
         results.record("Concept cell fires for associated concept", False, str(e))
 
@@ -563,9 +591,11 @@ def test_conceptual_space():
         dist_dog_cat = cmap.conceptual_distance("dog", "cat")
         dist_dog_car = cmap.conceptual_distance("dog", "car")
 
-        results.record("Similar concepts are closer in concept space",
-                      dist_dog_cat < dist_dog_car,
-                      f"dog-cat: {dist_dog_cat:.3f}, dog-car: {dist_dog_car:.3f}")
+        results.record(
+            "Similar concepts are closer in concept space",
+            dist_dog_cat < dist_dog_car,
+            f"dog-cat: {dist_dog_cat:.3f}, dog-car: {dist_dog_car:.3f}",
+        )
     except Exception as e:
         results.record("Similar concepts are closer in concept space", False, str(e))
 
@@ -580,9 +610,11 @@ def test_conceptual_space():
 
         similar = cmap.find_similar("apple", n=2)
 
-        results.record("Find similar concepts",
-                      len(similar) == 2 and similar[0][0] in ["orange", "banana"],
-                      f"similar to apple: {similar}")
+        results.record(
+            "Find similar concepts",
+            len(similar) == 2 and similar[0][0] in ["orange", "banana"],
+            f"similar to apple: {similar}",
+        )
     except Exception as e:
         results.record("Find similar concepts", False, str(e))
 
@@ -598,9 +630,11 @@ def test_conceptual_space():
 
         result = cmap.compute_analogy("man", "king", "woman")
 
-        results.record("Analogy computation (man:king :: woman:?)",
-                      result is not None and result[0] == "queen",
-                      f"result: {result}")
+        results.record(
+            "Analogy computation (man:king :: woman:?)",
+            result is not None and result[0] == "queen",
+            f"result: {result}",
+        )
     except Exception as e:
         results.record("Analogy computation (man:king :: woman:?)", False, str(e))
 
@@ -616,9 +650,11 @@ def test_conceptual_space():
         dist_colleague = social.compute_social_distance("boss", "colleague")
         dist_friend = social.compute_social_distance("boss", "friend")
 
-        results.record("Social distance computed",
-                      dist_colleague is not None and dist_friend is not None,
-                      f"boss-colleague: {dist_colleague:.3f}, boss-friend: {dist_friend:.3f}")
+        results.record(
+            "Social distance computed",
+            dist_colleague is not None and dist_friend is not None,
+            f"boss-colleague: {dist_colleague:.3f}, boss-friend: {dist_friend:.3f}",
+        )
     except Exception as e:
         results.record("Social distance computed", False, str(e))
 
@@ -631,9 +667,11 @@ def test_conceptual_space():
 
         path = cmap.navigate_concepts("start", "end", steps=5)
 
-        results.record("Navigate through concept space",
-                      len(path) == 6,  # start + 5 intermediate + end
-                      f"path length: {len(path)}")
+        results.record(
+            "Navigate through concept space",
+            len(path) == 6,  # start + 5 intermediate + end
+            f"path length: {len(path)}",
+        )
     except Exception as e:
         results.record("Navigate through concept space", False, str(e))
 
@@ -641,6 +679,7 @@ def test_conceptual_space():
 # =============================================================================
 # 8. EDGE CASES AND STRESS
 # =============================================================================
+
 
 def test_edge_cases():
     test_section("EDGE CASES AND STRESS")
@@ -650,8 +689,7 @@ def test_edge_cases():
         pop = PlaceCellPopulation(n_cells=1000, random_seed=42)
         activity = pop.get_population_activity(np.array([0.5, 0.5]))
 
-        results.record("Large place cell population (1000 cells)",
-                      len(activity) == 1000)
+        results.record("Large place cell population (1000 cells)", len(activity) == 1000)
     except Exception as e:
         results.record("Large place cell population (1000 cells)", False, str(e))
 
@@ -664,8 +702,7 @@ def test_edge_cases():
 
         pos = cmap.get_position()
 
-        results.record("Long navigation (1000 steps)",
-                      cmap.environment.is_valid_position(pos))
+        results.record("Long navigation (1000 steps)", cmap.environment.is_valid_position(pos))
     except Exception as e:
         results.record("Long navigation (1000 steps)", False, str(e))
 
@@ -679,9 +716,11 @@ def test_edge_cases():
 
         pos = cmap.get_position()
 
-        results.record("Position stays within bounds",
-                      cmap.environment.is_valid_position(pos),
-                      f"position: {pos}")
+        results.record(
+            "Position stays within bounds",
+            cmap.environment.is_valid_position(pos),
+            f"position: {pos}",
+        )
     except Exception as e:
         results.record("Position stays within bounds", False, str(e))
 
@@ -693,8 +732,7 @@ def test_edge_cases():
             features = np.random.randn(10)
             cmap.embed_concept(f"concept_{i}", features)
 
-        results.record("Embed many concepts (100)",
-                      len(cmap) == 100)
+        results.record("Embed many concepts (100)", len(cmap) == 100)
     except Exception as e:
         results.record("Embed many concepts (100)", False, str(e))
 
@@ -703,7 +741,7 @@ def test_edge_cases():
         integrator = PathIntegrator(initial_position=np.array([0.5, 0.5]))
 
         # Move in a circle
-        for angle in np.linspace(0, 2*np.pi, 100):
+        for angle in np.linspace(0, 2 * np.pi, 100):
             velocity = 0.01 * np.array([np.cos(angle), np.sin(angle)])
             integrator.integrate(velocity, dt=0.1)
 
@@ -712,9 +750,9 @@ def test_edge_cases():
         start = np.array([0.5, 0.5])
         drift = np.linalg.norm(final - start)
 
-        results.record("Circular path integration (drift < 0.5)",
-                      drift < 0.5,
-                      f"drift: {drift:.3f}")
+        results.record(
+            "Circular path integration (drift < 0.5)", drift < 0.5, f"drift: {drift:.3f}"
+        )
     except Exception as e:
         results.record("Circular path integration (drift < 0.5)", False, str(e))
 
@@ -722,6 +760,7 @@ def test_edge_cases():
 # =============================================================================
 # 9. ADVANCED PLACE CELL STRESS TESTS
 # =============================================================================
+
 
 def test_advanced_place_cells():
     test_section("ADVANCED PLACE CELL STRESS")
@@ -740,9 +779,11 @@ def test_advanced_place_cells():
         mean_error = np.mean(errors)
         max_error = np.max(errors)
 
-        results.record("1000 position decode (mean < 0.15)",
-                      mean_error < 0.15,
-                      f"mean: {mean_error:.4f}, max: {max_error:.4f}")
+        results.record(
+            "1000 position decode (mean < 0.15)",
+            mean_error < 0.15,
+            f"mean: {mean_error:.4f}, max: {max_error:.4f}",
+        )
     except Exception as e:
         results.record("1000 position decode (mean < 0.15)", False, str(e))
 
@@ -754,9 +795,11 @@ def test_advanced_place_cells():
         activity = pop.get_population_activity(np.array([0.5, 0.5]))
         active_fraction = np.sum(activity > 1.0) / len(activity)
 
-        results.record("Sparse place field coverage",
-                      0.01 < active_fraction < 0.3,
-                      f"active fraction: {active_fraction:.3f}")
+        results.record(
+            "Sparse place field coverage",
+            0.01 < active_fraction < 0.3,
+            f"active fraction: {active_fraction:.3f}",
+        )
     except Exception as e:
         results.record("Sparse place field coverage", False, str(e))
 
@@ -778,8 +821,11 @@ def test_advanced_place_cells():
 
         all_active = all(a > 0 for a in activities)
 
-        results.record("Large environment (10x10) coverage", all_active,
-                      f"activities: {[f'{a:.2f}' for a in activities]}")
+        results.record(
+            "Large environment (10x10) coverage",
+            all_active,
+            f"activities: {[f'{a:.2f}' for a in activities]}",
+        )
     except Exception as e:
         results.record("Large environment (10x10) coverage", False, str(e))
 
@@ -787,6 +833,7 @@ def test_advanced_place_cells():
 # =============================================================================
 # 10. ADVANCED GRID CELL STRESS TESTS
 # =============================================================================
+
 
 def test_advanced_grid_cells():
     test_section("ADVANCED GRID CELL STRESS")
@@ -813,9 +860,11 @@ def test_advanced_grid_cells():
         dynamic_range = max_rate - min_rate
 
         # Grid cells should show clear periodicity with high dynamic range
-        results.record("Grid periodicity (2+ high regions, range > 10)",
-                      high_regions >= 2 and dynamic_range > 10,
-                      f"regions: {high_regions}, range: {dynamic_range:.2f}")
+        results.record(
+            "Grid periodicity (2+ high regions, range > 10)",
+            high_regions >= 2 and dynamic_range > 10,
+            f"regions: {high_regions}, range: {dynamic_range:.2f}",
+        )
     except Exception as e:
         results.record("Grid periodicity (2+ high regions, range > 10)", False, str(e))
 
@@ -827,8 +876,11 @@ def test_advanced_grid_cells():
         spacings = [m.spacing for m in pop.modules]
         all_different = len(set([round(s, 3) for s in spacings])) == len(spacings)
 
-        results.record("5 modules with different spacings", all_different,
-                      f"spacings: {[f'{s:.3f}' for s in spacings]}")
+        results.record(
+            "5 modules with different spacings",
+            all_different,
+            f"spacings: {[f'{s:.3f}' for s in spacings]}",
+        )
     except Exception as e:
         results.record("5 modules with different spacings", False, str(e))
 
@@ -845,9 +897,11 @@ def test_advanced_grid_cells():
         actual = pop.get_position_estimate()
         error = np.linalg.norm(actual - expected)
 
-        results.record("Long path integration (100 steps)",
-                      error < 0.5,
-                      f"expected: {expected}, actual: {actual}, error: {error:.3f}")
+        results.record(
+            "Long path integration (100 steps)",
+            error < 0.5,
+            f"expected: {expected}, actual: {actual}, error: {error:.3f}",
+        )
     except Exception as e:
         results.record("Long path integration (100 steps)", False, str(e))
 
@@ -855,6 +909,7 @@ def test_advanced_grid_cells():
 # =============================================================================
 # 11. ADVANCED HEAD DIRECTION STRESS TESTS
 # =============================================================================
+
 
 def test_advanced_head_direction():
     test_section("ADVANCED HEAD DIRECTION STRESS")
@@ -867,7 +922,7 @@ def test_advanced_head_direction():
         # Rotate through full 360 degrees
         headings = []
         for i in range(36):
-            system.update_heading(np.pi/18, dt=1.0)  # 10 degrees per step
+            system.update_heading(np.pi / 18, dt=1.0)  # 10 degrees per step
             headings.append(system.get_heading_degrees())
 
         # Should complete full rotation
@@ -875,9 +930,11 @@ def test_advanced_head_direction():
         expected = 2 * np.pi
         error = abs(final_heading - expected)
 
-        results.record("Full 360-degree rotation tracking",
-                      error < 0.1,
-                      f"final: {np.degrees(final_heading):.1f} deg")
+        results.record(
+            "Full 360-degree rotation tracking",
+            error < 0.1,
+            f"final: {np.degrees(final_heading):.1f} deg",
+        )
     except Exception as e:
         results.record("Full 360-degree rotation tracking", False, str(e))
 
@@ -888,11 +945,11 @@ def test_advanced_head_direction():
 
         # Rotate left (positive)
         for _ in range(5):
-            system.update_heading(np.pi/10, dt=1.0)
+            system.update_heading(np.pi / 10, dt=1.0)
 
         # Rotate right (negative)
         for _ in range(10):
-            system.update_heading(-np.pi/10, dt=1.0)
+            system.update_heading(-np.pi / 10, dt=1.0)
 
         # Should end up at pi - pi/2 = pi/2 (facing east)
         expected = np.pi / 2
@@ -903,9 +960,11 @@ def test_advanced_head_direction():
         if error > np.pi:
             error = 2 * np.pi - error
 
-        results.record("Bidirectional rotation accuracy",
-                      error < 0.2,
-                      f"expected: {np.degrees(expected):.1f}, actual: {np.degrees(actual):.1f}")
+        results.record(
+            "Bidirectional rotation accuracy",
+            error < 0.2,
+            f"expected: {np.degrees(expected):.1f}, actual: {np.degrees(actual):.1f}",
+        )
     except Exception as e:
         results.record("Bidirectional rotation accuracy", False, str(e))
 
@@ -914,7 +973,7 @@ def test_advanced_head_direction():
         system = HeadDirectionSystem(n_cells=100)
 
         # Test at 8 compass directions
-        directions = np.linspace(0, 2*np.pi, 8, endpoint=False)
+        directions = np.linspace(0, 2 * np.pi, 8, endpoint=False)
         errors = []
 
         for direction in directions:
@@ -928,9 +987,11 @@ def test_advanced_head_direction():
 
         max_error = np.max(errors)
 
-        results.record("8 compass directions decode (max error < 0.15)",
-                      max_error < 0.15,
-                      f"max error: {max_error:.4f} rad")
+        results.record(
+            "8 compass directions decode (max error < 0.15)",
+            max_error < 0.15,
+            f"max error: {max_error:.4f} rad",
+        )
     except Exception as e:
         results.record("8 compass directions decode (max error < 0.15)", False, str(e))
 
@@ -938,6 +999,7 @@ def test_advanced_head_direction():
 # =============================================================================
 # 12. ADVANCED PATH INTEGRATION STRESS TESTS
 # =============================================================================
+
 
 def test_advanced_path_integration():
     test_section("ADVANCED PATH INTEGRATION STRESS")
@@ -962,18 +1024,13 @@ def test_advanced_path_integration():
         start = np.array([0.5, 0.5])
         error = np.linalg.norm(final - start)
 
-        results.record("Return to home (square path, no noise)",
-                      error < 0.1,
-                      f"error: {error:.4f}")
+        results.record("Return to home (square path, no noise)", error < 0.1, f"error: {error:.4f}")
     except Exception as e:
         results.record("Return to home (square path, no noise)", False, str(e))
 
     # Test 2: Long journey with noise
     try:
-        integrator = PathIntegrator(
-            initial_position=np.array([0.0, 0.0]),
-            noise_scale=0.001
-        )
+        integrator = PathIntegrator(initial_position=np.array([0.0, 0.0]), noise_scale=0.001)
 
         # 500 steps in random directions
         np.random.seed(42)
@@ -987,9 +1044,11 @@ def test_advanced_path_integration():
         actual = integrator.position_estimate
         error = np.linalg.norm(actual - expected)
 
-        results.record("500 step random walk with noise",
-                      error < 1.0,  # Allow for accumulated noise
-                      f"error: {error:.3f}")
+        results.record(
+            "500 step random walk with noise",
+            error < 1.0,  # Allow for accumulated noise
+            f"error: {error:.3f}",
+        )
     except Exception as e:
         results.record("500 step random walk with noise", False, str(e))
 
@@ -1007,9 +1066,11 @@ def test_advanced_path_integration():
         trajectory = integrator.get_trajectory()
         total_dist = integrator.get_total_distance()
 
-        results.record("Spiral path tracking (100 steps)",
-                      len(trajectory) == 101 and total_dist > 0,
-                      f"distance: {total_dist:.2f}")
+        results.record(
+            "Spiral path tracking (100 steps)",
+            len(trajectory) == 101 and total_dist > 0,
+            f"distance: {total_dist:.2f}",
+        )
     except Exception as e:
         results.record("Spiral path tracking (100 steps)", False, str(e))
 
@@ -1017,6 +1078,7 @@ def test_advanced_path_integration():
 # =============================================================================
 # 13. ADVANCED CONCEPTUAL SPACE STRESS TESTS
 # =============================================================================
+
 
 def test_advanced_conceptual_space():
     test_section("ADVANCED CONCEPTUAL SPACE STRESS")
@@ -1033,8 +1095,7 @@ def test_advanced_conceptual_space():
                 features = base + np.random.randn(20) * 0.1
                 cmap.embed_concept(f"cluster{cluster}_item{i}", features)
 
-        results.record("Large concept network (500 concepts)",
-                      len(cmap) == 500)
+        results.record("Large concept network (500 concepts)", len(cmap) == 500)
     except Exception as e:
         results.record("Large concept network (500 concepts)", False, str(e))
 
@@ -1044,16 +1105,24 @@ def test_advanced_conceptual_space():
 
         # Create two distinct clusters
         for i in range(10):
-            cmap.embed_concept(f"animal_{i}", np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]) + np.random.randn(10) * 0.1)
-            cmap.embed_concept(f"vehicle_{i}", np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]) + np.random.randn(10) * 0.1)
+            cmap.embed_concept(
+                f"animal_{i}",
+                np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+                + np.random.randn(10) * 0.1,
+            )
+            cmap.embed_concept(
+                f"vehicle_{i}",
+                np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+                + np.random.randn(10) * 0.1,
+            )
 
         # Animals should be closer to animals
         similar_to_animal = cmap.find_similar("animal_0", n=5)
         animal_count = sum(1 for name, _ in similar_to_animal if "animal" in name)
 
-        results.record("Cluster similarity preserved",
-                      animal_count >= 4,
-                      f"animals in top 5: {animal_count}")
+        results.record(
+            "Cluster similarity preserved", animal_count >= 4, f"animals in top 5: {animal_count}"
+        )
     except Exception as e:
         results.record("Cluster similarity preserved", False, str(e))
 
@@ -1073,9 +1142,11 @@ def test_advanced_conceptual_space():
         # france:paris :: germany:?
         result = cmap.compute_analogy("france", "paris", "germany")
 
-        results.record("Country:capital analogy",
-                      result is not None and result[0] == "berlin",
-                      f"result: {result}")
+        results.record(
+            "Country:capital analogy",
+            result is not None and result[0] == "berlin",
+            f"result: {result}",
+        )
     except Exception as e:
         results.record("Country:capital analogy", False, str(e))
 
@@ -1085,16 +1156,18 @@ def test_advanced_conceptual_space():
 
         for i in range(50):
             features = np.zeros(100)
-            features[i*2:(i+1)*2] = 1.0  # Each concept has unique features
+            features[i * 2 : (i + 1) * 2] = 1.0  # Each concept has unique features
             cmap.embed_concept(f"hd_concept_{i}", features)
 
         # All should be equidistant
         dist1 = cmap.conceptual_distance("hd_concept_0", "hd_concept_1")
         dist2 = cmap.conceptual_distance("hd_concept_0", "hd_concept_25")
 
-        results.record("100-dimensional concept space",
-                      abs(dist1 - dist2) < 0.1,
-                      f"dist1: {dist1:.3f}, dist2: {dist2:.3f}")
+        results.record(
+            "100-dimensional concept space",
+            abs(dist1 - dist2) < 0.1,
+            f"dist1: {dist1:.3f}, dist2: {dist2:.3f}",
+        )
     except Exception as e:
         results.record("100-dimensional concept space", False, str(e))
 
@@ -1102,6 +1175,7 @@ def test_advanced_conceptual_space():
 # =============================================================================
 # 14. COGNITIVE MAP EXTREME STRESS TESTS
 # =============================================================================
+
 
 def test_extreme_cognitive_map():
     test_section("EXTREME COGNITIVE MAP STRESS")
@@ -1124,8 +1198,7 @@ def test_extreme_cognitive_map():
             else:
                 errors.append(0)
 
-        results.record("100 location memories stored and recalled",
-                      sum(errors) == 5)
+        results.record("100 location memories stored and recalled", sum(errors) == 5)
     except Exception as e:
         results.record("100 location memories stored and recalled", False, str(e))
 
@@ -1134,14 +1207,16 @@ def test_extreme_cognitive_map():
         cmap = CognitiveMap(random_seed=42)
 
         for i in range(10):
-            env = Environment(bounds=(0, i+1, 0, i+1), name=f"env_{i}")
+            env = Environment(bounds=(0, i + 1, 0, i + 1), name=f"env_{i}")
             cmap.remap(env)
-            cmap.set_position(np.array([(i+1)/2, (i+1)/2]))
+            cmap.set_position(np.array([(i + 1) / 2, (i + 1) / 2]))
 
         final_pos = cmap.get_position()
 
-        results.record("10 environment remappings",
-                      cmap.environment.name == "env_9" and cmap.environment.is_valid_position(final_pos))
+        results.record(
+            "10 environment remappings",
+            cmap.environment.name == "env_9" and cmap.environment.is_valid_position(final_pos),
+        )
     except Exception as e:
         results.record("10 environment remappings", False, str(e))
 
@@ -1157,9 +1232,9 @@ def test_extreme_cognitive_map():
 
         pos = cmap.get_position()
 
-        results.record("5000 step navigation",
-                      cmap.environment.is_valid_position(pos),
-                      f"final: {pos}")
+        results.record(
+            "5000 step navigation", cmap.environment.is_valid_position(pos), f"final: {pos}"
+        )
     except Exception as e:
         results.record("5000 step navigation", False, str(e))
 
@@ -1174,9 +1249,9 @@ def test_extreme_cognitive_map():
 
         # Verify state integrity
         all_valid = all(
-            len(s.place_activity) == 500 and
-            len(s.grid_activity) > 0 and
-            len(s.head_direction_activity) > 0
+            len(s.place_activity) == 500
+            and len(s.grid_activity) > 0
+            and len(s.head_direction_activity) > 0
             for s in states
         )
 
@@ -1188,6 +1263,7 @@ def test_extreme_cognitive_map():
 # =============================================================================
 # 15. PERFORMANCE AND MEMORY STRESS
 # =============================================================================
+
 
 def test_performance():
     test_section("PERFORMANCE STRESS")
@@ -1201,9 +1277,7 @@ def test_performance():
             pop.get_population_activity(np.random.rand(2))
         elapsed = time.time() - start
 
-        results.record("1000 place cell queries (< 2s)",
-                      elapsed < 2.0,
-                      f"time: {elapsed:.3f}s")
+        results.record("1000 place cell queries (< 2s)", elapsed < 2.0, f"time: {elapsed:.3f}s")
     except Exception as e:
         results.record("1000 place cell queries (< 2s)", False, str(e))
 
@@ -1216,9 +1290,7 @@ def test_performance():
             cmap.update(velocity=np.random.randn(2) * 0.1, dt=0.1)
         elapsed = time.time() - start
 
-        results.record("500 cognitive map updates (< 2s)",
-                      elapsed < 2.0,
-                      f"time: {elapsed:.3f}s")
+        results.record("500 cognitive map updates (< 2s)", elapsed < 2.0, f"time: {elapsed:.3f}s")
     except Exception as e:
         results.record("500 cognitive map updates (< 2s)", False, str(e))
 
@@ -1234,9 +1306,9 @@ def test_performance():
             cmap.find_similar(f"c_{i}", n=10)
         elapsed = time.time() - start
 
-        results.record("100 similarity searches (200 concepts) (< 1s)",
-                      elapsed < 1.0,
-                      f"time: {elapsed:.3f}s")
+        results.record(
+            "100 similarity searches (200 concepts) (< 1s)", elapsed < 1.0, f"time: {elapsed:.3f}s"
+        )
     except Exception as e:
         results.record("100 similarity searches (200 concepts) (< 1s)", False, str(e))
 
@@ -1249,9 +1321,11 @@ def test_performance():
 
         total_cells = len(place_pop) + len(grid_pop) + len(hd_system)
 
-        results.record("Large neural populations (2000+ cells)",
-                      total_cells > 2000,
-                      f"total: {total_cells} cells")
+        results.record(
+            "Large neural populations (2000+ cells)",
+            total_cells > 2000,
+            f"total: {total_cells} cells",
+        )
     except Exception as e:
         results.record("Large neural populations (2000+ cells)", False, str(e))
 
@@ -1259,6 +1333,7 @@ def test_performance():
 # =============================================================================
 # RUN ALL TESTS
 # =============================================================================
+
 
 def run_all_tests():
     print("\n" + "=" * 60)

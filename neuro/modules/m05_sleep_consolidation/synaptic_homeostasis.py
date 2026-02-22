@@ -18,10 +18,11 @@ from dataclasses import dataclass, field
 @dataclass
 class Synapse:
     """Single synaptic connection"""
+
     id: int
     weight: float
-    source: int            # Pre-synaptic neuron
-    target: int            # Post-synaptic neuron
+    source: int  # Pre-synaptic neuron
+    target: int  # Post-synaptic neuron
     is_tagged: bool = False  # Protected from downscaling
     tag_strength: float = 0.0
     last_potentiation: float = 0.0  # Time of last strengthening
@@ -42,7 +43,7 @@ class SynapticHomeostasis:
         n_neurons: int = 100,
         connectivity: float = 0.1,
         baseline_weight: float = 0.5,
-        downscale_rate: float = 0.1
+        downscale_rate: float = 0.1,
     ):
         """Initialize synaptic homeostasis system.
 
@@ -78,10 +79,7 @@ class SynapticHomeostasis:
             for j in range(self.n_neurons):
                 if i != j and np.random.random() < connectivity:
                     self.synapses[synapse_id] = Synapse(
-                        id=synapse_id,
-                        weight=self.baseline_weight,
-                        source=i,
-                        target=j
+                        id=synapse_id, weight=self.baseline_weight, source=i, target=j
                     )
                     synapse_id += 1
 
@@ -100,18 +98,13 @@ class SynapticHomeostasis:
 
         Energy ~ sum of squared weights (quadratic cost)
         """
-        return sum(s.weight ** 2 for s in self.synapses.values())
+        return sum(s.weight**2 for s in self.synapses.values())
 
     def compute_energy_cost(self) -> float:
         """Get current metabolic energy cost."""
         return self._compute_total_energy()
 
-    def potentiate(
-        self,
-        synapse_id: int,
-        amount: float,
-        timestamp: float = 0.0
-    ) -> None:
+    def potentiate(self, synapse_id: int, amount: float, timestamp: float = 0.0) -> None:
         """Potentiate (strengthen) a synapse.
 
         This happens during wake/learning.
@@ -137,7 +130,7 @@ class SynapticHomeostasis:
         pre_activity: np.ndarray,
         post_activity: np.ndarray,
         learning_rate: float = 0.01,
-        timestamp: float = 0.0
+        timestamp: float = 0.0,
     ) -> float:
         """Apply Hebbian potentiation based on neural activity.
 
@@ -187,7 +180,7 @@ class SynapticHomeostasis:
             if not synapse.is_tagged:
                 old_weight = synapse.weight
                 synapse.weight *= factor
-                total_reduction += (old_weight - synapse.weight)
+                total_reduction += old_weight - synapse.weight
 
         self.total_downscaling += total_reduction
         self._update_weight_matrix()
@@ -234,10 +227,7 @@ class SynapticHomeostasis:
         if total < 1e-8:
             return {}
 
-        return {
-            sid: s.weight / total
-            for sid, s in self.synapses.items()
-        }
+        return {sid: s.weight / total for sid, s in self.synapses.items()}
 
     def get_statistics(self) -> Dict:
         """Get homeostasis statistics."""
@@ -275,7 +265,7 @@ class SelectiveConsolidation:
         self,
         homeostasis: SynapticHomeostasis,
         tag_threshold: float = 0.7,
-        tag_decay_rate: float = 0.1
+        tag_decay_rate: float = 0.1,
     ):
         """Initialize selective consolidation.
 
@@ -291,11 +281,7 @@ class SelectiveConsolidation:
         # Track tagged synapses
         self.tagged_synapses: Set[int] = set()
 
-    def tag_for_protection(
-        self,
-        synapse_id: int,
-        strength: float = 1.0
-    ) -> bool:
+    def tag_for_protection(self, synapse_id: int, strength: float = 1.0) -> bool:
         """Tag a synapse for protection from downscaling.
 
         Args:
@@ -316,10 +302,7 @@ class SelectiveConsolidation:
         return True
 
     def tag_by_activity(
-        self,
-        activity_threshold: int = 5,
-        recency_window: float = 100.0,
-        current_time: float = 0.0
+        self, activity_threshold: int = 5, recency_window: float = 100.0, current_time: float = 0.0
     ) -> int:
         """Tag synapses based on recent activity.
 
@@ -439,15 +422,8 @@ class SleepWakeCycle:
     Sleep: Downscaling with selective protection
     """
 
-    def __init__(
-        self,
-        n_neurons: int = 100,
-        connectivity: float = 0.1
-    ):
-        self.homeostasis = SynapticHomeostasis(
-            n_neurons=n_neurons,
-            connectivity=connectivity
-        )
+    def __init__(self, n_neurons: int = 100, connectivity: float = 0.1):
+        self.homeostasis = SynapticHomeostasis(n_neurons=n_neurons, connectivity=connectivity)
         self.consolidation = SelectiveConsolidation(self.homeostasis)
 
         # Cycle tracking
@@ -458,11 +434,7 @@ class SleepWakeCycle:
         self.weight_history: List[float] = []
         self.energy_history: List[float] = []
 
-    def wake_learning(
-        self,
-        duration: float,
-        learning_intensity: float = 0.1
-    ) -> Dict:
+    def wake_learning(self, duration: float, learning_intensity: float = 0.1) -> Dict:
         """Simulate wake period with learning.
 
         Args:
@@ -484,9 +456,7 @@ class SleepWakeCycle:
             post = np.random.random(self.homeostasis.n_neurons) > 0.5
 
             pot = self.homeostasis.hebbian_potentiation(
-                pre.astype(float),
-                post.astype(float),
-                learning_rate=learning_intensity
+                pre.astype(float), post.astype(float), learning_rate=learning_intensity
             )
             total_pot += pot
 
@@ -499,11 +469,7 @@ class SleepWakeCycle:
             "final_strength": self.homeostasis.measure_total_strength(),
         }
 
-    def sleep_consolidation(
-        self,
-        duration: float,
-        tag_percentile: float = 90
-    ) -> Dict:
+    def sleep_consolidation(self, duration: float, tag_percentile: float = 90) -> Dict:
         """Simulate sleep period with downscaling.
 
         Args:
@@ -548,7 +514,7 @@ class SleepWakeCycle:
         self,
         wake_duration: float = 16.0,
         sleep_duration: float = 8.0,
-        learning_intensity: float = 0.1
+        learning_intensity: float = 0.1,
     ) -> Dict:
         """Run a complete wake-sleep cycle.
 

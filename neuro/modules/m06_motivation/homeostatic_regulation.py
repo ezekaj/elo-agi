@@ -24,28 +24,31 @@ from enum import Enum
 
 class NeedType(Enum):
     """Types of homeostatic needs"""
-    ENERGY = "energy"              # Food, glucose
-    HYDRATION = "hydration"        # Water
-    TEMPERATURE = "temperature"    # Thermal regulation
-    SOCIAL = "social"              # Social connection
-    NOVELTY = "novelty"            # Stimulation/information
-    REST = "rest"                  # Sleep, recovery
-    SAFETY = "safety"              # Security, predictability
+
+    ENERGY = "energy"  # Food, glucose
+    HYDRATION = "hydration"  # Water
+    TEMPERATURE = "temperature"  # Thermal regulation
+    SOCIAL = "social"  # Social connection
+    NOVELTY = "novelty"  # Stimulation/information
+    REST = "rest"  # Sleep, recovery
+    SAFETY = "safety"  # Security, predictability
 
 
 @dataclass
 class HomeostaticSetpoint:
     """A homeostatic setpoint for a need"""
-    optimal_value: float = 0.7      # Target level
-    tolerance_low: float = 0.3      # Below this triggers strong drive
-    tolerance_high: float = 0.9     # Above this is satiated
-    depletion_rate: float = 0.01    # Natural decay toward 0
-    importance: float = 1.0         # Priority weight
+
+    optimal_value: float = 0.7  # Target level
+    tolerance_low: float = 0.3  # Below this triggers strong drive
+    tolerance_high: float = 0.9  # Above this is satiated
+    depletion_rate: float = 0.01  # Natural decay toward 0
+    importance: float = 1.0  # Priority weight
 
 
 @dataclass
 class NeedState:
     """Current state of a single need"""
+
     current_level: float
     setpoint: HomeostaticSetpoint
     drive_strength: float
@@ -78,14 +81,10 @@ class HomeostaticState:
         }
 
         # Track time since last satiation
-        self.satiation_times: Dict[NeedType, float] = {
-            need: 0.0 for need in NeedType
-        }
+        self.satiation_times: Dict[NeedType, float] = {need: 0.0 for need in NeedType}
 
         # History for trend analysis
-        self.level_history: Dict[NeedType, deque] = {
-            need: deque(maxlen=100) for need in NeedType
-        }
+        self.level_history: Dict[NeedType, deque] = {need: deque(maxlen=100) for need in NeedType}
 
         # Current time
         self.current_time = 0.0
@@ -188,7 +187,7 @@ class HomeostaticState:
             setpoint=setpoint,
             drive_strength=self.get_drive(need),
             time_since_satiation=self.current_time - self.satiation_times[need],
-            trend=trend
+            trend=trend,
         )
 
     def get_overall_wellbeing(self) -> float:
@@ -211,32 +210,24 @@ class NeedBasedValuation:
     - Satiation effects
     """
 
-    def __init__(
-        self,
-        homeostatic_state: HomeostaticState,
-        satiation_rate: float = 0.3
-    ):
+    def __init__(self, homeostatic_state: HomeostaticState, satiation_rate: float = 0.3):
         self.state = homeostatic_state
         self.satiation_rate = satiation_rate
 
         # Resource-need mappings (which resources satisfy which needs)
         self.resource_mappings: Dict[str, Dict[NeedType, float]] = {
-            'food': {NeedType.ENERGY: 0.8, NeedType.SOCIAL: 0.1},
-            'water': {NeedType.HYDRATION: 0.9},
-            'shelter': {NeedType.SAFETY: 0.7, NeedType.TEMPERATURE: 0.5},
-            'social_contact': {NeedType.SOCIAL: 0.8, NeedType.SAFETY: 0.2},
-            'information': {NeedType.NOVELTY: 0.7},
-            'rest': {NeedType.REST: 0.9, NeedType.ENERGY: 0.2},
+            "food": {NeedType.ENERGY: 0.8, NeedType.SOCIAL: 0.1},
+            "water": {NeedType.HYDRATION: 0.9},
+            "shelter": {NeedType.SAFETY: 0.7, NeedType.TEMPERATURE: 0.5},
+            "social_contact": {NeedType.SOCIAL: 0.8, NeedType.SAFETY: 0.2},
+            "information": {NeedType.NOVELTY: 0.7},
+            "rest": {NeedType.REST: 0.9, NeedType.ENERGY: 0.2},
         }
 
         # Consumption history for satiation
         self.consumption_history: Dict[str, deque] = {}
 
-    def compute_value(
-        self,
-        resource_type: str,
-        resource_amount: float = 1.0
-    ) -> float:
+    def compute_value(self, resource_type: str, resource_amount: float = 1.0) -> float:
         """Compute subjective value of a resource.
 
         Args:
@@ -260,7 +251,7 @@ class NeedBasedValuation:
 
             # Apply satiation effect
             satiation = self._get_satiation(resource_type)
-            need_value *= (1 - satiation * self.satiation_rate)
+            need_value *= 1 - satiation * self.satiation_rate
 
             total_value += need_value
 
@@ -294,11 +285,7 @@ class NeedBasedValuation:
         best = max(values, key=lambda x: x[1])
         return best
 
-    def register_resource(
-        self,
-        resource_type: str,
-        need_mappings: Dict[NeedType, float]
-    ) -> None:
+    def register_resource(self, resource_type: str, need_mappings: Dict[NeedType, float]) -> None:
         """Register a new resource type."""
         self.resource_mappings[resource_type] = need_mappings
 
@@ -310,11 +297,7 @@ class InternalStateTracker:
     future needs rather than just reacting to current deficits.
     """
 
-    def __init__(
-        self,
-        homeostatic_state: HomeostaticState,
-        prediction_horizon: float = 100.0
-    ):
+    def __init__(self, homeostatic_state: HomeostaticState, prediction_horizon: float = 100.0):
         self.state = homeostatic_state
         self.prediction_horizon = prediction_horizon
 
@@ -323,9 +306,9 @@ class InternalStateTracker:
 
         # Learned patterns (e.g., energy drops after activity)
         self.depletion_patterns: Dict[str, Dict[NeedType, float]] = {
-            'exercise': {NeedType.ENERGY: 0.1, NeedType.HYDRATION: 0.08},
-            'social_interaction': {NeedType.SOCIAL: -0.05, NeedType.ENERGY: 0.02},
-            'work': {NeedType.ENERGY: 0.05, NeedType.REST: 0.03, NeedType.NOVELTY: -0.01},
+            "exercise": {NeedType.ENERGY: 0.1, NeedType.HYDRATION: 0.08},
+            "social_interaction": {NeedType.SOCIAL: -0.05, NeedType.ENERGY: 0.02},
+            "work": {NeedType.ENERGY: 0.05, NeedType.REST: 0.03, NeedType.NOVELTY: -0.01},
         }
 
         # Predicted future state
@@ -334,16 +317,14 @@ class InternalStateTracker:
     def record_state(self) -> None:
         """Record current state for pattern learning."""
         snapshot = {
-            'time': self.state.current_time,
-            'levels': dict(self.state.levels),
-            'drives': self.state.get_all_drives()
+            "time": self.state.current_time,
+            "levels": dict(self.state.levels),
+            "drives": self.state.get_all_drives(),
         }
         self.state_history.append(snapshot)
 
     def predict_future_state(
-        self,
-        planned_activities: List[str],
-        time_horizon: float
+        self, planned_activities: List[str], time_horizon: float
     ) -> Dict[NeedType, float]:
         """Predict future need levels based on planned activities.
 
@@ -422,7 +403,7 @@ class InternalStateTracker:
         self,
         activity: str,
         before_levels: Dict[NeedType, float],
-        after_levels: Dict[NeedType, float]
+        after_levels: Dict[NeedType, float],
     ) -> None:
         """Learn how an activity affects need levels."""
         effects = {}

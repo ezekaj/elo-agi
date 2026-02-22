@@ -21,6 +21,7 @@ from enum import Enum
 
 class GitStatus(Enum):
     """Status of a git operation."""
+
     SUCCESS = "success"
     FAILED = "failed"
     BLOCKED = "blocked"
@@ -30,6 +31,7 @@ class GitStatus(Enum):
 @dataclass
 class GitResult:
     """Result of a git operation."""
+
     status: GitStatus
     message: str
     output: str = ""
@@ -40,6 +42,7 @@ class GitResult:
 @dataclass
 class FileChange:
     """A changed file."""
+
     path: str
     status: str  # M=modified, A=added, D=deleted, ?=untracked
     staged: bool = False
@@ -63,20 +66,29 @@ class GitAutomator:
         r'(?i)(api[_-]?key|apikey)\s*[=:]\s*["\']?[\w-]{20,}',
         r'(?i)(secret|password|passwd|pwd)\s*[=:]\s*["\']?[^\s]{8,}',
         r'(?i)(token)\s*[=:]\s*["\']?[\w-]{20,}',
-        r'(?i)Bearer\s+[\w-]+\.[\w-]+\.[\w-]+',  # JWT
-        r'-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----',
-        r'(?i)AWS[_-]?(ACCESS|SECRET)[_-]?KEY',
-        r'(?i)(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}',  # GitHub tokens
-        r'sk-[A-Za-z0-9]{48}',  # OpenAI keys
-        r'(?i)ANTHROPIC[_-]?API[_-]?KEY',
+        r"(?i)Bearer\s+[\w-]+\.[\w-]+\.[\w-]+",  # JWT
+        r"-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
+        r"(?i)AWS[_-]?(ACCESS|SECRET)[_-]?KEY",
+        r"(?i)(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}",  # GitHub tokens
+        r"sk-[A-Za-z0-9]{48}",  # OpenAI keys
+        r"(?i)ANTHROPIC[_-]?API[_-]?KEY",
     ]
 
     # Files that likely contain secrets
     SENSITIVE_FILES = [
-        '.env', '.env.local', '.env.production',
-        'credentials.json', 'secrets.json', 'config.json',
-        '.netrc', '.npmrc', '.pypirc',
-        'id_rsa', 'id_ed25519', '*.pem', '*.key',
+        ".env",
+        ".env.local",
+        ".env.production",
+        "credentials.json",
+        "secrets.json",
+        "config.json",
+        ".netrc",
+        ".npmrc",
+        ".pypirc",
+        "id_rsa",
+        "id_ed25519",
+        "*.pem",
+        "*.key",
     ]
 
     def __init__(self, repo_path: str = ".", verbose: bool = False):
@@ -87,11 +99,7 @@ class GitAutomator:
         """Run a git command."""
         try:
             result = subprocess.run(
-                cmd,
-                cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                timeout=60
+                cmd, cwd=self.repo_path, capture_output=True, text=True, timeout=60
             )
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
@@ -116,7 +124,7 @@ class GitAutomator:
             return []
 
         changes = []
-        for line in stdout.strip().split('\n'):
+        for line in stdout.strip().split("\n"):
             if not line:
                 continue
 
@@ -125,17 +133,13 @@ class GitAutomator:
             path = line[3:].strip()
 
             # Handle renamed files
-            if ' -> ' in path:
-                path = path.split(' -> ')[1]
+            if " -> " in path:
+                path = path.split(" -> ")[1]
 
-            staged = status[0] != ' ' and status[0] != '?'
+            staged = status[0] != " " and status[0] != "?"
             file_status = status[0] if staged else status[1]
 
-            changes.append(FileChange(
-                path=path,
-                status=file_status,
-                staged=staged
-            ))
+            changes.append(FileChange(path=path, status=file_status, staged=staged))
 
         return changes
 
@@ -158,8 +162,9 @@ class GitAutomator:
 
             # Check if filename matches sensitive patterns
             for pattern in self.SENSITIVE_FILES:
-                if '*' in pattern:
+                if "*" in pattern:
                     import fnmatch
+
                     if fnmatch.fnmatch(file_path, pattern):
                         found.append((file_path, f"Sensitive filename: {pattern}"))
                         continue
@@ -170,7 +175,7 @@ class GitAutomator:
             # Check file contents
             if full_path.exists() and full_path.is_file():
                 try:
-                    content = full_path.read_text(errors='ignore')
+                    content = full_path.read_text(errors="ignore")
                     for pattern in self.SECRET_PATTERNS:
                         if re.search(pattern, content):
                             found.append((file_path, f"Pattern match: {pattern[:30]}..."))
@@ -185,51 +190,37 @@ class GitAutomator:
         hook_path = self.repo_path / ".git" / "hooks" / "pre-commit"
 
         if not hook_path.exists():
-            return GitResult(
-                status=GitStatus.SKIPPED,
-                message="No pre-commit hook found"
-            )
+            return GitResult(status=GitStatus.SKIPPED, message="No pre-commit hook found")
 
         self._log("Running pre-commit hook...")
         code, stdout, stderr = self._run([str(hook_path)])
 
         if code == 0:
             return GitResult(
-                status=GitStatus.SUCCESS,
-                message="Pre-commit hook passed",
-                output=stdout
+                status=GitStatus.SUCCESS, message="Pre-commit hook passed", output=stdout
             )
         else:
             return GitResult(
                 status=GitStatus.FAILED,
                 message="Pre-commit hook failed",
                 output=stdout,
-                error=stderr
+                error=stderr,
             )
 
     def stage_files(self, files: List[str]) -> GitResult:
         """Stage specific files for commit."""
         if not files:
-            return GitResult(
-                status=GitStatus.SKIPPED,
-                message="No files to stage"
-            )
+            return GitResult(status=GitStatus.SKIPPED, message="No files to stage")
 
         cmd = ["git", "add"] + files
         code, stdout, stderr = self._run(cmd)
 
         if code == 0:
             return GitResult(
-                status=GitStatus.SUCCESS,
-                message=f"Staged {len(files)} files",
-                files_affected=files
+                status=GitStatus.SUCCESS, message=f"Staged {len(files)} files", files_affected=files
             )
         else:
-            return GitResult(
-                status=GitStatus.FAILED,
-                message="Failed to stage files",
-                error=stderr
-            )
+            return GitResult(status=GitStatus.FAILED, message="Failed to stage files", error=stderr)
 
     def commit(self, message: str, allow_empty: bool = False) -> GitResult:
         """Create a commit."""
@@ -240,17 +231,10 @@ class GitAutomator:
         code, stdout, stderr = self._run(cmd)
 
         if code == 0:
-            return GitResult(
-                status=GitStatus.SUCCESS,
-                message="Commit created",
-                output=stdout
-            )
+            return GitResult(status=GitStatus.SUCCESS, message="Commit created", output=stdout)
         else:
             return GitResult(
-                status=GitStatus.FAILED,
-                message="Commit failed",
-                output=stdout,
-                error=stderr
+                status=GitStatus.FAILED, message="Commit failed", output=stdout, error=stderr
             )
 
     def safe_commit(
@@ -259,7 +243,7 @@ class GitAutomator:
         message: str,
         check_secrets: bool = True,
         run_pre_commit: bool = True,
-        author: Optional[str] = None
+        author: Optional[str] = None,
     ) -> GitResult:
         """
         Safely commit files with validation.
@@ -284,7 +268,7 @@ class GitAutomator:
                 return GitResult(
                     status=GitStatus.BLOCKED,
                     message=f"Potential secrets detected:\n{secret_list}",
-                    files_affected=[f for f, _ in secrets]
+                    files_affected=[f for f, _ in secrets],
                 )
 
         # 2. Stage files
@@ -307,7 +291,7 @@ class GitAutomator:
         remote: str = "origin",
         branch: Optional[str] = None,
         force: bool = False,
-        set_upstream: bool = False
+        set_upstream: bool = False,
     ) -> GitResult:
         """
         Push to remote with safety checks.
@@ -324,10 +308,9 @@ class GitAutomator:
         branch = branch or self.get_current_branch()
 
         # Block force push to main/master
-        if force and branch in ('main', 'master'):
+        if force and branch in ("main", "master"):
             return GitResult(
-                status=GitStatus.BLOCKED,
-                message="Force push to main/master is blocked for safety"
+                status=GitStatus.BLOCKED, message="Force push to main/master is blocked for safety"
             )
 
         cmd = ["git", "push"]
@@ -344,16 +327,11 @@ class GitAutomator:
 
         if code == 0:
             return GitResult(
-                status=GitStatus.SUCCESS,
-                message=f"Pushed to {remote}/{branch}",
-                output=stdout
+                status=GitStatus.SUCCESS, message=f"Pushed to {remote}/{branch}", output=stdout
             )
         else:
             return GitResult(
-                status=GitStatus.FAILED,
-                message="Push failed",
-                output=stdout,
-                error=stderr
+                status=GitStatus.FAILED, message="Push failed", output=stdout, error=stderr
             )
 
     def create_branch(self, name: str, checkout: bool = True) -> GitResult:
@@ -367,15 +345,11 @@ class GitAutomator:
 
         if code == 0:
             return GitResult(
-                status=GitStatus.SUCCESS,
-                message=f"Created branch: {name}",
-                output=stdout
+                status=GitStatus.SUCCESS, message=f"Created branch: {name}", output=stdout
             )
         else:
             return GitResult(
-                status=GitStatus.FAILED,
-                message=f"Failed to create branch: {name}",
-                error=stderr
+                status=GitStatus.FAILED, message=f"Failed to create branch: {name}", error=stderr
             )
 
     def get_diff(self, staged: bool = True) -> str:
@@ -391,7 +365,7 @@ class GitAutomator:
         """Get recent commit log."""
         cmd = ["git", "log", f"-{limit}", f"--format={format}"]
         code, stdout, _ = self._run(cmd)
-        return stdout.strip().split('\n') if code == 0 else []
+        return stdout.strip().split("\n") if code == 0 else []
 
     def generate_commit_message(self, diff: Optional[str] = None) -> str:
         """Generate a commit message based on changes."""
@@ -402,8 +376,8 @@ class GitAutomator:
             return "Update files"
 
         # Analyze diff to generate message
-        lines_added = diff.count('\n+') - diff.count('\n+++')
-        lines_removed = diff.count('\n-') - diff.count('\n---')
+        lines_added = diff.count("\n+") - diff.count("\n+++")
+        lines_removed = diff.count("\n-") - diff.count("\n---")
 
         # Get changed files
         changes = self.get_status()
@@ -416,15 +390,15 @@ class GitAutomator:
         file_types = set()
         for change in staged:
             ext = Path(change.path).suffix.lower()
-            file_types.add(ext or 'files')
+            file_types.add(ext or "files")
 
         if len(staged) == 1:
             action = {
-                'A': 'Add',
-                'M': 'Update',
-                'D': 'Remove',
-                'R': 'Rename',
-            }.get(staged[0].status, 'Update')
+                "A": "Add",
+                "M": "Update",
+                "D": "Remove",
+                "R": "Rename",
+            }.get(staged[0].status, "Update")
             return f"{action} {staged[0].path}"
 
         # Multiple files
@@ -433,6 +407,7 @@ class GitAutomator:
 
 
 # Convenience functions
+
 
 def safe_commit(files: List[str], message: str, repo_path: str = ".") -> GitResult:
     """Safely commit files."""

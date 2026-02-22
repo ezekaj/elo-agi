@@ -7,8 +7,9 @@ from neuro.modules.m06_motivation.intrinsic_motivation import (
     PossibilitySpace,
     ActionDiversityTracker,
     IntrinsicDrive,
-    DriveType
+    DriveType,
 )
+
 
 class TestPossibilitySpace:
     """Tests for possibility space tracking"""
@@ -81,6 +82,7 @@ class TestPossibilitySpace:
         # Should have some positive value for expansion
         assert value >= 0.0
 
+
 class TestActionDiversityTracker:
     """Tests for action diversity tracking"""
 
@@ -126,6 +128,7 @@ class TestActionDiversityTracker:
 
         assert rare_bonus > common_bonus
 
+
 class TestIntrinsicDrive:
     """Tests for individual intrinsic drives"""
 
@@ -165,6 +168,7 @@ class TestIntrinsicDrive:
         for _ in range(100):
             drive.update(satisfaction=1.0, dt=1.0)
         assert drive.level >= 0.0
+
 
 class TestPathEntropyMaximizer:
     """Tests for the complete path entropy maximizer"""
@@ -235,11 +239,11 @@ class TestPathEntropyMaximizer:
 
         metrics = maximizer.get_metrics()
 
-        assert 'intrinsic_motivation' in metrics
-        assert 'path_entropy' in metrics
-        assert 'possibility_volume' in metrics
-        assert 'state_diversity' in metrics
-        assert 'exploration_drive' in metrics
+        assert "intrinsic_motivation" in metrics
+        assert "path_entropy" in metrics
+        assert "possibility_volume" in metrics
+        assert "state_diversity" in metrics
+        assert "exploration_drive" in metrics
 
     def test_exploration_vs_exploitation_behavior(self):
         maximizer = PathEntropyMaximizer(state_dim=2, action_dim=2)
@@ -253,7 +257,8 @@ class TestPathEntropyMaximizer:
 
         # Should have healthy diversity
         metrics = maximizer.get_metrics()
-        assert metrics['state_diversity'] > 0.3
+        assert metrics["state_diversity"] > 0.3
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

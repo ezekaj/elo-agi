@@ -13,6 +13,7 @@ import time
 
 class AudioFormat(Enum):
     """Audio formats."""
+
     FLOAT32 = "float32"
     INT16 = "int16"
     INT32 = "int32"
@@ -21,6 +22,7 @@ class AudioFormat(Enum):
 @dataclass
 class MicrophoneConfig:
     """Configuration for microphone."""
+
     sample_rate: int = 16000
     channels: int = 1
     buffer_size: int = 1024
@@ -32,6 +34,7 @@ class MicrophoneConfig:
 @dataclass
 class AudioBuffer:
     """A buffer of audio samples."""
+
     data: np.ndarray
     timestamp: float
     buffer_id: int
@@ -48,6 +51,7 @@ class AudioBuffer:
 @dataclass
 class AudioEvent:
     """An detected audio event."""
+
     event_type: str
     start_time: float
     end_time: float
@@ -152,10 +156,10 @@ class Microphone:
 
         # Mix of frequencies
         signal = (
-            0.3 * np.sin(2 * np.pi * 440 * t) +   # A4
-            0.2 * np.sin(2 * np.pi * 880 * t) +   # A5
-            0.1 * np.sin(2 * np.pi * 220 * t) +   # A3
-            0.05 * np.random.randn(n_samples)      # Noise
+            0.3 * np.sin(2 * np.pi * 440 * t)  # A4
+            + 0.2 * np.sin(2 * np.pi * 880 * t)  # A5
+            + 0.1 * np.sin(2 * np.pi * 220 * t)  # A3
+            + 0.05 * np.random.randn(n_samples)  # Noise
         )
 
         if self.config.channels > 1:
@@ -255,7 +259,7 @@ class AudioProcessor:
 
         for i in range(n_frames):
             start = i * hop_size
-            frame = data[start:start + window_size] * window
+            frame = data[start : start + window_size] * window
             fft = np.fft.rfft(frame)
             spectrum[i] = np.abs(fft)
 
@@ -282,9 +286,7 @@ class AudioProcessor:
 
         # Create mel filterbank
         n_fft = window_size // 2 + 1
-        mel_filters = self._create_mel_filterbank(
-            n_mels, n_fft, audio.sample_rate
-        )
+        mel_filters = self._create_mel_filterbank(n_mels, n_fft, audio.sample_rate)
 
         # Apply filterbank
         mel_spectrum = spectrum @ mel_filters.T
@@ -298,6 +300,7 @@ class AudioProcessor:
         sample_rate: int,
     ) -> np.ndarray:
         """Create mel filterbank."""
+
         # Mel scale conversion
         def hz_to_mel(hz):
             return 2595 * np.log10(1 + hz / 700)
@@ -358,7 +361,8 @@ class AudioProcessor:
 
         # DCT to get MFCCs
         from scipy.fftpack import dct
-        mfcc = dct(log_mel, type=2, axis=1, norm='ortho')[:, :n_mfcc]
+
+        mfcc = dct(log_mel, type=2, axis=1, norm="ortho")[:, :n_mfcc]
 
         return mfcc
 
@@ -384,7 +388,7 @@ class AudioProcessor:
             data = data[:, 0]
 
         # Compute energy
-        energy = np.mean(data ** 2)
+        energy = np.mean(data**2)
 
         # Compute zero crossing rate
         signs = np.sign(data)
@@ -395,7 +399,9 @@ class AudioProcessor:
         zcr_check = zero_crossing_threshold < zero_crossings < 0.5
 
         voice_detected = energy_check and zcr_check
-        confidence = min(1.0, energy / energy_threshold * 0.5 + (1 - abs(zero_crossings - 0.3) / 0.3) * 0.5)
+        confidence = min(
+            1.0, energy / energy_threshold * 0.5 + (1 - abs(zero_crossings - 0.3) / 0.3) * 0.5
+        )
 
         return voice_detected, float(confidence)
 
@@ -445,12 +451,14 @@ class AudioProcessor:
                 in_event = False
                 duration = t - event_start
                 if duration >= min_duration:
-                    events.append(AudioEvent(
-                        event_type="sound",
-                        start_time=event_start,
-                        end_time=t,
-                        confidence=float(flux[i - 1] / threshold),
-                    ))
+                    events.append(
+                        AudioEvent(
+                            event_type="sound",
+                            start_time=event_start,
+                            end_time=t,
+                            confidence=float(flux[i - 1] / threshold),
+                        )
+                    )
 
         return events
 
@@ -477,7 +485,7 @@ class AudioProcessor:
 
         # Autocorrelation
         n = len(data)
-        corr = np.correlate(data, data, mode='full')[n - 1:]
+        corr = np.correlate(data, data, mode="full")[n - 1 :]
 
         # Find peaks in valid range
         min_lag = int(audio.sample_rate / max_freq)

@@ -15,6 +15,7 @@ import hashlib
 @dataclass
 class SessionMessage:
     """A message in the conversation."""
+
     role: str  # "user", "assistant", "system", "tool"
     content: str
     timestamp: datetime = field(default_factory=datetime.now)
@@ -41,6 +42,7 @@ class SessionMessage:
 @dataclass
 class Session:
     """A conversation session."""
+
     id: str
     project_dir: str
     created_at: datetime
@@ -92,11 +94,7 @@ class SessionManager:
 
         # Sessions directory
         self.sessions_path = os.path.join(
-            os.path.expanduser("~"),
-            ".neuro",
-            "projects",
-            self._get_project_hash(),
-            "sessions"
+            os.path.expanduser("~"), ".neuro", "projects", self._get_project_hash(), "sessions"
         )
         if persist:
             os.makedirs(self.sessions_path, exist_ok=True)
@@ -133,7 +131,7 @@ class SessionManager:
         transcripts = sorted(
             Path(self.sessions_path).glob(f"*{self.TRANSCRIPT_EXT}"),
             key=lambda p: p.stat().st_mtime,
-            reverse=True
+            reverse=True,
         )
 
         if transcripts:
@@ -151,34 +149,30 @@ class SessionManager:
         if not session:
             return
 
-        transcript_path = os.path.join(
-            self.sessions_path,
-            f"{session.id}{self.TRANSCRIPT_EXT}"
-        )
+        transcript_path = os.path.join(self.sessions_path, f"{session.id}{self.TRANSCRIPT_EXT}")
 
-        with open(transcript_path, 'w') as f:
+        with open(transcript_path, "w") as f:
             # Write session metadata
-            f.write(json.dumps({
-                "type": "session",
-                "id": session.id,
-                "project_dir": session.project_dir,
-                "created_at": session.created_at.isoformat(),
-                "metadata": session.metadata,
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "type": "session",
+                        "id": session.id,
+                        "project_dir": session.project_dir,
+                        "created_at": session.created_at.isoformat(),
+                        "metadata": session.metadata,
+                    }
+                )
+                + "\n"
+            )
 
             # Write messages
             for msg in session.messages:
-                f.write(json.dumps({
-                    "type": "message",
-                    **msg.to_dict()
-                }) + "\n")
+                f.write(json.dumps({"type": "message", **msg.to_dict()}) + "\n")
 
     def _load_session(self, session_id: str) -> Optional[Session]:
         """Load session from transcript file."""
-        transcript_path = os.path.join(
-            self.sessions_path,
-            f"{session_id}{self.TRANSCRIPT_EXT}"
-        )
+        transcript_path = os.path.join(self.sessions_path, f"{session_id}{self.TRANSCRIPT_EXT}")
 
         if not os.path.exists(transcript_path):
             return None
@@ -215,7 +209,7 @@ class SessionManager:
         transcripts = sorted(
             Path(self.sessions_path).glob(f"*{self.TRANSCRIPT_EXT}"),
             key=lambda p: p.stat().st_mtime,
-            reverse=True
+            reverse=True,
         )[:limit]
 
         for t in transcripts:
@@ -236,13 +230,15 @@ class SessionManager:
                                 preview = data.get("content", "")[:50]
 
                     if session_data:
-                        sessions.append({
-                            "id": session_data["id"],
-                            "created_at": session_data["created_at"],
-                            "project_dir": session_data["project_dir"],
-                            "preview": preview,
-                            "message_count": msg_count,
-                        })
+                        sessions.append(
+                            {
+                                "id": session_data["id"],
+                                "created_at": session_data["created_at"],
+                                "project_dir": session_data["project_dir"],
+                                "preview": preview,
+                                "message_count": msg_count,
+                            }
+                        )
             except Exception:
                 pass
 
@@ -263,13 +259,17 @@ class SessionManager:
 
         if len(other_msgs) > 20:
             # Add compaction boundary marker
-            session.messages = system_msgs + [
-                SessionMessage(
-                    role="system",
-                    content="[Previous context compacted]",
-                    metadata={"type": "compact_boundary"}
-                )
-            ] + other_msgs[-20:]
+            session.messages = (
+                system_msgs
+                + [
+                    SessionMessage(
+                        role="system",
+                        content="[Previous context compacted]",
+                        metadata={"type": "compact_boundary"},
+                    )
+                ]
+                + other_msgs[-20:]
+            )
             session.is_compacted = True
             session.token_count = sum(len(m.content) // 4 for m in session.messages)
             self.save(session)

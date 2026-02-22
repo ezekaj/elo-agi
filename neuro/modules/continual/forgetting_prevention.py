@@ -15,6 +15,7 @@ import numpy as np
 
 class ForgettingPreventionMethod(Enum):
     """Methods for preventing forgetting."""
+
     EWC = "ewc"
     PACKNET = "packnet"
     SYNAPTIC_INTELLIGENCE = "si"
@@ -24,6 +25,7 @@ class ForgettingPreventionMethod(Enum):
 @dataclass
 class ForgettingPreventionConfig:
     """Configuration for forgetting prevention."""
+
     method: ForgettingPreventionMethod = ForgettingPreventionMethod.EWC
     ewc_lambda: float = 1000.0
     si_c: float = 0.1
@@ -36,6 +38,7 @@ class ForgettingPreventionConfig:
 @dataclass
 class TaskMemory:
     """Memory of parameters for a task."""
+
     task_id: str
     params: Dict[str, np.ndarray]
     fisher_info: Dict[str, np.ndarray]
@@ -138,11 +141,14 @@ class CatastrophicForgettingPrevention:
 
         # Default loss: MSE between predicted and target
         if loss_fn is None:
+
             def loss_fn(p, x, y):
                 # Simple forward pass: weighted sum of params applied to input
                 # This is a basic approximation for when no model is provided
-                pred = sum(np.sum(v * x.flatten()[:v.size].reshape(v.shape) if v.size <= x.size else v)
-                          for v in p.values())
+                pred = sum(
+                    np.sum(v * x.flatten()[: v.size].reshape(v.shape) if v.size <= x.size else v)
+                    for v in p.values()
+                )
                 return float(np.mean((pred - y) ** 2))
 
         for name, p in params.items():
@@ -195,7 +201,7 @@ class CatastrophicForgettingPrevention:
                 if name in memory.params and name in memory.fisher_info:
                     diff = current_params[name] - memory.params[name]
                     fisher = memory.fisher_info[name]
-                    loss += 0.5 * np.sum(fisher * diff ** 2)
+                    loss += 0.5 * np.sum(fisher * diff**2)
 
         return float(self.config.ewc_lambda * loss)
 
@@ -382,7 +388,7 @@ class CatastrophicForgettingPrevention:
 
             # Update cumulative importance with damping
             # The denominator prevents division by zero for unchanged parameters
-            total_change_sq = param_change ** 2 + 1e-8
+            total_change_sq = param_change**2 + 1e-8
             self._si_omega[name] = self._si_running_sum[name] / total_change_sq
 
             importance[name] = self._si_omega[name].copy()
@@ -467,7 +473,7 @@ class CatastrophicForgettingPrevention:
                 if name in memory.params and name in memory.importance:
                     diff = current_params[name] - memory.params[name]
                     omega = memory.importance[name]
-                    loss += np.sum(omega * diff ** 2)
+                    loss += np.sum(omega * diff**2)
 
         return float(self.config.si_c * loss)
 
@@ -486,12 +492,18 @@ class CatastrophicForgettingPrevention:
         """
         losses = {}
 
-        if self.config.method in [ForgettingPreventionMethod.EWC, ForgettingPreventionMethod.COMBINED]:
+        if self.config.method in [
+            ForgettingPreventionMethod.EWC,
+            ForgettingPreventionMethod.COMBINED,
+        ]:
             losses["ewc"] = self.compute_ewc_loss(current_params)
         else:
             losses["ewc"] = 0.0
 
-        if self.config.method in [ForgettingPreventionMethod.SYNAPTIC_INTELLIGENCE, ForgettingPreventionMethod.COMBINED]:
+        if self.config.method in [
+            ForgettingPreventionMethod.SYNAPTIC_INTELLIGENCE,
+            ForgettingPreventionMethod.COMBINED,
+        ]:
             losses["si"] = self.compute_si_loss(current_params)
         else:
             losses["si"] = 0.0
@@ -528,8 +540,8 @@ class CatastrophicForgettingPrevention:
             for name, fi in fisher_info.items():
                 if name in self._online_fisher:
                     self._online_fisher[name] = (
-                        self.config.ewc_decay * self._online_fisher[name] +
-                        (1 - self.config.ewc_decay) * fi
+                        self.config.ewc_decay * self._online_fisher[name]
+                        + (1 - self.config.ewc_decay) * fi
                     )
                 else:
                     self._online_fisher[name] = fi.copy()

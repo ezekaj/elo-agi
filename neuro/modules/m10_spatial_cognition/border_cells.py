@@ -16,17 +16,19 @@ from enum import Enum
 
 class WallDirection(Enum):
     """Cardinal directions for walls"""
+
     NORTH = "north"  # y = y_max
     SOUTH = "south"  # y = y_min
-    EAST = "east"    # x = x_max
-    WEST = "west"    # x = x_min
+    EAST = "east"  # x = x_max
+    WEST = "west"  # x = x_min
 
 
 @dataclass
 class Wall:
     """A wall segment in the environment"""
+
     start: np.ndarray  # (x, y) start point
-    end: np.ndarray    # (x, y) end point
+    end: np.ndarray  # (x, y) end point
     direction: WallDirection
 
     def distance_to(self, position: np.ndarray) -> float:
@@ -50,7 +52,7 @@ class BorderCell:
         preferred_wall: WallDirection,
         distance_tuning: float = 0.15,
         peak_rate: float = 25.0,
-        firing_threshold: float = 0.3
+        firing_threshold: float = 0.3,
     ):
         self.preferred_wall = preferred_wall
         self.distance_tuning = distance_tuning  # Distance constant
@@ -59,9 +61,7 @@ class BorderCell:
         self.firing_rate = 0.0
 
     def compute_firing(
-        self,
-        position: np.ndarray,
-        environment_bounds: Tuple[float, float, float, float]
+        self, position: np.ndarray, environment_bounds: Tuple[float, float, float, float]
     ) -> float:
         """
         Compute firing rate based on distance to preferred wall.
@@ -81,7 +81,7 @@ class BorderCell:
         elif self.preferred_wall == WallDirection.WEST:
             distance = position[0] - x_min
         else:
-            distance = float('inf')
+            distance = float("inf")
 
         # Only fire if within threshold distance
         if distance > self.firing_threshold:
@@ -93,9 +93,7 @@ class BorderCell:
         return self.firing_rate
 
     def is_near_wall(
-        self,
-        position: np.ndarray,
-        environment_bounds: Tuple[float, float, float, float]
+        self, position: np.ndarray, environment_bounds: Tuple[float, float, float, float]
     ) -> bool:
         """Check if position is near the preferred wall"""
         rate = self.compute_firing(position, environment_bounds)
@@ -113,7 +111,7 @@ class BorderCellPopulation:
         self,
         cells_per_wall: int = 5,
         environment_bounds: Tuple[float, float, float, float] = (0, 1, 0, 1),
-        distance_tuning: float = 0.1
+        distance_tuning: float = 0.1,
     ):
         self.cells_per_wall = cells_per_wall
         self.environment_bounds = environment_bounds
@@ -131,24 +129,16 @@ class BorderCellPopulation:
                 # Vary tuning distance slightly
                 tuning = self.distance_tuning * (0.8 + 0.4 * i / self.cells_per_wall)
 
-                cell = BorderCell(
-                    preferred_wall=direction,
-                    distance_tuning=tuning
-                )
+                cell = BorderCell(preferred_wall=direction, distance_tuning=tuning)
                 self.cells.append(cell)
 
     def get_population_activity(self, position: np.ndarray) -> np.ndarray:
         """Get firing rates of all border cells"""
-        return np.array([
-            cell.compute_firing(position, self.environment_bounds)
-            for cell in self.cells
-        ])
+        return np.array(
+            [cell.compute_firing(position, self.environment_bounds) for cell in self.cells]
+        )
 
-    def detect_boundary(
-        self,
-        position: np.ndarray,
-        threshold: float = 0.3
-    ) -> List[WallDirection]:
+    def detect_boundary(self, position: np.ndarray, threshold: float = 0.3) -> List[WallDirection]:
         """Detect which boundaries are nearby"""
         activity = self.get_population_activity(position)
 
@@ -159,10 +149,7 @@ class BorderCellPopulation:
 
         return list(nearby_walls)
 
-    def get_distance_to_walls(
-        self,
-        position: np.ndarray
-    ) -> Dict[WallDirection, float]:
+    def get_distance_to_walls(self, position: np.ndarray) -> Dict[WallDirection, float]:
         """Get distances to all walls"""
         x_min, x_max, y_min, y_max = self.environment_bounds
         position = np.array(position)
@@ -171,7 +158,7 @@ class BorderCellPopulation:
             WallDirection.NORTH: y_max - position[1],
             WallDirection.SOUTH: position[1] - y_min,
             WallDirection.EAST: x_max - position[0],
-            WallDirection.WEST: position[0] - x_min
+            WallDirection.WEST: position[0] - x_min,
         }
 
     def get_nearest_wall(self, position: np.ndarray) -> Tuple[WallDirection, float]:
@@ -181,9 +168,7 @@ class BorderCellPopulation:
         return nearest, distances[nearest]
 
     def get_wall_activity_map(
-        self,
-        wall: WallDirection,
-        resolution: int = 50
+        self, wall: WallDirection, resolution: int = 50
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate activity map for cells preferring a specific wall.
@@ -204,17 +189,13 @@ class BorderCellPopulation:
             for j in range(resolution):
                 pos = np.array([X[i, j], Y[i, j]])
                 total_activity = sum(
-                    c.compute_firing(pos, self.environment_bounds)
-                    for c in wall_cells
+                    c.compute_firing(pos, self.environment_bounds) for c in wall_cells
                 )
                 activity_map[i, j] = total_activity / len(wall_cells)
 
         return X, Y, activity_map
 
-    def update_environment(
-        self,
-        new_bounds: Tuple[float, float, float, float]
-    ) -> None:
+    def update_environment(self, new_bounds: Tuple[float, float, float, float]) -> None:
         """Update environment bounds (e.g., when environment changes)"""
         self.environment_bounds = new_bounds
 

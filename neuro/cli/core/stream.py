@@ -16,6 +16,7 @@ except ImportError:
 
 class StreamEventType(Enum):
     """Types of stream events."""
+
     TOKEN = "token"
     TOOL_USE_START = "tool_use_start"
     TOOL_USE_END = "tool_use_end"
@@ -27,6 +28,7 @@ class StreamEventType(Enum):
 @dataclass
 class StreamEvent:
     """A single event in the response stream."""
+
     type: StreamEventType
     content: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -107,7 +109,7 @@ class StreamHandler:
         if aiohttp is None:
             yield StreamEvent(
                 type=StreamEventType.ERROR,
-                content="aiohttp not installed. Run: pip install aiohttp"
+                content="aiohttp not installed. Run: pip install aiohttp",
             )
             return
 
@@ -132,7 +134,9 @@ Begin your response with <thinking> to show your reasoning process, then provide
 
 """
             if system_prompt:
-                all_messages.append({"role": "system", "content": ultrathink_prefix + system_prompt})
+                all_messages.append(
+                    {"role": "system", "content": ultrathink_prefix + system_prompt}
+                )
             else:
                 all_messages.append({"role": "system", "content": ultrathink_prefix})
         elif system_prompt:
@@ -144,7 +148,7 @@ Begin your response with <thinking> to show your reasoning process, then provide
         if ultrathink:
             options = {
                 "temperature": 0.4,  # More focused
-                "num_ctx": 32768,    # Max context
+                "num_ctx": 32768,  # Max context
                 "num_predict": 8192,  # Max output tokens
                 "top_p": 0.9,
                 "repeat_penalty": 1.1,
@@ -160,19 +164,16 @@ Begin your response with <thinking> to show your reasoning process, then provide
         }
 
         # Add native function calling tools if available
-        if hasattr(self, 'tools') and self.tools:
+        if hasattr(self, "tools") and self.tools:
             payload["tools"] = self.tools
 
         try:
-            async with session.post(
-                f"{self.base_url}/api/chat",
-                json=payload
-            ) as response:
+            async with session.post(f"{self.base_url}/api/chat", json=payload) as response:
                 if response.status != 200:
                     error_text = await response.text()
                     yield StreamEvent(
                         type=StreamEventType.ERROR,
-                        content=f"API error {response.status}: {error_text}"
+                        content=f"API error {response.status}: {error_text}",
                     )
                     return
 
@@ -184,7 +185,7 @@ Begin your response with <thinking> to show your reasoning process, then provide
                         continue
 
                     try:
-                        data = json.loads(line.decode('utf-8'))
+                        data = json.loads(line.decode("utf-8"))
                     except json.JSONDecodeError:
                         continue
 
@@ -203,7 +204,11 @@ Begin your response with <thinking> to show your reasoning process, then provide
                             yield StreamEvent(
                                 type=StreamEventType.TOOL_USE_START,
                                 content=tool_name,
-                                metadata={"name": tool_name, "arguments": tool_args, "native": True}
+                                metadata={
+                                    "name": tool_name,
+                                    "arguments": tool_args,
+                                    "native": True,
+                                },
                             )
 
                     if content:
@@ -214,28 +219,19 @@ Begin your response with <thinking> to show your reasoning process, then provide
                             tool_parsing = True
                             if self.on_tool_start:
                                 self.on_tool_start(buffer)
-                            yield StreamEvent(
-                                type=StreamEventType.TOOL_USE_START,
-                                content=buffer
-                            )
+                            yield StreamEvent(type=StreamEventType.TOOL_USE_START, content=buffer)
 
                         # Detect tool use end
                         elif "</args>" in buffer and tool_parsing:
                             tool_parsing = False
-                            yield StreamEvent(
-                                type=StreamEventType.TOOL_USE_END,
-                                content=buffer
-                            )
+                            yield StreamEvent(type=StreamEventType.TOOL_USE_END, content=buffer)
                             buffer = ""
 
                         # Normal token
                         elif not tool_parsing:
                             if self.on_token:
                                 self.on_token(content)
-                            yield StreamEvent(
-                                type=StreamEventType.TOKEN,
-                                content=content
-                            )
+                            yield StreamEvent(type=StreamEventType.TOKEN, content=content)
 
                     if done:
                         yield StreamEvent(
@@ -244,20 +240,14 @@ Begin your response with <thinking> to show your reasoning process, then provide
                                 "total_duration": data.get("total_duration"),
                                 "eval_count": data.get("eval_count"),
                                 "model": data.get("model"),
-                            }
+                            },
                         )
                         break
 
         except asyncio.TimeoutError:
-            yield StreamEvent(
-                type=StreamEventType.ERROR,
-                content="Request timed out"
-            )
+            yield StreamEvent(type=StreamEventType.ERROR, content="Request timed out")
         except Exception as e:
-            yield StreamEvent(
-                type=StreamEventType.ERROR,
-                content=str(e)
-            )
+            yield StreamEvent(type=StreamEventType.ERROR, content=str(e))
 
     async def _get_session(self):
         """Get or create aiohttp session."""

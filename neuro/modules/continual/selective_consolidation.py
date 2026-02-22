@@ -15,6 +15,7 @@ import numpy as np
 
 class ConsolidationStrategy(Enum):
     """Strategies for consolidation."""
+
     UNIFORM = "uniform"
     PERFORMANCE_WEIGHTED = "performance_weighted"
     RECENCY_WEIGHTED = "recency_weighted"
@@ -24,6 +25,7 @@ class ConsolidationStrategy(Enum):
 @dataclass
 class ConsolidationConfig:
     """Configuration for selective consolidation."""
+
     strategy: ConsolidationStrategy = ConsolidationStrategy.PERFORMANCE_WEIGHTED
     min_gap_for_consolidation: float = 0.1
     max_consolidation_budget: int = 1000
@@ -34,6 +36,7 @@ class ConsolidationConfig:
 @dataclass
 class PerformanceRecord:
     """Performance record for a task."""
+
     task_id: str
     historical_performance: List[float]
     current_performance: float
@@ -44,6 +47,7 @@ class PerformanceRecord:
 @dataclass
 class ConsolidationPlan:
     """Plan for consolidation."""
+
     task_priorities: List[Tuple[str, float]]
     budget_allocation: Dict[str, int]
     total_budget: int
@@ -164,7 +168,7 @@ class SelectiveConsolidation:
         if record is None:
             return 0.0
 
-        gap_factor = gap ** self.config.priority_exponent
+        gap_factor = gap**self.config.priority_exponent
 
         if self.config.strategy == ConsolidationStrategy.UNIFORM:
             return gap_factor
@@ -175,7 +179,7 @@ class SelectiveConsolidation:
 
         elif self.config.strategy == ConsolidationStrategy.RECENCY_WEIGHTED:
             time_since_update = self._timestep - record.last_updated + 1
-            recency_factor = self.config.decay_rate ** time_since_update
+            recency_factor = self.config.decay_rate**time_since_update
             return gap_factor * (1.0 + 1.0 - recency_factor)
 
         elif self.config.strategy == ConsolidationStrategy.DIFFICULTY_WEIGHTED:
@@ -256,12 +260,14 @@ class SelectiveConsolidation:
             strategy=self.config.strategy,
         )
 
-        self._consolidation_history.append({
-            "timestep": self._timestep,
-            "num_tasks": len(priorities),
-            "total_budget": total_budget,
-            "allocated_budget": sum(allocation.values()),
-        })
+        self._consolidation_history.append(
+            {
+                "timestep": self._timestep,
+                "num_tasks": len(priorities),
+                "total_budget": total_budget,
+                "allocated_budget": sum(allocation.values()),
+            }
+        )
 
         self._total_consolidations += 1
         self._timestep += 1
@@ -313,10 +319,7 @@ class SelectiveConsolidation:
 
     def statistics(self) -> Dict[str, Any]:
         """Get consolidation statistics."""
-        gaps = [
-            self.assess_performance_gap(tid)
-            for tid in self._performance_records
-        ]
+        gaps = [self.assess_performance_gap(tid) for tid in self._performance_records]
 
         return {
             "total_tasks": len(self._performance_records),

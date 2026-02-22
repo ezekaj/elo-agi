@@ -8,8 +8,9 @@ from neuro.modules.m06_motivation.dopamine_system import (
     IncentiveSalience,
     BenefitCostEvaluator,
     DopamineSignal,
-    DopamineChannel
+    DopamineChannel,
 )
+
 
 class TestPredictionErrorComputer:
     """Tests for reward prediction error computation"""
@@ -25,9 +26,7 @@ class TestPredictionErrorComputer:
 
         # No expected value, but got reward
         rpe = computer.compute_prediction_error(
-            actual_reward=1.0,
-            current_state=state,
-            next_state=next_state
+            actual_reward=1.0, current_state=state, next_state=next_state
         )
 
         # Should be positive (got more than expected)
@@ -44,9 +43,7 @@ class TestPredictionErrorComputer:
 
         # Now get nothing
         rpe = computer.compute_prediction_error(
-            actual_reward=0.0,
-            current_state=state,
-            next_state=state
+            actual_reward=0.0, current_state=state, next_state=state
         )
 
         # Should be negative (got less than expected)
@@ -72,6 +69,7 @@ class TestPredictionErrorComputer:
         surprise_neg = computer.get_surprise(-0.5)
 
         assert surprise_pos == surprise_neg == 0.5
+
 
 class TestIncentiveSalience:
     """Tests for incentive salience (wanting)"""
@@ -102,11 +100,11 @@ class TestIncentiveSalience:
         salience.update_salience(cue, reward=1.0, prediction_error=0.3)
 
         # Satiated state
-        satiated = {'hunger': 0.9}
+        satiated = {"hunger": 0.9}
         satiated_salience = salience.compute_salience(cue, satiated)
 
         # Deprived state
-        deprived = {'hunger': 0.1}
+        deprived = {"hunger": 0.1}
         deprived_salience = salience.compute_salience(cue, deprived)
 
         # Wanting should be higher when deprived
@@ -125,6 +123,7 @@ class TestIncentiveSalience:
 
         idx, value = salience.get_most_wanted([cue_low, cue_high])
         assert idx == 1  # cue_high is second in list
+
 
 class TestBenefitCostEvaluator:
     """Tests for benefit/cost evaluation"""
@@ -167,6 +166,7 @@ class TestBenefitCostEvaluator:
         # (or at minimum equal if implementation clips)
         assert high_willingness >= low_willingness
 
+
 class TestDopamineSystem:
     """Tests for integrated dopamine system"""
 
@@ -183,12 +183,12 @@ class TestDopamineSystem:
             action=np.array([0.1, 0.1]),
             reward=1.0,
             next_state=np.array([0.1, 0.1]),
-            cue=np.array([1.0, 0.0])
+            cue=np.array([1.0, 0.0]),
         )
 
         assert isinstance(signal, DopamineSignal)
-        assert hasattr(signal, 'prediction_error')
-        assert hasattr(signal, 'incentive_salience')
+        assert hasattr(signal, "prediction_error")
+        assert hasattr(signal, "incentive_salience")
 
     def test_tonic_level_tracks_average_reward(self):
         system = DopamineSystem(state_dim=2, cue_dim=2)
@@ -201,7 +201,7 @@ class TestDopamineSystem:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=1.0,
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         # Tonic should have increased
@@ -216,7 +216,7 @@ class TestDopamineSystem:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=np.random.rand(),
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         motivation = system.get_motivation_level()
@@ -232,7 +232,7 @@ class TestDopamineSystem:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=reward,
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         bonus = system.get_exploration_bonus()
@@ -246,14 +246,15 @@ class TestDopamineSystem:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=np.random.rand(),
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         summary = system.get_state_summary()
 
-        assert 'tonic_level' in summary
-        assert 'motivation' in summary
-        assert 'exploration_bonus' in summary
+        assert "tonic_level" in summary
+        assert "motivation" in summary
+        assert "exploration_bonus" in summary
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

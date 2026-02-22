@@ -23,6 +23,7 @@ class MentalStateType(Enum):
 @dataclass
 class Belief:
     """A belief about the world"""
+
     belief_id: str
     content: str
     subject: Optional[str] = None
@@ -34,6 +35,7 @@ class Belief:
 @dataclass
 class Desire:
     """A desire/goal"""
+
     desire_id: str
     content: str
     intensity: float = 0.5
@@ -43,6 +45,7 @@ class Desire:
 @dataclass
 class Intention:
     """An intention to act"""
+
     intention_id: str
     action: str
     target: Optional[str] = None
@@ -53,6 +56,7 @@ class Intention:
 @dataclass
 class MentalStateModel:
     """Model of another agent's mental states"""
+
     agent_id: str
     beliefs: Dict[str, Belief] = field(default_factory=dict)
     desires: Dict[str, Desire] = field(default_factory=dict)
@@ -82,6 +86,7 @@ class MentalStateModel:
 @dataclass
 class Observation:
     """An observation of an agent's behavior"""
+
     observation_id: str
     agent_id: str
     action: str
@@ -129,7 +134,7 @@ class TheoryOfMind:
             desire = Desire(
                 desire_id=f"desire_{obs.action}_{obs.context['target']}",
                 content=f"wants {obs.context['target']}",
-                intensity=0.7
+                intensity=0.7,
             )
             model.add_desire(desire)
 
@@ -137,7 +142,7 @@ class TheoryOfMind:
             belief = Belief(
                 belief_id=f"belief_location_{obs.context['looked_at']}",
                 content=f"believes something is at {obs.context['looked_at']}",
-                source="inferred_from_action"
+                source="inferred_from_action",
             )
             model.add_belief(belief)
 
@@ -148,10 +153,7 @@ class TheoryOfMind:
         model.last_updated = obs.timestamp
         model.confidence = min(1.0, model.confidence + 0.1)
 
-    def infer_belief(self,
-                     agent_id: str,
-                     subject: str
-                     ) -> Optional[Belief]:
+    def infer_belief(self, agent_id: str, subject: str) -> Optional[Belief]:
         """Infer what an agent believes about a subject"""
         if agent_id not in self.agent_models:
             return None
@@ -168,22 +170,19 @@ class TheoryOfMind:
                     belief_id=f"inferred_{subject}",
                     content=f"believes {subject} is {self.world_state[subject]}",
                     confidence=0.8,
-                    is_true=True
+                    is_true=True,
                 )
             else:
                 return Belief(
                     belief_id=f"inferred_{subject}_outdated",
                     content=f"may have outdated belief about {subject}",
                     confidence=0.5,
-                    is_true=None
+                    is_true=None,
                 )
 
         return None
 
-    def infer_desire(self,
-                     agent_id: str,
-                     from_actions: List[str] = None
-                     ) -> List[Desire]:
+    def infer_desire(self, agent_id: str, from_actions: List[str] = None) -> List[Desire]:
         """Infer what an agent wants from their actions"""
         if agent_id not in self.agent_models:
             return []
@@ -198,7 +197,7 @@ class TheoryOfMind:
                     desire = Desire(
                         desire_id=f"inferred_desire_{target}",
                         content=f"wants {target}",
-                        intensity=0.6
+                        intensity=0.6,
                     )
                     inferred_desires.append(desire)
 
@@ -207,16 +206,13 @@ class TheoryOfMind:
                     desire = Desire(
                         desire_id=f"inferred_avoidance_{target}",
                         content=f"wants to avoid {target}",
-                        intensity=0.7
+                        intensity=0.7,
                     )
                     inferred_desires.append(desire)
 
         return inferred_desires
 
-    def infer_intention(self,
-                        agent_id: str,
-                        context: Dict[str, Any] = None
-                        ) -> Optional[Intention]:
+    def infer_intention(self, agent_id: str, context: Dict[str, Any] = None) -> Optional[Intention]:
         """Infer what an agent intends to do"""
         if agent_id not in self.agent_models:
             return None
@@ -232,15 +228,12 @@ class TheoryOfMind:
             return Intention(
                 intention_id=f"inferred_intention_{strongest.desire_id}",
                 action=f"achieve_{strongest.content}",
-                commitment=strongest.intensity
+                commitment=strongest.intensity,
             )
 
         return None
 
-    def predict_action(self,
-                       agent_id: str,
-                       context: Dict[str, Any] = None
-                       ) -> Tuple[str, float]:
+    def predict_action(self, agent_id: str, context: Dict[str, Any] = None) -> Tuple[str, float]:
         """Predict what action an agent will take"""
         if agent_id not in self.agent_models:
             return "unknown", 0.0
@@ -272,12 +265,9 @@ class TheoryOfMind:
                 if agent_id in self.agent_models:
                     self.agent_models[agent_id].knowledge.add(f"informed_{key}")
 
-    def false_belief_test(self,
-                          agent_id: str,
-                          object_id: str,
-                          true_location: str,
-                          believed_location: str
-                          ) -> Dict[str, Any]:
+    def false_belief_test(
+        self, agent_id: str, object_id: str, true_location: str, believed_location: str
+    ) -> Dict[str, Any]:
         """
         Sally-Anne test implementation.
         Agent believes object is at believed_location,
@@ -292,7 +282,7 @@ class TheoryOfMind:
             belief_id=f"belief_{object_id}_location",
             content=f"{object_id} is at {believed_location}",
             confidence=0.9,
-            is_true=False
+            is_true=False,
         )
         model.add_belief(false_belief)
 
@@ -306,14 +296,10 @@ class TheoryOfMind:
             "true_location": true_location,
             "agent_believes": believed_location,
             "predicted_search_location": predicted_search,
-            "has_false_belief": true_location != believed_location
+            "has_false_belief": true_location != believed_location,
         }
 
-    def recursive_belief(self,
-                         about_agent: str,
-                         belief_content: str,
-                         depth: int = 1
-                         ) -> str:
+    def recursive_belief(self, about_agent: str, belief_content: str, depth: int = 1) -> str:
         """
         Generate recursive belief statement.
         e.g., "I think Alice thinks Bob thinks..."
@@ -325,15 +311,14 @@ class TheoryOfMind:
             about_agent, belief_content, depth - 1
         )
 
-    def what_does_agent_think_i_believe(self,
-                                         agent_id: str,
-                                         subject: str
-                                         ) -> Optional[str]:
+    def what_does_agent_think_i_believe(self, agent_id: str, subject: str) -> Optional[str]:
         """Second-order belief: What does agent think I believe?"""
         if agent_id not in self.agent_models:
             return None
 
-        my_belief = self.infer_belief(self.self_id, subject) if self.self_id in self.agent_models else None
+        my_belief = (
+            self.infer_belief(self.self_id, subject) if self.self_id in self.agent_models else None
+        )
 
         if my_belief:
             return f"{agent_id} probably thinks I believe: {my_belief.content}"
@@ -351,19 +336,15 @@ class TheoryOfMind:
 
         achieved_desires = [d for d in model.desires.values() if d.achieved]
         if achieved_desires:
-            emotions['happiness'] = emotions.get('happiness', 0) + 0.3
+            emotions["happiness"] = emotions.get("happiness", 0) + 0.3
 
-        unmet_desires = [d for d in model.desires.values()
-                        if not d.achieved and d.intensity > 0.7]
+        unmet_desires = [d for d in model.desires.values() if not d.achieved and d.intensity > 0.7]
         if unmet_desires:
-            emotions['frustration'] = emotions.get('frustration', 0) + 0.2
+            emotions["frustration"] = emotions.get("frustration", 0) + 0.2
 
         return emotions
 
-    def simulate_perspective(self,
-                             agent_id: str,
-                             scenario: Dict[str, Any]
-                             ) -> Dict[str, Any]:
+    def simulate_perspective(self, agent_id: str, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Simulate how an agent would perceive a scenario"""
         if agent_id not in self.agent_models:
             return {"error": "unknown_agent"}
@@ -387,5 +368,5 @@ class TheoryOfMind:
             "agent_id": agent_id,
             "scenario": scenario,
             "agent_perception": perceived,
-            "knowledge_gaps": [k for k, v in perceived.items() if v == "unknown"]
+            "knowledge_gaps": [k for k, v in perceived.items() if v == "unknown"],
         }

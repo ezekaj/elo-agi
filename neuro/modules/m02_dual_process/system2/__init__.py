@@ -5,10 +5,10 @@ from .cognitive_control import CognitiveControl
 from .relational_reasoning import RelationalReasoning, Relation, Structure
 
 __all__ = [
-    'WorkingMemory',
-    'MemorySlot',
-    'CognitiveControl',
-    'RelationalReasoning',
-    'Relation',
-    'Structure',
+    "WorkingMemory",
+    "MemorySlot",
+    "CognitiveControl",
+    "RelationalReasoning",
+    "Relation",
+    "Structure",
 ]

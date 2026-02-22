@@ -22,16 +22,18 @@ from enum import Enum
 
 class EffortType(Enum):
     """Types of effort"""
-    PHYSICAL = "physical"          # Bodily exertion
-    COGNITIVE = "cognitive"        # Mental processing
-    EMOTIONAL = "emotional"        # Emotional regulation
-    SOCIAL = "social"              # Social interaction effort
-    ATTENTIONAL = "attentional"    # Sustained focus
+
+    PHYSICAL = "physical"  # Bodily exertion
+    COGNITIVE = "cognitive"  # Mental processing
+    EMOTIONAL = "emotional"  # Emotional regulation
+    SOCIAL = "social"  # Social interaction effort
+    ATTENTIONAL = "attentional"  # Sustained focus
 
 
 @dataclass
 class EffortProfile:
     """Profile of effort requirements for a task"""
+
     physical: float = 0.0
     cognitive: float = 0.0
     emotional: float = 0.0
@@ -39,13 +41,13 @@ class EffortProfile:
     attentional: float = 0.0
 
     def total(self) -> float:
-        return self.physical + self.cognitive + self.emotional + \
-               self.social + self.attentional
+        return self.physical + self.cognitive + self.emotional + self.social + self.attentional
 
 
 @dataclass
 class EffortOutcome:
     """Outcome of an effortful action"""
+
     effort_expended: EffortProfile
     reward_gained: float
     subjective_cost: float
@@ -66,16 +68,14 @@ class EffortCostModel:
         self,
         base_cost_per_unit: float = 0.1,
         fatigue_sensitivity: float = 0.5,
-        dopamine_sensitivity: float = 0.3
+        dopamine_sensitivity: float = 0.3,
     ):
         self.base_cost = base_cost_per_unit
         self.fatigue_sensitivity = fatigue_sensitivity
         self.dopamine_sensitivity = dopamine_sensitivity
 
         # Resource pools (deplete with effort)
-        self.resources: Dict[EffortType, float] = {
-            et: 1.0 for et in EffortType
-        }
+        self.resources: Dict[EffortType, float] = {et: 1.0 for et in EffortType}
 
         # Recovery rates
         self.recovery_rates: Dict[EffortType, float] = {
@@ -92,11 +92,7 @@ class EffortCostModel:
         # Effort history
         self.effort_history: deque = deque(maxlen=200)
 
-    def compute_cost(
-        self,
-        effort_profile: EffortProfile,
-        context: Optional[Dict] = None
-    ) -> float:
+    def compute_cost(self, effort_profile: EffortProfile, context: Optional[Dict] = None) -> float:
         """Compute subjective cost of effort.
 
         Args:
@@ -145,19 +141,19 @@ class EffortCostModel:
         modified_cost = cost
 
         # Deadline pressure reduces perceived cost
-        if context.get('deadline_pressure', 0) > 0.5:
+        if context.get("deadline_pressure", 0) > 0.5:
             modified_cost *= 0.7
 
         # High importance reduces cost
-        if context.get('importance', 0) > 0.7:
+        if context.get("importance", 0) > 0.7:
             modified_cost *= 0.8
 
         # Autonomy reduces cost
-        if context.get('autonomy', 0) > 0.5:
+        if context.get("autonomy", 0) > 0.5:
             modified_cost *= 0.85
 
         # Boredom increases cost
-        if context.get('boredom', 0) > 0.5:
+        if context.get("boredom", 0) > 0.5:
             modified_cost *= 1.3
 
         return modified_cost
@@ -230,7 +226,7 @@ class ParadoxicalEffort:
         self,
         effort_justification_rate: float = 0.3,
         challenge_preference: float = 0.5,
-        mastery_sensitivity: float = 0.4
+        mastery_sensitivity: float = 0.4,
     ):
         self.justification_rate = effort_justification_rate
         self.challenge_pref = challenge_preference
@@ -243,11 +239,7 @@ class ParadoxicalEffort:
         self.skill_levels: Dict[str, float] = {}
 
     def compute_effort_value(
-        self,
-        effort_expended: float,
-        task_difficulty: float,
-        skill_level: float,
-        success: bool
+        self, effort_expended: float, task_difficulty: float, skill_level: float, success: bool
     ) -> float:
         """Compute value ADDED by effort (can be negative or positive).
 
@@ -321,7 +313,7 @@ class ParadoxicalEffort:
         hard_reward: float,
         easy_effort: float,
         hard_effort: float,
-        skill: float
+        skill: float,
     ) -> bool:
         """Decide whether to choose harder option (children often do!).
 
@@ -345,19 +337,17 @@ class ParadoxicalEffort:
         return hard_value > easy_value
 
     def record_outcome(
-        self,
-        effort: float,
-        difficulty: float,
-        success: bool,
-        subjective_value: float
+        self, effort: float, difficulty: float, success: bool, subjective_value: float
     ) -> None:
         """Record effort outcome for learning."""
-        self.effort_outcome_history.append({
-            'effort': effort,
-            'difficulty': difficulty,
-            'success': success,
-            'value': subjective_value
-        })
+        self.effort_outcome_history.append(
+            {
+                "effort": effort,
+                "difficulty": difficulty,
+                "success": success,
+                "value": subjective_value,
+            }
+        )
 
 
 class MotivationalTransform:
@@ -371,7 +361,7 @@ class MotivationalTransform:
         self,
         deadline_effect: float = 0.5,
         importance_effect: float = 0.4,
-        autonomy_effect: float = 0.3
+        autonomy_effect: float = 0.3,
     ):
         self.deadline_effect = deadline_effect
         self.importance_effect = importance_effect
@@ -388,7 +378,7 @@ class MotivationalTransform:
         deadline: float = 0.0,
         importance: float = 0.5,
         autonomy: float = 0.5,
-        interest: float = 0.5
+        interest: float = 0.5,
     ) -> None:
         """Set motivational context."""
         self.deadline_pressure = np.clip(deadline, 0, 1)
@@ -406,17 +396,17 @@ class MotivationalTransform:
         # Deadline pressure reduces perceived cost
         if self.deadline_pressure > 0.5:
             deadline_reduction = self.deadline_effect * (self.deadline_pressure - 0.5) * 2
-            transformed *= (1 - deadline_reduction)
+            transformed *= 1 - deadline_reduction
 
         # High importance reduces cost
         if self.task_importance > 0.5:
             importance_reduction = self.importance_effect * (self.task_importance - 0.5) * 2
-            transformed *= (1 - importance_reduction)
+            transformed *= 1 - importance_reduction
 
         # Autonomy reduces cost
         if self.autonomy_level > 0.5:
             autonomy_reduction = self.autonomy_effect * (self.autonomy_level - 0.5) * 2
-            transformed *= (1 - autonomy_reduction)
+            transformed *= 1 - autonomy_reduction
 
         # Intrinsic interest can make effort positive!
         if self.intrinsic_interest > 0.7:
@@ -451,12 +441,14 @@ class MotivationalTransform:
 
     def get_motivation_level(self) -> float:
         """Get overall motivation level."""
-        return np.mean([
-            self.deadline_pressure,
-            self.task_importance,
-            self.autonomy_level,
-            self.intrinsic_interest
-        ])
+        return np.mean(
+            [
+                self.deadline_pressure,
+                self.task_importance,
+                self.autonomy_level,
+                self.intrinsic_interest,
+            ]
+        )
 
     def predict_engagement(self, task_effort: float, task_reward: float) -> float:
         """Predict engagement level for a task."""

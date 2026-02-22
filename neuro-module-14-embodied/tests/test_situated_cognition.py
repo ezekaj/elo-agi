@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m14_embodied.situated_cognition import (
-    ExternalMemory, SituatedContext, ContextualReasoner, SituatedParams
+    ExternalMemory,
+    SituatedContext,
+    ContextualReasoner,
+    SituatedParams,
 )
+
 
 class TestExternalMemory:
     """Tests for external memory"""
@@ -65,6 +69,7 @@ class TestExternalMemory:
 
         assert memory.attention["note1"] < initial
 
+
 class TestSituatedContext:
     """Tests for situated context"""
 
@@ -122,6 +127,7 @@ class TestSituatedContext:
         context.set_physical_context(np.ones(len(context.physical_context)))
 
         assert context.detect_context_change(threshold=0.1)
+
 
 class TestContextualReasoner:
     """Tests for contextual reasoning"""
@@ -185,5 +191,6 @@ class TestContextualReasoner:
 
         assert reasoner.external_memory.attention["note"] < initial
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

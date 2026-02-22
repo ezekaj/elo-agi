@@ -6,10 +6,18 @@ regardless of the specific inputs or sequence of operations.
 
 import pytest
 import numpy as np
-from neuro.modules.m05_sleep_consolidation.spaced_repetition import SpacedRepetitionScheduler, ReviewQuality
-from neuro.modules.m05_sleep_consolidation.meta_learning import MetaLearningController, MemoryType, ReplayWeights
+from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
+    SpacedRepetitionScheduler,
+    ReviewQuality,
+)
+from neuro.modules.m05_sleep_consolidation.meta_learning import (
+    MetaLearningController,
+    MemoryType,
+    ReplayWeights,
+)
 from neuro.modules.m05_sleep_consolidation.interference_resolution import InterferenceResolver
 from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner
+
 
 class TestSpacedRepetitionInvariants:
     """Property tests for spaced repetition."""
@@ -26,8 +34,9 @@ class TestSpacedRepetitionInvariants:
 
             # Intervals grow until hitting max_interval cap (365 days)
             if prev_interval < scheduler.maximum_interval:
-                assert curr >= prev_interval, \
+                assert curr >= prev_interval, (
                     f"Iteration {i}: interval {curr} should not decrease from {prev_interval}"
+                )
             prev_interval = curr
 
         # Should hit the cap
@@ -75,8 +84,7 @@ class TestSpacedRepetitionInvariants:
             scheduler.set_night(night)
             scheduler.schedule_review("mem1", ReviewQuality.EASY_CORRECT)
             next_review = scheduler.get_schedule("mem1").next_review
-            assert next_review > night, \
-                f"Next review {next_review} not after current night {night}"
+            assert next_review > night, f"Next review {next_review} not after current night {night}"
 
     def test_streak_consistency(self):
         """Streak must match consecutive successes."""
@@ -108,6 +116,7 @@ class TestSpacedRepetitionInvariants:
             assert curr_total > prev_total
             prev_total = curr_total
 
+
 class TestMetaLearningInvariants:
     """Property tests for meta-learning controller."""
 
@@ -123,7 +132,7 @@ class TestMetaLearningInvariants:
         # After many operations
         for i in range(30):
             controller.register_memory(f"mem{i}", MemoryType.EPISODIC, 0.2)
-            controller.track_consolidation_success(f"mem{i}", 0.2, 0.5 + 0.01*i, 3)
+            controller.track_consolidation_success(f"mem{i}", 0.2, 0.5 + 0.01 * i, 3)
 
         controller.adapt_replay_weights()
         w = controller.weights
@@ -145,10 +154,10 @@ class TestMetaLearningInvariants:
         ]
 
         for recency, emotional, incomp, interf in test_cases:
-            score = controller.compute_priority_score(
-                "mem1", recency, emotional, incomp, interf
+            score = controller.compute_priority_score("mem1", recency, emotional, incomp, interf)
+            assert 0 <= score <= 1, (
+                f"Score {score} out of bounds for inputs {(recency, emotional, incomp, interf)}"
             )
-            assert 0 <= score <= 1, f"Score {score} out of bounds for inputs {(recency, emotional, incomp, interf)}"
 
     def test_consolidation_history_grows(self):
         """Consolidation history must grow with each tracking."""
@@ -156,7 +165,7 @@ class TestMetaLearningInvariants:
         controller.register_memory("mem1", MemoryType.EPISODIC, 0.1)
 
         for i in range(10):
-            controller.track_consolidation_success("mem1", 0.1 + 0.05*i, 0.15 + 0.05*i, 2)
+            controller.track_consolidation_success("mem1", 0.1 + 0.05 * i, 0.15 + 0.05 * i, 2)
             curve = controller.get_learning_curve("mem1")
             assert len(curve.consolidation_history) == i + 2  # +1 for initial, +1 for this
 
@@ -169,6 +178,7 @@ class TestMetaLearningInvariants:
             for mem_type in MemoryType:
                 rate = controller.update_learning_rates(mem_type, success_rate)
                 assert 0.01 <= rate <= 0.5, f"Rate {rate} out of bounds"
+
 
 class TestInterferenceInvariants:
     """Property tests for interference resolution."""
@@ -212,7 +222,7 @@ class TestInterferenceInvariants:
             resolver.register_memory(f"mem{i}", vec, 0.0)
 
         for i in range(10):
-            for j in range(i+1, 10):
+            for j in range(i + 1, 10):
                 sim = resolver.compute_similarity(f"mem{i}", f"mem{j}")
                 assert -1 <= sim <= 1, f"Similarity {sim} out of bounds"
 
@@ -228,13 +238,15 @@ class TestInterferenceInvariants:
         resolver.register_memory("base", base, 0.0)
         for i in range(5):
             vec = base + 0.1 * np.random.randn(128)
-            resolver.register_memory(f"similar{i}", vec, float(i+1))
+            resolver.register_memory(f"similar{i}", vec, float(i + 1))
 
         events = resolver.detect_interference(["base"] + [f"similar{i}" for i in range(5)])
 
         for event in events:
-            assert event.similarity >= resolver.similarity_threshold, \
+            assert event.similarity >= resolver.similarity_threshold, (
                 f"Event similarity {event.similarity} below threshold"
+            )
+
 
 class TestSchemaInvariants:
     """Property tests for schema refinement."""
@@ -285,11 +297,13 @@ class TestSchemaInvariants:
         for inst_id in added:
             assert inst_id in schema.instances, f"{inst_id} not in schema instances"
 
+
 class TestDeterminism:
     """Tests for deterministic behavior with seeds."""
 
     def test_scheduler_deterministic(self):
         """Same seed produces identical scheduler behavior."""
+
         def run_scheduler(seed):
             scheduler = SpacedRepetitionScheduler(random_seed=seed)
             scheduler.register_memory("mem1")
@@ -309,6 +323,7 @@ class TestDeterminism:
 
     def test_controller_deterministic(self):
         """Same seed produces identical controller behavior."""
+
         def run_controller(seed):
             controller = MetaLearningController(random_seed=seed)
             controller.register_memory("mem1", MemoryType.EPISODIC, 0.3)
@@ -322,6 +337,7 @@ class TestDeterminism:
 
     def test_resolver_deterministic(self):
         """Same seed produces identical resolver behavior."""
+
         def run_resolver(seed):
             np.random.seed(seed)
             resolver = InterferenceResolver(random_seed=seed)

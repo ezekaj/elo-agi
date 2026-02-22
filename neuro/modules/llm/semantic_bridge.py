@@ -18,6 +18,7 @@ from .llm_interface import LLMOracle, MockLLM, LLMConfig
 @dataclass
 class SemanticConfig:
     """Configuration for semantic bridge."""
+
     embedding_dim: int = 64
     internal_dim: int = 64  # Cognitive system dimension
     projection_method: str = "linear"  # "linear", "mlp", "attention"
@@ -29,13 +30,14 @@ class SemanticConfig:
 @dataclass
 class Embedding:
     """A semantic embedding with metadata."""
+
     vector: np.ndarray
     text: str
     source: str = "llm"  # "llm", "internal", "projected"
     timestamp: float = field(default_factory=time.time)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def similarity(self, other: 'Embedding') -> float:
+    def similarity(self, other: "Embedding") -> float:
         """Compute cosine similarity with another embedding."""
         dot = np.dot(self.vector, other.vector)
         norm_self = np.linalg.norm(self.vector)
@@ -106,11 +108,10 @@ class SemanticBridge:
         if len(llm_embedding) != self.config.embedding_dim:
             if len(llm_embedding) < self.config.embedding_dim:
                 llm_embedding = np.pad(
-                    llm_embedding,
-                    (0, self.config.embedding_dim - len(llm_embedding))
+                    llm_embedding, (0, self.config.embedding_dim - len(llm_embedding))
                 )
             else:
-                llm_embedding = llm_embedding[:self.config.embedding_dim]
+                llm_embedding = llm_embedding[: self.config.embedding_dim]
 
         # Project to internal space
         internal = self._project_to_internal(llm_embedding)
@@ -189,7 +190,7 @@ class SemanticBridge:
         if not self._memory:
             return np.zeros(self.config.internal_dim, dtype=np.float32)
 
-        recent = self._memory[-self.config.context_window:]
+        recent = self._memory[-self.config.context_window :]
         vectors = [e.vector for e in recent]
 
         # Weighted average (more recent = higher weight)
@@ -197,11 +198,7 @@ class SemanticBridge:
         weighted_sum = sum(w * v for w, v in zip(weights, vectors))
         return weighted_sum / sum(weights)
 
-    def _find_similar_concepts(
-        self,
-        embedding: np.ndarray,
-        k: int = 5
-    ) -> List[Embedding]:
+    def _find_similar_concepts(self, embedding: np.ndarray, k: int = 5) -> List[Embedding]:
         """Find k most similar concepts in cache."""
         if not self._concept_cache:
             return []
@@ -249,19 +246,16 @@ class SemanticBridge:
         # Project observation to embedding space
         if len(observation) != self.config.internal_dim:
             if len(observation) < self.config.internal_dim:
-                observation = np.pad(
-                    observation,
-                    (0, self.config.internal_dim - len(observation))
-                )
+                observation = np.pad(observation, (0, self.config.internal_dim - len(observation)))
             else:
-                observation = observation[:self.config.internal_dim]
+                observation = observation[: self.config.internal_dim]
 
         # Describe based on activation patterns
         activations = []
 
         # Segment observation into regions
         region_size = len(observation) // 4
-        regions = ['perception', 'action', 'memory', 'goal']
+        regions = ["perception", "action", "memory", "goal"]
 
         for i, region in enumerate(regions):
             start = i * region_size
@@ -298,20 +292,20 @@ class SemanticBridge:
         # Modify vector based on action type
         action = encoded.copy()
 
-        action_type = parsed.get('type', 'unknown')
+        action_type = parsed.get("type", "unknown")
         type_weights = {
-            'move': np.array([1, 0, 0, 0]),
-            'take': np.array([0, 1, 0, 0]),
-            'speak': np.array([0, 0, 1, 0]),
-            'observe': np.array([0, 0, 0, 1]),
-            'wait': np.array([0, 0, 0, 0]),
-            'unknown': np.array([0.25, 0.25, 0.25, 0.25]),
+            "move": np.array([1, 0, 0, 0]),
+            "take": np.array([0, 1, 0, 0]),
+            "speak": np.array([0, 0, 1, 0]),
+            "observe": np.array([0, 0, 0, 1]),
+            "wait": np.array([0, 0, 0, 0]),
+            "unknown": np.array([0.25, 0.25, 0.25, 0.25]),
         }
 
-        weight = type_weights.get(action_type, type_weights['unknown'])
+        weight = type_weights.get(action_type, type_weights["unknown"])
 
         # Inject action type into first dimensions
-        action[:len(weight)] = weight
+        action[: len(weight)] = weight
 
         return action
 
@@ -343,11 +337,10 @@ class SemanticBridge:
             llm_embedding = self.llm.embed(text)
             if len(llm_embedding) < self.config.embedding_dim:
                 llm_embedding = np.pad(
-                    llm_embedding,
-                    (0, self.config.embedding_dim - len(llm_embedding))
+                    llm_embedding, (0, self.config.embedding_dim - len(llm_embedding))
                 )
             else:
-                llm_embedding = llm_embedding[:self.config.embedding_dim]
+                llm_embedding = llm_embedding[: self.config.embedding_dim]
 
             predicted = self._project_to_internal(llm_embedding)
 
@@ -356,11 +349,11 @@ class SemanticBridge:
                 if len(target) < self.config.internal_dim:
                     target = np.pad(target, (0, self.config.internal_dim - len(target)))
                 else:
-                    target = target[:self.config.internal_dim]
+                    target = target[: self.config.internal_dim]
 
             # Compute error
             error = target - predicted
-            loss = float(np.mean(error ** 2))
+            loss = float(np.mean(error**2))
             total_loss += loss
 
             # Update projection (simple gradient descent)
@@ -372,13 +365,13 @@ class SemanticBridge:
     def get_statistics(self) -> Dict[str, Any]:
         """Get bridge statistics."""
         return {
-            'encode_count': self._encode_count,
-            'decode_count': self._decode_count,
-            'memory_size': len(self._memory),
-            'concept_count': len(self._concept_cache),
-            'embedding_dim': self.config.embedding_dim,
-            'internal_dim': self.config.internal_dim,
-            'llm_stats': self.llm.get_statistics(),
+            "encode_count": self._encode_count,
+            "decode_count": self._decode_count,
+            "memory_size": len(self._memory),
+            "concept_count": len(self._concept_cache),
+            "embedding_dim": self.config.embedding_dim,
+            "internal_dim": self.config.internal_dim,
+            "llm_stats": self.llm.get_statistics(),
         }
 
     def reset(self) -> None:

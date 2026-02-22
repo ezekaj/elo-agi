@@ -6,11 +6,10 @@ Classic logical syllogisms demonstrating certain deductive inference.
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.logical.deductive import (
-    DeductiveReasoner, Proposition, PropositionType
-)
+from src.logical.deductive import DeductiveReasoner, Proposition, PropositionType
 
 
 def demo_socrates_syllogism():
@@ -27,19 +26,19 @@ def demo_socrates_syllogism():
     reasoner = DeductiveReasoner()
 
     major = Proposition(
-        proposition_id='p1',
+        proposition_id="p1",
         prop_type=PropositionType.UNIVERSAL,
-        content='All men are mortal',
-        subject='men',
-        predicate='mortal'
+        content="All men are mortal",
+        subject="men",
+        predicate="mortal",
     )
 
     minor = Proposition(
-        proposition_id='p2',
+        proposition_id="p2",
         prop_type=PropositionType.ATOMIC,
-        content='Socrates is a man',
-        subject='Socrates',
-        predicate='men'
+        content="Socrates is a man",
+        subject="Socrates",
+        predicate="men",
     )
 
     print("\nPremises:")
@@ -79,12 +78,27 @@ def demo_chained_syllogisms():
 
     reasoner = DeductiveReasoner()
 
-    p1 = Proposition('p1', PropositionType.UNIVERSAL, 'All Greeks are humans',
-                    subject='Greeks', predicate='humans')
-    p2 = Proposition('p2', PropositionType.UNIVERSAL, 'All humans are mammals',
-                    subject='humans', predicate='mammals')
-    p3 = Proposition('p3', PropositionType.UNIVERSAL, 'All mammals are animals',
-                    subject='mammals', predicate='animals')
+    p1 = Proposition(
+        "p1",
+        PropositionType.UNIVERSAL,
+        "All Greeks are humans",
+        subject="Greeks",
+        predicate="humans",
+    )
+    p2 = Proposition(
+        "p2",
+        PropositionType.UNIVERSAL,
+        "All humans are mammals",
+        subject="humans",
+        predicate="mammals",
+    )
+    p3 = Proposition(
+        "p3",
+        PropositionType.UNIVERSAL,
+        "All mammals are animals",
+        subject="mammals",
+        predicate="animals",
+    )
 
     premises = [p1, p2, p3]
 
@@ -96,15 +110,19 @@ def demo_chained_syllogisms():
     print("\n--- Derivation Steps ---")
 
     step1 = reasoner.derive([p1, p2])
-    greeks_mammals = [i for i in step1
-                     if i.conclusion.subject == 'Greeks' and i.conclusion.predicate == 'mammals']
+    greeks_mammals = [
+        i for i in step1 if i.conclusion.subject == "Greeks" and i.conclusion.predicate == "mammals"
+    ]
     if greeks_mammals:
         print(f"Step 1: From P1 + P2 → {greeks_mammals[0].conclusion}")
         reasoner.add_premise(greeks_mammals[0].conclusion)
 
         step2 = reasoner.derive([greeks_mammals[0].conclusion, p3])
-        greeks_animals = [i for i in step2
-                        if i.conclusion.subject == 'Greeks' and i.conclusion.predicate == 'animals']
+        greeks_animals = [
+            i
+            for i in step2
+            if i.conclusion.subject == "Greeks" and i.conclusion.predicate == "animals"
+        ]
         if greeks_animals:
             print(f"Step 2: From (P1+P2) + P3 → {greeks_animals[0].conclusion}")
 
@@ -127,24 +145,21 @@ def demo_modus_tollens():
 
     reasoner = DeductiveReasoner()
 
-    p = Proposition('p', PropositionType.ATOMIC, 'it is raining',
-                   subject='weather', predicate='raining')
-    q = Proposition('q', PropositionType.ATOMIC, 'the ground is wet',
-                   subject='ground', predicate='wet')
+    p = Proposition(
+        "p", PropositionType.ATOMIC, "it is raining", subject="weather", predicate="raining"
+    )
+    q = Proposition(
+        "q", PropositionType.ATOMIC, "the ground is wet", subject="ground", predicate="wet"
+    )
 
     conditional = Proposition(
-        'if_p_then_q',
+        "if_p_then_q",
         PropositionType.CONDITIONAL,
-        'If it is raining, then the ground is wet',
-        components=[p, q]
+        "If it is raining, then the ground is wet",
+        components=[p, q],
     )
 
-    not_q = Proposition(
-        'not_q',
-        PropositionType.NEGATION,
-        'The ground is not wet',
-        components=[q]
-    )
+    not_q = Proposition("not_q", PropositionType.NEGATION, "The ground is not wet", components=[q])
 
     print("\nPremises:")
     print(f"  Conditional: {conditional}")
@@ -198,7 +213,7 @@ def compare_with_induction():
     print("Induction: Ampliative, conclusion goes beyond premises, can be wrong")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_socrates_syllogism()
     demo_chained_syllogisms()
     demo_modus_tollens()

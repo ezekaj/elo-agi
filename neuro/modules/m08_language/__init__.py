@@ -13,25 +13,16 @@ from .language_hierarchy import (
     SyntacticLayer,
     SemanticLayer,
     PragmaticLayer,
-    LanguageProcessingHierarchy
+    LanguageProcessingHierarchy,
 )
 from .language_network import (
     BrocaRegion,
     WernickeRegion,
     ArcuateFasciculus,
-    DistributedLanguageNetwork
+    DistributedLanguageNetwork,
 )
-from .grammar_manifold import (
-    GrammarState,
-    GrammarConstraintManifold,
-    UniversalGrammar
-)
-from .recursive_parser import (
-    Constituent,
-    RecursiveGrammar,
-    ConstituentParser,
-    LinearPredictor
-)
+from .grammar_manifold import GrammarState, GrammarConstraintManifold, UniversalGrammar
+from .recursive_parser import Constituent, RecursiveGrammar, ConstituentParser, LinearPredictor
 from .predictive_language import PredictiveLanguageProcessor
 
 __version__ = "0.1.0"

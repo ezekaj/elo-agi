@@ -15,6 +15,7 @@ import numpy as np
 
 class ProblemType(Enum):
     """Types of problems."""
+
     LOGICAL = "logical"
     MATHEMATICAL = "mathematical"
     ANALOGICAL = "analogical"
@@ -29,6 +30,7 @@ class ProblemType(Enum):
 
 class ProblemDifficulty(Enum):
     """Problem difficulty levels."""
+
     TRIVIAL = "trivial"
     EASY = "easy"
     MEDIUM = "medium"
@@ -39,6 +41,7 @@ class ProblemDifficulty(Enum):
 @dataclass
 class ProblemClassifierConfig:
     """Configuration for problem classification."""
+
     embedding_dim: int = 128
     num_problem_types: int = 10
     complexity_threshold_easy: float = 0.3
@@ -50,6 +53,7 @@ class ProblemClassifierConfig:
 @dataclass
 class ProblemAnalysis:
     """Analysis of a problem."""
+
     problem_type: ProblemType
     type_confidence: float
     complexity: float
@@ -106,44 +110,74 @@ class ProblemClassifier:
         # These encode characteristic features rather than random noise
         type_features = {
             ProblemType.LOGICAL: {
-                "symbolic": 0.9, "formal": 0.8, "deductive": 0.9,
-                "structured": 0.8, "rule_based": 0.9
+                "symbolic": 0.9,
+                "formal": 0.8,
+                "deductive": 0.9,
+                "structured": 0.8,
+                "rule_based": 0.9,
             },
             ProblemType.MATHEMATICAL: {
-                "numerical": 0.9, "quantitative": 0.9, "symbolic": 0.7,
-                "precise": 0.9, "computational": 0.8
+                "numerical": 0.9,
+                "quantitative": 0.9,
+                "symbolic": 0.7,
+                "precise": 0.9,
+                "computational": 0.8,
             },
             ProblemType.ANALOGICAL: {
-                "relational": 0.9, "structural": 0.8, "transfer": 0.9,
-                "similarity": 0.8, "mapping": 0.9
+                "relational": 0.9,
+                "structural": 0.8,
+                "transfer": 0.9,
+                "similarity": 0.8,
+                "mapping": 0.9,
             },
             ProblemType.CAUSAL: {
-                "causal": 0.9, "interventional": 0.8, "counterfactual": 0.8,
-                "mechanism": 0.9, "dependency": 0.8
+                "causal": 0.9,
+                "interventional": 0.8,
+                "counterfactual": 0.8,
+                "mechanism": 0.9,
+                "dependency": 0.8,
             },
             ProblemType.SPATIAL: {
-                "spatial": 0.9, "visual": 0.8, "geometric": 0.9,
-                "topological": 0.7, "transformation": 0.8
+                "spatial": 0.9,
+                "visual": 0.8,
+                "geometric": 0.9,
+                "topological": 0.7,
+                "transformation": 0.8,
             },
             ProblemType.TEMPORAL: {
-                "temporal": 0.9, "sequential": 0.9, "ordering": 0.8,
-                "duration": 0.7, "causality": 0.6
+                "temporal": 0.9,
+                "sequential": 0.9,
+                "ordering": 0.8,
+                "duration": 0.7,
+                "causality": 0.6,
             },
             ProblemType.LINGUISTIC: {
-                "semantic": 0.9, "syntactic": 0.8, "linguistic": 0.9,
-                "contextual": 0.8, "pragmatic": 0.7
+                "semantic": 0.9,
+                "syntactic": 0.8,
+                "linguistic": 0.9,
+                "contextual": 0.8,
+                "pragmatic": 0.7,
             },
             ProblemType.PLANNING: {
-                "goal_oriented": 0.9, "sequential": 0.8, "hierarchical": 0.8,
-                "constraint": 0.7, "resource": 0.7
+                "goal_oriented": 0.9,
+                "sequential": 0.8,
+                "hierarchical": 0.8,
+                "constraint": 0.7,
+                "resource": 0.7,
             },
             ProblemType.CREATIVE: {
-                "divergent": 0.9, "generative": 0.9, "novel": 0.9,
-                "associative": 0.8, "flexible": 0.8
+                "divergent": 0.9,
+                "generative": 0.9,
+                "novel": 0.9,
+                "associative": 0.8,
+                "flexible": 0.8,
             },
             ProblemType.UNKNOWN: {
-                "uncertain": 0.5, "ambiguous": 0.5, "mixed": 0.5,
-                "exploratory": 0.5, "general": 0.5
+                "uncertain": 0.5,
+                "ambiguous": 0.5,
+                "mixed": 0.5,
+                "exploratory": 0.5,
+                "general": 0.5,
             },
         }
 
@@ -233,7 +267,7 @@ class ProblemClassifier:
             return embedding[indices]
         else:
             result = np.zeros(self.config.embedding_dim)
-            result[:len(embedding)] = embedding
+            result[: len(embedding)] = embedding
             return result
 
     def _identify_type(
@@ -350,9 +384,7 @@ class ProblemClassifier:
         """Decompose problem into subproblems."""
         subproblems = []
 
-        complexity = self._compute_complexity(
-            self._extract_features(embedding, context)
-        )
+        complexity = self._compute_complexity(self._extract_features(embedding, context))
 
         if complexity < 0.3:
             return subproblems

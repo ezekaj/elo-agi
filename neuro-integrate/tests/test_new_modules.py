@@ -12,6 +12,7 @@ import pytest
 import numpy as np
 import os
 
+
 # Add parent paths for imports
 class TestNeuroAbstractSharedSpaceIntegration:
     """Tests for neuro-abstract → SharedSpace integration."""
@@ -21,6 +22,7 @@ class TestNeuroAbstractSharedSpaceIntegration:
         """Create SharedSpaceIntegration from neuro-abstract."""
         try:
             from integration import SharedSpaceIntegration, SharedSpaceConfig
+
             config = SharedSpaceConfig(
                 embedding_dim=512,
                 projection_dim=256,
@@ -96,13 +98,12 @@ class TestNeuroAbstractSharedSpaceIntegration:
     def test_grounded_embedding(self, shared_space_integration):
         """Test creating grounded symbol-perception embeddings."""
         perceptual = np.random.randn(256)
-        embedding = shared_space_integration.create_grounded_embedding(
-            "cat", perceptual
-        )
+        embedding = shared_space_integration.create_grounded_embedding("cat", perceptual)
 
         assert embedding.vector.shape == (512,)
         assert embedding.symbol == "cat"
         from integration import SemanticModalityType
+
         assert embedding.modality == SemanticModalityType.GROUNDED
 
     def test_store_and_retrieve_concept(self, shared_space_integration):
@@ -123,6 +124,7 @@ class TestNeuroAbstractSharedSpaceIntegration:
         assert stats["n_projections"] >= 2
         assert stats["n_active_embeddings"] >= 2
 
+
 class TestNeuroRobustSharedSpaceIntegration:
     """Tests for neuro-robust → SharedSpace integration."""
 
@@ -131,6 +133,7 @@ class TestNeuroRobustSharedSpaceIntegration:
         """Create SharedSpaceRobustness from neuro-robust."""
         try:
             from integration import SharedSpaceRobustness, RobustnessLevel
+
             return SharedSpaceRobustness(
                 embedding_dim=256,
                 hidden_dim=128,
@@ -172,14 +175,10 @@ class TestNeuroRobustSharedSpaceIntegration:
         shared_space_robustness.fit(reference_data)
 
         # Normal input
-        normal_embedding = shared_space_robustness.add_robustness(
-            np.random.randn(256) * 0.5
-        )
+        normal_embedding = shared_space_robustness.add_robustness(np.random.randn(256) * 0.5)
 
         # OOD input (extreme values)
-        ood_embedding = shared_space_robustness.add_robustness(
-            np.ones(256) * 100
-        )
+        ood_embedding = shared_space_robustness.add_robustness(np.ones(256) * 100)
 
         # OOD should have higher score
         assert ood_embedding.robustness.ood_score >= normal_embedding.robustness.ood_score - 0.1
@@ -189,14 +188,11 @@ class TestNeuroRobustSharedSpaceIntegration:
         shared_space_robustness.fit(reference_data)
 
         embeddings = [
-            shared_space_robustness.add_robustness(np.random.randn(256))
-            for _ in range(10)
+            shared_space_robustness.add_robustness(np.random.randn(256)) for _ in range(10)
         ]
 
         # Some should be filtered
-        reliable = shared_space_robustness.filter_reliable(
-            embeddings, threshold=0.5
-        )
+        reliable = shared_space_robustness.filter_reliable(embeddings, threshold=0.5)
 
         assert len(reliable) <= len(embeddings)
         for e in reliable:
@@ -205,8 +201,7 @@ class TestNeuroRobustSharedSpaceIntegration:
     def test_rank_by_reliability(self, shared_space_robustness):
         """Test ranking by reliability."""
         embeddings = [
-            shared_space_robustness.add_robustness(np.random.randn(256))
-            for _ in range(5)
+            shared_space_robustness.add_robustness(np.random.randn(256)) for _ in range(5)
         ]
 
         ranked = shared_space_robustness.rank_by_reliability(embeddings)
@@ -218,8 +213,7 @@ class TestNeuroRobustSharedSpaceIntegration:
     def test_aggregate_with_uncertainty(self, shared_space_robustness):
         """Test aggregating embeddings with uncertainty weighting."""
         embeddings = [
-            shared_space_robustness.add_robustness(np.random.randn(256))
-            for _ in range(3)
+            shared_space_robustness.add_robustness(np.random.randn(256)) for _ in range(3)
         ]
 
         aggregated = shared_space_robustness.aggregate_with_uncertainty(embeddings)
@@ -250,6 +244,7 @@ class TestNeuroRobustSharedSpaceIntegration:
         stats = shared_space_robustness.statistics()
         assert stats["n_processed"] == 5
 
+
 class TestNeuroCausalInferenceIntegration:
     """Tests for neuro-causal → neuro-inference integration."""
 
@@ -258,6 +253,7 @@ class TestNeuroCausalInferenceIntegration:
         """Create InferenceSCMAdapter."""
         try:
             from inference_adapter import InferenceSCMAdapter, AdapterConfig
+
             config = AdapterConfig(random_seed=42)
             return InferenceSCMAdapter(name="test_adapter", config=config)
         except ImportError:
@@ -312,10 +308,7 @@ class TestNeuroCausalInferenceIntegration:
         adapter.add_linear_equation("X", [], {}, intercept=0.0)
         adapter.add_linear_equation("Y", ["X"], {"X": 2.0}, intercept=0.0)
 
-        cf = adapter.counterfactual(
-            evidence={"X": 1.0, "Y": 2.0},
-            intervention={"X": 2.0}
-        )
+        cf = adapter.counterfactual(evidence={"X": 1.0, "Y": 2.0}, intervention={"X": 2.0})
 
         # If X had been 2, Y would be 4
         assert np.abs(cf["Y"] - 4.0) < 0.5
@@ -362,6 +355,7 @@ class TestNeuroCausalInferenceIntegration:
         assert stats["n_variables"] >= 1
         assert stats["adapter_type"] == "InferenceSCMAdapter"
 
+
 class TestCausalInferenceEnhanced:
     """Tests for enhanced causal inference engine."""
 
@@ -370,6 +364,7 @@ class TestCausalInferenceEnhanced:
         """Create CausalInferenceEnhanced."""
         try:
             from inference_adapter import CausalInferenceEnhanced
+
             return CausalInferenceEnhanced(random_seed=42)
         except ImportError:
             pytest.skip("neuro-causal not available")
@@ -408,6 +403,7 @@ class TestCausalInferenceEnhanced:
         attributions = engine.causal_attribution("C", 2.0, evidence)
 
         assert "A" in attributions or "B" in attributions
+
 
 class TestEndToEndIntegration:
     """End-to-end integration tests combining all new modules."""
@@ -531,15 +527,16 @@ class TestEndToEndIntegration:
 
         # 4. Run causal query
         cf = causal.counterfactual(
-            evidence={"Observation": 1.0, "Inference": 1.0},
-            intervention={"Observation": 2.0}
+            evidence={"Observation": 1.0, "Inference": 1.0}, intervention={"Observation": 2.0}
         )
 
         # 5. Create output embedding with robustness
-        output_vector = np.concatenate([
-            grounded.vector[:256],  # Use first 256 dims
-            np.array([cf.get("Inference", 0.0)]),  # Add causal result
-        ])
+        output_vector = np.concatenate(
+            [
+                grounded.vector[:256],  # Use first 256 dims
+                np.array([cf.get("Inference", 0.0)]),  # Add causal result
+            ]
+        )
         # Pad to 512
         output_vector = np.pad(output_vector, (0, 512 - len(output_vector)))
 

@@ -14,6 +14,7 @@ from enum import Enum
 
 class TimingMode(Enum):
     """Timing operation modes"""
+
     PROSPECTIVE = "prospective"  # Timing in advance (attention to time)
     RETROSPECTIVE = "retrospective"  # Timing after the fact (memory-based)
     PRODUCTION = "production"  # Producing a target duration
@@ -23,6 +24,7 @@ class TimingMode(Enum):
 @dataclass
 class TimingResult:
     """Result of a timing operation"""
+
     estimated_duration: float
     actual_duration: float
     error: float  # estimated - actual
@@ -48,7 +50,7 @@ class PacemakerAccumulator:
         self,
         base_rate: float = 10.0,  # Pulses per second
         switch_latency: float = 0.05,  # Seconds to open switch
-        memory_noise: float = 0.1
+        memory_noise: float = 0.1,
     ):
         self.base_rate = base_rate
         self.switch_latency = switch_latency
@@ -111,7 +113,7 @@ class PacemakerAccumulator:
         self,
         actual_duration: float,
         attention: float = 1.0,
-        mode: TimingMode = TimingMode.PROSPECTIVE
+        mode: TimingMode = TimingMode.PROSPECTIVE,
     ) -> TimingResult:
         """Estimate a duration.
 
@@ -153,14 +155,10 @@ class PacemakerAccumulator:
             error=error,
             relative_error=relative_error,
             mode=mode,
-            confidence=confidence
+            confidence=confidence,
         )
 
-    def produce_duration(
-        self,
-        target_duration: float,
-        tolerance: float = 0.1
-    ) -> TimingResult:
+    def produce_duration(self, target_duration: float, tolerance: float = 0.1) -> TimingResult:
         """Produce a target duration (stop when you think time is up).
 
         Args:
@@ -197,7 +195,7 @@ class PacemakerAccumulator:
             error=error,
             relative_error=relative_error,
             mode=TimingMode.PRODUCTION,
-            confidence=1.0 / (1 + abs(relative_error))
+            confidence=1.0 / (1 + abs(relative_error)),
         )
 
     def store_reference(self, name: str, duration: float) -> None:
@@ -206,11 +204,7 @@ class PacemakerAccumulator:
         noisy_duration = duration * (1 + np.random.normal(0, self.memory_noise))
         self.reference_memory[name] = noisy_duration
 
-    def compare_to_reference(
-        self,
-        duration: float,
-        reference_name: str
-    ) -> Tuple[str, float]:
+    def compare_to_reference(self, duration: float, reference_name: str) -> Tuple[str, float]:
         """Compare duration to stored reference.
 
         Returns:
@@ -255,16 +249,14 @@ class StriatalBeatFrequency:
         self,
         n_oscillators: int = 100,
         freq_range: Tuple[float, float] = (1.0, 20.0),
-        detection_threshold: float = 0.8
+        detection_threshold: float = 0.8,
     ):
         self.n_oscillators = n_oscillators
         self.freq_range = freq_range
         self.detection_threshold = detection_threshold
 
         # Initialize oscillators with different frequencies
-        self.frequencies = np.linspace(
-            freq_range[0], freq_range[1], n_oscillators
-        )
+        self.frequencies = np.linspace(freq_range[0], freq_range[1], n_oscillators)
 
         # Random initial phases
         self.initial_phases = np.random.uniform(0, 2 * np.pi, n_oscillators)
@@ -289,11 +281,7 @@ class StriatalBeatFrequency:
         phases = 2 * np.pi * self.frequencies * time + self.initial_phases
         return np.sin(phases)
 
-    def encode_duration(
-        self,
-        duration: float,
-        name: Optional[str] = None
-    ) -> np.ndarray:
+    def encode_duration(self, duration: float, name: Optional[str] = None) -> np.ndarray:
         """Encode a duration as an oscillator pattern.
 
         Args:
@@ -311,9 +299,7 @@ class StriatalBeatFrequency:
         return pattern
 
     def estimate_duration(
-        self,
-        actual_duration: float,
-        mode: TimingMode = TimingMode.PROSPECTIVE
+        self, actual_duration: float, mode: TimingMode = TimingMode.PROSPECTIVE
     ) -> TimingResult:
         """Estimate duration by pattern matching.
 
@@ -345,13 +331,10 @@ class StriatalBeatFrequency:
             error=error,
             relative_error=relative_error,
             mode=mode,
-            confidence=confidence
+            confidence=confidence,
         )
 
-    def detect_learned_duration(
-        self,
-        pattern: np.ndarray
-    ) -> Tuple[Optional[str], float]:
+    def detect_learned_duration(self, pattern: np.ndarray) -> Tuple[Optional[str], float]:
         """Detect which learned duration matches a pattern.
 
         Args:
@@ -378,11 +361,7 @@ class StriatalBeatFrequency:
         else:
             return (None, best_similarity)
 
-    def time_until_pattern(
-        self,
-        target_pattern: np.ndarray,
-        max_time: float = 60.0
-    ) -> float:
+    def time_until_pattern(self, target_pattern: np.ndarray, max_time: float = 60.0) -> float:
         """Estimate time until oscillators return to a pattern.
 
         Args:
@@ -431,7 +410,7 @@ class IntervalTimer:
         self,
         pacemaker: Optional[PacemakerAccumulator] = None,
         sbf: Optional[StriatalBeatFrequency] = None,
-        model_weights: Tuple[float, float] = (0.6, 0.4)
+        model_weights: Tuple[float, float] = (0.6, 0.4),
     ):
         self.pacemaker = pacemaker or PacemakerAccumulator()
         self.sbf = sbf or StriatalBeatFrequency()
@@ -443,7 +422,7 @@ class IntervalTimer:
         self,
         actual_duration: float,
         attention: float = 1.0,
-        mode: TimingMode = TimingMode.PROSPECTIVE
+        mode: TimingMode = TimingMode.PROSPECTIVE,
     ) -> TimingResult:
         """Estimate duration using both models.
 
@@ -456,23 +435,17 @@ class IntervalTimer:
             Combined timing result
         """
         # Get estimates from both models
-        pa_result = self.pacemaker.estimate_duration(
-            actual_duration, attention, mode
-        )
+        pa_result = self.pacemaker.estimate_duration(actual_duration, attention, mode)
         sbf_result = self.sbf.estimate_duration(actual_duration, mode)
 
         # Weighted combination
         w_pa, w_sbf = self.model_weights
 
         combined_estimate = (
-            w_pa * pa_result.estimated_duration +
-            w_sbf * sbf_result.estimated_duration
+            w_pa * pa_result.estimated_duration + w_sbf * sbf_result.estimated_duration
         )
 
-        combined_confidence = (
-            w_pa * pa_result.confidence +
-            w_sbf * sbf_result.confidence
-        )
+        combined_confidence = w_pa * pa_result.confidence + w_sbf * sbf_result.confidence
 
         error = combined_estimate - actual_duration
         relative_error = error / actual_duration if actual_duration > 0 else 0
@@ -483,7 +456,7 @@ class IntervalTimer:
             error=error,
             relative_error=relative_error,
             mode=mode,
-            confidence=combined_confidence
+            confidence=combined_confidence,
         )
 
         self.timing_history.append(result)
@@ -499,11 +472,7 @@ class IntervalTimer:
         self.pacemaker.store_reference(name, duration)
         self.sbf.encode_duration(duration, name)
 
-    def compare_duration(
-        self,
-        duration: float,
-        reference_name: str
-    ) -> Tuple[str, float]:
+    def compare_duration(self, duration: float, reference_name: str) -> Tuple[str, float]:
         """Compare duration to learned reference."""
         return self.pacemaker.compare_to_reference(duration, reference_name)
 
@@ -515,21 +484,17 @@ class IntervalTimer:
     def get_timing_statistics(self) -> Dict:
         """Get statistics from timing history."""
         if not self.timing_history:
-            return {
-                'n_trials': 0,
-                'mean_error': 0.0,
-                'mean_relative_error': 0.0
-            }
+            return {"n_trials": 0, "mean_error": 0.0, "mean_relative_error": 0.0}
 
         errors = [r.error for r in self.timing_history]
         rel_errors = [r.relative_error for r in self.timing_history]
 
         return {
-            'n_trials': len(self.timing_history),
-            'mean_error': np.mean(errors),
-            'std_error': np.std(errors),
-            'mean_relative_error': np.mean(rel_errors),
-            'mean_confidence': np.mean([r.confidence for r in self.timing_history])
+            "n_trials": len(self.timing_history),
+            "mean_error": np.mean(errors),
+            "std_error": np.std(errors),
+            "mean_relative_error": np.mean(rel_errors),
+            "mean_confidence": np.mean([r.confidence for r in self.timing_history]),
         }
 
     def reset(self) -> None:

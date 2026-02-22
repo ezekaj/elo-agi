@@ -19,9 +19,13 @@ from neuro.modules.m00_integration.global_workspace import (
     WorkspaceParams,
     WorkspaceMode,
 )
-from neuro.modules.m00_integration.attention_competition import AttentionCompetition, CompetitionParams
+from neuro.modules.m00_integration.attention_competition import (
+    AttentionCompetition,
+    CompetitionParams,
+)
 from neuro.modules.m00_integration.broadcast_system import BroadcastSystem, BroadcastParams
 from neuro.modules.m00_integration.ignition import IgnitionDetector, IgnitionParams, IgnitionState
+
 
 class TestModuleInterface:
     """Tests for the cognitive module interface."""
@@ -106,6 +110,7 @@ class TestModuleInterface:
         state = module.get_state()
         assert state.activation_level == 0.0
         assert len(state.pending_proposals) == 0
+
 
 class TestAttentionCompetition:
     """Tests for attention-based competition."""
@@ -202,6 +207,7 @@ class TestAttentionCompetition:
         # Aligned should be first winner (higher score)
         assert result.winners[0].content is aligned_content
 
+
 class TestIgnitionDetector:
     """Tests for ignition detection."""
 
@@ -252,8 +258,9 @@ class TestIgnitionDetector:
         for i in range(10):
             detector.detect(activation=np.random.rand(), buffer=[])
         stats = detector.get_statistics()
-        assert 'total_events' in stats
-        assert stats['total_events'] == 10
+        assert "total_events" in stats
+        assert stats["total_events"] == 10
+
 
 class TestBroadcastSystem:
     """Tests for the broadcast system."""
@@ -293,7 +300,8 @@ class TestBroadcastSystem:
             )
             system.broadcast(proposal, [ModuleType.EMOTION])
         stats = system.get_statistics()
-        assert stats['total_broadcasts'] >= 1
+        assert stats["total_broadcasts"] >= 1
+
 
 class TestGlobalWorkspace:
     """Tests for the complete global workspace."""
@@ -367,29 +375,29 @@ class TestGlobalWorkspace:
         """Test workspace statistics."""
         workspace = GlobalWorkspace()
         for i in range(3):
-            module = DummyModule(
-                module_type=list(ModuleType)[i],
-                name=f"Module{i}"
-            )
+            module = DummyModule(module_type=list(ModuleType)[i], name=f"Module{i}")
             workspace.register_module(module)
 
         for _ in range(10):
             workspace.run_cycle(np.random.randn(64))
 
         stats = workspace.get_statistics()
-        assert 'step_count' in stats
-        assert stats['step_count'] == 10
-        assert stats['module_count'] == 3
+        assert "step_count" in stats
+        assert stats["step_count"] == 10
+        assert stats["module_count"] == 3
+
 
 class TestIntegration:
     """Integration tests for the complete system."""
 
     def test_full_cycle_multiple_modules(self):
         """Test full cycle with multiple modules."""
-        workspace = GlobalWorkspace(WorkspaceParams(
-            buffer_capacity=5,
-            ignition_threshold=0.5,
-        ))
+        workspace = GlobalWorkspace(
+            WorkspaceParams(
+                buffer_capacity=5,
+                ignition_threshold=0.5,
+            )
+        )
 
         # Register several modules
         module_types = [
@@ -409,14 +417,16 @@ class TestIntegration:
             winners, broadcast = workspace.run_cycle(input_state)
 
         stats = workspace.get_statistics()
-        assert stats['step_count'] == 20
-        assert stats['module_count'] == 5
+        assert stats["step_count"] == 20
+        assert stats["module_count"] == 5
 
     def test_broadcast_reception(self):
         """Test that modules receive broadcasts."""
-        workspace = GlobalWorkspace(WorkspaceParams(
-            ignition_threshold=0.3,  # Low threshold for testing
-        ))
+        workspace = GlobalWorkspace(
+            WorkspaceParams(
+                ignition_threshold=0.3,  # Low threshold for testing
+            )
+        )
 
         received_broadcasts = []
 
@@ -443,8 +453,7 @@ class TestIntegration:
 
         for i in range(10):
             module = DummyModule(
-                module_type=list(ModuleType)[i % len(ModuleType)],
-                name=f"Module{i}"
+                module_type=list(ModuleType)[i % len(ModuleType)], name=f"Module{i}"
             )
             workspace.register_module(module)
 
@@ -454,5 +463,6 @@ class TestIntegration:
         state = workspace.get_state()
         assert len(state.buffer) <= 3
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

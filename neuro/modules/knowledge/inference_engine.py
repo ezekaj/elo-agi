@@ -15,14 +15,16 @@ from .fact_store import FactStore, Fact, Triple
 
 class InferenceMode(Enum):
     """Mode of inference."""
-    FORWARD = "forward"   # Data-driven, derive all conclusions
-    BACKWARD = "backward" # Goal-driven, prove specific facts
-    MIXED = "mixed"       # Combine both
+
+    FORWARD = "forward"  # Data-driven, derive all conclusions
+    BACKWARD = "backward"  # Goal-driven, prove specific facts
+    MIXED = "mixed"  # Combine both
 
 
 @dataclass
 class Pattern:
     """A pattern that can match facts."""
+
     subject: str  # Can be variable like ?x
     predicate: str
     obj: str
@@ -42,7 +44,7 @@ class Pattern:
             variables.add(self.obj)
         return variables
 
-    def substitute(self, bindings: Dict[str, str]) -> 'Pattern':
+    def substitute(self, bindings: Dict[str, str]) -> "Pattern":
         """Apply variable bindings to create new pattern."""
         return Pattern(
             subject=bindings.get(self.subject, self.subject),
@@ -84,6 +86,7 @@ class Pattern:
 @dataclass
 class Rule:
     """An inference rule with antecedents and consequents."""
+
     name: str
     antecedents: List[Pattern]  # IF these patterns match
     consequents: List[Pattern]  # THEN derive these
@@ -101,6 +104,7 @@ class Rule:
 @dataclass
 class InferenceResult:
     """Result of an inference."""
+
     derived_facts: List[Fact]
     rule_used: Optional[Rule]
     bindings: Dict[str, str]
@@ -111,6 +115,7 @@ class InferenceResult:
 @dataclass
 class InferenceChain:
     """A chain of inference steps."""
+
     goal: Pattern
     steps: List[InferenceResult]
     success: bool
@@ -124,7 +129,7 @@ class InferenceChain:
             lines.append("Proof:")
             for i, step in enumerate(self.steps):
                 if step.rule_used:
-                    lines.append(f"  {i+1}. Applied rule: {step.rule_used.name}")
+                    lines.append(f"  {i + 1}. Applied rule: {step.rule_used.name}")
                     lines.append(f"      Bindings: {step.bindings}")
                     for fact in step.derived_facts:
                         lines.append(f"      Derived: {fact.subject} {fact.predicate} {fact.obj}")
@@ -264,12 +269,14 @@ class InferenceEngine:
                     derived.append(fact)
 
             if derived:
-                results.append(InferenceResult(
-                    derived_facts=derived,
-                    rule_used=rule,
-                    bindings=bindings,
-                    confidence=confidence,
-                ))
+                results.append(
+                    InferenceResult(
+                        derived_facts=derived,
+                        rule_used=rule,
+                        bindings=bindings,
+                        confidence=confidence,
+                    )
+                )
 
         return results
 
@@ -469,10 +476,9 @@ class InferenceEngine:
 
     def _is_known(self, triple: Triple) -> bool:
         """Check if a triple is known (in base or derived)."""
-        return (
-            self.fact_store.exists(triple.subject, triple.predicate, triple.obj) or
-            self._derived.exists(triple.subject, triple.predicate, triple.obj)
-        )
+        return self.fact_store.exists(
+            triple.subject, triple.predicate, triple.obj
+        ) or self._derived.exists(triple.subject, triple.predicate, triple.obj)
 
     def prove(
         self,

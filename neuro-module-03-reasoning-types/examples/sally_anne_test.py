@@ -6,6 +6,7 @@ Classic false belief task demonstrating understanding of others' mental states.
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.interactive.theory_of_mind import TheoryOfMind, Observation, MentalStateModel
@@ -34,11 +35,11 @@ def run_sally_anne_test():
     print("\n--- Scene Setup ---")
     print("Sally and Anne are in a room with a basket and a box")
 
-    tom.agent_models['sally'] = MentalStateModel(agent_id='sally')
-    tom.agent_models['anne'] = MentalStateModel(agent_id='anne')
+    tom.agent_models["sally"] = MentalStateModel(agent_id="sally")
+    tom.agent_models["anne"] = MentalStateModel(agent_id="anne")
 
     print("\n--- Step 1: Sally puts marble in basket ---")
-    tom.update_world_state('marble_location', 'basket', inform_agents=['sally', 'anne'])
+    tom.update_world_state("marble_location", "basket", inform_agents=["sally", "anne"])
 
     print("Sally knows: marble is in basket")
     print("Anne knows: marble is in basket")
@@ -48,7 +49,7 @@ def run_sally_anne_test():
     print("(Sally can no longer observe changes)")
 
     print("\n--- Step 3: Anne moves marble to box ---")
-    tom.update_world_state('marble_location', 'box', inform_agents=['anne'])
+    tom.update_world_state("marble_location", "box", inform_agents=["anne"])
 
     print("Anne was informed of this change")
     print("Sally was NOT informed of this change")
@@ -61,10 +62,7 @@ def run_sally_anne_test():
     print("=" * 60)
 
     result = tom.false_belief_test(
-        agent_id='sally',
-        object_id='marble',
-        true_location='box',
-        believed_location='basket'
+        agent_id="sally", object_id="marble", true_location="box", believed_location="basket"
     )
 
     print(f"\nAnalysis:")
@@ -74,7 +72,7 @@ def run_sally_anne_test():
     print(f"\n  PREDICTED: Sally will look in the {result['predicted_search_location']}")
 
     print("\n--- Explanation ---")
-    if result['has_false_belief']:
+    if result["has_false_belief"]:
         print("Sally has a FALSE BELIEF because:")
         print("  - She last saw the marble in the basket")
         print("  - She was not present when Anne moved it")
@@ -126,6 +124,6 @@ def run_second_order_belief():
     return recursive
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     result = run_sally_anne_test()
     run_second_order_belief()

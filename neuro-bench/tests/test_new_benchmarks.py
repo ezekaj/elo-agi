@@ -37,6 +37,7 @@ from neuro.modules.bench.consolidation_bench import (
 )
 from neuro.modules.bench.base_benchmark import BenchmarkConfig
 
+
 class TestCausalBenchmarks:
     """Tests for causal reasoning benchmarks."""
 
@@ -156,6 +157,7 @@ class TestCausalBenchmarks:
         suite = create_causal_benchmark_suite()
         assert len(suite) == 4
 
+
 class TestAbstractionBenchmarks:
     """Tests for abstraction benchmarks."""
 
@@ -271,6 +273,7 @@ class TestAbstractionBenchmarks:
         """Test suite creation."""
         suite = create_abstraction_benchmark_suite()
         assert len(suite) == 5
+
 
 class TestRobustnessBenchmarks:
     """Tests for robustness benchmarks."""
@@ -401,6 +404,7 @@ class TestRobustnessBenchmarks:
         """Test suite creation."""
         suite = create_robustness_benchmark_suite()
         assert len(suite) == 5
+
 
 class TestConsolidationBenchmarks:
     """Tests for consolidation benchmarks."""
@@ -540,6 +544,7 @@ class TestConsolidationBenchmarks:
         """Test suite creation."""
         suite = create_consolidation_benchmark_suite()
         assert len(suite) == 5
+
 
 class TestBenchmarkExecution:
     """Tests for running benchmarks."""

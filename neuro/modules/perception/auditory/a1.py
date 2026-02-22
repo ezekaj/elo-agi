@@ -13,6 +13,7 @@ import numpy as np
 @dataclass
 class SpectrotemporalRF:
     """Spectrotemporal receptive field (STRF)."""
+
     kernel: np.ndarray  # (n_freq, n_time) filter
     best_frequency: float
     best_rate: float  # Preferred modulation rate
@@ -23,11 +24,12 @@ class SpectrotemporalRF:
 @dataclass
 class A1Output:
     """Output from A1 processing."""
-    tonotopic_map: np.ndarray      # Frequency-organized responses
-    rate_map: np.ndarray           # Temporal modulation responses
-    scale_map: np.ndarray          # Spectral modulation responses
-    onset_map: np.ndarray          # Onset/offset detection
-    strf_responses: np.ndarray     # Full STRF responses
+
+    tonotopic_map: np.ndarray  # Frequency-organized responses
+    rate_map: np.ndarray  # Temporal modulation responses
+    scale_map: np.ndarray  # Spectral modulation responses
+    onset_map: np.ndarray  # Onset/offset detection
+    strf_responses: np.ndarray  # Full STRF responses
     size: Tuple[int, int] = (0, 0)  # (n_freq, n_time)
 
 
@@ -70,7 +72,7 @@ class A1Processor:
 
         for rate in rates:
             for scale in scales:
-                for direction in ['up', 'down']:
+                for direction in ["up", "down"]:
                     strf = self._create_strf(rate, scale, direction)
                     strfs.append(strf)
 
@@ -102,7 +104,7 @@ class A1Processor:
         sigma_f = 1.0 / (scale + 1)
 
         # Direction (upward vs downward sweep)
-        if direction == 'up':
+        if direction == "up":
             angle = np.pi / 4
         else:
             angle = -np.pi / 4
@@ -132,8 +134,8 @@ class A1Processor:
         # Difference of Gaussians in time
         t = np.linspace(-2, 2, size)
 
-        on_kernel = np.exp(-t**2 / 0.5)
-        off_kernel = np.exp(-(t - 0.5)**2 / 0.5)
+        on_kernel = np.exp(-(t**2) / 0.5)
+        off_kernel = np.exp(-((t - 0.5) ** 2) / 0.5)
 
         kernel = on_kernel - 0.5 * off_kernel
         kernel = kernel - kernel.mean()
@@ -165,7 +167,7 @@ class A1Processor:
 
         for i, strf in enumerate(self._strfs):
             # 2D convolution with STRF kernel
-            response = convolve(an_response, strf.kernel, mode='constant')
+            response = convolve(an_response, strf.kernel, mode="constant")
             strf_responses[i] = np.maximum(0, response)
 
         # Rate map (max response across scales for each rate)
@@ -188,7 +190,7 @@ class A1Processor:
         # Onset detection
         onset_map = np.zeros((n_freq, n_time))
         for fi in range(n_freq):
-            onset_response = convolve1d(an_response[fi], self._onset_kernel, mode='constant')
+            onset_response = convolve1d(an_response[fi], self._onset_kernel, mode="constant")
             onset_map[fi] = np.maximum(0, onset_response)
 
         return A1Output(

@@ -21,6 +21,7 @@ import time
 
 class HabitStrength(Enum):
     """How ingrained a habit is"""
+
     WEAK = 1
     MODERATE = 2
     STRONG = 3
@@ -30,6 +31,7 @@ class HabitStrength(Enum):
 @dataclass
 class Action:
     """An action or action sequence"""
+
     id: str
     execute: Optional[Callable] = None
     parameters: Dict[str, Any] = field(default_factory=dict)
@@ -41,6 +43,7 @@ class Action:
 @dataclass
 class Habit:
     """A stimulus-response association"""
+
     trigger_pattern: np.ndarray
     action: Action
     strength: float = 0.5
@@ -53,6 +56,7 @@ class Habit:
 @dataclass
 class HabitResponse:
     """Result of habit execution attempt"""
+
     triggered: bool
     action: Optional[Action]
     habit_strength: float
@@ -70,20 +74,21 @@ class HabitExecutor:
     - Extinction through non-reinforcement
     """
 
-    def __init__(self,
-                 trigger_threshold: float = 0.6,
-                 learning_rate: float = 0.1,
-                 decay_rate: float = 0.01):
+    def __init__(
+        self, trigger_threshold: float = 0.6, learning_rate: float = 0.1, decay_rate: float = 0.01
+    ):
         self.habits: List[Habit] = []
         self.trigger_threshold = trigger_threshold
         self.learning_rate = learning_rate
         self.decay_rate = decay_rate
 
-    def add_habit(self,
-                  trigger_pattern: np.ndarray,
-                  action: Action,
-                  initial_strength: float = 0.3,
-                  contexts: Optional[List[Any]] = None) -> Habit:
+    def add_habit(
+        self,
+        trigger_pattern: np.ndarray,
+        action: Action,
+        initial_strength: float = 0.3,
+        contexts: Optional[List[Any]] = None,
+    ) -> Habit:
         """
         Create a new habit association.
 
@@ -93,15 +98,14 @@ class HabitExecutor:
             trigger_pattern=trigger_pattern,
             action=action,
             strength=initial_strength,
-            contexts=contexts or []
+            contexts=contexts or [],
         )
         self.habits.append(habit)
         return habit
 
-    def execute(self,
-                stimulus: np.ndarray,
-                context: Optional[Any] = None,
-                allow_multiple: bool = False) -> HabitResponse:
+    def execute(
+        self, stimulus: np.ndarray, context: Optional[Any] = None, allow_multiple: bool = False
+    ) -> HabitResponse:
         """
         Check if stimulus triggers any habits.
 
@@ -126,12 +130,7 @@ class HabitExecutor:
                 matches.append((habit, confidence))
 
         if not matches:
-            return HabitResponse(
-                triggered=False,
-                action=None,
-                habit_strength=0.0,
-                confidence=0.0
-            )
+            return HabitResponse(triggered=False, action=None, habit_strength=0.0, confidence=0.0)
 
         # Sort by confidence, get strongest
         matches.sort(key=lambda x: x[1], reverse=True)
@@ -150,7 +149,7 @@ class HabitExecutor:
             triggered=True,
             action=best_habit.action,
             habit_strength=best_habit.strength,
-            confidence=best_confidence
+            confidence=best_confidence,
         )
 
     def _compute_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
@@ -159,10 +158,9 @@ class HabitExecutor:
         b_norm = b / (np.linalg.norm(b) + 1e-8)
         return float(np.clip(np.dot(a_norm, b_norm), 0, 1))
 
-    def strengthen(self,
-                   stimulus: np.ndarray,
-                   action: Action,
-                   reward: float = 1.0) -> Optional[Habit]:
+    def strengthen(
+        self, stimulus: np.ndarray, action: Action, reward: float = 1.0
+    ) -> Optional[Habit]:
         """
         Strengthen habit through successful execution.
 
@@ -192,16 +190,11 @@ class HabitExecutor:
 
         # Update trigger pattern (weighted average)
         weight = 1.0 / (best_habit.repetition_count + 1)
-        best_habit.trigger_pattern = (
-            best_habit.trigger_pattern * (1 - weight) +
-            stimulus * weight
-        )
+        best_habit.trigger_pattern = best_habit.trigger_pattern * (1 - weight) + stimulus * weight
 
         return best_habit
 
-    def weaken(self,
-               stimulus: np.ndarray,
-               extinction_rate: float = 0.2) -> Optional[Habit]:
+    def weaken(self, stimulus: np.ndarray, extinction_rate: float = 0.2) -> Optional[Habit]:
         """
         Weaken habit through non-reinforcement or negative outcome.
 
@@ -277,7 +270,7 @@ class HabitExecutor:
 
         # Strong habits are hard to inhibit
         # This creates the "automatic" feeling of habits
-        inhibition_difficulty = response.habit_strength ** 2
+        inhibition_difficulty = response.habit_strength**2
 
         # Random element - sometimes you can override, sometimes not
         return np.random.random() > inhibition_difficulty

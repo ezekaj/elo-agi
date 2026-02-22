@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Fact:
     """A single fact in the knowledge base."""
+
     id: str
     topic: str
     content: str
@@ -48,20 +49,128 @@ class KnowledgeBase:
 
     # Stop words for filtering
     STOP_WORDS = {
-        'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-        'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare',
-        'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by',
-        'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above',
-        'below', 'between', 'under', 'again', 'further', 'then', 'once',
-        'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'few',
-        'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
-        'own', 'same', 'so', 'than', 'too', 'very', 'just', 'and', 'but',
-        'if', 'or', 'because', 'until', 'while', 'about', 'against', 'what',
-        'which', 'who', 'this', 'that', 'these', 'those', 'am', 'it', 'its',
-        'i', 'me', 'my', 'myself', 'we', 'our', 'you', 'your', 'he', 'him',
-        'his', 'she', 'her', 'they', 'them', 'their', 'find', 'search',
-        'look', 'get', 'show', 'tell', 'give', 'know', 'think', 'want'
+        "a",
+        "an",
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "must",
+        "shall",
+        "can",
+        "need",
+        "dare",
+        "ought",
+        "used",
+        "to",
+        "of",
+        "in",
+        "for",
+        "on",
+        "with",
+        "at",
+        "by",
+        "from",
+        "as",
+        "into",
+        "through",
+        "during",
+        "before",
+        "after",
+        "above",
+        "below",
+        "between",
+        "under",
+        "again",
+        "further",
+        "then",
+        "once",
+        "here",
+        "there",
+        "when",
+        "where",
+        "why",
+        "how",
+        "all",
+        "each",
+        "few",
+        "more",
+        "most",
+        "other",
+        "some",
+        "such",
+        "no",
+        "nor",
+        "not",
+        "only",
+        "own",
+        "same",
+        "so",
+        "than",
+        "too",
+        "very",
+        "just",
+        "and",
+        "but",
+        "if",
+        "or",
+        "because",
+        "until",
+        "while",
+        "about",
+        "against",
+        "what",
+        "which",
+        "who",
+        "this",
+        "that",
+        "these",
+        "those",
+        "am",
+        "it",
+        "its",
+        "i",
+        "me",
+        "my",
+        "myself",
+        "we",
+        "our",
+        "you",
+        "your",
+        "he",
+        "him",
+        "his",
+        "she",
+        "her",
+        "they",
+        "them",
+        "their",
+        "find",
+        "search",
+        "look",
+        "get",
+        "show",
+        "tell",
+        "give",
+        "know",
+        "think",
+        "want",
     }
 
     def __init__(self, storage_path: str = None):
@@ -77,13 +186,13 @@ class KnowledgeBase:
         self.facts: List[Fact] = []
         self.embeddings: Dict[str, np.ndarray] = {}
         self.topic_index: Dict[str, List[str]] = {}  # topic -> fact_ids
-        self.word_index: Dict[str, List[str]] = {}   # word -> fact_ids
+        self.word_index: Dict[str, List[str]] = {}  # word -> fact_ids
         self.stats = {
-            'total_facts': 0,
-            'total_searches': 0,
-            'total_recalls': 0,
-            'created': datetime.now().isoformat(),
-            'last_updated': datetime.now().isoformat()
+            "total_facts": 0,
+            "total_searches": 0,
+            "total_recalls": 0,
+            "created": datetime.now().isoformat(),
+            "last_updated": datetime.now().isoformat(),
         }
 
         self._load()
@@ -93,7 +202,7 @@ class KnowledgeBase:
         # Load facts
         if self.facts_file.exists():
             try:
-                with open(self.facts_file, 'r') as f:
+                with open(self.facts_file, "r") as f:
                     data = json.load(f)
                     self.facts = [Fact(**fact) for fact in data]
             except Exception:
@@ -102,7 +211,7 @@ class KnowledgeBase:
         # Load embeddings
         if self.embeddings_file.exists():
             try:
-                with open(self.embeddings_file, 'rb') as f:
+                with open(self.embeddings_file, "rb") as f:
                     self.embeddings = pickle.load(f)
             except Exception:
                 pass
@@ -110,7 +219,7 @@ class KnowledgeBase:
         # Load stats
         if self.stats_file.exists():
             try:
-                with open(self.stats_file, 'r') as f:
+                with open(self.stats_file, "r") as f:
                     self.stats = json.load(f)
             except Exception:
                 pass
@@ -118,10 +227,10 @@ class KnowledgeBase:
         # Load/rebuild indices
         if self.index_file.exists():
             try:
-                with open(self.index_file, 'r') as f:
+                with open(self.index_file, "r") as f:
                     indices = json.load(f)
-                    self.topic_index = indices.get('topics', {})
-                    self.word_index = indices.get('words', {})
+                    self.topic_index = indices.get("topics", {})
+                    self.word_index = indices.get("words", {})
             except Exception:
                 self._rebuild_indices()
         else:
@@ -159,7 +268,7 @@ class KnowledgeBase:
         words = []
         for word in text.lower().split():
             # Clean punctuation
-            word = ''.join(c for c in word if c.isalnum())
+            word = "".join(c for c in word if c.isalnum())
             if word and len(word) > 2 and word not in self.STOP_WORDS:
                 words.append(word)
         return words
@@ -170,36 +279,33 @@ class KnowledgeBase:
         facts_data = []
         for fact in self.facts:
             fact_dict = {
-                'id': fact.id,
-                'topic': fact.topic,
-                'content': fact.content,
-                'source': fact.source,
-                'timestamp': fact.timestamp,
-                'access_count': fact.access_count,
-                'importance': fact.importance,
-                'confidence': fact.confidence
+                "id": fact.id,
+                "topic": fact.topic,
+                "content": fact.content,
+                "source": fact.source,
+                "timestamp": fact.timestamp,
+                "access_count": fact.access_count,
+                "importance": fact.importance,
+                "confidence": fact.confidence,
             }
             facts_data.append(fact_dict)
 
-        with open(self.facts_file, 'w') as f:
+        with open(self.facts_file, "w") as f:
             json.dump(facts_data, f, indent=2)
 
         # Save embeddings
-        with open(self.embeddings_file, 'wb') as f:
+        with open(self.embeddings_file, "wb") as f:
             pickle.dump(self.embeddings, f)
 
         # Save stats
-        self.stats['total_facts'] = len(self.facts)
-        self.stats['last_updated'] = datetime.now().isoformat()
-        with open(self.stats_file, 'w') as f:
+        self.stats["total_facts"] = len(self.facts)
+        self.stats["last_updated"] = datetime.now().isoformat()
+        with open(self.stats_file, "w") as f:
             json.dump(self.stats, f, indent=2)
 
         # Save indices
-        indices = {
-            'topics': self.topic_index,
-            'words': self.word_index
-        }
-        with open(self.index_file, 'w') as f:
+        indices = {"topics": self.topic_index, "words": self.word_index}
+        with open(self.index_file, "w") as f:
             json.dump(indices, f)
 
     def _create_embedding(self, text: str, dim: int = 128) -> np.ndarray:
@@ -215,7 +321,7 @@ class KnowledgeBase:
         content: str,
         source: str,
         importance: float = 0.5,
-        confidence: float = 0.8
+        confidence: float = 0.8,
     ) -> str:
         """Add a new fact to the knowledge base."""
         # Generate unique ID
@@ -232,7 +338,7 @@ class KnowledgeBase:
             source=source,
             embedding=embedding,
             importance=importance,
-            confidence=confidence
+            confidence=confidence,
         )
 
         # Add to storage
@@ -248,12 +354,7 @@ class KnowledgeBase:
 
         return fact_id
 
-    def search(
-        self,
-        query: str,
-        k: int = 5,
-        min_score: float = 0.0
-    ) -> List[Tuple[Fact, float]]:
+    def search(self, query: str, k: int = 5, min_score: float = 0.0) -> List[Tuple[Fact, float]]:
         """
         Search for relevant facts using multi-strategy matching.
 
@@ -262,7 +363,7 @@ class KnowledgeBase:
         2. Word-based index lookup
         3. Embedding similarity
         """
-        self.stats['total_searches'] = self.stats.get('total_searches', 0) + 1
+        self.stats["total_searches"] = self.stats.get("total_searches", 0) + 1
 
         query_lower = query.lower()
         query_words = self._extract_words(query)
@@ -305,7 +406,7 @@ class KnowledgeBase:
             fact = self._get_fact_by_id(fid)
             if fact:
                 # Importance boost
-                scored_facts[fid] *= (0.5 + fact.importance)
+                scored_facts[fid] *= 0.5 + fact.importance
 
                 # Recency boost (newer facts slightly preferred)
                 try:
@@ -358,11 +459,11 @@ class KnowledgeBase:
         """Get knowledge base statistics."""
         return {
             **self.stats,
-            'total_facts': len(self.facts),
-            'total_embeddings': len(self.embeddings),
-            'total_topics': len(self.topic_index),
-            'total_indexed_words': len(self.word_index),
-            'storage_path': str(self.storage_path)
+            "total_facts": len(self.facts),
+            "total_embeddings": len(self.embeddings),
+            "total_topics": len(self.topic_index),
+            "total_indexed_words": len(self.word_index),
+            "storage_path": str(self.storage_path),
         }
 
 
@@ -381,28 +482,26 @@ class SelfTrainer:
         self.session_learning: List[Dict] = []
 
     def learn(
-        self,
-        topic: str,
-        content: str,
-        source: str = "conversation",
-        importance: float = 0.5
+        self, topic: str, content: str, source: str = "conversation", importance: float = 0.5
     ) -> str:
         """Learn a new fact."""
         fact_id = self.kb.add_fact(topic, content, source, importance)
 
-        self.session_learning.append({
-            'topic': topic,
-            'content': content[:100],
-            'source': source,
-            'time': datetime.now().isoformat()
-        })
+        self.session_learning.append(
+            {
+                "topic": topic,
+                "content": content[:100],
+                "source": source,
+                "time": datetime.now().isoformat(),
+            }
+        )
 
         return fact_id
 
     def recall(self, query: str, k: int = 5) -> List[str]:
         """Recall relevant knowledge for a query."""
         results = self.kb.search(query, k=k)
-        self.kb.stats['total_recalls'] = self.kb.stats.get('total_recalls', 0) + 1
+        self.kb.stats["total_recalls"] = self.kb.stats.get("total_recalls", 0) + 1
         return [fact.content for fact, _ in results]
 
     def get_knowledge_for_prompt(self, query: str, k: int = 3) -> str:
@@ -428,10 +527,7 @@ class SelfTrainer:
 
     def get_stats(self) -> Dict[str, Any]:
         """Get training statistics."""
-        return {
-            **self.kb.get_stats(),
-            'session_learning': len(self.session_learning)
-        }
+        return {**self.kb.get_stats(), "session_learning": len(self.session_learning)}
 
     def get_session_summary(self) -> str:
         """Get summary of what was learned this session."""
@@ -454,11 +550,19 @@ if __name__ == "__main__":
     trainer = SelfTrainer()
 
     # Learn some facts
-    trainer.learn("AI", "Artificial intelligence is the simulation of human intelligence by machines", "test")
+    trainer.learn(
+        "AI", "Artificial intelligence is the simulation of human intelligence by machines", "test"
+    )
     trainer.learn("Memory", "Human memory uses hippocampus for episodic storage", "test")
     trainer.learn("Python", "Python is a high-level programming language", "test")
-    trainer.learn("Neural Networks", "Neural networks are computing systems inspired by biological neurons", "test")
-    trainer.learn("Machine Learning", "Machine learning is a subset of AI that learns from data", "test")
+    trainer.learn(
+        "Neural Networks",
+        "Neural networks are computing systems inspired by biological neurons",
+        "test",
+    )
+    trainer.learn(
+        "Machine Learning", "Machine learning is a subset of AI that learns from data", "test"
+    )
 
     # Test search
     print("\nSearching for 'intelligence':")

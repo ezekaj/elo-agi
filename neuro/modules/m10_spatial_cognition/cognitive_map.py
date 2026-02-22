@@ -27,6 +27,7 @@ from .path_integration import PathIntegrator
 @dataclass
 class Landmark:
     """A recognizable landmark in the environment"""
+
     name: str
     position: np.ndarray
     features: Dict[str, Any] = field(default_factory=dict)
@@ -35,6 +36,7 @@ class Landmark:
 @dataclass
 class Environment:
     """Spatial environment representation"""
+
     bounds: Tuple[float, float, float, float]  # x_min, x_max, y_min, y_max
     landmarks: List[Landmark] = field(default_factory=list)
     name: str = "default"
@@ -49,22 +51,17 @@ class Environment:
 
     @property
     def center(self) -> np.ndarray:
-        return np.array([
-            (self.bounds[0] + self.bounds[1]) / 2,
-            (self.bounds[2] + self.bounds[3]) / 2
-        ])
+        return np.array(
+            [(self.bounds[0] + self.bounds[1]) / 2, (self.bounds[2] + self.bounds[3]) / 2]
+        )
 
     def is_valid_position(self, position: np.ndarray) -> bool:
         """Check if position is within bounds"""
         x, y = position
-        return (self.bounds[0] <= x <= self.bounds[1] and
-                self.bounds[2] <= y <= self.bounds[3])
+        return self.bounds[0] <= x <= self.bounds[1] and self.bounds[2] <= y <= self.bounds[3]
 
     def get_visible_landmarks(
-        self,
-        position: np.ndarray,
-        heading: float,
-        fov: float = np.pi
+        self, position: np.ndarray, heading: float, fov: float = np.pi
     ) -> List[Tuple[Landmark, float, float]]:
         """
         Get landmarks visible from position.
@@ -104,6 +101,7 @@ class Environment:
 @dataclass
 class CognitiveMapState:
     """Current state of the cognitive map"""
+
     position: np.ndarray
     heading: float
     place_activity: np.ndarray
@@ -127,7 +125,7 @@ class CognitiveMap:
         n_place_cells: int = 200,
         n_grid_modules: int = 4,
         n_head_direction_cells: int = 60,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ):
         # Default environment
         if environment is None:
@@ -143,29 +141,20 @@ class CognitiveMap:
         env_size = (environment.width, environment.height)
 
         self.place_cells = PlaceCellPopulation(
-            n_cells=n_place_cells,
-            environment_size=env_size,
-            random_seed=random_seed
+            n_cells=n_place_cells, environment_size=env_size, random_seed=random_seed
         )
 
-        self.grid_cells = GridCellPopulation(
-            n_modules=n_grid_modules,
-            random_seed=random_seed
-        )
+        self.grid_cells = GridCellPopulation(n_modules=n_grid_modules, random_seed=random_seed)
 
-        self.head_direction = HeadDirectionSystem(
-            n_cells=n_head_direction_cells
-        )
+        self.head_direction = HeadDirectionSystem(n_cells=n_head_direction_cells)
 
-        self.border_cells = BorderCellPopulation(
-            environment_bounds=environment.bounds
-        )
+        self.border_cells = BorderCellPopulation(environment_bounds=environment.bounds)
 
         # Path integrator for navigation
         self.path_integrator = PathIntegrator(
             grid_cells=self.grid_cells,
             head_direction=self.head_direction,
-            initial_position=environment.center
+            initial_position=environment.center,
         )
 
         # Current state
@@ -176,10 +165,7 @@ class CognitiveMap:
         self._encoded_locations: Dict[str, np.ndarray] = {}
 
     def update(
-        self,
-        velocity: np.ndarray,
-        angular_velocity: float = 0.0,
-        dt: float = 0.1
+        self, velocity: np.ndarray, angular_velocity: float = 0.0, dt: float = 0.1
     ) -> CognitiveMapState:
         """
         Update cognitive map with movement.
@@ -200,7 +186,7 @@ class CognitiveMap:
         self._position = np.clip(
             self._position,
             [self.environment.bounds[0], self.environment.bounds[2]],
-            [self.environment.bounds[1], self.environment.bounds[3]]
+            [self.environment.bounds[1], self.environment.bounds[3]],
         )
 
         return self.get_state()
@@ -218,27 +204,20 @@ class CognitiveMap:
         decoded_position = self.place_cells.decode_position(place_activity)
 
         # If landmarks visible, correct estimate
-        if sensory_input and 'landmarks' in sensory_input:
-            for landmark_name, observation in sensory_input['landmarks'].items():
+        if sensory_input and "landmarks" in sensory_input:
+            for landmark_name, observation in sensory_input["landmarks"].items():
                 if landmark_name in [lm.name for lm in self.environment.landmarks]:
                     landmark = next(
-                        lm for lm in self.environment.landmarks
-                        if lm.name == landmark_name
+                        lm for lm in self.environment.landmarks if lm.name == landmark_name
                     )
                     self.path_integrator.correct_with_landmark(
-                        landmark.position,
-                        observation['distance'],
-                        observation['bearing']
+                        landmark.position, observation["distance"], observation["bearing"]
                     )
                     decoded_position = self.path_integrator.position_estimate
 
         return decoded_position
 
-    def navigate_to(
-        self,
-        goal: np.ndarray,
-        speed: float = 0.1
-    ) -> Tuple[np.ndarray, float]:
+    def navigate_to(self, goal: np.ndarray, speed: float = 0.1) -> Tuple[np.ndarray, float]:
         """
         Compute velocity vector to navigate toward goal.
 
@@ -312,7 +291,7 @@ class CognitiveMap:
             grid_activity=grid_activity,
             head_direction_activity=head_activity,
             border_activity=border_activity,
-            nearby_walls=nearby_walls
+            nearby_walls=nearby_walls,
         )
 
     def get_position(self) -> np.ndarray:

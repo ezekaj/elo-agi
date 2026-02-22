@@ -15,31 +15,23 @@ from .intrinsic_motivation import (
     PathEntropyMaximizer,
     PossibilitySpace,
     IntrinsicDrive,
-    ActionDiversityTracker
+    ActionDiversityTracker,
 )
 from .dopamine_system import (
     DopamineSignal,
     PredictionErrorComputer,
     IncentiveSalience,
     BenefitCostEvaluator,
-    DopamineSystem
+    DopamineSystem,
 )
 from .curiosity_drive import (
     CuriosityModule,
     NoveltyDetector,
     InformationValue,
-    ExplorationController
+    ExplorationController,
 )
-from .homeostatic_regulation import (
-    HomeostaticState,
-    NeedBasedValuation,
-    InternalStateTracker
-)
-from .effort_valuation import (
-    EffortCostModel,
-    ParadoxicalEffort,
-    MotivationalTransform
-)
+from .homeostatic_regulation import HomeostaticState, NeedBasedValuation, InternalStateTracker
+from .effort_valuation import EffortCostModel, ParadoxicalEffort, MotivationalTransform
 
 __version__ = "0.1.0"
 __all__ = [

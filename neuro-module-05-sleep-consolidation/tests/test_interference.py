@@ -3,9 +3,14 @@
 import pytest
 import numpy as np
 from neuro.modules.m05_sleep_consolidation.interference_resolution import (
-    InterferenceResolver, InterferenceEvent, MemoryVector,
-    ResolutionStrategy, InterferenceType, InterleaveSchedule,
+    InterferenceResolver,
+    InterferenceEvent,
+    MemoryVector,
+    ResolutionStrategy,
+    InterferenceType,
+    InterleaveSchedule,
 )
+
 
 class TestMemoryVector:
     """Tests for MemoryVector."""
@@ -43,6 +48,7 @@ class TestMemoryVector:
         mem2 = MemoryVector("mem2", vec2, 0.0)
 
         assert mem1.similarity(mem2) == pytest.approx(1.0, abs=0.01)
+
 
 class TestInterleaveSchedule:
     """Tests for InterleaveSchedule."""
@@ -83,6 +89,7 @@ class TestInterleaveSchedule:
 
         assert schedule.is_complete()
 
+
 class TestInterferenceResolver:
     """Tests for InterferenceResolver."""
 
@@ -113,12 +120,8 @@ class TestInterferenceResolver:
     def dissimilar_memories(self, resolver):
         """Create dissimilar memories."""
         np.random.seed(42)
-        mem1 = resolver.register_memory(
-            "memA", np.random.randn(128), encoding_time=0.0
-        )
-        mem2 = resolver.register_memory(
-            "memB", np.random.randn(128), encoding_time=1.0
-        )
+        mem1 = resolver.register_memory("memA", np.random.randn(128), encoding_time=0.0)
+        mem2 = resolver.register_memory("memB", np.random.randn(128), encoding_time=1.0)
         return [mem1, mem2]
 
     def test_initialization(self, resolver):
@@ -163,7 +166,9 @@ class TestInterferenceResolver:
         base = base / np.linalg.norm(base)
 
         resolver.register_memory("old", base, encoding_time=0.0)
-        resolver.register_memory("new", base * 0.99 + 0.01 * np.random.randn(128), encoding_time=10.0)
+        resolver.register_memory(
+            "new", base * 0.99 + 0.01 * np.random.randn(128), encoding_time=10.0
+        )
 
         events = resolver.detect_interference(["old", "new"])
         if events:

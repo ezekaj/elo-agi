@@ -13,6 +13,7 @@ import time
 
 class CalibrationType(Enum):
     """Types of calibration."""
+
     CAMERA_INTRINSIC = "camera_intrinsic"
     CAMERA_EXTRINSIC = "camera_extrinsic"
     IMU = "imu"
@@ -23,6 +24,7 @@ class CalibrationType(Enum):
 
 class CalibrationStatus(Enum):
     """Calibration status."""
+
     NOT_CALIBRATED = "not_calibrated"
     IN_PROGRESS = "in_progress"
     CALIBRATED = "calibrated"
@@ -32,6 +34,7 @@ class CalibrationStatus(Enum):
 @dataclass
 class CalibrationConfig:
     """Configuration for calibration."""
+
     calibration_type: CalibrationType
     n_samples: int = 100
     warmup_samples: int = 10
@@ -43,6 +46,7 @@ class CalibrationConfig:
 @dataclass
 class CalibrationResult:
     """Result of a calibration procedure."""
+
     sensor_id: str
     calibration_type: CalibrationType
     status: CalibrationStatus
@@ -56,6 +60,7 @@ class CalibrationResult:
 @dataclass
 class CameraCalibrationParams:
     """Camera calibration parameters."""
+
     intrinsic_matrix: np.ndarray  # 3x3
     distortion_coeffs: np.ndarray  # 5 or 8 coeffs
     reprojection_error: float
@@ -64,6 +69,7 @@ class CameraCalibrationParams:
 @dataclass
 class IMUCalibrationParams:
     """IMU calibration parameters."""
+
     accelerometer_bias: np.ndarray  # 3D
     accelerometer_scale: np.ndarray  # 3x3
     gyroscope_bias: np.ndarray  # 3D
@@ -155,11 +161,7 @@ class SensorCalibrator:
 
         # Build intrinsic matrix
         cx, cy = image_size[0] / 2, image_size[1] / 2
-        intrinsic = np.array([
-            [focal, 0, cx],
-            [0, focal, cy],
-            [0, 0, 1]
-        ])
+        intrinsic = np.array([[focal, 0, cx], [0, focal, cy], [0, 0, 1]])
 
         # No distortion for simplified version
         distortion = np.zeros(5)
@@ -368,9 +370,7 @@ class SensorCalibrator:
 
             for i in range(n_axes):
                 A = np.vstack([readings[:, i], np.ones(len(readings))]).T
-                calibration_matrix[i, i], bias[i] = np.linalg.lstsq(
-                    A, forces[:, i], rcond=None
-                )[0]
+                calibration_matrix[i, i], bias[i] = np.linalg.lstsq(A, forces[:, i], rcond=None)[0]
 
         # Compute error
         predicted = readings @ calibration_matrix.T + bias

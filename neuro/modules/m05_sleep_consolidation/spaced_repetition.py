@@ -13,25 +13,27 @@ import numpy as np
 
 class ReviewQuality(Enum):
     """Quality of memory recall during review."""
-    COMPLETE_BLACKOUT = 0      # No recall at all
-    INCORRECT = 1              # Incorrect recall
-    DIFFICULT_CORRECT = 2      # Correct with difficulty
-    CORRECT_WITH_EFFORT = 3    # Correct with some effort
-    EASY_CORRECT = 4           # Correct, easy recall
-    PERFECT = 5                # Perfect, automatic recall
+
+    COMPLETE_BLACKOUT = 0  # No recall at all
+    INCORRECT = 1  # Incorrect recall
+    DIFFICULT_CORRECT = 2  # Correct with difficulty
+    CORRECT_WITH_EFFORT = 3  # Correct with some effort
+    EASY_CORRECT = 4  # Correct, easy recall
+    PERFECT = 5  # Perfect, automatic recall
 
 
 @dataclass
 class RepetitionSchedule:
     """Schedule for a single memory's repetitions."""
+
     memory_id: str
-    next_review: float          # Night index for next review
-    interval: float             # Current interval (nights)
-    easiness: float             # SM-2 easiness factor (1.3-2.5)
-    repetition_count: int       # Number of successful reviews
-    last_review: float          # Night of last review
+    next_review: float  # Night index for next review
+    interval: float  # Current interval (nights)
+    easiness: float  # SM-2 easiness factor (1.3-2.5)
+    repetition_count: int  # Number of successful reviews
+    last_review: float  # Night of last review
     last_quality: ReviewQuality = ReviewQuality.CORRECT_WITH_EFFORT
-    streak: int = 0             # Consecutive successful reviews
+    streak: int = 0  # Consecutive successful reviews
     total_reviews: int = 0
     created_night: float = 0.0
 
@@ -51,6 +53,7 @@ class RepetitionSchedule:
 @dataclass
 class ReviewResult:
     """Result of a memory review."""
+
     memory_id: str
     night_index: float
     quality: ReviewQuality
@@ -341,7 +344,8 @@ class SpacedRepetitionScheduler:
                 interval=schedule_data.get("interval", self.initial_interval),
                 easiness=schedule_data.get("easiness", self.initial_easiness),
                 repetition_count=schedule_data.get("repetition_count", 0),
-                last_review=schedule_data.get("next_review", 0.0) - schedule_data.get("interval", 0.0),
+                last_review=schedule_data.get("next_review", 0.0)
+                - schedule_data.get("interval", 0.0),
                 streak=schedule_data.get("streak", 0),
                 total_reviews=schedule_data.get("total_reviews", 0),
             )
@@ -385,7 +389,8 @@ class SpacedRepetitionScheduler:
                 # Move some reviews to adjacent days
                 night = self._current_night + day_idx
                 due_that_day = [
-                    (m_id, s) for m_id, s in self._schedules.items()
+                    (m_id, s)
+                    for m_id, s in self._schedules.items()
                     if abs(s.next_review - night) < 0.5
                 ]
 
@@ -430,16 +435,15 @@ class SpacedRepetitionScheduler:
             "total_reviews": self._total_reviews,
             "successful_reviews": self._successful_reviews,
             "success_rate": (
-                self._successful_reviews / self._total_reviews
-                if self._total_reviews > 0 else 0.0
+                self._successful_reviews / self._total_reviews if self._total_reviews > 0 else 0.0
             ),
             "workload_7day": self.get_workload_forecast(days=7),
         }
 
 
 __all__ = [
-    'ReviewQuality',
-    'RepetitionSchedule',
-    'ReviewResult',
-    'SpacedRepetitionScheduler',
+    "ReviewQuality",
+    "RepetitionSchedule",
+    "ReviewResult",
+    "SpacedRepetitionScheduler",
 ]

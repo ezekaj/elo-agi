@@ -12,6 +12,7 @@ from typing import Optional, Tuple, List, Dict
 @dataclass
 class SensorimotorParams:
     """Parameters for sensorimotor processing"""
+
     n_sensory: int = 50
     n_motor: int = 30
     prediction_gain: float = 0.8
@@ -56,8 +57,13 @@ class MotorSensoryCoupling:
         motor_command = np.tanh(np.dot(self.sensory_to_motor, desired_sensory))
         return motor_command
 
-    def update_coupling(self, motor: np.ndarray, predicted: np.ndarray,
-                       actual: np.ndarray, learning_rate: float = 0.01):
+    def update_coupling(
+        self,
+        motor: np.ndarray,
+        predicted: np.ndarray,
+        actual: np.ndarray,
+        learning_rate: float = 0.01,
+    ):
         """Update forward model based on prediction error"""
         error = actual - predicted
 
@@ -109,9 +115,7 @@ class PredictiveProcessor:
         self.efference_copy = command.copy()
 
         # Generate prediction
-        self.prediction = np.tanh(
-            np.dot(self.forward_model, command) * self.params.prediction_gain
-        )
+        self.prediction = np.tanh(np.dot(self.forward_model, command) * self.params.prediction_gain)
 
         return self.prediction
 
@@ -132,9 +136,7 @@ class PredictiveProcessor:
         self.error_history.append(np.mean(np.abs(self.prediction_error)))
 
         # Update forward model (error-driven learning)
-        delta = self.params.learning_rate * np.outer(
-            self.prediction_error, self.efference_copy
-        )
+        delta = self.params.learning_rate * np.outer(self.prediction_error, self.efference_copy)
         self.forward_model += delta
 
         return self.prediction_error
@@ -160,9 +162,7 @@ class SensorimotorLoop:
         self.params = params or SensorimotorParams()
 
         # Components
-        self.coupling = MotorSensoryCoupling(
-            self.params.n_sensory, self.params.n_motor
-        )
+        self.coupling = MotorSensoryCoupling(self.params.n_sensory, self.params.n_motor)
         self.predictor = PredictiveProcessor(self.params)
 
         # State
@@ -207,8 +207,7 @@ class SensorimotorLoop:
 
         # 5. Update coupling based on error
         self.coupling.update_coupling(
-            self.motor_output, prediction, self.sensory_input,
-            self.params.learning_rate
+            self.motor_output, prediction, self.sensory_input, self.params.learning_rate
         )
 
         self.t += 1
@@ -219,11 +218,12 @@ class SensorimotorLoop:
             "sensory_input": self.sensory_input.copy(),
             "prediction_error": error.copy(),
             "surprise": self.predictor.get_surprise(),
-            "goal_error": np.mean(np.abs(self.sensory_input - self.goal_state))
+            "goal_error": np.mean(np.abs(self.sensory_input - self.goal_state)),
         }
 
-    def run_to_goal(self, goal: np.ndarray, max_steps: int = 100,
-                   tolerance: float = 0.1) -> List[Dict]:
+    def run_to_goal(
+        self, goal: np.ndarray, max_steps: int = 100, tolerance: float = 0.1
+    ) -> List[Dict]:
         """Run loop until goal is reached
 
         Args:
@@ -254,5 +254,5 @@ class SensorimotorLoop:
             "goal_state": self.goal_state.copy(),
             "prediction": self.predictor.prediction.copy(),
             "coupling_strength": self.coupling.get_coupling_strength(),
-            "mean_error": self.predictor.get_mean_error()
+            "mean_error": self.predictor.get_mean_error(),
         }

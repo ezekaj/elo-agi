@@ -4,16 +4,17 @@ import numpy as np
 import pytest
 from neuro.modules.m08_language.predictive_language import (
     PredictiveLanguageProcessor,
-    LanguageAcquisitionSimulator
+    LanguageAcquisitionSimulator,
 )
 from neuro.modules.m08_language.recursive_parser import (
     RecursiveGrammar,
     ConstituentParser,
     LinearPredictor,
     Constituent,
-    compare_human_vs_llm
+    compare_human_vs_llm,
 )
 from neuro.modules.m08_language.grammar_manifold import ImpossibleGrammarGenerator
+
 
 class TestPredictiveLanguageProcessor:
     """Tests for integrated language processor"""
@@ -45,10 +46,10 @@ class TestPredictiveLanguageProcessor:
         tokens = ["the", "cat", "sat"]
         result = processor.process_utterance(tokens)
 
-        assert result['tokens'] == tokens
-        assert len(result['token_results']) == 3
-        assert 'final_state' in result
-        assert 'total_error' in result
+        assert result["tokens"] == tokens
+        assert len(result["token_results"]) == 3
+        assert "final_state" in result
+        assert "total_error" in result
 
     def test_grammar_testing(self):
         """Test grammar evaluation"""
@@ -57,27 +58,24 @@ class TestPredictiveLanguageProcessor:
         grammar_params = np.random.randn(32)
         result = processor.test_grammar(grammar_params)
 
-        assert 'is_possible' in result
-        assert 'violation_score' in result
-        assert 'broca_inhibition' in result
-        assert 'ug_compatibility' in result
+        assert "is_possible" in result
+        assert "violation_score" in result
+        assert "broca_inhibition" in result
+        assert "ug_compatibility" in result
 
     def test_lesion_experiment(self):
         """Test lesion experiment"""
         processor = PredictiveLanguageProcessor(input_dim=64, hidden_dim=32)
 
-        test_utterances = [
-            ["the", "cat"],
-            ["a", "dog", "runs"]
-        ]
+        test_utterances = [["the", "cat"], ["a", "dog", "runs"]]
 
-        result = processor.lesion_experiment('broca', test_utterances, damage_level=1.0)
+        result = processor.lesion_experiment("broca", test_utterances, damage_level=1.0)
 
-        assert result['region'] == 'broca'
-        assert 'baseline' in result
-        assert 'lesioned' in result
+        assert result["region"] == "broca"
+        assert "baseline" in result
+        assert "lesioned" in result
         # Key finding: Broca's alone should still be functional
-        assert result['broca_alone_functional']
+        assert result["broca_alone_functional"]
 
     def test_layer_activations(self):
         """Test getting layer activations"""
@@ -86,10 +84,11 @@ class TestPredictiveLanguageProcessor:
         processor.process_token("test")
         activations = processor.get_layer_activations()
 
-        assert 'phonological' in activations
-        assert 'syntactic' in activations
-        assert 'semantic' in activations
-        assert 'pragmatic' in activations
+        assert "phonological" in activations
+        assert "syntactic" in activations
+        assert "semantic" in activations
+        assert "pragmatic" in activations
+
 
 class TestRecursiveParser:
     """Tests for recursive parser"""
@@ -98,15 +97,15 @@ class TestRecursiveParser:
         """Test recursive grammar generation"""
         grammar = RecursiveGrammar()
 
-        tree = grammar.generate('S', max_depth=3)
+        tree = grammar.generate("S", max_depth=3)
 
         assert isinstance(tree, Constituent)
-        assert tree.label == 'S'
+        assert tree.label == "S"
 
     def test_constituent_structure(self):
         """Test constituent tree structure"""
         grammar = RecursiveGrammar()
-        tree = grammar.generate('S', max_depth=4)
+        tree = grammar.generate("S", max_depth=4)
 
         # Has depth
         assert tree.depth() >= 1
@@ -149,9 +148,10 @@ class TestRecursiveParser:
         """Test human vs LLM comparison"""
         result = compare_human_vs_llm("the cat sat on the mat")
 
-        assert result['human_has_hierarchy']
-        assert not result['llm_has_hierarchy']
-        assert result['human_depth'] >= 1
+        assert result["human_has_hierarchy"]
+        assert not result["llm_has_hierarchy"]
+        assert result["human_depth"] >= 1
+
 
 class TestLanguageAcquisition:
     """Tests for language acquisition simulation"""
@@ -164,9 +164,9 @@ class TestLanguageAcquisition:
         samples = [np.random.randn(32) * 0.3 for _ in range(5)]
         result = simulator.attempt_grammar_learning(samples, n_epochs=3)
 
-        assert 'success' in result
-        assert 'final_inhibition' in result
-        assert 'inhibition_history' in result
+        assert "success" in result
+        assert "final_inhibition" in result
+        assert "inhibition_history" in result
 
     def test_possible_vs_impossible(self):
         """Test selective inhibition in acquisition"""
@@ -179,9 +179,10 @@ class TestLanguageAcquisition:
 
         result = simulator.compare_possible_vs_impossible(possible, impossible)
 
-        assert 'possible' in result
-        assert 'impossible' in result
-        assert 'selective_inhibition' in result
+        assert "possible" in result
+        assert "impossible" in result
+        assert "selective_inhibition" in result
+
 
 class TestFullPipeline:
     """End-to-end integration tests"""
@@ -194,47 +195,40 @@ class TestFullPipeline:
         result = processor.process_utterance(sentence, update_weights=True)
 
         # Should complete without error
-        assert result['tokens'] == sentence
-        assert np.isfinite(result['total_error'])
+        assert result["tokens"] == sentence
+        assert np.isfinite(result["total_error"])
 
         # Timescales should be ordered
-        timescales = result['layer_timescales']
+        timescales = result["layer_timescales"]
         assert timescales[0] < timescales[1] < timescales[2] < timescales[3]
 
     def test_multiple_sentences(self):
         """Test processing multiple sentences"""
         processor = PredictiveLanguageProcessor(input_dim=64, hidden_dim=32)
 
-        sentences = [
-            ["the", "cat", "ran"],
-            ["a", "dog", "barked"],
-            ["the", "bird", "flew"]
-        ]
+        sentences = [["the", "cat", "ran"], ["a", "dog", "barked"], ["the", "bird", "flew"]]
 
         results = processor.process_sequence(sentences)
 
         assert len(results) == 3
         for result in results:
-            assert np.isfinite(result['total_error'])
+            assert np.isfinite(result["total_error"])
 
     def test_lesion_comparison(self):
         """Test comparing different lesion conditions"""
         processor = PredictiveLanguageProcessor(input_dim=64, hidden_dim=32)
 
-        test_sentences = [
-            ["the", "cat"],
-            ["a", "dog"]
-        ]
+        test_sentences = [["the", "cat"], ["a", "dog"]]
 
         # Broca lesion
-        broca_result = processor.lesion_experiment('broca', test_sentences)
+        broca_result = processor.lesion_experiment("broca", test_sentences)
 
         # Wernicke lesion
-        wernicke_result = processor.lesion_experiment('wernicke', test_sentences)
+        wernicke_result = processor.lesion_experiment("wernicke", test_sentences)
 
         # Both should have results
-        assert broca_result['region'] == 'broca'
-        assert wernicke_result['region'] == 'wernicke'
+        assert broca_result["region"] == "broca"
+        assert wernicke_result["region"] == "wernicke"
 
     def test_reset(self):
         """Test system reset"""
@@ -250,5 +244,6 @@ class TestFullPipeline:
         assert processor.current_state is None
         assert len(processor.processing_history) == 0
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -24,6 +24,7 @@ except ImportError:
 @dataclass
 class RunConfig:
     """Configuration for benchmark runner."""
+
     output_dir: Path = field(default_factory=lambda: Path("results"))
     n_trials: Optional[int] = None  # Override per-benchmark settings
     verbose: bool = True
@@ -34,6 +35,7 @@ class RunConfig:
 @dataclass
 class RunResult:
     """Result of a complete benchmark run."""
+
     suite_name: str
     results: Dict[str, BenchmarkResult]
     total_time: float
@@ -60,16 +62,13 @@ class RunResult:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'suite_name': self.suite_name,
-            'n_benchmarks': self.n_benchmarks,
-            'overall_score': self.overall_score,
-            'overall_success_rate': self.overall_success_rate,
-            'total_time': self.total_time,
-            'timestamp': self.timestamp,
-            'benchmarks': {
-                name: result.to_dict()
-                for name, result in self.results.items()
-            },
+            "suite_name": self.suite_name,
+            "n_benchmarks": self.n_benchmarks,
+            "overall_score": self.overall_score,
+            "overall_success_rate": self.overall_success_rate,
+            "total_time": self.total_time,
+            "timestamp": self.timestamp,
+            "benchmarks": {name: result.to_dict() for name, result in self.results.items()},
         }
 
 
@@ -165,8 +164,10 @@ class BenchmarkRunner:
                 all_results[f"{name}/{bench_name}"] = result
 
                 if self.config.verbose:
-                    print(f"  {bench_name}: score={result.mean_score:.3f}, "
-                          f"success={result.success_rate:.1%}")
+                    print(
+                        f"  {bench_name}: score={result.mean_score:.3f}, "
+                        f"success={result.success_rate:.1%}"
+                    )
 
         total_time = time.time() - start_time
 
@@ -213,7 +214,7 @@ class BenchmarkRunner:
         filename = f"run_{int(run_result.timestamp)}.json"
         filepath = output_dir / filename
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(run_result.to_dict(), f, indent=2, default=str)
 
     def get_history(self) -> List[RunResult]:
@@ -229,13 +230,13 @@ class BenchmarkRunner:
         run2 = self._run_history[run2_idx]
 
         comparison = {
-            'run1_score': run1.overall_score,
-            'run2_score': run2.overall_score,
-            'score_diff': run2.overall_score - run1.overall_score,
-            'run1_success': run1.overall_success_rate,
-            'run2_success': run2.overall_success_rate,
-            'success_diff': run2.overall_success_rate - run1.overall_success_rate,
-            'per_benchmark': {},
+            "run1_score": run1.overall_score,
+            "run2_score": run2.overall_score,
+            "score_diff": run2.overall_score - run1.overall_score,
+            "run1_success": run1.overall_success_rate,
+            "run2_success": run2.overall_success_rate,
+            "success_diff": run2.overall_success_rate - run1.overall_success_rate,
+            "per_benchmark": {},
         }
 
         # Per-benchmark comparison
@@ -243,10 +244,10 @@ class BenchmarkRunner:
         for bench in all_benchmarks:
             score1 = run1.results.get(bench, BenchmarkResult(bench, None, [], 0)).mean_score
             score2 = run2.results.get(bench, BenchmarkResult(bench, None, [], 0)).mean_score
-            comparison['per_benchmark'][bench] = {
-                'run1': score1,
-                'run2': score2,
-                'diff': score2 - score1,
+            comparison["per_benchmark"][bench] = {
+                "run1": score1,
+                "run2": score2,
+                "diff": score2 - score1,
             }
 
         return comparison
@@ -282,8 +283,8 @@ class BenchmarkRunner:
         # Group by category
         categories = {}
         for name, result in run_result.results.items():
-            parts = name.split('/')
-            category = parts[0] if len(parts) > 1 else 'default'
+            parts = name.split("/")
+            category = parts[0] if len(parts) > 1 else "default"
             bench_name = parts[-1]
 
             if category not in categories:
@@ -300,12 +301,14 @@ class BenchmarkRunner:
                     f"latency={result.mean_latency:.3f}s"
                 )
 
-        lines.extend([
-            "",
-            "=" * 60,
-            "END OF REPORT",
-            "=" * 60,
-        ])
+        lines.extend(
+            [
+                "",
+                "=" * 60,
+                "END OF REPORT",
+                "=" * 60,
+            ]
+        )
 
         return "\n".join(lines)
 
@@ -332,8 +335,8 @@ class BenchmarkRunner:
         # Group benchmarks by category
         categories = {}
         for name, result in run_result.results.items():
-            parts = name.split('/')
-            category = parts[0] if len(parts) > 1 else 'default'
+            parts = name.split("/")
+            category = parts[0] if len(parts) > 1 else "default"
             bench_name = parts[-1]
 
             if category not in categories:
@@ -341,7 +344,7 @@ class BenchmarkRunner:
             categories[category].append((bench_name, result))
 
         # Build HTML
-        html = f'''<!DOCTYPE html>
+        html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -466,13 +469,13 @@ class BenchmarkRunner:
             <span class="metric-label">Benchmarks</span>
         </div>
     </div>
-'''
+"""
 
         # Add benchmark tables by category
         for category, benchmarks in sorted(categories.items()):
-            html += f'''
+            html += f"""
     <div class="category">
-        <h3 class="category-title">{category.replace('-', ' ').title()}</h3>
+        <h3 class="category-title">{category.replace("-", " ").title()}</h3>
         <table>
             <thead>
                 <tr>
@@ -484,10 +487,10 @@ class BenchmarkRunner:
                 </tr>
             </thead>
             <tbody>
-'''
+"""
             for bench_name, result in benchmarks:
                 score_pct = min(100, result.mean_score * 100)
-                html += f'''
+                html += f"""
                 <tr>
                     <td>{bench_name}</td>
                     <td><strong>{result.mean_score:.3f}</strong></td>
@@ -499,27 +502,27 @@ class BenchmarkRunner:
                         </div>
                     </td>
                 </tr>
-'''
-            html += '''
+"""
+            html += """
             </tbody>
         </table>
     </div>
-'''
+"""
 
-        html += '''
+        html += """
     <div class="footer">
         <p>Generated by <strong>Neuro AGI Benchmark Suite v0.9.0</strong></p>
         <p>38 cognitive modules | Neuroscience-inspired architecture</p>
     </div>
 </body>
 </html>
-'''
+"""
 
         # Save to file if requested
         if output_file:
             output_path = Path(output_file)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 f.write(html)
 
         return html
@@ -533,11 +536,11 @@ def create_random_agent() -> Callable[[Any], Any]:
         """Agent that returns random outputs."""
         if isinstance(input_data, dict):
             # Try to determine expected output type
-            if 'sequence' in input_data:
+            if "sequence" in input_data:
                 return rng.integers(0, 10, size=7).tolist()
-            elif 'grid_size' in input_data:
-                return ['right'] * 5
-            elif 'premises' in input_data:
+            elif "grid_size" in input_data:
+                return ["right"] * 5
+            elif "premises" in input_data:
                 return rng.choice([True, False])
             else:
                 return rng.random(64)
@@ -549,10 +552,12 @@ def create_random_agent() -> Callable[[Any], Any]:
 
 def quick_benchmark(agent_fn: Callable[[Any], Any], n_trials: int = 10) -> RunResult:
     """Quickly benchmark an agent with reduced trials."""
-    runner = BenchmarkRunner(RunConfig(
-        n_trials=n_trials,
-        verbose=True,
-        save_results=False,
-    ))
+    runner = BenchmarkRunner(
+        RunConfig(
+            n_trials=n_trials,
+            verbose=True,
+            save_results=False,
+        )
+    )
     runner.create_default_suite()
     return runner.run(agent_fn)

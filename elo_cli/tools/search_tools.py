@@ -19,14 +19,14 @@ class GlobTool(Tool):
         "properties": {
             "pattern": {
                 "type": "string",
-                "description": "Glob pattern to match (e.g., '*.py', '**/*.js')"
+                "description": "Glob pattern to match (e.g., '*.py', '**/*.js')",
             },
             "path": {
                 "type": "string",
-                "description": "Directory to search in (default: current directory)"
-            }
+                "description": "Directory to search in (default: current directory)",
+            },
         },
-        "required": ["pattern"]
+        "required": ["pattern"],
     }
 
     def execute(self, pattern: str, path: str = ".", **kwargs) -> ToolResult:
@@ -54,8 +54,8 @@ class GlobTool(Tool):
 
             return ToolResult(
                 True,
-                '\n'.join(output_lines),
-                data={"count": len(matches), "files": [str(m) for m in matches[:50]]}
+                "\n".join(output_lines),
+                data={"count": len(matches), "files": [str(m) for m in matches[:50]]},
             )
 
         except Exception as e:
@@ -72,20 +72,14 @@ class GrepTool(Tool):
     parameters = {
         "type": "object",
         "properties": {
-            "pattern": {
-                "type": "string",
-                "description": "Regex pattern to search for"
-            },
-            "path": {
-                "type": "string",
-                "description": "File or directory to search in"
-            },
+            "pattern": {"type": "string", "description": "Regex pattern to search for"},
+            "path": {"type": "string", "description": "File or directory to search in"},
             "file_pattern": {
                 "type": "string",
-                "description": "Only search files matching this glob (e.g., '*.py')"
-            }
+                "description": "Only search files matching this glob (e.g., '*.py')",
+            },
         },
-        "required": ["pattern", "path"]
+        "required": ["pattern", "path"],
     }
 
     def execute(self, pattern: str, path: str, file_pattern: str = "*", **kwargs) -> ToolResult:
@@ -106,9 +100,13 @@ class GrepTool(Tool):
 
                 try:
                     content = file_path.read_text()
-                    for i, line in enumerate(content.split('\n'), 1):
+                    for i, line in enumerate(content.split("\n"), 1):
                         if regex.search(line):
-                            rel_path = file_path.relative_to(base) if file_path.is_relative_to(base) else file_path
+                            rel_path = (
+                                file_path.relative_to(base)
+                                if file_path.is_relative_to(base)
+                                else file_path
+                            )
                             matches.append((str(rel_path), i, line.strip()[:100]))
                 except (UnicodeDecodeError, PermissionError):
                     continue
@@ -125,9 +123,7 @@ class GrepTool(Tool):
                 output_lines.append(f"  ... and {len(matches) - 30} more matches")
 
             return ToolResult(
-                True,
-                '\n'.join(output_lines),
-                data={"count": len(matches), "matches": matches[:30]}
+                True, "\n".join(output_lines), data={"count": len(matches), "matches": matches[:30]}
             )
 
         except re.error as e:
@@ -148,14 +144,11 @@ class LsTool(Tool):
         "properties": {
             "path": {
                 "type": "string",
-                "description": "Directory to list (default: current directory)"
+                "description": "Directory to list (default: current directory)",
             },
-            "all": {
-                "type": "boolean",
-                "description": "Include hidden files (default: false)"
-            }
+            "all": {"type": "boolean", "description": "Include hidden files (default: false)"},
         },
-        "required": []
+        "required": [],
     }
 
     def execute(self, path: str = ".", all: bool = False, **kwargs) -> ToolResult:
@@ -170,7 +163,7 @@ class LsTool(Tool):
 
             entries = []
             for entry in sorted(p.iterdir()):
-                if not all and entry.name.startswith('.'):
+                if not all and entry.name.startswith("."):
                     continue
 
                 if entry.is_dir():
@@ -179,13 +172,9 @@ class LsTool(Tool):
                     size = entry.stat().st_size
                     entries.append(f"  📄 {entry.name} ({size:,} bytes)")
 
-            output = f"Contents of {p}:\n\n" + '\n'.join(entries)
+            output = f"Contents of {p}:\n\n" + "\n".join(entries)
 
-            return ToolResult(
-                True,
-                output,
-                data={"path": str(p), "count": len(entries)}
-            )
+            return ToolResult(True, output, data={"path": str(p), "count": len(entries)})
 
         except PermissionError:
             return ToolResult(False, "", f"Permission denied: {path}")

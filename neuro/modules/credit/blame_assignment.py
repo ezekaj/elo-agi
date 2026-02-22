@@ -15,6 +15,7 @@ import numpy as np
 
 class FailureType(Enum):
     """Types of failures."""
+
     TIMEOUT = "timeout"
     CONSTRAINT_VIOLATION = "constraint_violation"
     GOAL_UNREACHED = "goal_unreached"
@@ -26,6 +27,7 @@ class FailureType(Enum):
 @dataclass
 class Failure:
     """A detected failure event."""
+
     failure_type: FailureType
     description: str
     timestamp: int
@@ -37,6 +39,7 @@ class Failure:
 @dataclass
 class BlameResult:
     """Result of blame assignment."""
+
     module_id: str
     blame_score: float
     confidence: float
@@ -48,6 +51,7 @@ class BlameResult:
 @dataclass
 class ModuleAction:
     """Record of a module action."""
+
     module_id: str
     action: Any
     state_before: Any
@@ -102,7 +106,9 @@ class CounterfactualBlame:
         alt_idx = 0
 
         for action_record in original_trajectory:
-            if action_record.module_id == intervention_module and alt_idx < len(alternative_actions):
+            if action_record.module_id == intervention_module and alt_idx < len(
+                alternative_actions
+            ):
                 action = alternative_actions[alt_idx]
                 alt_idx += 1
             else:
@@ -266,10 +272,10 @@ class BlameAssignment:
         evidence.append(f"contribution: {contribution:.2f}")
 
         blame_score = (
-            0.3 * temporal_blame +
-            0.3 * counterfactual_impact +
-            0.2 * historical_blame +
-            0.2 * contribution
+            0.3 * temporal_blame
+            + 0.3 * counterfactual_impact
+            + 0.2 * historical_blame
+            + 0.2 * contribution
         )
 
         confidence = self._compute_confidence(len(module_actions), len(trajectory))
@@ -316,10 +322,7 @@ class BlameAssignment:
 
     def get_chronic_offenders(self, threshold: int = 3) -> List[Tuple[str, int]]:
         """Get modules with repeated failures."""
-        offenders = [
-            (m, c) for m, c in self._module_failure_counts.items()
-            if c >= threshold
-        ]
+        offenders = [(m, c) for m, c in self._module_failure_counts.items() if c >= threshold]
         return sorted(offenders, key=lambda x: x[1], reverse=True)
 
     def _compute_temporal_blame(
@@ -348,7 +351,8 @@ class BlameAssignment:
     ) -> float:
         """Compute blame based on historical patterns."""
         relevant_failures = [
-            (f, d) for f, d in self._failure_history
+            (f, d)
+            for f, d in self._failure_history
             if f.failure_type == failure_type and module_id in d
         ]
 

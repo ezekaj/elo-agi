@@ -20,6 +20,7 @@ from neuro.modules.causal.causal_discovery import (
     EdgeType,
 )
 
+
 def generate_data_from_dag(
     n_samples: int,
     adjacency: dict,
@@ -51,6 +52,7 @@ def generate_data_from_dag(
 
     return data, variables
 
+
 @pytest.fixture
 def chain_data():
     """Generate data from chain: A -> B -> C."""
@@ -61,6 +63,7 @@ def chain_data():
     }
     data, var_names = generate_data_from_dag(500, adjacency)
     return data, var_names, adjacency
+
 
 @pytest.fixture
 def fork_data():
@@ -73,6 +76,7 @@ def fork_data():
     data, var_names = generate_data_from_dag(500, adjacency)
     return data, var_names, adjacency
 
+
 @pytest.fixture
 def collider_data():
     """Generate data from collider: A -> C <- B."""
@@ -83,6 +87,7 @@ def collider_data():
     }
     data, var_names = generate_data_from_dag(500, adjacency)
     return data, var_names, adjacency
+
 
 class TestConditionalIndependenceTest:
     """Test CI testing methods."""
@@ -139,7 +144,7 @@ class TestConditionalIndependenceTest:
         np.random.seed(42)
         n = 500
         x = np.random.randn(n)
-        y = x ** 2 + np.random.randn(n) * 0.1  # Non-linear dependence
+        y = x**2 + np.random.randn(n) * 0.1  # Non-linear dependence
         data = np.column_stack([x, y])
 
         ci_test = ConditionalIndependenceTest(method="mutual_information", alpha=0.05)
@@ -158,6 +163,7 @@ class TestConditionalIndependenceTest:
 
         stats = ci_test.statistics()
         assert stats["n_tests"] == 2
+
 
 class TestCausalGraph:
     """Test CausalGraph data structure."""
@@ -225,6 +231,7 @@ class TestCausalGraph:
         assert edge.confidence == 0.9
 
         assert graph.get_edge("B", "A") is None  # Directed, not symmetric
+
 
 class TestPCAlgorithm:
     """Test PC algorithm implementation."""
@@ -325,6 +332,7 @@ class TestPCAlgorithm:
         assert graph.get_edge("B", "C") is None
         assert graph.get_edge("C", "B") is None
 
+
 class TestStructureUncertainty:
     """Test uncertainty estimation."""
 
@@ -333,9 +341,7 @@ class TestStructureUncertainty:
         data, var_names, _ = chain_data
 
         discovery = CausalDiscovery(alpha=0.01)
-        edge_conf = discovery.estimate_structure_uncertainty(
-            data, var_names, n_bootstrap=10
-        )
+        edge_conf = discovery.estimate_structure_uncertainty(data, var_names, n_bootstrap=10)
 
         # Should have confidence for discovered edges
         assert isinstance(edge_conf, dict)
@@ -346,14 +352,13 @@ class TestStructureUncertainty:
         data, var_names, _ = chain_data
 
         discovery = CausalDiscovery(alpha=0.01)
-        edge_conf = discovery.estimate_structure_uncertainty(
-            data, var_names, n_bootstrap=30
-        )
+        edge_conf = discovery.estimate_structure_uncertainty(data, var_names, n_bootstrap=30)
 
         # A-B edge should have high confidence
         ab_key = tuple(sorted(["A", "B"]))
         if ab_key in edge_conf:
             assert edge_conf[ab_key] > 0.5
+
 
 class TestGraphComparison:
     """Test graph comparison metrics."""
@@ -392,6 +397,7 @@ class TestGraphComparison:
         assert metrics["precision"] == 0.0
         assert metrics["recall"] == 0.0
 
+
 class TestGraphScoring:
     """Test BIC scoring of graphs."""
 
@@ -421,6 +427,7 @@ class TestGraphScoring:
         # Note: This may not always hold depending on noise
         assert isinstance(true_score, float)
         assert isinstance(wrong_score, float)
+
 
 class TestEdgeCases:
     """Test edge cases."""
@@ -483,6 +490,7 @@ class TestEdgeCases:
 
         # Should detect strong dependence
         assert len(graph.edges) >= 0  # May or may not detect depending on numerical issues
+
 
 class TestStatisticsTracking:
     """Test statistics tracking."""

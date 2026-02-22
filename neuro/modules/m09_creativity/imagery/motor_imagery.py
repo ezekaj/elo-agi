@@ -19,6 +19,7 @@ from enum import Enum
 
 class MotorProperty(Enum):
     """Properties of motor images"""
+
     FORCE = "force"
     SPEED = "speed"
     PRECISION = "precision"
@@ -31,13 +32,14 @@ class MotorProperty(Enum):
 @dataclass
 class MotorImage:
     """A mental motor image - simulated action"""
+
     id: str
     action: str
     properties: Dict[MotorProperty, Any]
     vividness: float
     duration: float  # seconds
     body_parts: List[str] = field(default_factory=list)
-    sequence: List['MotorImage'] = field(default_factory=list)
+    sequence: List["MotorImage"] = field(default_factory=list)
     kinesthetic_feel: float = 0.5  # How much you "feel" the movement
 
 
@@ -56,12 +58,14 @@ class MotorImagery:
         self.actions: Dict[str, MotorImage] = {}
         self.default_vividness = default_vividness
 
-    def imagine_action(self,
-                       action_id: str,
-                       action: str,
-                       body_parts: Optional[List[str]] = None,
-                       properties: Optional[Dict[MotorProperty, Any]] = None,
-                       duration: float = 1.0) -> MotorImage:
+    def imagine_action(
+        self,
+        action_id: str,
+        action: str,
+        body_parts: Optional[List[str]] = None,
+        properties: Optional[Dict[MotorProperty, Any]] = None,
+        duration: float = 1.0,
+    ) -> MotorImage:
         """
         Imagine performing an action.
 
@@ -74,7 +78,7 @@ class MotorImagery:
             vividness=self.default_vividness,
             duration=duration,
             body_parts=body_parts or [],
-            kinesthetic_feel=0.5
+            kinesthetic_feel=0.5,
         )
 
         self.actions[action_id] = motor_image
@@ -89,10 +93,7 @@ class MotorImagery:
 
         action_id = f"movement_{len(self.actions)}"
         return self.imagine_action(
-            action_id,
-            description,
-            body_parts=body_parts,
-            properties=properties
+            action_id, description, body_parts=body_parts, properties=properties
         )
 
     def _extract_properties(self, description: str) -> Dict[MotorProperty, Any]:
@@ -124,9 +125,19 @@ class MotorImagery:
         desc_lower = description.lower()
 
         body_part_keywords = [
-            "hand", "hands", "arm", "arms", "leg", "legs",
-            "foot", "feet", "finger", "fingers", "head",
-            "body", "whole body"
+            "hand",
+            "hands",
+            "arm",
+            "arms",
+            "leg",
+            "legs",
+            "foot",
+            "feet",
+            "finger",
+            "fingers",
+            "head",
+            "body",
+            "whole body",
         ]
 
         for part in body_part_keywords:
@@ -175,7 +186,7 @@ class MotorImagery:
             vividness=original.vividness,
             duration=original.duration / factor,
             body_parts=original.body_parts,
-            kinesthetic_feel=original.kinesthetic_feel * 1.1  # Better feel in slow-mo
+            kinesthetic_feel=original.kinesthetic_feel * 1.1,  # Better feel in slow-mo
         )
 
         self.actions[slow_id] = slow
@@ -202,13 +213,13 @@ class MotorImagery:
             action=f"Sequence: {' -> '.join(a.action for a in actions)}",
             properties={
                 MotorProperty.DURATION: total_duration,
-                MotorProperty.COORDINATION: "sequential"
+                MotorProperty.COORDINATION: "sequential",
             },
             vividness=np.mean([a.vividness for a in actions]),
             duration=total_duration,
             body_parts=all_body_parts,
             sequence=actions,
-            kinesthetic_feel=np.mean([a.kinesthetic_feel for a in actions])
+            kinesthetic_feel=np.mean([a.kinesthetic_feel for a in actions]),
         )
 
         self.actions[seq_id] = sequence
@@ -236,7 +247,7 @@ class MotorImagery:
             vividness=original.vividness,
             duration=original.duration,
             body_parts=original.body_parts,
-            kinesthetic_feel=original.kinesthetic_feel
+            kinesthetic_feel=original.kinesthetic_feel,
         )
 
         self.actions[new_id] = modified
@@ -269,7 +280,7 @@ class MotorImagery:
             vividness=original.vividness * 0.9,  # Slight loss
             duration=original.duration,
             body_parts=mirrored_parts,
-            kinesthetic_feel=original.kinesthetic_feel * 0.9
+            kinesthetic_feel=original.kinesthetic_feel * 0.9,
         )
 
         self.actions[mirror_id] = mirrored

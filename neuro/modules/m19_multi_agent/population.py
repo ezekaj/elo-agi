@@ -19,31 +19,40 @@ import numpy as np
 import time
 
 from .agent import (
-    CognitiveAgent, AgentParams, AgentRole, ModuleProposal,
-    ContentType, Message, BeliefState
+    CognitiveAgent,
+    AgentParams,
+    AgentRole,
+    ModuleProposal,
+    ContentType,
+    Message,
+    BeliefState,
 )
 
 
 class TopologyType(Enum):
     """Types of communication topology."""
+
     FULLY_CONNECTED = "fully_connected"  # All can communicate with all
-    RING = "ring"                        # Each connects to neighbors
-    STAR = "star"                        # Central hub
-    RANDOM = "random"                    # Random connections
-    SMALL_WORLD = "small_world"          # Clustered with shortcuts
+    RING = "ring"  # Each connects to neighbors
+    STAR = "star"  # Central hub
+    RANDOM = "random"  # Random connections
+    SMALL_WORLD = "small_world"  # Clustered with shortcuts
 
 
 @dataclass
 class PopulationParams:
     """Parameters for the agent population."""
+
     n_agents: int = 10
     topology: TopologyType = TopologyType.FULLY_CONNECTED
-    role_distribution: Dict[AgentRole, float] = field(default_factory=lambda: {
-        AgentRole.EXPLORER: 0.2,
-        AgentRole.WORKER: 0.5,
-        AgentRole.VALIDATOR: 0.2,
-        AgentRole.GENERALIST: 0.1,
-    })
+    role_distribution: Dict[AgentRole, float] = field(
+        default_factory=lambda: {
+            AgentRole.EXPLORER: 0.2,
+            AgentRole.WORKER: 0.5,
+            AgentRole.VALIDATOR: 0.2,
+            AgentRole.GENERALIST: 0.1,
+        }
+    )
     workspace_capacity: int = 7  # Miller's Law
     ignition_threshold: float = 0.7
     broadcast_decay: float = 0.1
@@ -52,6 +61,7 @@ class PopulationParams:
 @dataclass
 class PopulationState:
     """State of the population at a given time."""
+
     n_agents: int
     n_proposals: int
     n_broadcasts: int
@@ -206,7 +216,7 @@ class AgentPopulation:
                 self._total_broadcasts += 1
 
         # 4. Update workspace
-        self._workspace = winners[:self.params.workspace_capacity]
+        self._workspace = winners[: self.params.workspace_capacity]
 
         # 5. Process agent internal steps
         for agent in self.agents.values():
@@ -375,16 +385,16 @@ class AgentPopulation:
             role_counts[role.value] = len(self.get_agents_by_role(role))
 
         return {
-            'n_agents': len(self.agents),
-            'step_count': self._step_count,
-            'total_proposals': self._total_proposals,
-            'total_broadcasts': self._total_broadcasts,
-            'broadcast_rate': self._total_broadcasts / max(1, self._total_proposals),
-            'mean_activation': self._get_mean_activation(),
-            'diversity': self.get_diversity(),
-            'consensus': self.get_consensus(),
-            'workspace_size': len(self._workspace),
-            'role_counts': role_counts,
+            "n_agents": len(self.agents),
+            "step_count": self._step_count,
+            "total_proposals": self._total_proposals,
+            "total_broadcasts": self._total_broadcasts,
+            "broadcast_rate": self._total_broadcasts / max(1, self._total_proposals),
+            "mean_activation": self._get_mean_activation(),
+            "diversity": self.get_diversity(),
+            "consensus": self.get_consensus(),
+            "workspace_size": len(self._workspace),
+            "role_counts": role_counts,
         }
 
     def reset(self) -> None:

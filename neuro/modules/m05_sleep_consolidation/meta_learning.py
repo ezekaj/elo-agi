@@ -15,15 +15,17 @@ import numpy as np
 
 class MemoryType(Enum):
     """Types of memories with different learning dynamics."""
-    EPISODIC = "episodic"           # Specific events
-    SEMANTIC = "semantic"           # Facts and concepts
-    PROCEDURAL = "procedural"       # Skills and habits
-    EMOTIONAL = "emotional"         # Emotionally salient
+
+    EPISODIC = "episodic"  # Specific events
+    SEMANTIC = "semantic"  # Facts and concepts
+    PROCEDURAL = "procedural"  # Skills and habits
+    EMOTIONAL = "emotional"  # Emotionally salient
 
 
 @dataclass
 class LearningCurve:
     """Tracks learning progress for a specific memory."""
+
     memory_id: str
     memory_type: MemoryType
     consolidation_history: List[float] = field(default_factory=list)
@@ -67,6 +69,7 @@ class LearningCurve:
 @dataclass
 class ConsolidationOutcome:
     """Outcome of a consolidation attempt."""
+
     memory_id: str
     before_strength: float
     after_strength: float
@@ -82,14 +85,17 @@ class ConsolidationOutcome:
 @dataclass
 class ReplayWeights:
     """Weights for replay prioritization."""
+
     recency: float = 0.4
     emotional_salience: float = 0.3
     incompleteness: float = 0.3
     interference_risk: float = 0.0  # New: prioritize memories at risk
 
-    def normalize(self) -> 'ReplayWeights':
+    def normalize(self) -> "ReplayWeights":
         """Normalize weights to sum to 1."""
-        total = self.recency + self.emotional_salience + self.incompleteness + self.interference_risk
+        total = (
+            self.recency + self.emotional_salience + self.incompleteness + self.interference_risk
+        )
         if total < 1e-8:
             return ReplayWeights()
         return ReplayWeights(
@@ -147,9 +153,7 @@ class MetaLearningController:
         }
 
         # Type-specific success rates (for adaptation)
-        self._type_success_rates: Dict[MemoryType, List[float]] = {
-            mt: [] for mt in MemoryType
-        }
+        self._type_success_rates: Dict[MemoryType, List[float]] = {mt: [] for mt in MemoryType}
 
         # Statistics
         self._n_adaptations = 0
@@ -259,14 +263,18 @@ class MetaLearningController:
 
         # Adjust weights based on what works
         # If incomplete memories consolidate better, increase incompleteness weight
-        success_incomplete = np.mean([
-            1.0 - (c.consolidation_history[-1] if c.consolidation_history else 0.0)
-            for c in success_curves
-        ])
-        failure_incomplete = np.mean([
-            1.0 - (c.consolidation_history[-1] if c.consolidation_history else 0.0)
-            for c in failure_curves
-        ])
+        success_incomplete = np.mean(
+            [
+                1.0 - (c.consolidation_history[-1] if c.consolidation_history else 0.0)
+                for c in success_curves
+            ]
+        )
+        failure_incomplete = np.mean(
+            [
+                1.0 - (c.consolidation_history[-1] if c.consolidation_history else 0.0)
+                for c in failure_curves
+            ]
+        )
 
         # Adjust incompleteness weight
         if success_incomplete > failure_incomplete + 0.1:
@@ -280,12 +288,10 @@ class MetaLearningController:
 
         # Emotional salience adaptation
         success_emotional = sum(
-            1 for c in success_curves
-            if c.memory_type == MemoryType.EMOTIONAL
+            1 for c in success_curves if c.memory_type == MemoryType.EMOTIONAL
         ) / max(1, len(success_curves))
         failure_emotional = sum(
-            1 for c in failure_curves
-            if c.memory_type == MemoryType.EMOTIONAL
+            1 for c in failure_curves if c.memory_type == MemoryType.EMOTIONAL
         ) / max(1, len(failure_curves))
 
         if success_emotional > failure_emotional + 0.1:
@@ -415,10 +421,10 @@ class MetaLearningController:
     ) -> float:
         """Compute weighted priority score for a memory."""
         return (
-            self.weights.recency * recency_score +
-            self.weights.emotional_salience * emotional_score +
-            self.weights.incompleteness * incompleteness_score +
-            self.weights.interference_risk * interference_score
+            self.weights.recency * recency_score
+            + self.weights.emotional_salience * emotional_score
+            + self.weights.incompleteness * incompleteness_score
+            + self.weights.interference_risk * interference_score
         )
 
     def get_memories_needing_replay(
@@ -466,14 +472,12 @@ class MetaLearningController:
         recent_outcomes = self._outcomes[-20:] if self._outcomes else []
         recent_success_rate = (
             sum(1 for o in recent_outcomes if o.success) / len(recent_outcomes)
-            if recent_outcomes else 0.0
+            if recent_outcomes
+            else 0.0
         )
 
         # Average efficiency
-        avg_efficiency = (
-            np.mean([o.efficiency for o in self._outcomes])
-            if self._outcomes else 0.0
-        )
+        avg_efficiency = np.mean([o.efficiency for o in self._outcomes]) if self._outcomes else 0.0
 
         return {
             "total_memories": total_memories,
@@ -482,8 +486,7 @@ class MetaLearningController:
             "type_distribution": type_counts,
             "current_weights": self.weights.to_dict(),
             "type_learning_rates": {
-                mt.value: rate
-                for mt, rate in self._type_learning_rates.items()
+                mt.value: rate for mt, rate in self._type_learning_rates.items()
             },
             "n_outcomes": len(self._outcomes),
             "n_adaptations": self._n_adaptations,
@@ -494,9 +497,9 @@ class MetaLearningController:
 
 
 __all__ = [
-    'MemoryType',
-    'LearningCurve',
-    'ConsolidationOutcome',
-    'ReplayWeights',
-    'MetaLearningController',
+    "MemoryType",
+    "LearningCurve",
+    "ConsolidationOutcome",
+    "ReplayWeights",
+    "MetaLearningController",
 ]

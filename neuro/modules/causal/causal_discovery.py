@@ -18,14 +18,16 @@ from scipy import stats
 
 class EdgeType(Enum):
     """Types of edges in a causal graph."""
+
     UNDIRECTED = "undirected"  # X -- Y
-    DIRECTED = "directed"      # X -> Y
+    DIRECTED = "directed"  # X -> Y
     BIDIRECTED = "bidirected"  # X <-> Y (latent confounder)
 
 
 @dataclass
 class CausalEdge:
     """An edge in a causal graph."""
+
     source: str
     target: str
     edge_type: EdgeType = EdgeType.UNDIRECTED
@@ -36,6 +38,7 @@ class CausalEdge:
 @dataclass
 class CausalGraph:
     """A causal graph (DAG or CPDAG)."""
+
     nodes: Set[str]
     edges: List[CausalEdge]
     is_dag: bool = False
@@ -61,15 +64,13 @@ class CausalGraph:
     def parents(self, node: str) -> Set[str]:
         """Get parents of a node."""
         return {
-            e.source for e in self.edges
-            if e.target == node and e.edge_type == EdgeType.DIRECTED
+            e.source for e in self.edges if e.target == node and e.edge_type == EdgeType.DIRECTED
         }
 
     def children(self, node: str) -> Set[str]:
         """Get children of a node."""
         return {
-            e.target for e in self.edges
-            if e.source == node and e.edge_type == EdgeType.DIRECTED
+            e.target for e in self.edges if e.source == node and e.edge_type == EdgeType.DIRECTED
         }
 
     def neighbors(self, node: str) -> Set[str]:
@@ -214,8 +215,7 @@ class ConditionalIndependenceTest:
             if Z.ndim == 1:
                 Z = Z.reshape(-1, 1)
             Z_disc = np.apply_along_axis(
-                lambda col: np.digitize(col, np.histogram_bin_edges(col, bins=n_bins)),
-                0, Z
+                lambda col: np.digitize(col, np.histogram_bin_edges(col, bins=n_bins)), 0, Z
             )
             mi = self._compute_cmi(X_disc, Y_disc, Z_disc)
 
@@ -414,12 +414,14 @@ class CausalDiscovery:
             for j in range(i + 1, n_vars):
                 if adj[i, j] > 0:
                     conf = self._edge_confidences.get((var_names[i], var_names[j]), 1.0)
-                    edges.append(CausalEdge(
-                        source=var_names[i],
-                        target=var_names[j],
-                        edge_type=EdgeType.UNDIRECTED,
-                        confidence=conf,
-                    ))
+                    edges.append(
+                        CausalEdge(
+                            source=var_names[i],
+                            target=var_names[j],
+                            edge_type=EdgeType.UNDIRECTED,
+                            confidence=conf,
+                        )
+                    )
 
         return CausalGraph(nodes=nodes, edges=edges, is_dag=False)
 
@@ -430,10 +432,7 @@ class CausalDiscovery:
     ) -> CausalGraph:
         """Orient edges to form CPDAG."""
         # Make copy of edges
-        oriented_edges = {
-            (e.source, e.target): e.edge_type
-            for e in skeleton.edges
-        }
+        oriented_edges = {(e.source, e.target): e.edge_type for e in skeleton.edges}
 
         # Also add reverse for undirected
         for e in skeleton.edges:
@@ -491,17 +490,23 @@ class CausalDiscovery:
                 if key in seen:
                     continue
                 seen.add(key)
-                final_edges.append(CausalEdge(
-                    source=src, target=tgt,
-                    edge_type=EdgeType.UNDIRECTED,
-                    confidence=self._edge_confidences.get((src, tgt), 1.0),
-                ))
+                final_edges.append(
+                    CausalEdge(
+                        source=src,
+                        target=tgt,
+                        edge_type=EdgeType.UNDIRECTED,
+                        confidence=self._edge_confidences.get((src, tgt), 1.0),
+                    )
+                )
             else:
-                final_edges.append(CausalEdge(
-                    source=src, target=tgt,
-                    edge_type=etype,
-                    confidence=self._edge_confidences.get((src, tgt), 1.0),
-                ))
+                final_edges.append(
+                    CausalEdge(
+                        source=src,
+                        target=tgt,
+                        edge_type=etype,
+                        confidence=self._edge_confidences.get((src, tgt), 1.0),
+                    )
+                )
 
         return CausalGraph(nodes=skeleton.nodes, edges=final_edges, is_dag=False)
 
@@ -536,10 +541,7 @@ class CausalDiscovery:
                 edge_counts[key] = edge_counts.get(key, 0) + 1
 
         # Compute frequencies
-        edge_confidence = {
-            key: count / n_bootstrap
-            for key, count in edge_counts.items()
-        }
+        edge_confidence = {key: count / n_bootstrap for key, count in edge_counts.items()}
 
         return edge_confidence
 
@@ -553,6 +555,7 @@ class CausalDiscovery:
 
         Returns structural Hamming distance and other metrics.
         """
+
         # Get edge sets (as undirected for skeleton comparison)
         def edge_set(g: CausalGraph) -> Set[Tuple[str, str]]:
             edges = set()
@@ -622,7 +625,7 @@ class CausalDiscovery:
                 residuals = Y - Y.mean()
 
             # Compute log-likelihood
-            rss = np.sum(residuals ** 2)
+            rss = np.sum(residuals**2)
             var = rss / n_samples
             ll = -0.5 * n_samples * (np.log(2 * np.pi * var) + 1)
 

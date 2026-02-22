@@ -39,7 +39,7 @@ def print_result(response):
 def scenario_1():
     print_header("Scenario 1: Causal Reasoning")
     query = "If a company raises product prices by 20%, what happens to their revenue?"
-    print(f"\n  Query: \"{query}\"\n")
+    print(f'\n  Query: "{query}"\n')
 
     wrapper = SmartWrapper()
     response = wrapper.query(query)
@@ -49,7 +49,7 @@ def scenario_1():
 def scenario_2():
     print_header("Scenario 2: Multi-step Planning")
     query = "Plan a study schedule for learning Python in 30 days"
-    print(f"\n  Query: \"{query}\"\n")
+    print(f'\n  Query: "{query}"\n')
 
     wrapper = SmartWrapper()
     response = wrapper.query(query)
@@ -62,12 +62,12 @@ def scenario_3():
     wrapper = SmartWrapper()
 
     query_1 = "My cat Luna is a British Shorthair. She's 3 years old."
-    print(f"\n  Query 1: \"{query_1}\"\n")
+    print(f'\n  Query 1: "{query_1}"\n')
     response_1 = wrapper.query(query_1)
     print_result(response_1)
 
     query_2 = "What breed is my cat and how old is she?"
-    print(f"\n  Query 2: \"{query_2}\"\n")
+    print(f'\n  Query 2: "{query_2}"\n')
     response_2 = wrapper.query(query_2)
     print_result(response_2)
 

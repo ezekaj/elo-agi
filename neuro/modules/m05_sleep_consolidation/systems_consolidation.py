@@ -16,10 +16,11 @@ from .memory_replay import MemoryTrace, MemoryType
 @dataclass
 class StoredMemory:
     """Memory representation in a store (hippocampus or cortex)"""
+
     trace: MemoryTrace
     consolidation_level: float = 0.0  # 0-1, how consolidated
-    schema_integration: float = 0.0   # 0-1, how integrated with schemas
-    abstraction_level: float = 0.0    # 0-1, how abstract (gist vs detail)
+    schema_integration: float = 0.0  # 0-1, how integrated with schemas
+    abstraction_level: float = 0.0  # 0-1, how abstract (gist vs detail)
 
 
 class HippocampalStore:
@@ -47,7 +48,7 @@ class HippocampalStore:
         memory = StoredMemory(
             trace=trace,
             consolidation_level=0.0,  # Not yet consolidated
-            abstraction_level=0.0     # Full detail initially
+            abstraction_level=0.0,  # Full detail initially
         )
 
         memory_id = self._next_id
@@ -73,10 +74,7 @@ class HippocampalStore:
         Returns:
             List of memories needing consolidation
         """
-        return [
-            mem for mem in self.memories.values()
-            if mem.consolidation_level < threshold
-        ]
+        return [mem for mem in self.memories.values() if mem.consolidation_level < threshold]
 
     def update_consolidation(self, memory_id: int, amount: float) -> None:
         """Update consolidation level for a memory.
@@ -103,9 +101,8 @@ class HippocampalStore:
         weakest_id = min(
             self.memories.keys(),
             key=lambda k: (
-                self.memories[k].trace.strength *
-                (1 - self.memories[k].consolidation_level)
-            )
+                self.memories[k].trace.strength * (1 - self.memories[k].consolidation_level)
+            ),
         )
         del self.memories[weakest_id]
 
@@ -126,11 +123,7 @@ class CorticalStore:
         self.schemas: Dict[str, np.ndarray] = {}  # Named schemas
         self._next_id = 0
 
-    def receive_transfer(
-        self,
-        memory: StoredMemory,
-        abstraction: float = 0.0
-    ) -> int:
+    def receive_transfer(self, memory: StoredMemory, abstraction: float = 0.0) -> int:
         """Receive a memory transferred from hippocampus.
 
         Args:
@@ -150,10 +143,10 @@ class CorticalStore:
                 encoding_time=memory.trace.encoding_time,
                 emotional_salience=memory.trace.emotional_salience,
                 memory_type=memory.trace.memory_type,
-                context=memory.trace.context
+                context=memory.trace.context,
             ),
             consolidation_level=memory.consolidation_level,
-            abstraction_level=abstraction
+            abstraction_level=abstraction,
         )
 
         memory_id = self._next_id
@@ -162,11 +155,7 @@ class CorticalStore:
 
         return memory_id
 
-    def _abstract_content(
-        self,
-        content: np.ndarray,
-        abstraction: float
-    ) -> np.ndarray:
+    def _abstract_content(self, content: np.ndarray, abstraction: float) -> np.ndarray:
         """Apply abstraction to memory content.
 
         Higher abstraction = more smoothing/averaging.
@@ -176,14 +165,11 @@ class CorticalStore:
 
         # Simulate gist extraction via low-pass filtering
         from scipy.ndimage import gaussian_filter1d
+
         sigma = abstraction * 2  # More abstraction = more smoothing
         return gaussian_filter1d(content.astype(float), sigma=max(0.1, sigma))
 
-    def integrate_with_schema(
-        self,
-        memory_id: int,
-        schema_name: str
-    ) -> float:
+    def integrate_with_schema(self, memory_id: int, schema_name: str) -> float:
         """Integrate a memory with an existing schema.
 
         Args:
@@ -263,6 +249,7 @@ class ConsolidationWindow:
     Consolidation is maximized when slow oscillations, spindles,
     and ripples are temporally aligned.
     """
+
     slow_oscillation_phase: str = "down"  # "up" or "down"
     spindle_present: bool = False
     ripple_present: bool = False
@@ -273,11 +260,7 @@ class ConsolidationWindow:
 
         Optimal = up-state of slow oscillation + spindle + ripple
         """
-        return (
-            self.slow_oscillation_phase == "up" and
-            self.spindle_present and
-            self.ripple_present
-        )
+        return self.slow_oscillation_phase == "up" and self.spindle_present and self.ripple_present
 
     def get_consolidation_boost(self) -> float:
         """Get consolidation boost factor based on current state."""
@@ -304,19 +287,11 @@ class MemoryTransformation:
     - Abstraction: increase generality over time
     """
 
-    def __init__(
-        self,
-        gist_extraction_rate: float = 0.1,
-        schema_weight: float = 0.3
-    ):
+    def __init__(self, gist_extraction_rate: float = 0.1, schema_weight: float = 0.3):
         self.gist_extraction_rate = gist_extraction_rate
         self.schema_weight = schema_weight
 
-    def extract_gist(
-        self,
-        memory: StoredMemory,
-        amount: float = 0.1
-    ) -> np.ndarray:
+    def extract_gist(self, memory: StoredMemory, amount: float = 0.1) -> np.ndarray:
         """Extract semantic gist from memory.
 
         Gist = core meaning without episodic details.
@@ -337,11 +312,7 @@ class MemoryTransformation:
 
         return gist
 
-    def integrate_with_schema(
-        self,
-        memory: StoredMemory,
-        schema: np.ndarray
-    ) -> np.ndarray:
+    def integrate_with_schema(self, memory: StoredMemory, schema: np.ndarray) -> np.ndarray:
         """Integrate memory with existing schema.
 
         Memory is pulled toward schema structure.
@@ -359,18 +330,11 @@ class MemoryTransformation:
             return content
 
         # Blend memory with schema
-        integrated = (
-            (1 - self.schema_weight) * content +
-            self.schema_weight * schema
-        )
+        integrated = (1 - self.schema_weight) * content + self.schema_weight * schema
 
         return integrated
 
-    def increase_abstraction(
-        self,
-        memory: StoredMemory,
-        amount: float = 0.1
-    ) -> None:
+    def increase_abstraction(self, memory: StoredMemory, amount: float = 0.1) -> None:
         """Increase abstraction level of memory.
 
         Higher abstraction = more generalized representation.
@@ -396,7 +360,7 @@ class HippocampalCorticalDialogue:
         self,
         hippocampus: Optional[HippocampalStore] = None,
         cortex: Optional[CorticalStore] = None,
-        transfer_threshold: float = 0.7
+        transfer_threshold: float = 0.7,
     ):
         self.hippocampus = hippocampus or HippocampalStore()
         self.cortex = cortex or CorticalStore()
@@ -411,10 +375,7 @@ class HippocampalCorticalDialogue:
         self.total_consolidation_events = 0
 
     def initiate_dialogue(
-        self,
-        slow_osc_phase: str = "up",
-        spindle: bool = False,
-        ripple: bool = False
+        self, slow_osc_phase: str = "up", spindle: bool = False, ripple: bool = False
     ) -> float:
         """Update consolidation window state.
 
@@ -432,11 +393,7 @@ class HippocampalCorticalDialogue:
 
         return self.consolidation_window.get_consolidation_boost()
 
-    def consolidate_memory(
-        self,
-        memory_id: int,
-        replay_strength: float = 1.0
-    ) -> bool:
+    def consolidate_memory(self, memory_id: int, replay_strength: float = 1.0) -> bool:
         """Consolidate a single memory.
 
         Args:
@@ -495,9 +452,7 @@ class HippocampalCorticalDialogue:
         return cortical_id
 
     def run_consolidation_cycle(
-        self,
-        duration_seconds: float,
-        oscillation_events: Optional[List[Dict]] = None
+        self, duration_seconds: float, oscillation_events: Optional[List[Dict]] = None
     ) -> Dict:
         """Run a consolidation cycle (e.g., during one slow oscillation).
 

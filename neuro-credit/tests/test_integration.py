@@ -6,6 +6,7 @@ import numpy as np
 from neuro.modules.credit.integration import CreditConfig, CreditAssignmentSystem
 from neuro.modules.credit.blame_assignment import FailureType
 
+
 class TestCreditConfig:
     """Tests for CreditConfig class."""
 
@@ -18,6 +19,7 @@ class TestCreditConfig:
         config = CreditConfig(gamma=0.95, use_shapley=False)
         assert config.gamma == 0.95
         assert not config.use_shapley
+
 
 class TestCreditAssignmentSystem:
     """Tests for CreditAssignmentSystem class."""
@@ -160,9 +162,7 @@ class TestCreditAssignmentSystem:
 
         for _ in range(5):
             system.record_action("failing", "s", "a")
-            system.handle_failure(
-                FailureType.TIMEOUT, "Timeout", severity=1.0
-            )
+            system.handle_failure(FailureType.TIMEOUT, "Timeout", severity=1.0)
 
         chronic = system.get_chronic_failure_modules(threshold=3)
         module_names = [m[0] for m in chronic]
@@ -212,6 +212,7 @@ class TestCreditAssignmentSystem:
         assert "blame_stats" in stats
         assert "surprise_stats" in stats
         assert "contribution_stats" in stats
+
 
 class TestEndToEndCredit:
     """End-to-end credit assignment tests."""

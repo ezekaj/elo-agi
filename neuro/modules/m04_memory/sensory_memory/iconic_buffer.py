@@ -16,6 +16,7 @@ from dataclasses import dataclass
 @dataclass
 class IconicTrace:
     """A single iconic memory trace"""
+
     data: np.ndarray
     timestamp: float
     initial_strength: float = 1.0
@@ -47,10 +48,7 @@ class IconicBuffer:
         Args:
             visual_input: Raw visual data (any shape)
         """
-        self._trace = IconicTrace(
-            data=np.copy(visual_input),
-            timestamp=self._time_fn()
-        )
+        self._trace = IconicTrace(data=np.copy(visual_input), timestamp=self._time_fn())
 
     def read(self) -> Optional[np.ndarray]:
         """

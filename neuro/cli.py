@@ -14,6 +14,7 @@ import asyncio
 from pathlib import Path
 from typing import Optional, Dict, Any
 
+
 # ANSI color codes
 class Colors:
     RESET = "\033[0m"
@@ -77,7 +78,8 @@ class UI:
     def box_line(text="", align="left"):
         # Strip ANSI codes for length calculation
         import re
-        visible_text = re.sub(r'\033\[[0-9;]*m', '', text)
+
+        visible_text = re.sub(r"\033\[[0-9;]*m", "", text)
         padding = UI.WIDTH - len(visible_text) - 4
 
         if align == "center":
@@ -135,8 +137,12 @@ def print_header():
     """Print the main header."""
     print()
     print(f"  {Colors.CYAN}{Colors.BOLD}╭{'─' * 50}╮{Colors.RESET}")
-    print(f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{'NEURO AGI v0.9':^50}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}")
-    print(f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{Colors.DIM}{'Local AI That Learns From Your Code':^50}{Colors.RESET}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}")
+    print(
+        f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{'NEURO AGI v0.9':^50}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}"
+    )
+    print(
+        f"  {Colors.CYAN}{Colors.BOLD}│{Colors.RESET}{Colors.DIM}{'Local AI That Learns From Your Code':^50}{Colors.RESET}{Colors.CYAN}{Colors.BOLD}│{Colors.RESET}"
+    )
     print(f"  {Colors.CYAN}{Colors.BOLD}╰{'─' * 50}╯{Colors.RESET}")
     print()
 
@@ -207,9 +213,9 @@ class StatusLine:
             # Show cycle progress
             if self.engine.evolution:
                 evo = self.engine.evolution.get_stats()
-                cycle = evo.get('cycle', 0)
-                facts = evo.get('facts_this_cycle', 0)
-                total = evo.get('total_facts', 0)
+                cycle = evo.get("cycle", 0)
+                facts = evo.get("facts_this_cycle", 0)
+                total = evo.get("total_facts", 0)
 
                 # Progress bar
                 progress = facts / 100
@@ -291,10 +297,10 @@ class ActivityDisplay:
         # Format message based on type
         if activity_type == "learned":
             # Show detailed learning info
-            topic = data.get('topic', 'Unknown')
-            source = data.get('source', 'Unknown')
-            progress = data.get('cycle_progress', 0)
-            total = data.get('total_facts', 0)
+            topic = data.get("topic", "Unknown")
+            source = data.get("source", "Unknown")
+            progress = data.get("cycle_progress", 0)
+            total = data.get("total_facts", 0)
 
             # Progress bar
             bar_width = 20
@@ -306,8 +312,8 @@ class ActivityDisplay:
             print(f"     {Colors.DIM}Source: {source} | Total: {total} facts{Colors.RESET}")
 
         elif activity_type == "benchmark_done":
-            score = data.get('score', 0)
-            weak = data.get('weak_areas', [])
+            score = data.get("score", 0)
+            weak = data.get("weak_areas", [])
             print(f"\n  {icon} {color}BENCHMARK COMPLETE{Colors.RESET}")
             print(f"     {Colors.CYAN}Score:{Colors.RESET} {score:.1%}")
             if weak:
@@ -315,13 +321,13 @@ class ActivityDisplay:
                 print(f"     {Colors.YELLOW}Weak areas:{Colors.RESET} {weak_str}")
 
         elif activity_type == "focus":
-            source = data.get('source', 'Unknown')
-            items = data.get('items', 0)
+            source = data.get("source", "Unknown")
+            items = data.get("items", 0)
             print(f"\n  {icon} {color}FOCUS:{Colors.RESET} {source}")
             print(f"     {Colors.DIM}Processing {items} items...{Colors.RESET}")
 
         elif activity_type == "new_cycle":
-            cycle = data.get('cycle', 0)
+            cycle = data.get("cycle", 0)
             print(f"\n  {icon} {color}NEW LEARNING CYCLE {cycle}{Colors.RESET}")
             print(f"     {Colors.DIM}Target: 100 unique facts{Colors.RESET}")
 
@@ -329,9 +335,9 @@ class ActivityDisplay:
             # Show reflection summary
             print(f"\n  {icon} {color}REFLECTION{Colors.RESET}")
             # Parse reflection message for key stats
-            lines = message.strip().split('\n')
+            lines = message.strip().split("\n")
             for line in lines[:5]:
-                if line.strip() and not line.startswith('='):
+                if line.strip() and not line.startswith("="):
                     print(f"     {Colors.DIM}{line.strip()}{Colors.RESET}")
 
         elif activity_type in ["skip", "fetching", "analyzing"]:
@@ -371,33 +377,41 @@ class LearningNotifier:
 
         try:
             evo = engine.evolution.get_stats()
-            facts = evo.get('total_facts', 0)
-            cycle = evo.get('cycle', 0)
-            facts_this_cycle = evo.get('facts_this_cycle', 0)
+            facts = evo.get("total_facts", 0)
+            cycle = evo.get("cycle", 0)
+            facts_this_cycle = evo.get("facts_this_cycle", 0)
 
             # New facts learned
             if facts > self.last_facts:
                 diff = facts - self.last_facts
-                notifications.append(f"{Colors.GREEN}+{diff} facts learned{Colors.RESET} (total: {facts})")
+                notifications.append(
+                    f"{Colors.GREEN}+{diff} facts learned{Colors.RESET} (total: {facts})"
+                )
                 self.last_facts = facts
 
             # New cycle started
             if cycle > self.last_cycle:
-                notifications.append(f"{Colors.BRIGHT_CYAN}Started learning cycle {cycle}{Colors.RESET}")
+                notifications.append(
+                    f"{Colors.BRIGHT_CYAN}Started learning cycle {cycle}{Colors.RESET}"
+                )
                 self.last_cycle = cycle
 
             # Milestone notifications
             if facts_this_cycle == 50 and self.last_facts < facts:
-                notifications.append(f"{Colors.YELLOW}Halfway to benchmark! (50/100 facts){Colors.RESET}")
+                notifications.append(
+                    f"{Colors.YELLOW}Halfway to benchmark! (50/100 facts){Colors.RESET}"
+                )
 
             if facts_this_cycle >= 100:
-                notifications.append(f"{Colors.BRIGHT_GREEN}Cycle complete! Running benchmark...{Colors.RESET}")
+                notifications.append(
+                    f"{Colors.BRIGHT_GREEN}Cycle complete! Running benchmark...{Colors.RESET}"
+                )
 
             # Check autonomous loop state
             if engine.autonomous:
                 auto = engine.autonomous
                 if auto.initial_benchmark_done and auto.benchmark_results:
-                    score = auto.benchmark_results.get('avg_score', 0)
+                    score = auto.benchmark_results.get("avg_score", 0)
                     weak = auto.weak_areas
                     if weak and len(notifications) == 0:
                         # Occasionally remind about weak areas
@@ -413,14 +427,14 @@ class LearningNotifier:
 def cmd_chat(args):
     """Chat with Neuro AGI using streaming responses."""
     # Get flags with defaults
-    model = getattr(args, 'model', 'ministral-3:8b') or 'ministral-3:8b'
-    verbose = getattr(args, 'verbose', False)
-    print_mode = getattr(args, 'print_mode', False)
-    initial_prompt = getattr(args, 'prompt', None)
-    no_stream = getattr(args, 'no_stream', False)
-    output_format = getattr(args, 'output_format', 'text')
-    system_prompt = getattr(args, 'system_prompt', None)
-    append_system_prompt = getattr(args, 'append_system_prompt', None)
+    model = getattr(args, "model", "ministral-3:8b") or "ministral-3:8b"
+    verbose = getattr(args, "verbose", False)
+    print_mode = getattr(args, "print_mode", False)
+    initial_prompt = getattr(args, "prompt", None)
+    no_stream = getattr(args, "no_stream", False)
+    output_format = getattr(args, "output_format", "text")
+    system_prompt = getattr(args, "system_prompt", None)
+    append_system_prompt = getattr(args, "append_system_prompt", None)
 
     # Skip header in print mode
     if not print_mode:
@@ -436,6 +450,7 @@ def cmd_chat(args):
 
     try:
         import requests
+
         r = requests.get("http://localhost:11434/api/tags", timeout=5)
         if r.status_code == 200:
             ollama_available = True
@@ -452,11 +467,8 @@ def cmd_chat(args):
 
     try:
         from neuro.engine import NeuroEngine, EngineConfig
-        config = EngineConfig(
-            model=model,
-            show_thinking=not print_mode,
-            verbose=verbose
-        )
+
+        config = EngineConfig(model=model, show_thinking=not print_mode, verbose=verbose)
         if system_prompt:
             config.system_prompt = system_prompt
         engine = NeuroEngine(config)
@@ -465,11 +477,8 @@ def cmd_chat(args):
         # Fallback: try relative import
         try:
             from neuro.engine import NeuroEngine, EngineConfig
-            config = EngineConfig(
-                model=model,
-                show_thinking=not print_mode,
-                verbose=verbose
-            )
+
+            config = EngineConfig(model=model, show_thinking=not print_mode, verbose=verbose)
             if system_prompt:
                 config.system_prompt = system_prompt
             engine = NeuroEngine(config)
@@ -482,6 +491,7 @@ def cmd_chat(args):
     tools_available = False
     try:
         from neuro.modules.model.tools import Tools
+
         tools = Tools(work_dir=os.getcwd())
         tools_available = True
     except ImportError:
@@ -492,6 +502,7 @@ def cmd_chat(args):
     pipeline_available = False
     try:
         from cognitive_pipeline import CognitivePipeline
+
         pipeline = CognitivePipeline(verbose=False)
         pipeline_available = True
     except ImportError:
@@ -524,6 +535,7 @@ def cmd_chat(args):
     else:
         try:
             from ultrathink import UltraThink
+
             ultrathink = UltraThink(verbose=False)
             ultrathink_available = True
         except ImportError:
@@ -540,6 +552,7 @@ def cmd_chat(args):
     self_improver_available = False
     try:
         from self_improving_agent import SelfImprovingAgent
+
         self_improver = SelfImprovingAgent()
         self_improver_available = True
     except ImportError:
@@ -551,50 +564,68 @@ def cmd_chat(args):
         print(f"  {Colors.GREEN}●{Colors.RESET} Ollama: {Colors.GREEN}connected{Colors.RESET}")
         print(f"  {Colors.DIM}  Model: {model}{Colors.RESET}")
     else:
-        print(f"  {Colors.YELLOW}●{Colors.RESET} Ollama: {Colors.YELLOW}not available{Colors.RESET}")
+        print(
+            f"  {Colors.YELLOW}●{Colors.RESET} Ollama: {Colors.YELLOW}not available{Colors.RESET}"
+        )
         print(f"  {Colors.DIM}  Run: ollama serve && ollama pull ministral-3:8b{Colors.RESET}")
 
     if engine_available:
         stats = engine.get_stats()
-        print(f"  {Colors.BRIGHT_GREEN}●{Colors.RESET} NEURO Engine: {Colors.BRIGHT_GREEN}STREAMING ENABLED{Colors.RESET}")
-        if stats.get('pipeline_available'):
+        print(
+            f"  {Colors.BRIGHT_GREEN}●{Colors.RESET} NEURO Engine: {Colors.BRIGHT_GREEN}STREAMING ENABLED{Colors.RESET}"
+        )
+        if stats.get("pipeline_available"):
             print(f"  {Colors.DIM}  └─ Cognitive Pipeline: active{Colors.RESET}")
-        if stats.get('emotions_available'):
-            emo = stats.get('emotion', {})
+        if stats.get("emotions_available"):
+            emo = stats.get("emotion", {})
             print(f"  {Colors.DIM}  └─ Emotions: {emo.get('dominant', 'neutral')}{Colors.RESET}")
-        if stats.get('social_available'):
+        if stats.get("social_available"):
             print(f"  {Colors.DIM}  └─ Social Cognition: active{Colors.RESET}")
-        if stats.get('embodied_available'):
+        if stats.get("embodied_available"):
             print(f"  {Colors.DIM}  └─ Embodied Cognition: active{Colors.RESET}")
-        if stats.get('git_repo'):
+        if stats.get("git_repo"):
             print(f"  {Colors.DIM}  └─ Git: repository detected{Colors.RESET}")
     elif pipeline_available:
         pstats = pipeline.get_stats()
-        cognitive_count = pstats.get('cognitive_modules', 0)
-        pipeline_count = pstats.get('pipeline_components', len(pstats.get('active_components', [])))
-        total = pstats.get('num_components', cognitive_count + pipeline_count)
-        print(f"  {Colors.GREEN}●{Colors.RESET} Cognitive Pipeline: {Colors.GREEN}{total} components{Colors.RESET}")
+        cognitive_count = pstats.get("cognitive_modules", 0)
+        pipeline_count = pstats.get("pipeline_components", len(pstats.get("active_components", [])))
+        total = pstats.get("num_components", cognitive_count + pipeline_count)
+        print(
+            f"  {Colors.GREEN}●{Colors.RESET} Cognitive Pipeline: {Colors.GREEN}{total} components{Colors.RESET}"
+        )
 
     if tools_available:
-        print(f"  {Colors.GREEN}●{Colors.RESET} Tools: {Colors.GREEN}13 tools available{Colors.RESET}")
+        print(
+            f"  {Colors.GREEN}●{Colors.RESET} Tools: {Colors.GREEN}13 tools available{Colors.RESET}"
+        )
 
     if learner_available and engine_available:
         if engine.trainer:
             trainer_stats = engine.trainer.get_stats()
-            fact_count = trainer_stats.get('total_facts', 0)
-            topic_count = trainer_stats.get('topics_count', 0)
+            fact_count = trainer_stats.get("total_facts", 0)
+            topic_count = trainer_stats.get("topics_count", 0)
             if autonomous_started:
-                print(f"  {Colors.BRIGHT_GREEN}●{Colors.RESET} Autonomous: {Colors.BRIGHT_GREEN}READY{Colors.RESET} | {fact_count} facts | {topic_count} topics")
-                print(f"  {Colors.DIM}    └─ Will learn when idle (10s after your last message){Colors.RESET}")
+                print(
+                    f"  {Colors.BRIGHT_GREEN}●{Colors.RESET} Autonomous: {Colors.BRIGHT_GREEN}READY{Colors.RESET} | {fact_count} facts | {topic_count} topics"
+                )
+                print(
+                    f"  {Colors.DIM}    └─ Will learn when idle (10s after your last message){Colors.RESET}"
+                )
             else:
-                print(f"  {Colors.GREEN}●{Colors.RESET} Learning: {Colors.GREEN}{fact_count} facts{Colors.RESET} | {topic_count} topics")
+                print(
+                    f"  {Colors.GREEN}●{Colors.RESET} Learning: {Colors.GREEN}{fact_count} facts{Colors.RESET} | {topic_count} topics"
+                )
 
     if self_improver_available:
         si_stats = self_improver.get_stats()
-        print(f"  {Colors.BRIGHT_BLUE}●{Colors.RESET} Self-Improver: {Colors.BRIGHT_BLUE}{si_stats['learned_patterns']} patterns{Colors.RESET}, {si_stats['error_solutions']} solutions")
+        print(
+            f"  {Colors.BRIGHT_BLUE}●{Colors.RESET} Self-Improver: {Colors.BRIGHT_BLUE}{si_stats['learned_patterns']} patterns{Colors.RESET}, {si_stats['error_solutions']} solutions"
+        )
 
     print()
-    print(f"  {Colors.DIM}Commands: /help /status /model /tools /learn /benchmark /compact /cost /clear /exit{Colors.RESET}")
+    print(
+        f"  {Colors.DIM}Commands: /help /status /model /tools /learn /benchmark /compact /cost /clear /exit{Colors.RESET}"
+    )
     print(f"  {Colors.DIM}{'─' * 50}{Colors.RESET}")
 
     history = []
@@ -611,8 +642,10 @@ def cmd_chat(args):
             if pipeline_available:
                 pipeline.save()
                 pstats = pipeline.get_stats()
-                if 'knowledge' in pstats:
-                    print(f"  {Colors.GREEN}Knowledge: {pstats['knowledge']['total_facts']} facts saved{Colors.RESET}")
+                if "knowledge" in pstats:
+                    print(
+                        f"  {Colors.GREEN}Knowledge: {pstats['knowledge']['total_facts']} facts saved{Colors.RESET}"
+                    )
         except Exception:
             pass
         # Autonomous loop is stopped by engine.close()
@@ -638,19 +671,26 @@ def cmd_chat(args):
                 )
             else:
                 import requests
+
                 r = requests.post(
                     "http://localhost:11434/api/chat",
-                    json={"model": current_model, "messages": [{"role": "user", "content": initial_prompt}], "stream": False},
-                    timeout=120
+                    json={
+                        "model": current_model,
+                        "messages": [{"role": "user", "content": initial_prompt}],
+                        "stream": False,
+                    },
+                    timeout=120,
                 )
                 response = r.json()["message"]["content"]
 
             # Output based on format
             if output_format == "json":
                 import json
+
                 print(json.dumps({"response": response}))
             elif output_format == "stream-json":
                 import json
+
                 print(json.dumps({"type": "message", "content": response}))
             else:
                 if no_stream:
@@ -728,7 +768,7 @@ def cmd_chat(args):
             if len(parts) > 1:
                 new_model = parts[1].strip()
                 # Check if model exists
-                if new_model in models or ':' in new_model:
+                if new_model in models or ":" in new_model:
                     current_model = new_model
                     if engine_available:
                         engine.config.model = new_model
@@ -764,8 +804,12 @@ def cmd_chat(args):
                         engine.chat(summary_prompt, stream_to_terminal=False)
                     )
                     # Keep last 4 messages, prepend summary
-                    history = [{"role": "system", "content": f"Previous context: {summary}"}] + history[-4:]
-                    print(f"  {Colors.GREEN}Compacted {old_count} messages to {len(history)}{Colors.RESET}")
+                    history = [
+                        {"role": "system", "content": f"Previous context: {summary}"}
+                    ] + history[-4:]
+                    print(
+                        f"  {Colors.GREEN}Compacted {old_count} messages to {len(history)}{Colors.RESET}"
+                    )
                 except Exception as e:
                     print(f"  {Colors.RED}Compact failed: {e}{Colors.RESET}")
             else:
@@ -780,7 +824,7 @@ def cmd_chat(args):
             print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
 
             # Estimate tokens (rough: 4 chars = 1 token)
-            total_chars = sum(len(m.get('content', '')) for m in history)
+            total_chars = sum(len(m.get("content", "")) for m in history)
             est_tokens = total_chars // 4
 
             print(f"  {Colors.CYAN}Messages:{Colors.RESET} {len(history)}")
@@ -796,7 +840,7 @@ def cmd_chat(args):
             print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
 
             # Visual context bar
-            total_chars = sum(len(m.get('content', '')) for m in history)
+            total_chars = sum(len(m.get("content", "")) for m in history)
             max_context = 32000  # Approximate for most models
             usage = min(1.0, total_chars / max_context)
             bar_width = 40
@@ -828,7 +872,11 @@ def cmd_chat(args):
             for path, desc in memory_files:
                 expanded = os.path.expanduser(path)
                 exists = os.path.exists(expanded)
-                status = f"{Colors.GREEN}exists{Colors.RESET}" if exists else f"{Colors.DIM}not found{Colors.RESET}"
+                status = (
+                    f"{Colors.GREEN}exists{Colors.RESET}"
+                    if exists
+                    else f"{Colors.DIM}not found{Colors.RESET}"
+                )
                 print(f"  {path:35} {status}")
             print()
             continue
@@ -843,6 +891,7 @@ def cmd_chat(args):
             if os.path.exists(config_path):
                 try:
                     import json
+
                     with open(config_path) as f:
                         cfg = json.load(f)
                     for k, v in cfg.items():
@@ -868,34 +917,42 @@ def cmd_chat(args):
                 print(f"  {Colors.BRIGHT_GREEN}●{Colors.RESET} Engine: streaming enabled")
                 print(f"    └─ Model: {stats['model']}")
                 print(f"    └─ Tools: {'available' if stats['tools_available'] else 'not loaded'}")
-                print(f"    └─ Pipeline: {'active' if stats['pipeline_available'] else 'not loaded'}")
+                print(
+                    f"    └─ Pipeline: {'active' if stats['pipeline_available'] else 'not loaded'}"
+                )
                 print(f"    └─ Git repo: {'yes' if stats['git_repo'] else 'no'}")
 
             if pipeline_available:
                 pstats = pipeline.get_stats()
-                if 'knowledge' in pstats:
-                    kb = pstats['knowledge']
+                if "knowledge" in pstats:
+                    kb = pstats["knowledge"]
                     print(f"  {Colors.GREEN}●{Colors.RESET} Knowledge: {kb['total_facts']} facts")
-                if 'ultrathink' in pstats:
-                    ut = pstats['ultrathink']
-                    print(f"  {Colors.GREEN}●{Colors.RESET} UltraThink: {ut['modules_loaded']} modules")
+                if "ultrathink" in pstats:
+                    ut = pstats["ultrathink"]
+                    print(
+                        f"  {Colors.GREEN}●{Colors.RESET} UltraThink: {ut['modules_loaded']} modules"
+                    )
 
             if learner_available and engine_available:
                 if engine.trainer:
                     trainer_stats = engine.trainer.get_stats()
-                    print(f"  {Colors.GREEN}●{Colors.RESET} Learning: {trainer_stats.get('total_facts', 0)} facts")
+                    print(
+                        f"  {Colors.GREEN}●{Colors.RESET} Learning: {trainer_stats.get('total_facts', 0)} facts"
+                    )
                 if engine.evolution:
                     evo_stats = engine.evolution.get_stats()
-                    print(f"  {Colors.CYAN}●{Colors.RESET} Evolution: cycle {evo_stats.get('cycle', 0)}, {evo_stats.get('total_facts', 0)} unique facts")
-                    improvement = evo_stats.get('improvement', 0)
+                    print(
+                        f"  {Colors.CYAN}●{Colors.RESET} Evolution: cycle {evo_stats.get('cycle', 0)}, {evo_stats.get('total_facts', 0)} unique facts"
+                    )
+                    improvement = evo_stats.get("improvement", 0)
                     if improvement:
                         print(f"    └─ Improvement: {improvement:+.1%}")
                 if autonomous_started and engine.autonomous:
                     auto_stats = engine.autonomous.get_stats()
-                    status = "RUNNING" if auto_stats.get('running', False) else "STOPPED"
+                    status = "RUNNING" if auto_stats.get("running", False) else "STOPPED"
                     print(f"  {Colors.BRIGHT_GREEN}●{Colors.RESET} Autonomous: {status}")
-                    if auto_stats.get('initial_benchmark_done'):
-                        weak = auto_stats.get('weak_areas', [])
+                    if auto_stats.get("initial_benchmark_done"):
+                        weak = auto_stats.get("weak_areas", [])
                         if weak:
                             weak_str = ", ".join([f"{w[0]}: {w[1]:.0%}" for w in weak[:3]])
                             print(f"    └─ Weak areas: {weak_str}")
@@ -936,23 +993,37 @@ def cmd_chat(args):
             if engine_available and engine.trainer:
                 trainer_stats = engine.trainer.get_stats()
                 print(f"\n  {Colors.BOLD}Learning State:{Colors.RESET}")
-                print(f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
-                print(f"  {Colors.CYAN}Total Facts:{Colors.RESET} {trainer_stats.get('total_facts', 0)}")
-                print(f"  {Colors.CYAN}Topics:{Colors.RESET} {trainer_stats.get('topics_count', 0)}")
+                print(
+                    f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+                )
+                print(
+                    f"  {Colors.CYAN}Total Facts:{Colors.RESET} {trainer_stats.get('total_facts', 0)}"
+                )
+                print(
+                    f"  {Colors.CYAN}Topics:{Colors.RESET} {trainer_stats.get('topics_count', 0)}"
+                )
 
                 if engine.evolution:
                     evo = engine.evolution.get_stats()
                     print(f"  {Colors.CYAN}Unique Facts:{Colors.RESET} {evo.get('total_facts', 0)}")
                     print(f"  {Colors.CYAN}Learning Cycle:{Colors.RESET} {evo.get('cycle', 0)}")
-                    print(f"  {Colors.CYAN}Facts This Cycle:{Colors.RESET} {evo.get('facts_this_cycle', 0)}/100")
-                    if evo.get('baseline_score'):
-                        print(f"  {Colors.CYAN}Baseline Score:{Colors.RESET} {evo['baseline_score']:.1%}")
-                    if evo.get('current_score'):
-                        print(f"  {Colors.CYAN}Current Score:{Colors.RESET} {evo['current_score']:.1%}")
-                    if evo.get('improvement'):
-                        imp = evo['improvement']
+                    print(
+                        f"  {Colors.CYAN}Facts This Cycle:{Colors.RESET} {evo.get('facts_this_cycle', 0)}/100"
+                    )
+                    if evo.get("baseline_score"):
+                        print(
+                            f"  {Colors.CYAN}Baseline Score:{Colors.RESET} {evo['baseline_score']:.1%}"
+                        )
+                    if evo.get("current_score"):
+                        print(
+                            f"  {Colors.CYAN}Current Score:{Colors.RESET} {evo['current_score']:.1%}"
+                        )
+                    if evo.get("improvement"):
+                        imp = evo["improvement"]
                         color = Colors.GREEN if imp > 0 else Colors.RED
-                        print(f"  {Colors.CYAN}Improvement:{Colors.RESET} {color}{imp:+.1%}{Colors.RESET}")
+                        print(
+                            f"  {Colors.CYAN}Improvement:{Colors.RESET} {color}{imp:+.1%}{Colors.RESET}"
+                        )
 
                 print()
             else:
@@ -962,7 +1033,9 @@ def cmd_chat(args):
         if user_input == "/benchmark":
             if engine_available and engine.benchmark:
                 print(f"\n  {Colors.BOLD}{Colors.YELLOW}Running Benchmark...{Colors.RESET}")
-                print(f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
+                print(
+                    f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+                )
 
                 def think_fn(q):
                     knowledge = ""
@@ -976,15 +1049,15 @@ def cmd_chat(args):
 
                 results = engine.benchmark.run_benchmark(think_fn, "cli-test")
 
-                avg_score = results.get('avg_score', 0)
+                avg_score = results.get("avg_score", 0)
                 print(f"\n  {Colors.BOLD}Results:{Colors.RESET}")
                 print(f"  {Colors.CYAN}Average Score:{Colors.RESET} {avg_score:.1%}")
 
                 # Show by category
                 category_scores = {}
-                for test in results.get('tests', []):
-                    cat = test.get('category', 'unknown')
-                    score = test.get('score', 0)
+                for test in results.get("tests", []):
+                    cat = test.get("category", "unknown")
+                    score = test.get("score", 0)
                     if cat not in category_scores:
                         category_scores[cat] = []
                     category_scores[cat].append(score)
@@ -992,16 +1065,23 @@ def cmd_chat(args):
                 print(f"  {Colors.CYAN}By Category:{Colors.RESET}")
                 for cat, scores in sorted(category_scores.items()):
                     avg = sum(scores) / len(scores) if scores else 0
-                    color = Colors.GREEN if avg >= 0.7 else Colors.YELLOW if avg >= 0.4 else Colors.RED
+                    color = (
+                        Colors.GREEN if avg >= 0.7 else Colors.YELLOW if avg >= 0.4 else Colors.RED
+                    )
                     print(f"    {cat:15} {color}{avg:.0%}{Colors.RESET}")
 
                 # Record in evolution if available
                 if engine.evolution:
-                    engine.evolution.record_benchmark(avg_score, {
-                        'categories': {k: sum(v)/len(v) for k, v in category_scores.items()},
-                        'source': 'manual'
-                    })
-                    print(f"\n  {Colors.GREEN}Benchmark recorded in evolution tracker{Colors.RESET}")
+                    engine.evolution.record_benchmark(
+                        avg_score,
+                        {
+                            "categories": {k: sum(v) / len(v) for k, v in category_scores.items()},
+                            "source": "manual",
+                        },
+                    )
+                    print(
+                        f"\n  {Colors.GREEN}Benchmark recorded in evolution tracker{Colors.RESET}"
+                    )
 
                 print()
             else:
@@ -1014,38 +1094,52 @@ def cmd_chat(args):
                 stats = auto.get_stats()
 
                 # Determine actual status
-                if not stats.get('running', False):
+                if not stats.get("running", False):
                     status_str = f"{Colors.RED}STOPPED{Colors.RESET}"
                 elif auto.paused:
                     idle = time.time() - auto.last_user_activity
                     remaining = max(0, auto.idle_threshold - idle)
-                    status_str = f"{Colors.YELLOW}PAUSED{Colors.RESET} (resumes in {remaining:.0f}s)"
+                    status_str = (
+                        f"{Colors.YELLOW}PAUSED{Colors.RESET} (resumes in {remaining:.0f}s)"
+                    )
                 else:
                     status_str = f"{Colors.BRIGHT_GREEN}LEARNING{Colors.RESET}"
 
-                print(f"\n  {Colors.BOLD}{Colors.BRIGHT_GREEN}Autonomous Learning Loop:{Colors.RESET}")
-                print(f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
+                print(
+                    f"\n  {Colors.BOLD}{Colors.BRIGHT_GREEN}Autonomous Learning Loop:{Colors.RESET}"
+                )
+                print(
+                    f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+                )
                 print(f"  {Colors.BRIGHT_GREEN}Status:{Colors.RESET} {status_str}")
-                print(f"  {Colors.BRIGHT_GREEN}Initial Benchmark:{Colors.RESET} {'Done' if stats.get('initial_benchmark_done') else 'Pending'}")
-                print(f"  {Colors.BRIGHT_GREEN}Current Focus:{Colors.RESET} {stats.get('current_focus') or 'None'}")
-                print(f"  {Colors.BRIGHT_GREEN}Focus Learned:{Colors.RESET} {stats.get('focus_learned', 0)} facts")
+                print(
+                    f"  {Colors.BRIGHT_GREEN}Initial Benchmark:{Colors.RESET} {'Done' if stats.get('initial_benchmark_done') else 'Pending'}"
+                )
+                print(
+                    f"  {Colors.BRIGHT_GREEN}Current Focus:{Colors.RESET} {stats.get('current_focus') or 'None'}"
+                )
+                print(
+                    f"  {Colors.BRIGHT_GREEN}Focus Learned:{Colors.RESET} {stats.get('focus_learned', 0)} facts"
+                )
 
                 # Show last learned topic
                 if auto.last_learned_topic:
-                    print(f"  {Colors.CYAN}Last Learned:{Colors.RESET} {auto.last_learned_topic[:50]}")
+                    print(
+                        f"  {Colors.CYAN}Last Learned:{Colors.RESET} {auto.last_learned_topic[:50]}"
+                    )
                     print(f"  {Colors.DIM}    from {auto.last_learned_source}{Colors.RESET}")
 
-                evo = stats.get('evolution', {})
+                evo = stats.get("evolution", {})
                 if evo:
                     print(f"  {Colors.CYAN}Learning Cycle:{Colors.RESET} {evo.get('cycle', 0)}")
                     print(f"  {Colors.CYAN}Unique Facts:{Colors.RESET} {evo.get('total_facts', 0)}")
-                    progress = evo.get('facts_this_cycle', 0)
+                    progress = evo.get("facts_this_cycle", 0)
                     bar_w = 20
                     filled = int(bar_w * (progress / 100))
                     bar = f"{'█' * filled}{'░' * (bar_w - filled)}"
                     print(f"  {Colors.CYAN}Cycle Progress:{Colors.RESET} [{bar}] {progress}/100")
 
-                weak = stats.get('weak_areas', [])
+                weak = stats.get("weak_areas", [])
                 if weak:
                     print(f"  {Colors.YELLOW}Weak Areas:{Colors.RESET}")
                     for area, score in weak[:5]:
@@ -1055,7 +1149,7 @@ def cmd_chat(args):
                 if auto.activity_log:
                     print(f"\n  {Colors.DIM}Recent Activity:{Colors.RESET}")
                     for a in auto.activity_log[-3:]:
-                        icon = ActivityDisplay.ICONS.get(a['type'], '●')
+                        icon = ActivityDisplay.ICONS.get(a["type"], "●")
                         print(f"    {icon} {a['message'][:50]}")
 
                 print()
@@ -1103,11 +1197,13 @@ def cmd_chat(args):
 
             # Read the file
             if os.path.exists(file_path):
-                with open(file_path, 'r') as f:
+                with open(file_path, "r") as f:
                     content = f.read()
                 print(f"\n  {Colors.CYAN}File:{Colors.RESET} {file_path}")
                 print(f"  {Colors.DIM}Lines: {len(content.splitlines())}{Colors.RESET}")
-                print(f"  {Colors.DIM}Ask me to make specific edits (e.g., 'change line 5 to ...'):{Colors.RESET}")
+                print(
+                    f"  {Colors.DIM}Ask me to make specific edits (e.g., 'change line 5 to ...'):{Colors.RESET}"
+                )
             else:
                 print(f"  {Colors.RED}File not found: {file_path}{Colors.RESET}")
             continue
@@ -1125,7 +1221,9 @@ def cmd_chat(args):
                     changes = engine.git.get_status()
                     branch = engine.git.get_current_branch()
                     print(f"\n  {Colors.BOLD}Git Status:{Colors.RESET}")
-                    print(f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
+                    print(
+                        f"  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+                    )
                     print(f"  {Colors.CYAN}Branch:{Colors.RESET} {branch}")
                     print(f"  {Colors.CYAN}Changes:{Colors.RESET} {len(changes)} files")
                     for c in changes[:10]:
@@ -1142,10 +1240,14 @@ def cmd_chat(args):
                     print(f"\n  {Colors.CYAN}Generating commit message...{Colors.RESET}")
                     msg = engine.git.generate_commit_message()
                     print(f"  {Colors.GREEN}Suggested:{Colors.RESET} {msg}")
-                    confirm = input(f"  {Colors.DIM}Commit with this message? [Y/n]:{Colors.RESET} ").strip().lower()
-                    if confirm in ('', 'y', 'yes'):
+                    confirm = (
+                        input(f"  {Colors.DIM}Commit with this message? [Y/n]:{Colors.RESET} ")
+                        .strip()
+                        .lower()
+                    )
+                    if confirm in ("", "y", "yes"):
                         changes = engine.git.get_status()
-                        files = [c.path for c in changes if c.status != '?']
+                        files = [c.path for c in changes if c.status != "?"]
                         result = loop.run_until_complete(engine.commit_changes(files, msg))
                         if result.status.value == "success":
                             print(f"  {Colors.GREEN}Committed!{Colors.RESET}")
@@ -1157,16 +1259,24 @@ def cmd_chat(args):
         if user_input.startswith("/ocr"):
             if not engine_available or not engine.ocr:
                 print(f"  {Colors.DIM}DeepSeek OCR not available{Colors.RESET}")
-                print(f"  {Colors.DIM}Make sure deepseek-ocr:latest is installed in Ollama{Colors.RESET}")
+                print(
+                    f"  {Colors.DIM}Make sure deepseek-ocr:latest is installed in Ollama{Colors.RESET}"
+                )
                 continue
 
             parts = user_input[4:].strip().split(maxsplit=1)
             if not parts:
                 print(f"  {Colors.DIM}Usage: /ocr <image_path> [question]{Colors.RESET}")
                 print(f"  {Colors.DIM}Examples:{Colors.RESET}")
-                print(f"    {Colors.CYAN}/ocr screenshot.png{Colors.RESET}              - Extract all text")
-                print(f"    {Colors.CYAN}/ocr diagram.png what does this show?{Colors.RESET} - Analyze image")
-                print(f"    {Colors.CYAN}/ocr code.png --code{Colors.RESET}             - Extract code only")
+                print(
+                    f"    {Colors.CYAN}/ocr screenshot.png{Colors.RESET}              - Extract all text"
+                )
+                print(
+                    f"    {Colors.CYAN}/ocr diagram.png what does this show?{Colors.RESET} - Analyze image"
+                )
+                print(
+                    f"    {Colors.CYAN}/ocr code.png --code{Colors.RESET}             - Extract code only"
+                )
                 continue
 
             image_path = parts[0]
@@ -1185,7 +1295,7 @@ def cmd_chat(args):
                     result = engine.ocr.extract_code(image_path)
                     print(f"\n  {Colors.BOLD}Extracted Code:{Colors.RESET}")
                     print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
-                    for line in result.text.split('\n'):
+                    for line in result.text.split("\n"):
                         print(f"  {Colors.GREEN}{line}{Colors.RESET}")
                 elif question == "--learn":
                     # Learn from image
@@ -1199,18 +1309,18 @@ def cmd_chat(args):
                     result = engine.ocr.analyze_image(image_path, question)
                     print(f"\n  {Colors.BOLD}Analysis:{Colors.RESET}")
                     print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
-                    for line in result.text.split('\n'):
+                    for line in result.text.split("\n"):
                         print(f"  {line}")
                 else:
                     # Extract all text
                     result = engine.ocr.read_image(image_path)
                     print(f"\n  {Colors.BOLD}Extracted Text:{Colors.RESET}")
                     print(f"  {Colors.DIM}{'─' * 55}{Colors.RESET}")
-                    for line in result.text.split('\n'):
+                    for line in result.text.split("\n"):
                         print(f"  {line}")
 
                 # Show metadata
-                if result and hasattr(result, 'confidence'):
+                if result and hasattr(result, "confidence"):
                     print(f"\n  {Colors.DIM}Confidence: {result.confidence:.0%}{Colors.RESET}")
 
             except Exception as e:
@@ -1229,7 +1339,10 @@ def cmd_chat(args):
                 print(f"  {Colors.DIM}$ {cmd}{Colors.RESET}")
                 try:
                     import subprocess
-                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+
+                    result = subprocess.run(
+                        cmd, shell=True, capture_output=True, text=True, timeout=30
+                    )
                     if result.stdout:
                         print(f"  {result.stdout.rstrip()}")
                     if result.stderr:
@@ -1243,7 +1356,8 @@ def cmd_chat(args):
         # @./file - Include file content in prompt
         if "@" in user_input:
             import re
-            file_refs = re.findall(r'@(\.?/[^\s]+)', user_input)
+
+            file_refs = re.findall(r"@(\.?/[^\s]+)", user_input)
             for ref in file_refs:
                 file_path = os.path.expanduser(ref)
                 if os.path.exists(file_path):
@@ -1253,7 +1367,7 @@ def cmd_chat(args):
                             files = os.listdir(file_path)[:20]
                             content = f"[Directory {ref}]: {', '.join(files)}"
                         else:
-                            with open(file_path, 'r') as f:
+                            with open(file_path, "r") as f:
                                 content = f.read()[:5000]  # Limit size
                             content = f"[File {ref}]:\n```\n{content}\n```"
                         user_input = user_input.replace(f"@{ref}", content)
@@ -1289,10 +1403,12 @@ def cmd_chat(args):
                     )
 
                     if cognitive_context:
-                        memories = cognitive_context.get('memories', [])
-                        confidence = cognitive_context.get('confidence', 0)
+                        memories = cognitive_context.get("memories", [])
+                        confidence = cognitive_context.get("confidence", 0)
                         if memories:
-                            show_cognitive_phase("perceive", f"{len(memories)} memories, {confidence:.0%} confidence")
+                            show_cognitive_phase(
+                                "perceive", f"{len(memories)} memories, {confidence:.0%} confidence"
+                            )
 
                     # Show cognitive phase: THINK
                     show_cognitive_phase("think", "Streaming response...")
@@ -1311,21 +1427,25 @@ def cmd_chat(args):
                             # Extract and learn facts from response
                             facts = engine._extract_facts(response)
                             for fact in facts:
-                                if engine.evolution and engine.evolution.is_duplicate(fact['content']):
+                                if engine.evolution and engine.evolution.is_duplicate(
+                                    fact["content"]
+                                ):
                                     continue
                                 engine.trainer.learn(
-                                    topic=fact.get('topic', user_input[:30]),
-                                    content=fact['content'],
-                                    source="conversation"
+                                    topic=fact.get("topic", user_input[:30]),
+                                    content=fact["content"],
+                                    source="conversation",
                                 )
                                 if engine.evolution:
-                                    engine.evolution.mark_learned(fact['content'])
+                                    engine.evolution.mark_learned(fact["content"])
                                 facts_learned += 1
 
                             if facts_learned > 0:
                                 engine.trainer.kb.save()
-                                total = engine.trainer.kb.stats.get('total_facts', 0)
-                                show_cognitive_phase("learn", f"Learned {facts_learned} facts (total: {total})")
+                                total = engine.trainer.kb.stats.get("total_facts", 0)
+                                show_cognitive_phase(
+                                    "learn", f"Learned {facts_learned} facts (total: {total})"
+                                )
                             else:
                                 show_cognitive_phase("learn", "No new facts to learn")
                         except Exception as e:
@@ -1337,7 +1457,7 @@ def cmd_chat(args):
                                 topic="conversation",
                                 content=f"Q: {user_input[:100]} A: {response[:200]}",
                                 source="chat",
-                                importance=0.5
+                                importance=0.5,
                             )
                         except Exception:
                             pass
@@ -1349,13 +1469,13 @@ def cmd_chat(args):
 
                     # Get real learning stats
                     if engine_available and engine.trainer:
-                        total_facts = engine.trainer.kb.stats.get('total_facts', 0)
+                        total_facts = engine.trainer.kb.stats.get("total_facts", 0)
                         learning_str = f" | {Colors.GREEN}{total_facts} facts{Colors.RESET}"
 
                         if engine.evolution:
                             evo_stats = engine.evolution.get_stats()
-                            cycle = evo_stats.get('cycle', 0)
-                            progress = evo_stats.get('facts_this_cycle', 0)
+                            cycle = evo_stats.get("cycle", 0)
+                            progress = evo_stats.get("facts_this_cycle", 0)
                             learning_str += f" | cycle {cycle}"
 
                             # Show progress bar
@@ -1369,12 +1489,18 @@ def cmd_chat(args):
                         if engine.autonomous.running:
                             focus = engine.autonomous._current_focus
                             if focus:
-                                auto_str = f"\n  {Colors.CYAN}🎯 Learning from: {focus}{Colors.RESET}"
+                                auto_str = (
+                                    f"\n  {Colors.CYAN}🎯 Learning from: {focus}{Colors.RESET}"
+                                )
                             elif engine.autonomous.is_busy:
                                 auto_str = f"\n  {Colors.YELLOW}🔄 Processing...{Colors.RESET}"
 
-                    print(f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
-                    print(f"  {Colors.DIM}model: {current_model} | streaming{tools_used}{Colors.RESET}{learning_str}")
+                    print(
+                        f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+                    )
+                    print(
+                        f"  {Colors.DIM}model: {current_model} | streaming{tools_used}{Colors.RESET}{learning_str}"
+                    )
                     if auto_str:
                         print(auto_str)
 
@@ -1426,23 +1552,25 @@ To use a tool: <tool>name</tool><args>{"param": "value"}</args>
                     r = req.post(
                         "http://localhost:11434/api/chat",
                         json={"model": current_model, "messages": messages, "stream": False},
-                        timeout=120
+                        timeout=120,
                     )
                     response = r.json()["message"]["content"]
 
                     # Word wrap and print
                     col = 9
-                    display_response = re.sub(r'<tool>.*?</tool>', '', response)
-                    display_response = re.sub(r'<args>.*?</args>', '', display_response, flags=re.DOTALL)
+                    display_response = re.sub(r"<tool>.*?</tool>", "", response)
+                    display_response = re.sub(
+                        r"<args>.*?</args>", "", display_response, flags=re.DOTALL
+                    )
                     display_response = display_response.strip()
 
                     for char in display_response:
-                        if char == '\n':
+                        if char == "\n":
                             print()
                             print("         ", end="")
                             col = 9
                         else:
-                            if col > 65 and char == ' ':
+                            if col > 65 and char == " ":
                                 print()
                                 print("         ", end="")
                                 col = 9
@@ -1451,7 +1579,9 @@ To use a tool: <tool>name</tool><args>{"param": "value"}</args>
                                 col += 1
                     print()
 
-                    print(f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
+                    print(
+                        f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+                    )
                     print(f"  {Colors.DIM}model: {current_model} | fallback mode{Colors.RESET}")
 
                     history.append({"role": "assistant", "content": response})
@@ -1462,7 +1592,9 @@ To use a tool: <tool>name</tool><args>{"param": "value"}</args>
             print(f"\n  {Colors.BRIGHT_GREEN}Neuro:{Colors.RESET} ", end="")
             print(f"Ollama is not running. Please start it:")
             print(f"         {Colors.DIM}ollama serve && ollama pull ministral-3:8b{Colors.RESET}")
-            print(f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}")
+            print(
+                f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
+            )
 
     return 0
 
@@ -1512,6 +1644,7 @@ def cmd_demo(args):
 
     try:
         from neuro.engine import NeuroEngine, EngineConfig
+
         config = EngineConfig(model="ministral-3:8b", show_thinking=False)
         engine = NeuroEngine(config)
         spinner.stop()
@@ -1533,6 +1666,7 @@ def cmd_demo(args):
 
     try:
         from editor import CodeEditor
+
         editor = CodeEditor(auto_confirm=True)
         spinner.stop()
         print(f"  {Colors.GREEN}✓{Colors.RESET} Code Editor loaded")
@@ -1546,6 +1680,7 @@ def cmd_demo(args):
 
     try:
         from git import GitAutomator
+
         git = GitAutomator()
         is_repo = git.is_repo()
         spinner.stop()
@@ -1563,6 +1698,7 @@ def cmd_demo(args):
 
     try:
         from executor import ParallelExecutor
+
         executor = ParallelExecutor(max_parallel=5)
         spinner.stop()
         print(f"  {Colors.GREEN}✓{Colors.RESET} Parallel Executor loaded")
@@ -1593,7 +1729,7 @@ def cmd_check(args):
     for pkg in ["numpy", "scipy", "aiohttp", "rich"]:
         try:
             mod = __import__(pkg)
-            ver = getattr(mod, '__version__', 'ok')
+            ver = getattr(mod, "__version__", "ok")
             print(f"  {Colors.GREEN}✓{Colors.RESET} {pkg} {Colors.DIM}{ver}{Colors.RESET}")
             checks.append(True)
         except ImportError:
@@ -1627,20 +1763,27 @@ def cmd_check(args):
 
     try:
         import requests
+
         r = requests.get("http://localhost:11434/api/tags", timeout=5)
         if r.status_code == 200:
             models = [m["name"] for m in r.json().get("models", [])]
             print(f"  {Colors.GREEN}✓{Colors.RESET} Ollama running")
             if models:
-                print(f"  {Colors.GREEN}✓{Colors.RESET} Models: {Colors.DIM}{', '.join(models)}{Colors.RESET}")
+                print(
+                    f"  {Colors.GREEN}✓{Colors.RESET} Models: {Colors.DIM}{', '.join(models)}{Colors.RESET}"
+                )
             else:
-                print(f"  {Colors.YELLOW}!{Colors.RESET} No models. Run: {Colors.DIM}ollama pull ministral-3:8b{Colors.RESET}")
+                print(
+                    f"  {Colors.YELLOW}!{Colors.RESET} No models. Run: {Colors.DIM}ollama pull ministral-3:8b{Colors.RESET}"
+                )
             checks.append(True)
         else:
             print(f"  {Colors.YELLOW}!{Colors.RESET} Ollama not responding")
             checks.append(False)
     except Exception:
-        print(f"  {Colors.YELLOW}!{Colors.RESET} Ollama not running. Run: {Colors.DIM}ollama serve{Colors.RESET}")
+        print(
+            f"  {Colors.YELLOW}!{Colors.RESET} Ollama not running. Run: {Colors.DIM}ollama serve{Colors.RESET}"
+        )
         checks.append(False)
 
     print()
@@ -1673,38 +1816,53 @@ Examples:
   neuro --model qwen2.5:7b       Use specific model
   neuro info                     Show system information
   neuro check                    Verify installation
-"""
+""",
     )
 
     # Core flags (Claude-style)
     parser.add_argument("prompt", nargs="?", help="Initial prompt to send")
     parser.add_argument("-v", "--version", action="store_true", help="Show version")
-    parser.add_argument("-p", "--print", action="store_true", dest="print_mode",
-                        help="Print response and exit (no interactive mode)")
-    parser.add_argument("-c", "--continue", action="store_true", dest="continue_session",
-                        help="Continue most recent conversation")
-    parser.add_argument("-r", "--resume", type=str, metavar="SESSION",
-                        help="Resume specific session by ID")
-    parser.add_argument("--model", type=str, default="ministral-3:8b",
-                        help="Model to use (default: ministral-3:8b)")
-    parser.add_argument("--verbose", action="store_true",
-                        help="Enable verbose logging")
+    parser.add_argument(
+        "-p",
+        "--print",
+        action="store_true",
+        dest="print_mode",
+        help="Print response and exit (no interactive mode)",
+    )
+    parser.add_argument(
+        "-c",
+        "--continue",
+        action="store_true",
+        dest="continue_session",
+        help="Continue most recent conversation",
+    )
+    parser.add_argument(
+        "-r", "--resume", type=str, metavar="SESSION", help="Resume specific session by ID"
+    )
+    parser.add_argument(
+        "--model", type=str, default="ministral-3:8b", help="Model to use (default: ministral-3:8b)"
+    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     # System prompt flags
-    parser.add_argument("--system-prompt", type=str,
-                        help="Custom system prompt (replaces default)")
-    parser.add_argument("--append-system-prompt", type=str,
-                        help="Append to default system prompt")
+    parser.add_argument("--system-prompt", type=str, help="Custom system prompt (replaces default)")
+    parser.add_argument("--append-system-prompt", type=str, help="Append to default system prompt")
 
     # Output flags
-    parser.add_argument("--output-format", choices=["text", "json", "stream-json"],
-                        default="text", help="Output format for print mode")
-    parser.add_argument("--no-stream", action="store_true",
-                        help="Disable streaming (wait for full response)")
+    parser.add_argument(
+        "--output-format",
+        choices=["text", "json", "stream-json"],
+        default="text",
+        help="Output format for print mode",
+    )
+    parser.add_argument(
+        "--no-stream", action="store_true", help="Disable streaming (wait for full response)"
+    )
 
     # Permission flags
-    parser.add_argument("--dangerously-skip-permissions", action="store_true",
-                        help="Skip all permission prompts")
+    parser.add_argument(
+        "--dangerously-skip-permissions", action="store_true", help="Skip all permission prompts"
+    )
 
     # Subcommands
     subparsers = parser.add_subparsers(dest="command")

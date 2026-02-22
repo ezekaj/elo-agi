@@ -15,6 +15,7 @@ from .model_router import ModelRouter, ModelSelection
 @dataclass
 class NeuroLLMConfig:
     """Configuration for NeuroLLM."""
+
     default_model: str = "mistral"
     enable_routing: bool = True
     system_prompt: str = """You are Neuro, an advanced AGI assistant built on a neuroscience-inspired cognitive architecture. You combine multiple reasoning styles (deductive, inductive, abductive, analogical, causal) to provide thoughtful, well-reasoned responses.
@@ -27,6 +28,7 @@ You are helpful, direct, and concise. You think through problems carefully befor
 @dataclass
 class Message:
     """A chat message."""
+
     role: str
     content: str
     timestamp: float = field(default_factory=time.time)
@@ -47,10 +49,12 @@ class NeuroLLM:
 
     def __init__(self, config: Optional[NeuroLLMConfig] = None):
         self.config = config or NeuroLLMConfig()
-        self._ollama = OllamaClient(OllamaConfig(
-            default_model=self.config.default_model,
-            temperature=self.config.temperature,
-        ))
+        self._ollama = OllamaClient(
+            OllamaConfig(
+                default_model=self.config.default_model,
+                temperature=self.config.temperature,
+            )
+        )
         self._router = ModelRouter(fallback_model=self.config.default_model)
         self._history: List[Message] = []
         self._total_tokens = 0
@@ -95,10 +99,12 @@ class NeuroLLM:
 
         model = model or self.config.default_model
 
-        self._history.append(Message(
-            role="user",
-            content=message,
-        ))
+        self._history.append(
+            Message(
+                role="user",
+                content=message,
+            )
+        )
 
         messages = self._build_messages()
 
@@ -106,12 +112,14 @@ class NeuroLLM:
             return self._stream_response(messages, model, selection)
         else:
             response = self._ollama.chat(messages, model=model)
-            self._history.append(Message(
-                role="assistant",
-                content=response,
-                model_used=model,
-                reasoning_style=selection.reasoning_style if selection else None,
-            ))
+            self._history.append(
+                Message(
+                    role="assistant",
+                    content=response,
+                    model_used=model,
+                    reasoning_style=selection.reasoning_style if selection else None,
+                )
+            )
             return response
 
     def _stream_response(
@@ -128,29 +136,35 @@ class NeuroLLM:
             yield token
 
         response = "".join(full_response)
-        self._history.append(Message(
-            role="assistant",
-            content=response,
-            model_used=model,
-            reasoning_style=selection.reasoning_style if selection else None,
-        ))
+        self._history.append(
+            Message(
+                role="assistant",
+                content=response,
+                model_used=model,
+                reasoning_style=selection.reasoning_style if selection else None,
+            )
+        )
 
     def _build_messages(self) -> List[Dict[str, str]]:
         """Build messages for API call."""
         messages = []
 
         if self.config.system_prompt:
-            messages.append({
-                "role": "system",
-                "content": self.config.system_prompt,
-            })
+            messages.append(
+                {
+                    "role": "system",
+                    "content": self.config.system_prompt,
+                }
+            )
 
-        recent = self._history[-self.config.max_history:]
+        recent = self._history[-self.config.max_history :]
         for msg in recent:
-            messages.append({
-                "role": msg.role,
-                "content": msg.content,
-            })
+            messages.append(
+                {
+                    "role": msg.role,
+                    "content": msg.content,
+                }
+            )
 
         return messages
 

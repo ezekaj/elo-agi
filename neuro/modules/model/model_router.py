@@ -22,6 +22,7 @@ try:
         StyleSelector,
         ReasoningStyle,
     )
+
     META_REASONING_AVAILABLE = True
 except ImportError:
     META_REASONING_AVAILABLE = False
@@ -29,6 +30,7 @@ except ImportError:
 
 class ModelTier(Enum):
     """Model capability tiers."""
+
     FAST = "fast"
     BALANCED = "balanced"
     POWERFUL = "powerful"
@@ -37,6 +39,7 @@ class ModelTier(Enum):
 @dataclass
 class ModelSelection:
     """Result of model selection."""
+
     model: str
     tier: ModelTier
     reasoning_style: Optional[str]
@@ -122,43 +125,74 @@ class ModelRouter:
                 tier=ModelTier.FAST,
                 reasoning_style=None,
                 confidence=0.9,
-                rationale="Short query, using fast model"
+                rationale="Short query, using fast model",
             )
 
-        if any(word in query_lower for word in [
-            "code", "program", "function", "algorithm", "debug",
-            "math", "calculate", "solve", "equation", "proof"
-        ]):
+        if any(
+            word in query_lower
+            for word in [
+                "code",
+                "program",
+                "function",
+                "algorithm",
+                "debug",
+                "math",
+                "calculate",
+                "solve",
+                "equation",
+                "proof",
+            ]
+        ):
             return ModelSelection(
                 model=self._get_available(ModelTier.BALANCED, available),
                 tier=ModelTier.BALANCED,
                 reasoning_style="systematic",
                 confidence=0.85,
-                rationale="Technical/mathematical query"
+                rationale="Technical/mathematical query",
             )
 
-        if any(word in query_lower for word in [
-            "creative", "story", "imagine", "design", "invent",
-            "brainstorm", "novel", "unique", "innovative"
-        ]):
+        if any(
+            word in query_lower
+            for word in [
+                "creative",
+                "story",
+                "imagine",
+                "design",
+                "invent",
+                "brainstorm",
+                "novel",
+                "unique",
+                "innovative",
+            ]
+        ):
             return ModelSelection(
                 model=self._get_available(ModelTier.POWERFUL, available),
                 tier=ModelTier.POWERFUL,
                 reasoning_style="creative",
                 confidence=0.85,
-                rationale="Creative task requiring powerful model"
+                rationale="Creative task requiring powerful model",
             )
 
-        if any(word in query_lower for word in [
-            "analyze", "explain", "compare", "evaluate", "reason",
-            "why", "how", "complex", "detailed"
-        ]):
+        if any(
+            word in query_lower
+            for word in [
+                "analyze",
+                "explain",
+                "compare",
+                "evaluate",
+                "reason",
+                "why",
+                "how",
+                "complex",
+                "detailed",
+            ]
+        ):
             return ModelSelection(
                 model=self._get_available(ModelTier.BALANCED, available),
                 tier=ModelTier.BALANCED,
                 reasoning_style="deductive",
                 confidence=0.8,
-                rationale="Analytical task"
+                rationale="Analytical task",
             )
 
         return ModelSelection(
@@ -166,7 +200,7 @@ class ModelRouter:
             tier=ModelTier.BALANCED,
             reasoning_style="inductive",
             confidence=0.7,
-            rationale="General query"
+            rationale="General query",
         )
 
     def _get_available(

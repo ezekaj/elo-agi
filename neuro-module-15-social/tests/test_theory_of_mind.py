@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m15_social.theory_of_mind import (
-    BeliefTracker, MentalStateAttribution, TheoryOfMind, ToMParams
+    BeliefTracker,
+    MentalStateAttribution,
+    TheoryOfMind,
+    ToMParams,
 )
+
 
 class TestBeliefTracker:
     """Tests for belief tracking"""
@@ -47,6 +51,7 @@ class TestBeliefTracker:
         tracker.attribute_belief("sally", "location", false_belief)
         assert tracker.check_false_belief("sally", "location")
 
+
 class TestMentalStateAttribution:
     """Tests for mental state attribution"""
 
@@ -77,6 +82,7 @@ class TestMentalStateAttribution:
         attr.observe_behavior("agent1", np.random.rand(50))
         prediction = attr.predict_behavior("agent1")
         assert prediction is not None
+
 
 class TestTheoryOfMind:
     """Tests for integrated ToM"""
@@ -118,5 +124,6 @@ class TestTheoryOfMind:
         tom.update(dt=10.0)
         assert np.mean(tom.tpj_activation) < initial
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

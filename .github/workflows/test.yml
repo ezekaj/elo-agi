@@ -55,8 +55,8 @@ jobs:
           if [ $failed -gt 0 ]; then
             echo "Failed modules:$failed_modules"
           fi
-          if [ $failed -gt 8 ]; then
-            echo "Too many failures (>8), failing CI"
+          if [ $failed -gt 2 ]; then
+            echo "Too many failures (>2), failing CI"
             exit 1
           fi
           echo "CI passed ($passed modules passed, $failed within tolerance)"

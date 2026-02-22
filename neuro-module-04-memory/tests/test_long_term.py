@@ -4,11 +4,15 @@ import pytest
 import time
 
 from neuro.modules.m04_memory.long_term_memory import (
-    EpisodicMemory, Episode,
-    SemanticMemory, Concept,
-    ProceduralMemory, Procedure
+    EpisodicMemory,
+    Episode,
+    SemanticMemory,
+    Concept,
+    ProceduralMemory,
+    Procedure,
 )
 from neuro.modules.m04_memory.long_term_memory.procedural_memory import Pattern, Action
+
 
 class TestEpisodicMemory:
     """Tests for episodic memory"""
@@ -20,7 +24,7 @@ class TestEpisodicMemory:
         episode = em.encode(
             experience="Had coffee at cafe",
             context={"location": "downtown", "time": "morning"},
-            emotional_valence=0.5
+            emotional_valence=0.5,
         )
 
         results = em.retrieve_by_cue("coffee")
@@ -93,6 +97,7 @@ class TestEpisodicMemory:
         assert episode.strength < 1.0
         assert episode.vividness < 1.0
 
+
 class TestSemanticMemory:
     """Tests for semantic memory"""
 
@@ -103,7 +108,7 @@ class TestSemanticMemory:
         sm.create_concept(
             name="dog",
             features={"furry": 1.0, "has_tail": 1.0},
-            relations=[("is-a", "animal", 1.0)]
+            relations=[("is-a", "animal", 1.0)],
         )
 
         concept = sm.retrieve("dog")
@@ -153,6 +158,7 @@ class TestSemanticMemory:
         assert "dog" in members
         assert "cat" in members
 
+
 class TestProceduralMemory:
     """Tests for procedural memory"""
 
@@ -163,7 +169,7 @@ class TestProceduralMemory:
         pm.encode_simple(
             name="greet",
             trigger_features={"situation": "meeting"},
-            action_names=["smile", "wave", "say_hello"]
+            action_names=["smile", "wave", "say_hello"],
         )
 
         results = pm.execute({"situation": "meeting"})
@@ -176,9 +182,7 @@ class TestProceduralMemory:
         pm = ProceduralMemory()
 
         procedure = pm.encode_simple(
-            name="typing",
-            trigger_features={"task": "write"},
-            action_names=["type"]
+            name="typing", trigger_features={"task": "write"}, action_names=["type"]
         )
 
         initial_strength = procedure.strength
@@ -197,16 +201,12 @@ class TestProceduralMemory:
 
         # Two competing procedures
         p1 = pm.encode_simple(
-            name="response1",
-            trigger_features={"stimulus": "beep"},
-            action_names=["action1"]
+            name="response1", trigger_features={"stimulus": "beep"}, action_names=["action1"]
         )
         p1.strength = 0.9
 
         p2 = pm.encode_simple(
-            name="response2",
-            trigger_features={"stimulus": "beep"},
-            action_names=["action2"]
+            name="response2", trigger_features={"stimulus": "beep"}, action_names=["action2"]
         )
         p2.strength = 0.3
 
@@ -222,9 +222,7 @@ class TestProceduralMemory:
         pm = ProceduralMemory()
 
         procedure = pm.encode_simple(
-            name="skill",
-            trigger_features={"x": 1},
-            action_names=["do_something"]
+            name="skill", trigger_features={"x": 1}, action_names=["do_something"]
         )
         procedure.strength = 0.8
 

@@ -12,6 +12,7 @@ from typing import Optional, Dict, List
 @dataclass
 class EmpathyParams:
     """Parameters for empathy"""
+
     n_features: int = 50
     contagion_strength: float = 0.5
     regulation_strength: float = 0.3
@@ -42,9 +43,7 @@ class AffectiveSharing:
             other_emotion = np.resize(other_emotion, self.params.n_features)
 
         # Anterior insula processes emotional observation
-        self.insula_activation = np.tanh(
-            self.insula_activation * 0.3 + other_emotion * 0.7
-        )
+        self.insula_activation = np.tanh(self.insula_activation * 0.3 + other_emotion * 0.7)
 
         # Emotional contagion - automatic sharing
         contagion = other_emotion * self.params.contagion_strength
@@ -52,15 +51,15 @@ class AffectiveSharing:
 
         # Update own affect
         self.own_affect = np.tanh(
-            self.own_affect * (1 - self.params.contagion_strength) +
-            self.shared_affect * self.params.contagion_strength
+            self.own_affect * (1 - self.params.contagion_strength)
+            + self.shared_affect * self.params.contagion_strength
         )
 
         return {
             "observed_emotion": other_emotion,
             "shared_affect": self.shared_affect.copy(),
             "own_affect_change": contagion,
-            "insula_activity": np.mean(self.insula_activation)
+            "insula_activity": np.mean(self.insula_activation),
         }
 
     def get_emotional_resonance(self, other_emotion: np.ndarray) -> float:
@@ -109,9 +108,7 @@ class EmpathicConcern:
             distress_signal = np.resize(distress_signal, self.params.n_features)
 
         # ACC processes pain/distress
-        self.acc_activation = np.tanh(
-            self.acc_activation * 0.3 + distress_signal * 0.7
-        )
+        self.acc_activation = np.tanh(self.acc_activation * 0.3 + distress_signal * 0.7)
 
         # Calculate distress intensity
         distress_intensity = np.mean(np.abs(distress_signal))
@@ -128,7 +125,7 @@ class EmpathicConcern:
             "distress_intensity": distress_intensity,
             "concern_level": self.concern_levels[agent],
             "prosocial_motivation": self.prosocial_motivation,
-            "acc_activity": np.mean(self.acc_activation)
+            "acc_activity": np.mean(self.acc_activation),
         }
 
     def get_helping_motivation(self, agent: str) -> float:
@@ -167,8 +164,7 @@ class EmpathySystem:
         # Perspective-taking modulation
         self.perspective_active = False
 
-    def empathize(self, agent: str, emotional_state: np.ndarray,
-                 is_distress: bool = False) -> Dict:
+    def empathize(self, agent: str, emotional_state: np.ndarray, is_distress: bool = False) -> Dict:
         """Full empathic response to another's emotional state"""
         if len(emotional_state) != self.params.n_features:
             emotional_state = np.resize(emotional_state, self.params.n_features)
@@ -186,7 +182,7 @@ class EmpathySystem:
 
         # Perspective modulates empathy
         if self.perspective_active:
-            resonance *= (1 + self.params.perspective_weight)
+            resonance *= 1 + self.params.perspective_weight
 
         self.empathy_level = np.clip(0.5 + resonance * 0.5, 0, 1)
 
@@ -196,7 +192,7 @@ class EmpathySystem:
             "concern": concern_result,
             "resonance": resonance,
             "empathy_level": self.empathy_level,
-            "helping_motivation": self.empathic_concern.get_helping_motivation(agent)
+            "helping_motivation": self.empathic_concern.get_helping_motivation(agent),
         }
 
     def take_perspective(self, active: bool = True):
@@ -212,11 +208,11 @@ class EmpathySystem:
     def update(self, dt: float = 1.0):
         """Update empathy system"""
         # Decay activations
-        self.affective_sharing.insula_activation *= (1 - 0.1 * dt)
-        self.empathic_concern.acc_activation *= (1 - 0.1 * dt)
+        self.affective_sharing.insula_activation *= 1 - 0.1 * dt
+        self.empathic_concern.acc_activation *= 1 - 0.1 * dt
 
         # Decay prosocial motivation
-        self.empathic_concern.prosocial_motivation *= (1 - 0.05 * dt)
+        self.empathic_concern.prosocial_motivation *= 1 - 0.05 * dt
 
     def get_state(self) -> Dict:
         """Get empathy state"""
@@ -227,5 +223,5 @@ class EmpathySystem:
             "acc_activity": np.mean(self.empathic_concern.acc_activation),
             "prosocial_motivation": self.empathic_concern.prosocial_motivation,
             "perspective_active": self.perspective_active,
-            "concern_levels": self.empathic_concern.concern_levels.copy()
+            "concern_levels": self.empathic_concern.concern_levels.copy(),
         }

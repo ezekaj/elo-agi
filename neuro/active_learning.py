@@ -26,12 +26,13 @@ import threading
 @dataclass
 class Topic:
     """A topic the AI knows about or is curious about."""
+
     name: str
-    confidence: float = 0.5      # How well we know it (0=unknown, 1=expert)
-    curiosity: float = 0.5       # How interested we are (0=boring, 1=fascinating)
-    exposure_count: int = 0      # How many times we've seen it
-    success_count: int = 0       # How many times we answered correctly
-    last_seen: float = 0.0       # Timestamp
+    confidence: float = 0.5  # How well we know it (0=unknown, 1=expert)
+    curiosity: float = 0.5  # How interested we are (0=boring, 1=fascinating)
+    exposure_count: int = 0  # How many times we've seen it
+    success_count: int = 0  # How many times we answered correctly
+    last_seen: float = 0.0  # Timestamp
     related_topics: List[str] = field(default_factory=list)
 
     @property
@@ -50,9 +51,11 @@ class Topic:
         uncertainty = 1.0 - self.confidence
         novelty_bonus = 1.0 / (1.0 + self.exposure_count * 0.1)
 
-        priority = (uncertainty * 0.4 +          # Want to learn unknowns
-                   self.curiosity * 0.4 +         # Want to learn interesting things
-                   novelty_bonus * 0.2)           # Slight preference for new topics
+        priority = (
+            uncertainty * 0.4  # Want to learn unknowns
+            + self.curiosity * 0.4  # Want to learn interesting things
+            + novelty_bonus * 0.2
+        )  # Slight preference for new topics
 
         return min(1.0, priority)
 
@@ -67,6 +70,7 @@ class Topic:
 @dataclass
 class LearningEvent:
     """Record of a learning interaction."""
+
     topic: str
     timestamp: float
     was_correct: bool
@@ -87,7 +91,9 @@ class ActiveLearner:
     """
 
     def __init__(self, storage_path: str = None):
-        self.storage_path = Path(storage_path or os.path.expanduser("~/.cognitive_ai_knowledge/active_learning"))
+        self.storage_path = Path(
+            storage_path or os.path.expanduser("~/.cognitive_ai_knowledge/active_learning")
+        )
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         # Topic knowledge base
@@ -98,10 +104,10 @@ class ActiveLearner:
 
         # Curiosity model - what drives interest
         self.curiosity_drivers = {
-            'novelty': 0.3,        # New things are interesting
-            'surprise': 0.3,       # Unexpected outcomes
-            'complexity': 0.2,     # Moderately complex things
-            'relevance': 0.2,      # Related to known topics
+            "novelty": 0.3,  # New things are interesting
+            "surprise": 0.3,  # Unexpected outcomes
+            "complexity": 0.2,  # Moderately complex things
+            "relevance": 0.2,  # Related to known topics
         }
 
         # Load saved state
@@ -146,8 +152,9 @@ class ActiveLearner:
             # Default: learn if priority is high enough
             return priority > 0.4, priority, "priority_based"
 
-    def record_exposure(self, topic: str, was_successful: bool,
-                       surprise_level: float = 0.5, complexity: float = 0.5):
+    def record_exposure(
+        self, topic: str, was_successful: bool, surprise_level: float = 0.5, complexity: float = 0.5
+    ):
         """
         Record that we encountered/learned about a topic.
 
@@ -196,7 +203,7 @@ class ActiveLearner:
                 was_correct=was_successful,
                 confidence_before=old_confidence,
                 confidence_after=t.confidence,
-                curiosity_delta=t.curiosity - 0.5
+                curiosity_delta=t.curiosity - 0.5,
             )
             self.history.append(event)
 
@@ -251,8 +258,11 @@ class ActiveLearner:
 
         # Find topics seen around the same time
         related = []
-        topic_times = [(name, top.last_seen) for name, top in self.topics.items()
-                      if name != topic and top.last_seen > 0]
+        topic_times = [
+            (name, top.last_seen)
+            for name, top in self.topics.items()
+            if name != topic and top.last_seen > 0
+        ]
 
         if not topic_times:
             return []
@@ -285,88 +295,92 @@ class ActiveLearner:
         """Get learning statistics."""
         with self._lock:
             if not self.topics:
-                return {'total_topics': 0, 'avg_confidence': 0, 'avg_curiosity': 0}
+                return {"total_topics": 0, "avg_confidence": 0, "avg_curiosity": 0}
 
             confidences = [t.confidence for t in self.topics.values()]
             curiosities = [t.curiosity for t in self.topics.values()]
 
             recent_events = [e for e in self.history[-100:]]
-            recent_accuracy = sum(1 for e in recent_events if e.was_correct) / max(1, len(recent_events))
+            recent_accuracy = sum(1 for e in recent_events if e.was_correct) / max(
+                1, len(recent_events)
+            )
 
             return {
-                'total_topics': len(self.topics),
-                'avg_confidence': np.mean(confidences),
-                'avg_curiosity': np.mean(curiosities),
-                'recent_accuracy': recent_accuracy,
-                'total_learning_events': len(self.history),
-                'high_curiosity_topics': sum(1 for t in self.topics.values() if t.curiosity > 0.7),
-                'low_confidence_topics': sum(1 for t in self.topics.values() if t.confidence < 0.3),
+                "total_topics": len(self.topics),
+                "avg_confidence": np.mean(confidences),
+                "avg_curiosity": np.mean(curiosities),
+                "recent_accuracy": recent_accuracy,
+                "total_learning_events": len(self.history),
+                "high_curiosity_topics": sum(1 for t in self.topics.values() if t.curiosity > 0.7),
+                "low_confidence_topics": sum(1 for t in self.topics.values() if t.confidence < 0.3),
             }
 
     def _save_state(self):
         """Save state to disk."""
         try:
             state = {
-                'topics': {
+                "topics": {
                     name: {
-                        'name': t.name,
-                        'confidence': t.confidence,
-                        'curiosity': t.curiosity,
-                        'exposure_count': t.exposure_count,
-                        'success_count': t.success_count,
-                        'last_seen': t.last_seen,
-                        'related_topics': t.related_topics,
+                        "name": t.name,
+                        "confidence": t.confidence,
+                        "curiosity": t.curiosity,
+                        "exposure_count": t.exposure_count,
+                        "success_count": t.success_count,
+                        "last_seen": t.last_seen,
+                        "related_topics": t.related_topics,
                     }
                     for name, t in self.topics.items()
                 },
-                'history': [
+                "history": [
                     {
-                        'topic': e.topic,
-                        'timestamp': e.timestamp,
-                        'was_correct': e.was_correct,
-                        'confidence_before': e.confidence_before,
-                        'confidence_after': e.confidence_after,
+                        "topic": e.topic,
+                        "timestamp": e.timestamp,
+                        "was_correct": e.was_correct,
+                        "confidence_before": e.confidence_before,
+                        "confidence_after": e.confidence_after,
                     }
                     for e in self.history[-200:]  # Keep last 200
-                ]
+                ],
             }
 
-            with open(self.storage_path / 'state.json', 'w') as f:
+            with open(self.storage_path / "state.json", "w") as f:
                 json.dump(state, f, indent=2)
         except Exception as e:
             print(f"[ActiveLearner] Save error: {e}")
 
     def _load_state(self):
         """Load state from disk."""
-        state_file = self.storage_path / 'state.json'
+        state_file = self.storage_path / "state.json"
         if not state_file.exists():
             return
 
         try:
-            with open(state_file, 'r') as f:
+            with open(state_file, "r") as f:
                 state = json.load(f)
 
             # Load topics
-            for name, data in state.get('topics', {}).items():
+            for name, data in state.get("topics", {}).items():
                 self.topics[name] = Topic(
-                    name=data['name'],
-                    confidence=data['confidence'],
-                    curiosity=data['curiosity'],
-                    exposure_count=data['exposure_count'],
-                    success_count=data['success_count'],
-                    last_seen=data['last_seen'],
-                    related_topics=data.get('related_topics', [])
+                    name=data["name"],
+                    confidence=data["confidence"],
+                    curiosity=data["curiosity"],
+                    exposure_count=data["exposure_count"],
+                    success_count=data["success_count"],
+                    last_seen=data["last_seen"],
+                    related_topics=data.get("related_topics", []),
                 )
 
             # Load history
-            for data in state.get('history', []):
-                self.history.append(LearningEvent(
-                    topic=data['topic'],
-                    timestamp=data['timestamp'],
-                    was_correct=data['was_correct'],
-                    confidence_before=data['confidence_before'],
-                    confidence_after=data['confidence_after'],
-                ))
+            for data in state.get("history", []):
+                self.history.append(
+                    LearningEvent(
+                        topic=data["topic"],
+                        timestamp=data["timestamp"],
+                        was_correct=data["was_correct"],
+                        confidence_before=data["confidence_before"],
+                        confidence_after=data["confidence_after"],
+                    )
+                )
 
         except Exception as e:
             print(f"[ActiveLearner] Load error: {e}")
@@ -467,13 +481,13 @@ if __name__ == "__main__":
 
     # Simulate learning sessions
     topics = [
-        ("python", True, 0.3),    # Know it well
+        ("python", True, 0.3),  # Know it well
         ("python", True, 0.2),
         ("machine learning", True, 0.7),  # Surprising success
         ("machine learning", False, 0.8),  # Surprising failure
         ("quantum computing", False, 0.9),  # Don't know, very surprising
         ("quantum computing", False, 0.8),
-        ("cooking", True, 0.2),   # Know it, boring
+        ("cooking", True, 0.2),  # Know it, boring
         ("cooking", True, 0.1),
     ]
 
@@ -486,7 +500,9 @@ if __name__ == "__main__":
     recs = learner.get_learning_recommendations(k=5)
     for topic, priority, reason in recs:
         t = learner.topics[topic]
-        print(f"  {topic}: priority={priority:.2f}, confidence={t.confidence:.2f}, curiosity={t.curiosity:.2f}")
+        print(
+            f"  {topic}: priority={priority:.2f}, confidence={t.confidence:.2f}, curiosity={t.curiosity:.2f}"
+        )
 
     print("\n--- Statistics ---")
     stats = learner.get_stats()

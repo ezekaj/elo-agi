@@ -16,6 +16,7 @@ import hashlib
 @dataclass
 class Episode:
     """Single episodic memory - a personal experience"""
+
     content: Any
     context: Dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
@@ -63,7 +64,7 @@ class EpisodicMemory:
         experience: Any,
         context: Optional[Dict[str, Any]] = None,
         emotional_valence: float = 0.0,
-        vividness: float = 1.0
+        vividness: float = 1.0,
     ) -> Episode:
         """
         Create new episodic memory.
@@ -82,7 +83,7 @@ class EpisodicMemory:
             context=context or {},
             timestamp=self._time_fn(),
             emotional_valence=emotional_valence,
-            vividness=vividness
+            vividness=vividness,
         )
 
         self._episodes.append(episode)
@@ -144,8 +145,7 @@ class EpisodicMemory:
         # Dict cue - check context overlap
         if isinstance(cue, dict):
             overlap = sum(
-                1 for k, v in cue.items()
-                if k in episode.context and episode.context[k] == v
+                1 for k, v in cue.items() if k in episode.context and episode.context[k] == v
             )
             if overlap > 0:
                 return overlap / len(cue)
@@ -156,6 +156,7 @@ class EpisodicMemory:
         """Check if content matches cue"""
         try:
             import numpy as np
+
             if isinstance(content, np.ndarray) and isinstance(cue, np.ndarray):
                 return np.array_equal(content, cue)
         except ImportError:
@@ -189,9 +190,7 @@ class EpisodicMemory:
         return list(candidates)
 
     def retrieve_by_time(
-        self,
-        start_time: Optional[float] = None,
-        end_time: Optional[float] = None
+        self, start_time: Optional[float] = None, end_time: Optional[float] = None
     ) -> List[Episode]:
         """
         Temporal search.
@@ -218,9 +217,7 @@ class EpisodicMemory:
         return matches
 
     def retrieve_by_emotion(
-        self,
-        valence_min: float = -1.0,
-        valence_max: float = 1.0
+        self, valence_min: float = -1.0, valence_max: float = 1.0
     ) -> List[Episode]:
         """
         Mood-congruent recall.
@@ -233,8 +230,7 @@ class EpisodicMemory:
             Episodes within emotional range
         """
         matches = [
-            ep for ep in self._episodes
-            if valence_min <= ep.emotional_valence <= valence_max
+            ep for ep in self._episodes if valence_min <= ep.emotional_valence <= valence_max
         ]
 
         for episode in matches:
@@ -256,10 +252,7 @@ class EpisodicMemory:
             # Replay recent episodes
             current_time = self._time_fn()
             day_seconds = 24 * 60 * 60
-            episodes = [
-                ep for ep in self._episodes
-                if current_time - ep.timestamp < day_seconds
-            ]
+            episodes = [ep for ep in self._episodes if current_time - ep.timestamp < day_seconds]
 
         for episode in episodes:
             # Strengthen through replay
@@ -268,11 +261,7 @@ class EpisodicMemory:
             if abs(episode.emotional_valence) > 0.5:
                 episode.strength = min(1.0, episode.strength + 0.05)
 
-    def forget(
-        self,
-        episode: Episode,
-        method: str = "decay"
-    ) -> bool:
+    def forget(self, episode: Episode, method: str = "decay") -> bool:
         """
         Remove or weaken memory.
 

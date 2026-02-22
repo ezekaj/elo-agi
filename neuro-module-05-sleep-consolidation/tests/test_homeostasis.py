@@ -6,8 +6,9 @@ from neuro.modules.m05_sleep_consolidation.synaptic_homeostasis import (
     Synapse,
     SynapticHomeostasis,
     SelectiveConsolidation,
-    SleepWakeCycle
+    SleepWakeCycle,
 )
+
 
 class TestSynapse:
     """Tests for single synapse representation"""
@@ -21,6 +22,7 @@ class TestSynapse:
         assert synapse.source == 1
         assert synapse.target == 2
         assert not synapse.is_tagged
+
 
 class TestSynapticHomeostasis:
     """Tests for synaptic homeostasis system"""
@@ -131,6 +133,7 @@ class TestSynapticHomeostasis:
         assert "mean_weight" in stats
         assert "energy_cost" in stats
 
+
 class TestSelectiveConsolidation:
     """Tests for selective protection from downscaling"""
 
@@ -210,9 +213,7 @@ class TestSelectiveConsolidation:
             homeostasis.synapses[sid].last_potentiation = 90.0
 
         n_tagged = selective.tag_by_activity(
-            activity_threshold=5,
-            recency_window=20.0,
-            current_time=100.0
+            activity_threshold=5, recency_window=20.0, current_time=100.0
         )
 
         assert n_tagged > 0
@@ -246,6 +247,7 @@ class TestSelectiveConsolidation:
         selective.clear_tags()
 
         assert selective.get_tagged_count() == 0
+
 
 class TestSleepWakeCycle:
     """Tests for complete sleep-wake cycle"""
@@ -293,11 +295,7 @@ class TestSleepWakeCycle:
 
         initial_strength = cycle.homeostasis.measure_total_strength()
 
-        stats = cycle.run_full_cycle(
-            wake_duration=16.0,
-            sleep_duration=8.0,
-            learning_intensity=0.1
-        )
+        stats = cycle.run_full_cycle(wake_duration=16.0, sleep_duration=8.0, learning_intensity=0.1)
 
         # After full cycle, strength should be somewhat restored
         assert "wake" in stats
@@ -324,17 +322,14 @@ class TestSleepWakeCycle:
 
         # Run several cycles
         for _ in range(3):
-            cycle.run_full_cycle(
-                wake_duration=16.0,
-                sleep_duration=8.0,
-                learning_intensity=0.05
-            )
+            cycle.run_full_cycle(wake_duration=16.0, sleep_duration=8.0, learning_intensity=0.05)
 
         final_strength = cycle.homeostasis.measure_total_strength()
 
         # Strength should not explode over time
         # (homeostasis should keep it bounded)
         assert final_strength < initial_strength * 5  # Reasonable bound
+
 
 class TestHomeostasisIntegration:
     """Integration tests for homeostasis with other systems"""
@@ -390,5 +385,6 @@ class TestHomeostasisIntegration:
         # SNR should improve (or at least not worsen much)
         assert final_snr >= initial_snr * 0.9
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

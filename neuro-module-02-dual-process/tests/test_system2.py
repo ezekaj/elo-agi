@@ -4,8 +4,16 @@ import pytest
 import numpy as np
 import time
 from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory, MemorySlot
-from neuro.modules.m02_dual_process.system2.cognitive_control import CognitiveControl, Response, ConflictLevel
-from neuro.modules.m02_dual_process.system2.relational_reasoning import RelationalReasoning, RelationType
+from neuro.modules.m02_dual_process.system2.cognitive_control import (
+    CognitiveControl,
+    Response,
+    ConflictLevel,
+)
+from neuro.modules.m02_dual_process.system2.relational_reasoning import (
+    RelationalReasoning,
+    RelationType,
+)
+
 
 class TestWorkingMemory:
     """Tests for limited-capacity working memory"""
@@ -88,6 +96,7 @@ class TestWorkingMemory:
 
         assert results == ["first", "second", "third"]
 
+
 class TestCognitiveControl:
     """Tests for conflict detection and inhibition"""
 
@@ -117,10 +126,7 @@ class TestCognitiveControl:
         cc = CognitiveControl()
 
         # Many equally strong responses
-        responses = [
-            Response(id=f"R{i}", activation=0.9, source="s1")
-            for i in range(4)
-        ]
+        responses = [Response(id=f"R{i}", activation=0.9, source="s1") for i in range(4)]
         signal = cc.detect_conflict(responses)
 
         assert signal.level in [ConflictLevel.HIGH, ConflictLevel.SEVERE]
@@ -129,9 +135,7 @@ class TestCognitiveControl:
         cc = CognitiveControl()
 
         signal = cc.error_signal(
-            expected=np.array([1.0, 0.0]),
-            actual=np.array([0.0, 1.0]),
-            error_type="prediction"
+            expected=np.array([1.0, 0.0]), actual=np.array([0.0, 1.0]), error_type="prediction"
         )
 
         assert signal.magnitude > 0
@@ -175,6 +179,7 @@ class TestCognitiveControl:
 
         # Total should not exceed budget (1.0)
         assert sum(allocated.values()) <= 1.0
+
 
 class TestRelationalReasoning:
     """Tests for compositional binding"""
@@ -225,11 +230,7 @@ class TestRelationalReasoning:
         dog = rr.create_element("dog", type_tag="entity")
         cat = rr.create_element("cat", type_tag="entity")
 
-        structure = rr.create_action_structure(
-            action=bite,
-            agent=dog,
-            patient=cat
-        )
+        structure = rr.create_action_structure(action=bite, agent=dog, patient=cat)
 
         assert len(structure.elements) == 3
 
@@ -272,6 +273,7 @@ class TestRelationalReasoning:
         assert result is not None
         assert len(result.relations) == 1
         assert result.relations[0].relation_type == RelationType.IS_A
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

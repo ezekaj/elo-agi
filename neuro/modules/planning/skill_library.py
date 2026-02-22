@@ -13,6 +13,7 @@ import numpy as np
 
 class SkillType(Enum):
     """Types of skills."""
+
     PRIMITIVE = "primitive"
     COMPOSITE = "composite"
     PARAMETERIZED = "parameterized"
@@ -22,6 +23,7 @@ class SkillType(Enum):
 @dataclass
 class SkillMetadata:
     """Metadata about a skill."""
+
     created_at: float = 0.0
     last_used: float = 0.0
     use_count: int = 0
@@ -64,6 +66,7 @@ class Skill:
     Skills are more abstract than options - they represent capabilities
     that can be instantiated with parameters and adapted to contexts.
     """
+
     name: str
     skill_type: SkillType
     preconditions: Callable[[Any], bool]
@@ -468,7 +471,9 @@ class SkillLibrary:
                 policy=source_skill.policy,
                 termination=source_skill.termination,
                 parameters=dict(source_skill.parameters),
-                embedding=source_skill.embedding.copy() if source_skill.embedding is not None else None,
+                embedding=source_skill.embedding.copy()
+                if source_skill.embedding is not None
+                else None,
                 parent_skills=[skill_name],
             )
 

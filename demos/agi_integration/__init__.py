@@ -7,4 +7,4 @@ neuro-robust, and sleep-consolidation modules.
 
 from .agent import IntegratedAGIAgent
 
-__all__ = ['IntegratedAGIAgent']
+__all__ = ["IntegratedAGIAgent"]

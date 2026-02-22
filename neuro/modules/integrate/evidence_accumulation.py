@@ -15,17 +15,19 @@ from .shared_space import SemanticEmbedding, ModalityType
 
 class EvidenceType(Enum):
     """Types of evidence."""
-    SENSORY = "sensory"           # Direct sensory evidence
-    MEMORY = "memory"             # Retrieved from memory
-    INFERENCE = "inference"       # Logical/probabilistic inference
-    PRIOR = "prior"               # Prior belief
-    CONTEXTUAL = "contextual"     # Context-dependent
-    SOCIAL = "social"             # From social sources
+
+    SENSORY = "sensory"  # Direct sensory evidence
+    MEMORY = "memory"  # Retrieved from memory
+    INFERENCE = "inference"  # Logical/probabilistic inference
+    PRIOR = "prior"  # Prior belief
+    CONTEXTUAL = "contextual"  # Context-dependent
+    SOCIAL = "social"  # From social sources
 
 
 @dataclass
 class EvidenceSource:
     """A source of evidence."""
+
     name: str
     reliability: float = 1.0
     modality: Optional[ModalityType] = None
@@ -35,10 +37,11 @@ class EvidenceSource:
 @dataclass
 class Evidence:
     """A piece of evidence for a hypothesis."""
+
     source: EvidenceSource
     evidence_type: EvidenceType
     value: np.ndarray  # Evidence vector
-    strength: float    # How strong is this evidence
+    strength: float  # How strong is this evidence
     timestamp: float = 0.0
     uncertainty: float = 0.1  # Measurement uncertainty
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -52,13 +55,14 @@ class Evidence:
 @dataclass
 class AccumulatorConfig:
     """Configuration for evidence accumulator."""
-    threshold: float = 1.0          # Decision threshold
-    leak_rate: float = 0.0          # Evidence leak over time
-    noise_std: float = 0.1          # Internal noise
-    n_alternatives: int = 2         # Number of choice alternatives
-    time_step: float = 0.01         # Integration time step
-    max_time: float = 10.0          # Maximum accumulation time
-    prior_strength: float = 0.0     # Strength of prior bias
+
+    threshold: float = 1.0  # Decision threshold
+    leak_rate: float = 0.0  # Evidence leak over time
+    noise_std: float = 0.1  # Internal noise
+    n_alternatives: int = 2  # Number of choice alternatives
+    time_step: float = 0.01  # Integration time step
+    max_time: float = 10.0  # Maximum accumulation time
+    prior_strength: float = 0.0  # Strength of prior bias
     random_seed: Optional[int] = None
 
 
@@ -106,9 +110,8 @@ class DriftDiffusionAccumulator:
         noise = self._rng.normal(0, self.config.noise_std)
 
         # Update state with leaky integration
-        self._state = (
-            (1 - self.config.leak_rate) * self._state +
-            self.config.time_step * (drift + noise)
+        self._state = (1 - self.config.leak_rate) * self._state + self.config.time_step * (
+            drift + noise
         )
 
         self._time += self.config.time_step
@@ -193,14 +196,14 @@ class BayesianAccumulator:
         self._evidence_history.append(evidence)
 
         # Weight likelihoods by evidence reliability
-        weighted_likelihoods = likelihoods ** evidence.weight
+        weighted_likelihoods = likelihoods**evidence.weight
 
         # Bayesian update in log space for numerical stability
         self._log_posterior += np.log(weighted_likelihoods + 1e-10)
 
         # Normalize
         log_sum = np.log(np.sum(np.exp(self._log_posterior - self._log_posterior.max())))
-        self._log_posterior -= (self._log_posterior.max() + log_sum)
+        self._log_posterior -= self._log_posterior.max() + log_sum
 
         self._posterior = np.exp(self._log_posterior)
         self._posterior /= self._posterior.sum()
@@ -314,8 +317,7 @@ class EvidenceAccumulator:
         # Leaky integration
         leak = 1 - self.config.leak_rate
         self._accumulated[hypothesis] = (
-            leak * self._accumulated[hypothesis] +
-            evidence.weight * evidence.value
+            leak * self._accumulated[hypothesis] + evidence.weight * evidence.value
         )
 
         return self._accumulated[hypothesis].copy()
@@ -400,17 +402,11 @@ class EvidenceAccumulator:
 
             if self._bayesian.is_decided(threshold):
                 self._decisions_made += 1
-                return (
-                    self._bayesian.get_map_hypothesis(),
-                    self._bayesian.get_posterior()
-                )
+                return (self._bayesian.get_map_hypothesis(), self._bayesian.get_posterior())
 
         # Return best guess
         self._decisions_made += 1
-        return (
-            self._bayesian.get_map_hypothesis(),
-            self._bayesian.get_posterior()
-        )
+        return (self._bayesian.get_map_hypothesis(), self._bayesian.get_posterior())
 
     def integrate_module_evidence(
         self,
@@ -466,10 +462,7 @@ class EvidenceAccumulator:
             return
 
         # Exponential moving average
-        source.reliability = (
-            (1 - learning_rate) * source.reliability +
-            learning_rate * accuracy
-        )
+        source.reliability = (1 - learning_rate) * source.reliability + learning_rate * accuracy
 
     def clear(self) -> None:
         """Clear all accumulated evidence."""
@@ -488,7 +481,6 @@ class EvidenceAccumulator:
             "total_evidence": self._total_evidence,
             "decisions_made": self._decisions_made,
             "source_reliabilities": {
-                name: source.reliability
-                for name, source in self._sources.items()
+                name: source.reliability for name, source in self._sources.items()
             },
         }

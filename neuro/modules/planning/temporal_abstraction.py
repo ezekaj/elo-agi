@@ -13,6 +13,7 @@ import numpy as np
 
 class OptionState(Enum):
     """State of an option during execution."""
+
     INACTIVE = "inactive"
     EXECUTING = "executing"
     TERMINATED = "terminated"
@@ -21,11 +22,10 @@ class OptionState(Enum):
 @dataclass
 class TerminationCondition:
     """Termination condition for an option."""
+
     name: str
     predicate: Callable[[Any], bool]
-    probability: Callable[[Any], float] = field(
-        default_factory=lambda: lambda s: 0.0
-    )
+    probability: Callable[[Any], float] = field(default_factory=lambda: lambda s: 0.0)
 
     def should_terminate(self, state: Any) -> bool:
         """Check if option should terminate deterministically."""
@@ -41,6 +41,7 @@ class TerminationCondition:
 @dataclass
 class OptionPolicy:
     """Policy for selecting actions within an option."""
+
     name: str
     policy_fn: Callable[[Any], Any]
     stochastic: bool = False
@@ -71,6 +72,7 @@ class Option:
     - π: Option policy (action selection within option)
     - β: Termination condition (when option ends)
     """
+
     name: str
     initiation_set: Callable[[Any], bool]
     policy: OptionPolicy
@@ -135,6 +137,7 @@ class IntraOptionLearning:
     Implements learning that occurs during option execution,
     not just at option boundaries.
     """
+
     discount: float = 0.99
     learning_rate: float = 0.1
 
@@ -166,9 +169,7 @@ class IntraOptionLearning:
             state_key = str(hash(str(state)))
 
         action_key = str(hash(str(action)))
-        return self.option_q_values.get(option_name, {}).get(
-            (state_key, action_key), 0.0
-        )
+        return self.option_q_values.get(option_name, {}).get((state_key, action_key), 0.0)
 
     def update(
         self,
@@ -212,9 +213,7 @@ class IntraOptionLearning:
             continuation_value = self.get_option_q_value(
                 option_name, next_state, option.policy.select_action(next_state)
             )
-            terminal_value = self.option_values.get(option_name, {}).get(
-                next_state_key, 0.0
-            )
+            terminal_value = self.option_values.get(option_name, {}).get(next_state_key, 0.0)
             next_value = (1 - term_prob) * continuation_value + term_prob * terminal_value
 
         td_target = reward + self.discount * next_value
@@ -243,8 +242,8 @@ class IntraOptionLearning:
             self.option_values[option_name] = {}
 
         current = self.option_values[option_name].get(state_key, 0.0)
-        self.option_values[option_name][state_key] = (
-            current + self.learning_rate * (value - current)
+        self.option_values[option_name][state_key] = current + self.learning_rate * (
+            value - current
         )
 
     def statistics(self) -> Dict[str, Any]:
@@ -425,9 +424,7 @@ class OptionsFramework:
         option = self._options[self._active_option]
         option.add_reward(reward, self.discount)
 
-        return self._learner.update(
-            option, state, action, reward, next_state, terminated
-        )
+        return self._learner.update(option, state, action, reward, next_state, terminated)
 
     def option_value(self, option_name: str, state: Any) -> float:
         """Get the value of executing an option in a state."""

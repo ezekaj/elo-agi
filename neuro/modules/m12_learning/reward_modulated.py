@@ -14,6 +14,7 @@ from .stdp import STDPParams, STDPNetwork
 @dataclass
 class DopamineParams:
     """Dopamine system parameters"""
+
     baseline: float = 0.5  # Baseline dopamine level
     release_rate: float = 1.0  # Release per reward unit
     decay_rate: float = 0.1  # Decay rate
@@ -93,7 +94,7 @@ class RewardModulatedSTDP(STDPNetwork):
         n_pre: int,
         n_post: int,
         stdp_params: Optional[STDPParams] = None,
-        dopamine_params: Optional[DopamineParams] = None
+        dopamine_params: Optional[DopamineParams] = None,
     ):
         super().__init__(n_pre, n_post, stdp_params)
 
@@ -103,12 +104,7 @@ class RewardModulatedSTDP(STDPNetwork):
         self.eligibility_trace = np.zeros((n_post, n_pre))
         self.eligibility_decay = 0.95
 
-    def update(
-        self,
-        pre_spikes: np.ndarray,
-        post_spikes: np.ndarray,
-        dt: float = 1.0
-    ) -> None:
+    def update(self, pre_spikes: np.ndarray, post_spikes: np.ndarray, dt: float = 1.0) -> None:
         """Update eligibility traces (not weights yet)"""
         # Update pre trace first (LTP uses updated pre_trace)
         self.pre_trace = self.pre_trace * self.trace_decay + pre_spikes
@@ -144,10 +140,7 @@ class RewardModulatedSTDP(STDPNetwork):
         self.eligibility_trace *= 0.5
 
     def train_episode(
-        self,
-        pre_sequence: np.ndarray,
-        post_sequence: np.ndarray,
-        reward: float
+        self, pre_sequence: np.ndarray, post_sequence: np.ndarray, reward: float
     ) -> float:
         """Train on sequence with delayed reward
 
@@ -183,12 +176,7 @@ class ErrorBasedLearning:
     Δw = η × error × input
     """
 
-    def __init__(
-        self,
-        n_input: int,
-        n_output: int,
-        learning_rate: float = 0.01
-    ):
+    def __init__(self, n_input: int, n_output: int, learning_rate: float = 0.01):
         self.n_input = n_input
         self.n_output = n_output
         self.learning_rate = learning_rate
@@ -199,11 +187,7 @@ class ErrorBasedLearning:
         """Compute output"""
         return np.tanh(self.weights @ x)
 
-    def update(
-        self,
-        x: np.ndarray,
-        target: np.ndarray
-    ) -> float:
+    def update(self, x: np.ndarray, target: np.ndarray) -> float:
         """Update weights based on error
 
         Args:
@@ -220,14 +204,9 @@ class ErrorBasedLearning:
         dW = self.learning_rate * np.outer(error, x)
         self.weights += dW
 
-        return np.mean(error ** 2)
+        return np.mean(error**2)
 
-    def train(
-        self,
-        inputs: np.ndarray,
-        targets: np.ndarray,
-        n_epochs: int = 100
-    ) -> List[float]:
+    def train(self, inputs: np.ndarray, targets: np.ndarray, n_epochs: int = 100) -> List[float]:
         """Train on dataset"""
         errors = []
 

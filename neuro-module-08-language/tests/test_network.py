@@ -6,8 +6,9 @@ from neuro.modules.m08_language.language_network import (
     BrocaRegion,
     WernickeRegion,
     ArcuateFasciculus,
-    DistributedLanguageNetwork
+    DistributedLanguageNetwork,
 )
+
 
 class TestBrocaRegion:
     """Tests for Broca's area"""
@@ -78,6 +79,7 @@ class TestBrocaRegion:
         output = broca.process_syntax(np.ones(32))
         assert np.linalg.norm(output) < 32  # Reduced
 
+
 class TestWernickeRegion:
     """Tests for Wernicke's area"""
 
@@ -122,6 +124,7 @@ class TestWernickeRegion:
         assert integrated.shape == (32,)
         assert np.all(np.isfinite(integrated))
 
+
 class TestArcuateFasciculus:
     """Tests for arcuate fasciculus"""
 
@@ -157,6 +160,7 @@ class TestArcuateFasciculus:
         assert broca_update.shape == (32,)
         assert wernicke_update.shape == (32,)
 
+
 class TestDistributedLanguageNetwork:
     """Tests for full distributed network"""
 
@@ -175,10 +179,10 @@ class TestDistributedLanguageNetwork:
         input_signal = np.random.randn(32)
         result = network.process(input_signal)
 
-        assert 'broca' in result
-        assert 'wernicke' in result
-        assert 'combined' in result
-        assert 'broca_inhibition' in result
+        assert "broca" in result
+        assert "wernicke" in result
+        assert "combined" in result
+        assert "broca_inhibition" in result
 
     def test_distributed_redundancy(self):
         """Test that Broca's damage alone doesn't prevent function
@@ -188,21 +192,21 @@ class TestDistributedLanguageNetwork:
         network = DistributedLanguageNetwork(dim=32)
 
         # Lesion Broca's only
-        network.lesion('broca', 1.0)
+        network.lesion("broca", 1.0)
 
         # Network should still be functional
         assert network.is_functional()
 
         # Can still process
         result = network.process(np.random.randn(32))
-        assert np.all(np.isfinite(result['combined']))
+        assert np.all(np.isfinite(result["combined"]))
 
     def test_both_regions_lesioned(self):
         """Test that both regions lesioned = non-functional"""
         network = DistributedLanguageNetwork(dim=32)
 
-        network.lesion('broca', 1.0)
-        network.lesion('wernicke', 1.0)
+        network.lesion("broca", 1.0)
+        network.lesion("wernicke", 1.0)
 
         assert not network.is_functional()
 
@@ -214,16 +218,16 @@ class TestDistributedLanguageNetwork:
         intact_result = network.process(np.random.randn(32))
 
         # Lesion
-        network.lesion('broca', 0.8)
+        network.lesion("broca", 0.8)
         lesioned_result = network.process(np.random.randn(32))
 
         # Restore
-        network.restore('broca')
+        network.restore("broca")
         restored_result = network.process(np.random.randn(32))
 
         # Verify damage levels
         damage = network.get_damage_levels()
-        assert damage['broca'] == 0.0  # Restored
+        assert damage["broca"] == 0.0  # Restored
 
     def test_region_states(self):
         """Test getting region states"""
@@ -232,9 +236,10 @@ class TestDistributedLanguageNetwork:
         network.process(np.random.randn(32))
         states = network.get_region_states()
 
-        assert 'broca' in states
-        assert 'wernicke' in states
-        assert 'combined' in states
+        assert "broca" in states
+        assert "wernicke" in states
+        assert "combined" in states
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

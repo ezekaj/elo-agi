@@ -19,6 +19,7 @@ from neuro.modules.abstract.program_synthesis import (
 )
 from neuro.modules.abstract.composition_types import INT, BOOL, ListType
 
+
 class TestPrimitive:
     """Test Primitive class."""
 
@@ -55,6 +56,7 @@ class TestPrimitive:
         )
 
         assert "inc" in repr(inc)
+
 
 class TestProgram:
     """Test Program class."""
@@ -142,6 +144,7 @@ class TestProgram:
         p = Program(primitive=add, arguments=[x, x])
         assert "add" in repr(p)
 
+
 class TestPrimitiveLibrary:
     """Test PrimitiveLibrary class."""
 
@@ -211,6 +214,7 @@ class TestPrimitiveLibrary:
         assert length([1, 2, 3]) == 3
         assert total([1, 2, 3, 4]) == 10
 
+
 class TestExample:
     """Test Example class."""
 
@@ -224,6 +228,7 @@ class TestExample:
         """Should have readable repr."""
         ex = Example(inputs=[1, 2], output=3)
         assert "(1, 2) -> 3" in repr(ex)
+
 
 class TestProgramSynthesizer:
     """Test ProgramSynthesizer class."""
@@ -377,6 +382,7 @@ class TestProgramSynthesizer:
         assert stats["programs_enumerated"] > 0
         assert stats["programs_evaluated"] > 0
 
+
 class TestComplexSynthesis:
     """Test more complex synthesis tasks."""
 
@@ -392,9 +398,7 @@ class TestComplexSynthesis:
             Example(inputs=[[5]], output=5),
         ]
 
-        program = synthesizer.synthesize_from_examples(
-            examples, [ListType(INT)], INT
-        )
+        program = synthesizer.synthesize_from_examples(examples, [ListType(INT)], INT)
 
         assert program is not None
         assert program.execute([[1, 2, 3, 4]]) == 10
@@ -407,9 +411,7 @@ class TestComplexSynthesis:
             Example(inputs=[[1, 2, 3, 4, 5]], output=5),
         ]
 
-        program = synthesizer.synthesize_from_examples(
-            examples, [ListType(INT)], INT
-        )
+        program = synthesizer.synthesize_from_examples(examples, [ListType(INT)], INT)
 
         assert program is not None
         assert program.execute([[1, 2]]) == 2
@@ -422,12 +424,11 @@ class TestComplexSynthesis:
             Example(inputs=[[42]], output=42),
         ]
 
-        program = synthesizer.synthesize_from_examples(
-            examples, [ListType(INT)], INT
-        )
+        program = synthesizer.synthesize_from_examples(examples, [ListType(INT)], INT)
 
         if program:  # May not find due to size limits
             assert program.execute([[1, 100, 50]]) == 100
+
 
 class TestEdgeCases:
     """Test edge cases."""

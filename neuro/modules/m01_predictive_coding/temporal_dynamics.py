@@ -16,6 +16,7 @@ from enum import Enum
 
 class DecayType(Enum):
     """Types of temporal decay"""
+
     EXPONENTIAL = "exponential"
     POWER_LAW = "power_law"
     OSCILLATORY = "oscillatory"
@@ -24,6 +25,7 @@ class DecayType(Enum):
 @dataclass
 class TemporalState:
     """State with temporal dynamics"""
+
     value: np.ndarray
     timescale: float
     age: float = 0.0
@@ -42,7 +44,7 @@ class TemporalLayer:
         dim: int,
         timescale: float = 1.0,
         decay_rate: float = 0.1,
-        nonlinearity: Callable = np.tanh
+        nonlinearity: Callable = np.tanh,
     ):
         """Initialize temporal layer.
 
@@ -148,7 +150,7 @@ class TemporalHierarchy:
         layer_dims: List[int],
         base_timescale: float = 0.01,
         timescale_factor: float = 10.0,
-        decay_rate: float = 0.1
+        decay_rate: float = 0.1,
     ):
         """Initialize temporal hierarchy.
 
@@ -164,12 +166,8 @@ class TemporalHierarchy:
         # Create layers with increasing timescales
         self.layers: List[TemporalLayer] = []
         for i, dim in enumerate(layer_dims):
-            timescale = base_timescale * (timescale_factor ** i)
-            layer = TemporalLayer(
-                dim=dim,
-                timescale=timescale,
-                decay_rate=decay_rate
-            )
+            timescale = base_timescale * (timescale_factor**i)
+            layer = TemporalLayer(dim=dim, timescale=timescale, decay_rate=decay_rate)
             self.layers.append(layer)
 
         # Inter-layer connections (for feeding forward/backward)
@@ -177,7 +175,7 @@ class TemporalHierarchy:
 
     def _init_connections(self) -> None:
         """Initialize connection weights between layers"""
-        self.W_up: List[np.ndarray] = []    # Bottom-up weights
+        self.W_up: List[np.ndarray] = []  # Bottom-up weights
         self.W_down: List[np.ndarray] = []  # Top-down weights
 
         for i in range(self.n_layers - 1):
@@ -254,10 +252,7 @@ class TemporalPrediction:
         # Prediction weights for each timescale
         self.prediction_weights: List[np.ndarray] = []
         for i, layer in enumerate(hierarchy.layers[:-1]):
-            W = np.random.randn(
-                hierarchy.layer_dims[0],
-                layer.dim
-            ) * 0.1
+            W = np.random.randn(hierarchy.layer_dims[0], layer.dim) * 0.1
             self.prediction_weights.append(W)
 
     def predict(self, horizon: float) -> np.ndarray:
@@ -276,9 +271,7 @@ class TemporalPrediction:
         prediction = np.zeros(self.hierarchy.layer_dims[0])
         total_weight = 0.0
 
-        for i, (layer, timescale) in enumerate(zip(
-            self.hierarchy.layers[:-1], timescales[:-1]
-        )):
+        for i, (layer, timescale) in enumerate(zip(self.hierarchy.layers[:-1], timescales[:-1])):
             # Gaussian weight based on timescale-horizon match
             weight = np.exp(-((np.log(timescale) - np.log(horizon)) ** 2) / 2.0)
             state = layer.get_integrated_state()
@@ -290,10 +283,7 @@ class TemporalPrediction:
 
         return prediction
 
-    def predict_sequence(
-        self,
-        horizons: List[float]
-    ) -> List[np.ndarray]:
+    def predict_sequence(self, horizons: List[float]) -> List[np.ndarray]:
         """Generate predictions for multiple horizons"""
         return [self.predict(h) for h in horizons]
 
@@ -307,7 +297,7 @@ class TemporalBuffer:
         max_duration: float = 10.0,
         resolution: float = 0.01,
         decay_type: DecayType = DecayType.EXPONENTIAL,
-        decay_rate: float = 0.1
+        decay_rate: float = 0.1,
     ):
         """Initialize temporal buffer.
 
@@ -392,11 +382,7 @@ class MultiTimescaleIntegrator:
     Maintains parallel representations at different temporal resolutions.
     """
 
-    def __init__(
-        self,
-        dim: int,
-        timescales: List[float] = [0.01, 0.1, 1.0, 10.0]
-    ):
+    def __init__(self, dim: int, timescales: List[float] = [0.01, 0.1, 1.0, 10.0]):
         """Initialize multi-timescale integrator.
 
         Args:
@@ -409,8 +395,7 @@ class MultiTimescaleIntegrator:
 
         # One buffer per timescale
         self.buffers = [
-            TemporalBuffer(dim, max_duration=ts * 10, resolution=ts / 10)
-            for ts in timescales
+            TemporalBuffer(dim, max_duration=ts * 10, resolution=ts / 10) for ts in timescales
         ]
 
         # Integrated states at each timescale

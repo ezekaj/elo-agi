@@ -18,18 +18,20 @@ from collections import deque
 
 class OmissionType(Enum):
     """Types of omission events"""
-    COMPLETE = "complete"          # Expected input entirely absent
-    PARTIAL = "partial"            # Input present but reduced
-    TEMPORAL = "temporal"          # Input delayed beyond expectation
-    PATTERN = "pattern"            # Pattern break (sequence violation)
+
+    COMPLETE = "complete"  # Expected input entirely absent
+    PARTIAL = "partial"  # Input present but reduced
+    TEMPORAL = "temporal"  # Input delayed beyond expectation
+    PATTERN = "pattern"  # Pattern break (sequence violation)
 
 
 @dataclass
 class ExpectedInput:
     """Specification of an expected input"""
+
     value: np.ndarray
-    time_window: float              # When we expect it (relative)
-    tolerance: float = 0.1          # Temporal tolerance
+    time_window: float  # When we expect it (relative)
+    tolerance: float = 0.1  # Temporal tolerance
     magnitude_threshold: float = 0.5  # Minimum similarity for "present"
     id: str = ""
 
@@ -37,6 +39,7 @@ class ExpectedInput:
 @dataclass
 class OmissionEvent:
     """Record of a detected omission"""
+
     omission_type: OmissionType
     expected: ExpectedInput
     actual: Optional[np.ndarray]
@@ -55,10 +58,7 @@ class OmissionDetector:
     """
 
     def __init__(
-        self,
-        input_dim: int,
-        expectation_decay: float = 0.1,
-        temporal_precision: float = 0.05
+        self, input_dim: int, expectation_decay: float = 0.1, temporal_precision: float = 0.05
     ):
         """Initialize omission detector.
 
@@ -91,11 +91,7 @@ class OmissionDetector:
         self.omission_error = np.zeros(input_dim)
 
     def add_expectation(
-        self,
-        value: np.ndarray,
-        time_window: float,
-        tolerance: float = 0.1,
-        id: str = ""
+        self, value: np.ndarray, time_window: float, tolerance: float = 0.1, id: str = ""
     ) -> None:
         """Add an expected input.
 
@@ -109,7 +105,7 @@ class OmissionDetector:
             value=value.copy(),
             time_window=time_window,
             tolerance=tolerance,
-            id=id if id else f"exp_{len(self.expectations)}"
+            id=id if id else f"exp_{len(self.expectations)}",
         )
         self.expectations.append(expectation)
 
@@ -147,26 +143,17 @@ class OmissionDetector:
                 else:
                     # Partial omission - input present but wrong
                     omission = self._create_omission_event(
-                        OmissionType.PARTIAL,
-                        exp,
-                        value,
-                        timestamp
+                        OmissionType.PARTIAL, exp, value, timestamp
                     )
 
             elif timestamp > expected_time + exp.tolerance:
                 # Window passed without satisfying input - temporal omission
-                omission = self._create_omission_event(
-                    OmissionType.TEMPORAL,
-                    exp,
-                    value,
-                    timestamp
-                )
+                omission = self._create_omission_event(OmissionType.TEMPORAL, exp, value, timestamp)
                 satisfied_indices.append(i)  # Remove expired expectation
 
         # Remove satisfied/expired expectations
         self.expectations = [
-            exp for i, exp in enumerate(self.expectations)
-            if i not in satisfied_indices
+            exp for i, exp in enumerate(self.expectations) if i not in satisfied_indices
         ]
 
         # Update omission error signal
@@ -193,19 +180,13 @@ class OmissionDetector:
         for i, exp in enumerate(self.expectations):
             if timestamp > exp.time_window + exp.tolerance:
                 # Complete omission - expected input never arrived
-                omission = self._create_omission_event(
-                    OmissionType.COMPLETE,
-                    exp,
-                    None,
-                    timestamp
-                )
+                omission = self._create_omission_event(OmissionType.COMPLETE, exp, None, timestamp)
                 omissions.append(omission)
                 expired_indices.append(i)
 
         # Remove expired expectations
         self.expectations = [
-            exp for i, exp in enumerate(self.expectations)
-            if i not in expired_indices
+            exp for i, exp in enumerate(self.expectations) if i not in expired_indices
         ]
 
         # Update omission error
@@ -236,7 +217,7 @@ class OmissionDetector:
         omission_type: OmissionType,
         expected: ExpectedInput,
         actual: Optional[np.ndarray],
-        timestamp: float
+        timestamp: float,
     ) -> OmissionEvent:
         """Create an omission event record"""
         # Compute error magnitude
@@ -254,7 +235,7 @@ class OmissionDetector:
             actual=actual,
             time=timestamp,
             confidence=confidence,
-            error_magnitude=error_mag
+            error_magnitude=error_mag,
         )
 
         self.omission_events.append(event)
@@ -291,12 +272,7 @@ class SequenceOmissionDetector:
     sequence elements are missing.
     """
 
-    def __init__(
-        self,
-        input_dim: int,
-        sequence_length: int = 10,
-        learning_rate: float = 0.1
-    ):
+    def __init__(self, input_dim: int, sequence_length: int = 10, learning_rate: float = 0.1):
         """Initialize sequence omission detector.
 
         Args:
@@ -388,12 +364,7 @@ class RhythmicOmissionDetector:
     rhythmic beats are missing.
     """
 
-    def __init__(
-        self,
-        input_dim: int,
-        max_period: float = 2.0,
-        period_resolution: int = 100
-    ):
+    def __init__(self, input_dim: int, max_period: float = 2.0, period_resolution: int = 100):
         """Initialize rhythmic omission detector.
 
         Args:
@@ -422,9 +393,7 @@ class RhythmicOmissionDetector:
         self.current_time = 0.0
 
     def observe(
-        self,
-        value: np.ndarray,
-        timestamp: float
+        self, value: np.ndarray, timestamp: float
     ) -> Tuple[Optional[float], Optional[np.ndarray]]:
         """Observe a rhythmic event.
 
@@ -485,7 +454,7 @@ class RhythmicOmissionDetector:
                 # Generate omission
                 expected = ExpectedInput(
                     value=self.phase_bins[phase_bin] / self.phase_counts[phase_bin],
-                    time_window=timestamp
+                    time_window=timestamp,
                 )
                 return OmissionEvent(
                     omission_type=OmissionType.COMPLETE,
@@ -493,7 +462,7 @@ class RhythmicOmissionDetector:
                     actual=None,
                     time=timestamp,
                     confidence=self.period_confidence,
-                    error_magnitude=expected_magnitude
+                    error_magnitude=expected_magnitude,
                 )
 
         return None

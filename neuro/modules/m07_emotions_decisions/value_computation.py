@@ -20,11 +20,12 @@ class ValueSignal:
 
     VMPFC/OFC represents value as a common currency for decision-making.
     """
-    magnitude: float           # Raw value magnitude
-    certainty: float           # Probability/confidence (0-1)
-    temporal_distance: float   # Delay in time units (0 = immediate)
-    emotional_weight: float    # Emotional modulation (-1 to 1)
-    social_weight: float       # Social context modulation (-1 to 1)
+
+    magnitude: float  # Raw value magnitude
+    certainty: float  # Probability/confidence (0-1)
+    temporal_distance: float  # Delay in time units (0 = immediate)
+    emotional_weight: float  # Emotional modulation (-1 to 1)
+    social_weight: float  # Social context modulation (-1 to 1)
     source: str = "unknown"
 
     @property
@@ -48,10 +49,10 @@ class ValueSignal:
             ev *= discount
 
         # Emotional modulation (can increase or decrease value)
-        ev *= (1 + self.emotional_weight * 0.5)
+        ev *= 1 + self.emotional_weight * 0.5
 
         # Social modulation
-        ev *= (1 + self.social_weight * 0.3)
+        ev *= 1 + self.social_weight * 0.3
 
         return ev
 
@@ -67,11 +68,7 @@ class OFCValueComputer:
     - Learn value from experience
     """
 
-    def __init__(
-        self,
-        discount_rate: float = 0.1,
-        learning_rate: float = 0.1
-    ):
+    def __init__(self, discount_rate: float = 0.1, learning_rate: float = 0.1):
         self.discount_rate = discount_rate  # k in hyperbolic discounting
         self.learning_rate = learning_rate
 
@@ -81,11 +78,7 @@ class OFCValueComputer:
         # Experience history
         self.experience_history: Dict[str, List[float]] = {}
 
-    def compute_expected_value(
-        self,
-        outcome: float,
-        probability: float
-    ) -> float:
+    def compute_expected_value(self, outcome: float, probability: float) -> float:
         """
         Compute expected value.
 
@@ -106,19 +99,13 @@ class OFCValueComputer:
         discounted = value / (1 + self.discount_rate * delay)
         return discounted
 
-    def compare_options(
-        self,
-        options: List[Tuple[str, ValueSignal]]
-    ) -> List[Tuple[str, float]]:
+    def compare_options(self, options: List[Tuple[str, ValueSignal]]) -> List[Tuple[str, float]]:
         """
         Compare multiple options on common value scale.
 
         Returns options ranked by subjective value.
         """
-        ranked = [
-            (name, signal.subjective_value)
-            for name, signal in options
-        ]
+        ranked = [(name, signal.subjective_value) for name, signal in options]
 
         # Sort by value (highest first)
         ranked.sort(key=lambda x: x[1], reverse=True)
@@ -150,11 +137,7 @@ class OFCValueComputer:
         return self.option_values.get(option)
 
     def compute_value_signal(
-        self,
-        option: str,
-        magnitude: float,
-        probability: float = 1.0,
-        delay: float = 0.0
+        self, option: str, magnitude: float, probability: float = 1.0, delay: float = 0.0
     ) -> ValueSignal:
         """
         Compute full value signal for an option.
@@ -169,7 +152,7 @@ class OFCValueComputer:
             temporal_distance=delay,
             emotional_weight=np.clip(emotional, -1, 1),
             social_weight=0.0,  # Set separately
-            source="ofc"
+            source="ofc",
         )
 
 
@@ -195,10 +178,7 @@ class VMPFCIntegrator:
         self.intact = True
 
     def integrate(
-        self,
-        value: ValueSignal,
-        emotion: float,
-        social_context: Dict[str, Any]
+        self, value: ValueSignal, emotion: float, social_context: Dict[str, Any]
     ) -> float:
         """
         Full VMPFC integration of value, emotion, and social context.
@@ -223,15 +203,15 @@ class VMPFCIntegrator:
         base_value *= emotional_modulation
 
         # Social modulations
-        fairness = social_context.get('fairness', 0.0)  # -1 to 1
-        reciprocity = social_context.get('reciprocity', 0.0)  # -1 to 1
-        reputation = social_context.get('reputation_impact', 0.0)  # -1 to 1
+        fairness = social_context.get("fairness", 0.0)  # -1 to 1
+        reciprocity = social_context.get("reciprocity", 0.0)  # -1 to 1
+        reputation = social_context.get("reputation_impact", 0.0)  # -1 to 1
 
         social_modulation = (
-            1 +
-            fairness * self.fairness_weight +
-            reciprocity * self.reciprocity_weight +
-            reputation * self.reputation_weight
+            1
+            + fairness * self.fairness_weight
+            + reciprocity * self.reciprocity_weight
+            + reputation * self.reputation_weight
         )
         base_value *= social_modulation
 
@@ -261,9 +241,7 @@ class VMPFCIntegrator:
             return -unfairness * 0.5  # Advantageous inequity (still negative)
 
     def evaluate_reciprocity(
-        self,
-        my_past_actions: List[float],
-        their_past_actions: List[float]
+        self, my_past_actions: List[float], their_past_actions: List[float]
     ) -> float:
         """
         Evaluate reciprocity (tit-for-tat expectations).
@@ -282,11 +260,7 @@ class VMPFCIntegrator:
         # Positive if they match or exceed, negative if they defect
         return np.clip(difference, -1, 1)
 
-    def ultimatum_response(
-        self,
-        offer: float,
-        total: float
-    ) -> Tuple[bool, float]:
+    def ultimatum_response(self, offer: float, total: float) -> Tuple[bool, float]:
         """
         Respond to ultimatum game offer.
 
@@ -310,11 +284,7 @@ class VMPFCIntegrator:
 
         return accept, accept_value
 
-    def compute_regret(
-        self,
-        chosen_outcome: float,
-        foregone_outcome: float
-    ) -> float:
+    def compute_regret(self, chosen_outcome: float, foregone_outcome: float) -> float:
         """
         Compute anticipated/experienced regret.
 
@@ -323,11 +293,7 @@ class VMPFCIntegrator:
         regret = foregone_outcome - chosen_outcome
         return max(0, regret)
 
-    def compute_relief(
-        self,
-        obtained_outcome: float,
-        avoided_outcome: float
-    ) -> float:
+    def compute_relief(self, obtained_outcome: float, avoided_outcome: float) -> float:
         """
         Compute relief from avoiding bad outcome.
 

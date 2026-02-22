@@ -62,7 +62,7 @@ After seeing results, provide a helpful summary."""
 
 def parse_tool_calls(text):
     """Extract tool calls from response."""
-    pattern = r'<tool>(.*?)</tool>'
+    pattern = r"<tool>(.*?)</tool>"
     matches = re.findall(pattern, text, re.DOTALL)
     tools = []
     for m in matches:
@@ -133,19 +133,23 @@ def execute_tool(name, args):
             try:
                 import urllib.request
                 import urllib.parse
+
                 # Use DuckDuckGo HTML
                 url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}"
-                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, timeout=10) as r:
-                    html = r.read().decode('utf-8')
+                    html = r.read().decode("utf-8")
                 # Extract results
                 results = []
                 import re
-                links = re.findall(r'<a rel="nofollow" class="result__a" href="([^"]+)"[^>]*>([^<]+)</a>', html)
+
+                links = re.findall(
+                    r'<a rel="nofollow" class="result__a" href="([^"]+)"[^>]*>([^<]+)</a>', html
+                )
                 snippets = re.findall(r'<a class="result__snippet"[^>]*>([^<]+)', html)
                 for i, (href, title) in enumerate(links[:5]):
                     snippet = snippets[i] if i < len(snippets) else ""
-                    results.append(f"{i+1}. {title}\n   {snippet[:100]}...")
+                    results.append(f"{i + 1}. {title}\n   {snippet[:100]}...")
                 return "\n\n".join(results) if results else "No results found"
             except Exception as e:
                 return f"Search error: {e}"
@@ -160,9 +164,9 @@ def execute_tool(name, args):
 def clean_response(text):
     """Remove think tags from response."""
     # Remove <think>...</think>
-    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
     # Remove standalone <think> or </think>
-    text = text.replace('<think>', '').replace('</think>', '')
+    text = text.replace("<think>", "").replace("</think>", "")
     return text.strip()
 
 
@@ -206,7 +210,9 @@ def main():
 
             if user_input.lower().startswith("/run "):
                 cmd = user_input[5:].strip()
-                console.print(Panel(execute_tool("bash", {"command": cmd}), title=cmd, border_style="cyan"))
+                console.print(
+                    Panel(execute_tool("bash", {"command": cmd}), title=cmd, border_style="cyan")
+                )
                 continue
 
             messages.append({"role": "user", "content": user_input})
@@ -214,16 +220,11 @@ def main():
             # Agent loop - let model use tools
             for iteration in range(5):  # Max 5 tool iterations
                 prompt = tokenizer.apply_chat_template(
-                    messages,
-                    tokenize=False,
-                    add_generation_prompt=True
+                    messages, tokenize=False, add_generation_prompt=True
                 )
 
                 response = mlx_lm.generate(
-                    model, tokenizer,
-                    prompt=prompt,
-                    max_tokens=500,
-                    verbose=False
+                    model, tokenizer, prompt=prompt, max_tokens=500, verbose=False
                 )
 
                 response = clean_response(response)
@@ -261,7 +262,12 @@ def main():
 
                 # Feed results back to model
                 results_msg = "\n\n".join(tool_results)
-                messages.append({"role": "user", "content": f"Tool results:\n{results_msg}\n\nNow summarize what you found."})
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": f"Tool results:\n{results_msg}\n\nNow summarize what you found.",
+                    }
+                )
 
         except KeyboardInterrupt:
             console.print("\n[dim]Ctrl+C again to exit[/dim]")
@@ -277,10 +283,14 @@ if __name__ == "__main__":
             model, tokenizer = mlx_lm.load(MODEL_PATH)
             messages = [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ]
-            full_prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            response = mlx_lm.generate(model, tokenizer, prompt=full_prompt, max_tokens=500, verbose=False)
+            full_prompt = tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            response = mlx_lm.generate(
+                model, tokenizer, prompt=full_prompt, max_tokens=500, verbose=False
+            )
             response = clean_response(response)
             print(response)
         except Exception as e:

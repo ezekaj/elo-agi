@@ -3,35 +3,33 @@
 import numpy as np
 import pytest
 from neuro.modules.m10_spatial_cognition.conceptual_space import (
-    ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap, ConceptFeatures
+    ConceptCell,
+    ConceptualGrid,
+    SocialDistanceGrid,
+    ConceptualMap,
+    ConceptFeatures,
 )
+
 
 class TestConceptCell:
     """Test concept cell functionality."""
 
     def test_concept_cell_creation(self):
         cell = ConceptCell(
-            concept_center=np.array([0.5, 0.5]),
-            concept_radius=0.3,
-            associated_concept="democracy"
+            concept_center=np.array([0.5, 0.5]), concept_radius=0.3, associated_concept="democracy"
         )
         assert cell.associated_concept == "democracy"
         assert cell.concept_radius == 0.3
 
     def test_activation_at_center(self):
         cell = ConceptCell(
-            concept_center=np.array([0.5, 0.5]),
-            concept_radius=0.3,
-            peak_activation=1.0
+            concept_center=np.array([0.5, 0.5]), concept_radius=0.3, peak_activation=1.0
         )
         activation = cell.compute_activation(np.array([0.5, 0.5]))
         assert activation == pytest.approx(1.0, rel=0.01)
 
     def test_activation_decreases_with_distance(self):
-        cell = ConceptCell(
-            concept_center=np.array([0.5, 0.5]),
-            concept_radius=0.3
-        )
+        cell = ConceptCell(concept_center=np.array([0.5, 0.5]), concept_radius=0.3)
         act_center = cell.compute_activation(np.array([0.5, 0.5]))
         act_edge = cell.compute_activation(np.array([0.8, 0.5]))
         act_far = cell.compute_activation(np.array([1.5, 1.5]))
@@ -39,12 +37,10 @@ class TestConceptCell:
         assert act_center > act_edge > act_far
 
     def test_is_active(self):
-        cell = ConceptCell(
-            concept_center=np.array([0.5, 0.5]),
-            concept_radius=0.3
-        )
+        cell = ConceptCell(concept_center=np.array([0.5, 0.5]), concept_radius=0.3)
         assert cell.is_active(np.array([0.5, 0.5]))
         assert not cell.is_active(np.array([2.0, 2.0]))
+
 
 class TestConceptualGrid:
     """Test conceptual grid functionality."""
@@ -61,11 +57,9 @@ class TestConceptualGrid:
 
     def test_conceptual_distance(self):
         grid = ConceptualGrid(spacing=0.3, dimensions=2)
-        dist = grid.compute_conceptual_distance(
-            np.array([0.0, 0.0]),
-            np.array([0.3, 0.4])
-        )
+        dist = grid.compute_conceptual_distance(np.array([0.0, 0.0]), np.array([0.3, 0.4]))
         assert dist == pytest.approx(0.5, rel=0.01)
+
 
 class TestSocialDistanceGrid:
     """Test social distance encoding."""
@@ -108,6 +102,7 @@ class TestSocialDistanceGrid:
         assert len(similar) == 1
         assert similar[0][0] == "bob"
 
+
 class TestConceptualMap:
     """Test conceptual map integration."""
 
@@ -119,9 +114,7 @@ class TestConceptualMap:
     def test_embed_concept(self):
         cm = ConceptualMap(concept_dimensions=5)
         pos = cm.embed_concept(
-            "democracy",
-            features=np.array([0.8, 0.7, 0.6, 0.5, 0.4]),
-            category="political"
+            "democracy", features=np.array([0.8, 0.7, 0.6, 0.5, 0.4]), category="political"
         )
         assert len(pos) == 5
         assert "democracy" in cm.get_all_concepts()
@@ -213,28 +206,25 @@ class TestConceptualMap:
         assert "b" in concepts
         assert len(concepts) == 2
 
+
 class TestConceptFeatures:
     """Test concept features dataclass."""
 
     def test_concept_features_creation(self):
         cf = ConceptFeatures(
-            name="democracy",
-            features=np.array([0.8, 0.7, 0.6]),
-            category="political"
+            name="democracy", features=np.array([0.8, 0.7, 0.6]), category="political"
         )
         assert cf.name == "democracy"
         assert cf.category == "political"
         assert len(cf.features) == 3
+
 
 class TestResearchValidation:
     """Test that implementation validates 2025 research findings."""
 
     def test_concept_cells_like_place_cells(self):
         """Concept cells should have Gaussian tuning like place cells."""
-        cell = ConceptCell(
-            concept_center=np.array([0.5, 0.5]),
-            concept_radius=0.3
-        )
+        cell = ConceptCell(concept_center=np.array([0.5, 0.5]), concept_radius=0.3)
 
         # Should have peak at center
         center_act = cell.compute_activation(np.array([0.5, 0.5]))
@@ -242,7 +232,7 @@ class TestResearchValidation:
 
         assert center_act > edge_act
         # Should follow Gaussian decay
-        expected_ratio = np.exp(-0.3**2 / (2 * 0.3**2))
+        expected_ratio = np.exp(-(0.3**2) / (2 * 0.3**2))
         actual_ratio = edge_act / center_act
         assert actual_ratio == pytest.approx(expected_ratio, rel=0.1)
 

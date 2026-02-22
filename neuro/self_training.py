@@ -41,7 +41,7 @@ class KnowledgeBase:
         """Load facts from disk."""
         if self.facts_file.exists():
             try:
-                with open(self.facts_file, 'r') as f:
+                with open(self.facts_file, "r") as f:
                     return json.load(f)
             except:
                 pass
@@ -51,7 +51,7 @@ class KnowledgeBase:
         """Load embeddings from disk."""
         if self.embeddings_file.exists():
             try:
-                with open(self.embeddings_file, 'rb') as f:
+                with open(self.embeddings_file, "rb") as f:
                     return pickle.load(f)
             except:
                 pass
@@ -61,32 +61,32 @@ class KnowledgeBase:
         """Load stats from disk."""
         if self.stats_file.exists():
             try:
-                with open(self.stats_file, 'r') as f:
+                with open(self.stats_file, "r") as f:
                     return json.load(f)
             except:
                 pass
         return {
-            'total_facts': 0,
-            'total_searches': 0,
-            'total_conversations': 0,
-            'created': datetime.now().isoformat(),
-            'last_updated': datetime.now().isoformat()
+            "total_facts": 0,
+            "total_searches": 0,
+            "total_conversations": 0,
+            "created": datetime.now().isoformat(),
+            "last_updated": datetime.now().isoformat(),
         }
 
     def save(self):
         """Save all knowledge to disk."""
         # Save facts
-        with open(self.facts_file, 'w') as f:
+        with open(self.facts_file, "w") as f:
             json.dump(self.facts, f, indent=2)
 
         # Save embeddings
-        with open(self.embeddings_file, 'wb') as f:
+        with open(self.embeddings_file, "wb") as f:
             pickle.dump(self.embeddings, f)
 
         # Update and save stats
-        self.stats['total_facts'] = len(self.facts)
-        self.stats['last_updated'] = datetime.now().isoformat()
-        with open(self.stats_file, 'w') as f:
+        self.stats["total_facts"] = len(self.facts)
+        self.stats["last_updated"] = datetime.now().isoformat()
+        with open(self.stats_file, "w") as f:
             json.dump(self.stats, f, indent=2)
 
     def add_fact(self, topic: str, content: str, source: str, embedding: np.ndarray = None):
@@ -94,12 +94,12 @@ class KnowledgeBase:
         fact_id = f"fact_{len(self.facts)}_{datetime.now().timestamp()}"
 
         fact = {
-            'id': fact_id,
-            'topic': topic,
-            'content': content,
-            'source': source,
-            'timestamp': datetime.now().isoformat(),
-            'access_count': 0
+            "id": fact_id,
+            "topic": topic,
+            "content": content,
+            "source": source,
+            "timestamp": datetime.now().isoformat(),
+            "access_count": 0,
         }
 
         self.facts.append(fact)
@@ -113,36 +113,143 @@ class KnowledgeBase:
 
         return fact_id
 
-    def search_facts(self, query: str, query_embedding: np.ndarray = None, k: int = 5) -> List[Dict]:
+    def search_facts(
+        self, query: str, query_embedding: np.ndarray = None, k: int = 5
+    ) -> List[Dict]:
         """Search for relevant facts - understands the whole query as one request."""
         results = []
         query_lower = query.lower()
 
         # Extract meaningful words from the WHOLE query (ignore small words)
-        stop_words = {'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been',
-                      'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will',
-                      'would', 'could', 'should', 'may', 'might', 'must', 'shall',
-                      'can', 'need', 'dare', 'ought', 'used', 'to', 'of', 'in',
-                      'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into',
-                      'through', 'during', 'before', 'after', 'above', 'below',
-                      'between', 'under', 'again', 'further', 'then', 'once',
-                      'here', 'there', 'when', 'where', 'why', 'how', 'all',
-                      'each', 'few', 'more', 'most', 'other', 'some', 'such',
-                      'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than',
-                      'too', 'very', 'just', 'and', 'but', 'if', 'or', 'because',
-                      'until', 'while', 'about', 'against', 'what', 'which', 'who',
-                      'this', 'that', 'these', 'those', 'am', 'it', 'its', 'i',
-                      'me', 'my', 'myself', 'we', 'our', 'you', 'your', 'he',
-                      'him', 'his', 'she', 'her', 'they', 'them', 'their',
-                      'find', 'search', 'look', 'get', 'show', 'tell', 'give'}
+        stop_words = {
+            "a",
+            "an",
+            "the",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "must",
+            "shall",
+            "can",
+            "need",
+            "dare",
+            "ought",
+            "used",
+            "to",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "at",
+            "by",
+            "from",
+            "as",
+            "into",
+            "through",
+            "during",
+            "before",
+            "after",
+            "above",
+            "below",
+            "between",
+            "under",
+            "again",
+            "further",
+            "then",
+            "once",
+            "here",
+            "there",
+            "when",
+            "where",
+            "why",
+            "how",
+            "all",
+            "each",
+            "few",
+            "more",
+            "most",
+            "other",
+            "some",
+            "such",
+            "no",
+            "nor",
+            "not",
+            "only",
+            "own",
+            "same",
+            "so",
+            "than",
+            "too",
+            "very",
+            "just",
+            "and",
+            "but",
+            "if",
+            "or",
+            "because",
+            "until",
+            "while",
+            "about",
+            "against",
+            "what",
+            "which",
+            "who",
+            "this",
+            "that",
+            "these",
+            "those",
+            "am",
+            "it",
+            "its",
+            "i",
+            "me",
+            "my",
+            "myself",
+            "we",
+            "our",
+            "you",
+            "your",
+            "he",
+            "him",
+            "his",
+            "she",
+            "her",
+            "they",
+            "them",
+            "their",
+            "find",
+            "search",
+            "look",
+            "get",
+            "show",
+            "tell",
+            "give",
+        }
 
         # Get meaningful words from query
         query_words = [w for w in query_lower.split() if w not in stop_words and len(w) > 2]
 
         for fact in self.facts:
             score = 0
-            fact_topic = fact['topic'].lower()
-            fact_content = fact['content'].lower()
+            fact_topic = fact["topic"].lower()
+            fact_content = fact["content"].lower()
 
             # Check if WHOLE query concept matches (higher score)
             if query_lower in fact_topic or query_lower in fact_content:
@@ -175,9 +282,9 @@ class KnowledgeBase:
         """Get knowledge base statistics."""
         return {
             **self.stats,
-            'total_facts': len(self.facts),
-            'total_embeddings': len(self.embeddings),
-            'storage_path': str(self.storage_path)
+            "total_facts": len(self.facts),
+            "total_embeddings": len(self.embeddings),
+            "storage_path": str(self.storage_path),
         }
 
 
@@ -202,8 +309,8 @@ class SelfTrainer:
 
         # Curiosity and confidence tracking
         self.topic_confidence: Dict[str, float] = {}  # How well we know each topic
-        self.topic_curiosity: Dict[str, float] = {}   # How interested we are
-        self.topic_exposure: Dict[str, int] = {}      # How many times seen
+        self.topic_curiosity: Dict[str, float] = {}  # How interested we are
+        self.topic_exposure: Dict[str, int] = {}  # How many times seen
 
         # Learning priority queue
         self.learning_queue: List[Tuple[float, str]] = []  # (priority, topic)
@@ -216,7 +323,7 @@ class SelfTrainer:
             (should_learn, priority, reason)
         """
         confidence = self.topic_confidence.get(topic, 0.3)  # Default: uncertain
-        curiosity = self.topic_curiosity.get(topic, 0.7)    # Default: curious
+        curiosity = self.topic_curiosity.get(topic, 0.7)  # Default: curious
         exposure = self.topic_exposure.get(topic, 0)
 
         # Calculate learning priority
@@ -224,7 +331,7 @@ class SelfTrainer:
         uncertainty = 1.0 - confidence
         novelty_bonus = 1.0 / (1.0 + exposure * 0.1)
 
-        priority = (uncertainty * 0.4 + curiosity * 0.4 + novelty_bonus * 0.2)
+        priority = uncertainty * 0.4 + curiosity * 0.4 + novelty_bonus * 0.2
 
         # Decision logic
         if confidence > 0.85:
@@ -252,13 +359,15 @@ class SelfTrainer:
 
         fact_id = self.kb.add_fact(topic, content, source, embedding)
 
-        self.session_learning.append({
-            'topic': topic,
-            'content': content[:100],
-            'time': datetime.now().isoformat(),
-            'priority': priority,
-            'reason': reason
-        })
+        self.session_learning.append(
+            {
+                "topic": topic,
+                "content": content[:100],
+                "time": datetime.now().isoformat(),
+                "priority": priority,
+                "reason": reason,
+            }
+        )
 
         # Update tracking
         self.topic_exposure[topic] = self.topic_exposure.get(topic, 0) + 1
@@ -310,10 +419,12 @@ class SelfTrainer:
         # Try to use semantic embeddings if available
         try:
             from integrations.semantic_embeddings import embed_text
+
             return embed_text(text)
         except ImportError:
             # Fallback to hash-based
             import hashlib
+
             h = hashlib.sha256(text.encode()).digest()
             full_hash = h * 4  # 128 bytes
             emb = np.frombuffer(full_hash[:128], dtype=np.uint8).astype(np.float32)
@@ -326,9 +437,9 @@ class SelfTrainer:
 
         # Update access counts
         for fact in facts:
-            fact['access_count'] += 1
+            fact["access_count"] += 1
 
-        return [f['content'] for f in facts]
+        return [f["content"] for f in facts]
 
     def get_knowledge_for_prompt(self, query: str) -> str:
         """Get relevant knowledge to inject into the prompt.
@@ -371,23 +482,68 @@ class SelfTrainer:
         query_lower = query.lower()
 
         # Extract meaningful words (same logic as search_facts)
-        stop_words = {'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been',
-                      'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will',
-                      'would', 'could', 'should', 'may', 'might', 'must', 'shall',
-                      'can', 'need', 'to', 'of', 'in', 'for', 'on', 'with', 'at',
-                      'by', 'from', 'as', 'what', 'which', 'who', 'how', 'why',
-                      'this', 'that', 'these', 'those', 'it', 'its', 'i', 'you'}
+        stop_words = {
+            "a",
+            "an",
+            "the",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "must",
+            "shall",
+            "can",
+            "need",
+            "to",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "at",
+            "by",
+            "from",
+            "as",
+            "what",
+            "which",
+            "who",
+            "how",
+            "why",
+            "this",
+            "that",
+            "these",
+            "those",
+            "it",
+            "its",
+            "i",
+            "you",
+        }
 
         query_words = [w for w in query_lower.split() if w not in stop_words and len(w) > 2]
 
         try:
-            with open(training_file, 'r') as f:
+            with open(training_file, "r") as f:
                 for line in f:
                     try:
                         qa = json.loads(line.strip())
-                        prompt = qa.get('prompt', '').lower()
-                        completion = qa.get('completion', '').lower()
-                        topic = qa.get('topic', '').lower()
+                        prompt = qa.get("prompt", "").lower()
+                        completion = qa.get("completion", "").lower()
+                        topic = qa.get("topic", "").lower()
 
                         score = 0
 
@@ -401,7 +557,9 @@ class SelfTrainer:
                                 score += 2
 
                         # Bonus for multiple matches
-                        matching = sum(1 for w in query_words if w in prompt or w in completion or w in topic)
+                        matching = sum(
+                            1 for w in query_words if w in prompt or w in completion or w in topic
+                        )
                         if matching > 1:
                             score += matching * 2
 
@@ -423,10 +581,7 @@ class SelfTrainer:
 
     def get_stats(self) -> Dict:
         """Get training statistics."""
-        return {
-            **self.kb.get_stats(),
-            'session_learning': len(self.session_learning)
-        }
+        return {**self.kb.get_stats(), "session_learning": len(self.session_learning)}
 
     def get_session_summary(self) -> str:
         """Get summary of what was learned this session."""

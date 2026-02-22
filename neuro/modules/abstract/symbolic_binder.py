@@ -17,24 +17,26 @@ from abc import ABC, abstractmethod
 
 class RoleType(Enum):
     """Standard thematic roles for binding."""
-    AGENT = "agent"         # Entity performing action
-    PATIENT = "patient"     # Entity affected by action
-    THEME = "theme"         # Entity moved or changed
+
+    AGENT = "agent"  # Entity performing action
+    PATIENT = "patient"  # Entity affected by action
+    THEME = "theme"  # Entity moved or changed
     INSTRUMENT = "instrument"  # Tool used
-    LOCATION = "location"   # Place
-    SOURCE = "source"       # Origin
-    GOAL = "goal"           # Destination
-    ATTRIBUTE = "attribute" # Property
-    VALUE = "value"         # Property value
-    RELATION = "relation"   # Relationship type
-    ARG1 = "arg1"           # Generic argument 1
-    ARG2 = "arg2"           # Generic argument 2
-    ARG3 = "arg3"           # Generic argument 3
+    LOCATION = "location"  # Place
+    SOURCE = "source"  # Origin
+    GOAL = "goal"  # Destination
+    ATTRIBUTE = "attribute"  # Property
+    VALUE = "value"  # Property value
+    RELATION = "relation"  # Relationship type
+    ARG1 = "arg1"  # Generic argument 1
+    ARG2 = "arg2"  # Generic argument 2
+    ARG3 = "arg3"  # Generic argument 3
 
 
 @dataclass
 class RoleBinding:
     """A binding between a role and a filler (value)."""
+
     role: RoleType
     filler: str  # Symbol name
     neural_rep: np.ndarray  # Neural representation of filler
@@ -51,6 +53,7 @@ class CompositeBinding:
     - neural_rep: embedding of chase concept
     - role_bindings: {AGENT: dog, PATIENT: cat}
     """
+
     symbol: str
     neural_rep: np.ndarray
     role_bindings: Dict[RoleType, RoleBinding] = field(default_factory=dict)
@@ -210,9 +213,7 @@ class SymbolicBinder:
         If no representation is provided, creates a random one.
         """
         if neural_rep is None:
-            neural_rep = HRROperations.normalize(
-                self._rng.normal(0, 1, self.embedding_dim)
-            )
+            neural_rep = HRROperations.normalize(self._rng.normal(0, 1, self.embedding_dim))
         else:
             neural_rep = HRROperations.normalize(neural_rep)
 
@@ -336,8 +337,10 @@ class SymbolicBinder:
                 role_vec = self._role_vectors[role]
                 # Use circular convolution as approximation to full TPR
                 bound = HRROperations.circular_convolution(
-                    np.tile(role_vec, self.embedding_dim // self.role_dim + 1)[:self.embedding_dim],
-                    role_binding.neural_rep
+                    np.tile(role_vec, self.embedding_dim // self.role_dim + 1)[
+                        : self.embedding_dim
+                    ],
+                    role_binding.neural_rep,
                 )
                 composed_parts.append(bound)
 
@@ -355,12 +358,13 @@ class SymbolicBinder:
 
             for role, role_binding in binding.role_bindings.items():
                 role_vec = self._role_vectors[role]
-                role_vec_expanded = np.tile(role_vec, self.embedding_dim // self.role_dim + 1)[:self.embedding_dim]
+                role_vec_expanded = np.tile(role_vec, self.embedding_dim // self.role_dim + 1)[
+                    : self.embedding_dim
+                ]
 
                 # Bind role to filler
                 bound = HRROperations.circular_convolution(
-                    role_vec_expanded,
-                    role_binding.neural_rep
+                    role_vec_expanded, role_binding.neural_rep
                 )
                 trace += bound
 
@@ -381,7 +385,9 @@ class SymbolicBinder:
         self._n_retrievals += 1
 
         role_vec = self._role_vectors[role]
-        role_vec_expanded = np.tile(role_vec, self.embedding_dim // self.role_dim + 1)[:self.embedding_dim]
+        role_vec_expanded = np.tile(role_vec, self.embedding_dim // self.role_dim + 1)[
+            : self.embedding_dim
+        ]
 
         # Unbind using circular correlation
         retrieved = HRROperations.circular_correlation(role_vec_expanded, composed)

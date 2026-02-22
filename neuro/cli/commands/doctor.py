@@ -32,8 +32,11 @@ async def _check_health():
     ollama_info = ""
     try:
         import aiohttp
+
         async with aiohttp.ClientSession() as session:
-            async with session.get("http://localhost:11434/api/tags", timeout=aiohttp.ClientTimeout(total=5)) as r:
+            async with session.get(
+                "http://localhost:11434/api/tags", timeout=aiohttp.ClientTimeout(total=5)
+            ) as r:
                 if r.status == 200:
                     data = await r.json()
                     models = [m["name"] for m in data.get("models", [])]
@@ -49,6 +52,7 @@ async def _check_health():
     aiohttp_ok = False
     try:
         import aiohttp
+
         aiohttp_ok = True
         checks.append(("aiohttp", "Installed", True, ""))
     except ImportError:
@@ -58,6 +62,7 @@ async def _check_health():
     rich_ok = False
     try:
         import rich
+
         rich_ok = True
         checks.append(("rich", "Installed", True, ""))
     except ImportError:
@@ -67,6 +72,7 @@ async def _check_health():
     yaml_ok = False
     try:
         import yaml
+
         yaml_ok = True
         checks.append(("pyyaml", "Installed", True, ""))
     except ImportError:
@@ -75,8 +81,14 @@ async def _check_health():
     # Check config directory
     config_dir = os.path.expanduser("~/.neuro")
     config_ok = os.path.exists(config_dir)
-    checks.append(("Config dir", config_dir if config_ok else "Not found", config_ok,
-                   "" if config_ok else f"mkdir -p {config_dir}"))
+    checks.append(
+        (
+            "Config dir",
+            config_dir if config_ok else "Not found",
+            config_ok,
+            "" if config_ok else f"mkdir -p {config_dir}",
+        )
+    )
 
     # Check sessions directory
     sessions_found = 0

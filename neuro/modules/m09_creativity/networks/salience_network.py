@@ -18,13 +18,15 @@ import time
 
 class NetworkState(Enum):
     """Current dominant network"""
-    DMN = "default_mode"      # Generating, imagining
+
+    DMN = "default_mode"  # Generating, imagining
     ECN = "executive_control"  # Evaluating, refining
     TRANSITION = "transition"  # Switching between
 
 
 class SwitchTrigger(Enum):
     """What triggers a network switch"""
+
     IDEA_GENERATED = "idea_generated"
     EVALUATION_COMPLETE = "evaluation_complete"
     STUCK = "stuck"
@@ -37,6 +39,7 @@ class SwitchTrigger(Enum):
 @dataclass
 class NetworkSwitch:
     """Record of a network switch event"""
+
     from_network: NetworkState
     to_network: NetworkState
     trigger: SwitchTrigger
@@ -47,6 +50,7 @@ class NetworkSwitch:
 @dataclass
 class NetworkActivity:
     """Current activity levels of each network"""
+
     dmn_activity: float  # 0-1
     ecn_activity: float  # 0-1
     dominant: NetworkState
@@ -67,10 +71,12 @@ class SalienceNetwork:
     reconfiguration than generating non-creative ideas"
     """
 
-    def __init__(self,
-                 switch_threshold: float = 0.6,
-                 min_time_in_state: float = 2.0,  # seconds
-                 oscillation_frequency: float = 0.1):  # switches per second
+    def __init__(
+        self,
+        switch_threshold: float = 0.6,
+        min_time_in_state: float = 2.0,  # seconds
+        oscillation_frequency: float = 0.1,
+    ):  # switches per second
         self.current_state = NetworkState.DMN
         self.switch_history: List[NetworkSwitch] = []
         self.switch_threshold = switch_threshold
@@ -93,7 +99,7 @@ class SalienceNetwork:
             dmn_activity=self._dmn_activity,
             ecn_activity=self._ecn_activity,
             dominant=self.current_state,
-            reconfiguration_level=self._compute_reconfiguration()
+            reconfiguration_level=self._compute_reconfiguration(),
         )
 
     def _compute_reconfiguration(self) -> float:
@@ -104,7 +110,8 @@ class SalienceNetwork:
         """
         # Recent switch frequency
         recent_switches = [
-            s for s in self.switch_history[-20:]
+            s
+            for s in self.switch_history[-20:]
             if time.time() - s.timestamp < 60  # Last minute
         ]
         switch_rate = len(recent_switches) / 60.0
@@ -116,8 +123,9 @@ class SalienceNetwork:
         reconfiguration = (switch_rate / self.oscillation_frequency) * 0.5 + balance * 0.5
         return min(1.0, reconfiguration)
 
-    def should_switch(self,
-                      current_metrics: Dict[str, float]) -> Tuple[bool, Optional[SwitchTrigger]]:
+    def should_switch(
+        self, current_metrics: Dict[str, float]
+    ) -> Tuple[bool, Optional[SwitchTrigger]]:
         """
         Determine if networks should switch.
 
@@ -138,8 +146,9 @@ class SalienceNetwork:
 
         return False, None
 
-    def _should_switch_from_dmn(self,
-                                metrics: Dict[str, float]) -> Tuple[bool, Optional[SwitchTrigger]]:
+    def _should_switch_from_dmn(
+        self, metrics: Dict[str, float]
+    ) -> Tuple[bool, Optional[SwitchTrigger]]:
         """Check if should switch from DMN to ECN"""
 
         # Generated enough ideas?
@@ -154,7 +163,11 @@ class SalienceNetwork:
 
         if len(self._recent_novelty_scores) >= 3:
             avg_recent = np.mean(self._recent_novelty_scores[-3:])
-            avg_earlier = np.mean(self._recent_novelty_scores[:-3]) if len(self._recent_novelty_scores) > 3 else avg_recent
+            avg_earlier = (
+                np.mean(self._recent_novelty_scores[:-3])
+                if len(self._recent_novelty_scores) > 3
+                else avg_recent
+            )
             if avg_recent < avg_earlier * 0.7:  # 30% drop
                 return True, SwitchTrigger.NOVELTY_DROP
 
@@ -169,8 +182,9 @@ class SalienceNetwork:
 
         return False, None
 
-    def _should_switch_from_ecn(self,
-                                metrics: Dict[str, float]) -> Tuple[bool, Optional[SwitchTrigger]]:
+    def _should_switch_from_ecn(
+        self, metrics: Dict[str, float]
+    ) -> Tuple[bool, Optional[SwitchTrigger]]:
         """Check if should switch from ECN to DMN"""
 
         # Evaluation complete?
@@ -195,9 +209,9 @@ class SalienceNetwork:
 
         return False, None
 
-    def execute_switch(self,
-                       trigger: SwitchTrigger,
-                       context: Optional[Dict[str, Any]] = None) -> NetworkSwitch:
+    def execute_switch(
+        self, trigger: SwitchTrigger, context: Optional[Dict[str, Any]] = None
+    ) -> NetworkSwitch:
         """
         Execute a network switch.
 
@@ -227,7 +241,7 @@ class SalienceNetwork:
             to_network=new_state,
             trigger=trigger,
             timestamp=time.time(),
-            context=context or {}
+            context=context or {},
         )
 
         self.switch_history.append(switch)
@@ -239,9 +253,7 @@ class SalienceNetwork:
 
         return switch
 
-    def update_activity(self,
-                        dmn_delta: float = 0.0,
-                        ecn_delta: float = 0.0):
+    def update_activity(self, dmn_delta: float = 0.0, ecn_delta: float = 0.0):
         """
         Gradually update network activity levels.
 
@@ -285,10 +297,8 @@ class SalienceNetwork:
         if not self.switch_history:
             return {"total_switches": 0}
 
-        dmn_to_ecn = sum(1 for s in self.switch_history
-                        if s.from_network == NetworkState.DMN)
-        ecn_to_dmn = sum(1 for s in self.switch_history
-                        if s.from_network == NetworkState.ECN)
+        dmn_to_ecn = sum(1 for s in self.switch_history if s.from_network == NetworkState.DMN)
+        ecn_to_dmn = sum(1 for s in self.switch_history if s.from_network == NetworkState.ECN)
 
         # Time spent in each state
         dmn_time = 0.0
@@ -313,13 +323,10 @@ class SalienceNetwork:
             "dmn_time": dmn_time,
             "ecn_time": ecn_time,
             "trigger_counts": trigger_counts,
-            "current_reconfiguration": self._compute_reconfiguration()
+            "current_reconfiguration": self._compute_reconfiguration(),
         }
 
     def force_switch_to(self, target: NetworkState):
         """Force switch to specific network (override automatic)"""
         if self.current_state != target:
-            self.execute_switch(
-                SwitchTrigger.TIME_BASED,
-                context={"forced": True}
-            )
+            self.execute_switch(SwitchTrigger.TIME_BASED, context={"forced": True})

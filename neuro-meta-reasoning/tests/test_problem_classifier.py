@@ -11,6 +11,7 @@ from neuro.modules.meta_reasoning.problem_classifier import (
     ProblemDifficulty,
 )
 
+
 class TestProblemClassifierConfig:
     """Tests for ProblemClassifierConfig class."""
 
@@ -23,6 +24,7 @@ class TestProblemClassifierConfig:
         config = ProblemClassifierConfig(embedding_dim=64, min_confidence=0.7)
         assert config.embedding_dim == 64
         assert config.min_confidence == 0.7
+
 
 class TestProblemClassifier:
     """Tests for ProblemClassifier class."""
@@ -131,6 +133,7 @@ class TestProblemClassifier:
         assert "avg_complexity" in stats
         assert stats["total_classifications"] == 10
 
+
 class TestProblemType:
     """Tests for ProblemType enum."""
 
@@ -139,6 +142,7 @@ class TestProblemType:
         assert ProblemType.MATHEMATICAL.value == "mathematical"
         assert ProblemType.CAUSAL.value == "causal"
         assert ProblemType.UNKNOWN.value == "unknown"
+
 
 class TestProblemDifficulty:
     """Tests for ProblemDifficulty enum."""
@@ -149,6 +153,7 @@ class TestProblemDifficulty:
         assert ProblemDifficulty.MEDIUM.value == "medium"
         assert ProblemDifficulty.HARD.value == "hard"
         assert ProblemDifficulty.EXPERT.value == "expert"
+
 
 class TestProblemAnalysis:
     """Tests for ProblemAnalysis dataclass."""

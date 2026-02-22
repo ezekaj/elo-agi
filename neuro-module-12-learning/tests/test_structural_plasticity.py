@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m12_learning.structural_plasticity import (
-    StructuralPlasticity, SynapticPruning, DendriticGrowth, StructuralParams
+    StructuralPlasticity,
+    SynapticPruning,
+    DendriticGrowth,
+    StructuralParams,
 )
+
 
 class TestStructuralPlasticity:
     """Tests for structural plasticity"""
@@ -30,10 +34,7 @@ class TestStructuralPlasticity:
 
     def test_synapse_formation(self):
         """Test new synapses can form"""
-        params = StructuralParams(
-            synapse_formation_rate=0.5,
-            activity_threshold=0.1
-        )
+        params = StructuralParams(synapse_formation_rate=0.5, activity_threshold=0.1)
         sp = StructuralPlasticity(n_neurons=5, params=params)
 
         # Record high activity
@@ -49,10 +50,7 @@ class TestStructuralPlasticity:
 
     def test_synapse_elimination(self):
         """Test weak synapses can be eliminated"""
-        params = StructuralParams(
-            synapse_elimination_rate=0.5,
-            weight_threshold=0.3
-        )
+        params = StructuralParams(synapse_elimination_rate=0.5, weight_threshold=0.3)
         sp = StructuralPlasticity(n_neurons=5, params=params)
 
         # Make all weights weak
@@ -82,6 +80,7 @@ class TestStructuralPlasticity:
         density = sp.get_connectivity_density()
 
         assert 0 <= density <= 1
+
 
 class TestSynapticPruning:
     """Tests for synaptic pruning"""
@@ -126,6 +125,7 @@ class TestSynapticPruning:
         # Should have pruned some weights
         final_weights = pruner.get_weights()
         assert np.sum(final_weights == 0) > 0
+
 
 class TestDendriticGrowth:
     """Tests for dendritic growth"""
@@ -184,5 +184,6 @@ class TestDendriticGrowth:
 
         assert len(sizes) == 5
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

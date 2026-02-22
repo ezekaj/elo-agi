@@ -16,16 +16,27 @@ from .head_direction_cells import HeadDirectionCell, HeadDirectionSystem
 from .border_cells import BorderCell, BorderCellPopulation, WallDirection, Wall
 from .cognitive_map import CognitiveMap, Environment, Landmark, CognitiveMapState
 from .path_integration import PathIntegrator
-from .conceptual_space import (
-    ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap
-)
+from .conceptual_space import ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap
 
 __all__ = [
-    'PlaceField', 'PlaceCell', 'PlaceCellPopulation',
-    'GridParameters', 'GridCell', 'GridCellModule', 'GridCellPopulation',
-    'HeadDirectionCell', 'HeadDirectionSystem',
-    'BorderCell', 'BorderCellPopulation',
-    'CognitiveMap', 'Environment', 'Wall', 'Landmark',
-    'PathIntegrator',
-    'ConceptCell', 'ConceptualGrid', 'SocialDistanceGrid', 'ConceptualMap',
+    "PlaceField",
+    "PlaceCell",
+    "PlaceCellPopulation",
+    "GridParameters",
+    "GridCell",
+    "GridCellModule",
+    "GridCellPopulation",
+    "HeadDirectionCell",
+    "HeadDirectionSystem",
+    "BorderCell",
+    "BorderCellPopulation",
+    "CognitiveMap",
+    "Environment",
+    "Wall",
+    "Landmark",
+    "PathIntegrator",
+    "ConceptCell",
+    "ConceptualGrid",
+    "SocialDistanceGrid",
+    "ConceptualMap",
 ]

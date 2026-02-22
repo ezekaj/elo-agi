@@ -12,6 +12,7 @@ from neuro.modules.planning.goal_hierarchy import Goal
 from neuro.modules.planning.skill_library import Skill, SkillType
 from neuro.modules.planning.subgoal_discovery import Trajectory
 
+
 class TestPlanningConfig:
     """Tests for PlanningConfig class."""
 
@@ -30,6 +31,7 @@ class TestPlanningConfig:
         assert config.state_dim == 128
         assert config.action_dim == 8
         assert config.mcts_simulations == 50
+
 
 class TestWorldModelAdapterIntegration:
     """Tests for WorldModelAdapter in integration context."""
@@ -81,6 +83,7 @@ class TestWorldModelAdapterIntegration:
 
         stats = adapter.statistics()
         assert stats["imagination_calls"] == 2
+
 
 class TestPlanningIntegration:
     """Tests for PlanningIntegration class."""
@@ -170,7 +173,9 @@ class TestPlanningIntegration:
         integration.plan(state)
 
         action = integration.get_action(state)
-        assert action is not None or integration._plan_step >= len(integration._current_plan.actions)
+        assert action is not None or integration._plan_step >= len(
+            integration._current_plan.actions
+        )
 
     def test_get_action_no_plan(self):
         integration = PlanningIntegration()
@@ -294,6 +299,7 @@ class TestPlanningIntegration:
         assert "decomposition_stats" in stats
         assert "options_stats" in stats
         assert "skills_stats" in stats
+
 
 class TestEndToEndPlanning:
     """End-to-end planning tests."""

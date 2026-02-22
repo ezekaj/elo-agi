@@ -13,23 +13,25 @@ import numpy as np
 
 class RelationType(Enum):
     """Types of semantic relations."""
-    IS_A = "is_a"               # Taxonomic (dog IS_A animal)
-    HAS_A = "has_a"             # Part-whole (car HAS_A wheel)
-    PART_OF = "part_of"         # Meronymic (wheel PART_OF car)
-    PROPERTY = "property"       # Attribute (apple PROPERTY red)
-    CAN = "can"                 # Capability (bird CAN fly)
-    CAUSES = "causes"           # Causal (fire CAUSES smoke)
-    LOCATED_IN = "located_in"   # Spatial (Paris LOCATED_IN France)
-    SIMILAR_TO = "similar_to"   # Similarity (dog SIMILAR_TO wolf)
-    OPPOSITE_OF = "opposite_of" # Antonymy (hot OPPOSITE_OF cold)
-    RELATED_TO = "related_to"   # General association
-    INSTANCE_OF = "instance_of" # Instance (Fido INSTANCE_OF dog)
-    USED_FOR = "used_for"       # Function (hammer USED_FOR nail)
+
+    IS_A = "is_a"  # Taxonomic (dog IS_A animal)
+    HAS_A = "has_a"  # Part-whole (car HAS_A wheel)
+    PART_OF = "part_of"  # Meronymic (wheel PART_OF car)
+    PROPERTY = "property"  # Attribute (apple PROPERTY red)
+    CAN = "can"  # Capability (bird CAN fly)
+    CAUSES = "causes"  # Causal (fire CAUSES smoke)
+    LOCATED_IN = "located_in"  # Spatial (Paris LOCATED_IN France)
+    SIMILAR_TO = "similar_to"  # Similarity (dog SIMILAR_TO wolf)
+    OPPOSITE_OF = "opposite_of"  # Antonymy (hot OPPOSITE_OF cold)
+    RELATED_TO = "related_to"  # General association
+    INSTANCE_OF = "instance_of"  # Instance (Fido INSTANCE_OF dog)
+    USED_FOR = "used_for"  # Function (hammer USED_FOR nail)
 
 
 @dataclass
 class Concept:
     """A concept node in the semantic network."""
+
     name: str
     embedding: Optional[np.ndarray] = None
     activation: float = 0.0
@@ -49,6 +51,7 @@ class Concept:
 @dataclass
 class SemanticRelation:
     """A relation between concepts."""
+
     source: str
     target: str
     relation_type: RelationType
@@ -60,6 +63,7 @@ class SemanticRelation:
 @dataclass
 class ActivationPattern:
     """Pattern of activation across network."""
+
     activations: Dict[str, float]
     source_concept: str
     spread_depth: int
@@ -67,11 +71,7 @@ class ActivationPattern:
 
     def top_k(self, k: int = 10) -> List[Tuple[str, float]]:
         """Get top k activated concepts."""
-        sorted_items = sorted(
-            self.activations.items(),
-            key=lambda x: x[1],
-            reverse=True
-        )
+        sorted_items = sorted(self.activations.items(), key=lambda x: x[1], reverse=True)
         return sorted_items[:k]
 
 
@@ -208,10 +208,7 @@ class SemanticNetwork:
         elif direction == "incoming":
             relations = self._incoming.get(concept, [])
         else:
-            relations = (
-                self._outgoing.get(concept, []) +
-                self._incoming.get(concept, [])
-            )
+            relations = self._outgoing.get(concept, []) + self._incoming.get(concept, [])
 
         if relation_type:
             relations = [r for r in relations if r.relation_type == relation_type]
@@ -257,15 +254,8 @@ class SemanticNetwork:
                 target = relation.target
 
                 # Compute spread activation
-                relation_weight = self._relation_weights.get(
-                    relation.relation_type, 0.5
-                )
-                spread = (
-                    current_activation *
-                    self.decay_rate *
-                    relation.weight *
-                    relation_weight
-                )
+                relation_weight = self._relation_weights.get(relation.relation_type, 0.5)
+                spread = current_activation * self.decay_rate * relation.weight * relation_weight
 
                 if spread < self.activation_threshold:
                     continue
@@ -443,7 +433,7 @@ class SemanticNetwork:
 
             if c1 and c2 and c1.embedding is not None and c2.embedding is not None:
                 return 1.0 - np.dot(c1.embedding, c2.embedding)
-            return float('inf')
+            return float("inf")
 
         # Path-based distance with relation weights
         distance = 0.0

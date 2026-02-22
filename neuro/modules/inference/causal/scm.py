@@ -12,13 +12,15 @@ import numpy as np
 
 class VariableType(Enum):
     """Types of causal variables."""
-    EXOGENOUS = "exogenous"    # External/noise variables (U)
+
+    EXOGENOUS = "exogenous"  # External/noise variables (U)
     ENDOGENOUS = "endogenous"  # Determined by equations (V)
 
 
 @dataclass
 class CausalVariable:
     """A variable in a structural causal model."""
+
     name: str
     var_type: VariableType
     domain: Optional[List[Any]] = None  # Discrete values, or None for continuous
@@ -41,6 +43,7 @@ class StructuralEquation:
     Represents how a variable is determined by its parents
     and noise term.
     """
+
     variable: str
     parents: List[str]
     noise_var: Optional[str] = None  # Associated exogenous variable

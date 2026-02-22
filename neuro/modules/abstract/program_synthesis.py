@@ -21,7 +21,11 @@ from .composition_types import (
     FunctionType,
     ListType,
     StructuredType,
-    INT, FLOAT, STR, BOOL, ANY,
+    INT,
+    FLOAT,
+    STR,
+    BOOL,
+    ANY,
 )
 
 
@@ -32,6 +36,7 @@ class Primitive:
 
     Primitives are the building blocks for synthesized programs.
     """
+
     name: str
     input_types: List[CompositionType]
     output_type: CompositionType
@@ -59,8 +64,9 @@ class Program:
 
     Programs are trees of primitive applications.
     """
+
     primitive: Optional[Primitive]
-    arguments: List['Program'] = field(default_factory=list)
+    arguments: List["Program"] = field(default_factory=list)
     is_variable: bool = False
     variable_index: int = -1
     constant_value: Any = None
@@ -122,6 +128,7 @@ class Program:
 @dataclass
 class Example:
     """An input-output example for synthesis."""
+
     inputs: List[Any]
     output: Any
 
@@ -142,222 +149,274 @@ class PrimitiveLibrary:
     def _load_default_primitives(self) -> None:
         """Load default primitive library."""
         # Arithmetic
-        self.register(Primitive(
-            name="add",
-            input_types=[INT, INT],
-            output_type=INT,
-            executable=lambda x, y: x + y,
-            description="Integer addition",
-        ))
+        self.register(
+            Primitive(
+                name="add",
+                input_types=[INT, INT],
+                output_type=INT,
+                executable=lambda x, y: x + y,
+                description="Integer addition",
+            )
+        )
 
-        self.register(Primitive(
-            name="sub",
-            input_types=[INT, INT],
-            output_type=INT,
-            executable=lambda x, y: x - y,
-            description="Integer subtraction",
-        ))
+        self.register(
+            Primitive(
+                name="sub",
+                input_types=[INT, INT],
+                output_type=INT,
+                executable=lambda x, y: x - y,
+                description="Integer subtraction",
+            )
+        )
 
-        self.register(Primitive(
-            name="mul",
-            input_types=[INT, INT],
-            output_type=INT,
-            executable=lambda x, y: x * y,
-            description="Integer multiplication",
-        ))
+        self.register(
+            Primitive(
+                name="mul",
+                input_types=[INT, INT],
+                output_type=INT,
+                executable=lambda x, y: x * y,
+                description="Integer multiplication",
+            )
+        )
 
-        self.register(Primitive(
-            name="div",
-            input_types=[INT, INT],
-            output_type=INT,
-            executable=lambda x, y: x // y if y != 0 else 0,
-            description="Integer division",
-        ))
+        self.register(
+            Primitive(
+                name="div",
+                input_types=[INT, INT],
+                output_type=INT,
+                executable=lambda x, y: x // y if y != 0 else 0,
+                description="Integer division",
+            )
+        )
 
-        self.register(Primitive(
-            name="mod",
-            input_types=[INT, INT],
-            output_type=INT,
-            executable=lambda x, y: x % y if y != 0 else 0,
-            description="Modulo",
-        ))
+        self.register(
+            Primitive(
+                name="mod",
+                input_types=[INT, INT],
+                output_type=INT,
+                executable=lambda x, y: x % y if y != 0 else 0,
+                description="Modulo",
+            )
+        )
 
-        self.register(Primitive(
-            name="neg",
-            input_types=[INT],
-            output_type=INT,
-            executable=lambda x: -x,
-            description="Negation",
-        ))
+        self.register(
+            Primitive(
+                name="neg",
+                input_types=[INT],
+                output_type=INT,
+                executable=lambda x: -x,
+                description="Negation",
+            )
+        )
 
-        self.register(Primitive(
-            name="abs",
-            input_types=[INT],
-            output_type=INT,
-            executable=lambda x: abs(x),
-            description="Absolute value",
-        ))
+        self.register(
+            Primitive(
+                name="abs",
+                input_types=[INT],
+                output_type=INT,
+                executable=lambda x: abs(x),
+                description="Absolute value",
+            )
+        )
 
         # Comparison
-        self.register(Primitive(
-            name="eq",
-            input_types=[INT, INT],
-            output_type=BOOL,
-            executable=lambda x, y: x == y,
-            description="Equality",
-        ))
+        self.register(
+            Primitive(
+                name="eq",
+                input_types=[INT, INT],
+                output_type=BOOL,
+                executable=lambda x, y: x == y,
+                description="Equality",
+            )
+        )
 
-        self.register(Primitive(
-            name="lt",
-            input_types=[INT, INT],
-            output_type=BOOL,
-            executable=lambda x, y: x < y,
-            description="Less than",
-        ))
+        self.register(
+            Primitive(
+                name="lt",
+                input_types=[INT, INT],
+                output_type=BOOL,
+                executable=lambda x, y: x < y,
+                description="Less than",
+            )
+        )
 
-        self.register(Primitive(
-            name="gt",
-            input_types=[INT, INT],
-            output_type=BOOL,
-            executable=lambda x, y: x > y,
-            description="Greater than",
-        ))
+        self.register(
+            Primitive(
+                name="gt",
+                input_types=[INT, INT],
+                output_type=BOOL,
+                executable=lambda x, y: x > y,
+                description="Greater than",
+            )
+        )
 
         # Boolean
-        self.register(Primitive(
-            name="and",
-            input_types=[BOOL, BOOL],
-            output_type=BOOL,
-            executable=lambda x, y: x and y,
-            description="Logical AND",
-        ))
+        self.register(
+            Primitive(
+                name="and",
+                input_types=[BOOL, BOOL],
+                output_type=BOOL,
+                executable=lambda x, y: x and y,
+                description="Logical AND",
+            )
+        )
 
-        self.register(Primitive(
-            name="or",
-            input_types=[BOOL, BOOL],
-            output_type=BOOL,
-            executable=lambda x, y: x or y,
-            description="Logical OR",
-        ))
+        self.register(
+            Primitive(
+                name="or",
+                input_types=[BOOL, BOOL],
+                output_type=BOOL,
+                executable=lambda x, y: x or y,
+                description="Logical OR",
+            )
+        )
 
-        self.register(Primitive(
-            name="not",
-            input_types=[BOOL],
-            output_type=BOOL,
-            executable=lambda x: not x,
-            description="Logical NOT",
-        ))
+        self.register(
+            Primitive(
+                name="not",
+                input_types=[BOOL],
+                output_type=BOOL,
+                executable=lambda x: not x,
+                description="Logical NOT",
+            )
+        )
 
         # Conditionals
-        self.register(Primitive(
-            name="if",
-            input_types=[BOOL, INT, INT],
-            output_type=INT,
-            executable=lambda c, t, f: t if c else f,
-            cost=2.0,
-            description="Conditional",
-        ))
+        self.register(
+            Primitive(
+                name="if",
+                input_types=[BOOL, INT, INT],
+                output_type=INT,
+                executable=lambda c, t, f: t if c else f,
+                cost=2.0,
+                description="Conditional",
+            )
+        )
 
         # List operations
-        self.register(Primitive(
-            name="head",
-            input_types=[ListType(INT)],
-            output_type=INT,
-            executable=lambda xs: xs[0] if xs else 0,
-            description="First element",
-        ))
+        self.register(
+            Primitive(
+                name="head",
+                input_types=[ListType(INT)],
+                output_type=INT,
+                executable=lambda xs: xs[0] if xs else 0,
+                description="First element",
+            )
+        )
 
-        self.register(Primitive(
-            name="tail",
-            input_types=[ListType(INT)],
-            output_type=ListType(INT),
-            executable=lambda xs: xs[1:],
-            description="All but first",
-        ))
+        self.register(
+            Primitive(
+                name="tail",
+                input_types=[ListType(INT)],
+                output_type=ListType(INT),
+                executable=lambda xs: xs[1:],
+                description="All but first",
+            )
+        )
 
-        self.register(Primitive(
-            name="cons",
-            input_types=[INT, ListType(INT)],
-            output_type=ListType(INT),
-            executable=lambda x, xs: [x] + list(xs),
-            description="Prepend element",
-        ))
+        self.register(
+            Primitive(
+                name="cons",
+                input_types=[INT, ListType(INT)],
+                output_type=ListType(INT),
+                executable=lambda x, xs: [x] + list(xs),
+                description="Prepend element",
+            )
+        )
 
-        self.register(Primitive(
-            name="len",
-            input_types=[ListType(INT)],
-            output_type=INT,
-            executable=lambda xs: len(xs),
-            description="List length",
-        ))
+        self.register(
+            Primitive(
+                name="len",
+                input_types=[ListType(INT)],
+                output_type=INT,
+                executable=lambda xs: len(xs),
+                description="List length",
+            )
+        )
 
-        self.register(Primitive(
-            name="sum",
-            input_types=[ListType(INT)],
-            output_type=INT,
-            executable=lambda xs: sum(xs),
-            description="Sum of list",
-        ))
+        self.register(
+            Primitive(
+                name="sum",
+                input_types=[ListType(INT)],
+                output_type=INT,
+                executable=lambda xs: sum(xs),
+                description="Sum of list",
+            )
+        )
 
-        self.register(Primitive(
-            name="max",
-            input_types=[ListType(INT)],
-            output_type=INT,
-            executable=lambda xs: max(xs) if xs else 0,
-            description="Maximum",
-        ))
+        self.register(
+            Primitive(
+                name="max",
+                input_types=[ListType(INT)],
+                output_type=INT,
+                executable=lambda xs: max(xs) if xs else 0,
+                description="Maximum",
+            )
+        )
 
-        self.register(Primitive(
-            name="min",
-            input_types=[ListType(INT)],
-            output_type=INT,
-            executable=lambda xs: min(xs) if xs else 0,
-            description="Minimum",
-        ))
+        self.register(
+            Primitive(
+                name="min",
+                input_types=[ListType(INT)],
+                output_type=INT,
+                executable=lambda xs: min(xs) if xs else 0,
+                description="Minimum",
+            )
+        )
 
-        self.register(Primitive(
-            name="reverse",
-            input_types=[ListType(INT)],
-            output_type=ListType(INT),
-            executable=lambda xs: list(reversed(xs)),
-            description="Reverse list",
-        ))
+        self.register(
+            Primitive(
+                name="reverse",
+                input_types=[ListType(INT)],
+                output_type=ListType(INT),
+                executable=lambda xs: list(reversed(xs)),
+                description="Reverse list",
+            )
+        )
 
-        self.register(Primitive(
-            name="sort",
-            input_types=[ListType(INT)],
-            output_type=ListType(INT),
-            executable=lambda xs: sorted(xs),
-            description="Sort list",
-        ))
+        self.register(
+            Primitive(
+                name="sort",
+                input_types=[ListType(INT)],
+                output_type=ListType(INT),
+                executable=lambda xs: sorted(xs),
+                description="Sort list",
+            )
+        )
 
         # Constants
-        self.register(Primitive(
-            name="zero",
-            input_types=[],
-            output_type=INT,
-            executable=lambda: 0,
-            cost=0.1,
-            description="Zero constant",
-        ))
+        self.register(
+            Primitive(
+                name="zero",
+                input_types=[],
+                output_type=INT,
+                executable=lambda: 0,
+                cost=0.1,
+                description="Zero constant",
+            )
+        )
 
-        self.register(Primitive(
-            name="one",
-            input_types=[],
-            output_type=INT,
-            executable=lambda: 1,
-            cost=0.1,
-            description="One constant",
-        ))
+        self.register(
+            Primitive(
+                name="one",
+                input_types=[],
+                output_type=INT,
+                executable=lambda: 1,
+                cost=0.1,
+                description="One constant",
+            )
+        )
 
-        self.register(Primitive(
-            name="empty",
-            input_types=[],
-            output_type=ListType(INT),
-            executable=lambda: [],
-            cost=0.1,
-            description="Empty list",
-        ))
+        self.register(
+            Primitive(
+                name="empty",
+                input_types=[],
+                output_type=ListType(INT),
+                executable=lambda: [],
+                cost=0.1,
+                description="Empty list",
+            )
+        )
 
     def register(self, primitive: Primitive) -> None:
         """Register a primitive."""
@@ -374,7 +433,8 @@ class PrimitiveLibrary:
     def primitives_with_output(self, output_type: CompositionType) -> List[Primitive]:
         """Get primitives that produce a given output type."""
         return [
-            p for p in self._primitives.values()
+            p
+            for p in self._primitives.values()
             if p.output_type == output_type or output_type == ANY
         ]
 
@@ -441,9 +501,7 @@ class ProgramSynthesizer:
         """Generate candidate programs in order of increasing size."""
         # Bottom-up enumeration
         for size in range(1, self.max_size + 1):
-            for program in self._enumerate_size(
-                size, input_types, output_type, 0
-            ):
+            for program in self._enumerate_size(size, input_types, output_type, 0):
                 self._programs_enumerated += 1
                 yield program
 
@@ -490,9 +548,9 @@ class ProgramSynthesizer:
 
                 for i, arg_size in enumerate(size_dist):
                     arg_type = prim.input_types[i]
-                    arg_programs = list(self._enumerate_size(
-                        arg_size, input_types, arg_type, depth + 1
-                    ))
+                    arg_programs = list(
+                        self._enumerate_size(arg_size, input_types, arg_type, depth + 1)
+                    )
 
                     if not arg_programs:
                         valid = False

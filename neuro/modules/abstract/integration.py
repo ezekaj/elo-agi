@@ -17,11 +17,12 @@ from .composition_types import CompositionType, AtomicType, StructuredType
 
 class SemanticModalityType(Enum):
     """Types of semantic content in shared space."""
-    SYMBOLIC = "symbolic"        # Pure symbolic representations
-    GROUNDED = "grounded"        # Symbol-percept bindings
-    ABSTRACT = "abstract"        # Abstractions
-    RELATIONAL = "relational"    # Relations between concepts
-    PROCEDURAL = "procedural"    # Programs/procedures
+
+    SYMBOLIC = "symbolic"  # Pure symbolic representations
+    GROUNDED = "grounded"  # Symbol-percept bindings
+    ABSTRACT = "abstract"  # Abstractions
+    RELATIONAL = "relational"  # Relations between concepts
+    PROCEDURAL = "procedural"  # Programs/procedures
 
 
 @dataclass
@@ -31,6 +32,7 @@ class AbstractSemanticEmbedding:
 
     Combines symbolic, structural, and neural information.
     """
+
     vector: np.ndarray
     modality: SemanticModalityType
     source: str
@@ -42,7 +44,7 @@ class AbstractSemanticEmbedding:
     confidence: float = 1.0
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def similarity(self, other: 'AbstractSemanticEmbedding') -> float:
+    def similarity(self, other: "AbstractSemanticEmbedding") -> float:
         """Compute cosine similarity with another embedding."""
         norm_self = np.linalg.norm(self.vector)
         norm_other = np.linalg.norm(other.vector)
@@ -54,6 +56,7 @@ class AbstractSemanticEmbedding:
 @dataclass
 class SharedSpaceConfig:
     """Configuration for shared space integration."""
+
     embedding_dim: int = 512
     projection_dim: int = 256
     n_attention_heads: int = 8
@@ -88,7 +91,7 @@ class SharedSpaceProjection:
         if len(vector) < self.input_dim:
             vector = np.pad(vector, (0, self.input_dim - len(vector)))
         elif len(vector) > self.input_dim:
-            vector = vector[:self.input_dim]
+            vector = vector[: self.input_dim]
 
         projected = np.tanh(vector @ self.weights + self.bias)
         norm = np.linalg.norm(projected)
@@ -263,7 +266,7 @@ class SharedSpaceIntegration:
         # Prune if over capacity
         if len(self._active) > self.config.max_active_concepts:
             self._active.sort(key=lambda e: e.confidence, reverse=True)
-            self._active = self._active[:self.config.max_active_concepts]
+            self._active = self._active[: self.config.max_active_concepts]
 
     def query(
         self,
@@ -304,10 +307,7 @@ class SharedSpaceIntegration:
         filler: str,
     ) -> List[AbstractSemanticEmbedding]:
         """Query embeddings by role-filler pair."""
-        return [
-            e for e in self._active
-            if e.roles.get(role) == filler
-        ]
+        return [e for e in self._active if e.roles.get(role) == filler]
 
     def bind_to_shared_space(
         self,
@@ -321,10 +321,7 @@ class SharedSpaceIntegration:
 
         # Create binding
         if roles:
-            role_tuples = {
-                role: (filler, None)
-                for role, filler in roles.items()
-            }
+            role_tuples = {role: (filler, None) for role, filler in roles.items()}
             binding = self.binder.bind(symbol, roles=role_tuples)
         else:
             binding = self.binder.bind(symbol)
@@ -349,11 +346,10 @@ class SharedSpaceIntegration:
         # Combine symbol and perceptual representations
         if len(perceptual_embedding) < self.config.projection_dim:
             perceptual_embedding = np.pad(
-                perceptual_embedding,
-                (0, self.config.projection_dim - len(perceptual_embedding))
+                perceptual_embedding, (0, self.config.projection_dim - len(perceptual_embedding))
             )
         elif len(perceptual_embedding) > self.config.projection_dim:
-            perceptual_embedding = perceptual_embedding[:self.config.projection_dim]
+            perceptual_embedding = perceptual_embedding[: self.config.projection_dim]
 
         # Weighted combination
         combined = 0.5 * symbol_rep + 0.5 * perceptual_embedding
@@ -434,8 +430,7 @@ class SharedSpaceIntegration:
         # Filter by domain if specified
         if target_domain_filter:
             results = [
-                (e, s) for e, s in results
-                if e.metadata.get("domain") == target_domain_filter
+                (e, s) for e, s in results if e.metadata.get("domain") == target_domain_filter
             ]
 
         return results
@@ -452,9 +447,7 @@ class SharedSpaceIntegration:
         """Get integration statistics."""
         modality_counts = {}
         for e in self._active:
-            modality_counts[e.modality.value] = modality_counts.get(
-                e.modality.value, 0
-            ) + 1
+            modality_counts[e.modality.value] = modality_counts.get(e.modality.value, 0) + 1
 
         return {
             "n_active_embeddings": len(self._active),

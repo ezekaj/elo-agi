@@ -15,29 +15,48 @@ from pathlib import Path
 
 # Add src to path
 from neuro.modules.integrate.shared_space import (
-    SharedSpace, SharedSpaceConfig, SemanticEmbedding,
-    ProjectionLayer, ModalityType
+    SharedSpace,
+    SharedSpaceConfig,
+    SemanticEmbedding,
+    ProjectionLayer,
+    ModalityType,
 )
 from neuro.modules.integrate.cross_module_learning import (
-    CrossModuleLearner, LearningSignal, SignalType,
-    GradientRouter, ModuleSynapse
+    CrossModuleLearner,
+    LearningSignal,
+    SignalType,
+    GradientRouter,
+    ModuleSynapse,
 )
 from neuro.modules.integrate.conflict_resolution import (
-    ConflictResolver, Conflict, Resolution, ConflictType,
-    ResolutionStrategy
+    ConflictResolver,
+    Conflict,
+    Resolution,
+    ConflictType,
+    ResolutionStrategy,
 )
 from neuro.modules.integrate.evidence_accumulation import (
-    EvidenceAccumulator, Evidence, EvidenceSource, EvidenceType,
-    AccumulatorConfig, DriftDiffusionAccumulator, BayesianAccumulator
+    EvidenceAccumulator,
+    Evidence,
+    EvidenceSource,
+    EvidenceType,
+    AccumulatorConfig,
+    DriftDiffusionAccumulator,
+    BayesianAccumulator,
 )
 from neuro.modules.integrate.coherence_checker import (
-    CoherenceChecker, Belief, Inconsistency, InconsistencyType,
-    BeliefNetwork, CoherenceReport
+    CoherenceChecker,
+    Belief,
+    Inconsistency,
+    InconsistencyType,
+    BeliefNetwork,
+    CoherenceReport,
 )
 
 # =============================================================================
 # Tests: Shared Space
 # =============================================================================
+
 
 class TestSharedSpaceConfig:
     """Tests for SharedSpaceConfig."""
@@ -52,16 +71,13 @@ class TestSharedSpaceConfig:
         assert config.embedding_dim == 256
         assert config.temperature == 0.5
 
+
 class TestSemanticEmbedding:
     """Tests for SemanticEmbedding."""
 
     def test_creation(self):
         vec = np.random.randn(512)
-        emb = SemanticEmbedding(
-            vector=vec,
-            modality=ModalityType.VISUAL,
-            source_module="test"
-        )
+        emb = SemanticEmbedding(vector=vec, modality=ModalityType.VISUAL, source_module="test")
         assert emb.modality == ModalityType.VISUAL
         assert emb.source_module == "test"
 
@@ -95,15 +111,13 @@ class TestSemanticEmbedding:
         assert blended.source_module == "blended"
         assert blended.confidence == pytest.approx(0.7)
 
+
 class TestProjectionLayer:
     """Tests for ProjectionLayer."""
 
     def test_creation(self):
         proj = ProjectionLayer(
-            input_dim=64,
-            output_dim=512,
-            modality=ModalityType.VISUAL,
-            module_name="vision"
+            input_dim=64, output_dim=512, modality=ModalityType.VISUAL, module_name="vision"
         )
         assert proj.input_dim == 64
         assert proj.output_dim == 512
@@ -128,6 +142,7 @@ class TestProjectionLayer:
         weights_before = proj.weights.copy()
         proj.update(error, input_vec)
         assert not np.allclose(proj.weights, weights_before)
+
 
 class TestSharedSpace:
     """Tests for SharedSpace."""
@@ -219,9 +234,11 @@ class TestSharedSpace:
         assert stats["n_registered_modules"] == 1
         assert stats["n_active_embeddings"] == 1
 
+
 # =============================================================================
 # Tests: Cross-Module Learning
 # =============================================================================
+
 
 class TestModuleSynapse:
     """Tests for ModuleSynapse."""
@@ -247,6 +264,7 @@ class TestModuleSynapse:
         synapse.update(pre, post, reward=1.0)
         # Weights should change
         assert not np.allclose(synapse.weights, weights)
+
 
 class TestGradientRouter:
     """Tests for GradientRouter."""
@@ -285,6 +303,7 @@ class TestGradientRouter:
         assert "m1" in credits
         assert "m2" in credits
 
+
 class TestCrossModuleLearner:
     """Tests for CrossModuleLearner."""
 
@@ -308,12 +327,7 @@ class TestCrossModuleLearner:
         learner.register_module("m1")
         learner.register_module("m2")
 
-        signal = learner.emit_signal(
-            SignalType.ERROR,
-            "m1",
-            ["m2"],
-            np.random.randn(512)
-        )
+        signal = learner.emit_signal(SignalType.ERROR, "m1", ["m2"], np.random.randn(512))
         assert signal.source_module == "m1"
         assert len(learner._signal_queue) == 1
 
@@ -323,11 +337,7 @@ class TestCrossModuleLearner:
         learner.register_module("m2")
         learner.register_module("m3")
 
-        signal = learner.broadcast_signal(
-            SignalType.REWARD,
-            "m1",
-            np.random.randn(512)
-        )
+        signal = learner.broadcast_signal(SignalType.REWARD, "m1", np.random.randn(512))
         assert "m2" in signal.target_modules
         assert "m3" in signal.target_modules
         assert "m1" not in signal.target_modules
@@ -368,9 +378,11 @@ class TestCrossModuleLearner:
         stats = learner.statistics()
         assert stats["n_registered_modules"] == 1
 
+
 # =============================================================================
 # Tests: Conflict Resolution
 # =============================================================================
+
 
 class TestConflict:
     """Tests for Conflict."""
@@ -384,7 +396,7 @@ class TestConflict:
             conflict_type=ConflictType.BELIEF,
             modules=["m1", "m2"],
             embeddings={"m1": emb1, "m2": emb2},
-            confidences={"m1": 0.9, "m2": 0.8}
+            confidences={"m1": 0.9, "m2": 0.8},
         )
         assert conflict.conflict_id == 1
         assert len(conflict.modules) == 2
@@ -401,9 +413,10 @@ class TestConflict:
             conflict_type=ConflictType.BELIEF,
             modules=["m1", "m2"],
             embeddings={"m1": emb1, "m2": emb2},
-            confidences={"m1": 0.9, "m2": 0.8}
+            confidences={"m1": 0.9, "m2": 0.8},
         )
         assert conflict.severity > 0  # Should have high severity
+
 
 class TestConflictResolver:
     """Tests for ConflictResolver."""
@@ -418,8 +431,12 @@ class TestConflictResolver:
         vec1 = np.random.randn(512)
         vec2 = -vec1  # Opposite direction
 
-        emb1 = SemanticEmbedding(vec1 / np.linalg.norm(vec1), ModalityType.VISUAL, "m1", confidence=0.9)
-        emb2 = SemanticEmbedding(vec2 / np.linalg.norm(vec2), ModalityType.AUDITORY, "m2", confidence=0.9)
+        emb1 = SemanticEmbedding(
+            vec1 / np.linalg.norm(vec1), ModalityType.VISUAL, "m1", confidence=0.9
+        )
+        emb2 = SemanticEmbedding(
+            vec2 / np.linalg.norm(vec2), ModalityType.AUDITORY, "m2", confidence=0.9
+        )
 
         conflict = resolver.detect_conflict({"m1": emb1, "m2": emb2}, threshold=0.3)
         assert conflict is not None
@@ -447,7 +464,7 @@ class TestConflictResolver:
             conflict_type=ConflictType.BELIEF,
             modules=["m1", "m2"],
             embeddings={"m1": emb1, "m2": emb2},
-            confidences={"m1": 0.9, "m2": 0.6}
+            confidences={"m1": 0.9, "m2": 0.6},
         )
 
         resolution = resolver.resolve(conflict, ResolutionStrategy.WEIGHTED_AVERAGE)
@@ -465,7 +482,7 @@ class TestConflictResolver:
             conflict_type=ConflictType.ACTION,
             modules=["m1", "m2"],
             embeddings={"m1": emb1, "m2": emb2},
-            confidences={"m1": 0.9, "m2": 0.3}
+            confidences={"m1": 0.9, "m2": 0.3},
         )
 
         resolution = resolver.resolve(conflict, ResolutionStrategy.WINNER_TAKE_ALL)
@@ -480,7 +497,9 @@ class TestConflictResolver:
         base_vec /= np.linalg.norm(base_vec)
 
         emb1 = SemanticEmbedding(base_vec + 0.01 * np.random.randn(512), ModalityType.VISUAL, "m1")
-        emb2 = SemanticEmbedding(base_vec + 0.01 * np.random.randn(512), ModalityType.AUDITORY, "m2")
+        emb2 = SemanticEmbedding(
+            base_vec + 0.01 * np.random.randn(512), ModalityType.AUDITORY, "m2"
+        )
         emb3 = SemanticEmbedding(base_vec + 0.01 * np.random.randn(512), ModalityType.MOTOR, "m3")
         emb4 = SemanticEmbedding(-base_vec, ModalityType.SPATIAL, "m4")
 
@@ -489,7 +508,7 @@ class TestConflictResolver:
             conflict_type=ConflictType.ATTENTION,
             modules=["m1", "m2", "m3", "m4"],
             embeddings={"m1": emb1, "m2": emb2, "m3": emb3, "m4": emb4},
-            confidences={"m1": 0.8, "m2": 0.8, "m3": 0.8, "m4": 0.8}
+            confidences={"m1": 0.8, "m2": 0.8, "m3": 0.8, "m4": 0.8},
         )
 
         resolution = resolver.resolve(conflict, ResolutionStrategy.VOTING)
@@ -510,9 +529,11 @@ class TestConflictResolver:
         assert "total_conflicts" in stats
         assert "module_reliability" in stats
 
+
 # =============================================================================
 # Tests: Evidence Accumulation
 # =============================================================================
+
 
 class TestEvidenceSource:
     """Tests for EvidenceSource."""
@@ -521,6 +542,7 @@ class TestEvidenceSource:
         source = EvidenceSource(name="vision", reliability=0.9)
         assert source.name == "vision"
         assert source.reliability == 0.9
+
 
 class TestEvidence:
     """Tests for Evidence."""
@@ -531,7 +553,7 @@ class TestEvidence:
             source=source,
             evidence_type=EvidenceType.SENSORY,
             value=np.random.randn(64),
-            strength=0.8
+            strength=0.8,
         )
         assert evidence.strength == 0.8
 
@@ -542,10 +564,11 @@ class TestEvidence:
             evidence_type=EvidenceType.SENSORY,
             value=np.random.randn(64),
             strength=1.0,
-            uncertainty=0.1
+            uncertainty=0.1,
         )
         # Weight should account for reliability and uncertainty
         assert evidence.weight < 1.0
+
 
 class TestDriftDiffusionAccumulator:
     """Tests for DriftDiffusionAccumulator."""
@@ -569,6 +592,7 @@ class TestDriftDiffusionAccumulator:
         ddm = DriftDiffusionAccumulator()
         prob = ddm.get_decision_probability()
         assert 0 <= prob <= 1
+
 
 class TestBayesianAccumulator:
     """Tests for BayesianAccumulator."""
@@ -597,6 +621,7 @@ class TestBayesianAccumulator:
         entropy = bayes.get_entropy()
         assert entropy > 0
 
+
 class TestEvidenceAccumulator:
     """Tests for EvidenceAccumulator."""
 
@@ -614,10 +639,7 @@ class TestEvidenceAccumulator:
         acc = EvidenceAccumulator()
         acc.register_source("vision")
         evidence = acc.create_evidence(
-            "vision",
-            EvidenceType.SENSORY,
-            np.random.randn(64),
-            strength=0.8
+            "vision", EvidenceType.SENSORY, np.random.randn(64), strength=0.8
         )
         assert evidence.source.name == "vision"
 
@@ -650,8 +672,7 @@ class TestEvidenceAccumulator:
 
         # Create evidence stream favoring option 1
         evidence_stream = [
-            Evidence(source, EvidenceType.SENSORY, np.array([0.5]), 1.0)
-            for _ in range(20)
+            Evidence(source, EvidenceType.SENSORY, np.array([0.5]), 1.0) for _ in range(20)
         ]
 
         decision, confidence, rt = acc.decide_binary(evidence_stream)
@@ -665,9 +686,11 @@ class TestEvidenceAccumulator:
         assert "n_sources" in stats
         assert "total_evidence" in stats
 
+
 # =============================================================================
 # Tests: Coherence Checker
 # =============================================================================
+
 
 class TestBelief:
     """Tests for Belief."""
@@ -675,11 +698,7 @@ class TestBelief:
     def test_creation(self):
         emb = SemanticEmbedding(np.random.randn(512), ModalityType.ABSTRACT, "test")
         belief = Belief(
-            belief_id="b1",
-            content=emb,
-            source_module="vision",
-            confidence=0.9,
-            timestamp=1.0
+            belief_id="b1", content=emb, source_module="vision", confidence=0.9, timestamp=1.0
         )
         assert belief.belief_id == "b1"
         assert belief.source_module == "vision"
@@ -693,6 +712,7 @@ class TestBelief:
         b2 = Belief("b2", emb2, "m2", 0.9, 1.0)
 
         assert b1.similarity(b2) == pytest.approx(1.0)
+
 
 class TestBeliefNetwork:
     """Tests for BeliefNetwork."""
@@ -733,6 +753,7 @@ class TestBeliefNetwork:
         clusters = network.find_clusters()
         assert len(clusters) >= 1
 
+
 class TestCoherenceChecker:
     """Tests for CoherenceChecker."""
 
@@ -760,7 +781,9 @@ class TestCoherenceChecker:
         _, inconsistencies = checker.add_belief(emb2, "m2", 0.9)
 
         # Should detect contradiction
-        contradictions = [i for i in inconsistencies if i.inconsistency_type == InconsistencyType.CONTRADICTION]
+        contradictions = [
+            i for i in inconsistencies if i.inconsistency_type == InconsistencyType.CONTRADICTION
+        ]
         assert len(contradictions) > 0
 
     def test_check_staleness(self):
@@ -832,9 +855,11 @@ class TestCoherenceChecker:
         assert "n_beliefs" in stats
         assert "coherence_score" in stats
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for the complete integration system."""
@@ -862,19 +887,14 @@ class TestIntegration:
         emb_language = space.project("language", np.random.randn(64))
 
         # Check for conflicts
-        conflict = resolver.detect_conflict({
-            "vision": emb_vision,
-            "language": emb_language
-        })
+        conflict = resolver.detect_conflict({"vision": emb_vision, "language": emb_language})
 
         if conflict:
             resolution = resolver.resolve(conflict)
             assert resolution is not None
 
         # Accumulate evidence
-        evidence = accumulator.create_evidence(
-            "vision", EvidenceType.SENSORY, np.random.randn(64)
-        )
+        evidence = accumulator.create_evidence("vision", EvidenceType.SENSORY, np.random.randn(64))
         accumulator.accumulate("object_present", evidence)
 
         # Add beliefs and check coherence
@@ -885,10 +905,9 @@ class TestIntegration:
         assert report.coherence_score >= 0
 
         # Apply learning
-        learner.apply_reward(1.0, {
-            "vision": np.random.randn(512),
-            "language": np.random.randn(512)
-        })
+        learner.apply_reward(
+            1.0, {"vision": np.random.randn(512), "language": np.random.randn(512)}
+        )
 
         assert learner._total_updates > 0
 
@@ -924,8 +943,12 @@ class TestIntegration:
         vec1 = np.random.randn(512)
         vec2 = -vec1
 
-        emb1 = SemanticEmbedding(vec1 / np.linalg.norm(vec1), ModalityType.ABSTRACT, "m1", confidence=0.9)
-        emb2 = SemanticEmbedding(vec2 / np.linalg.norm(vec2), ModalityType.ABSTRACT, "m2", confidence=0.8)
+        emb1 = SemanticEmbedding(
+            vec1 / np.linalg.norm(vec1), ModalityType.ABSTRACT, "m1", confidence=0.9
+        )
+        emb2 = SemanticEmbedding(
+            vec2 / np.linalg.norm(vec2), ModalityType.ABSTRACT, "m2", confidence=0.8
+        )
 
         conflict = resolver.detect_conflict({"m1": emb1, "m2": emb2})
         assert conflict is not None
@@ -934,11 +957,11 @@ class TestIntegration:
 
         # Learn from resolution
         learner.apply_reward(
-            0.5 if resolution.winning_modules[0] == "m1" else -0.5,
-            {"m1": vec1, "m2": vec2}
+            0.5 if resolution.winning_modules[0] == "m1" else -0.5, {"m1": vec1, "m2": vec2}
         )
 
         assert learner._total_updates > 0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

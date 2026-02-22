@@ -20,6 +20,7 @@ import uuid
 
 class RelationType(Enum):
     """Basic relation types"""
+
     IS_A = "is_a"
     HAS = "has"
     PART_OF = "part_of"
@@ -40,6 +41,7 @@ class RelationType(Enum):
 @dataclass
 class Element:
     """A conceptual element that can participate in relations"""
+
     id: str
     content: Any
     type_tag: str = "entity"
@@ -49,6 +51,7 @@ class Element:
 @dataclass
 class Relation:
     """A relation between elements"""
+
     id: str
     source: str  # Element ID
     target: str  # Element ID
@@ -60,6 +63,7 @@ class Relation:
 @dataclass
 class Structure:
     """A structured representation (bound elements + relations)"""
+
     id: str
     elements: Dict[str, Element]
     relations: List[Relation]
@@ -70,8 +74,7 @@ class Structure:
         return self.elements.get(element_id)
 
     def get_relations(self, element_id: str) -> List[Relation]:
-        return [r for r in self.relations
-                if r.source == element_id or r.target == element_id]
+        return [r for r in self.relations if r.source == element_id or r.target == element_id]
 
 
 class RelationalReasoning:
@@ -89,31 +92,32 @@ class RelationalReasoning:
         self.elements: Dict[str, Element] = {}
         self.structures: Dict[str, Structure] = {}
 
-    def create_element(self,
-                       content: Any,
-                       type_tag: str = "entity",
-                       features: Optional[Dict[str, Any]] = None,
-                       element_id: Optional[str] = None) -> Element:
+    def create_element(
+        self,
+        content: Any,
+        type_tag: str = "entity",
+        features: Optional[Dict[str, Any]] = None,
+        element_id: Optional[str] = None,
+    ) -> Element:
         """Create a new conceptual element"""
         if element_id is None:
             element_id = str(uuid.uuid4())[:8]
 
         element = Element(
-            id=element_id,
-            content=content,
-            type_tag=type_tag,
-            features=features or {}
+            id=element_id, content=content, type_tag=type_tag, features=features or {}
         )
 
         self.elements[element_id] = element
         return element
 
-    def bind(self,
-             element1: Element,
-             relation_type: RelationType,
-             element2: Element,
-             strength: float = 1.0,
-             metadata: Optional[Dict[str, Any]] = None) -> Structure:
+    def bind(
+        self,
+        element1: Element,
+        relation_type: RelationType,
+        element2: Element,
+        strength: float = 1.0,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Structure:
         """
         Bind two elements with a relation to create a structure.
 
@@ -129,24 +133,25 @@ class RelationalReasoning:
             target=element2.id,
             relation_type=relation_type,
             strength=strength,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         structure = Structure(
             id=structure_id,
-            elements={
-                element1.id: element1,
-                element2.id: element2
-            },
+            elements={element1.id: element1, element2.id: element2},
             relations=[relation],
-            root=element1.id
+            root=element1.id,
         )
 
         self.structures[structure_id] = structure
         return structure
 
-    def compose(self, structure1: Structure, structure2: Structure,
-                binding_relation: Optional[Relation] = None) -> Structure:
+    def compose(
+        self,
+        structure1: Structure,
+        structure2: Structure,
+        binding_relation: Optional[Relation] = None,
+    ) -> Structure:
         """
         Compose two structures into a larger structure.
 
@@ -170,9 +175,7 @@ class RelationalReasoning:
             elements=elements,
             relations=relations,
             root=structure1.root,
-            metadata={
-                "composed_from": [structure1.id, structure2.id]
-            }
+            metadata={"composed_from": [structure1.id, structure2.id]},
         )
 
         self.structures[new_id] = structure
@@ -186,9 +189,7 @@ class RelationalReasoning:
         """
         return structure.elements.copy(), list(structure.relations)
 
-    def bind_modifier(self,
-                      base_concept: Element,
-                      modifier: Element) -> Structure:
+    def bind_modifier(self, base_concept: Element, modifier: Element) -> Structure:
         """
         Bind a modifier to a base concept.
 
@@ -199,14 +200,16 @@ class RelationalReasoning:
             modifier,
             RelationType.MODIFIER,
             base_concept,
-            metadata={"composition_type": "modification"}
+            metadata={"composition_type": "modification"},
         )
 
-    def create_action_structure(self,
-                                action: Element,
-                                agent: Optional[Element] = None,
-                                patient: Optional[Element] = None,
-                                modifiers: Optional[List[Element]] = None) -> Structure:
+    def create_action_structure(
+        self,
+        action: Element,
+        agent: Optional[Element] = None,
+        patient: Optional[Element] = None,
+        modifiers: Optional[List[Element]] = None,
+    ) -> Structure:
         """
         Create an action structure with roles.
 
@@ -221,46 +224,52 @@ class RelationalReasoning:
 
         if agent:
             elements[agent.id] = agent
-            relations.append(Relation(
-                id=str(uuid.uuid4())[:8],
-                source=agent.id,
-                target=action.id,
-                relation_type=RelationType.AGENT
-            ))
+            relations.append(
+                Relation(
+                    id=str(uuid.uuid4())[:8],
+                    source=agent.id,
+                    target=action.id,
+                    relation_type=RelationType.AGENT,
+                )
+            )
 
         if patient:
             elements[patient.id] = patient
-            relations.append(Relation(
-                id=str(uuid.uuid4())[:8],
-                source=patient.id,
-                target=action.id,
-                relation_type=RelationType.PATIENT
-            ))
+            relations.append(
+                Relation(
+                    id=str(uuid.uuid4())[:8],
+                    source=patient.id,
+                    target=action.id,
+                    relation_type=RelationType.PATIENT,
+                )
+            )
 
         if modifiers:
             for mod in modifiers:
                 elements[mod.id] = mod
-                relations.append(Relation(
-                    id=str(uuid.uuid4())[:8],
-                    source=mod.id,
-                    target=action.id,
-                    relation_type=RelationType.MODIFIER
-                ))
+                relations.append(
+                    Relation(
+                        id=str(uuid.uuid4())[:8],
+                        source=mod.id,
+                        target=action.id,
+                        relation_type=RelationType.MODIFIER,
+                    )
+                )
 
         structure = Structure(
             id=structure_id,
             elements=elements,
             relations=relations,
             root=action.id,
-            metadata={"structure_type": "action_frame"}
+            metadata={"structure_type": "action_frame"},
         )
 
         self.structures[structure_id] = structure
         return structure
 
-    def analogy(self,
-                source: Structure,
-                target_elements: Dict[str, Element]) -> Optional[Structure]:
+    def analogy(
+        self, source: Structure, target_elements: Dict[str, Element]
+    ) -> Optional[Structure]:
         """
         Map relational structure from source to target.
 
@@ -287,14 +296,16 @@ class RelationalReasoning:
         new_relations = []
         for rel in source_relations:
             if rel.source in mapping and rel.target in mapping:
-                new_relations.append(Relation(
-                    id=str(uuid.uuid4())[:8],
-                    source=mapping[rel.source],
-                    target=mapping[rel.target],
-                    relation_type=rel.relation_type,
-                    strength=rel.strength * 0.8,  # Slight uncertainty in analogies
-                    metadata={"analogical_source": rel.id}
-                ))
+                new_relations.append(
+                    Relation(
+                        id=str(uuid.uuid4())[:8],
+                        source=mapping[rel.source],
+                        target=mapping[rel.target],
+                        relation_type=rel.relation_type,
+                        strength=rel.strength * 0.8,  # Slight uncertainty in analogies
+                        metadata={"analogical_source": rel.id},
+                    )
+                )
 
         if not new_relations:
             return None
@@ -303,15 +314,15 @@ class RelationalReasoning:
             id=str(uuid.uuid4())[:8],
             elements=target_elements,
             relations=new_relations,
-            metadata={"analogical_from": source.id}
+            metadata={"analogical_from": source.id},
         )
 
         self.structures[structure.id] = structure
         return structure
 
-    def find_similar_structures(self,
-                                structure: Structure,
-                                threshold: float = 0.7) -> List[Tuple[Structure, float]]:
+    def find_similar_structures(
+        self, structure: Structure, threshold: float = 0.7
+    ) -> List[Tuple[Structure, float]]:
         """
         Find structures with similar relational patterns.
 
@@ -330,9 +341,7 @@ class RelationalReasoning:
         results.sort(key=lambda x: x[1], reverse=True)
         return results
 
-    def _compute_structural_similarity(self,
-                                        s1: Structure,
-                                        s2: Structure) -> float:
+    def _compute_structural_similarity(self, s1: Structure, s2: Structure) -> float:
         """Compute similarity between two structures based on relations"""
         r1_types = {r.relation_type for r in s1.relations}
         r2_types = {r.relation_type for r in s2.relations}
@@ -345,8 +354,7 @@ class RelationalReasoning:
 
         return intersection / union if union > 0 else 0.0
 
-    def query_by_relation(self,
-                          relation_type: RelationType) -> List[Structure]:
+    def query_by_relation(self, relation_type: RelationType) -> List[Structure]:
         """Find all structures containing a specific relation type"""
         results = []
         for structure in self.structures.values():
@@ -356,9 +364,9 @@ class RelationalReasoning:
                     break
         return results
 
-    def get_related_elements(self,
-                              element_id: str,
-                              relation_type: Optional[RelationType] = None) -> List[Tuple[Element, Relation]]:
+    def get_related_elements(
+        self, element_id: str, relation_type: Optional[RelationType] = None
+    ) -> List[Tuple[Element, Relation]]:
         """Get all elements related to the given element"""
         results = []
 

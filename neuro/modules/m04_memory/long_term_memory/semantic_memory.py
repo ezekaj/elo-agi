@@ -17,6 +17,7 @@ import heapq
 @dataclass
 class Concept:
     """Semantic knowledge unit"""
+
     name: str
     features: Dict[str, float] = field(default_factory=dict)
     relations: List[Tuple[str, str, float]] = field(default_factory=list)
@@ -32,8 +33,7 @@ class Concept:
         """Add relation to another concept"""
         # Remove existing relation of same type to same target
         self.relations = [
-            r for r in self.relations
-            if not (r[0] == relation_type and r[1] == target)
+            r for r in self.relations if not (r[0] == relation_type and r[1] == target)
         ]
         self.relations.append((relation_type, target, strength))
 
@@ -47,19 +47,21 @@ class SemanticMemory:
     """
 
     RELATION_TYPES = {
-        "is-a",      # Category membership (dog is-a animal)
-        "has-a",     # Part-whole (car has-a wheel)
-        "part-of",   # Inverse of has-a
-        "causes",    # Causal relation
-        "caused-by", # Inverse causal
+        "is-a",  # Category membership (dog is-a animal)
+        "has-a",  # Part-whole (car has-a wheel)
+        "part-of",  # Inverse of has-a
+        "causes",  # Causal relation
+        "caused-by",  # Inverse causal
         "similar-to",  # Similarity
-        "opposite-of", # Antonymy
+        "opposite-of",  # Antonymy
         "related-to",  # General association
     }
 
     def __init__(self):
         self._concepts: Dict[str, Concept] = {}
-        self._relation_index: Dict[str, Dict[str, List[Tuple[str, float]]]] = defaultdict(lambda: defaultdict(list))
+        self._relation_index: Dict[str, Dict[str, List[Tuple[str, float]]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
         self._time_fn = time.time
 
     def store(self, concept: Concept) -> None:
@@ -79,7 +81,7 @@ class SemanticMemory:
         self,
         name: str,
         features: Optional[Dict[str, float]] = None,
-        relations: Optional[List[Tuple[str, str, float]]] = None
+        relations: Optional[List[Tuple[str, str, float]]] = None,
     ) -> Concept:
         """
         Create and store a new concept.
@@ -92,11 +94,7 @@ class SemanticMemory:
         Returns:
             The created Concept
         """
-        concept = Concept(
-            name=name,
-            features=features or {},
-            relations=relations or []
-        )
+        concept = Concept(name=name, features=features or {}, relations=relations or [])
         self.store(concept)
         return concept
 
@@ -117,11 +115,7 @@ class SemanticMemory:
         return concept
 
     def spread_activation(
-        self,
-        source: str,
-        initial_strength: float = 1.0,
-        decay: float = 0.5,
-        depth: int = 3
+        self, source: str, initial_strength: float = 1.0, decay: float = 0.5, depth: int = 3
     ) -> Dict[str, float]:
         """
         Activate related concepts via spreading activation.
@@ -172,9 +166,7 @@ class SemanticMemory:
         return activations
 
     def get_related(
-        self,
-        concept_name: str,
-        relation_type: Optional[str] = None
+        self, concept_name: str, relation_type: Optional[str] = None
     ) -> List[Tuple[str, str, float]]:
         """
         Find linked concepts.
@@ -195,10 +187,7 @@ class SemanticMemory:
         return concept.relations.copy()
 
     def find_path(
-        self,
-        start: str,
-        end: str,
-        max_depth: int = 5
+        self, start: str, end: str, max_depth: int = 5
     ) -> Optional[List[Tuple[str, str, str]]]:
         """
         Find shortest relational path between concepts.
@@ -255,7 +244,7 @@ class SemanticMemory:
             return None
 
         # Extract common features (simplified)
-        all_contents = [str(ep.content) if hasattr(ep, 'content') else str(ep) for ep in episodes]
+        all_contents = [str(ep.content) if hasattr(ep, "content") else str(ep) for ep in episodes]
 
         # Find common words (very simplified)
         word_sets = [set(content.lower().split()) for content in all_contents]
@@ -270,13 +259,7 @@ class SemanticMemory:
 
         return self.create_concept(concept_name, features)
 
-    def add_relation(
-        self,
-        source: str,
-        relation: str,
-        target: str,
-        strength: float = 1.0
-    ) -> bool:
+    def add_relation(self, source: str, relation: str, target: str, strength: float = 1.0) -> bool:
         """
         Create link between concepts.
 
@@ -319,10 +302,7 @@ class SemanticMemory:
                 continue
 
             # Prune weak relations
-            concept.relations = [
-                r for r in concept.relations
-                if r[2] >= strength_threshold
-            ]
+            concept.relations = [r for r in concept.relations if r[2] >= strength_threshold]
 
         for name in to_remove:
             del self._concepts[name]
@@ -334,7 +314,8 @@ class SemanticMemory:
     def find_by_feature(self, feature: str, min_value: float = 0.0) -> List[Concept]:
         """Find concepts with a specific feature"""
         return [
-            c for c in self._concepts.values()
+            c
+            for c in self._concepts.values()
             if feature in c.features and c.features[feature] >= min_value
         ]
 

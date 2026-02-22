@@ -4,4 +4,4 @@ from .pattern_recognition import PatternRecognition
 from .habit_executor import HabitExecutor
 from .emotional_valuation import EmotionalValuation
 
-__all__ = ['PatternRecognition', 'HabitExecutor', 'EmotionalValuation']
+__all__ = ["PatternRecognition", "HabitExecutor", "EmotionalValuation"]

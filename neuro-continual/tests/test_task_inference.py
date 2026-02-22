@@ -10,6 +10,7 @@ from neuro.modules.continual.task_inference import (
     TaskChangeMethod,
 )
 
+
 class TestTaskInferenceConfig:
     """Tests for TaskInferenceConfig class."""
 
@@ -23,6 +24,7 @@ class TestTaskInferenceConfig:
         config = TaskInferenceConfig(change_threshold=0.3, embedding_dim=128)
         assert config.change_threshold == 0.3
         assert config.embedding_dim == 128
+
 
 class TestTaskInference:
     """Tests for TaskInference class."""
@@ -172,6 +174,7 @@ class TestTaskInference:
         assert "current_task" in stats
         assert "task_changes" in stats
         assert stats["total_tasks"] >= 1
+
 
 class TestTaskChangeMethod:
     """Tests for TaskChangeMethod enum."""

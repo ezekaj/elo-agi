@@ -12,26 +12,45 @@ import numpy as np
 import time
 
 from neuro.modules.m19_multi_agent.agent import (
-    CognitiveAgent, AgentParams, AgentRole, BeliefState,
-    Message, ModuleProposal, ContentType
+    CognitiveAgent,
+    AgentParams,
+    AgentRole,
+    BeliefState,
+    Message,
+    ModuleProposal,
+    ContentType,
 )
 from neuro.modules.m19_multi_agent.population import (
-    AgentPopulation, PopulationParams, PopulationState, TopologyType
+    AgentPopulation,
+    PopulationParams,
+    PopulationState,
+    TopologyType,
 )
 from neuro.modules.m19_multi_agent.coordination import (
-    EmergentCoordination, CoordinationMechanism, CoordinationParams,
-    Task, Action, EmergentPattern
+    EmergentCoordination,
+    CoordinationMechanism,
+    CoordinationParams,
+    Task,
+    Action,
+    EmergentPattern,
 )
 from neuro.modules.m19_multi_agent.collective_memory import (
-    CollectiveMemory, MemoryParams, MemoryEntry
+    CollectiveMemory,
+    MemoryParams,
+    MemoryEntry,
 )
 from neuro.modules.m19_multi_agent.swarm import (
-    SwarmIntelligence, SwarmParams, Problem, Solution, ProblemStatus
+    SwarmIntelligence,
+    SwarmParams,
+    Problem,
+    Solution,
+    ProblemStatus,
 )
 
 # =============================================================================
 # Unit Tests: CognitiveAgent
 # =============================================================================
+
 
 class TestCognitiveAgent:
     """Tests for the CognitiveAgent class."""
@@ -113,6 +132,7 @@ class TestCognitiveAgent:
             # Each role should be able to generate proposals
             assert isinstance(proposals, list)
 
+
 class TestBeliefState:
     """Tests for BeliefState."""
 
@@ -137,9 +157,11 @@ class TestBeliefState:
 
         assert "key2" in belief1.beliefs
 
+
 # =============================================================================
 # Unit Tests: AgentPopulation
 # =============================================================================
+
 
 class TestAgentPopulation:
     """Tests for AgentPopulation."""
@@ -169,10 +191,7 @@ class TestAgentPopulation:
             AgentRole.VALIDATOR: 0.0,
             AgentRole.GENERALIST: 0.0,
         }
-        pop = AgentPopulation(PopulationParams(
-            n_agents=10,
-            role_distribution=role_dist
-        ))
+        pop = AgentPopulation(PopulationParams(n_agents=10, role_distribution=role_dist))
 
         explorers = pop.get_agents_by_role(AgentRole.EXPLORER)
         workers = pop.get_agents_by_role(AgentRole.WORKER)
@@ -183,10 +202,7 @@ class TestAgentPopulation:
     def test_topology_types(self):
         """Test different topology types."""
         for topo in TopologyType:
-            pop = AgentPopulation(PopulationParams(
-                n_agents=5,
-                topology=topo
-            ))
+            pop = AgentPopulation(PopulationParams(n_agents=5, topology=topo))
             assert pop._topology is not None
             if len(pop.agents) > 1:
                 assert pop._topology.shape == (5, 5)
@@ -205,9 +221,11 @@ class TestAgentPopulation:
         assert result is True
         assert len(pop.agents) == 3
 
+
 # =============================================================================
 # Unit Tests: EmergentCoordination
 # =============================================================================
+
 
 class TestEmergentCoordination:
     """Tests for EmergentCoordination."""
@@ -254,9 +272,11 @@ class TestEmergentCoordination:
         # Should detect synchronization pattern
         assert isinstance(patterns, list)
 
+
 # =============================================================================
 # Unit Tests: CollectiveMemory
 # =============================================================================
+
 
 class TestCollectiveMemory:
     """Tests for CollectiveMemory."""
@@ -309,10 +329,12 @@ class TestCollectiveMemory:
 
     def test_forgetting(self):
         """Test memory decay."""
-        mem = CollectiveMemory(MemoryParams(
-            decay_rate=0.5,  # High decay
-            min_confidence=0.3
-        ))
+        mem = CollectiveMemory(
+            MemoryParams(
+                decay_rate=0.5,  # High decay
+                min_confidence=0.3,
+            )
+        )
 
         # Store with low confidence
         mem.store("agent1", "key1", np.array([1, 2, 3]), confidence=0.2)
@@ -338,9 +360,11 @@ class TestCollectiveMemory:
 
         assert score1 > score2  # agent1 contributed more
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for the multi-agent system."""
@@ -393,7 +417,7 @@ class TestIntegration:
 
         # Check memory was populated
         stats = swarm.collective_memory.get_statistics()
-        assert stats['size'] > 0
+        assert stats["size"] > 0
 
     def test_consensus_formation(self):
         """Test agents reach consensus."""
@@ -425,9 +449,11 @@ class TestIntegration:
         # Should maintain some diversity
         assert diversity >= 0
 
+
 # =============================================================================
 # Stress Tests
 # =============================================================================
+
 
 class TestStress:
     """Stress tests for scalability."""
@@ -452,11 +478,7 @@ class TestStress:
         agents = list(pop.agents.values())
         for sender in agents[:10]:
             for receiver in agents[10:]:
-                sender.send_message(
-                    receiver.agent_id,
-                    np.random.randn(32),
-                    ContentType.OBSERVATION
-                )
+                sender.send_message(receiver.agent_id, np.random.randn(32), ContentType.OBSERVATION)
 
         # Deliver messages
         delivered = pop.deliver_messages()
@@ -464,10 +486,7 @@ class TestStress:
 
     def test_convergence_speed(self):
         """Test how fast swarm converges."""
-        swarm = SwarmIntelligence(SwarmParams(
-            n_agents=10,
-            convergence_threshold=0.95
-        ))
+        swarm = SwarmIntelligence(SwarmParams(n_agents=10, convergence_threshold=0.95))
 
         problem = Problem(
             problem_id="convergence_test",
@@ -506,9 +525,11 @@ class TestStress:
         solution = swarm.solve(problem)
         assert solution is not None
 
+
 # =============================================================================
 # Additional Unit Tests
 # =============================================================================
+
 
 class TestSwarmIntelligence:
     """Additional tests for SwarmIntelligence."""
@@ -538,16 +559,14 @@ class TestSwarmIntelligence:
 
         # Check learning had effect
         stats = swarm.get_statistics()
-        assert stats['problems_solved'] >= 0
+        assert stats["problems_solved"] >= 0
 
     def test_collective_belief(self):
         """Test collective belief aggregation."""
         swarm = SwarmIntelligence(SwarmParams(n_agents=5))
 
         # Store some beliefs
-        swarm.collective_memory.store(
-            "agent1", "topic_test", np.ones(64), confidence=0.8
-        )
+        swarm.collective_memory.store("agent1", "topic_test", np.ones(64), confidence=0.8)
 
         belief = swarm.get_collective_belief("topic_test")
         assert len(belief) == 64
@@ -586,8 +605,9 @@ class TestSwarmIntelligence:
         swarm.reset()
 
         stats = swarm.get_statistics()
-        assert stats['step_count'] == 0
-        assert stats['problems_solved'] == 0
+        assert stats["step_count"] == 0
+        assert stats["problems_solved"] == 0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

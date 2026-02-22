@@ -19,6 +19,7 @@ Usage:
 
 try:
     from importlib.metadata import version as _pkg_version
+
     __version__ = _pkg_version("neuro-agi")
 except Exception:
     __version__ = "0.9.0"
@@ -29,54 +30,50 @@ _lazy_imports = {
     # Core (neuro.modules.system)
     "CognitiveCore": ("neuro.modules.system.cognitive_core", "CognitiveCore"),
     "SystemConfig": ("neuro.modules.system.config", "SystemConfig"),
-
     # Integration (neuro.modules.integrate)
     "SharedSpace": ("neuro.modules.integrate.shared_space", "SharedSpace"),
     "CrossModuleLearner": ("neuro.modules.integrate.cross_module_learning", "CrossModuleLearner"),
-
     # Global Workspace (neuro.modules.m00_integration)
     "GlobalWorkspace": ("neuro.modules.m00_integration.global_workspace", "GlobalWorkspace"),
-
     # LLM (neuro.modules.llm)
     "LLMOracle": ("neuro.modules.llm.llm_interface", "LLMOracle"),
-
     # Knowledge (neuro.modules.knowledge)
     "KnowledgeBase": ("neuro.modules.knowledge.knowledge_graph", "KnowledgeGraph"),
-
     # Causal (neuro.modules.causal)
     "DifferentiableSCM": ("neuro.modules.causal.differentiable_scm", "DifferentiableSCM"),
     "CausalDiscovery": ("neuro.modules.causal.causal_discovery", "CausalDiscovery"),
-
     # Abstract (neuro.modules.abstract)
     "SymbolicBinder": ("neuro.modules.abstract.symbolic_binder", "SymbolicBinder"),
     "ProgramSynthesizer": ("neuro.modules.abstract.program_synthesis", "ProgramSynthesizer"),
-
     # Robust (neuro.modules.robust)
     "UncertaintyQuantifier": ("neuro.modules.robust.uncertainty", "UncertaintyQuantifier"),
     "OODDetector": ("neuro.modules.robust.ood_detection", "OODDetector"),
-
     # Planning (neuro.modules.planning)
     "HierarchicalMCTS": ("neuro.modules.planning.planning_search", "HierarchicalMCTS"),
     "MAXQDecomposition": ("neuro.modules.planning.goal_hierarchy", "MAXQDecomposition"),
-
     # Credit (neuro.modules.credit)
-    "EligibilityTraceManager": ("neuro.modules.credit.eligibility_traces", "EligibilityTraceManager"),
-    "ContributionAccountant": ("neuro.modules.credit.contribution_accounting", "ContributionAccountant"),
-
+    "EligibilityTraceManager": (
+        "neuro.modules.credit.eligibility_traces",
+        "EligibilityTraceManager",
+    ),
+    "ContributionAccountant": (
+        "neuro.modules.credit.contribution_accounting",
+        "ContributionAccountant",
+    ),
     # Continual (neuro.modules.continual)
     "TaskInference": ("neuro.modules.continual.task_inference", "TaskInference"),
-    "CatastrophicForgettingPrevention": ("neuro.modules.continual.forgetting_prevention", "CatastrophicForgettingPrevention"),
-
+    "CatastrophicForgettingPrevention": (
+        "neuro.modules.continual.forgetting_prevention",
+        "CatastrophicForgettingPrevention",
+    ),
     # Meta-reasoning (neuro.modules.meta_reasoning)
     "ProblemClassifier": ("neuro.modules.meta_reasoning.problem_classifier", "ProblemClassifier"),
     "StyleSelector": ("neuro.modules.meta_reasoning.style_selector", "StyleSelector"),
     "DynamicOrchestrator": ("neuro.modules.meta_reasoning.orchestrator", "DynamicOrchestrator"),
     "FallacyDetector": ("neuro.modules.meta_reasoning.fallacy_detector", "FallacyDetector"),
-
     # Smart Wrapper (neuro.wrapper)
     "SmartWrapper": ("neuro.wrapper", "SmartWrapper"),
     "smart_query": ("neuro.wrapper", "smart_query"),
-
     # Brain API (neuro.brain)
     "Brain": ("neuro.brain", "Brain"),
     "think": ("neuro.brain", "think"),
@@ -89,6 +86,7 @@ def __getattr__(name: str):
         module_name, class_name = _lazy_imports[name]
         try:
             import importlib
+
             module = importlib.import_module(module_name)
             return getattr(module, class_name)
         except (ImportError, AttributeError) as e:

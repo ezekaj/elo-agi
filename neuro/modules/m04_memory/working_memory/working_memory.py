@@ -16,6 +16,7 @@ import hashlib
 @dataclass
 class MemorySlot:
     """Single item in working memory"""
+
     content: Any
     timestamp: float
     last_rehearsal: float
@@ -31,6 +32,7 @@ class MemorySlot:
 
 class Chunk:
     """A chunk combining multiple items into one slot"""
+
     def __init__(self, items: List[Any], label: Optional[str] = None):
         self.items = items
         self.label = label or f"chunk_{len(items)}"
@@ -50,12 +52,7 @@ class WorkingMemory:
     Supports chunking to increase effective capacity.
     """
 
-    def __init__(
-        self,
-        capacity: int = 7,
-        decay_time: float = 30.0,
-        decay_rate: float = 0.1
-    ):
+    def __init__(self, capacity: int = 7, decay_time: float = 30.0, decay_rate: float = 0.1):
         """
         Initialize working memory.
 
@@ -93,10 +90,7 @@ class WorkingMemory:
 
         # Create new slot
         new_slot = MemorySlot(
-            content=item,
-            timestamp=current_time,
-            last_rehearsal=current_time,
-            activation=1.0
+            content=item, timestamp=current_time, last_rehearsal=current_time, activation=1.0
         )
 
         # If at capacity, remove lowest activation
@@ -112,6 +106,7 @@ class WorkingMemory:
         """Check if two items are equal (handles numpy arrays)"""
         try:
             import numpy as np
+
             if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
                 if isinstance(a, np.ndarray) and isinstance(b, np.ndarray):
                     return bool(np.array_equal(a, b))
@@ -121,8 +116,9 @@ class WorkingMemory:
         try:
             result = a == b
             # Handle case where comparison returns array
-            if hasattr(result, '__iter__') and not isinstance(result, (str, bytes)):
+            if hasattr(result, "__iter__") and not isinstance(result, (str, bytes)):
                 import numpy as np
+
                 return bool(np.all(result))
             return bool(result)
         except Exception:

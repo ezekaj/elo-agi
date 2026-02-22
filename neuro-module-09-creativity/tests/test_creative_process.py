@@ -7,6 +7,7 @@ import numpy as np
 from neuro.modules.m09_creativity.creative_process import CreativeProcess, Idea, CreativeOutput
 from neuro.modules.m09_creativity.networks.salience_network import NetworkState
 
+
 class TestCreativeProcess:
     """Tests for Creative Process"""
 
@@ -52,10 +53,7 @@ class TestCreativeProcess:
         cp.create_associations(associations)
 
         # Check associations list contains the association
-        assoc_found = any(
-            a.source_id == "A" and a.target_id == "B"
-            for a in cp.dmn.associations
-        )
+        assoc_found = any(a.source_id == "A" and a.target_id == "B" for a in cp.dmn.associations)
         assert assoc_found
 
     def test_set_creative_goal(self):
@@ -63,9 +61,7 @@ class TestCreativeProcess:
         cp = CreativeProcess()
 
         cp.set_creative_goal(
-            "compose_music",
-            "Compose a new musical piece",
-            constraints=["must be melodic"]
+            "compose_music", "Compose a new musical piece", constraints=["must be melodic"]
         )
 
         assert cp.ecn.current_goal is not None
@@ -81,10 +77,12 @@ class TestCreativeProcess:
             ("bird", "Flying creature", {"motion": 0.7, "nature": 0.8}),
         ]
         cp.setup_knowledge(concepts)
-        cp.create_associations([
-            ("sky", "sea", 0.6, "visual"),
-            ("sky", "bird", 0.8, "location"),
-        ])
+        cp.create_associations(
+            [
+                ("sky", "sea", 0.6, "visual"),
+                ("sky", "bird", 0.8, "location"),
+            ]
+        )
 
         ideas = cp.generate_ideas(num_ideas=3, seed_concepts=["sky"])
 
@@ -166,16 +164,18 @@ class TestCreativeProcess:
             ("disruption", "Change", {"dynamic": 0.8}),
         ]
         cp.setup_knowledge(concepts)
-        cp.create_associations([
-            ("nature", "harmony", 0.8, "concept"),
-            ("technology", "disruption", 0.7, "concept"),
-            ("nature", "technology", 0.4, "contrast"),  # Distant connection
-        ])
+        cp.create_associations(
+            [
+                ("nature", "harmony", 0.8, "concept"),
+                ("technology", "disruption", 0.7, "concept"),
+                ("nature", "technology", 0.4, "contrast"),  # Distant connection
+            ]
+        )
 
         output = cp.creative_session(
             goal="Blend nature and technology",
             duration_seconds=2.0,  # Short for testing
-            target_good_ideas=2
+            target_good_ideas=2,
         )
 
         assert isinstance(output, CreativeOutput)
@@ -194,10 +194,12 @@ class TestCreativeProcess:
             ("fantasy", "Imagination", {"creative": 0.9}),
         ]
         cp.setup_knowledge(concepts)
-        cp.create_associations([
-            ("dream", "memory", 0.7, "cognitive"),
-            ("dream", "fantasy", 0.8, "imaginative"),
-        ])
+        cp.create_associations(
+            [
+                ("dream", "memory", 0.7, "cognitive"),
+                ("dream", "fantasy", 0.8, "imaginative"),
+            ]
+        )
 
         ideas = cp.mind_wander_for_ideas(duration_steps=5)
 
@@ -216,11 +218,13 @@ class TestCreativeProcess:
             ("end", "Ending", {"d": 0.4}),
         ]
         cp.setup_knowledge(concepts)
-        cp.create_associations([
-            ("start", "middle1", 0.9, "chain"),
-            ("middle1", "middle2", 0.8, "chain"),
-            ("middle2", "end", 0.7, "chain"),
-        ])
+        cp.create_associations(
+            [
+                ("start", "middle1", 0.9, "chain"),
+                ("middle1", "middle2", 0.8, "chain"),
+                ("middle2", "end", 0.7, "chain"),
+            ]
+        )
 
         distant = cp.find_distant_connections("start", max_results=5)
 
@@ -305,6 +309,7 @@ class TestCreativeProcess:
 
         # Tactile imagery should provide semantic associations
 
+
 class TestCreativeOutput:
     """Tests for Creative Output dataclass"""
 
@@ -316,7 +321,7 @@ class TestCreativeOutput:
                 content="Test content",
                 source_concepts=["a", "b"],
                 novelty=0.7,
-                coherence=0.8
+                coherence=0.8,
             )
         ]
 
@@ -326,7 +331,7 @@ class TestCreativeOutput:
             total_evaluated=8,
             process_duration=5.0,
             network_reconfigurations=3,
-            creativity_score=0.75
+            creativity_score=0.75,
         )
 
         assert len(output.best_ideas) == 1
@@ -335,6 +340,7 @@ class TestCreativeOutput:
         assert output.process_duration == 5.0
         assert output.network_reconfigurations == 3
         assert output.creativity_score == 0.75
+
 
 class TestIdea:
     """Tests for Idea dataclass"""
@@ -346,7 +352,7 @@ class TestIdea:
             content="Combining X with Y",
             source_concepts=["X", "Y"],
             novelty=0.6,
-            coherence=0.8
+            coherence=0.8,
         )
 
         assert idea.id == "idea_1"
@@ -355,6 +361,7 @@ class TestIdea:
         assert idea.imagery is None
         assert idea.evaluation is None
         assert len(idea.refinements) == 0
+
 
 class TestCreativeProcessIntegration:
     """Integration tests for creative process"""
@@ -394,15 +401,12 @@ class TestCreativeProcessIntegration:
 
         # 3. Set goal
         cp.set_creative_goal(
-            "synesthetic_art",
-            "Create art that bridges multiple sensory modalities"
+            "synesthetic_art", "Create art that bridges multiple sensory modalities"
         )
 
         # 4. Run creative session
         output = cp.creative_session(
-            goal="Create synesthetic artwork",
-            duration_seconds=3.0,
-            target_good_ideas=2
+            goal="Create synesthetic artwork", duration_seconds=3.0, target_good_ideas=2
         )
 
         # 5. Verify output
@@ -468,11 +472,7 @@ class TestCreativeProcessIntegration:
         initial_reconfig = initial_activity.reconfiguration_level
 
         # Run creative session
-        cp.creative_session(
-            goal="Be creative",
-            duration_seconds=2.0,
-            target_good_ideas=2
-        )
+        cp.creative_session(goal="Be creative", duration_seconds=2.0, target_good_ideas=2)
 
         final_activity = cp.salience.get_network_activity()
         final_reconfig = final_activity.reconfiguration_level

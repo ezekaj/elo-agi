@@ -14,6 +14,7 @@ from collections import Counter
 @dataclass
 class Observation:
     """A single observation/instance"""
+
     observation_id: str
     features: Dict[str, Any]
     label: Optional[Any] = None
@@ -24,6 +25,7 @@ class Observation:
 @dataclass
 class Hypothesis:
     """A general hypothesis induced from observations"""
+
     hypothesis_id: str
     description: str
     predicate: Callable[[Dict[str, Any]], bool]
@@ -40,9 +42,7 @@ class Hypothesis:
         except Exception:
             return False
 
-    def update_confidence(self,
-                          is_supporting: bool,
-                          observation_id: str):
+    def update_confidence(self, is_supporting: bool, observation_id: str):
         """Update confidence based on new evidence"""
         self.n_observations += 1
 
@@ -67,9 +67,7 @@ class InductiveReasoner:
     "All observed swans are white" → "All swans are white"
     """
 
-    def __init__(self,
-                 confidence_threshold: float = 0.7,
-                 min_observations: int = 3):
+    def __init__(self, confidence_threshold: float = 0.7, min_observations: int = 3):
         self.observations: Dict[str, Observation] = {}
         self.hypotheses: Dict[str, Hypothesis] = {}
         self.confidence_threshold = confidence_threshold
@@ -88,15 +86,14 @@ class InductiveReasoner:
         for obs in observations:
             self.observe(obs)
 
-    def hypothesize(self,
-                    observation_ids: List[str] = None
-                    ) -> List[Hypothesis]:
+    def hypothesize(self, observation_ids: List[str] = None) -> List[Hypothesis]:
         """Form hypotheses from observations"""
         if observation_ids is None:
             observations = list(self.observations.values())
         else:
-            observations = [self.observations[oid] for oid in observation_ids
-                          if oid in self.observations]
+            observations = [
+                self.observations[oid] for oid in observation_ids if oid in self.observations
+            ]
 
         if len(observations) < self.min_observations:
             return []
@@ -121,9 +118,7 @@ class InductiveReasoner:
 
         return new_hypotheses
 
-    def _find_common_features(self,
-                              observations: List[Observation]
-                              ) -> Dict[str, Any]:
+    def _find_common_features(self, observations: List[Observation]) -> Dict[str, Any]:
         """Find features that are constant across all observations"""
         if not observations:
             return {}
@@ -133,18 +128,16 @@ class InductiveReasoner:
 
         for key, value in first_features.items():
             is_common = all(
-                key in obs.features and obs.features[key] == value
-                for obs in observations
+                key in obs.features and obs.features[key] == value for obs in observations
             )
             if is_common:
                 common[key] = value
 
         return common
 
-    def _find_correlations(self,
-                           observations: List[Observation],
-                           min_correlation: float = 0.8
-                           ) -> List[Tuple[Tuple[str, Any], Tuple[str, Any], float]]:
+    def _find_correlations(
+        self, observations: List[Observation], min_correlation: float = 0.8
+    ) -> List[Tuple[Tuple[str, Any], Tuple[str, Any], float]]:
         """Find correlated features across observations"""
         correlations = []
 
@@ -159,7 +152,7 @@ class InductiveReasoner:
 
         features = list(all_features)
         for i, feat1 in enumerate(features):
-            for feat2 in features[i+1:]:
+            for feat2 in features[i + 1 :]:
                 co_occurrence = Counter()
                 total = 0
 
@@ -173,25 +166,20 @@ class InductiveReasoner:
                     for (v1, v2), count in co_occurrence.most_common(1):
                         correlation = count / total
                         if correlation >= min_correlation:
-                            correlations.append(
-                                ((feat1, v1), (feat2, v2), correlation)
-                            )
+                            correlations.append(((feat1, v1), (feat2, v2), correlation))
 
         return correlations
 
-    def _create_hypothesis(self,
-                           feature: str,
-                           value: Any,
-                           observations: List[Observation]
-                           ) -> Optional[Hypothesis]:
+    def _create_hypothesis(
+        self, feature: str, value: Any, observations: List[Observation]
+    ) -> Optional[Hypothesis]:
         """Create a hypothesis about a single feature"""
         hyp_id = f"hyp_{feature}_{value}"
 
         def predicate(features: Dict[str, Any]) -> bool:
             return features.get(feature) == value
 
-        supporting = [obs.observation_id for obs in observations
-                     if predicate(obs.features)]
+        supporting = [obs.observation_id for obs in observations if predicate(obs.features)]
 
         if len(supporting) < self.min_observations:
             return None
@@ -203,15 +191,18 @@ class InductiveReasoner:
             confidence=len(supporting) / len(observations),
             supporting_observations=supporting,
             n_observations=len(observations),
-            created_from_features={feature: value}
+            created_from_features={feature: value},
         )
 
-    def _create_correlation_hypothesis(self,
-                                        feat1: str, val1: Any,
-                                        feat2: str, val2: Any,
-                                        correlation: float,
-                                        observations: List[Observation]
-                                        ) -> Optional[Hypothesis]:
+    def _create_correlation_hypothesis(
+        self,
+        feat1: str,
+        val1: Any,
+        feat2: str,
+        val2: Any,
+        correlation: float,
+        observations: List[Observation],
+    ) -> Optional[Hypothesis]:
         """Create a hypothesis about correlation between features"""
         hyp_id = f"hyp_corr_{feat1}_{val1}_{feat2}_{val2}"
 
@@ -220,8 +211,7 @@ class InductiveReasoner:
                 return features.get(feat2) == val2
             return True
 
-        supporting = [obs.observation_id for obs in observations
-                     if predicate(obs.features)]
+        supporting = [obs.observation_id for obs in observations if predicate(obs.features)]
 
         return Hypothesis(
             hypothesis_id=hyp_id,
@@ -230,13 +220,10 @@ class InductiveReasoner:
             confidence=correlation,
             supporting_observations=supporting,
             n_observations=len(observations),
-            created_from_features={feat1: val1, feat2: val2}
+            created_from_features={feat1: val1, feat2: val2},
         )
 
-    def confidence(self,
-                   hypothesis_id: str,
-                   n_observations: int = None
-                   ) -> float:
+    def confidence(self, hypothesis_id: str, n_observations: int = None) -> float:
         """Get confidence in a hypothesis"""
         if hypothesis_id not in self.hypotheses:
             return 0.0
@@ -248,10 +235,9 @@ class InductiveReasoner:
 
         return hyp.confidence
 
-    def counterexample_search(self,
-                              hypothesis_id: str,
-                              candidates: List[Observation] = None
-                              ) -> List[Observation]:
+    def counterexample_search(
+        self, hypothesis_id: str, candidates: List[Observation] = None
+    ) -> List[Observation]:
         """Search for counterexamples to a hypothesis"""
         if hypothesis_id not in self.hypotheses:
             return []
@@ -269,33 +255,35 @@ class InductiveReasoner:
 
         return counterexamples
 
-    def get_best_hypotheses(self,
-                            min_confidence: float = None
-                            ) -> List[Hypothesis]:
+    def get_best_hypotheses(self, min_confidence: float = None) -> List[Hypothesis]:
         """Get hypotheses sorted by confidence"""
         threshold = min_confidence or self.confidence_threshold
 
-        valid = [h for h in self.hypotheses.values()
-                if h.confidence >= threshold and not h.is_refuted]
+        valid = [
+            h for h in self.hypotheses.values() if h.confidence >= threshold and not h.is_refuted
+        ]
 
         return sorted(valid, key=lambda h: h.confidence, reverse=True)
 
-    def generalize(self,
-                   observation_ids: List[str],
-                   target_feature: str
-                   ) -> Optional[Tuple[Any, float]]:
+    def generalize(
+        self, observation_ids: List[str], target_feature: str
+    ) -> Optional[Tuple[Any, float]]:
         """
         Predict the value of target_feature for new instances
         based on generalization from observations.
         """
-        observations = [self.observations[oid] for oid in observation_ids
-                       if oid in self.observations]
+        observations = [
+            self.observations[oid] for oid in observation_ids if oid in self.observations
+        ]
 
         if not observations:
             return None
 
-        values = [obs.features.get(target_feature) for obs in observations
-                 if target_feature in obs.features]
+        values = [
+            obs.features.get(target_feature)
+            for obs in observations
+            if target_feature in obs.features
+        ]
 
         if not values:
             return None

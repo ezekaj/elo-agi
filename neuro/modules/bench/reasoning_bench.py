@@ -18,6 +18,7 @@ from .base_benchmark import Benchmark, BenchmarkConfig
 @dataclass
 class ReasoningConfig(BenchmarkConfig):
     """Configuration for reasoning benchmarks."""
+
     grid_size: int = 5
     max_patterns: int = 3
     include_transforms: List[str] = field(
@@ -65,7 +66,7 @@ class PatternCompletion(ReasoningBenchmark):
         grid_size = self.reasoning_config.grid_size
 
         # Choose a transformation rule
-        rule = self._rng.choice(['fill', 'extend', 'mirror', 'color_map'])
+        rule = self._rng.choice(["fill", "extend", "mirror", "color_map"])
 
         # Generate examples
         n_examples = self._rng.integers(2, 4)
@@ -74,16 +75,16 @@ class PatternCompletion(ReasoningBenchmark):
         for _ in range(n_examples):
             input_grid = self._generate_grid(grid_size)
             output_grid = self._apply_rule(input_grid, rule)
-            examples.append({'input': input_grid, 'output': output_grid})
+            examples.append({"input": input_grid, "output": output_grid})
 
         # Generate test case
         test_input = self._generate_grid(grid_size)
         expected_output = self._apply_rule(test_input, rule)
 
         trial_data = {
-            'examples': examples,
-            'test_input': test_input,
-            'rule': rule,  # For debugging
+            "examples": examples,
+            "test_input": test_input,
+            "rule": rule,  # For debugging
         }
 
         return trial_data, expected_output
@@ -118,18 +119,18 @@ class PatternCompletion(ReasoningBenchmark):
         # Simple patterns: shapes, lines, etc.
         grid = np.zeros((size, size), dtype=np.int32)
 
-        pattern_type = self._rng.choice(['square', 'line', 'diagonal', 'scatter'])
+        pattern_type = self._rng.choice(["square", "line", "diagonal", "scatter"])
 
-        if pattern_type == 'square':
+        if pattern_type == "square":
             # Random filled square
             x = self._rng.integers(0, size - 2)
             y = self._rng.integers(0, size - 2)
             w = self._rng.integers(1, min(3, size - x))
             h = self._rng.integers(1, min(3, size - y))
             color = self._rng.integers(1, 5)
-            grid[y:y+h, x:x+w] = color
+            grid[y : y + h, x : x + w] = color
 
-        elif pattern_type == 'line':
+        elif pattern_type == "line":
             # Horizontal or vertical line
             if self._rng.random() > 0.5:
                 row = self._rng.integers(0, size)
@@ -140,7 +141,7 @@ class PatternCompletion(ReasoningBenchmark):
                 color = self._rng.integers(1, 5)
                 grid[:, col] = color
 
-        elif pattern_type == 'diagonal':
+        elif pattern_type == "diagonal":
             color = self._rng.integers(1, 5)
             for i in range(size):
                 grid[i, i] = color
@@ -157,7 +158,7 @@ class PatternCompletion(ReasoningBenchmark):
 
     def _apply_rule(self, grid: np.ndarray, rule: str) -> np.ndarray:
         """Apply a transformation rule to the grid."""
-        if rule == 'fill':
+        if rule == "fill":
             # Fill background with most common non-zero color
             non_zero = grid[grid > 0]
             if len(non_zero) > 0:
@@ -167,7 +168,7 @@ class PatternCompletion(ReasoningBenchmark):
                 return result
             return grid.copy()
 
-        elif rule == 'extend':
+        elif rule == "extend":
             # Extend patterns to edges
             result = grid.copy()
             for i in range(grid.shape[0]):
@@ -178,11 +179,11 @@ class PatternCompletion(ReasoningBenchmark):
                     result[i, :] = color
             return result
 
-        elif rule == 'mirror':
+        elif rule == "mirror":
             # Mirror horizontally
             return np.fliplr(grid)
 
-        elif rule == 'color_map':
+        elif rule == "color_map":
             # Map colors: 1->2, 2->3, etc.
             result = grid.copy()
             result[result > 0] = (result[result > 0] % 4) + 1
@@ -214,7 +215,7 @@ class AnalogySolving(ReasoningBenchmark):
         A = self._generate_shape(size)
 
         # Choose transformation
-        transform = self._rng.choice(['rotate90', 'double', 'invert', 'shift'])
+        transform = self._rng.choice(["rotate90", "double", "invert", "shift"])
         B = self._apply_transform(A, transform)
 
         # Generate C
@@ -224,10 +225,10 @@ class AnalogySolving(ReasoningBenchmark):
         D = self._apply_transform(C, transform)
 
         trial_data = {
-            'A': A,
-            'B': B,
-            'C': C,
-            'transform': transform,
+            "A": A,
+            "B": B,
+            "C": C,
+            "transform": transform,
         }
 
         return trial_data, D
@@ -258,48 +259,48 @@ class AnalogySolving(ReasoningBenchmark):
         """Generate a simple shape."""
         grid = np.zeros((size, size), dtype=np.int32)
 
-        shape = self._rng.choice(['cross', 'L', 'T', 'square'])
+        shape = self._rng.choice(["cross", "L", "T", "square"])
         color = self._rng.integers(1, 5)
         center = size // 2
 
-        if shape == 'cross':
+        if shape == "cross":
             grid[center, :] = color
             grid[:, center] = color
 
-        elif shape == 'L':
+        elif shape == "L":
             grid[center:, center] = color
             grid[-1, center:] = color
 
-        elif shape == 'T':
+        elif shape == "T":
             grid[0, :] = color
             grid[:, center] = color
 
-        elif shape == 'square':
+        elif shape == "square":
             grid[1:-1, 1:-1] = color
 
         return grid
 
     def _apply_transform(self, grid: np.ndarray, transform: str) -> np.ndarray:
         """Apply transformation to grid."""
-        if transform == 'rotate90':
+        if transform == "rotate90":
             return np.rot90(grid)
 
-        elif transform == 'double':
+        elif transform == "double":
             # Double the size (simple upscale)
             result = np.zeros((grid.shape[0], grid.shape[1]), dtype=np.int32)
             for i in range(grid.shape[0] // 2):
                 for j in range(grid.shape[1] // 2):
-                    val = grid[i*2, j*2]
+                    val = grid[i * 2, j * 2]
                     result[i, j] = val
             return result
 
-        elif transform == 'invert':
+        elif transform == "invert":
             result = grid.copy()
             max_val = grid.max()
             result[result > 0] = max_val - result[result > 0] + 1
             return result
 
-        elif transform == 'shift':
+        elif transform == "shift":
             return np.roll(grid, 1, axis=1)
 
         return grid.copy()
@@ -324,53 +325,53 @@ class LogicalInference(ReasoningBenchmark):
     def generate_trial(self, trial_id: int) -> Tuple[Dict[str, Any], bool]:
         """Generate a logical inference trial."""
         # Simple propositional logic
-        problem_type = self._rng.choice(['modus_ponens', 'modus_tollens', 'syllogism', 'invalid'])
+        problem_type = self._rng.choice(["modus_ponens", "modus_tollens", "syllogism", "invalid"])
 
-        if problem_type == 'modus_ponens':
+        if problem_type == "modus_ponens":
             # If P then Q. P. Therefore Q.
             trial_data = {
-                'premises': [
-                    'If it rains, the ground is wet.',
-                    'It is raining.',
+                "premises": [
+                    "If it rains, the ground is wet.",
+                    "It is raining.",
                 ],
-                'conclusion': 'The ground is wet.',
-                'type': problem_type,
+                "conclusion": "The ground is wet.",
+                "type": problem_type,
             }
             expected = True
 
-        elif problem_type == 'modus_tollens':
+        elif problem_type == "modus_tollens":
             # If P then Q. Not Q. Therefore not P.
             trial_data = {
-                'premises': [
-                    'If it rains, the ground is wet.',
-                    'The ground is not wet.',
+                "premises": [
+                    "If it rains, the ground is wet.",
+                    "The ground is not wet.",
                 ],
-                'conclusion': 'It is not raining.',
-                'type': problem_type,
+                "conclusion": "It is not raining.",
+                "type": problem_type,
             }
             expected = True
 
-        elif problem_type == 'syllogism':
+        elif problem_type == "syllogism":
             # All A are B. All B are C. Therefore all A are C.
             trial_data = {
-                'premises': [
-                    'All dogs are mammals.',
-                    'All mammals are animals.',
+                "premises": [
+                    "All dogs are mammals.",
+                    "All mammals are animals.",
                 ],
-                'conclusion': 'All dogs are animals.',
-                'type': problem_type,
+                "conclusion": "All dogs are animals.",
+                "type": problem_type,
             }
             expected = True
 
         else:  # invalid
             # Invalid inference
             trial_data = {
-                'premises': [
-                    'If it rains, the ground is wet.',
-                    'The ground is wet.',
+                "premises": [
+                    "If it rains, the ground is wet.",
+                    "The ground is wet.",
                 ],
-                'conclusion': 'It is raining.',  # Affirming the consequent (invalid)
-                'type': problem_type,
+                "conclusion": "It is raining.",  # Affirming the consequent (invalid)
+                "type": problem_type,
             }
             expected = False
 
@@ -386,7 +387,7 @@ class LogicalInference(ReasoningBenchmark):
             if isinstance(actual, (bool, np.bool_)):
                 actual_bool = bool(actual)
             elif isinstance(actual, str):
-                actual_bool = actual.lower() in ['true', 'yes', 'valid', '1']
+                actual_bool = actual.lower() in ["true", "yes", "valid", "1"]
             elif isinstance(actual, (int, float)):
                 actual_bool = actual > 0.5
             else:

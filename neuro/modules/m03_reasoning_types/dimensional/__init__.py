@@ -5,7 +5,10 @@ from .temporal_reasoning import TemporalReasoner, SequenceMemory
 from .hierarchical_reasoning import HierarchicalReasoner, RuleHierarchy
 
 __all__ = [
-    'SpatialReasoner', 'SpatialRelations',
-    'TemporalReasoner', 'SequenceMemory',
-    'HierarchicalReasoner', 'RuleHierarchy'
+    "SpatialReasoner",
+    "SpatialRelations",
+    "TemporalReasoner",
+    "SequenceMemory",
+    "HierarchicalReasoner",
+    "RuleHierarchy",
 ]

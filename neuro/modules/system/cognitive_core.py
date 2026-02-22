@@ -29,6 +29,7 @@ from .active_inference import ActiveInferenceController, Policy
 @dataclass
 class CognitiveState:
     """Current state of the cognitive system."""
+
     cycle_count: int = 0
     last_input: Optional[np.ndarray] = None
     last_output: Optional[np.ndarray] = None
@@ -41,6 +42,7 @@ class CognitiveState:
 @dataclass
 class CycleResult:
     """Result of a single cognitive cycle."""
+
     cycle_id: int
     input_processed: bool
     proposals_generated: int
@@ -127,7 +129,7 @@ class CognitiveCore:
             return
 
         # Check if workspace has register method
-        if hasattr(self._global_workspace, 'register_module'):
+        if hasattr(self._global_workspace, "register_module"):
             for module_id, module in self._modules.items():
                 if module_id != "00":  # Don't register workspace with itself
                     try:
@@ -162,7 +164,7 @@ class CognitiveCore:
 
         # Feed to predictive coding module if available
         pred_coding = self.loader.get_module("01")
-        if pred_coding is not None and hasattr(pred_coding, 'process_input'):
+        if pred_coding is not None and hasattr(pred_coding, "process_input"):
             try:
                 pred_coding.process_input(sensory_input.processed)
             except Exception:
@@ -199,12 +201,12 @@ class CognitiveCore:
         # Run global workspace cycle if available
         if self._global_workspace is not None:
             try:
-                if hasattr(self._global_workspace, 'step'):
+                if hasattr(self._global_workspace, "step"):
                     result = self._global_workspace.step(current_input)
-                    if hasattr(result, 'n_proposals'):
+                    if hasattr(result, "n_proposals"):
                         proposals_count = result.n_proposals
                     self.state.workspace_contents = []
-                    if hasattr(result, 'winning_proposal') and result.winning_proposal:
+                    if hasattr(result, "winning_proposal") and result.winning_proposal:
                         self.state.workspace_contents.append(result.winning_proposal)
             except Exception as e:
                 self._errors.append(f"Workspace error: {e}")
@@ -212,7 +214,7 @@ class CognitiveCore:
         # If no workspace, collect proposals directly from modules
         if proposals_count == 0:
             for module_id, module in self._modules.items():
-                if hasattr(module, 'propose'):
+                if hasattr(module, "propose"):
                     try:
                         proposals = module.propose(current_input)
                         if proposals:
@@ -223,16 +225,16 @@ class CognitiveCore:
         # Update world model
         if self._world_model is not None:
             try:
-                if hasattr(self._world_model, 'update'):
+                if hasattr(self._world_model, "update"):
                     self._world_model.update(current_input)
-                elif hasattr(self._world_model, 'step'):
+                elif hasattr(self._world_model, "step"):
                     self._world_model.step(current_input)
             except Exception as e:
                 self._errors.append(f"World model error: {e}")
 
         # Process internal module steps
         for module_id, module in self._modules.items():
-            if hasattr(module, 'process'):
+            if hasattr(module, "process"):
                 try:
                     module.process(dt)
                 except Exception:
@@ -275,7 +277,9 @@ class CognitiveCore:
 
         return output
 
-    def run(self, steps: int = 100, input_generator: Optional[callable] = None) -> List[CycleResult]:
+    def run(
+        self, steps: int = 100, input_generator: Optional[callable] = None
+    ) -> List[CycleResult]:
         """
         Run the cognitive loop for multiple steps.
 
@@ -363,16 +367,16 @@ class CognitiveCore:
         controller_stats = self.controller.get_statistics()
 
         return {
-            'initialized': self._initialized,
-            'cycle_count': self._cycle_count,
-            'total_time': self._total_time,
-            'avg_cycle_time': self._total_time / max(1, self._cycle_count),
-            'error_count': len(self._errors),
-            'recent_errors': self._errors[-5:],
-            'loader': loader_stats,
-            'sensory': sensory_stats,
-            'motor': motor_stats,
-            'controller': controller_stats,
+            "initialized": self._initialized,
+            "cycle_count": self._cycle_count,
+            "total_time": self._total_time,
+            "avg_cycle_time": self._total_time / max(1, self._cycle_count),
+            "error_count": len(self._errors),
+            "recent_errors": self._errors[-5:],
+            "loader": loader_stats,
+            "sensory": sensory_stats,
+            "motor": motor_stats,
+            "controller": controller_stats,
         }
 
     def reset(self) -> None:
@@ -388,7 +392,7 @@ class CognitiveCore:
 
         # Reset modules
         for module in self._modules.values():
-            if hasattr(module, 'reset'):
+            if hasattr(module, "reset"):
                 try:
                     module.reset()
                 except Exception:

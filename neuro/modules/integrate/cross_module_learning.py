@@ -15,16 +15,18 @@ from .shared_space import SemanticEmbedding, ModalityType
 
 class SignalType(Enum):
     """Types of learning signals."""
-    ERROR = "error"           # Prediction error
-    REWARD = "reward"         # Reward signal
-    SURPRISE = "surprise"     # Information-theoretic surprise
-    RELEVANCE = "relevance"   # Task relevance
-    CONFLICT = "conflict"     # Conflict between modules
+
+    ERROR = "error"  # Prediction error
+    REWARD = "reward"  # Reward signal
+    SURPRISE = "surprise"  # Information-theoretic surprise
+    RELEVANCE = "relevance"  # Task relevance
+    CONFLICT = "conflict"  # Conflict between modules
 
 
 @dataclass
 class LearningSignal:
     """A learning signal that propagates between modules."""
+
     signal_type: SignalType
     source_module: str
     target_modules: List[str]
@@ -47,6 +49,7 @@ class ModuleSynapse:
 
     Enables credit assignment and gradient flow across modules.
     """
+
     source: str
     target: str
     weights: np.ndarray
@@ -71,9 +74,8 @@ class ModuleSynapse:
     ) -> None:
         """Update synaptic weights via Hebbian + reward modulation."""
         # Update eligibility trace
-        self.eligibility_trace = (
-            trace_decay * self.eligibility_trace +
-            np.outer(pre_activity, post_activity)
+        self.eligibility_trace = trace_decay * self.eligibility_trace + np.outer(
+            pre_activity, post_activity
         )
 
         # Apply learning with reward modulation
@@ -211,8 +213,7 @@ class GradientRouter:
 
         delta = learning_rate if success else -learning_rate
         self._influence[src_idx, tgt_idx] = np.clip(
-            self._influence[src_idx, tgt_idx] + delta,
-            0.0, 1.0
+            self._influence[src_idx, tgt_idx] + delta, 0.0, 1.0
         )
 
     def get_influence_matrix(self) -> Tuple[np.ndarray, List[str]]:
@@ -398,10 +399,7 @@ class CrossModuleLearner:
 
         # Blend transferred knowledge with existing weights
         if knowledge.shape == synapse.weights.shape:
-            synapse.weights = (
-                (1 - transfer_rate) * synapse.weights +
-                transfer_rate * knowledge
-            )
+            synapse.weights = (1 - transfer_rate) * synapse.weights + transfer_rate * knowledge
             return True
 
         return False

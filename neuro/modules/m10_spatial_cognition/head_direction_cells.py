@@ -16,6 +16,7 @@ from dataclasses import dataclass
 @dataclass
 class HeadDirectionTuning:
     """Tuning curve parameters for head direction cell"""
+
     preferred_direction: float  # Angle in radians (0 to 2*pi)
     tuning_width: float  # Concentration parameter (kappa) for von Mises
     peak_rate: float = 30.0  # Maximum firing rate (Hz)
@@ -30,15 +31,12 @@ class HeadDirectionCell:
     """
 
     def __init__(
-        self,
-        preferred_direction: float,
-        tuning_width: float = 2.0,
-        peak_rate: float = 30.0
+        self, preferred_direction: float, tuning_width: float = 2.0, peak_rate: float = 30.0
     ):
         self.tuning = HeadDirectionTuning(
             preferred_direction=preferred_direction % (2 * np.pi),
             tuning_width=tuning_width,
-            peak_rate=peak_rate
+            peak_rate=peak_rate,
         )
         self.firing_rate = 0.0
 
@@ -74,12 +72,7 @@ class HeadDirectionSystem:
     bump attractor dynamics, maintaining a stable heading estimate.
     """
 
-    def __init__(
-        self,
-        n_cells: int = 60,
-        tuning_width: float = 2.0,
-        peak_rate: float = 30.0
-    ):
+    def __init__(self, n_cells: int = 60, tuning_width: float = 2.0, peak_rate: float = 30.0):
         self.n_cells = n_cells
         self.tuning_width = tuning_width
         self.peak_rate = peak_rate
@@ -99,7 +92,7 @@ class HeadDirectionSystem:
             cell = HeadDirectionCell(
                 preferred_direction=preferred,
                 tuning_width=self.tuning_width,
-                peak_rate=self.peak_rate
+                peak_rate=self.peak_rate,
             )
             self.cells.append(cell)
 
@@ -155,10 +148,7 @@ class HeadDirectionSystem:
         """Get current heading in degrees"""
         return np.degrees(self._current_heading)
 
-    def get_tuning_curves(
-        self,
-        resolution: int = 360
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def get_tuning_curves(self, resolution: int = 360) -> Tuple[np.ndarray, np.ndarray]:
         """
         Get tuning curves for all cells.
 

@@ -23,7 +23,7 @@ from src.cognitive_manifold import (
     CognitiveManifold,
     DualProcess,
     AttractorLandscape,
-    FlowType
+    FlowType,
 )
 from src.precision_weighting import AdaptivePrecision
 from src.predictive_hierarchy import PredictiveHierarchy
@@ -37,10 +37,7 @@ def demo_belief_flow():
 
     # Create manifold with goal (optimal belief state)
     manifold = CognitiveManifold(
-        dim=2,
-        accuracy_weight=1.0,
-        parsimony_weight=0.1,
-        utility_weight=0.8
+        dim=2, accuracy_weight=1.0, parsimony_weight=0.1, utility_weight=0.8
     )
 
     # Set goal: where we want beliefs to converge
@@ -54,15 +51,12 @@ def demo_belief_flow():
     print(f"Goal belief: {goal}")
 
     # Flow toward optimal beliefs
-    trajectories = {
-        'gradient': [],
-        'natural': []
-    }
+    trajectories = {"gradient": [], "natural": []}
 
     # Standard gradient descent
     manifold.reset(np.array([-2.0, -1.0]))
     for _ in range(100):
-        trajectories['gradient'].append(manifold.state.position.copy())
+        trajectories["gradient"].append(manifold.state.position.copy())
         manifold.flow(dt=0.1, flow_type=FlowType.GRADIENT_DESCENT)
 
     # Natural gradient (metric-aware)
@@ -71,7 +65,7 @@ def demo_belief_flow():
     manifold.state.metric = np.array([[2.0, 0.0], [0.0, 0.5]])
     manifold.state._update_inverse_metric()
     for _ in range(100):
-        trajectories['natural'].append(manifold.state.position.copy())
+        trajectories["natural"].append(manifold.state.position.copy())
         manifold.flow(dt=0.1, flow_type=FlowType.NATURAL_GRADIENT)
 
     # Convert to arrays
@@ -86,13 +80,23 @@ def demo_belief_flow():
 
     # Trajectory plot
     ax = axes[0]
-    ax.plot(trajectories['gradient'][:, 0], trajectories['gradient'][:, 1],
-            'b-', label='Gradient Descent', linewidth=2)
-    ax.plot(trajectories['natural'][:, 0], trajectories['natural'][:, 1],
-            'r--', label='Natural Gradient', linewidth=2)
+    ax.plot(
+        trajectories["gradient"][:, 0],
+        trajectories["gradient"][:, 1],
+        "b-",
+        label="Gradient Descent",
+        linewidth=2,
+    )
+    ax.plot(
+        trajectories["natural"][:, 0],
+        trajectories["natural"][:, 1],
+        "r--",
+        label="Natural Gradient",
+        linewidth=2,
+    )
 
-    ax.plot(-2.0, -1.0, 'ko', markersize=12, label='Start')
-    ax.plot(goal[0], goal[1], 'g*', markersize=15, label='Goal')
+    ax.plot(-2.0, -1.0, "ko", markersize=12, label="Start")
+    ax.plot(goal[0], goal[1], "g*", markersize=15, label="Goal")
 
     # Draw potential contours
     x = np.linspace(-3, 4, 50)
@@ -102,14 +106,15 @@ def demo_belief_flow():
     for i in range(X.shape[0]):
         for j in range(X.shape[1]):
             state = np.array([X[i, j], Y[i, j]])
-            Z[i, j] = manifold.parsimony_weight * np.sum(state ** 2) + \
-                      manifold.utility_weight * np.sum((state - goal) ** 2)
+            Z[i, j] = manifold.parsimony_weight * np.sum(
+                state**2
+            ) + manifold.utility_weight * np.sum((state - goal) ** 2)
 
-    ax.contour(X, Y, Z, levels=20, alpha=0.3, cmap='viridis')
+    ax.contour(X, Y, Z, levels=20, alpha=0.3, cmap="viridis")
 
-    ax.set_xlabel('Belief Dimension 1')
-    ax.set_ylabel('Belief Dimension 2')
-    ax.set_title('Belief Trajectories on Cognitive Manifold')
+    ax.set_xlabel("Belief Dimension 1")
+    ax.set_ylabel("Belief Dimension 2")
+    ax.set_title("Belief Trajectories on Cognitive Manifold")
     ax.legend()
     ax.grid(True, alpha=0.3)
     ax.set_xlim(-3, 4)
@@ -122,23 +127,23 @@ def demo_belief_flow():
     pot_natural = []
 
     manifold.reset(np.array([-2.0, -1.0]))
-    for pos in trajectories['gradient']:
+    for pos in trajectories["gradient"]:
         pot_gradient.append(manifold.potential(pos))
 
     manifold.reset(np.array([-2.0, -1.0]))
-    for pos in trajectories['natural']:
+    for pos in trajectories["natural"]:
         pot_natural.append(manifold.potential(pos))
 
-    ax.plot(pot_gradient, 'b-', label='Gradient Descent', linewidth=2)
-    ax.plot(pot_natural, 'r--', label='Natural Gradient', linewidth=2)
-    ax.set_xlabel('Iteration')
-    ax.set_ylabel('Cognitive Potential')
-    ax.set_title('Potential Minimization (Thinking)')
+    ax.plot(pot_gradient, "b-", label="Gradient Descent", linewidth=2)
+    ax.plot(pot_natural, "r--", label="Natural Gradient", linewidth=2)
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Cognitive Potential")
+    ax.set_title("Potential Minimization (Thinking)")
     ax.legend()
     ax.grid(True)
 
     plt.tight_layout()
-    plt.savefig('belief_flow.png', dpi=150)
+    plt.savefig("belief_flow.png", dpi=150)
     print("\nFigure saved: belief_flow.png")
 
 
@@ -150,10 +155,7 @@ def demo_dual_process_emergence():
 
     # Create manifold
     manifold = CognitiveManifold(
-        dim=2,
-        parsimony_weight=1.0,
-        utility_weight=0.5,
-        accuracy_weight=0.0
+        dim=2, parsimony_weight=1.0, utility_weight=0.5, accuracy_weight=0.0
     )
 
     manifold.set_goal(np.array([0.0, 0.0]))
@@ -163,9 +165,9 @@ def demo_dual_process_emergence():
 
     # Test different starting positions
     scenarios = [
-        ('Far from equilibrium', np.array([5.0, 5.0])),
-        ('Near equilibrium', np.array([0.5, 0.5])),
-        ('Medium distance', np.array([2.0, 2.0]))
+        ("Far from equilibrium", np.array([5.0, 5.0])),
+        ("Near equilibrium", np.array([0.5, 0.5])),
+        ("Medium distance", np.array([2.0, 2.0])),
     ]
 
     results = {}
@@ -176,11 +178,11 @@ def demo_dual_process_emergence():
         s1_prop, s2_prop = dp.get_system_balance(systems)
 
         results[name] = {
-            'trajectory': manifold.get_trajectory(),
-            'systems': systems,
-            's1_prop': s1_prop,
-            's2_prop': s2_prop,
-            'start': start
+            "trajectory": manifold.get_trajectory(),
+            "systems": systems,
+            "s1_prop": s1_prop,
+            "s2_prop": s2_prop,
+            "start": start,
         }
 
         print(f"\n{name}:")
@@ -193,52 +195,53 @@ def demo_dual_process_emergence():
 
     # Trajectories colored by system
     ax = axes[0, 0]
-    colors = {'Far from equilibrium': 'blue',
-              'Near equilibrium': 'green',
-              'Medium distance': 'orange'}
+    colors = {
+        "Far from equilibrium": "blue",
+        "Near equilibrium": "green",
+        "Medium distance": "orange",
+    }
 
     for name, data in results.items():
-        traj = data['trajectory']
-        ax.plot(traj[:, 0], traj[:, 1], color=colors[name],
-                linewidth=2, label=name)
-        ax.plot(traj[0, 0], traj[0, 1], 'o', color=colors[name], markersize=10)
+        traj = data["trajectory"]
+        ax.plot(traj[:, 0], traj[:, 1], color=colors[name], linewidth=2, label=name)
+        ax.plot(traj[0, 0], traj[0, 1], "o", color=colors[name], markersize=10)
 
-    ax.plot(0, 0, 'k*', markersize=15, label='Goal')
-    ax.set_xlabel('Dimension 1')
-    ax.set_ylabel('Dimension 2')
-    ax.set_title('Thinking Trajectories')
+    ax.plot(0, 0, "k*", markersize=15, label="Goal")
+    ax.set_xlabel("Dimension 1")
+    ax.set_ylabel("Dimension 2")
+    ax.set_title("Thinking Trajectories")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     # System usage over time (far from equilibrium case)
     ax = axes[0, 1]
-    systems = results['Far from equilibrium']['systems']
-    ax.plot(systems, 'b-', linewidth=1.5)
-    ax.axhline(y=1.5, color='gray', linestyle='--', alpha=0.5)
-    ax.set_xlabel('Step')
-    ax.set_ylabel('System (1=Fast, 2=Slow)')
-    ax.set_title('System Switching: Far from Equilibrium')
+    systems = results["Far from equilibrium"]["systems"]
+    ax.plot(systems, "b-", linewidth=1.5)
+    ax.axhline(y=1.5, color="gray", linestyle="--", alpha=0.5)
+    ax.set_xlabel("Step")
+    ax.set_ylabel("System (1=Fast, 2=Slow)")
+    ax.set_title("System Switching: Far from Equilibrium")
     ax.set_yticks([1, 2])
-    ax.set_yticklabels(['System 1\n(Fast)', 'System 2\n(Slow)'])
+    ax.set_yticklabels(["System 1\n(Fast)", "System 2\n(Slow)"])
     ax.grid(True, alpha=0.3)
 
     # System proportions comparison
     ax = axes[1, 0]
     names = list(results.keys())
-    s1_props = [results[n]['s1_prop'] for n in names]
-    s2_props = [results[n]['s2_prop'] for n in names]
+    s1_props = [results[n]["s1_prop"] for n in names]
+    s2_props = [results[n]["s2_prop"] for n in names]
 
     x = np.arange(len(names))
     width = 0.35
 
-    bars1 = ax.bar(x - width/2, s1_props, width, label='System 1 (Fast)', color='coral')
-    bars2 = ax.bar(x + width/2, s2_props, width, label='System 2 (Slow)', color='steelblue')
+    bars1 = ax.bar(x - width / 2, s1_props, width, label="System 1 (Fast)", color="coral")
+    bars2 = ax.bar(x + width / 2, s2_props, width, label="System 2 (Slow)", color="steelblue")
 
-    ax.set_xlabel('Scenario')
-    ax.set_ylabel('Proportion')
-    ax.set_title('System Usage by Scenario')
+    ax.set_xlabel("Scenario")
+    ax.set_ylabel("Proportion")
+    ax.set_title("System Usage by Scenario")
     ax.set_xticks(x)
-    ax.set_xticklabels(['Far', 'Near', 'Medium'])
+    ax.set_xticklabels(["Far", "Near", "Medium"])
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -252,27 +255,45 @@ def demo_dual_process_emergence():
         gradients.append(np.linalg.norm(grad))
         manifold.flow(dt=0.1)
 
-    ax.plot(gradients, 'b-', linewidth=2)
-    ax.axhline(y=dp.fast_threshold, color='coral', linestyle='--',
-               label=f'Fast threshold ({dp.fast_threshold})')
-    ax.axhline(y=dp.slow_threshold, color='steelblue', linestyle='--',
-               label=f'Slow threshold ({dp.slow_threshold})')
+    ax.plot(gradients, "b-", linewidth=2)
+    ax.axhline(
+        y=dp.fast_threshold,
+        color="coral",
+        linestyle="--",
+        label=f"Fast threshold ({dp.fast_threshold})",
+    )
+    ax.axhline(
+        y=dp.slow_threshold,
+        color="steelblue",
+        linestyle="--",
+        label=f"Slow threshold ({dp.slow_threshold})",
+    )
 
-    ax.fill_between(range(len(gradients)),
-                    dp.fast_threshold, max(gradients) + 0.5,
-                    alpha=0.2, color='coral', label='System 1 region')
-    ax.fill_between(range(len(gradients)),
-                    0, dp.slow_threshold,
-                    alpha=0.2, color='steelblue', label='System 2 region')
+    ax.fill_between(
+        range(len(gradients)),
+        dp.fast_threshold,
+        max(gradients) + 0.5,
+        alpha=0.2,
+        color="coral",
+        label="System 1 region",
+    )
+    ax.fill_between(
+        range(len(gradients)),
+        0,
+        dp.slow_threshold,
+        alpha=0.2,
+        color="steelblue",
+        label="System 2 region",
+    )
 
-    ax.set_xlabel('Step')
-    ax.set_ylabel('Gradient Magnitude')
-    ax.set_title('System Selection by Gradient Steepness')
+    ax.set_xlabel("Step")
+    ax.set_ylabel("Gradient Magnitude")
+    ax.set_title("System Selection by Gradient Steepness")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('dual_process.png', dpi=150)
+    plt.savefig("dual_process.png", dpi=150)
     print("\nFigure saved: dual_process.png")
 
 
@@ -284,10 +305,7 @@ def demo_attractor_dynamics():
 
     # Create manifold
     manifold = CognitiveManifold(
-        dim=2,
-        parsimony_weight=0.01,
-        utility_weight=0.0,
-        accuracy_weight=0.0
+        dim=2, parsimony_weight=0.01, utility_weight=0.0, accuracy_weight=0.0
     )
 
     # Create attractor landscape with multiple belief attractors
@@ -295,9 +313,9 @@ def demo_attractor_dynamics():
 
     # Add attractors (stable beliefs)
     attractors = [
-        (np.array([-2.0, 0.0]), 1.5, 'Belief A'),
-        (np.array([2.0, 0.0]), 1.0, 'Belief B'),
-        (np.array([0.0, 2.0]), 0.8, 'Belief C')
+        (np.array([-2.0, 0.0]), 1.5, "Belief A"),
+        (np.array([2.0, 0.0]), 1.0, "Belief B"),
+        (np.array([0.0, 2.0]), 0.8, "Belief C"),
     ]
 
     for pos, strength, name in attractors:
@@ -312,7 +330,7 @@ def demo_attractor_dynamics():
         np.array([-1.0, 0.5]),
         np.array([1.0, 0.5]),
         np.array([0.0, 1.5]),
-        np.array([0.0, -0.5])
+        np.array([0.0, -0.5]),
     ]
 
     trajectories = []
@@ -343,25 +361,23 @@ def demo_attractor_dynamics():
             state = np.array([X[i, j], Y[i, j]])
             Z[i, j] = landscape.attractor_potential(state)
 
-    contour = ax.contourf(X, Y, Z, levels=30, cmap='RdYlBu_r', alpha=0.7)
-    plt.colorbar(contour, ax=ax, label='Potential')
+    contour = ax.contourf(X, Y, Z, levels=30, cmap="RdYlBu_r", alpha=0.7)
+    plt.colorbar(contour, ax=ax, label="Potential")
 
     # Draw attractors
-    colors_attr = ['red', 'green', 'blue']
+    colors_attr = ["red", "green", "blue"]
     for i, (pos, strength, name) in enumerate(attractors):
-        ax.plot(pos[0], pos[1], 'o', color=colors_attr[i],
-                markersize=15 * strength, label=name)
+        ax.plot(pos[0], pos[1], "o", color=colors_attr[i], markersize=15 * strength, label=name)
 
     # Draw trajectories
-    traj_colors = ['purple', 'orange', 'cyan', 'magenta']
+    traj_colors = ["purple", "orange", "cyan", "magenta"]
     for i, traj in enumerate(trajectories):
-        ax.plot(traj[:, 0], traj[:, 1], color=traj_colors[i],
-                linewidth=2, alpha=0.8)
-        ax.plot(traj[0, 0], traj[0, 1], 's', color=traj_colors[i], markersize=10)
+        ax.plot(traj[:, 0], traj[:, 1], color=traj_colors[i], linewidth=2, alpha=0.8)
+        ax.plot(traj[0, 0], traj[0, 1], "s", color=traj_colors[i], markersize=10)
 
-    ax.set_xlabel('Belief Dimension 1')
-    ax.set_ylabel('Belief Dimension 2')
-    ax.set_title('Attractor Landscape (Stable Beliefs)')
+    ax.set_xlabel("Belief Dimension 1")
+    ax.set_ylabel("Belief Dimension 2")
+    ax.set_title("Attractor Landscape (Stable Beliefs)")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -382,23 +398,35 @@ def demo_attractor_dynamics():
     # Plot with colors by basin
     for i in range(len(attractors)):
         mask = np.array(basin_membership) == i
-        ax.scatter(sample_starts[mask, 0], sample_starts[mask, 1],
-                   c=colors_attr[i], alpha=0.3, s=20,
-                   label=f'{attractors[i][2]} basin')
+        ax.scatter(
+            sample_starts[mask, 0],
+            sample_starts[mask, 1],
+            c=colors_attr[i],
+            alpha=0.3,
+            s=20,
+            label=f"{attractors[i][2]} basin",
+        )
 
     # Draw attractors
     for i, (pos, strength, name) in enumerate(attractors):
-        ax.plot(pos[0], pos[1], 'o', color=colors_attr[i],
-                markersize=15, markeredgecolor='black', markeredgewidth=2)
+        ax.plot(
+            pos[0],
+            pos[1],
+            "o",
+            color=colors_attr[i],
+            markersize=15,
+            markeredgecolor="black",
+            markeredgewidth=2,
+        )
 
-    ax.set_xlabel('Starting Position X')
-    ax.set_ylabel('Starting Position Y')
-    ax.set_title('Basin of Attraction Membership')
+    ax.set_xlabel("Starting Position X")
+    ax.set_ylabel("Starting Position Y")
+    ax.set_title("Basin of Attraction Membership")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('attractor_dynamics.png', dpi=150)
+    plt.savefig("attractor_dynamics.png", dpi=150)
     print("\nFigure saved: attractor_dynamics.png")
 
 
@@ -414,10 +442,7 @@ def demo_precision_belief_updating():
     precision = AdaptivePrecision(dim=dim, learning_rate=0.3)
 
     # Create predictive hierarchy
-    hierarchy = PredictiveHierarchy(
-        layer_dims=[dim, 4, 3],
-        learning_rate=0.2
-    )
+    hierarchy = PredictiveHierarchy(layer_dims=[dim, 4, 3], learning_rate=0.2)
 
     # Simulate noisy observations of a true state
     true_state = np.array([1.0, -0.5, 0.8])
@@ -432,7 +457,7 @@ def demo_precision_belief_updating():
 
         error = observation - hierarchy.layers[0].generate_prediction()
         prec, vol = precision.update(error)
-        high_noise_errors.append(result['total_error'])
+        high_noise_errors.append(result["total_error"])
 
     print(f"  Mean precision: {np.mean(precision.precision):.3f}")
     print(f"  Mean volatility: {np.mean(precision.volatility):.3f}")
@@ -448,7 +473,7 @@ def demo_precision_belief_updating():
 
         error = observation - hierarchy.layers[0].generate_prediction()
         prec, vol = precision.update(error)
-        low_noise_errors.append(result['total_error'])
+        low_noise_errors.append(result["total_error"])
 
     print(f"  Mean precision: {np.mean(precision.precision):.3f}")
     print(f"  Mean volatility: {np.mean(precision.volatility):.3f}")
@@ -465,7 +490,7 @@ def demo_precision_belief_updating():
 
         error = observation - hierarchy.layers[0].generate_prediction()
         prec, vol = precision.update(error)
-        shift_errors.append(result['total_error'])
+        shift_errors.append(result["total_error"])
 
     print(f"  Mean precision: {np.mean(precision.precision):.3f}")
     print(f"  Mean volatility: {np.mean(precision.volatility):.3f}")
@@ -477,12 +502,12 @@ def demo_precision_belief_updating():
     # Error over time
     ax = axes[0, 0]
     all_errors = high_noise_errors + low_noise_errors + shift_errors
-    ax.plot(all_errors, 'b-', linewidth=1.5)
-    ax.axvline(x=30, color='gray', linestyle='--', label='Noise reduction')
-    ax.axvline(x=60, color='red', linestyle='--', label='Regime shift')
-    ax.set_xlabel('Time step')
-    ax.set_ylabel('Prediction Error')
-    ax.set_title('Prediction Error Across Phases')
+    ax.plot(all_errors, "b-", linewidth=1.5)
+    ax.axvline(x=30, color="gray", linestyle="--", label="Noise reduction")
+    ax.axvline(x=60, color="red", linestyle="--", label="Regime shift")
+    ax.set_xlabel("Time step")
+    ax.set_ylabel("Prediction Error")
+    ax.set_title("Prediction Error Across Phases")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -490,38 +515,38 @@ def demo_precision_belief_updating():
     ax = axes[0, 1]
     prec_history = np.array(precision.precision_history)
     for i in range(min(3, prec_history.shape[1])):
-        ax.plot(prec_history[:, i], label=f'Dim {i}')
-    ax.axvline(x=30, color='gray', linestyle='--')
-    ax.axvline(x=60, color='red', linestyle='--')
-    ax.set_xlabel('Time step')
-    ax.set_ylabel('Precision')
-    ax.set_title('Precision Adaptation')
+        ax.plot(prec_history[:, i], label=f"Dim {i}")
+    ax.axvline(x=30, color="gray", linestyle="--")
+    ax.axvline(x=60, color="red", linestyle="--")
+    ax.set_xlabel("Time step")
+    ax.set_ylabel("Precision")
+    ax.set_title("Precision Adaptation")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     # Confidence over phases
     ax = axes[1, 0]
-    phases = ['High Noise\n(Phase 1)', 'Low Noise\n(Phase 2)', 'After Shift\n(Phase 3)']
+    phases = ["High Noise\n(Phase 1)", "Low Noise\n(Phase 2)", "After Shift\n(Phase 3)"]
     errors = [np.mean(high_noise_errors), np.mean(low_noise_errors), np.mean(shift_errors)]
-    colors = ['red', 'green', 'orange']
+    colors = ["red", "green", "orange"]
     ax.bar(phases, errors, color=colors)
-    ax.set_ylabel('Mean Error')
-    ax.set_title('Error by Phase')
+    ax.set_ylabel("Mean Error")
+    ax.set_title("Error by Phase")
     ax.grid(True, alpha=0.3)
 
     # Hierarchy state representation
     ax = axes[1, 1]
     beliefs = hierarchy.get_beliefs()
-    layer_labels = [f'Layer {i}' for i in range(len(beliefs))]
+    layer_labels = [f"Layer {i}" for i in range(len(beliefs))]
     belief_norms = [np.linalg.norm(b) for b in beliefs]
 
-    ax.barh(layer_labels, belief_norms, color='steelblue')
-    ax.set_xlabel('Belief Magnitude')
-    ax.set_title('Hierarchical Belief States')
+    ax.barh(layer_labels, belief_norms, color="steelblue")
+    ax.set_xlabel("Belief Magnitude")
+    ax.set_title("Hierarchical Belief States")
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('precision_updating.png', dpi=150)
+    plt.savefig("precision_updating.png", dpi=150)
     print("\nFigure saved: precision_updating.png")
 
 
@@ -542,5 +567,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

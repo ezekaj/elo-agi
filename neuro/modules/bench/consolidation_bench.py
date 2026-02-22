@@ -18,6 +18,7 @@ from .base_benchmark import Benchmark, BenchmarkConfig
 @dataclass
 class MemoryItem:
     """A memory item for consolidation testing."""
+
     memory_id: str
     content: np.ndarray
     initial_strength: float
@@ -28,6 +29,7 @@ class MemoryItem:
 @dataclass
 class InterferenceScenario:
     """An interference resolution scenario."""
+
     original_memory: MemoryItem
     interfering_memory: MemoryItem
     similarity: float  # 0-1, higher = more similar
@@ -37,6 +39,7 @@ class InterferenceScenario:
 @dataclass
 class LearningScenario:
     """A learning efficiency scenario."""
+
     items: List[MemoryItem]
     target_strength: float
     max_replays: int
@@ -249,13 +252,15 @@ class LearningEfficiencyBenchmark(Benchmark):
             content = self._rng.standard_normal(self.embedding_dim)
             content = content / np.linalg.norm(content)
 
-            items.append(MemoryItem(
-                memory_id=f"item_{trial_id}_{i}",
-                content=content,
-                initial_strength=0.2,
-                timestamp=float(i),
-                category="semantic" if i % 2 == 0 else "episodic",
-            ))
+            items.append(
+                MemoryItem(
+                    memory_id=f"item_{trial_id}_{i}",
+                    content=content,
+                    initial_strength=0.2,
+                    timestamp=float(i),
+                    category="semantic" if i % 2 == 0 else "episodic",
+                )
+            )
 
         target_strength = 0.8
 
@@ -472,13 +477,13 @@ def create_consolidation_benchmark_suite() -> List[Benchmark]:
 
 
 __all__ = [
-    'MemoryItem',
-    'InterferenceScenario',
-    'LearningScenario',
-    'RetentionBenchmark',
-    'InterferenceBenchmark',
-    'LearningEfficiencyBenchmark',
-    'SchemaFormationBenchmark',
-    'SpacedRepetitionBenchmark',
-    'create_consolidation_benchmark_suite',
+    "MemoryItem",
+    "InterferenceScenario",
+    "LearningScenario",
+    "RetentionBenchmark",
+    "InterferenceBenchmark",
+    "LearningEfficiencyBenchmark",
+    "SchemaFormationBenchmark",
+    "SpacedRepetitionBenchmark",
+    "create_consolidation_benchmark_suite",
 ]

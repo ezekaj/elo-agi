@@ -12,12 +12,10 @@ with creative performance through semantic integration.
 """
 
 import sys
-sys.path.insert(0, '.')
 
-from src.imagery import (
-    VisualImagery, AuditoryImagery, MotorImagery,
-    TactileImagery, ImagerySystem
-)
+sys.path.insert(0, ".")
+
+from src.imagery import VisualImagery, AuditoryImagery, MotorImagery, TactileImagery, ImagerySystem
 
 
 def main():
@@ -45,7 +43,7 @@ def main():
     cube = visual.create_image(
         "rotating_cube",
         "A red 3D cube floating in space",
-        properties={"color": "red", "shape": "cube", "dimension": "3D"}
+        properties={"color": "red", "shape": "cube", "dimension": "3D"},
     )
     print(f"\nImage: Cube")
     print(f"  Vividness: {cube.vividness:.3f}")
@@ -122,7 +120,7 @@ def main():
         "throw_ball",
         "Throwing a ball overhand",
         body_parts=["right arm", "hand", "shoulder"],
-        duration=1.0
+        duration=1.0,
     )
     print(f"  Action: {throw.action}")
     print(f"  Body parts: {throw.body_parts}")
@@ -134,7 +132,9 @@ def main():
     initial_feel = throw.kinesthetic_feel
     motor.rehearse(throw.id, repetitions=5)
     print(f"  Before rehearsal: vividness={initial_vividness:.3f}, feel={initial_feel:.3f}")
-    print(f"  After 5 repetitions: vividness={throw.vividness:.3f}, feel={throw.kinesthetic_feel:.3f}")
+    print(
+        f"  After 5 repetitions: vividness={throw.vividness:.3f}, feel={throw.kinesthetic_feel:.3f}"
+    )
 
     print("\n--- Slow Motion ---")
     slow_throw = motor.slow_motion(throw.id, factor=0.25)
@@ -163,7 +163,7 @@ def main():
         "soft fluffy blanket",
         "rough sandpaper",
         "smooth glass surface",
-        "warm sunshine on skin"
+        "warm sunshine on skin",
     ]
 
     for texture_desc in textures:
@@ -224,8 +224,7 @@ def main():
 
     # Custom modality selection
     custom = imagery.simulate_experience(
-        "Playing a violin",
-        modalities=["visual", "motor", "auditory"]
+        "Playing a violin", modalities=["visual", "motor", "auditory"]
     )
     print(f"\nExperience: Violin Playing")
     print(f"  Visual: {'Present' if custom.visual else 'Absent'}")
@@ -239,7 +238,7 @@ def main():
         "A warm cozy fireplace with crackling fire",
         include_visual=True,
         include_auditory=True,
-        include_tactile=True
+        include_tactile=True,
     )
 
     associations = imagery.get_all_associations(rich_image.id)

@@ -37,9 +37,7 @@ class SocialBrain:
         if len(social_input) != self.n_features:
             social_input = np.resize(social_input, self.n_features)
 
-        self.cognitive_activation = np.tanh(
-            self.cognitive_activation * 0.3 + social_input * 0.7
-        )
+        self.cognitive_activation = np.tanh(self.cognitive_activation * 0.3 + social_input * 0.7)
         return self.cognitive_activation.copy()
 
     def process_affective(self, emotional_input: np.ndarray) -> np.ndarray:
@@ -47,9 +45,7 @@ class SocialBrain:
         if len(emotional_input) != self.n_features:
             emotional_input = np.resize(emotional_input, self.n_features)
 
-        self.affective_activation = np.tanh(
-            self.affective_activation * 0.3 + emotional_input * 0.7
-        )
+        self.affective_activation = np.tanh(self.affective_activation * 0.3 + emotional_input * 0.7)
         return self.affective_activation.copy()
 
     def integrate(self) -> np.ndarray:
@@ -64,7 +60,7 @@ class SocialBrain:
         return {
             "cognitive": self.cognitive_activation.copy(),
             "affective": self.affective_activation.copy(),
-            "integrated": self.integrated_activation.copy()
+            "integrated": self.integrated_activation.copy(),
         }
 
 
@@ -96,9 +92,13 @@ class SocialCognitionNetwork:
         # Social context
         self.current_interaction: Dict = {}
 
-    def process_social_stimulus(self, agent: str, behavior: np.ndarray,
-                               emotional_display: Optional[np.ndarray] = None,
-                               is_distress: bool = False) -> Dict:
+    def process_social_stimulus(
+        self,
+        agent: str,
+        behavior: np.ndarray,
+        emotional_display: Optional[np.ndarray] = None,
+        is_distress: bool = False,
+    ) -> Dict:
         """Full social processing of another agent"""
         if len(behavior) != self.n_features:
             behavior = np.resize(behavior, self.n_features)
@@ -134,8 +134,9 @@ class SocialCognitionNetwork:
         self.current_interaction = results
         return results
 
-    def take_perspective(self, agent: str, context: np.ndarray,
-                        perspective_type: str = "cognitive") -> Dict:
+    def take_perspective(
+        self, agent: str, context: np.ndarray, perspective_type: str = "cognitive"
+    ) -> Dict:
         """Take another's perspective"""
         if perspective_type == "visual":
             return self.perspective_taking.take_visual_perspective(agent, context, level=2)
@@ -145,18 +146,13 @@ class SocialCognitionNetwork:
             # Cognitive perspective (what do they think/believe)
             self.perspective_taking.tpj.switch_perspective(agent)
             viewed = self.perspective_taking.tpj.view_from_perspective(context)
-            return {
-                "agent": agent,
-                "type": "cognitive",
-                "their_view": viewed
-            }
+            return {"agent": agent, "type": "cognitive", "their_view": viewed}
 
     def predict_behavior(self, agent: str) -> Dict:
         """Predict agent's behavior"""
         return self.mentalizing.predict_behavior(agent)
 
-    def check_false_belief(self, agent: str, reality: np.ndarray,
-                          their_belief: np.ndarray) -> Dict:
+    def check_false_belief(self, agent: str, reality: np.ndarray, their_belief: np.ndarray) -> Dict:
         """Check for false belief understanding"""
         return self.theory_of_mind.run_false_belief_task(agent, reality, their_belief)
 
@@ -170,7 +166,7 @@ class SocialCognitionNetwork:
                 self.perspective_taking.self_other.other_representations.get(
                     agent, np.zeros(self.n_features)
                 )
-            )
+            ),
         }
 
     def process_self(self, own_state: np.ndarray):
@@ -198,6 +194,6 @@ class SocialCognitionNetwork:
             "social_brain": {
                 "cognitive_mean": np.mean(self.social_brain.cognitive_activation),
                 "affective_mean": np.mean(self.social_brain.affective_activation),
-                "integrated_mean": np.mean(self.social_brain.integrated_activation)
-            }
+                "integrated_mean": np.mean(self.social_brain.integrated_activation),
+            },
         }

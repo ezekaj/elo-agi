@@ -16,11 +16,17 @@ from pathlib import Path
 from neuro.modules.llm.llm_interface import LLMOracle, MockLLM, LLMConfig, LLMResponse, create_llm
 from neuro.modules.llm.semantic_bridge import SemanticBridge, SemanticConfig, Embedding
 from neuro.modules.llm.language_grounding import LanguageGrounding, GroundingConfig, GroundedConcept
-from neuro.modules.llm.dialogue_agent import NeuroDialogueAgent, DialogueConfig, ConversationTurn, MultiAgentDialogue
+from neuro.modules.llm.dialogue_agent import (
+    NeuroDialogueAgent,
+    DialogueConfig,
+    ConversationTurn,
+    MultiAgentDialogue,
+)
 
 # =============================================================================
 # Tests: LLM Interface
 # =============================================================================
+
 
 class TestLLMConfig:
     """Tests for LLMConfig."""
@@ -35,6 +41,7 @@ class TestLLMConfig:
         assert config.provider == "anthropic"
         assert config.model == "claude-3-opus"
 
+
 class TestLLMResponse:
     """Tests for LLMResponse."""
 
@@ -43,6 +50,7 @@ class TestLLMResponse:
         assert response.text == "Hello"
         assert response.tokens_used == 5
         assert not response.cached
+
 
 class TestMockLLM:
     """Tests for MockLLM."""
@@ -88,13 +96,13 @@ class TestMockLLM:
     def test_parse_action_move(self):
         llm = MockLLM()
         parsed = llm.parse_action("I will move north")
-        assert parsed['type'] == 'move'
-        assert parsed.get('direction') == 'north'
+        assert parsed["type"] == "move"
+        assert parsed.get("direction") == "north"
 
     def test_parse_action_take(self):
         llm = MockLLM()
         parsed = llm.parse_action("Let me take the key")
-        assert parsed['type'] == 'take'
+        assert parsed["type"] == "take"
 
     def test_cache(self):
         llm = MockLLM()
@@ -108,13 +116,14 @@ class TestMockLLM:
         llm.query("Test 1")
         llm.query("Test 2")
         stats = llm.get_statistics()
-        assert stats['query_count'] == 2
+        assert stats["query_count"] == 2
 
     def test_clear_cache(self):
         llm = MockLLM()
         llm.query("Test")
         llm.clear_cache()
         assert len(llm._cache) == 0
+
 
 class TestCreateLLM:
     """Tests for create_llm factory."""
@@ -127,9 +136,11 @@ class TestCreateLLM:
         llm = create_llm()
         assert isinstance(llm, MockLLM)
 
+
 # =============================================================================
 # Tests: Semantic Bridge
 # =============================================================================
+
 
 class TestEmbedding:
     """Tests for Embedding dataclass."""
@@ -153,6 +164,7 @@ class TestEmbedding:
         emb1 = Embedding(vector=vec1, text="a")
         emb2 = Embedding(vector=vec2, text="b")
         assert emb1.similarity(emb2) == pytest.approx(0.0)
+
 
 class TestSemanticBridge:
     """Tests for SemanticBridge."""
@@ -209,8 +221,8 @@ class TestSemanticBridge:
         bridge.encode("test")
         bridge.decode(np.zeros(64))
         stats = bridge.get_statistics()
-        assert stats['encode_count'] == 1
-        assert stats['decode_count'] == 1
+        assert stats["encode_count"] == 1
+        assert stats["decode_count"] == 1
 
     def test_reset(self):
         bridge = SemanticBridge()
@@ -218,9 +230,11 @@ class TestSemanticBridge:
         bridge.reset()
         assert len(bridge._memory) == 0
 
+
 # =============================================================================
 # Tests: Language Grounding
 # =============================================================================
+
 
 class TestGroundedConcept:
     """Tests for GroundedConcept."""
@@ -252,6 +266,7 @@ class TestGroundedConcept:
         assert concept.occurrences == 2
         assert concept.confidence > 0.5
 
+
 class TestLanguageGrounding:
     """Tests for LanguageGrounding."""
 
@@ -279,8 +294,8 @@ class TestLanguageGrounding:
         obs = np.random.randn(64).astype(np.float32)
         concept = grounding.ground("test object", observation=obs)
         descriptions = grounding.unground(concept)
-        assert 'perceptual' in descriptions
-        assert 'action' in descriptions
+        assert "perceptual" in descriptions
+        assert "action" in descriptions
 
     def test_describe_observation(self):
         grounding = LanguageGrounding()
@@ -291,7 +306,7 @@ class TestLanguageGrounding:
     def test_parse_instruction(self):
         grounding = LanguageGrounding()
         parsed = grounding.parse_instruction("move to the door")
-        assert 'type' in parsed
+        assert "type" in parsed
 
     def test_instruction_to_action(self):
         grounding = LanguageGrounding()
@@ -329,12 +344,14 @@ class TestLanguageGrounding:
         grounding = LanguageGrounding()
         grounding.ground("test", observation=np.zeros(64))
         stats = grounding.get_statistics()
-        assert stats['concept_count'] == 1
-        assert stats['ground_count'] == 1
+        assert stats["concept_count"] == 1
+        assert stats["ground_count"] == 1
+
 
 # =============================================================================
 # Tests: Dialogue Agent
 # =============================================================================
+
 
 class TestConversationTurn:
     """Tests for ConversationTurn."""
@@ -343,6 +360,7 @@ class TestConversationTurn:
         turn = ConversationTurn(role="user", content="Hello")
         assert turn.role == "user"
         assert turn.content == "Hello"
+
 
 class TestNeuroDialogueAgent:
     """Tests for NeuroDialogueAgent."""
@@ -379,7 +397,7 @@ class TestNeuroDialogueAgent:
     def test_set_goal(self):
         agent = NeuroDialogueAgent()
         agent.set_goal("Find the treasure")
-        assert agent._context.get('current_goal') == "Find the treasure"
+        assert agent._context.get("current_goal") == "Find the treasure"
 
     def test_get_goal_description(self):
         agent = NeuroDialogueAgent()
@@ -416,7 +434,7 @@ class TestNeuroDialogueAgent:
         agent = NeuroDialogueAgent()
         agent.respond("Test")
         stats = agent.get_statistics()
-        assert stats['turn_count'] == 1
+        assert stats["turn_count"] == 1
 
     def test_reset(self):
         agent = NeuroDialogueAgent()
@@ -424,6 +442,7 @@ class TestNeuroDialogueAgent:
         agent.reset()
         assert len(agent._history) == 0
         assert agent._current_state is None
+
 
 class TestMultiAgentDialogue:
     """Tests for MultiAgentDialogue."""
@@ -473,9 +492,11 @@ class TestMultiAgentDialogue:
         multi.clear_log()
         assert len(multi._conversation_log) == 0
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for the full language bridge."""
@@ -513,7 +534,7 @@ class TestIntegration:
 
         # Check grounding occurred
         stats = agent.get_statistics()
-        assert stats['grounding_stats']['concept_count'] > 0
+        assert stats["grounding_stats"]["concept_count"] > 0
 
     def test_full_pipeline(self):
         """Test full language processing pipeline."""
@@ -539,6 +560,7 @@ class TestIntegration:
         assert len(description) > 0
         assert len(response) > 0
         assert action.shape[0] > 0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

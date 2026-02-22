@@ -7,21 +7,54 @@ from .base import Tool, ToolResult
 
 # Commands that are safe to run without asking
 SAFE_COMMANDS = {
-    'ls', 'pwd', 'echo', 'cat', 'head', 'tail', 'wc',
-    'git status', 'git log', 'git branch', 'git diff',
-    'which', 'whoami', 'date', 'uname', 'env', 'printenv',
-    'python --version', 'python3 --version', 'node --version',
-    'pip list', 'npm list', 'cargo --version',
+    "ls",
+    "pwd",
+    "echo",
+    "cat",
+    "head",
+    "tail",
+    "wc",
+    "git status",
+    "git log",
+    "git branch",
+    "git diff",
+    "which",
+    "whoami",
+    "date",
+    "uname",
+    "env",
+    "printenv",
+    "python --version",
+    "python3 --version",
+    "node --version",
+    "pip list",
+    "npm list",
+    "cargo --version",
 }
 
 # Commands that should always require permission
 DANGEROUS_PATTERNS = [
-    'rm ', 'rm -', 'rmdir', 'mv ', 'cp ',
-    'sudo', 'chmod', 'chown',
-    'git push', 'git reset', 'git rebase', 'git merge',
-    'curl | ', 'wget | ', '| bash', '| sh',
-    'dd ', 'mkfs', 'fdisk',
-    '> /', 'rm -rf',
+    "rm ",
+    "rm -",
+    "rmdir",
+    "mv ",
+    "cp ",
+    "sudo",
+    "chmod",
+    "chown",
+    "git push",
+    "git reset",
+    "git rebase",
+    "git merge",
+    "curl | ",
+    "wget | ",
+    "| bash",
+    "| sh",
+    "dd ",
+    "mkfs",
+    "fdisk",
+    "> /",
+    "rm -rf",
 ]
 
 
@@ -35,16 +68,10 @@ class BashTool(Tool):
     parameters = {
         "type": "object",
         "properties": {
-            "command": {
-                "type": "string",
-                "description": "The shell command to execute"
-            },
-            "timeout": {
-                "type": "integer",
-                "description": "Timeout in seconds (default: 30)"
-            }
+            "command": {"type": "string", "description": "The shell command to execute"},
+            "timeout": {"type": "integer", "description": "Timeout in seconds (default: 30)"},
         },
-        "required": ["command"]
+        "required": ["command"],
     }
 
     def is_safe(self, command: str) -> bool:
@@ -71,7 +98,7 @@ class BashTool(Tool):
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=kwargs.get('cwd', None)
+                cwd=kwargs.get("cwd", None),
             )
 
             output = result.stdout
@@ -86,7 +113,7 @@ class BashTool(Tool):
                 success=result.returncode == 0,
                 output=output if output else "(no output)",
                 error="" if result.returncode == 0 else f"Exit code: {result.returncode}",
-                data={"return_code": result.returncode, "command": command}
+                data={"return_code": result.returncode, "command": command},
             )
 
         except subprocess.TimeoutExpired:

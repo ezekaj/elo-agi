@@ -91,7 +91,7 @@ class ToolSpinner(Spinner):
             self.console.print(f"  [red]✗[/red] [bold]{self.tool_name}[/bold]")
 
         if output:
-            lines = output.strip().split('\n')
+            lines = output.strip().split("\n")
             for line in lines[:3]:
                 self.console.print(f"    [dim]{line}[/dim]")
             if len(lines) > 3:

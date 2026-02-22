@@ -5,12 +5,12 @@ from .executive_control_network import ExecutiveControlNetwork, Evaluation, Refi
 from .salience_network import SalienceNetwork, NetworkSwitch
 
 __all__ = [
-    'DefaultModeNetwork',
-    'SpontaneousThought',
-    'Association',
-    'ExecutiveControlNetwork',
-    'Evaluation',
-    'Refinement',
-    'SalienceNetwork',
-    'NetworkSwitch',
+    "DefaultModeNetwork",
+    "SpontaneousThought",
+    "Association",
+    "ExecutiveControlNetwork",
+    "Evaluation",
+    "Refinement",
+    "SalienceNetwork",
+    "NetworkSwitch",
 ]

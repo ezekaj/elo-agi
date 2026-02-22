@@ -17,24 +17,26 @@ from enum import Enum
 
 class SleepStage(Enum):
     """Sleep stages with distinct neural signatures"""
+
     WAKE = "wake"
-    NREM1 = "nrem1"     # Light sleep, transition stage
-    NREM2 = "nrem2"     # Light sleep, sleep spindles
-    SWS = "sws"         # Slow-wave sleep (N3), deep sleep
-    REM = "rem"         # Rapid eye movement, dreaming
+    NREM1 = "nrem1"  # Light sleep, transition stage
+    NREM2 = "nrem2"  # Light sleep, sleep spindles
+    SWS = "sws"  # Slow-wave sleep (N3), deep sleep
+    REM = "rem"  # Rapid eye movement, dreaming
 
 
 @dataclass
 class StageProperties:
     """Properties for each sleep stage"""
+
     oscillation_freq: Tuple[float, float]  # Hz range (min, max)
-    duration_typical: float                 # Typical duration in minutes
-    memory_function: str                    # Primary memory role
-    plasticity_mode: str                    # "encoding" or "consolidation"
-    arousal_threshold: float                # How hard to wake (0-1)
+    duration_typical: float  # Typical duration in minutes
+    memory_function: str  # Primary memory role
+    plasticity_mode: str  # "encoding" or "consolidation"
+    arousal_threshold: float  # How hard to wake (0-1)
 
     @classmethod
-    def for_stage(cls, stage: SleepStage) -> 'StageProperties':
+    def for_stage(cls, stage: SleepStage) -> "StageProperties":
         """Get properties for a specific stage"""
         properties = {
             SleepStage.WAKE: cls(
@@ -42,35 +44,35 @@ class StageProperties:
                 duration_typical=0.0,
                 memory_function="encoding",
                 plasticity_mode="encoding",
-                arousal_threshold=0.0
+                arousal_threshold=0.0,
             ),
             SleepStage.NREM1: cls(
                 oscillation_freq=(4.0, 8.0),  # Theta
                 duration_typical=5.0,
                 memory_function="replay_initiation",
                 plasticity_mode="consolidation",
-                arousal_threshold=0.3
+                arousal_threshold=0.3,
             ),
             SleepStage.NREM2: cls(
                 oscillation_freq=(12.0, 16.0),  # Sleep spindles
                 duration_typical=25.0,
                 memory_function="memory_replay",
                 plasticity_mode="consolidation",
-                arousal_threshold=0.5
+                arousal_threshold=0.5,
             ),
             SleepStage.SWS: cls(
                 oscillation_freq=(0.5, 4.0),  # Delta/slow waves
                 duration_typical=20.0,
                 memory_function="systems_consolidation",
                 plasticity_mode="consolidation",
-                arousal_threshold=0.9
+                arousal_threshold=0.9,
             ),
             SleepStage.REM: cls(
                 oscillation_freq=(4.0, 8.0),  # Theta
                 duration_typical=20.0,
                 memory_function="emotional_processing",
                 plasticity_mode="consolidation",
-                arousal_threshold=0.4
+                arousal_threshold=0.4,
             ),
         }
         return properties[stage]
@@ -79,6 +81,7 @@ class StageProperties:
 @dataclass
 class OscillationEvent:
     """A discrete oscillatory event (spindle, ripple, etc.)"""
+
     event_type: str
     start_time: float
     duration: float
@@ -121,11 +124,7 @@ class OscillationGenerator:
         self.theta_freq_range = (4.0, 8.0)
 
     def generate_sine_wave(
-        self,
-        frequency: float,
-        duration: float,
-        amplitude: float = 1.0,
-        phase: float = 0.0
+        self, frequency: float, duration: float, amplitude: float = 1.0, phase: float = 0.0
     ) -> np.ndarray:
         """Generate a simple sine wave."""
         n_samples = int(duration * self.sample_rate)
@@ -133,9 +132,7 @@ class OscillationGenerator:
         return amplitude * np.sin(2 * np.pi * frequency * t + phase)
 
     def sleep_spindle(
-        self,
-        duration: Optional[float] = None,
-        amplitude: float = 1.0
+        self, duration: Optional[float] = None, amplitude: float = 1.0
     ) -> OscillationEvent:
         """Generate a sleep spindle (12-16 Hz burst).
 
@@ -159,16 +156,12 @@ class OscillationGenerator:
             duration=duration,
             frequency=freq,
             amplitude=amplitude,
-            waveform=waveform
+            waveform=waveform,
         )
         self.current_time += duration
         return event
 
-    def slow_oscillation(
-        self,
-        duration: float = 1.0,
-        amplitude: float = 1.0
-    ) -> OscillationEvent:
+    def slow_oscillation(self, duration: float = 1.0, amplitude: float = 1.0) -> OscillationEvent:
         """Generate slow oscillation (0.5-4 Hz).
 
         Slow oscillations coordinate hippocampal-cortical dialogue
@@ -183,7 +176,7 @@ class OscillationGenerator:
             duration=duration,
             frequency=freq,
             amplitude=amplitude,
-            waveform=waveform
+            waveform=waveform,
         )
         self.current_time += duration
         return event
@@ -200,7 +193,7 @@ class OscillationGenerator:
         t = np.arange(n_samples) / self.sample_rate
 
         # Ripples have a sharp envelope
-        envelope = np.exp(-((t - duration/2) ** 2) / (2 * (duration/6) ** 2))
+        envelope = np.exp(-((t - duration / 2) ** 2) / (2 * (duration / 6) ** 2))
         waveform = amplitude * envelope * np.sin(2 * np.pi * freq * t)
 
         event = OscillationEvent(
@@ -209,16 +202,12 @@ class OscillationGenerator:
             duration=duration,
             frequency=freq,
             amplitude=amplitude,
-            waveform=waveform
+            waveform=waveform,
         )
         self.current_time += duration
         return event
 
-    def theta_wave(
-        self,
-        duration: float = 1.0,
-        amplitude: float = 1.0
-    ) -> OscillationEvent:
+    def theta_wave(self, duration: float = 1.0, amplitude: float = 1.0) -> OscillationEvent:
         """Generate theta wave (4-8 Hz).
 
         Theta oscillations dominate during REM sleep and are associated
@@ -233,7 +222,7 @@ class OscillationGenerator:
             duration=duration,
             frequency=freq,
             amplitude=amplitude,
-            waveform=waveform
+            waveform=waveform,
         )
         self.current_time += duration
         return event
@@ -259,16 +248,12 @@ class OscillationGenerator:
             duration=duration,
             frequency=2.0,  # ~2 Hz equivalent
             amplitude=amplitude,
-            waveform=waveform
+            waveform=waveform,
         )
         self.current_time += duration
         return event
 
-    def generate_stage_activity(
-        self,
-        stage: SleepStage,
-        duration: float
-    ) -> List[OscillationEvent]:
+    def generate_stage_activity(self, stage: SleepStage, duration: float) -> List[OscillationEvent]:
         """Generate oscillatory activity for a sleep stage.
 
         Args:
@@ -287,14 +272,16 @@ class OscillationGenerator:
                 evt_duration = min(1.0, duration - elapsed)
                 freq = np.random.uniform(8.0, 30.0)
                 waveform = self.generate_sine_wave(freq, evt_duration)
-                events.append(OscillationEvent(
-                    event_type="wake_activity",
-                    start_time=self.current_time,
-                    duration=evt_duration,
-                    frequency=freq,
-                    amplitude=1.0,
-                    waveform=waveform
-                ))
+                events.append(
+                    OscillationEvent(
+                        event_type="wake_activity",
+                        start_time=self.current_time,
+                        duration=evt_duration,
+                        frequency=freq,
+                        amplitude=1.0,
+                        waveform=waveform,
+                    )
+                )
                 elapsed += evt_duration
                 self.current_time += evt_duration
 
@@ -383,7 +370,7 @@ class SleepStageController:
             SleepStage.NREM2,
             SleepStage.SWS,
             SleepStage.NREM2,
-            SleepStage.REM
+            SleepStage.REM,
         ]
         self.sequence_index = 0
 
@@ -399,11 +386,7 @@ class SleepStageController:
         # Record previous stage
         if self.current_stage != target_stage:
             duration = self.total_time - self.stage_start_time
-            self.stage_history.append((
-                self.current_stage,
-                self.stage_start_time,
-                duration
-            ))
+            self.stage_history.append((self.current_stage, self.stage_start_time, duration))
 
             # Detect cycle completion: transitioning from REM to NREM1
             if self.current_stage == SleepStage.REM and target_stage == SleepStage.NREM1:
@@ -432,8 +415,7 @@ class SleepStageController:
         # Check if stage should transition
         # Duration varies by cycle (more REM later in night)
         adjusted_duration = self._adjust_duration_for_cycle(
-            props.duration_typical,
-            self.current_stage
+            props.duration_typical, self.current_stage
         )
 
         if stage_duration >= adjusted_duration:
@@ -441,18 +423,14 @@ class SleepStageController:
 
         return None
 
-    def _adjust_duration_for_cycle(
-        self,
-        base_duration: float,
-        stage: SleepStage
-    ) -> float:
+    def _adjust_duration_for_cycle(self, base_duration: float, stage: SleepStage) -> float:
         """Adjust stage duration based on cycle number.
 
         SWS decreases across the night, REM increases.
         """
         if stage == SleepStage.SWS:
             # SWS decreases: 100% -> 50% -> 25% -> ...
-            factor = 0.5 ** self.cycle_count
+            factor = 0.5**self.cycle_count
             return base_duration * max(factor, 0.1)
         elif stage == SleepStage.REM:
             # REM increases: starts short, grows
@@ -494,10 +472,7 @@ class SleepStageController:
         Returns:
             List of oscillation events
         """
-        return self.oscillation_gen.generate_stage_activity(
-            self.current_stage,
-            duration
-        )
+        return self.oscillation_gen.generate_stage_activity(self.current_stage, duration)
 
     def get_stage_properties(self) -> StageProperties:
         """Get properties of current stage."""

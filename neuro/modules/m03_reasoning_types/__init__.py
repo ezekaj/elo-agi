@@ -10,4 +10,4 @@ Implementation of the brain's four fundamental reasoning systems:
 
 from .reasoning_orchestrator import ReasoningOrchestrator
 
-__all__ = ['ReasoningOrchestrator']
+__all__ = ["ReasoningOrchestrator"]

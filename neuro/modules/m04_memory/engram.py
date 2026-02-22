@@ -15,14 +15,16 @@ from enum import Enum
 
 class EngramState(Enum):
     """State of engram consolidation"""
-    LABILE = "labile"           # Recently formed, easily modified
+
+    LABILE = "labile"  # Recently formed, easily modified
     CONSOLIDATED = "consolidated"  # Stabilized, resistant to change
-    REACTIVATED = "reactivated"   # Retrieved, temporarily labile again
+    REACTIVATED = "reactivated"  # Retrieved, temporarily labile again
 
 
 @dataclass
 class Neuron:
     """Single unit in engram network"""
+
     id: int
     activation: float = 0.0
     threshold: float = 0.5
@@ -54,7 +56,7 @@ class Engram:
         n_neurons: int = 100,
         connectivity: float = 0.3,
         learning_rate: float = 0.1,
-        consolidation_rate: float = 0.05
+        consolidation_rate: float = 0.05,
     ):
         """
         Initialize engram network.
@@ -102,7 +104,7 @@ class Engram:
             input_pattern = np.interp(
                 np.linspace(0, 1, self.n_neurons),
                 np.linspace(0, 1, len(input_pattern)),
-                input_pattern
+                input_pattern,
             )
 
         self.pattern = input_pattern.copy()
@@ -154,11 +156,7 @@ class Engram:
         """
         # Normalize cue
         if len(cue) != self.n_neurons:
-            cue = np.interp(
-                np.linspace(0, 1, self.n_neurons),
-                np.linspace(0, 1, len(cue)),
-                cue
-            )
+            cue = np.interp(np.linspace(0, 1, self.n_neurons), np.linspace(0, 1, len(cue)), cue)
 
         # Initialize activations from cue
         for i, neuron in enumerate(self.neurons):
@@ -249,10 +247,7 @@ class Engram:
 
         for neuron in self.neurons:
             original_count = len(neuron.connections)
-            neuron.connections = {
-                k: v for k, v in neuron.connections.items()
-                if abs(v) > threshold
-            }
+            neuron.connections = {k: v for k, v in neuron.connections.items() if abs(v) > threshold}
             pruned_count += original_count - len(neuron.connections)
 
         # Weaken overall engram
@@ -286,7 +281,7 @@ class Engram:
             other_pattern = np.interp(
                 np.linspace(0, 1, self.n_neurons),
                 np.linspace(0, 1, len(other_pattern)),
-                other_pattern
+                other_pattern,
             )
 
         # Cosine similarity
@@ -329,5 +324,5 @@ class Engram:
             "std": np.std(all_weights),
             "count": len(all_weights),
             "positive": sum(1 for w in all_weights if w > 0),
-            "negative": sum(1 for w in all_weights if w < 0)
+            "negative": sum(1 for w in all_weights if w < 0),
         }

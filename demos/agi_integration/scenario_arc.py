@@ -16,9 +16,9 @@ from typing import List, Dict, Any, Tuple
 
 def demo_arc_reasoning():
     """Run the ARC-style reasoning demonstration."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCENARIO: ARC-Style Pattern Reasoning")
-    print("="*60)
+    print("=" * 60)
     print("\nDemonstrating symbol binding, pattern causality, and")
     print("problem classification on abstract pattern tasks.")
 
@@ -37,9 +37,9 @@ def demo_arc_reasoning():
     from problem_classifier import ProblemClassifier, ProblemType
     from differentiable_scm import DifferentiableSCM
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Task 1: Symbol Binding for Pattern Representation")
-    print("-"*60)
+    print("-" * 60)
 
     binder = SymbolicBinder(embedding_dim=64, random_seed=42)
 
@@ -69,7 +69,7 @@ def demo_arc_reasoning():
             RoleType.THEME: ("square", None),
             RoleType.ATTRIBUTE: ("red", None),
             RoleType.LOCATION: ("top", None),
-        }
+        },
     )
     print(f"   Pattern 1: red square at top (confidence: {binding1.confidence:.2f})")
 
@@ -80,7 +80,7 @@ def demo_arc_reasoning():
             RoleType.THEME: ("circle", None),
             RoleType.ATTRIBUTE: ("blue", None),
             RoleType.LOCATION: ("center", None),
-        }
+        },
     )
     print(f"   Pattern 2: blue circle at center (confidence: {binding2.confidence:.2f})")
 
@@ -98,7 +98,7 @@ def demo_arc_reasoning():
             RoleType.THEME: ("triangle", None),
             RoleType.ATTRIBUTE: ("green", None),
             RoleType.LOCATION: ("bottom", None),
-        }
+        },
     )
 
     # Compute similarity between patterns
@@ -109,9 +109,9 @@ def demo_arc_reasoning():
     print(f"   Similarity(pattern_1, pattern_3): {sim_13:.3f}")
     print(f"   Similarity(pattern_2, pattern_3): {sim_23:.3f}")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Task 2: Problem Classification")
-    print("-"*60)
+    print("-" * 60)
 
     classifier = ProblemClassifier(random_seed=42)
 
@@ -144,17 +144,17 @@ def demo_arc_reasoning():
         # Create embedding from features
         embedding = np.zeros(128)
         for j, (key, value) in enumerate(problem["features"].items()):
-            embedding[j * 10:(j + 1) * 10] = value
+            embedding[j * 10 : (j + 1) * 10] = value
 
         analysis = classifier.classify(embedding)
-        print(f"\n   Problem {i+1}: {problem['description'][:50]}...")
+        print(f"\n   Problem {i + 1}: {problem['description'][:50]}...")
         print(f"   Type: {analysis.problem_type.value}")
         print(f"   Difficulty: {analysis.difficulty.value}")
         print(f"   Estimated steps: {analysis.estimated_steps}")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Task 3: Causal Pattern Discovery")
-    print("-"*60)
+    print("-" * 60)
 
     scm = DifferentiableSCM(name="pattern_scm", random_seed=42)
 
@@ -173,7 +173,7 @@ def demo_arc_reasoning():
     scm.add_variable(
         "output_shape",
         parents=["input_shape", "color_change", "position_shift", "size_scale"],
-        noise_std=0.1
+        noise_std=0.1,
     )
 
     print("   Causal graph constructed with 5 nodes")
@@ -201,19 +201,16 @@ def demo_arc_reasoning():
         "color_change": 0.3,
         "position_shift": 0.2,
         "size_scale": 0.1,
-        "output_shape": 0.7
+        "output_shape": 0.7,
     }
-    cf_result = scm.counterfactual(
-        evidence=evidence,
-        intervention={"input_shape": 1.0}
-    )
+    cf_result = scm.counterfactual(evidence=evidence, intervention={"input_shape": 1.0})
     print(f"   Observed: input_shape=0.5, output_shape=0.7")
     print(f"   Counterfactual: If input_shape had been 1.0...")
     print(f"   Output would have been: {cf_result.get('output_shape', 'N/A')}")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Task 4: Solving ARC-like Pattern Tasks")
-    print("-"*60)
+    print("-" * 60)
 
     # Simulate solving 5 pattern tasks
     tasks_solved = 0
@@ -231,20 +228,22 @@ def demo_arc_reasoning():
         causal_clarity = 0.7 + 0.25 * np.random.random()
 
         # Task is solved if all components work well
-        success = (recognition_confidence > 0.72 and
-                   binding_strength > 0.76 and
-                   causal_clarity > 0.71)
+        success = (
+            recognition_confidence > 0.72 and binding_strength > 0.76 and causal_clarity > 0.71
+        )
 
         if success:
             tasks_solved += 1
 
-        task_results.append({
-            "task_id": task_id,
-            "success": success,
-            "recognition": recognition_confidence,
-            "binding": binding_strength,
-            "causality": causal_clarity,
-        })
+        task_results.append(
+            {
+                "task_id": task_id,
+                "success": success,
+                "recognition": recognition_confidence,
+                "binding": binding_strength,
+                "causality": causal_clarity,
+            }
+        )
 
         status = "SOLVED" if success else "FAILED"
         print(f"\n   Task {task_id}: {status}")
@@ -252,11 +251,11 @@ def demo_arc_reasoning():
         print(f"      Symbol binding: {binding_strength:.2f}")
         print(f"      Causal clarity: {causal_clarity:.2f}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ARC Demo Summary")
-    print("="*60)
+    print("=" * 60)
     print(f"\n   Tasks solved: {tasks_solved}/5")
-    print(f"   Success rate: {tasks_solved/5*100:.0f}%")
+    print(f"   Success rate: {tasks_solved / 5 * 100:.0f}%")
     print(f"\n   Modules demonstrated:")
     print(f"   - neuro-abstract (SymbolicBinder): Role-filler binding")
     print(f"   - neuro-meta-reasoning (ProblemClassifier): Task analysis")
@@ -273,7 +272,7 @@ def demo_arc_reasoning():
     }
 
     print(f"\n   Statistics: {stats}")
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     return stats
 

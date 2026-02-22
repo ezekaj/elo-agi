@@ -6,7 +6,12 @@ Based on Part XIV of neuroscience research:
 - Key Principles: Closed-loop sensorimotor integration, Predictive processing, Error-driven learning
 """
 
-from .sensorimotor import SensorimotorLoop, MotorSensoryCoupling, PredictiveProcessor, SensorimotorParams
+from .sensorimotor import (
+    SensorimotorLoop,
+    MotorSensoryCoupling,
+    PredictiveProcessor,
+    SensorimotorParams,
+)
 from .grounded_concepts import GroundedConcept, ConceptGrounding, ModalityBindings, GroundingParams
 from .action_simulation import MotorSimulator, ActionUnderstanding, MirrorSystem, SimulationParams
 from .situated_cognition import SituatedContext, ExternalMemory, ContextualReasoner, SituatedParams
@@ -14,9 +19,23 @@ from .enactive_system import EnactiveCognitiveSystem, AutopoieticSystem, Sensori
 
 __version__ = "0.1.0"
 __all__ = [
-    "SensorimotorLoop", "MotorSensoryCoupling", "PredictiveProcessor", "SensorimotorParams",
-    "GroundedConcept", "ConceptGrounding", "ModalityBindings", "GroundingParams",
-    "MotorSimulator", "ActionUnderstanding", "MirrorSystem", "SimulationParams",
-    "SituatedContext", "ExternalMemory", "ContextualReasoner", "SituatedParams",
-    "EnactiveCognitiveSystem", "AutopoieticSystem", "SensoriMotorEnaction"
+    "SensorimotorLoop",
+    "MotorSensoryCoupling",
+    "PredictiveProcessor",
+    "SensorimotorParams",
+    "GroundedConcept",
+    "ConceptGrounding",
+    "ModalityBindings",
+    "GroundingParams",
+    "MotorSimulator",
+    "ActionUnderstanding",
+    "MirrorSystem",
+    "SimulationParams",
+    "SituatedContext",
+    "ExternalMemory",
+    "ContextualReasoner",
+    "SituatedParams",
+    "EnactiveCognitiveSystem",
+    "AutopoieticSystem",
+    "SensoriMotorEnaction",
 ]

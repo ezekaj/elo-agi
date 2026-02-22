@@ -16,6 +16,7 @@ import numpy as np
 
 class TaskChangeMethod(Enum):
     """Methods for detecting task changes."""
+
     DISTRIBUTION_SHIFT = "distribution_shift"
     PERFORMANCE_DROP = "performance_drop"
     CONTEXT_CHANGE = "context_change"
@@ -25,6 +26,7 @@ class TaskChangeMethod(Enum):
 @dataclass
 class TaskInferenceConfig:
     """Configuration for task inference."""
+
     change_threshold: float = 0.5
     embedding_dim: int = 64
     min_samples_for_task: int = 10
@@ -41,6 +43,7 @@ class TaskInferenceConfig:
 @dataclass
 class TaskInfo:
     """Information about a detected task."""
+
     task_id: str
     embedding: np.ndarray
     exemplars: List[np.ndarray]
@@ -119,7 +122,9 @@ class TaskInference:
             change_scores = [dist_change, perf_change, context_change]
             change_detected = np.mean(change_scores) > self.config.change_threshold
         else:
-            change_detected = self._detect_distribution_shift(current_state) > self.config.change_threshold
+            change_detected = (
+                self._detect_distribution_shift(current_state) > self.config.change_threshold
+            )
 
         if change_detected:
             self._task_changes += 1
@@ -157,8 +162,9 @@ class TaskInference:
 
         # KL divergence for Gaussian: log(σ_q/σ_p) + (σ_p² + (μ_p - μ_q)²)/(2σ_q²) - 0.5
         kl_approx = np.mean(
-            np.log(new_std / old_std) +
-            (old_std**2 + (old_mean - new_mean)**2) / (2 * new_std**2) - 0.5
+            np.log(new_std / old_std)
+            + (old_std**2 + (old_mean - new_mean) ** 2) / (2 * new_std**2)
+            - 0.5
         )
 
         # Use sigmoid instead of tanh for bounded [0,1] output
@@ -301,7 +307,7 @@ class TaskInference:
             embedding = state[indices]
         else:
             embedding = np.zeros(self.config.embedding_dim)
-            embedding[:len(state)] = state
+            embedding[: len(state)] = state
 
         norm = np.linalg.norm(embedding) + 1e-8
         return embedding / norm
@@ -358,7 +364,7 @@ class TaskInference:
             if task_id1 in merged_into:
                 continue
 
-            for task_id2 in task_ids[i + 1:]:
+            for task_id2 in task_ids[i + 1 :]:
                 if task_id2 in merged_into:
                     continue
 
@@ -386,10 +392,7 @@ class TaskInference:
         target_weight = target.sample_count / total_samples
         source_weight = source.sample_count / total_samples
 
-        target.embedding = (
-            target_weight * target.embedding +
-            source_weight * source.embedding
-        )
+        target.embedding = target_weight * target.embedding + source_weight * source.embedding
 
         combined = target.exemplars + source.exemplars
         if len(combined) > 100:

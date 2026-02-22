@@ -28,15 +28,17 @@ import scipy.stats as stats
 
 class DriveType(Enum):
     """Types of intrinsic drives"""
-    EXPLORATION = "exploration"      # Seek new states
-    MASTERY = "mastery"              # Expand action repertoire
-    AUTONOMY = "autonomy"            # Maintain control/options
-    CHALLENGE = "challenge"          # Seek optimal difficulty
+
+    EXPLORATION = "exploration"  # Seek new states
+    MASTERY = "mastery"  # Expand action repertoire
+    AUTONOMY = "autonomy"  # Maintain control/options
+    CHALLENGE = "challenge"  # Seek optimal difficulty
 
 
 @dataclass
 class ActionState:
     """A point in action-state space"""
+
     state: np.ndarray
     action: Optional[np.ndarray] = None
     timestamp: float = 0.0
@@ -47,11 +49,12 @@ class ActionState:
 @dataclass
 class PossibilityMetrics:
     """Metrics about the current possibility space"""
-    volume: float                    # Size of reachable space
-    diversity: float                 # Entropy of visited states
-    expansion_rate: float            # How fast space is growing
-    constraint_level: float          # How constrained we are
-    future_options: int              # Estimated future possibilities
+
+    volume: float  # Size of reachable space
+    diversity: float  # Entropy of visited states
+    expansion_rate: float  # How fast space is growing
+    constraint_level: float  # How constrained we are
+    future_options: int  # Estimated future possibilities
 
 
 class PossibilitySpace:
@@ -66,7 +69,7 @@ class PossibilitySpace:
         state_dim: int,
         action_dim: int,
         history_length: int = 1000,
-        expansion_weight: float = 1.0
+        expansion_weight: float = 1.0,
     ):
         self.state_dim = state_dim
         self.action_dim = action_dim
@@ -169,7 +172,7 @@ class PossibilitySpace:
         states = list(self.visited_states)
 
         # Compare recent vs older volume
-        old_states = np.array(states[-window*2:-window])
+        old_states = np.array(states[-window * 2 : -window])
         new_states = np.array(states[-window:])
 
         old_volume = np.prod(np.ptp(old_states, axis=0) + 1e-8)
@@ -197,7 +200,7 @@ class PossibilitySpace:
 
         # Discretize to count of states
         cell_size = np.mean(transition_std) + 1e-8
-        n_options = int(reachable_volume / (cell_size ** self.state_dim))
+        n_options = int(reachable_volume / (cell_size**self.state_dim))
 
         return max(1, min(n_options, 10000))
 
@@ -208,7 +211,7 @@ class PossibilitySpace:
             diversity=self.compute_diversity(),
             expansion_rate=self.compute_expansion_rate(),
             constraint_level=1.0 - self.compute_diversity(),
-            future_options=self.estimate_future_options()
+            future_options=self.estimate_future_options(),
         )
 
     def compute_action_value(self, proposed_action: np.ndarray) -> float:
@@ -281,12 +284,7 @@ class ActionDiversityTracker:
     with complex rather than rigid patterns.
     """
 
-    def __init__(
-        self,
-        action_dim: int,
-        history_length: int = 500,
-        diversity_target: float = 0.7
-    ):
+    def __init__(self, action_dim: int, history_length: int = 500, diversity_target: float = 0.7):
         self.action_dim = action_dim
         self.history_length = history_length
         self.diversity_target = diversity_target
@@ -325,7 +323,7 @@ class ActionDiversityTracker:
         entropy = -np.sum(probs * np.log(probs + 1e-10))
 
         # Normalize by max entropy
-        max_entropy = np.log(float(self.n_bins ** self.action_dim))
+        max_entropy = np.log(float(self.n_bins**self.action_dim))
         return entropy / max_entropy if max_entropy > 0 else 0.0
 
     def get_diversity_bonus(self, proposed_action: np.ndarray) -> float:
@@ -351,7 +349,7 @@ class ActionDiversityTracker:
             return np.random.randn(self.action_dim)
 
         # Find least-used action region
-        min_count = float('inf')
+        min_count = float("inf")
         min_key = None
 
         # Sample random keys and find underexplored region
@@ -387,7 +385,7 @@ class IntrinsicDrive:
         drive_type: DriveType,
         base_strength: float = 1.0,
         satiation_rate: float = 0.1,
-        recovery_rate: float = 0.05
+        recovery_rate: float = 0.05,
     ):
         self.drive_type = drive_type
         self.base_strength = base_strength
@@ -453,7 +451,7 @@ class PathEntropyMaximizer:
         action_dim: int,
         entropy_weight: float = 1.0,
         diversity_weight: float = 0.5,
-        risk_aversion: float = 0.3
+        risk_aversion: float = 0.3,
     ):
         self.state_dim = state_dim
         self.action_dim = action_dim
@@ -477,12 +475,7 @@ class PathEntropyMaximizer:
         self.path_history: List[Tuple[np.ndarray, np.ndarray]] = []
         self.max_path_length = 1000
 
-    def observe(
-        self,
-        state: np.ndarray,
-        action: np.ndarray,
-        extrinsic_reward: float = 0.0
-    ) -> None:
+    def observe(self, state: np.ndarray, action: np.ndarray, extrinsic_reward: float = 0.0) -> None:
         """Observe a state-action transition."""
         self.possibility_space.observe(state, action)
         self.action_tracker.record_action(action)
@@ -495,10 +488,7 @@ class PathEntropyMaximizer:
         self._update_drives(state, action, extrinsic_reward)
 
     def _update_drives(
-        self,
-        state: np.ndarray,
-        action: np.ndarray,
-        extrinsic_reward: float
+        self, state: np.ndarray, action: np.ndarray, extrinsic_reward: float
     ) -> None:
         """Update intrinsic drives based on transition."""
         # Exploration: satisfied by novelty
@@ -533,9 +523,7 @@ class PathEntropyMaximizer:
         return total / len(self.drives)
 
     def compute_action_value(
-        self,
-        proposed_action: np.ndarray,
-        expected_state: Optional[np.ndarray] = None
+        self, proposed_action: np.ndarray, expected_state: Optional[np.ndarray] = None
     ) -> float:
         """Compute intrinsic value of a proposed action.
 
@@ -604,14 +592,18 @@ class PathEntropyMaximizer:
         state_cov = np.cov(states.T)
         if np.ndim(state_cov) == 0:
             state_cov = np.array([[state_cov]])
-        state_entropy = 0.5 * np.log(np.linalg.det(state_cov + 1e-8 * np.eye(self.state_dim)) + 1e-10)
+        state_entropy = 0.5 * np.log(
+            np.linalg.det(state_cov + 1e-8 * np.eye(self.state_dim)) + 1e-10
+        )
 
         # Action entropy
         actions = np.array([p[1] for p in recent_path])
         action_cov = np.cov(actions.T)
         if np.ndim(action_cov) == 0:
             action_cov = np.array([[action_cov]])
-        action_entropy = 0.5 * np.log(np.linalg.det(action_cov + 1e-8 * np.eye(self.action_dim)) + 1e-10)
+        action_entropy = 0.5 * np.log(
+            np.linalg.det(action_cov + 1e-8 * np.eye(self.action_dim)) + 1e-10
+        )
 
         return state_entropy + action_entropy
 
@@ -627,7 +619,7 @@ class PathEntropyMaximizer:
 
         # Evaluate each
         best_action = candidates[0]
-        best_value = float('-inf')
+        best_value = float("-inf")
 
         for action in candidates:
             # Clip to valid range

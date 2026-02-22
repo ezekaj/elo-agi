@@ -20,6 +20,7 @@ import time
 
 class EvaluationCriterion(Enum):
     """Criteria for evaluating ideas"""
+
     NOVELTY = "novelty"
     USEFULNESS = "usefulness"
     FEASIBILITY = "feasibility"
@@ -31,6 +32,7 @@ class EvaluationCriterion(Enum):
 @dataclass
 class Evaluation:
     """Evaluation result for an idea"""
+
     idea_id: str
     scores: Dict[EvaluationCriterion, float]
     overall_score: float
@@ -43,6 +45,7 @@ class Evaluation:
 @dataclass
 class Refinement:
     """A refinement applied to an idea"""
+
     original_id: str
     refined_id: str
     refinement_type: str  # "elaborate", "simplify", "combine", "constrain"
@@ -53,6 +56,7 @@ class Refinement:
 @dataclass
 class Goal:
     """A goal to guide creative search"""
+
     id: str
     description: str
     criteria_weights: Dict[EvaluationCriterion, float]
@@ -77,8 +81,7 @@ class ExecutiveControlNetwork:
     - Maintain goal focus
     """
 
-    def __init__(self,
-                 default_weights: Optional[Dict[EvaluationCriterion, float]] = None):
+    def __init__(self, default_weights: Optional[Dict[EvaluationCriterion, float]] = None):
         self.evaluations: Dict[str, Evaluation] = {}
         self.refinements: List[Refinement] = []
         self.current_goal: Optional[Goal] = None
@@ -96,27 +99,31 @@ class ExecutiveControlNetwork:
         # Evaluation history for calibration
         self._evaluation_history: List[Evaluation] = []
 
-    def set_goal(self,
-                 goal_id: str,
-                 description: str,
-                 criteria_weights: Optional[Dict[EvaluationCriterion, float]] = None,
-                 constraints: Optional[List[str]] = None,
-                 target_score: float = 0.7) -> Goal:
+    def set_goal(
+        self,
+        goal_id: str,
+        description: str,
+        criteria_weights: Optional[Dict[EvaluationCriterion, float]] = None,
+        constraints: Optional[List[str]] = None,
+        target_score: float = 0.7,
+    ) -> Goal:
         """Set the current creative goal"""
         self.current_goal = Goal(
             id=goal_id,
             description=description,
             criteria_weights=criteria_weights or self.default_weights,
             constraints=constraints or [],
-            target_score=target_score
+            target_score=target_score,
         )
         return self.current_goal
 
-    def evaluate_idea(self,
-                      idea_id: str,
-                      idea_content: Any,
-                      idea_features: Dict[str, float],
-                      context: Optional[Dict[str, Any]] = None) -> Evaluation:
+    def evaluate_idea(
+        self,
+        idea_id: str,
+        idea_content: Any,
+        idea_features: Dict[str, float],
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Evaluation:
         """
         Evaluate an idea against criteria.
 
@@ -175,7 +182,7 @@ class ExecutiveControlNetwork:
             strengths=strengths,
             weaknesses=weaknesses,
             recommendation=recommendation,
-            confidence=self._compute_confidence(scores)
+            confidence=self._compute_confidence(scores),
         )
 
         self.evaluations[idea_id] = evaluation
@@ -183,10 +190,9 @@ class ExecutiveControlNetwork:
 
         return evaluation
 
-    def _evaluate_novelty(self,
-                          content: Any,
-                          features: Dict[str, float],
-                          context: Optional[Dict]) -> float:
+    def _evaluate_novelty(
+        self, content: Any, features: Dict[str, float], context: Optional[Dict]
+    ) -> float:
         """Evaluate how novel/original the idea is"""
         # Use provided novelty feature if available
         if "novelty" in features:
@@ -198,10 +204,9 @@ class ExecutiveControlNetwork:
 
         return 0.5  # Default moderate novelty
 
-    def _evaluate_usefulness(self,
-                             content: Any,
-                             features: Dict[str, float],
-                             context: Optional[Dict]) -> float:
+    def _evaluate_usefulness(
+        self, content: Any, features: Dict[str, float], context: Optional[Dict]
+    ) -> float:
         """Evaluate practical usefulness"""
         if "usefulness" in features:
             return features["usefulness"]
@@ -213,10 +218,9 @@ class ExecutiveControlNetwork:
 
         return 0.5
 
-    def _evaluate_feasibility(self,
-                              content: Any,
-                              features: Dict[str, float],
-                              context: Optional[Dict]) -> float:
+    def _evaluate_feasibility(
+        self, content: Any, features: Dict[str, float], context: Optional[Dict]
+    ) -> float:
         """Evaluate implementation feasibility"""
         if "feasibility" in features:
             return features["feasibility"]
@@ -225,20 +229,18 @@ class ExecutiveControlNetwork:
         complexity = features.get("complexity", 0.5)
         return 1.0 - complexity * 0.5
 
-    def _evaluate_coherence(self,
-                            content: Any,
-                            features: Dict[str, float],
-                            context: Optional[Dict]) -> float:
+    def _evaluate_coherence(
+        self, content: Any, features: Dict[str, float], context: Optional[Dict]
+    ) -> float:
         """Evaluate internal consistency"""
         if "coherence" in features:
             return features["coherence"]
 
         return 0.6  # Default reasonable coherence
 
-    def _evaluate_elegance(self,
-                           content: Any,
-                           features: Dict[str, float],
-                           context: Optional[Dict]) -> float:
+    def _evaluate_elegance(
+        self, content: Any, features: Dict[str, float], context: Optional[Dict]
+    ) -> float:
         """Evaluate aesthetic quality/simplicity"""
         if "elegance" in features:
             return features["elegance"]
@@ -247,10 +249,9 @@ class ExecutiveControlNetwork:
         complexity = features.get("complexity", 0.5)
         return 1.0 - complexity * 0.7
 
-    def _evaluate_impact(self,
-                         content: Any,
-                         features: Dict[str, float],
-                         context: Optional[Dict]) -> float:
+    def _evaluate_impact(
+        self, content: Any, features: Dict[str, float], context: Optional[Dict]
+    ) -> float:
         """Evaluate potential impact"""
         if "impact" in features:
             return features["impact"]
@@ -274,11 +275,9 @@ class ExecutiveControlNetwork:
         # Higher variance = more confident discrimination
         return min(1.0, 0.5 + variance * 2)
 
-    def refine_idea(self,
-                    idea_id: str,
-                    idea_content: Any,
-                    evaluation: Evaluation,
-                    refinement_type: str = "auto") -> Tuple[str, Any, Refinement]:
+    def refine_idea(
+        self, idea_id: str, idea_content: Any, evaluation: Evaluation, refinement_type: str = "auto"
+    ) -> Tuple[str, Any, Refinement]:
         """
         Refine an idea based on its evaluation.
 
@@ -327,17 +326,16 @@ class ExecutiveControlNetwork:
             refined_id=refined_id,
             refinement_type=refinement_type,
             changes=changes,
-            improvement_score=improvement
+            improvement_score=improvement,
         )
 
         self.refinements.append(refinement)
 
         return refined_id, refined_content, refinement
 
-    def filter_ideas(self,
-                     idea_evaluations: List[Evaluation],
-                     top_k: int = 5,
-                     min_score: float = 0.3) -> List[Evaluation]:
+    def filter_ideas(
+        self, idea_evaluations: List[Evaluation], top_k: int = 5, min_score: float = 0.3
+    ) -> List[Evaluation]:
         """
         Filter and rank ideas by evaluation scores.
 
@@ -352,9 +350,9 @@ class ExecutiveControlNetwork:
 
         return ranked[:top_k]
 
-    def should_continue_generating(self,
-                                   evaluations: List[Evaluation],
-                                   target_count: int = 3) -> bool:
+    def should_continue_generating(
+        self, evaluations: List[Evaluation], target_count: int = 3
+    ) -> bool:
         """
         Decide whether to continue idea generation or stop.
 
@@ -366,14 +364,12 @@ class ExecutiveControlNetwork:
 
         # Count ideas meeting target score
         good_ideas = sum(
-            1 for e in evaluations
-            if e.overall_score >= self.current_goal.target_score
+            1 for e in evaluations if e.overall_score >= self.current_goal.target_score
         )
 
         return good_ideas < target_count
 
-    def get_improvement_suggestions(self,
-                                    evaluation: Evaluation) -> List[str]:
+    def get_improvement_suggestions(self, evaluation: Evaluation) -> List[str]:
         """Generate specific improvement suggestions"""
         suggestions = []
 
@@ -396,15 +392,15 @@ class ExecutiveControlNetwork:
 
         return suggestions
 
-    def compare_ideas(self,
-                      eval1: Evaluation,
-                      eval2: Evaluation) -> Dict[str, Any]:
+    def compare_ideas(self, eval1: Evaluation, eval2: Evaluation) -> Dict[str, Any]:
         """Compare two ideas across all criteria"""
         comparison = {
-            "overall_winner": eval1.idea_id if eval1.overall_score > eval2.overall_score else eval2.idea_id,
+            "overall_winner": eval1.idea_id
+            if eval1.overall_score > eval2.overall_score
+            else eval2.idea_id,
             "score_difference": abs(eval1.overall_score - eval2.overall_score),
             "criterion_winners": {},
-            "tradeoffs": []
+            "tradeoffs": [],
         }
 
         for criterion in EvaluationCriterion:

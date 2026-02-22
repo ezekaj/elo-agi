@@ -25,16 +25,18 @@ except ImportError:
 
 class BroadcastPriority(Enum):
     """Priority levels for broadcasts."""
-    CRITICAL = 4    # Emergency, immediate attention required
-    HIGH = 3        # Important, should be processed soon
-    NORMAL = 2      # Standard broadcast
-    LOW = 1         # Background information
-    MINIMAL = 0     # Can be ignored if busy
+
+    CRITICAL = 4  # Emergency, immediate attention required
+    HIGH = 3  # Important, should be processed soon
+    NORMAL = 2  # Standard broadcast
+    LOW = 1  # Background information
+    MINIMAL = 0  # Can be ignored if busy
 
 
 @dataclass
 class BroadcastParams:
     """Parameters for the broadcast system."""
+
     broadcast_strength: float = 1.0
     max_history_size: int = 100
     enable_filtering: bool = True
@@ -45,6 +47,7 @@ class BroadcastParams:
 @dataclass
 class BroadcastEvent:
     """Record of a broadcast event."""
+
     proposal: ModuleProposal
     timestamp: float
     priority: BroadcastPriority
@@ -115,7 +118,7 @@ class BroadcastSystem:
                 priority=priority,
                 recipients=[],
                 success_rate=0.0,
-                metadata={'skipped': True, 'reason': 'rate_limited'},
+                metadata={"skipped": True, "reason": "rate_limited"},
             )
 
         # Amplify broadcast content
@@ -165,7 +168,7 @@ class BroadcastSystem:
             confidence=proposal.confidence,
             relevance=proposal.relevance,
             timestamp=proposal.timestamp,
-            metadata={**proposal.metadata, 'amplified': True},
+            metadata={**proposal.metadata, "amplified": True},
         )
 
     def _filter_recipients(
@@ -237,10 +240,10 @@ class BroadcastSystem:
         """Get broadcast statistics."""
         if not self._history:
             return {
-                'total_broadcasts': 0,
-                'avg_success_rate': 0.0,
-                'broadcasts_by_type': {},
-                'broadcasts_by_source': {},
+                "total_broadcasts": 0,
+                "avg_success_rate": 0.0,
+                "broadcasts_by_type": {},
+                "broadcasts_by_source": {},
             }
 
         # Count by type
@@ -256,11 +259,11 @@ class BroadcastSystem:
             by_source[source_name] = by_source.get(source_name, 0) + 1
 
         return {
-            'total_broadcasts': len(self._history),
-            'avg_success_rate': np.mean([e.success_rate for e in self._history]),
-            'broadcasts_by_type': by_type,
-            'broadcasts_by_source': by_source,
-            'last_broadcast_time': self._last_broadcast_time,
+            "total_broadcasts": len(self._history),
+            "avg_success_rate": np.mean([e.success_rate for e in self._history]),
+            "broadcasts_by_type": by_type,
+            "broadcasts_by_source": by_source,
+            "last_broadcast_time": self._last_broadcast_time,
         }
 
     def reset(self) -> None:

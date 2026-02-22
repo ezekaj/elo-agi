@@ -23,6 +23,7 @@ import numpy as np
 
 class MoralFramework(Enum):
     """Moral reasoning frameworks."""
+
     DEONTOLOGICAL = "deontological"
     UTILITARIAN = "utilitarian"
     MIXED = "mixed"
@@ -30,10 +31,11 @@ class MoralFramework(Enum):
 
 class HarmType(Enum):
     """Types of harm in moral scenarios."""
-    PERSONAL = "personal"      # Direct physical harm (pushing someone)
+
+    PERSONAL = "personal"  # Direct physical harm (pushing someone)
     IMPERSONAL = "impersonal"  # Indirect harm (flipping a switch)
-    OMISSION = "omission"      # Harm by not acting
-    ACTION = "action"          # Harm by acting
+    OMISSION = "omission"  # Harm by not acting
+    ACTION = "action"  # Harm by acting
 
 
 @dataclass
@@ -43,6 +45,7 @@ class MoralScenario:
 
     Example: Trolley problem variants
     """
+
     name: str
     description: str
     action_description: str
@@ -50,13 +53,14 @@ class MoralScenario:
     lives_saved: int
     lives_lost: int
     personal_involvement: float  # 0-1, how personally involved in harm
-    emotional_intensity: float   # 0-1, emotional weight of scenario
+    emotional_intensity: float  # 0-1, emotional weight of scenario
     context: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class MoralDecision:
     """Result of moral reasoning."""
+
     action_taken: bool
     framework_used: MoralFramework
     confidence: float
@@ -83,12 +87,12 @@ class DeontologicalSystem:
 
         # Core moral rules (simplified)
         self.moral_rules: Dict[str, float] = {
-            'do_not_kill': 1.0,
-            'do_not_harm': 0.9,
-            'do_not_lie': 0.7,
-            'do_not_steal': 0.8,
-            'help_others': 0.5,
-            'keep_promises': 0.6,
+            "do_not_kill": 1.0,
+            "do_not_harm": 0.9,
+            "do_not_lie": 0.7,
+            "do_not_steal": 0.8,
+            "help_others": 0.5,
+            "keep_promises": 0.6,
         }
 
         # Personal harm aversion (key to trolley problem responses)
@@ -126,10 +130,7 @@ class DeontologicalSystem:
 
     def is_personal_harm(self, scenario: MoralScenario) -> bool:
         """Check if scenario involves personal/direct harm."""
-        return (
-            scenario.harm_type == HarmType.PERSONAL or
-            scenario.personal_involvement > 0.5
-        )
+        return scenario.harm_type == HarmType.PERSONAL or scenario.personal_involvement > 0.5
 
     def emotional_response(self, scenario: MoralScenario) -> float:
         """
@@ -165,10 +166,7 @@ class UtilitarianSystem:
         self.life_value = 1.0
         self.suffering_weight = 0.5
 
-    def evaluate(
-        self,
-        scenario: MoralScenario
-    ) -> Tuple[float, str]:
+    def evaluate(self, scenario: MoralScenario) -> Tuple[float, str]:
         """
         Evaluate action based on utilitarian calculus.
 
@@ -197,10 +195,10 @@ class UtilitarianSystem:
     def cost_benefit_analysis(self, scenario: MoralScenario) -> Dict[str, float]:
         """Detailed cost-benefit breakdown."""
         return {
-            'lives_saved': scenario.lives_saved,
-            'lives_lost': scenario.lives_lost,
-            'net_lives': scenario.lives_saved - scenario.lives_lost,
-            'utility_score': (scenario.lives_saved - scenario.lives_lost) * self.life_value
+            "lives_saved": scenario.lives_saved,
+            "lives_lost": scenario.lives_lost,
+            "net_lives": scenario.lives_saved - scenario.lives_lost,
+            "utility_score": (scenario.lives_saved - scenario.lives_lost) * self.life_value,
         }
 
 
@@ -288,7 +286,7 @@ class MoralDilemmaProcessor:
             utilitarian_weight=util_weight,
             reasoning=reasoning,
             emotional_response=emotional,
-            deliberation_time=deliberation
+            deliberation_time=deliberation,
         )
 
     def _compute_weights(self, scenario: MoralScenario) -> Tuple[float, float]:
@@ -325,8 +323,8 @@ class VMPFCLesionModel:
     """
 
     def __init__(self):
-        self.emotional_blunting = 0.8   # Reduced emotional response
-        self.utilitarian_bias = 0.9     # Stronger utilitarian tendency
+        self.emotional_blunting = 0.8  # Reduced emotional response
+        self.utilitarian_bias = 0.9  # Stronger utilitarian tendency
         self.intellectual_intact = True  # Reasoning preserved
 
         # Create lesioned processor
@@ -340,26 +338,24 @@ class VMPFCLesionModel:
         decision = self.processor.process_dilemma(scenario)
 
         # Override to show lesion effects
-        decision.emotional_response *= (1 - self.emotional_blunting)
+        decision.emotional_response *= 1 - self.emotional_blunting
 
         return decision
 
-    def compare_with_healthy(
-        self,
-        scenario: MoralScenario
-    ) -> Dict[str, MoralDecision]:
+    def compare_with_healthy(self, scenario: MoralScenario) -> Dict[str, MoralDecision]:
         """
         Compare lesioned vs healthy processing.
         """
         healthy_processor = MoralDilemmaProcessor(vmpfc_intact=True)
 
         return {
-            'healthy': healthy_processor.process_dilemma(scenario),
-            'lesioned': self.process_moral_dilemma(scenario)
+            "healthy": healthy_processor.process_dilemma(scenario),
+            "lesioned": self.process_moral_dilemma(scenario),
         }
 
 
 # Pre-built scenarios for testing
+
 
 def create_trolley_switch() -> MoralScenario:
     """
@@ -375,7 +371,7 @@ def create_trolley_switch() -> MoralScenario:
         lives_saved=5,
         lives_lost=1,
         personal_involvement=0.1,
-        emotional_intensity=0.4
+        emotional_intensity=0.4,
     )
 
 
@@ -393,7 +389,7 @@ def create_trolley_push() -> MoralScenario:
         lives_saved=5,
         lives_lost=1,
         personal_involvement=0.9,
-        emotional_intensity=0.9
+        emotional_intensity=0.9,
     )
 
 
@@ -411,5 +407,5 @@ def create_crying_baby() -> MoralScenario:
         lives_saved=20,
         lives_lost=1,
         personal_involvement=1.0,
-        emotional_intensity=1.0
+        emotional_intensity=1.0,
     )

@@ -20,12 +20,19 @@ import time
 
 from .agent import CognitiveAgent, AgentParams, AgentRole, ModuleProposal
 from .population import AgentPopulation, PopulationParams, PopulationState
-from .coordination import EmergentCoordination, CoordinationMechanism, CoordinationParams, Task, Action
+from .coordination import (
+    EmergentCoordination,
+    CoordinationMechanism,
+    CoordinationParams,
+    Task,
+    Action,
+)
 from .collective_memory import CollectiveMemory, MemoryParams, MemoryEntry
 
 
 class ProblemStatus(Enum):
     """Status of a problem."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     SOLVED = "solved"
@@ -35,6 +42,7 @@ class ProblemStatus(Enum):
 @dataclass
 class Problem:
     """A problem to be solved collectively."""
+
     problem_id: str
     description: str
     input_state: np.ndarray
@@ -47,6 +55,7 @@ class Problem:
 @dataclass
 class Solution:
     """A solution produced by the swarm."""
+
     problem_id: str
     output: np.ndarray
     confidence: float
@@ -59,6 +68,7 @@ class Solution:
 @dataclass
 class SwarmParams:
     """Parameters for swarm intelligence."""
+
     n_agents: int = 10
     coordination_mechanism: CoordinationMechanism = CoordinationMechanism.BROADCAST
     convergence_threshold: float = 0.9  # Consensus for solution
@@ -70,6 +80,7 @@ class SwarmParams:
 @dataclass
 class SwarmState:
     """Current state of the swarm."""
+
     n_agents: int
     n_problems_solved: int
     mean_solution_quality: float
@@ -108,19 +119,25 @@ class SwarmIntelligence:
         role_dist = self._build_role_distribution()
 
         # Initialize components
-        self.population = AgentPopulation(PopulationParams(
-            n_agents=self.params.n_agents,
-            role_distribution=role_dist,
-        ))
+        self.population = AgentPopulation(
+            PopulationParams(
+                n_agents=self.params.n_agents,
+                role_distribution=role_dist,
+            )
+        )
 
-        self.coordination = EmergentCoordination(CoordinationParams(
-            mechanism=self.params.coordination_mechanism,
-        ))
+        self.coordination = EmergentCoordination(
+            CoordinationParams(
+                mechanism=self.params.coordination_mechanism,
+            )
+        )
 
-        self.collective_memory = CollectiveMemory(MemoryParams(
-            capacity=1000,
-            decay_rate=0.01,
-        ))
+        self.collective_memory = CollectiveMemory(
+            MemoryParams(
+                capacity=1000,
+                decay_rate=0.01,
+            )
+        )
 
         # Problem tracking
         self._current_problem: Optional[Problem] = None
@@ -175,8 +192,7 @@ class SwarmIntelligence:
             difficulty=problem.difficulty,
         )
         role_assignments = self.coordination.role_assignment(
-            list(self.population.agents.values()),
-            task
+            list(self.population.agents.values()), task
         )
 
         # Update agent roles
@@ -198,7 +214,7 @@ class SwarmIntelligence:
             # Coordinate actions
             actions = self.coordination.coordinate(
                 list(self.population.agents.values()),
-                problem.target if problem.target is not None else problem.input_state
+                problem.target if problem.target is not None else problem.input_state,
             )
 
             # Process actions and update best output
@@ -227,9 +243,7 @@ class SwarmIntelligence:
                 break
 
             # Detect emergent patterns
-            patterns = self.coordination.detect_emergence(
-                list(self.population.agents.values())
-            )
+            patterns = self.coordination.detect_emergence(list(self.population.agents.values()))
 
         # Compute solution quality
         quality = self._compute_quality(problem, best_output)
@@ -295,8 +309,7 @@ class SwarmIntelligence:
             if agent:
                 # Boost or penalize based on reward
                 agent._activation = np.clip(
-                    agent._activation + (reward - 0.5) * self.params.learning_rate,
-                    0.1, 1.0
+                    agent._activation + (reward - 0.5) * self.params.learning_rate, 0.1, 1.0
                 )
 
                 # Record contribution
@@ -346,8 +359,7 @@ class SwarmIntelligence:
     def get_state(self) -> SwarmState:
         """Get current swarm state."""
         mean_quality = (
-            self._total_quality / self._problems_solved
-            if self._problems_solved > 0 else 0.0
+            self._total_quality / self._problems_solved if self._problems_solved > 0 else 0.0
         )
 
         return SwarmState(
@@ -364,30 +376,24 @@ class SwarmIntelligence:
         state = self.get_state()
 
         return {
-            'n_agents': state.n_agents,
-            'step_count': self._step_count,
-            'problems_solved': self._problems_solved,
-            'mean_solution_quality': state.mean_solution_quality,
-            'collective_memory_size': state.collective_memory_size,
-            'diversity': state.diversity,
-            'consensus': state.consensus,
-            'population_stats': self.population.get_statistics(),
-            'coordination_stats': self.coordination.get_statistics(),
-            'memory_stats': self.collective_memory.get_statistics(),
+            "n_agents": state.n_agents,
+            "step_count": self._step_count,
+            "problems_solved": self._problems_solved,
+            "mean_solution_quality": state.mean_solution_quality,
+            "collective_memory_size": state.collective_memory_size,
+            "diversity": state.diversity,
+            "consensus": state.consensus,
+            "population_stats": self.population.get_statistics(),
+            "coordination_stats": self.coordination.get_statistics(),
+            "memory_stats": self.collective_memory.get_statistics(),
         }
 
     def get_top_performers(self, n: int = 5) -> List[Tuple[str, Dict[str, Any]]]:
         """Get top performing agents."""
-        agents_stats = [
-            (a.agent_id, a.get_statistics())
-            for a in self.population.agents.values()
-        ]
+        agents_stats = [(a.agent_id, a.get_statistics()) for a in self.population.agents.values()]
 
         # Sort by total contribution
-        agents_stats.sort(
-            key=lambda x: x[1]['total_contribution'],
-            reverse=True
-        )
+        agents_stats.sort(key=lambda x: x[1]["total_contribution"], reverse=True)
 
         return agents_stats[:n]
 

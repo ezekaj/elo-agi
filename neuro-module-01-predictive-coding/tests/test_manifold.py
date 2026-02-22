@@ -7,8 +7,9 @@ from neuro.modules.m01_predictive_coding.cognitive_manifold import (
     CognitiveManifold,
     DualProcess,
     FlowType,
-    AttractorLandscape
+    AttractorLandscape,
 )
+
 
 class TestCognitiveState:
     """Tests for cognitive state representation"""
@@ -95,6 +96,7 @@ class TestCognitiveState:
         assert np.allclose(copy.velocity, state.velocity)
         assert copy is not state
 
+
 class TestCognitiveManifold:
     """Tests for cognitive manifold with potential"""
 
@@ -146,10 +148,7 @@ class TestCognitiveManifold:
     def test_flow_decreases_potential(self):
         """Test gradient flow decreases potential"""
         manifold = CognitiveManifold(
-            dim=2,
-            parsimony_weight=1.0,
-            utility_weight=0.0,
-            accuracy_weight=0.0
+            dim=2, parsimony_weight=1.0, utility_weight=0.0, accuracy_weight=0.0
         )
         manifold.state.position = np.array([2.0, 2.0])
 
@@ -166,10 +165,7 @@ class TestCognitiveManifold:
     def test_flow_toward_goal(self):
         """Test flow moves state toward goal"""
         manifold = CognitiveManifold(
-            dim=2,
-            utility_weight=1.0,
-            parsimony_weight=0.0,
-            accuracy_weight=0.0
+            dim=2, utility_weight=1.0, parsimony_weight=0.0, accuracy_weight=0.0
         )
         goal = np.array([5.0, 5.0])
         manifold.set_goal(goal)
@@ -187,19 +183,12 @@ class TestCognitiveManifold:
     def test_convergence(self):
         """Test flow_until_convergence"""
         manifold = CognitiveManifold(
-            dim=2,
-            utility_weight=1.0,
-            parsimony_weight=0.1,
-            accuracy_weight=0.0
+            dim=2, utility_weight=1.0, parsimony_weight=0.1, accuracy_weight=0.0
         )
         manifold.set_goal(np.array([1.0, 1.0]))
         manifold.state.position = np.array([0.0, 0.0])
 
-        final_pos, steps = manifold.flow_until_convergence(
-            dt=0.1,
-            max_steps=500,
-            tolerance=1e-5
-        )
+        final_pos, steps = manifold.flow_until_convergence(dt=0.1, max_steps=500, tolerance=1e-5)
 
         # Should converge before max steps
         assert steps < 500
@@ -234,6 +223,7 @@ class TestCognitiveManifold:
 
         # Natural gradient accounts for metric
         assert not np.allclose(euclidean, natural)
+
 
 class TestDualProcess:
     """Tests for dual-process cognition emergence"""
@@ -293,10 +283,7 @@ class TestDualProcess:
     def test_think_returns_trajectory(self):
         """Test complete thinking process"""
         manifold = CognitiveManifold(
-            dim=2,
-            parsimony_weight=1.0,
-            utility_weight=0.0,
-            accuracy_weight=0.0
+            dim=2, parsimony_weight=1.0, utility_weight=0.0, accuracy_weight=0.0
         )
         dp = DualProcess(manifold)
         manifold.state.position = np.array([2.0, 2.0])
@@ -321,10 +308,7 @@ class TestDualProcess:
     def test_dual_process_emergence(self):
         """Test that dual-process behavior emerges from geometry"""
         manifold = CognitiveManifold(
-            dim=2,
-            parsimony_weight=1.0,
-            utility_weight=0.0,
-            accuracy_weight=0.0
+            dim=2, parsimony_weight=1.0, utility_weight=0.0, accuracy_weight=0.0
         )
         dp = DualProcess(manifold, fast_threshold=1.0, slow_threshold=0.1)
 
@@ -341,6 +325,7 @@ class TestDualProcess:
             # Late phase should have more System 2
             # (This is a soft test as exact dynamics depend on parameters)
             assert len(systems) > 0
+
 
 class TestAttractorLandscape:
     """Tests for attractor dynamics"""
@@ -392,5 +377,6 @@ class TestAttractorLandscape:
         assert landscape.in_basin(np.array([0.5, 0.5]), 0, radius=1.0)
         assert not landscape.in_basin(np.array([2.0, 2.0]), 0, radius=1.0)
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -19,6 +19,7 @@ from .situated_cognition import ContextualReasoner, SituatedParams
 @dataclass
 class EnactiveParams:
     """Parameters for enactive system"""
+
     n_features: int = 50
     adaptation_rate: float = 0.1
     coupling_strength: float = 0.5
@@ -61,7 +62,7 @@ class AutopoieticSystem:
             "internal_state": self.internal_state.copy(),
             "energy": self.energy,
             "boundary_integrity": self.boundary_integrity,
-            "homeostatic_error": np.mean(np.abs(error))
+            "homeostatic_error": np.mean(np.abs(error)),
         }
 
     def interact_with_environment(self, environmental_input: np.ndarray) -> Dict:
@@ -80,7 +81,7 @@ class AutopoieticSystem:
         return {
             "perturbation": perturbation,
             "new_state": self.internal_state.copy(),
-            "boundary_stress": perturbation_strength
+            "boundary_stress": perturbation_strength,
         }
 
     def replenish_energy(self, amount: float):
@@ -111,8 +112,9 @@ class SensoriMotorEnaction:
         # History of sensorimotor interactions
         self.interaction_history = []
 
-    def learn_contingency(self, action_name: str, motor_pattern: np.ndarray,
-                         sensory_consequence: np.ndarray):
+    def learn_contingency(
+        self, action_name: str, motor_pattern: np.ndarray, sensory_consequence: np.ndarray
+    ):
         """Learn sensorimotor contingency"""
         if len(motor_pattern) != self.params.n_features:
             motor_pattern = np.resize(motor_pattern, self.params.n_features)
@@ -121,7 +123,7 @@ class SensoriMotorEnaction:
 
         self.contingencies[action_name] = {
             "motor": motor_pattern.copy(),
-            "sensory": sensory_consequence.copy()
+            "sensory": sensory_consequence.copy(),
         }
 
     def enact(self, action_name: str) -> Dict:
@@ -137,17 +139,19 @@ class SensoriMotorEnaction:
         # Sensory consequence (with noise)
         self.sensory_state = contingency["sensory"] + np.random.randn(self.params.n_features) * 0.1
 
-        self.interaction_history.append({
-            "action": action_name,
-            "motor": self.motor_state.copy(),
-            "sensory": self.sensory_state.copy()
-        })
+        self.interaction_history.append(
+            {
+                "action": action_name,
+                "motor": self.motor_state.copy(),
+                "sensory": self.sensory_state.copy(),
+            }
+        )
 
         return {
             "success": True,
             "action": action_name,
             "motor_state": self.motor_state.copy(),
-            "sensory_state": self.sensory_state.copy()
+            "sensory_state": self.sensory_state.copy(),
         }
 
     def perceive_through_action(self, target_sensory: np.ndarray) -> Dict:
@@ -161,8 +165,7 @@ class SensoriMotorEnaction:
 
         for action_name, contingency in self.contingencies.items():
             similarity = np.dot(contingency["sensory"], target_sensory) / (
-                np.linalg.norm(contingency["sensory"]) *
-                np.linalg.norm(target_sensory) + 1e-8
+                np.linalg.norm(contingency["sensory"]) * np.linalg.norm(target_sensory) + 1e-8
             )
             if similarity > best_similarity:
                 best_similarity = similarity
@@ -178,7 +181,7 @@ class SensoriMotorEnaction:
         return {
             "n_contingencies": len(self.contingencies),
             "contingency_names": list(self.contingencies.keys()),
-            "n_interactions": len(self.interaction_history)
+            "n_interactions": len(self.interaction_history),
         }
 
 
@@ -193,8 +196,7 @@ class EnactiveCognitiveSystem:
 
         # Core components
         sm_params = SensorimotorParams(
-            n_sensory=self.params.n_features,
-            n_motor=self.params.n_features
+            n_sensory=self.params.n_features, n_motor=self.params.n_features
         )
         self.sensorimotor_loop = SensorimotorLoop(sm_params)
 
@@ -231,14 +233,12 @@ class EnactiveCognitiveSystem:
         if sm_result["surprise"] < 0.3:  # Low surprise -> stable enough to learn
             concept_name = f"experience_{self.time}"
             self.concept_grounding.ground_concept(
-                concept_name,
-                sm_result["sensory_input"],
-                "proprioceptive"
+                concept_name, sm_result["sensory_input"], "proprioceptive"
             )
 
         # Update situated context
         self.situated_reasoning.context.set_physical_context(
-            sm_result["sensory_input"][:self.params.n_features // 3]
+            sm_result["sensory_input"][: self.params.n_features // 3]
         )
 
         self.time += 1
@@ -247,11 +247,12 @@ class EnactiveCognitiveSystem:
             "viable": True,
             "maintenance": maintenance,
             "sensorimotor": sm_result,
-            "energy": self.autopoietic.energy
+            "energy": self.autopoietic.energy,
         }
 
-    def learn_action(self, action_name: str, motor_pattern: np.ndarray,
-                    sensory_consequence: np.ndarray):
+    def learn_action(
+        self, action_name: str, motor_pattern: np.ndarray, sensory_consequence: np.ndarray
+    ):
         """Learn an action across all systems"""
         self.action_understanding.learn_action(action_name, motor_pattern)
         self.sensorimotor_enaction.learn_contingency(
@@ -288,10 +289,10 @@ class EnactiveCognitiveSystem:
             "autopoietic": {
                 "energy": self.autopoietic.energy,
                 "boundary_integrity": self.autopoietic.boundary_integrity,
-                "viable": self.autopoietic.is_viable()
+                "viable": self.autopoietic.is_viable(),
             },
             "sensorimotor": self.sensorimotor_loop.get_state(),
             "concepts": len(self.concept_grounding.concepts),
             "situated": self.situated_reasoning.get_state(),
-            "actions_learned": len(self.action_understanding.simulator.action_representations)
+            "actions_learned": len(self.action_understanding.simulator.action_representations),
         }

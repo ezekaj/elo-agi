@@ -11,7 +11,8 @@ Demonstrates:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 import numpy as np
 from src import (
@@ -43,12 +44,7 @@ def demo_navigation():
     print("\n2. CREATING COGNITIVE MAP")
     print("-" * 40)
 
-    cmap = CognitiveMap(
-        environment=env,
-        n_place_cells=200,
-        n_grid_modules=4,
-        random_seed=42
-    )
+    cmap = CognitiveMap(environment=env, n_place_cells=200, n_grid_modules=4, random_seed=42)
 
     print(f"Place cells: {len(cmap.place_cells)}")
     print(f"Grid modules: {len(cmap.grid_cells.modules)}")
@@ -127,7 +123,7 @@ def demo_navigation():
     print(f"Initial heading: {cmap.get_heading_degrees():.1f}°")
 
     for _ in range(4):
-        cmap.update(velocity=np.zeros(2), angular_velocity=np.pi/4, dt=1.0)
+        cmap.update(velocity=np.zeros(2), angular_velocity=np.pi / 4, dt=1.0)
         state = cmap.get_state()
 
         # Find peak head direction cell
@@ -192,12 +188,11 @@ def demo_navigation():
 
     # Walk in a square
     for direction, steps in [("east", 10), ("north", 10), ("west", 10), ("south", 10)]:
-        heading_map = {"east": 0, "north": np.pi/2, "west": np.pi, "south": 3*np.pi/2}
+        heading_map = {"east": 0, "north": np.pi / 2, "west": np.pi, "south": 3 * np.pi / 2}
         cmap.set_heading(heading_map[direction])
 
         for _ in range(steps):
-            velocity = 0.02 * np.array([np.cos(cmap.get_heading()),
-                                        np.sin(cmap.get_heading())])
+            velocity = 0.02 * np.array([np.cos(cmap.get_heading()), np.sin(cmap.get_heading())])
             cmap.update(velocity=velocity, dt=1.0)
 
     trajectory = cmap.get_trajectory()

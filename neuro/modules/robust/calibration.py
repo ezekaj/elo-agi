@@ -17,6 +17,7 @@ import numpy as np
 
 class CalibrationMethod(Enum):
     """Calibration methods."""
+
     TEMPERATURE = "temperature"
     PLATT = "platt"
     ISOTONIC = "isotonic"
@@ -27,9 +28,10 @@ class CalibrationMethod(Enum):
 @dataclass
 class CalibrationMetrics:
     """Calibration evaluation metrics."""
-    ece: float                       # Expected Calibration Error
-    mce: float                       # Maximum Calibration Error
-    brier_score: float               # Brier score
+
+    ece: float  # Expected Calibration Error
+    mce: float  # Maximum Calibration Error
+    brier_score: float  # Brier score
     reliability_diagram: Dict[str, np.ndarray]
     n_samples: int
 
@@ -37,6 +39,7 @@ class CalibrationMetrics:
 @dataclass
 class CalibrationResult:
     """Result of calibration."""
+
     calibrated_probs: np.ndarray
     method: CalibrationMethod
     parameters: Dict[str, Any]
@@ -150,7 +153,9 @@ class ConfidenceCalibrator:
 
     def _apply_isotonic(self, prob: float, class_idx: int) -> float:
         """Apply isotonic regression for a single probability."""
-        if self._isotonic_calibrator is None or class_idx >= len(self._isotonic_calibrator["mappings"]):
+        if self._isotonic_calibrator is None or class_idx >= len(
+            self._isotonic_calibrator["mappings"]
+        ):
             return prob
 
         mapping = self._isotonic_calibrator["mappings"][class_idx]
@@ -182,10 +187,7 @@ class ConfidenceCalibrator:
 
         calibrated = np.zeros_like(probs)
         for i in range(len(probs)):
-            bin_idx = min(
-                int(probs[i] * self.n_bins),
-                self.n_bins - 1
-            )
+            bin_idx = min(int(probs[i] * self.n_bins), self.n_bins - 1)
             if i < len(self._histogram_calibrator):
                 calibrated[i] = self._histogram_calibrator[i][bin_idx]
             else:
@@ -254,14 +256,11 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit temperature parameter."""
         # Grid search for optimal temperature
-        best_ece = float('inf')
+        best_ece = float("inf")
         best_temp = 1.0
 
         for temp in np.linspace(0.5, 5.0, 50):
-            probs = np.array([
-                self.temperature_scaling(l, temp)
-                for l in logits
-            ])
+            probs = np.array([self.temperature_scaling(l, temp) for l in logits])
             ece = self._compute_ece(probs, labels)
 
             if ece < best_ece:
@@ -277,16 +276,13 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit Platt scaling parameters."""
         # Simplified fitting using grid search
-        best_ece = float('inf')
+        best_ece = float("inf")
         best_a = 1.0
         best_b = 0.0
 
         for a in np.linspace(0.5, 2.0, 20):
             for b in np.linspace(-1.0, 1.0, 20):
-                probs = np.array([
-                    self.platt_scaling(l, a, b)
-                    for l in logits
-                ])
+                probs = np.array([self.platt_scaling(l, a, b) for l in logits])
                 ece = self._compute_ece(probs, labels)
 
                 if ece < best_ece:
@@ -304,10 +300,7 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit isotonic regression."""
         n_classes = logits.shape[1]
-        probs = np.array([
-            np.exp(l - np.max(l)) / np.sum(np.exp(l - np.max(l)))
-            for l in logits
-        ])
+        probs = np.array([np.exp(l - np.max(l)) / np.sum(np.exp(l - np.max(l))) for l in logits])
 
         self._isotonic_calibrator = {"mappings": []}
 
@@ -333,10 +326,12 @@ class ConfidenceCalibrator:
                     x_vals.append(np.mean(sorted_probs[start:end]))
                     y_vals.append(np.mean(sorted_labels[start:end]))
 
-            self._isotonic_calibrator["mappings"].append({
-                "x": np.array(x_vals),
-                "y": np.array(y_vals),
-            })
+            self._isotonic_calibrator["mappings"].append(
+                {
+                    "x": np.array(x_vals),
+                    "y": np.array(y_vals),
+                }
+            )
 
     def _fit_histogram(
         self,
@@ -345,10 +340,7 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit histogram binning."""
         n_classes = logits.shape[1]
-        probs = np.array([
-            np.exp(l - np.max(l)) / np.sum(np.exp(l - np.max(l)))
-            for l in logits
-        ])
+        probs = np.array([np.exp(l - np.max(l)) / np.sum(np.exp(l - np.max(l))) for l in logits])
 
         self._histogram_calibrator = []
 
@@ -416,10 +408,7 @@ class ConfidenceCalibrator:
         logits: np.ndarray,
     ) -> np.ndarray:
         """Calibrate batch of logits."""
-        return np.array([
-            self.calibrate(l).calibrated_probs
-            for l in logits
-        ])
+        return np.array([self.calibrate(l).calibrated_probs for l in logits])
 
     def expected_calibration_error(
         self,

@@ -22,6 +22,7 @@ from collections import defaultdict
 @dataclass
 class Episode:
     """A single episodic memory."""
+
     id: str
     content: str
     embedding: np.ndarray
@@ -56,7 +57,7 @@ class EpisodicMemoryStore:
         storage_path: str = None,
         hot_cache_size: int = 1000,
         cold_threshold_days: int = 7,
-        decay_rate: float = 0.01
+        decay_rate: float = 0.01,
     ):
         self.storage_path = Path(storage_path or "~/.neuro/episodic").expanduser()
         self.storage_path.mkdir(parents=True, exist_ok=True)
@@ -71,8 +72,8 @@ class EpisodicMemoryStore:
 
         # Multi-indices
         self.temporal_index: Dict[str, List[str]] = defaultdict(list)  # date -> episode_ids
-        self.entity_index: Dict[str, List[str]] = defaultdict(list)    # entity -> episode_ids
-        self.topic_index: Dict[str, List[str]] = defaultdict(list)     # topic -> episode_ids
+        self.entity_index: Dict[str, List[str]] = defaultdict(list)  # entity -> episode_ids
+        self.topic_index: Dict[str, List[str]] = defaultdict(list)  # topic -> episode_ids
 
         # Load existing memories
         self._load()
@@ -96,7 +97,7 @@ class EpisodicMemoryStore:
         context: Dict[str, Any] = None,
         entities: List[str] = None,
         topic: str = "",
-        importance: float = 0.5
+        importance: float = 0.5,
     ) -> str:
         """Store an episodic memory."""
         episode_id = f"ep_{int(datetime.now().timestamp())}_{len(self.hot_cache)}"
@@ -109,7 +110,7 @@ class EpisodicMemoryStore:
             context=context or {},
             entities=entities or [],
             topic=topic,
-            importance=importance
+            importance=importance,
         )
 
         # Add to hot cache
@@ -153,7 +154,7 @@ class EpisodicMemoryStore:
                 to_move.append(eid)
 
         # Move to cold storage
-        for eid in to_move[:len(self.hot_cache) - self.hot_cache_size]:
+        for eid in to_move[: len(self.hot_cache) - self.hot_cache_size]:
             self.cold_store[eid] = self.hot_cache.pop(eid)
 
     def retrieve(
@@ -164,7 +165,7 @@ class EpisodicMemoryStore:
         topic: str = None,
         start_date: datetime = None,
         end_date: datetime = None,
-        k: int = 5
+        k: int = 5,
     ) -> List[Tuple[Episode, float]]:
         """
         Retrieve episodes using multi-index lookup.
@@ -230,7 +231,7 @@ class EpisodicMemoryStore:
             episode = self._get_episode(eid)
             if episode:
                 # Importance weight
-                scores[eid] *= (0.5 + episode.importance)
+                scores[eid] *= 0.5 + episode.importance
 
                 # Recency decay
                 days_old = (now - episode.timestamp).days
@@ -307,53 +308,53 @@ class EpisodicMemoryStore:
         # Save hot cache
         hot_data = {
             eid: {
-                'id': ep.id,
-                'content': ep.content,
-                'embedding': ep.embedding.tolist(),
-                'timestamp': ep.timestamp.isoformat(),
-                'context': ep.context,
-                'entities': ep.entities,
-                'topic': ep.topic,
-                'importance': ep.importance,
-                'access_count': ep.access_count,
-                'last_accessed': ep.last_accessed.isoformat(),
-                'consolidated': ep.consolidated
+                "id": ep.id,
+                "content": ep.content,
+                "embedding": ep.embedding.tolist(),
+                "timestamp": ep.timestamp.isoformat(),
+                "context": ep.context,
+                "entities": ep.entities,
+                "topic": ep.topic,
+                "importance": ep.importance,
+                "access_count": ep.access_count,
+                "last_accessed": ep.last_accessed.isoformat(),
+                "consolidated": ep.consolidated,
             }
             for eid, ep in self.hot_cache.items()
         }
 
-        with open(self.storage_path / "hot_cache.json", 'w') as f:
+        with open(self.storage_path / "hot_cache.json", "w") as f:
             json.dump(hot_data, f)
 
         # Save cold store
         cold_data = {
             eid: {
-                'id': ep.id,
-                'content': ep.content,
-                'embedding': ep.embedding.tolist(),
-                'timestamp': ep.timestamp.isoformat(),
-                'context': ep.context,
-                'entities': ep.entities,
-                'topic': ep.topic,
-                'importance': ep.importance,
-                'access_count': ep.access_count,
-                'last_accessed': ep.last_accessed.isoformat(),
-                'consolidated': ep.consolidated
+                "id": ep.id,
+                "content": ep.content,
+                "embedding": ep.embedding.tolist(),
+                "timestamp": ep.timestamp.isoformat(),
+                "context": ep.context,
+                "entities": ep.entities,
+                "topic": ep.topic,
+                "importance": ep.importance,
+                "access_count": ep.access_count,
+                "last_accessed": ep.last_accessed.isoformat(),
+                "consolidated": ep.consolidated,
             }
             for eid, ep in self.cold_store.items()
         }
 
-        with open(self.storage_path / "cold_store.json", 'w') as f:
+        with open(self.storage_path / "cold_store.json", "w") as f:
             json.dump(cold_data, f)
 
         # Save indices
         indices = {
-            'temporal': dict(self.temporal_index),
-            'entity': dict(self.entity_index),
-            'topic': dict(self.topic_index)
+            "temporal": dict(self.temporal_index),
+            "entity": dict(self.entity_index),
+            "topic": dict(self.topic_index),
         }
 
-        with open(self.storage_path / "indices.json", 'w') as f:
+        with open(self.storage_path / "indices.json", "w") as f:
             json.dump(indices, f)
 
     def _load(self) -> None:
@@ -366,17 +367,19 @@ class EpisodicMemoryStore:
                     hot_data = json.load(f)
                 for eid, data in hot_data.items():
                     self.hot_cache[eid] = Episode(
-                        id=data['id'],
-                        content=data['content'],
-                        embedding=np.array(data['embedding']),
-                        timestamp=datetime.fromisoformat(data['timestamp']),
-                        context=data.get('context', {}),
-                        entities=data.get('entities', []),
-                        topic=data.get('topic', ''),
-                        importance=data.get('importance', 0.5),
-                        access_count=data.get('access_count', 0),
-                        last_accessed=datetime.fromisoformat(data.get('last_accessed', data['timestamp'])),
-                        consolidated=data.get('consolidated', False)
+                        id=data["id"],
+                        content=data["content"],
+                        embedding=np.array(data["embedding"]),
+                        timestamp=datetime.fromisoformat(data["timestamp"]),
+                        context=data.get("context", {}),
+                        entities=data.get("entities", []),
+                        topic=data.get("topic", ""),
+                        importance=data.get("importance", 0.5),
+                        access_count=data.get("access_count", 0),
+                        last_accessed=datetime.fromisoformat(
+                            data.get("last_accessed", data["timestamp"])
+                        ),
+                        consolidated=data.get("consolidated", False),
                     )
             except Exception:
                 pass
@@ -389,17 +392,19 @@ class EpisodicMemoryStore:
                     cold_data = json.load(f)
                 for eid, data in cold_data.items():
                     self.cold_store[eid] = Episode(
-                        id=data['id'],
-                        content=data['content'],
-                        embedding=np.array(data['embedding']),
-                        timestamp=datetime.fromisoformat(data['timestamp']),
-                        context=data.get('context', {}),
-                        entities=data.get('entities', []),
-                        topic=data.get('topic', ''),
-                        importance=data.get('importance', 0.5),
-                        access_count=data.get('access_count', 0),
-                        last_accessed=datetime.fromisoformat(data.get('last_accessed', data['timestamp'])),
-                        consolidated=data.get('consolidated', False)
+                        id=data["id"],
+                        content=data["content"],
+                        embedding=np.array(data["embedding"]),
+                        timestamp=datetime.fromisoformat(data["timestamp"]),
+                        context=data.get("context", {}),
+                        entities=data.get("entities", []),
+                        topic=data.get("topic", ""),
+                        importance=data.get("importance", 0.5),
+                        access_count=data.get("access_count", 0),
+                        last_accessed=datetime.fromisoformat(
+                            data.get("last_accessed", data["timestamp"])
+                        ),
+                        consolidated=data.get("consolidated", False),
                     )
             except Exception:
                 pass
@@ -410,21 +415,21 @@ class EpisodicMemoryStore:
             try:
                 with open(indices_file) as f:
                     indices = json.load(f)
-                self.temporal_index = defaultdict(list, indices.get('temporal', {}))
-                self.entity_index = defaultdict(list, indices.get('entity', {}))
-                self.topic_index = defaultdict(list, indices.get('topic', {}))
+                self.temporal_index = defaultdict(list, indices.get("temporal", {}))
+                self.entity_index = defaultdict(list, indices.get("entity", {}))
+                self.topic_index = defaultdict(list, indices.get("topic", {}))
             except Exception:
                 pass
 
     def get_stats(self) -> Dict[str, Any]:
         """Get memory statistics."""
         return {
-            'hot_cache_size': len(self.hot_cache),
-            'cold_store_size': len(self.cold_store),
-            'total_memories': len(self.hot_cache) + len(self.cold_store),
-            'topics': len(self.topic_index),
-            'entities': len(self.entity_index),
-            'storage_path': str(self.storage_path)
+            "hot_cache_size": len(self.hot_cache),
+            "cold_store_size": len(self.cold_store),
+            "total_memories": len(self.hot_cache) + len(self.cold_store),
+            "topics": len(self.topic_index),
+            "entities": len(self.entity_index),
+            "storage_path": str(self.storage_path),
         }
 
 
@@ -441,19 +446,19 @@ if __name__ == "__main__":
         "Had a conversation about machine learning with Claude",
         entities=["Claude", "machine learning"],
         topic="AI",
-        importance=0.8
+        importance=0.8,
     )
     store.store(
         "Learned about neural network architectures",
         entities=["neural networks"],
         topic="AI",
-        importance=0.7
+        importance=0.7,
     )
     store.store(
         "Discussed Python programming best practices",
         entities=["Python"],
         topic="programming",
-        importance=0.5
+        importance=0.5,
     )
 
     # Test retrieval

@@ -15,6 +15,7 @@ from .fact_store import FactStore
 
 class PhysicsProperty(Enum):
     """Physical properties of objects."""
+
     SOLID = "solid"
     LIQUID = "liquid"
     GAS = "gas"
@@ -30,6 +31,7 @@ class PhysicsProperty(Enum):
 
 class SocialRelation(Enum):
     """Social relations between agents."""
+
     FRIEND = "friend"
     FAMILY = "family"
     COLLEAGUE = "colleague"
@@ -41,15 +43,17 @@ class SocialRelation(Enum):
 @dataclass
 class PhysicsRule:
     """A physics rule for reasoning."""
+
     name: str
     condition: str  # Simplified condition description
-    effect: str     # Simplified effect description
+    effect: str  # Simplified effect description
     confidence: float = 1.0
 
 
 @dataclass
 class SocialNorm:
     """A social norm or expectation."""
+
     name: str
     context: str
     expected_behavior: str
@@ -60,6 +64,7 @@ class SocialNorm:
 @dataclass
 class TemporalRelation:
     """A temporal relation between events."""
+
     event1: str
     event2: str
     relation: str  # before, after, during, overlaps, meets
@@ -462,7 +467,7 @@ class TemporalReasoner:
             "cooking": (20, 120),
             "showering": (5, 20),
             "sleeping": (300, 600),  # 5-10 hours
-            "working": (240, 600),   # 4-10 hours
+            "working": (240, 600),  # 4-10 hours
             "meeting": (30, 120),
             "phone_call": (2, 30),
             "driving_commute": (15, 90),
@@ -590,18 +595,12 @@ class CommonSenseReasoner:
 
         # Physics reasoning
         if context and "object" in context:
-            effects = self.physics.predict_effect(
-                context["object"],
-                query
-            )
+            effects = self.physics.predict_effect(context["object"], query)
             result["physics_effects"] = effects
 
         # Social reasoning
         norms = self.social.get_applicable_norms(query)
-        result["social_norms"] = [
-            {"name": n.name, "expected": n.expected_behavior}
-            for n in norms
-        ]
+        result["social_norms"] = [{"name": n.name, "expected": n.expected_behavior} for n in norms]
 
         # Temporal reasoning
         if context and "activity" in context:

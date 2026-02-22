@@ -16,19 +16,21 @@ from enum import Enum
 
 class TimingScale(Enum):
     """Temporal scales processed by different circuits"""
+
     MILLISECONDS = "milliseconds"  # <1s, cerebellum
-    SECONDS = "seconds"            # 1-60s, basal ganglia
-    MINUTES = "minutes"            # >60s, prefrontal
-    CIRCADIAN = "circadian"        # ~24h, SCN
+    SECONDS = "seconds"  # 1-60s, basal ganglia
+    MINUTES = "minutes"  # >60s, prefrontal
+    CIRCADIAN = "circadian"  # ~24h, SCN
 
 
 @dataclass
 class TemporalSignal:
     """A timing signal from a brain region"""
+
     source: str
-    duration_estimate: float      # Estimated duration in seconds
-    confidence: float             # 0-1, how confident in estimate
-    timestamp: float              # When this estimate was made
+    duration_estimate: float  # Estimated duration in seconds
+    confidence: float  # 0-1, how confident in estimate
+    timestamp: float  # When this estimate was made
     scale: TimingScale
     raw_signal: Optional[np.ndarray] = None
 
@@ -44,8 +46,8 @@ class Insula:
     def __init__(
         self,
         heartbeat_rate: float = 70.0,  # BPM
-        breathing_rate: float = 15.0,   # breaths per minute
-        interoceptive_accuracy: float = 0.7
+        breathing_rate: float = 15.0,  # breaths per minute
+        interoceptive_accuracy: float = 0.7,
     ):
         self.heartbeat_rate = heartbeat_rate
         self.breathing_rate = breathing_rate
@@ -60,9 +62,7 @@ class Insula:
         self.signal_history: List[Dict] = []
 
     def process_interoceptive_signal(
-        self,
-        duration: float,
-        arousal_level: float = 0.5
+        self, duration: float, arousal_level: float = 0.5
     ) -> TemporalSignal:
         """Process body signals over a duration.
 
@@ -97,29 +97,31 @@ class Insula:
         self.accumulated_breaths += breaths
         self.current_time += duration
 
-        self.signal_history.append({
-            'duration': duration,
-            'heartbeats': heartbeats,
-            'breaths': breaths,
-            'arousal': arousal_level,
-            'estimate': estimated_duration
-        })
+        self.signal_history.append(
+            {
+                "duration": duration,
+                "heartbeats": heartbeats,
+                "breaths": breaths,
+                "arousal": arousal_level,
+                "estimate": estimated_duration,
+            }
+        )
 
         return TemporalSignal(
             source="insula",
             duration_estimate=estimated_duration,
             confidence=self.interoceptive_accuracy * (1 - abs(arousal_level - 0.5)),
             timestamp=self.current_time,
-            scale=TimingScale.SECONDS
+            scale=TimingScale.SECONDS,
         )
 
     def get_body_rhythm(self) -> Dict[str, float]:
         """Get current body rhythm parameters."""
         return {
-            'heartbeat_rate': self.heartbeat_rate,
-            'breathing_rate': self.breathing_rate,
-            'heartbeat_period': 60.0 / self.heartbeat_rate,
-            'breathing_period': 60.0 / self.breathing_rate
+            "heartbeat_rate": self.heartbeat_rate,
+            "breathing_rate": self.breathing_rate,
+            "heartbeat_period": 60.0 / self.heartbeat_rate,
+            "breathing_period": 60.0 / self.breathing_rate,
         }
 
     def set_arousal_state(self, arousal: float) -> None:
@@ -146,7 +148,7 @@ class SMA:
     def __init__(
         self,
         motor_precision: float = 0.9,
-        action_tempo: float = 1.0  # Actions per second baseline
+        action_tempo: float = 1.0,  # Actions per second baseline
     ):
         self.motor_precision = motor_precision
         self.action_tempo = action_tempo
@@ -157,9 +159,7 @@ class SMA:
         self.motor_sequences: List[Dict] = []
 
     def time_motor_sequence(
-        self,
-        duration: float,
-        movement_complexity: float = 0.5
+        self, duration: float, movement_complexity: float = 0.5
     ) -> TemporalSignal:
         """Time a motor sequence.
 
@@ -183,25 +183,25 @@ class SMA:
         self.action_count += actions
         self.current_time += duration
 
-        self.motor_sequences.append({
-            'duration': duration,
-            'actions': actions,
-            'complexity': movement_complexity,
-            'estimate': estimated_duration
-        })
+        self.motor_sequences.append(
+            {
+                "duration": duration,
+                "actions": actions,
+                "complexity": movement_complexity,
+                "estimate": estimated_duration,
+            }
+        )
 
         return TemporalSignal(
             source="sma",
             duration_estimate=estimated_duration,
             confidence=effective_precision,
             timestamp=self.current_time,
-            scale=TimingScale.SECONDS
+            scale=TimingScale.SECONDS,
         )
 
     def coordinate_body_environment(
-        self,
-        external_rhythm: float,
-        duration: float
+        self, external_rhythm: float, duration: float
     ) -> TemporalSignal:
         """Synchronize timing with external environmental rhythm.
 
@@ -229,7 +229,7 @@ class SMA:
             duration_estimate=estimated_duration,
             confidence=sync_precision,
             timestamp=self.current_time,
-            scale=TimingScale.SECONDS
+            scale=TimingScale.SECONDS,
         )
 
     def reset(self) -> None:
@@ -251,7 +251,7 @@ class BasalGanglia:
         self,
         clock_speed: float = 1.0,  # Relative clock speed
         dopamine_level: float = 1.0,
-        memory_capacity: int = 7
+        memory_capacity: int = 7,
     ):
         self.base_clock_speed = clock_speed
         self.dopamine_level = dopamine_level
@@ -273,11 +273,7 @@ class BasalGanglia:
         # Higher dopamine = faster clock = time feels faster
         return self.base_clock_speed * self.dopamine_level
 
-    def time_interval(
-        self,
-        duration: float,
-        attention_level: float = 0.5
-    ) -> TemporalSignal:
+    def time_interval(self, duration: float, attention_level: float = 0.5) -> TemporalSignal:
         """Time an interval using the striatal clock.
 
         Args:
@@ -316,7 +312,7 @@ class BasalGanglia:
             duration_estimate=max(0, estimated_duration),
             confidence=confidence,
             timestamp=self.current_time,
-            scale=TimingScale.SECONDS if duration < 60 else TimingScale.MINUTES
+            scale=TimingScale.SECONDS if duration < 60 else TimingScale.MINUTES,
         )
 
     def _store_in_memory(self, duration: float) -> None:
@@ -325,11 +321,7 @@ class BasalGanglia:
         if len(self.temporal_memory) > self.memory_capacity:
             self.temporal_memory.pop(0)
 
-    def compare_to_reference(
-        self,
-        duration: float,
-        reference_name: str
-    ) -> float:
+    def compare_to_reference(self, duration: float, reference_name: str) -> float:
         """Compare duration to a learned reference.
 
         Args:
@@ -374,7 +366,7 @@ class Cerebellum:
     def __init__(
         self,
         precision: float = 0.95,
-        max_duration: float = 1.0  # Optimal for durations under 1s
+        max_duration: float = 1.0,  # Optimal for durations under 1s
     ):
         self.precision = precision
         self.max_duration = max_duration
@@ -382,10 +374,7 @@ class Cerebellum:
         self.current_time = 0.0
         self.timing_events: List[Dict] = []
 
-    def time_precise_interval(
-        self,
-        duration: float
-    ) -> TemporalSignal:
+    def time_precise_interval(self, duration: float) -> TemporalSignal:
         """Time a precise sub-second interval.
 
         Args:
@@ -409,25 +398,19 @@ class Cerebellum:
 
         self.current_time += duration
 
-        self.timing_events.append({
-            'duration': duration,
-            'estimate': estimated_duration,
-            'precision': effective_precision
-        })
+        self.timing_events.append(
+            {"duration": duration, "estimate": estimated_duration, "precision": effective_precision}
+        )
 
         return TemporalSignal(
             source="cerebellum",
             duration_estimate=max(0, estimated_duration),
             confidence=effective_precision,
             timestamp=self.current_time,
-            scale=TimingScale.MILLISECONDS
+            scale=TimingScale.MILLISECONDS,
         )
 
-    def time_rhythm(
-        self,
-        beat_interval: float,
-        n_beats: int
-    ) -> List[float]:
+    def time_rhythm(self, beat_interval: float, n_beats: int) -> List[float]:
         """Time a rhythmic sequence.
 
         Args:
@@ -445,11 +428,7 @@ class Cerebellum:
 
         return intervals
 
-    def synchronize_to_beat(
-        self,
-        target_interval: float,
-        current_estimate: float
-    ) -> float:
+    def synchronize_to_beat(self, target_interval: float, current_estimate: float) -> float:
         """Compute correction to synchronize with a beat.
 
         Args:
@@ -484,7 +463,7 @@ class TimeCircuit:
         insula: Optional[Insula] = None,
         sma: Optional[SMA] = None,
         basal_ganglia: Optional[BasalGanglia] = None,
-        cerebellum: Optional[Cerebellum] = None
+        cerebellum: Optional[Cerebellum] = None,
     ):
         self.insula = insula or Insula()
         self.sma = sma or SMA()
@@ -492,12 +471,7 @@ class TimeCircuit:
         self.cerebellum = cerebellum or Cerebellum()
 
         # Integration weights (can be learned/adjusted)
-        self.weights = {
-            'insula': 0.25,
-            'sma': 0.25,
-            'basal_ganglia': 0.35,
-            'cerebellum': 0.15
-        }
+        self.weights = {"insula": 0.25, "sma": 0.25, "basal_ganglia": 0.35, "cerebellum": 0.15}
 
         self.current_time = 0.0
 
@@ -506,7 +480,7 @@ class TimeCircuit:
         actual_duration: float,
         arousal: float = 0.5,
         attention: float = 0.5,
-        movement: bool = False
+        movement: bool = False,
     ) -> TemporalSignal:
         """Estimate duration using all circuits.
 
@@ -522,27 +496,19 @@ class TimeCircuit:
         signals = []
 
         # Get estimates from each region
-        insula_signal = self.insula.process_interoceptive_signal(
-            actual_duration, arousal
-        )
-        signals.append(('insula', insula_signal))
+        insula_signal = self.insula.process_interoceptive_signal(actual_duration, arousal)
+        signals.append(("insula", insula_signal))
 
-        bg_signal = self.basal_ganglia.time_interval(
-            actual_duration, attention
-        )
-        signals.append(('basal_ganglia', bg_signal))
+        bg_signal = self.basal_ganglia.time_interval(actual_duration, attention)
+        signals.append(("basal_ganglia", bg_signal))
 
         if movement:
-            sma_signal = self.sma.time_motor_sequence(
-                actual_duration, movement_complexity=0.5
-            )
-            signals.append(('sma', sma_signal))
+            sma_signal = self.sma.time_motor_sequence(actual_duration, movement_complexity=0.5)
+            signals.append(("sma", sma_signal))
 
         if actual_duration < 1.0:
-            cerebellum_signal = self.cerebellum.time_precise_interval(
-                actual_duration
-            )
-            signals.append(('cerebellum', cerebellum_signal))
+            cerebellum_signal = self.cerebellum.time_precise_interval(actual_duration)
+            signals.append(("cerebellum", cerebellum_signal))
 
         # Weighted integration
         total_weight = 0.0
@@ -577,7 +543,7 @@ class TimeCircuit:
             duration_estimate=final_estimate,
             confidence=final_confidence,
             timestamp=self.current_time,
-            scale=scale
+            scale=scale,
         )
 
     def set_dopamine(self, level: float) -> None:
@@ -591,11 +557,11 @@ class TimeCircuit:
     def get_statistics(self) -> Dict:
         """Get timing statistics from all circuits."""
         return {
-            'insula_signals': len(self.insula.signal_history),
-            'sma_sequences': len(self.sma.motor_sequences),
-            'bg_memory': self.basal_ganglia.get_temporal_memory(),
-            'cerebellum_events': len(self.cerebellum.timing_events),
-            'current_time': self.current_time
+            "insula_signals": len(self.insula.signal_history),
+            "sma_sequences": len(self.sma.motor_sequences),
+            "bg_memory": self.basal_ganglia.get_temporal_memory(),
+            "cerebellum_events": len(self.cerebellum.timing_events),
+            "current_time": self.current_time,
         }
 
     def reset(self) -> None:

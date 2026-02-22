@@ -24,14 +24,16 @@ import uuid
 
 class AgentRole(Enum):
     """Roles an agent can take in the swarm."""
-    EXPLORER = "explorer"      # Discover new information
-    WORKER = "worker"          # Execute tasks
-    VALIDATOR = "validator"    # Verify results
+
+    EXPLORER = "explorer"  # Discover new information
+    WORKER = "worker"  # Execute tasks
+    VALIDATOR = "validator"  # Verify results
     GENERALIST = "generalist"  # Flexible role
 
 
 class ContentType(Enum):
     """Types of content agents can propose."""
+
     OBSERVATION = "observation"
     HYPOTHESIS = "hypothesis"
     SOLUTION = "solution"
@@ -42,6 +44,7 @@ class ContentType(Enum):
 @dataclass
 class BeliefState:
     """Represents an agent's beliefs."""
+
     beliefs: Dict[str, Any] = field(default_factory=dict)
     confidence: Dict[str, float] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
@@ -56,7 +59,7 @@ class BeliefState:
         """Get belief and its confidence."""
         return self.beliefs.get(key, default), self.confidence.get(key, 0.0)
 
-    def merge(self, other: 'BeliefState', weight: float = 0.5) -> None:
+    def merge(self, other: "BeliefState", weight: float = 0.5) -> None:
         """Merge another belief state into this one."""
         for key, value in other.beliefs.items():
             if key in self.beliefs:
@@ -72,6 +75,7 @@ class BeliefState:
 @dataclass
 class Message:
     """Message passed between agents."""
+
     sender_id: str
     recipient_id: str
     content: Any
@@ -83,6 +87,7 @@ class Message:
 @dataclass
 class AgentParams:
     """Parameters for a cognitive agent."""
+
     agent_id: str = field(default_factory=lambda: f"agent_{uuid.uuid4().hex[:8]}")
     role: AgentRole = AgentRole.GENERALIST
     specialization: np.ndarray = field(default_factory=lambda: np.random.randn(32))
@@ -95,6 +100,7 @@ class AgentParams:
 @dataclass
 class ModuleProposal:
     """Proposal from an agent to the collective."""
+
     source_agent: str
     content: np.ndarray
     content_type: ContentType
@@ -170,7 +176,12 @@ class CognitiveAgent:
             if len(spec) != len(input_state):
                 # Resize specialization to match input
                 spec = np.resize(spec, len(input_state))
-            relevance = float(np.tanh(np.dot(spec, input_state) / (np.linalg.norm(spec) * np.linalg.norm(input_state) + 1e-8)))
+            relevance = float(
+                np.tanh(
+                    np.dot(spec, input_state)
+                    / (np.linalg.norm(spec) * np.linalg.norm(input_state) + 1e-8)
+                )
+            )
             relevance = (relevance + 1) / 2  # Normalize to 0-1
         else:
             relevance = 0.5
@@ -204,7 +215,7 @@ class CognitiveAgent:
 
         elif self.role == AgentRole.WORKER:
             # Workers generate solutions - transform input
-            content = np.tanh(input_state * self.params.specialization[:len(input_state)])
+            content = np.tanh(input_state * self.params.specialization[: len(input_state)])
             return ContentType.SOLUTION, content
 
         elif self.role == AgentRole.VALIDATOR:
@@ -247,27 +258,24 @@ class CognitiveAgent:
 
         # Update belief state based on broadcast
         key = f"broadcast_{proposal.content_type.value}"
-        self.belief_state.update(
-            key,
-            proposal.content,
-            proposal.confidence
-        )
+        self.belief_state.update(key, proposal.content, proposal.confidence)
 
         # Update model of sender
         if proposal.source_agent not in self.other_models:
             self.other_models[proposal.source_agent] = BeliefState()
 
         self.other_models[proposal.source_agent].update(
-            proposal.content_type.value,
-            proposal.content,
-            proposal.confidence
+            proposal.content_type.value, proposal.content, proposal.confidence
         )
 
         # Update activation based on broadcast relevance
-        self._activation = (1 - self.params.learning_rate) * self._activation + \
-                          self.params.learning_rate * proposal.relevance
+        self._activation = (
+            1 - self.params.learning_rate
+        ) * self._activation + self.params.learning_rate * proposal.relevance
 
-    def send_message(self, recipient: str, content: Any, content_type: ContentType = ContentType.OBSERVATION) -> None:
+    def send_message(
+        self, recipient: str, content: Any, content_type: ContentType = ContentType.OBSERVATION
+    ) -> None:
         """Send a direct message to another agent."""
         msg = Message(
             sender_id=self.agent_id,
@@ -286,9 +294,7 @@ class CognitiveAgent:
             self.other_models[message.sender_id] = BeliefState()
 
         self.other_models[message.sender_id].update(
-            f"message_{message.content_type.value}",
-            message.content,
-            message.priority
+            f"message_{message.content_type.value}", message.content, message.priority
         )
 
     def process_messages(self) -> int:
@@ -321,7 +327,7 @@ class CognitiveAgent:
     def process(self, dt: float = 0.1) -> None:
         """Internal processing step."""
         # Decay activation over time
-        self._activation *= (1 - 0.01 * dt)
+        self._activation *= 1 - 0.01 * dt
 
         # Process any pending messages
         self.process_messages()
@@ -336,7 +342,10 @@ class CognitiveAgent:
             # Score based on relevance to specialization
             if isinstance(proposal.content, np.ndarray) and len(proposal.content) > 0:
                 spec = np.resize(self.params.specialization, len(proposal.content))
-                score = float(np.dot(spec, proposal.content) / (np.linalg.norm(spec) * np.linalg.norm(proposal.content) + 1e-8))
+                score = float(
+                    np.dot(spec, proposal.content)
+                    / (np.linalg.norm(spec) * np.linalg.norm(proposal.content) + 1e-8)
+                )
                 return (score + 1) / 2
         return 0.5
 
@@ -358,15 +367,15 @@ class CognitiveAgent:
         """Get agent statistics."""
         acceptance_rate = self._n_accepted / max(1, self._n_proposals)
         return {
-            'agent_id': self.agent_id,
-            'role': self.role.value,
-            'activation': self._activation,
-            'n_proposals': self._n_proposals,
-            'n_accepted': self._n_accepted,
-            'acceptance_rate': acceptance_rate,
-            'total_contribution': self._total_contribution,
-            'n_beliefs': len(self.belief_state.beliefs),
-            'n_other_models': len(self.other_models),
+            "agent_id": self.agent_id,
+            "role": self.role.value,
+            "activation": self._activation,
+            "n_proposals": self._n_proposals,
+            "n_accepted": self._n_accepted,
+            "acceptance_rate": acceptance_rate,
+            "total_contribution": self._total_contribution,
+            "n_beliefs": len(self.belief_state.beliefs),
+            "n_other_models": len(self.other_models),
         }
 
     def reset(self) -> None:

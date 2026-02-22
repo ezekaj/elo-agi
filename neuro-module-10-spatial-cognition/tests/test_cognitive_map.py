@@ -7,6 +7,7 @@ from neuro.modules.m10_spatial_cognition.border_cells import WallDirection
 from neuro.modules.m10_spatial_cognition.head_direction_cells import HeadDirectionSystem
 from neuro.modules.m10_spatial_cognition.path_integration import PathIntegrator
 
+
 class TestEnvironment:
     """Test environment representation."""
 
@@ -42,15 +43,12 @@ class TestEnvironment:
         assert landmark.name == "tree"
         assert distance == pytest.approx(0.2, rel=0.1)
 
+
 class TestCognitiveMap:
     """Test integrated cognitive map."""
 
     def test_cognitive_map_creation(self):
-        cog_map = CognitiveMap(
-            n_place_cells=50,
-            n_grid_modules=2,
-            n_head_direction_cells=30
-        )
+        cog_map = CognitiveMap(n_place_cells=50, n_grid_modules=2, n_head_direction_cells=30)
         assert len(cog_map.place_cells) == 50
         assert len(cog_map.grid_cells.modules) == 2
         assert len(cog_map.head_direction) == 30
@@ -59,9 +57,9 @@ class TestCognitiveMap:
         cog_map = CognitiveMap(n_place_cells=50)
         state = cog_map.get_state()
 
-        assert hasattr(state, 'position')
-        assert hasattr(state, 'heading')
-        assert hasattr(state, 'place_activity')
+        assert hasattr(state, "position")
+        assert hasattr(state, "heading")
+        assert hasattr(state, "place_activity")
         assert len(state.place_activity) == 50
 
     def test_update_with_movement(self):
@@ -87,7 +85,7 @@ class TestCognitiveMap:
             cog_map.update(
                 velocity=np.array([0.0, 0.0]),
                 angular_velocity=np.pi / 2,  # π/2 rad/s
-                dt=0.1  # 0.1 s per step -> 10 steps = 1s total -> π/2 rad
+                dt=0.1,  # 0.1 s per step -> 10 steps = 1s total -> π/2 rad
             )
 
         heading = cog_map.get_heading()
@@ -163,6 +161,7 @@ class TestCognitiveMap:
         trajectory = cog_map.get_trajectory()
         assert len(trajectory) >= 5
 
+
 class TestHeadDirectionSystem:
     """Test head direction cells."""
 
@@ -197,6 +196,7 @@ class TestHeadDirectionSystem:
         heading = hd.get_current_heading()
         assert heading == pytest.approx(0.1, rel=0.2)
 
+
 class TestPathIntegrator:
     """Test path integration."""
 
@@ -214,10 +214,7 @@ class TestPathIntegrator:
         assert pos[0] == pytest.approx(0.1, rel=0.2)
 
     def test_uncertainty_grows(self):
-        pi = PathIntegrator(
-            initial_position=np.array([0.0, 0.0]),
-            uncertainty_growth=0.01
-        )
+        pi = PathIntegrator(initial_position=np.array([0.0, 0.0]), uncertainty_growth=0.01)
         initial_uncertainty = pi.uncertainty
 
         for _ in range(10):
@@ -241,6 +238,7 @@ class TestPathIntegrator:
 
         total = pi.get_total_distance()
         assert total == pytest.approx(0.1, rel=0.2)
+
 
 class TestLandmark:
     """Test landmark dataclass."""

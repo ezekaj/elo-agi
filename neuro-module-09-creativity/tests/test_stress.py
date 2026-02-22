@@ -8,9 +8,14 @@ import pytest
 import numpy as np
 import time
 from neuro.modules.m09_creativity.creative_process import CreativeProcess
-from neuro.modules.m09_creativity.networks import DefaultModeNetwork, ExecutiveControlNetwork, SalienceNetwork
+from neuro.modules.m09_creativity.networks import (
+    DefaultModeNetwork,
+    ExecutiveControlNetwork,
+    SalienceNetwork,
+)
 from neuro.modules.m09_creativity.networks.salience_network import NetworkState, SwitchTrigger
 from neuro.modules.m09_creativity.imagery import ImagerySystem
+
 
 class TestDMNStress:
     """Stress tests for Default Mode Network"""
@@ -21,10 +26,7 @@ class TestDMNStress:
 
         # Add 1000 concepts
         for i in range(1000):
-            features = {
-                f"feature_{j}": np.random.random()
-                for j in range(5)
-            }
+            features = {f"feature_{j}": np.random.random() for j in range(5)}
             dmn.add_concept(f"concept_{i}", f"Content {i}", features)
 
         assert len(dmn.concepts) == 1000
@@ -64,7 +66,7 @@ class TestDMNStress:
             dmn.add_concept(f"c_{i}", f"Concept {i}", {"val": np.random.random()})
 
         for i in range(50):
-            dmn.create_association(f"c_{i}", f"c_{(i+1) % 100}", np.random.random())
+            dmn.create_association(f"c_{i}", f"c_{(i + 1) % 100}", np.random.random())
 
         # Generate 100 thoughts rapidly
         start = time.time()
@@ -87,7 +89,7 @@ class TestDMNStress:
             dmn.add_concept(f"chain_{i}", f"Chain node {i}", {"pos": i})
 
         for i in range(99):
-            dmn.create_association(f"chain_{i}", f"chain_{i+1}", 0.9)
+            dmn.create_association(f"chain_{i}", f"chain_{i + 1}", 0.9)
 
         # Find distant from start
         distant = dmn.find_distant_associations("chain_0", min_distance=5, max_results=10)
@@ -96,6 +98,7 @@ class TestDMNStress:
         found_distances = [int(d[0].split("_")[1]) for d in distant if d]
         if found_distances:
             assert max(found_distances) >= 5
+
 
 class TestECNStress:
     """Stress tests for Executive Control Network"""
@@ -113,8 +116,8 @@ class TestECNStress:
                 idea_features={
                     "novelty": np.random.random(),
                     "coherence": np.random.random(),
-                    "usefulness": np.random.random()
-                }
+                    "usefulness": np.random.random(),
+                },
             )
             evaluations.append(eval_result)
 
@@ -133,16 +136,10 @@ class TestECNStress:
 
         for iteration in range(10):
             evaluation = ecn.evaluate_idea(
-                idea_id,
-                idea_content,
-                idea_features={"novelty": 0.3, "coherence": 0.5}
+                idea_id, idea_content, idea_features={"novelty": 0.3, "coherence": 0.5}
             )
 
-            new_id, new_content, refinement = ecn.refine_idea(
-                idea_id,
-                idea_content,
-                evaluation
-            )
+            new_id, new_content, refinement = ecn.refine_idea(idea_id, idea_content, evaluation)
 
             idea_id = new_id
             idea_content = new_content
@@ -154,24 +151,25 @@ class TestECNStress:
         """Test evaluation with extreme criteria weights"""
         ecn = ExecutiveControlNetwork()
 
-        from neuro.modules.m09_creativity.networks.executive_control_network import EvaluationCriterion
+        from neuro.modules.m09_creativity.networks.executive_control_network import (
+            EvaluationCriterion,
+        )
 
         # Extreme weights
         extreme_weights = {
             EvaluationCriterion.NOVELTY: 100.0,
-            EvaluationCriterion.USEFULNESS: 0.001
+            EvaluationCriterion.USEFULNESS: 0.001,
         }
 
         ecn.set_goal("extreme", "Extreme weights", criteria_weights=extreme_weights)
 
         evaluation = ecn.evaluate_idea(
-            "extreme_idea",
-            "Test",
-            idea_features={"novelty": 0.9, "usefulness": 0.1}
+            "extreme_idea", "Test", idea_features={"novelty": 0.9, "usefulness": 0.1}
         )
 
         # Should still produce valid score
         assert 0 <= evaluation.overall_score
+
 
 class TestSalienceNetworkStress:
     """Stress tests for Salience Network"""
@@ -213,13 +211,14 @@ class TestSalienceNetworkStress:
                 "current_novelty": np.random.random(),
                 "evaluation_complete": np.random.random() > 0.5,
                 "best_score": np.random.random(),
-                "target_score": 0.7
+                "target_score": 0.7,
             }
             should_switch, trigger = salience.should_switch(metrics)
             decisions.append(should_switch)
 
         # Should make some decisions
         assert len(decisions) == 100
+
 
 class TestImageryStress:
     """Stress tests for Imagery System"""
@@ -235,7 +234,7 @@ class TestImageryStress:
                 include_visual=True,
                 include_auditory=i % 2 == 0,
                 include_motor=i % 3 == 0,
-                include_tactile=i % 4 == 0
+                include_tactile=i % 4 == 0,
             )
 
         assert len(imagery.multimodal_images) == 200
@@ -245,10 +244,7 @@ class TestImageryStress:
         imagery = ImagerySystem()
 
         img = imagery.create_multimodal_image(
-            "base",
-            "Base image",
-            include_visual=True,
-            include_motor=True
+            "base", "Base image", include_visual=True, include_motor=True
         )
 
         current_id = img.id
@@ -267,15 +263,12 @@ class TestImageryStress:
         # Create base images
         for i in range(20):
             imagery.create_multimodal_image(
-                f"base_{i}",
-                f"Base {i}",
-                include_visual=True,
-                include_tactile=True
+                f"base_{i}", f"Base {i}", include_visual=True, include_tactile=True
             )
 
         # Blend pairs
         for i in range(10):
-            imagery.blend_images(f"base_{i}", f"base_{i+10}", blend_factor=0.5)
+            imagery.blend_images(f"base_{i}", f"base_{i + 10}", blend_factor=0.5)
 
         # Should have blended images
         blend_count = sum(1 for k in imagery.multimodal_images if "blend" in k)
@@ -293,7 +286,7 @@ class TestImageryStress:
                 include_visual=True,
                 include_auditory=True,
                 include_motor=True,
-                include_tactile=True
+                include_tactile=True,
             )
 
         # All should have all modalities
@@ -303,6 +296,7 @@ class TestImageryStress:
             assert img.auditory is not None
             assert img.motor is not None
             assert img.tactile is not None
+
 
 class TestCreativeProcessStress:
     """Stress tests for Creative Process"""
@@ -320,8 +314,12 @@ class TestCreativeProcessStress:
 
         # Create 1000 associations
         associations = [
-            (f"concept_{i}", f"concept_{(i + np.random.randint(1, 50)) % 500}",
-             np.random.random(), "related")
+            (
+                f"concept_{i}",
+                f"concept_{(i + np.random.randint(1, 50)) % 500}",
+                np.random.random(),
+                "related",
+            )
             for i in range(1000)
         ]
         cp.create_associations(associations)
@@ -329,9 +327,7 @@ class TestCreativeProcessStress:
         # Run creative session
         cp.set_creative_goal("stress_test", "Handle large knowledge base")
         output = cp.creative_session(
-            goal="Stress test creativity",
-            duration_seconds=3.0,
-            target_good_ideas=3
+            goal="Stress test creativity", duration_seconds=3.0, target_good_ideas=3
         )
 
         assert output.total_generated >= 0
@@ -346,18 +342,18 @@ class TestCreativeProcessStress:
             ("C", "Concept C", {"z": 0.5}),
         ]
         cp.setup_knowledge(concepts)
-        cp.create_associations([
-            ("A", "B", 0.7, "related"),
-            ("B", "C", 0.8, "related"),
-        ])
+        cp.create_associations(
+            [
+                ("A", "B", 0.7, "related"),
+                ("B", "C", 0.8, "related"),
+            ]
+        )
 
         cp.set_creative_goal("extended", "Extended session")
 
         # Run for 3 seconds (reduced from 5 to avoid timeout)
         output = cp.creative_session(
-            goal="Extended creativity",
-            duration_seconds=3.0,
-            target_good_ideas=10
+            goal="Extended creativity", duration_seconds=3.0, target_good_ideas=10
         )
 
         # Session should have run
@@ -367,10 +363,10 @@ class TestCreativeProcessStress:
         """Test rapid alternation between generation and evaluation"""
         cp = CreativeProcess()
 
-        concepts = [(f"c_{i}", f"C{i}", {"v": i/10}) for i in range(20)]
+        concepts = [(f"c_{i}", f"C{i}", {"v": i / 10}) for i in range(20)]
         cp.setup_knowledge(concepts)
 
-        associations = [(f"c_{i}", f"c_{(i+1) % 20}", 0.7, "link") for i in range(20)]
+        associations = [(f"c_{i}", f"c_{(i + 1) % 20}", 0.7, "link") for i in range(20)]
         cp.create_associations(associations)
 
         cp.set_creative_goal("rapid", "Rapid cycling")
@@ -393,7 +389,9 @@ class TestCreativeProcessStress:
         # Dense associations for wandering
         for i in range(50):
             for j in range(i + 1, min(i + 5, 50)):
-                cp.create_associations([(f"wander_{i}", f"wander_{j}", np.random.random(), "wander")])
+                cp.create_associations(
+                    [(f"wander_{i}", f"wander_{j}", np.random.random(), "wander")]
+                )
 
         # Extended wandering
         ideas = cp.mind_wander_for_ideas(duration_steps=50)
@@ -409,7 +407,7 @@ class TestCreativeProcessStress:
         cp.setup_knowledge(concepts)
 
         for i in range(29):
-            cp.create_associations([(f"img_{i}", f"img_{i+1}", 0.7, "visual")])
+            cp.create_associations([(f"img_{i}", f"img_{i + 1}", 0.7, "visual")])
 
         # Generate ideas with imagery
         ideas = cp.generate_ideas(num_ideas=20, use_imagery=True)
@@ -417,6 +415,7 @@ class TestCreativeProcessStress:
         # Try to add imagery to all
         for idea in ideas:
             cp.imagine_idea(idea.id, modalities=["visual", "tactile", "motor"])
+
 
 class TestEdgeCases:
     """Edge case tests"""
@@ -491,11 +490,7 @@ class TestEdgeCases:
 
         long_description = "A " + " ".join(["very"] * 1000) + " long description"
 
-        img = imagery.create_multimodal_image(
-            "long_desc",
-            long_description,
-            include_visual=True
-        )
+        img = imagery.create_multimodal_image("long_desc", long_description, include_visual=True)
 
         assert img is not None
 
@@ -514,6 +509,7 @@ class TestEdgeCases:
 
         thought = dmn.generate_spontaneous_thought()
         assert thought is not None
+
 
 class TestPerformance:
     """Performance benchmarks"""
@@ -546,9 +542,7 @@ class TestPerformance:
         count = 0
         while time.time() - start < 1.0:
             ecn.evaluate_idea(
-                f"idea_{count}",
-                "Test idea",
-                idea_features={"novelty": 0.5, "coherence": 0.6}
+                f"idea_{count}", "Test idea", idea_features={"novelty": 0.5, "coherence": 0.6}
             )
             count += 1
 
@@ -563,10 +557,7 @@ class TestPerformance:
         count = 0
         while time.time() - start < 1.0:
             imagery.create_multimodal_image(
-                f"img_{count}",
-                "Test image",
-                include_visual=True,
-                include_tactile=True
+                f"img_{count}", "Test image", include_visual=True, include_tactile=True
             )
             count += 1
 

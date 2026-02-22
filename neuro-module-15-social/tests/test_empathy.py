@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m15_social.empathy import (
-    AffectiveSharing, EmpathicConcern, EmpathySystem, EmpathyParams
+    AffectiveSharing,
+    EmpathicConcern,
+    EmpathySystem,
+    EmpathyParams,
 )
+
 
 class TestAffectiveSharing:
     """Tests for affective sharing"""
@@ -45,6 +49,7 @@ class TestAffectiveSharing:
         regulation = sharing.regulate_affect(target)
         assert np.sum(np.abs(regulation)) > 0
 
+
 class TestEmpathicConcern:
     """Tests for empathic concern"""
 
@@ -75,6 +80,7 @@ class TestEmpathicConcern:
         initial_concern = concern.concern_levels["person1"]
         concern.relief_response("person1", np.zeros(50))
         assert concern.concern_levels["person1"] < initial_concern
+
 
 class TestEmpathySystem:
     """Tests for integrated empathy"""
@@ -121,5 +127,6 @@ class TestEmpathySystem:
         system.update(dt=10.0)
         assert system.empathic_concern.prosocial_motivation < initial_motivation
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class MinimalSelfParams:
     """Parameters for minimal self"""
+
     n_features: int = 50
     agency_threshold: float = 0.7
     ownership_threshold: float = 0.6
@@ -33,9 +34,7 @@ class AgencyDetector:
         self.premotor_activation = np.zeros(self.params.n_features)
 
         # Forward model for outcome prediction
-        self.forward_model = np.random.randn(
-            self.params.n_features, self.params.n_features
-        ) * 0.1
+        self.forward_model = np.random.randn(self.params.n_features, self.params.n_features) * 0.1
 
         # Recent actions and outcomes
         self.action_history: List[np.ndarray] = []
@@ -51,9 +50,7 @@ class AgencyDetector:
             action = np.resize(action, self.params.n_features)
 
         # Premotor processes action
-        self.premotor_activation = np.tanh(
-            self.premotor_activation * 0.3 + action * 0.7
-        )
+        self.premotor_activation = np.tanh(self.premotor_activation * 0.3 + action * 0.7)
 
         # Predict outcome using forward model
         predicted_outcome = np.tanh(np.dot(self.forward_model, action))
@@ -106,7 +103,7 @@ class AgencyDetector:
             "agency": self.agency_level,
             "match": match_quality,
             "prediction_error": error,
-            "premotor_activity": np.mean(self.premotor_activation)
+            "premotor_activity": np.mean(self.premotor_activation),
         }
 
     def get_agency_level(self) -> float:
@@ -139,8 +136,9 @@ class OwnershipProcessor:
         # Ownership level
         self.ownership_level = 0.8
 
-    def receive_multisensory(self, visual: np.ndarray, tactile: np.ndarray,
-                            proprioceptive: np.ndarray) -> Dict:
+    def receive_multisensory(
+        self, visual: np.ndarray, tactile: np.ndarray, proprioceptive: np.ndarray
+    ) -> Dict:
         """Integrate multisensory signals about body"""
         features_per = self.params.n_features // 3
 
@@ -158,23 +156,18 @@ class OwnershipProcessor:
         self.proprioceptive_channel = 0.5 * self.proprioceptive_channel + 0.5 * proprioceptive
 
         # Parietal integration
-        raw = np.concatenate([
-            self.visual_channel,
-            self.tactile_channel,
-            self.proprioceptive_channel
-        ])
+        raw = np.concatenate(
+            [self.visual_channel, self.tactile_channel, self.proprioceptive_channel]
+        )
         combined = np.zeros(self.params.n_features)
         n = min(len(raw), self.params.n_features)
         combined[:n] = raw[:n]
 
-        self.parietal_activation = np.tanh(
-            self.parietal_activation * 0.3 + combined * 0.7
-        )
+        self.parietal_activation = np.tanh(self.parietal_activation * 0.3 + combined * 0.7)
 
         # Check coherence with body schema
         coherence = np.dot(self.parietal_activation, self.body_schema) / (
-            np.linalg.norm(self.parietal_activation) *
-            np.linalg.norm(self.body_schema) + 1e-8
+            np.linalg.norm(self.parietal_activation) * np.linalg.norm(self.body_schema) + 1e-8
         )
 
         # Ownership based on coherence
@@ -185,19 +178,18 @@ class OwnershipProcessor:
 
         # Update body schema
         self.body_schema = (
-            (1 - self.params.integration_rate) * self.body_schema +
-            self.params.integration_rate * self.parietal_activation
-        )
+            1 - self.params.integration_rate
+        ) * self.body_schema + self.params.integration_rate * self.parietal_activation
 
         return {
             "ownership": self.ownership_level,
             "coherence": coherence,
-            "parietal_activity": np.mean(self.parietal_activation)
+            "parietal_activity": np.mean(self.parietal_activation),
         }
 
-    def rubber_hand_illusion(self, visual_hand: np.ndarray,
-                           tactile_hand: np.ndarray,
-                           synchronous: bool = True) -> Dict:
+    def rubber_hand_illusion(
+        self, visual_hand: np.ndarray, tactile_hand: np.ndarray, synchronous: bool = True
+    ) -> Dict:
         """Simulate rubber hand illusion paradigm"""
         features_per = self.params.n_features // 3
 
@@ -213,7 +205,7 @@ class OwnershipProcessor:
         return {
             "illusion_strength": coherence if synchronous else 0.2,
             "ownership_of_rubber_hand": self.ownership_level if synchronous else 0.1,
-            "synchronous": synchronous
+            "synchronous": synchronous,
         }
 
     def get_ownership_level(self) -> float:
@@ -240,14 +232,16 @@ class MinimalSelf:
         """Initiate an action"""
         return self.agency.initiate_action(action)
 
-    def receive_feedback(self, outcome: np.ndarray,
-                        visual: np.ndarray, tactile: np.ndarray,
-                        proprioceptive: np.ndarray) -> Dict:
+    def receive_feedback(
+        self,
+        outcome: np.ndarray,
+        visual: np.ndarray,
+        tactile: np.ndarray,
+        proprioceptive: np.ndarray,
+    ) -> Dict:
         """Receive sensory feedback from action"""
         agency_result = self.agency.receive_outcome(outcome)
-        ownership_result = self.ownership.receive_multisensory(
-            visual, tactile, proprioceptive
-        )
+        ownership_result = self.ownership.receive_multisensory(visual, tactile, proprioceptive)
 
         # Update self integrity
         self.self_integrity = 0.5 * agency_result["agency"] + 0.5 * ownership_result["ownership"]
@@ -255,7 +249,7 @@ class MinimalSelf:
         return {
             "agency": agency_result,
             "ownership": ownership_result,
-            "self_integrity": self.self_integrity
+            "self_integrity": self.self_integrity,
         }
 
     def get_minimal_self_state(self) -> Dict:
@@ -265,5 +259,5 @@ class MinimalSelf:
             "ownership_level": self.ownership.get_ownership_level(),
             "self_integrity": self.self_integrity,
             "premotor_activity": np.mean(self.agency.premotor_activation),
-            "parietal_activity": np.mean(self.ownership.parietal_activation)
+            "parietal_activity": np.mean(self.ownership.parietal_activation),
         }

@@ -5,11 +5,12 @@ import pytest
 from neuro.modules.m11_time_perception.temporal_integration import (
     SubjectiveTimeSystem,
     TimePerceptionOrchestrator,
-    TemporalEstimate
+    TemporalEstimate,
 )
 from neuro.modules.m11_time_perception.time_modulation import EmotionalState
 from neuro.modules.m11_time_perception.interval_timing import TimingMode
 from neuro.modules.m11_time_perception.embodied_time import BodyState
+
 
 class TestSubjectiveTimeSystem:
     """Tests for subjective time system"""
@@ -27,10 +28,7 @@ class TestSubjectiveTimeSystem:
         """Test complete duration estimation"""
         system = SubjectiveTimeSystem()
 
-        estimate = system.estimate_duration(
-            actual_duration=10.0,
-            attention=0.5
-        )
+        estimate = system.estimate_duration(actual_duration=10.0, attention=0.5)
 
         assert isinstance(estimate, TemporalEstimate)
         assert estimate.actual_duration == 10.0
@@ -41,15 +39,9 @@ class TestSubjectiveTimeSystem:
         """Test that emotion modulates time"""
         system = SubjectiveTimeSystem()
 
-        neutral = system.estimate_duration(
-            10.0,
-            emotional_state=EmotionalState.NEUTRAL
-        )
+        neutral = system.estimate_duration(10.0, emotional_state=EmotionalState.NEUTRAL)
 
-        fear = system.estimate_duration(
-            10.0,
-            emotional_state=EmotionalState.FEAR
-        )
+        fear = system.estimate_duration(10.0, emotional_state=EmotionalState.FEAR)
 
         # Fear should lengthen perceived duration
         assert fear.perceived_duration > neutral.perceived_duration
@@ -117,8 +109,8 @@ class TestSubjectiveTimeSystem:
 
         stats = system.get_statistics()
 
-        assert stats['n_estimates'] == 5
-        assert 'mean_error' in stats
+        assert stats["n_estimates"] == 5
+        assert "mean_error" in stats
 
     def test_set_dopamine(self):
         """Test setting dopamine across systems"""
@@ -139,6 +131,7 @@ class TestSubjectiveTimeSystem:
         assert estimate.embodied_estimate > 0
         assert estimate.modulation_ratio > 0
 
+
 class TestTimePerceptionOrchestrator:
     """Tests for orchestrator"""
 
@@ -153,7 +146,7 @@ class TestTimePerceptionOrchestrator:
         """Test baseline scenario estimation"""
         orchestrator = TimePerceptionOrchestrator()
 
-        estimate = orchestrator.estimate(10.0, scenario='baseline')
+        estimate = orchestrator.estimate(10.0, scenario="baseline")
 
         assert estimate.perceived_duration > 0
 
@@ -161,8 +154,8 @@ class TestTimePerceptionOrchestrator:
         """Test fear scenario"""
         orchestrator = TimePerceptionOrchestrator()
 
-        baseline = orchestrator.estimate(10.0, scenario='baseline')
-        fear = orchestrator.estimate(10.0, scenario='fear')
+        baseline = orchestrator.estimate(10.0, scenario="baseline")
+        fear = orchestrator.estimate(10.0, scenario="fear")
 
         assert fear.perceived_duration > baseline.perceived_duration
 
@@ -172,7 +165,7 @@ class TestTimePerceptionOrchestrator:
 
         # Boredom has mixed effects: emotional stretching but low attention
         # Just verify it produces a valid estimate
-        estimate = orchestrator.estimate(10.0, scenario='boredom')
+        estimate = orchestrator.estimate(10.0, scenario="boredom")
 
         assert estimate.perceived_duration > 0
 
@@ -180,8 +173,8 @@ class TestTimePerceptionOrchestrator:
         """Test flow scenario"""
         orchestrator = TimePerceptionOrchestrator()
 
-        baseline = orchestrator.estimate(10.0, scenario='baseline')
-        flow = orchestrator.estimate(10.0, scenario='flow')
+        baseline = orchestrator.estimate(10.0, scenario="baseline")
+        flow = orchestrator.estimate(10.0, scenario="flow")
 
         assert flow.perceived_duration < baseline.perceived_duration
 
@@ -191,7 +184,7 @@ class TestTimePerceptionOrchestrator:
 
         # Age effect is one factor among many, may be overwhelmed by noise
         # Verify elderly estimate is valid
-        elderly = orchestrator.estimate(10.0, scenario='elderly')
+        elderly = orchestrator.estimate(10.0, scenario="elderly")
 
         assert elderly.perceived_duration > 0
         assert elderly.age == 70
@@ -200,8 +193,8 @@ class TestTimePerceptionOrchestrator:
         """Test child scenario"""
         orchestrator = TimePerceptionOrchestrator()
 
-        baseline = orchestrator.estimate(10.0, scenario='baseline')
-        child = orchestrator.estimate(10.0, scenario='child')
+        baseline = orchestrator.estimate(10.0, scenario="baseline")
+        child = orchestrator.estimate(10.0, scenario="child")
 
         # Time should feel slower for children
         assert child.perceived_duration > baseline.perceived_duration
@@ -210,8 +203,8 @@ class TestTimePerceptionOrchestrator:
         """Test Parkinson's (low dopamine) scenario"""
         orchestrator = TimePerceptionOrchestrator()
 
-        baseline = orchestrator.estimate(10.0, scenario='baseline')
-        parkinsons = orchestrator.estimate(10.0, scenario='parkinsons')
+        baseline = orchestrator.estimate(10.0, scenario="baseline")
+        parkinsons = orchestrator.estimate(10.0, scenario="parkinsons")
 
         # Low dopamine = slower clock = time feels longer
         assert parkinsons.perceived_duration > baseline.perceived_duration
@@ -221,23 +214,20 @@ class TestTimePerceptionOrchestrator:
         orchestrator = TimePerceptionOrchestrator()
 
         results = orchestrator.compare_scenarios(
-            duration=10.0,
-            scenarios=['baseline', 'fear', 'flow']
+            duration=10.0, scenarios=["baseline", "fear", "flow"]
         )
 
         assert len(results) == 3
-        assert 'baseline' in results
-        assert 'fear' in results
-        assert 'flow' in results
+        assert "baseline" in results
+        assert "fear" in results
+        assert "flow" in results
 
     def test_simulate_threatening_event(self):
         """Test simulating a threatening event"""
         orchestrator = TimePerceptionOrchestrator()
 
         estimate = orchestrator.simulate_event(
-            duration=5.0,
-            event_type='threatening',
-            intensity=0.8
+            duration=5.0, event_type="threatening", intensity=0.8
         )
 
         # Threatening events slow time
@@ -247,11 +237,7 @@ class TestTimePerceptionOrchestrator:
         """Test simulating a rewarding event"""
         orchestrator = TimePerceptionOrchestrator()
 
-        estimate = orchestrator.simulate_event(
-            duration=5.0,
-            event_type='rewarding',
-            intensity=0.8
-        )
+        estimate = orchestrator.simulate_event(duration=5.0, event_type="rewarding", intensity=0.8)
 
         assert estimate.perceived_duration > 0
 
@@ -259,26 +245,18 @@ class TestTimePerceptionOrchestrator:
         """Test simulating a boring event"""
         orchestrator = TimePerceptionOrchestrator()
 
-        estimate = orchestrator.simulate_event(
-            duration=60.0,
-            event_type='boring',
-            intensity=0.9
-        )
+        estimate = orchestrator.simulate_event(duration=60.0, event_type="boring", intensity=0.9)
 
         # Boring events should produce valid estimate
         # Note: low attention can counteract emotional stretching
         assert estimate.perceived_duration > 0
-        assert estimate.emotional_state == 'boredom'
+        assert estimate.emotional_state == "boredom"
 
     def test_simulate_engaging_event(self):
         """Test simulating an engaging event"""
         orchestrator = TimePerceptionOrchestrator()
 
-        estimate = orchestrator.simulate_event(
-            duration=60.0,
-            event_type='engaging',
-            intensity=0.8
-        )
+        estimate = orchestrator.simulate_event(duration=60.0, event_type="engaging", intensity=0.8)
 
         # Engaging events feel shorter
         assert estimate.perceived_duration < 60.0
@@ -288,9 +266,9 @@ class TestTimePerceptionOrchestrator:
         orchestrator = TimePerceptionOrchestrator()
 
         events = [
-            (60.0, 'boring', 0.5),     # Boring meeting
-            (30.0, 'engaging', 0.7),   # Fun task
-            (10.0, 'threatening', 0.8) # Stressful moment
+            (60.0, "boring", 0.5),  # Boring meeting
+            (30.0, "engaging", 0.7),  # Fun task
+            (10.0, "threatening", 0.8),  # Stressful moment
         ]
 
         results = orchestrator.simulate_day(events)
@@ -302,11 +280,7 @@ class TestTimePerceptionOrchestrator:
         orchestrator = TimePerceptionOrchestrator()
 
         # Mix of boring and engaging events
-        events = [
-            (120.0, 'boring', 0.7),
-            (60.0, 'engaging', 0.8),
-            (30.0, 'boring', 0.5)
-        ]
+        events = [(120.0, "boring", 0.7), (60.0, "engaging", 0.8), (30.0, "boring", 0.5)]
 
         subjective, objective = orchestrator.get_subjective_day_length(events)
 
@@ -321,11 +295,12 @@ class TestTimePerceptionOrchestrator:
         # Use baseline but override age
         estimate = orchestrator.estimate(
             10.0,
-            scenario='baseline',
-            age=80  # Override
+            scenario="baseline",
+            age=80,  # Override
         )
 
         assert estimate.age == 80
+
 
 class TestResearchValidation:
     """Tests validating key research findings"""
@@ -367,5 +342,6 @@ class TestResearchValidation:
 
         assert old.perceived_duration < young.perceived_duration
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

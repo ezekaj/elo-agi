@@ -19,29 +19,32 @@ import copy
 
 class PropositionType(Enum):
     """Types of logical propositions"""
-    ATOMIC = "atomic"           # Simple fact: P
-    NEGATION = "negation"       # Not P
+
+    ATOMIC = "atomic"  # Simple fact: P
+    NEGATION = "negation"  # Not P
     CONJUNCTION = "conjunction"  # P and Q
     DISJUNCTION = "disjunction"  # P or Q
     IMPLICATION = "implication"  # If P then Q
     BICONDITIONAL = "biconditional"  # P if and only if Q
-    UNIVERSAL = "universal"     # For all X, P(X)
+    UNIVERSAL = "universal"  # For all X, P(X)
     EXISTENTIAL = "existential"  # There exists X such that P(X)
 
 
 @dataclass
 class Proposition:
     """A logical proposition"""
+
     id: str
     type: PropositionType
     content: Any
-    components: List['Proposition'] = field(default_factory=list)
+    components: List["Proposition"] = field(default_factory=list)
     variables: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class Relation:
     """A relation between entities"""
+
     name: str
     arity: int  # Number of arguments
     arguments: List[str]
@@ -51,6 +54,7 @@ class Relation:
 @dataclass
 class Inference:
     """Result of logical inference"""
+
     conclusion: Proposition
     premises: List[Proposition]
     rule_applied: str
@@ -85,29 +89,25 @@ class LogicNetwork:
 
     # ==================== Relational Processing ====================
 
-    def represent_relation(self,
-                           entities: List[str],
-                           relation_name: str,
-                           properties: Optional[Dict[str, Any]] = None) -> Relation:
+    def represent_relation(
+        self, entities: List[str], relation_name: str, properties: Optional[Dict[str, Any]] = None
+    ) -> Relation:
         """
         Represent structured relational information.
 
         E.g., represent_relation(["Socrates", "mortal"], "is_a")
         """
         relation = Relation(
-            name=relation_name,
-            arity=len(entities),
-            arguments=entities,
-            properties=properties or {}
+            name=relation_name, arity=len(entities), arguments=entities, properties=properties or {}
         )
 
         rel_id = f"{relation_name}({','.join(entities)})"
         self.relations[rel_id] = relation
         return relation
 
-    def query_relation(self,
-                       relation_name: str,
-                       partial_args: Optional[List[Optional[str]]] = None) -> List[Relation]:
+    def query_relation(
+        self, relation_name: str, partial_args: Optional[List[Optional[str]]] = None
+    ) -> List[Relation]:
         """
         Query for relations matching pattern.
 
@@ -140,8 +140,7 @@ class LogicNetwork:
 
     # ==================== Constraint Computation ====================
 
-    def compute_constraints(self,
-                            premises: List[Proposition]) -> Dict[str, Any]:
+    def compute_constraints(self, premises: List[Proposition]) -> Dict[str, Any]:
         """
         Compute what constraints the premises impose.
 
@@ -170,7 +169,7 @@ class LogicNetwork:
         return {
             "must_be_true": must_be_true,
             "cannot_be_true": cannot_be_true,
-            "undetermined": undetermined
+            "undetermined": undetermined,
         }
 
     def check_consistency(self, beliefs: List[Proposition]) -> Tuple[bool, List[str]]:
@@ -233,11 +232,13 @@ class LogicNetwork:
             antecedent, consequent = impl.components[0], impl.components[1]
 
             if antecedent.id in atoms:
-                inferences.append(Inference(
-                    conclusion=consequent,
-                    premises=[impl, atoms[antecedent.id]],
-                    rule_applied="modus_ponens"
-                ))
+                inferences.append(
+                    Inference(
+                        conclusion=consequent,
+                        premises=[impl, atoms[antecedent.id]],
+                        rule_applied="modus_ponens",
+                    )
+                )
 
         return inferences
 
@@ -263,13 +264,15 @@ class LogicNetwork:
                         id=f"not_{antecedent.id}",
                         type=PropositionType.NEGATION,
                         content=f"not {antecedent.content}",
-                        components=[antecedent]
+                        components=[antecedent],
                     )
-                    inferences.append(Inference(
-                        conclusion=not_antecedent,
-                        premises=[impl, neg],
-                        rule_applied="modus_tollens"
-                    ))
+                    inferences.append(
+                        Inference(
+                            conclusion=not_antecedent,
+                            premises=[impl, neg],
+                            rule_applied="modus_tollens",
+                        )
+                    )
 
         return inferences
 
@@ -294,13 +297,15 @@ class LogicNetwork:
                         id=f"impl_{impl1.components[0].id}_{impl2.components[1].id}",
                         type=PropositionType.IMPLICATION,
                         content=f"if {impl1.components[0].content} then {impl2.components[1].content}",
-                        components=[impl1.components[0], impl2.components[1]]
+                        components=[impl1.components[0], impl2.components[1]],
                     )
-                    inferences.append(Inference(
-                        conclusion=new_impl,
-                        premises=[impl1, impl2],
-                        rule_applied="hypothetical_syllogism"
-                    ))
+                    inferences.append(
+                        Inference(
+                            conclusion=new_impl,
+                            premises=[impl1, impl2],
+                            rule_applied="hypothetical_syllogism",
+                        )
+                    )
 
         return inferences
 
@@ -325,17 +330,21 @@ class LogicNetwork:
 
                 # Check which disjunct is negated
                 if disj.components[0].id == negated_id:
-                    inferences.append(Inference(
-                        conclusion=disj.components[1],
-                        premises=[disj, neg],
-                        rule_applied="disjunctive_syllogism"
-                    ))
+                    inferences.append(
+                        Inference(
+                            conclusion=disj.components[1],
+                            premises=[disj, neg],
+                            rule_applied="disjunctive_syllogism",
+                        )
+                    )
                 elif disj.components[1].id == negated_id:
-                    inferences.append(Inference(
-                        conclusion=disj.components[0],
-                        premises=[disj, neg],
-                        rule_applied="disjunctive_syllogism"
-                    ))
+                    inferences.append(
+                        Inference(
+                            conclusion=disj.components[0],
+                            premises=[disj, neg],
+                            rule_applied="disjunctive_syllogism",
+                        )
+                    )
 
         return inferences
 
@@ -347,18 +356,18 @@ class LogicNetwork:
         atoms = [p for p in premises if p.type == PropositionType.ATOMIC]
 
         for i, p1 in enumerate(atoms):
-            for p2 in atoms[i + 1:]:
+            for p2 in atoms[i + 1 :]:
                 conj = Proposition(
                     id=f"and_{p1.id}_{p2.id}",
                     type=PropositionType.CONJUNCTION,
                     content=f"{p1.content} and {p2.content}",
-                    components=[p1, p2]
+                    components=[p1, p2],
                 )
-                inferences.append(Inference(
-                    conclusion=conj,
-                    premises=[p1, p2],
-                    rule_applied="conjunction_introduction"
-                ))
+                inferences.append(
+                    Inference(
+                        conclusion=conj, premises=[p1, p2], rule_applied="conjunction_introduction"
+                    )
+                )
 
         return inferences
 
@@ -371,19 +380,19 @@ class LogicNetwork:
 
         for conj in conjunctions:
             for component in conj.components:
-                inferences.append(Inference(
-                    conclusion=component,
-                    premises=[conj],
-                    rule_applied="conjunction_elimination"
-                ))
+                inferences.append(
+                    Inference(
+                        conclusion=component,
+                        premises=[conj],
+                        rule_applied="conjunction_elimination",
+                    )
+                )
 
         return inferences
 
     # ==================== Structure Updating ====================
 
-    def update_model(self,
-                     model: Dict[str, Any],
-                     new_info: Proposition) -> Dict[str, Any]:
+    def update_model(self, model: Dict[str, Any], new_info: Proposition) -> Dict[str, Any]:
         """
         Update mental model with new information.
 
@@ -402,9 +411,9 @@ class LogicNetwork:
 
         return updated
 
-    def propagate_implications(self,
-                                model: Dict[str, Any],
-                                change: Tuple[str, Any]) -> Dict[str, Any]:
+    def propagate_implications(
+        self, model: Dict[str, Any], change: Tuple[str, Any]
+    ) -> Dict[str, Any]:
         """
         Propagate implications of a change through the model.
         """
@@ -451,9 +460,9 @@ class LogicNetwork:
 
         return None
 
-    def is_valid_argument(self,
-                          premises: List[Proposition],
-                          conclusion: Proposition) -> Tuple[bool, str]:
+    def is_valid_argument(
+        self, premises: List[Proposition], conclusion: Proposition
+    ) -> Tuple[bool, str]:
         """
         Check if conclusion validly follows from premises.
 
@@ -468,12 +477,14 @@ class LogicNetwork:
                 return True, f"Valid via {inf.rule_applied}"
 
         # Check if conclusion contradicts premises
-        test_beliefs = premises + [Proposition(
-            id=f"not_{conclusion.id}",
-            type=PropositionType.NEGATION,
-            content=f"not {conclusion.content}",
-            components=[conclusion]
-        )]
+        test_beliefs = premises + [
+            Proposition(
+                id=f"not_{conclusion.id}",
+                type=PropositionType.NEGATION,
+                content=f"not {conclusion.content}",
+                components=[conclusion],
+            )
+        ]
 
         consistent, contradictions = self.check_consistency(test_beliefs)
         if not consistent:

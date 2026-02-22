@@ -13,6 +13,7 @@ from collections import defaultdict
 @dataclass
 class Factor:
     """A factor in a factor graph."""
+
     name: str
     variables: List[str]
     # Maps variable assignments to potential values
@@ -29,7 +30,7 @@ class Factor:
         key = tuple(sorted(assignment.items()))
         self.potentials[key] = value
 
-    def marginalize(self, var: str, var_values: List[Any]) -> 'Factor':
+    def marginalize(self, var: str, var_values: List[Any]) -> "Factor":
         """Marginalize out a variable by summing."""
         new_vars = [v for v in self.variables if v != var]
 
@@ -49,7 +50,7 @@ class Factor:
 
         return Factor(f"{self.name}_marg_{var}", new_vars, new_potentials)
 
-    def multiply(self, other: 'Factor') -> 'Factor':
+    def multiply(self, other: "Factor") -> "Factor":
         """Multiply two factors."""
         all_vars = list(set(self.variables + other.variables))
         new_name = f"{self.name}_x_{other.name}"
@@ -80,22 +81,19 @@ class Factor:
 @dataclass
 class Message:
     """A message in belief propagation."""
+
     source: str  # Factor or variable name
     target: str  # Factor or variable name
     values: Dict[Any, float]  # Value -> probability/potential
 
-    def normalize(self) -> 'Message':
+    def normalize(self) -> "Message":
         """Return normalized message."""
         total = sum(self.values.values())
         if total > 0:
-            return Message(
-                self.source,
-                self.target,
-                {k: v / total for k, v in self.values.items()}
-            )
+            return Message(self.source, self.target, {k: v / total for k, v in self.values.items()})
         return self
 
-    def multiply(self, other: 'Message') -> 'Message':
+    def multiply(self, other: "Message") -> "Message":
         """Element-wise multiplication of messages."""
         result = {}
         for val in set(self.values.keys()) | set(other.values.keys()):
@@ -325,9 +323,7 @@ class BeliefPropagation:
                     # Compute difference
                     if old_msg:
                         for v in set(new_msg.values.keys()) | set(old_msg.values.keys()):
-                            diff = abs(
-                                new_msg.values.get(v, 0) - old_msg.values.get(v, 0)
-                            )
+                            diff = abs(new_msg.values.get(v, 0) - old_msg.values.get(v, 0))
                             max_diff = max(max_diff, diff)
 
                     self._messages[key] = new_msg
@@ -384,9 +380,5 @@ class BeliefPropagation:
                     key = tuple(sorted(assignment.items()))
                     potentials[key] = 1.0 if v == value else 0.0
 
-                evidence_factor = Factor(
-                    f"evidence_{var}",
-                    [var],
-                    potentials
-                )
+                evidence_factor = Factor(f"evidence_{var}", [var], potentials)
                 self.graph.add_factor(evidence_factor)

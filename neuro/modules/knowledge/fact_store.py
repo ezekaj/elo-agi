@@ -15,6 +15,7 @@ import numpy as np
 @dataclass
 class Triple:
     """A subject-predicate-object triple."""
+
     subject: str
     predicate: str
     obj: str  # 'object' is a Python builtin
@@ -25,9 +26,9 @@ class Triple:
     def __eq__(self, other):
         if isinstance(other, Triple):
             return (
-                self.subject == other.subject and
-                self.predicate == other.predicate and
-                self.obj == other.obj
+                self.subject == other.subject
+                and self.predicate == other.predicate
+                and self.obj == other.obj
             )
         return False
 
@@ -38,6 +39,7 @@ class Triple:
 @dataclass
 class Fact:
     """A fact with metadata."""
+
     triple: Triple
     confidence: float = 1.0
     source: str = "unknown"
@@ -73,6 +75,7 @@ class Fact:
 @dataclass
 class FactQuery:
     """A query against the fact store."""
+
     subject: Optional[str] = None
     predicate: Optional[str] = None
     obj: Optional[str] = None
@@ -398,7 +401,7 @@ class FactStore:
             added += 1
         return added
 
-    def merge(self, other: 'FactStore') -> int:
+    def merge(self, other: "FactStore") -> int:
         """Merge another fact store into this one."""
         merged = 0
         for fact in other.iterate():

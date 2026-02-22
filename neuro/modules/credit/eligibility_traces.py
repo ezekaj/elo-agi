@@ -13,6 +13,7 @@ import numpy as np
 
 class TraceType(Enum):
     """Type of eligibility trace."""
+
     ACCUMULATING = "accumulating"
     REPLACING = "replacing"
     DUTCH = "dutch"
@@ -21,6 +22,7 @@ class TraceType(Enum):
 @dataclass
 class TraceConfig:
     """Configuration for eligibility traces."""
+
     trace_type: TraceType = TraceType.ACCUMULATING
     lambda_param: float = 0.9
     gamma: float = 0.99
@@ -33,6 +35,7 @@ class TraceConfig:
 @dataclass
 class EligibilityTrace:
     """An individual eligibility trace."""
+
     state_key: str
     action_key: str
     module_id: str
@@ -54,9 +57,9 @@ class EligibilityTrace:
 
     def dutch_update(self, value: float, gamma_lambda: float, max_trace: float) -> None:
         """Dutch trace update: e = gamma*lambda*e + (1 - gamma*lambda*e)*value."""
-        self.trace_value = gamma_lambda * self.trace_value + (
-            1 - gamma_lambda * self.trace_value
-        ) * value
+        self.trace_value = (
+            gamma_lambda * self.trace_value + (1 - gamma_lambda * self.trace_value) * value
+        )
         self.trace_value = min(self.trace_value, max_trace)
 
 
@@ -211,10 +214,7 @@ class EligibilityTraceManager:
         """Get total trace value, optionally filtered by module."""
         if module_id is None:
             return sum(t.trace_value for t in self._traces.values())
-        return sum(
-            t.trace_value for t in self._traces.values()
-            if t.module_id == module_id
-        )
+        return sum(t.trace_value for t in self._traces.values() if t.module_id == module_id)
 
     def get_cumulative_credits(self) -> Dict[str, float]:
         """Get cumulative credits per module."""
@@ -236,8 +236,7 @@ class EligibilityTraceManager:
         """
         current = self._timestep
         to_remove = [
-            key for key, trace in self._traces.items()
-            if current - trace.timestamp > max_age
+            key for key, trace in self._traces.items() if current - trace.timestamp > max_age
         ]
         for key in to_remove:
             del self._traces[key]

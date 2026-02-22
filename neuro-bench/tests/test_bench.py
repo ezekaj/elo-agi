@@ -14,48 +14,83 @@ import pytest
 import numpy as np
 from pathlib import Path
 
-from neuro.modules.bench.base_benchmark import Benchmark, BenchmarkConfig, BenchmarkResult, TrialResult, BenchmarkSuite
+from neuro.modules.bench.base_benchmark import (
+    Benchmark,
+    BenchmarkConfig,
+    BenchmarkResult,
+    TrialResult,
+    BenchmarkSuite,
+)
 from neuro.modules.bench.reasoning_bench import PatternCompletion, AnalogySolving, LogicalInference
-from neuro.modules.bench.memory_bench import WorkingMemoryTest, EpisodicRecall, SequenceMemory, AssociativeMemory
-from neuro.modules.bench.language_bench import TextCompletion, InstructionFollowing, SemanticSimilarity, QuestionAnswering
-from neuro.modules.bench.planning_bench import GoalAchievement, MultiStepPlanning, ResourcePlanning, ConstraintSatisfaction
-from neuro.modules.bench.runner import BenchmarkRunner, RunConfig, RunResult, create_random_agent, quick_benchmark
+from neuro.modules.bench.memory_bench import (
+    WorkingMemoryTest,
+    EpisodicRecall,
+    SequenceMemory,
+    AssociativeMemory,
+)
+from neuro.modules.bench.language_bench import (
+    TextCompletion,
+    InstructionFollowing,
+    SemanticSimilarity,
+    QuestionAnswering,
+)
+from neuro.modules.bench.planning_bench import (
+    GoalAchievement,
+    MultiStepPlanning,
+    ResourcePlanning,
+    ConstraintSatisfaction,
+)
+from neuro.modules.bench.runner import (
+    BenchmarkRunner,
+    RunConfig,
+    RunResult,
+    create_random_agent,
+    quick_benchmark,
+)
 
 # =============================================================================
 # Helper Functions
 # =============================================================================
 
+
 def create_perfect_agent():
     """Create an agent that returns expected outputs."""
+
     def agent(input_data):
         # Return expected for testing
-        return input_data.get('_expected', None)
+        return input_data.get("_expected", None)
+
     return agent
+
 
 def create_simple_agent():
     """Create a simple rule-based agent."""
+
     def agent(input_data):
         if isinstance(input_data, dict):
-            if 'sequence' in input_data:
-                return input_data['sequence']
-            elif 'premises' in input_data:
+            if "sequence" in input_data:
+                return input_data["sequence"]
+            elif "premises" in input_data:
                 return True
-            elif 'text1' in input_data:
+            elif "text1" in input_data:
                 return True
-            elif 'prompt' in input_data:
+            elif "prompt" in input_data:
                 return "unknown"
-            elif 'instruction' in input_data:
+            elif "instruction" in input_data:
                 return "result"
-            elif 'start' in input_data:
-                return ['right', 'right', 'down', 'down']
-            elif 'task' in input_data:
-                return ['step1', 'step2', 'step3']
+            elif "start" in input_data:
+                return ["right", "right", "down", "down"]
+            elif "task" in input_data:
+                return ["step1", "step2", "step3"]
         return np.zeros(64)
+
     return agent
+
 
 # =============================================================================
 # Tests: Base Benchmark
 # =============================================================================
+
 
 class TestBenchmarkConfig:
     """Tests for BenchmarkConfig."""
@@ -70,6 +105,7 @@ class TestBenchmarkConfig:
         assert config.name == "test"
         assert config.n_trials == 50
 
+
 class TestTrialResult:
     """Tests for TrialResult."""
 
@@ -82,6 +118,7 @@ class TestTrialResult:
         )
         assert result.success
         assert result.score == 0.9
+
 
 class TestBenchmarkResult:
     """Tests for BenchmarkResult."""
@@ -100,7 +137,7 @@ class TestBenchmarkResult:
         )
 
         assert result.n_trials == 3
-        assert result.success_rate == pytest.approx(2/3)
+        assert result.success_rate == pytest.approx(2 / 3)
         assert result.mean_score == pytest.approx((1.0 + 0.8 + 0.5) / 3)
 
     def test_to_dict(self):
@@ -111,8 +148,8 @@ class TestBenchmarkResult:
             total_time=1.0,
         )
         d = result.to_dict()
-        assert 'benchmark_name' in d
-        assert 'success_rate' in d
+        assert "benchmark_name" in d
+        assert "success_rate" in d
 
     def test_summary(self):
         result = BenchmarkResult(
@@ -123,6 +160,7 @@ class TestBenchmarkResult:
         )
         summary = result.summary()
         assert "test" in summary
+
 
 class TestBenchmarkSuite:
     """Tests for BenchmarkSuite."""
@@ -142,9 +180,11 @@ class TestBenchmarkSuite:
         assert suite.remove("pattern_completion")
         assert "pattern_completion" not in suite.list_benchmarks()
 
+
 # =============================================================================
 # Tests: Reasoning Benchmarks
 # =============================================================================
+
 
 class TestPatternCompletion:
     """Tests for PatternCompletion benchmark."""
@@ -156,8 +196,8 @@ class TestPatternCompletion:
     def test_generate_trial(self):
         bench = PatternCompletion()
         trial_data, expected = bench.generate_trial(0)
-        assert 'examples' in trial_data
-        assert 'test_input' in trial_data
+        assert "examples" in trial_data
+        assert "test_input" in trial_data
         assert isinstance(expected, np.ndarray)
 
     def test_evaluate_exact(self):
@@ -175,6 +215,7 @@ class TestPatternCompletion:
         success, score = bench.evaluate(expected, actual)
         assert score == 0.75
 
+
 class TestAnalogySolving:
     """Tests for AnalogySolving benchmark."""
 
@@ -185,9 +226,10 @@ class TestAnalogySolving:
     def test_generate_trial(self):
         bench = AnalogySolving()
         trial_data, expected = bench.generate_trial(0)
-        assert 'A' in trial_data
-        assert 'B' in trial_data
-        assert 'C' in trial_data
+        assert "A" in trial_data
+        assert "B" in trial_data
+        assert "C" in trial_data
+
 
 class TestLogicalInference:
     """Tests for LogicalInference benchmark."""
@@ -199,8 +241,8 @@ class TestLogicalInference:
     def test_generate_trial(self):
         bench = LogicalInference()
         trial_data, expected = bench.generate_trial(0)
-        assert 'premises' in trial_data
-        assert 'conclusion' in trial_data
+        assert "premises" in trial_data
+        assert "conclusion" in trial_data
         assert isinstance(expected, bool)
 
     def test_evaluate(self):
@@ -213,9 +255,11 @@ class TestLogicalInference:
         assert not success
         assert score == 0.0
 
+
 # =============================================================================
 # Tests: Memory Benchmarks
 # =============================================================================
+
 
 class TestWorkingMemoryTest:
     """Tests for WorkingMemoryTest benchmark."""
@@ -227,8 +271,8 @@ class TestWorkingMemoryTest:
     def test_generate_trial(self):
         bench = WorkingMemoryTest()
         trial_data, expected = bench.generate_trial(0)
-        assert 'sequence' in trial_data
-        assert 'distractors' in trial_data
+        assert "sequence" in trial_data
+        assert "distractors" in trial_data
         assert isinstance(expected, list)
 
     def test_evaluate_exact(self):
@@ -244,6 +288,7 @@ class TestWorkingMemoryTest:
         success, score = bench.evaluate(expected, [1, 2, 3, 0, 0])
         assert score == 0.6
 
+
 class TestEpisodicRecall:
     """Tests for EpisodicRecall benchmark."""
 
@@ -254,9 +299,10 @@ class TestEpisodicRecall:
     def test_generate_trial(self):
         bench = EpisodicRecall()
         trial_data, expected = bench.generate_trial(0)
-        assert 'episodes' in trial_data
-        assert 'query' in trial_data
+        assert "episodes" in trial_data
+        assert "query" in trial_data
         assert isinstance(expected, dict)
+
 
 class TestSequenceMemory:
     """Tests for SequenceMemory benchmark."""
@@ -268,8 +314,9 @@ class TestSequenceMemory:
     def test_generate_trial(self):
         bench = SequenceMemory()
         trial_data, expected = bench.generate_trial(0)
-        assert 'sequence' in trial_data
+        assert "sequence" in trial_data
         assert isinstance(expected, list)
+
 
 class TestAssociativeMemory:
     """Tests for AssociativeMemory benchmark."""
@@ -281,12 +328,14 @@ class TestAssociativeMemory:
     def test_generate_trial(self):
         bench = AssociativeMemory()
         trial_data, expected = bench.generate_trial(0)
-        assert 'pairs' in trial_data
-        assert 'cue' in trial_data
+        assert "pairs" in trial_data
+        assert "cue" in trial_data
+
 
 # =============================================================================
 # Tests: Language Benchmarks
 # =============================================================================
+
 
 class TestTextCompletion:
     """Tests for TextCompletion benchmark."""
@@ -298,7 +347,7 @@ class TestTextCompletion:
     def test_generate_trial(self):
         bench = TextCompletion()
         trial_data, expected = bench.generate_trial(0)
-        assert 'prompt' in trial_data
+        assert "prompt" in trial_data
         assert isinstance(expected, str)
 
     def test_evaluate(self):
@@ -306,6 +355,7 @@ class TestTextCompletion:
         success, score = bench.evaluate("Paris", "Paris")
         assert success
         assert score == 1.0
+
 
 class TestInstructionFollowing:
     """Tests for InstructionFollowing benchmark."""
@@ -317,7 +367,8 @@ class TestInstructionFollowing:
     def test_generate_trial(self):
         bench = InstructionFollowing()
         trial_data, expected = bench.generate_trial(0)
-        assert 'instruction' in trial_data
+        assert "instruction" in trial_data
+
 
 class TestSemanticSimilarity:
     """Tests for SemanticSimilarity benchmark."""
@@ -329,9 +380,10 @@ class TestSemanticSimilarity:
     def test_generate_trial(self):
         bench = SemanticSimilarity()
         trial_data, expected = bench.generate_trial(0)
-        assert 'text1' in trial_data
-        assert 'text2' in trial_data
+        assert "text1" in trial_data
+        assert "text2" in trial_data
         assert isinstance(expected, bool)
+
 
 class TestQuestionAnswering:
     """Tests for QuestionAnswering benchmark."""
@@ -343,12 +395,14 @@ class TestQuestionAnswering:
     def test_generate_trial(self):
         bench = QuestionAnswering()
         trial_data, expected = bench.generate_trial(0)
-        assert 'context' in trial_data
-        assert 'question' in trial_data
+        assert "context" in trial_data
+        assert "question" in trial_data
+
 
 # =============================================================================
 # Tests: Planning Benchmarks
 # =============================================================================
+
 
 class TestGoalAchievement:
     """Tests for GoalAchievement benchmark."""
@@ -360,15 +414,16 @@ class TestGoalAchievement:
     def test_generate_trial(self):
         bench = GoalAchievement()
         trial_data, expected = bench.generate_trial(0)
-        assert 'grid_size' in trial_data
-        assert 'start' in trial_data
-        assert 'goal' in trial_data
+        assert "grid_size" in trial_data
+        assert "start" in trial_data
+        assert "goal" in trial_data
 
     def test_evaluate_valid_path(self):
         bench = GoalAchievement()
-        expected = ['right', 'right', 'down', 'down']
-        success, score = bench.evaluate(expected, ['right', 'right', 'down', 'down'])
+        expected = ["right", "right", "down", "down"]
+        success, score = bench.evaluate(expected, ["right", "right", "down", "down"])
         assert success
+
 
 class TestMultiStepPlanning:
     """Tests for MultiStepPlanning benchmark."""
@@ -380,8 +435,9 @@ class TestMultiStepPlanning:
     def test_generate_trial(self):
         bench = MultiStepPlanning()
         trial_data, expected = bench.generate_trial(0)
-        assert 'task' in trial_data
+        assert "task" in trial_data
         assert isinstance(expected, list)
+
 
 class TestResourcePlanning:
     """Tests for ResourcePlanning benchmark."""
@@ -393,8 +449,9 @@ class TestResourcePlanning:
     def test_generate_trial(self):
         bench = ResourcePlanning()
         trial_data, expected = bench.generate_trial(0)
-        assert 'resources' in trial_data
-        assert 'recipes' in trial_data
+        assert "resources" in trial_data
+        assert "recipes" in trial_data
+
 
 class TestConstraintSatisfaction:
     """Tests for ConstraintSatisfaction benchmark."""
@@ -406,12 +463,14 @@ class TestConstraintSatisfaction:
     def test_generate_trial(self):
         bench = ConstraintSatisfaction()
         trial_data, expected = bench.generate_trial(0)
-        assert 'tasks' in trial_data
-        assert 'constraints' in trial_data
+        assert "tasks" in trial_data
+        assert "constraints" in trial_data
+
 
 # =============================================================================
 # Tests: Runner
 # =============================================================================
+
 
 class TestRunConfig:
     """Tests for RunConfig."""
@@ -420,6 +479,7 @@ class TestRunConfig:
         config = RunConfig()
         assert config.verbose == True
         assert config.save_results == True
+
 
 class TestBenchmarkRunner:
     """Tests for BenchmarkRunner."""
@@ -449,17 +509,18 @@ class TestBenchmarkRunner:
         report = runner.generate_report(run_result)
         assert "NEURO BENCHMARK REPORT" in report
 
+
 class TestRunResult:
     """Tests for RunResult."""
 
     def test_properties(self):
         results = {
-            'test1': BenchmarkResult('test1', BenchmarkConfig(), [
-                TrialResult(0, True, 0.8, 0.1)
-            ], 1.0),
-            'test2': BenchmarkResult('test2', BenchmarkConfig(), [
-                TrialResult(0, True, 0.6, 0.1)
-            ], 1.0),
+            "test1": BenchmarkResult(
+                "test1", BenchmarkConfig(), [TrialResult(0, True, 0.8, 0.1)], 1.0
+            ),
+            "test2": BenchmarkResult(
+                "test2", BenchmarkConfig(), [TrialResult(0, True, 0.6, 0.1)], 1.0
+            ),
         }
         run_result = RunResult(
             suite_name="test",
@@ -476,15 +537,16 @@ class TestRunResult:
             total_time=1.0,
         )
         d = run_result.to_dict()
-        assert 'suite_name' in d
-        assert 'overall_score' in d
+        assert "suite_name" in d
+        assert "overall_score" in d
+
 
 class TestHelperFunctions:
     """Tests for helper functions."""
 
     def test_create_random_agent(self):
         agent = create_random_agent()
-        result = agent({'sequence': [1, 2, 3]})
+        result = agent({"sequence": [1, 2, 3]})
         assert result is not None
 
     def test_quick_benchmark(self):
@@ -493,9 +555,11 @@ class TestHelperFunctions:
         result = quick_benchmark(agent, n_trials=2)
         assert result.n_benchmarks > 0
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for the benchmark suite."""
@@ -548,6 +612,7 @@ class TestIntegration:
             trial_data, expected = bench.generate_trial(0)
             assert trial_data is not None
             assert expected is not None
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

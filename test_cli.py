@@ -4,21 +4,17 @@
 import subprocess
 import sys
 
+
 def run(cmd, timeout=5):
     """Run command and return (success, output)."""
     try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=timeout
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
         return result.returncode == 0, result.stdout + result.stderr
     except subprocess.TimeoutExpired:
         return True, "(timed out - interactive mode works)"
     except Exception as e:
         return False, str(e)
+
 
 def test(name, cmd, expect_success=True, expect_contains=None, timeout=5):
     """Run a test."""
@@ -37,6 +33,7 @@ def test(name, cmd, expect_success=True, expect_contains=None, timeout=5):
 
     return passed
 
+
 def main():
     print("\n=== NEURO CLI Test Suite ===\n")
 
@@ -46,16 +43,22 @@ def main():
     results = []
 
     print("Flags:")
-    results.append(test("--version", f"{venv}python -m neuro.cli --version", expect_contains="0.9.0"))
+    results.append(
+        test("--version", f"{venv}python -m neuro.cli --version", expect_contains="0.9.0")
+    )
     results.append(test("--help", f"{venv}python -m neuro.cli --help", expect_contains="NEURO"))
     results.append(test("-h", f"{venv}python -m neuro.cli -h", expect_contains="usage"))
 
     print("\nSubcommands:")
     results.append(test("doctor", f"{venv}python -m neuro.cli doctor", expect_contains="Python"))
-    results.append(test("config", f"{venv}python -m neuro.cli config", expect_contains="Configuration"))
+    results.append(
+        test("config", f"{venv}python -m neuro.cli config", expect_contains="Configuration")
+    )
 
     print("\nPrint mode:")
-    results.append(test("-p with prompt", f"{venv}python -m neuro.cli -p 'say hello' 2>&1", timeout=30))
+    results.append(
+        test("-p with prompt", f"{venv}python -m neuro.cli -p 'say hello' 2>&1", timeout=30)
+    )
 
     print("\nInteractive mode (timeout expected):")
     results.append(test("basic start", f"{venv}python -m neuro.cli 2>&1", timeout=2))
@@ -66,7 +69,7 @@ def main():
     # Summary
     passed = sum(results)
     total = len(results)
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Results: {passed}/{total} tests passed")
 
     if passed == total:
@@ -75,6 +78,7 @@ def main():
     else:
         print(f"[{total - passed} TESTS FAILED]")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

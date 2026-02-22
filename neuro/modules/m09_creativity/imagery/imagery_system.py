@@ -20,6 +20,7 @@ from .tactile_imagery import TactileImagery, TactileImage
 @dataclass
 class MultimodalImage:
     """An image that spans multiple sensory modalities"""
+
     id: str
     description: str
     visual: Optional[VisualImage] = None
@@ -51,13 +52,15 @@ class ImagerySystem:
 
         self.multimodal_images: Dict[str, MultimodalImage] = {}
 
-    def create_multimodal_image(self,
-                                 image_id: str,
-                                 description: str,
-                                 include_visual: bool = True,
-                                 include_auditory: bool = False,
-                                 include_motor: bool = False,
-                                 include_tactile: bool = False) -> MultimodalImage:
+    def create_multimodal_image(
+        self,
+        image_id: str,
+        description: str,
+        include_visual: bool = True,
+        include_auditory: bool = False,
+        include_motor: bool = False,
+        include_tactile: bool = False,
+    ) -> MultimodalImage:
         """
         Create an image with multiple sensory modalities.
         """
@@ -99,17 +102,19 @@ class ImagerySystem:
             motor=motor_img,
             tactile=tactile_img,
             overall_vividness=overall_vividness,
-            coherence=self._compute_coherence(visual_img, auditory_img, motor_img, tactile_img)
+            coherence=self._compute_coherence(visual_img, auditory_img, motor_img, tactile_img),
         )
 
         self.multimodal_images[image_id] = multimodal
         return multimodal
 
-    def _compute_coherence(self,
-                           visual: Optional[VisualImage],
-                           auditory: Optional[AuditoryImage],
-                           motor: Optional[MotorImage],
-                           tactile: Optional[TactileImage]) -> float:
+    def _compute_coherence(
+        self,
+        visual: Optional[VisualImage],
+        auditory: Optional[AuditoryImage],
+        motor: Optional[MotorImage],
+        tactile: Optional[TactileImage],
+    ) -> float:
         """
         Compute how coherently the modalities fit together.
 
@@ -138,7 +143,7 @@ class ImagerySystem:
             scene_description,
             include_visual=True,
             include_auditory=True,
-            include_tactile=True
+            include_tactile=True,
         )
 
     def imagine_action(self, action_description: str) -> MultimodalImage:
@@ -150,12 +155,10 @@ class ImagerySystem:
             action_description,
             include_visual=True,
             include_motor=True,
-            include_tactile=True
+            include_tactile=True,
         )
 
-    def simulate_experience(self,
-                            experience: str,
-                            modalities: List[str]) -> MultimodalImage:
+    def simulate_experience(self, experience: str, modalities: List[str]) -> MultimodalImage:
         """
         Simulate a full experience with specified modalities.
         """
@@ -165,7 +168,7 @@ class ImagerySystem:
             include_visual="visual" in modalities,
             include_auditory="auditory" in modalities,
             include_motor="motor" in modalities,
-            include_tactile="tactile" in modalities
+            include_tactile="tactile" in modalities,
         )
 
     def get_all_associations(self, image_id: str) -> List[str]:
@@ -200,9 +203,7 @@ class ImagerySystem:
 
         return list(set(associations))
 
-    def transform_multimodal(self,
-                              image_id: str,
-                              transformation: str) -> MultimodalImage:
+    def transform_multimodal(self, image_id: str, transformation: str) -> MultimodalImage:
         """
         Apply transformation across all modalities.
         """
@@ -253,16 +254,15 @@ class ImagerySystem:
             motor=new_motor,
             tactile=new_tactile,
             overall_vividness=original.overall_vividness * 0.9,
-            coherence=original.coherence * 0.95
+            coherence=original.coherence * 0.95,
         )
 
         self.multimodal_images[new_id] = transformed
         return transformed
 
-    def blend_images(self,
-                     image1_id: str,
-                     image2_id: str,
-                     blend_factor: float = 0.5) -> MultimodalImage:
+    def blend_images(
+        self, image1_id: str, image2_id: str, blend_factor: float = 0.5
+    ) -> MultimodalImage:
         """
         Blend two multimodal images together.
 
@@ -320,7 +320,7 @@ class ImagerySystem:
             motor=blended_motor,
             tactile=blended_tactile,
             overall_vividness=(img1.overall_vividness + img2.overall_vividness) / 2 * 0.9,
-            coherence=0.6  # Blends have lower coherence
+            coherence=0.6,  # Blends have lower coherence
         )
 
         self.multimodal_images[blend_id] = blended

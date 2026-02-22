@@ -13,6 +13,7 @@ import numpy as np
 @dataclass
 class KernelConfig:
     """Configuration for GPU kernels."""
+
     block_size: int = 256
     grid_size: int = 1024
     shared_memory: int = 48 * 1024  # 48KB
@@ -22,6 +23,7 @@ class KernelConfig:
 @dataclass
 class KernelStats:
     """Statistics from kernel execution."""
+
     kernel_name: str
     execution_time: float
     memory_used: int
@@ -57,12 +59,14 @@ class GPUKernel(ABC):
         flops: int,
     ) -> None:
         """Record kernel execution stats."""
-        self._stats.append(KernelStats(
-            kernel_name=kernel_name,
-            execution_time=execution_time,
-            memory_used=memory_used,
-            flops=flops,
-        ))
+        self._stats.append(
+            KernelStats(
+                kernel_name=kernel_name,
+                execution_time=execution_time,
+                memory_used=memory_used,
+                flops=flops,
+            )
+        )
 
 
 class MatMulKernel(GPUKernel):
@@ -96,6 +100,7 @@ class MatMulKernel(GPUKernel):
             Result matrix of shape (M, N)
         """
         import time
+
         start = time.time()
 
         # Validate shapes
@@ -119,9 +124,7 @@ class MatMulKernel(GPUKernel):
                     k_end = min(k + self.tile_size, K)
 
                     # Tile computation
-                    result[i:i_end, j:j_end] += (
-                        A[i:i_end, k:k_end] @ B[k:k_end, j:j_end]
-                    )
+                    result[i:i_end, j:j_end] += A[i:i_end, k:k_end] @ B[k:k_end, j:j_end]
 
         execution_time = time.time() - start
         flops = 2 * M * K * N  # multiply-add
@@ -166,17 +169,17 @@ class ConvolutionKernel(GPUKernel):
         """
         import time
         from scipy.ndimage import convolve
+
         start = time.time()
 
         # Handle different input shapes
         if input.ndim == 2:
-            result = convolve(input, kernel, mode='constant')
+            result = convolve(input, kernel, mode="constant")
         elif input.ndim == 3:
             # Apply to each channel
-            result = np.stack([
-                convolve(input[c], kernel, mode='constant')
-                for c in range(input.shape[0])
-            ])
+            result = np.stack(
+                [convolve(input[c], kernel, mode="constant") for c in range(input.shape[0])]
+            )
         else:
             raise ValueError(f"Unsupported input shape: {input.shape}")
 
@@ -217,6 +220,7 @@ class SoftmaxKernel(GPUKernel):
             Softmax probabilities
         """
         import time
+
         start = time.time()
 
         # Numerically stable softmax
@@ -265,6 +269,7 @@ class ReductionKernel(GPUKernel):
             Reduced result
         """
         import time
+
         start = time.time()
 
         if self.operation == "sum":
@@ -330,20 +335,13 @@ class KernelManager:
 
     def get_all_stats(self) -> Dict[str, List[KernelStats]]:
         """Get stats for all kernels."""
-        return {
-            name: kernel.get_stats()
-            for name, kernel in self._kernels.items()
-        }
+        return {name: kernel.get_stats() for name, kernel in self._kernels.items()}
 
     def statistics(self) -> Dict[str, Any]:
         """Get manager statistics."""
         all_stats = self.get_all_stats()
         total_executions = sum(len(stats) for stats in all_stats.values())
-        total_time = sum(
-            s.execution_time
-            for stats in all_stats.values()
-            for s in stats
-        )
+        total_time = sum(s.execution_time for stats in all_stats.values() for s in stats)
 
         return {
             "n_kernels": len(self._kernels),

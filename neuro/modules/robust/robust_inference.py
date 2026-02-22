@@ -20,15 +20,17 @@ from .calibration import ConfidenceCalibrator, CalibrationResult
 
 class RejectionPolicy(Enum):
     """Policies for rejecting uncertain predictions."""
-    CONFIDENCE = "confidence"        # Reject low confidence
-    UNCERTAINTY = "uncertainty"      # Reject high uncertainty
-    OOD = "ood"                      # Reject OOD inputs
-    COMBINED = "combined"            # Combine all criteria
+
+    CONFIDENCE = "confidence"  # Reject low confidence
+    UNCERTAINTY = "uncertainty"  # Reject high uncertainty
+    OOD = "ood"  # Reject OOD inputs
+    COMBINED = "combined"  # Combine all criteria
 
 
 @dataclass
 class RobustPrediction:
     """Result of robust inference."""
+
     prediction: int
     probabilities: np.ndarray
     confidence: float
@@ -42,12 +44,13 @@ class RobustPrediction:
 @dataclass
 class SelectivePrediction:
     """Result of selective prediction."""
-    prediction: Optional[int]       # None if abstained
+
+    prediction: Optional[int]  # None if abstained
     confidence: float
     abstained: bool
     abstention_reason: Optional[str]
-    coverage: float                  # Fraction of predictions made
-    risk: float                      # Error rate on predictions made
+    coverage: float  # Fraction of predictions made
+    risk: float  # Error rate on predictions made
 
 
 class RobustInference:
@@ -134,9 +137,7 @@ class RobustInference:
                 self._n_ood += 1
 
         # Determine rejection
-        is_rejected, rejection_reason = self._should_reject(
-            confidence, uncertainty, is_ood
-        )
+        is_rejected, rejection_reason = self._should_reject(confidence, uncertainty, is_ood)
 
         if is_rejected:
             self._n_rejected += 1
@@ -309,6 +310,7 @@ class RobustInference:
         elif method == "median":
             # Median confidence for winner
             from collections import Counter
+
             votes = [p for p, _ in predictions]
             winner = Counter(votes).most_common(1)[0][0]
             winner_confs = [c for p, c in predictions if p == winner]
@@ -509,9 +511,9 @@ class AdaptiveThresholdInference(RobustInference):
 
         # Trim to window size
         if len(self._recent_confidences) > self.window_size:
-            self._recent_confidences = self._recent_confidences[-self.window_size:]
-            self._recent_uncertainties = self._recent_uncertainties[-self.window_size:]
-            self._recent_rejections = self._recent_rejections[-self.window_size:]
+            self._recent_confidences = self._recent_confidences[-self.window_size :]
+            self._recent_uncertainties = self._recent_uncertainties[-self.window_size :]
+            self._recent_rejections = self._recent_rejections[-self.window_size :]
 
         # Adapt thresholds
         self._adapt_thresholds()

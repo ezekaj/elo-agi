@@ -13,6 +13,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class MetaParams:
     """Parameters for metacognition"""
+
     n_features: int = 50
     confidence_threshold: float = 0.5
     monitoring_sensitivity: float = 0.7
@@ -31,8 +32,7 @@ class ConfidenceEstimator:
         # Recent confidence judgments
         self.confidence_history: List[Tuple[float, bool]] = []
 
-    def estimate_confidence(self, evidence: np.ndarray,
-                           decision: np.ndarray) -> Dict:
+    def estimate_confidence(self, evidence: np.ndarray, decision: np.ndarray) -> Dict:
         """Estimate confidence in a decision given evidence"""
         if len(evidence) != self.params.n_features:
             evidence = np.resize(evidence, self.params.n_features)
@@ -57,7 +57,7 @@ class ConfidenceEstimator:
             "confidence": confidence,
             "evidence_strength": evidence_strength,
             "consistency": consistency,
-            "above_threshold": confidence > self.params.confidence_threshold
+            "above_threshold": confidence > self.params.confidence_threshold,
         }
 
     def receive_feedback(self, confidence: float, was_correct: bool):
@@ -106,8 +106,7 @@ class PerformanceMonitor:
         self.current_effort = 0.5
         self.current_accuracy = 0.5
 
-    def monitor_process(self, process_state: np.ndarray,
-                       expected_state: np.ndarray) -> Dict:
+    def monitor_process(self, process_state: np.ndarray, expected_state: np.ndarray) -> Dict:
         """Monitor ongoing cognitive process"""
         if len(process_state) != self.params.n_features:
             process_state = np.resize(process_state, self.params.n_features)
@@ -116,8 +115,8 @@ class PerformanceMonitor:
 
         # aPFC processing
         self.apfc_activation = np.tanh(
-            self.apfc_activation * 0.3 +
-            (process_state - expected_state) * 0.7 * self.params.monitoring_sensitivity
+            self.apfc_activation * 0.3
+            + (process_state - expected_state) * 0.7 * self.params.monitoring_sensitivity
         )
 
         # Calculate error signal
@@ -131,7 +130,7 @@ class PerformanceMonitor:
             "error_signal": error,
             "effort_needed": self.current_effort,
             "apfc_activity": np.mean(np.abs(self.apfc_activation)),
-            "needs_adjustment": error > 0.3
+            "needs_adjustment": error > 0.3,
         }
 
     def record_outcome(self, accuracy: float):
@@ -149,7 +148,11 @@ class PerformanceMonitor:
             return 0.0
 
         recent = self.performance_history[-window:]
-        older = self.performance_history[-2*window:-window] if len(self.performance_history) >= 2*window else self.performance_history[:window]
+        older = (
+            self.performance_history[-2 * window : -window]
+            if len(self.performance_history) >= 2 * window
+            else self.performance_history[:window]
+        )
 
         return np.mean(recent) - np.mean(older)
 
@@ -170,8 +173,7 @@ class MetacognitiveSystem:
         self.current_strategy = "default"
         self.strategy_effectiveness: Dict[str, float] = {"default": 0.5}
 
-    def evaluate_decision(self, evidence: np.ndarray,
-                         decision: np.ndarray) -> Dict:
+    def evaluate_decision(self, evidence: np.ndarray, decision: np.ndarray) -> Dict:
         """Metacognitive evaluation of a decision"""
         conf_result = self.confidence.estimate_confidence(evidence, decision)
 
@@ -185,11 +187,10 @@ class MetacognitiveSystem:
         return {
             "confidence": conf_result,
             "control_signal_strength": np.mean(self.control_signal),
-            "recommend_continue": conf_result["confidence"] < self.params.confidence_threshold
+            "recommend_continue": conf_result["confidence"] < self.params.confidence_threshold,
         }
 
-    def monitor_task(self, current_state: np.ndarray,
-                    target_state: np.ndarray) -> Dict:
+    def monitor_task(self, current_state: np.ndarray, target_state: np.ndarray) -> Dict:
         """Monitor task progress"""
         monitor_result = self.monitor.monitor_process(current_state, target_state)
 
@@ -228,8 +229,10 @@ class MetacognitiveSystem:
         return {
             "calibration_quality": self.confidence.get_calibration_quality(),
             "recent_confidence": [c for c, _ in self.confidence.confidence_history[-10:]],
-            "recent_accuracy": self.monitor.performance_history[-10:] if self.monitor.performance_history else [],
-            "performance_trend": self.monitor.get_performance_trend()
+            "recent_accuracy": self.monitor.performance_history[-10:]
+            if self.monitor.performance_history
+            else [],
+            "performance_trend": self.monitor.get_performance_trend(),
         }
 
     def get_metacognitive_state(self) -> Dict:
@@ -241,5 +244,5 @@ class MetacognitiveSystem:
             "current_accuracy": self.monitor.current_accuracy,
             "apfc_activity": np.mean(np.abs(self.monitor.apfc_activation)),
             "control_signal_strength": np.mean(self.control_signal),
-            "calibration_quality": self.confidence.get_calibration_quality()
+            "calibration_quality": self.confidence.get_calibration_quality(),
         }

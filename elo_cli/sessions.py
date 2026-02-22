@@ -58,7 +58,7 @@ class SessionManager:
 
         self.conn.execute(
             "INSERT INTO sessions (id, title, model, working_dir, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-            (sid, "New Session", model, wd, now, now)
+            (sid, "New Session", model, wd, now, now),
         )
         self.conn.commit()
         self.current_session = sid
@@ -72,21 +72,19 @@ class SessionManager:
         now = datetime.now().isoformat()
         self.conn.execute(
             "INSERT INTO messages (session_id, role, content, created_at) VALUES (?, ?, ?, ?)",
-            (self.current_session, role, content, now)
+            (self.current_session, role, content, now),
         )
 
         # Update session timestamp and auto-generate title
         self.conn.execute(
-            "UPDATE sessions SET updated_at = ? WHERE id = ?",
-            (now, self.current_session)
+            "UPDATE sessions SET updated_at = ? WHERE id = ?", (now, self.current_session)
         )
         self.conn.commit()
 
         # Auto-title from first user message
         if role == "user":
             cur = self.conn.execute(
-                "SELECT title FROM sessions WHERE id = ?",
-                (self.current_session,)
+                "SELECT title FROM sessions WHERE id = ?", (self.current_session,)
             )
             title = cur.fetchone()[0]
             if title == "New Session":
@@ -95,8 +93,7 @@ class SessionManager:
                 if len(content) > 50:
                     new_title += "..."
                 self.conn.execute(
-                    "UPDATE sessions SET title = ? WHERE id = ?",
-                    (new_title, self.current_session)
+                    "UPDATE sessions SET title = ? WHERE id = ?", (new_title, self.current_session)
                 )
                 self.conn.commit()
 
@@ -107,8 +104,7 @@ class SessionManager:
             return []
 
         cur = self.conn.execute(
-            "SELECT role, content FROM messages WHERE session_id = ? ORDER BY id",
-            (sid,)
+            "SELECT role, content FROM messages WHERE session_id = ? ORDER BY id", (sid,)
         )
         return [{"role": role, "content": content} for role, content in cur.fetchall()]
 
@@ -119,25 +115,20 @@ class SessionManager:
                FROM sessions
                ORDER BY updated_at DESC
                LIMIT ?""",
-            (limit,)
+            (limit,),
         )
         return cur.fetchall()
 
     def get_last_session_id(self) -> Optional[str]:
         """Get the ID of the most recent session."""
-        cur = self.conn.execute(
-            "SELECT id FROM sessions ORDER BY updated_at DESC LIMIT 1"
-        )
+        cur = self.conn.execute("SELECT id FROM sessions ORDER BY updated_at DESC LIMIT 1")
         row = cur.fetchone()
         return row[0] if row else None
 
     def resume(self, session_id: str) -> list[dict]:
         """Resume a session and return its messages."""
         # Verify session exists
-        cur = self.conn.execute(
-            "SELECT id FROM sessions WHERE id = ?",
-            (session_id,)
-        )
+        cur = self.conn.execute("SELECT id FROM sessions WHERE id = ?", (session_id,))
         if not cur.fetchone():
             return []
 

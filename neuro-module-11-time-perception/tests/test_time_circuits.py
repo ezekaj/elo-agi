@@ -9,8 +9,9 @@ from neuro.modules.m11_time_perception.time_circuits import (
     Cerebellum,
     TimeCircuit,
     TimingScale,
-    TemporalSignal
+    TemporalSignal,
 )
+
 
 class TestInsula:
     """Tests for insula interoceptive timing"""
@@ -50,8 +51,9 @@ class TestInsula:
 
         rhythm = insula.get_body_rhythm()
 
-        assert rhythm['heartbeat_rate'] == 80.0
-        assert rhythm['heartbeat_period'] == 60.0 / 80.0
+        assert rhythm["heartbeat_rate"] == 80.0
+        assert rhythm["heartbeat_period"] == 60.0 / 80.0
+
 
 class TestSMA:
     """Tests for SMA motor timing"""
@@ -90,10 +92,11 @@ class TestSMA:
 
         signal = sma.coordinate_body_environment(
             external_rhythm=1.0,  # 1 Hz
-            duration=5.0
+            duration=5.0,
         )
 
         assert signal.confidence > sma.motor_precision  # Sync improves precision
+
 
 class TestBasalGanglia:
     """Tests for basal ganglia interval timing"""
@@ -154,6 +157,7 @@ class TestBasalGanglia:
         memory = bg.get_temporal_memory()
         assert len(memory) <= 5  # Capacity limited
 
+
 class TestCerebellum:
     """Tests for cerebellar precise timing"""
 
@@ -194,6 +198,7 @@ class TestCerebellum:
         for interval in intervals:
             assert 0.3 < interval < 0.7
 
+
 class TestTimeCircuit:
     """Tests for integrated time circuit"""
 
@@ -211,10 +216,7 @@ class TestTimeCircuit:
         circuit = TimeCircuit()
 
         signal = circuit.estimate_duration(
-            actual_duration=5.0,
-            arousal=0.5,
-            attention=0.5,
-            movement=False
+            actual_duration=5.0, arousal=0.5, attention=0.5, movement=False
         )
 
         assert signal.source == "integrated"
@@ -250,8 +252,9 @@ class TestTimeCircuit:
 
         stats = circuit.get_statistics()
 
-        assert stats['current_time'] == 15.0
-        assert stats['insula_signals'] >= 2
+        assert stats["current_time"] == 15.0
+        assert stats["insula_signals"] >= 2
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -21,7 +21,9 @@ class Benchmark:
     """Simple benchmark to test AI improvements."""
 
     def __init__(self, storage_path: str = None):
-        self.storage_path = storage_path or os.path.expanduser("~/.cognitive_ai_knowledge/benchmark")
+        self.storage_path = storage_path or os.path.expanduser(
+            "~/.cognitive_ai_knowledge/benchmark"
+        )
         os.makedirs(self.storage_path, exist_ok=True)
 
         # Challenging reasoning tests (GSM8K style + logic + common sense)
@@ -32,21 +34,21 @@ class Benchmark:
                 "answer": "10",
                 "expected_keywords": ["10", "dollar", "change"],
                 "category": "math",
-                "check_exact": True
+                "check_exact": True,
             },
             {
                 "question": "A train travels at 60 mph. How far does it travel in 2.5 hours?",
                 "answer": "150",
                 "expected_keywords": ["150", "miles"],
                 "category": "math",
-                "check_exact": True
+                "check_exact": True,
             },
             {
                 "question": "If a rectangle has length 8 and width 5, what is its area?",
                 "answer": "40",
                 "expected_keywords": ["40"],
                 "category": "math",
-                "check_exact": True
+                "check_exact": True,
             },
             # === LOGICAL REASONING ===
             {
@@ -54,14 +56,14 @@ class Benchmark:
                 "answer": "yes",
                 "expected_keywords": ["yes", "mammal", "animal", "therefore", "logic"],
                 "category": "logic",
-                "check_exact": False
+                "check_exact": False,
             },
             {
                 "question": "If it rains, the ground gets wet. The ground is wet. Can we conclude it rained? Answer yes or no and explain.",
                 "answer": "no",
                 "expected_keywords": ["no", "not necessarily", "other", "reason", "could"],
                 "category": "logic",
-                "check_exact": False
+                "check_exact": False,
             },
             # === COMMON SENSE REASONING ===
             {
@@ -69,14 +71,14 @@ class Benchmark:
                 "answer": "melts",
                 "expected_keywords": ["melt", "liquid", "heat", "destroy"],
                 "category": "common_sense",
-                "check_exact": False
+                "check_exact": False,
             },
             {
                 "question": "You have a 5-gallon bucket and a 3-gallon bucket. How do you measure exactly 4 gallons?",
                 "answer": "fill",
                 "expected_keywords": ["fill", "pour", "empty", "gallon"],
                 "category": "reasoning",
-                "check_exact": False
+                "check_exact": False,
             },
             # === MULTI-STEP REASONING ===
             {
@@ -84,14 +86,14 @@ class Benchmark:
                 "answer": "9",
                 "expected_keywords": ["9", "but", "left"],
                 "category": "trick",
-                "check_exact": True
+                "check_exact": True,
             },
             {
                 "question": "If you have 3 apples and you take away 2, how many apples do YOU have?",
                 "answer": "2",
                 "expected_keywords": ["2", "you", "took", "have"],
                 "category": "trick",
-                "check_exact": True
+                "check_exact": True,
             },
             # === CHAIN OF THOUGHT ===
             {
@@ -99,72 +101,112 @@ class Benchmark:
                 "answer": "35",
                 "expected_keywords": ["30", "35", "twice", "plus"],
                 "category": "chain_of_thought",
-                "check_exact": True
+                "check_exact": True,
             },
-
             # === THEORY OF MIND (Sally-Anne style) ===
             {
                 "question": "Sally puts a marble in her basket and leaves the room. While she's gone, Anne moves the marble to her box. When Sally returns, where will she LOOK for the marble?",
                 "answer": "basket",
                 "expected_keywords": ["basket", "her", "think", "believe", "left"],
                 "category": "theory_of_mind",
-                "check_exact": False
+                "check_exact": False,
             },
             {
                 "question": "John thinks that Mary thinks it will rain tomorrow. Mary actually thinks it will be sunny. What does John believe about Mary's belief?",
                 "answer": "rain",
                 "expected_keywords": ["rain", "john", "thinks", "believes", "mary"],
                 "category": "theory_of_mind",
-                "check_exact": False
+                "check_exact": False,
             },
             {
                 "question": "A child sees cookies put in a blue jar. While the child is away, mom moves cookies to a red jar. The child is hungry. Which jar will the child open first?",
                 "answer": "blue",
                 "expected_keywords": ["blue", "thinks", "saw", "believe", "first"],
                 "category": "theory_of_mind",
-                "check_exact": False
+                "check_exact": False,
             },
-
             # === CREATIVITY / DIVERGENT THINKING ===
             {
                 "question": "List 5 unusual uses for a brick (not building). Be creative.",
                 "answer": "creative",
-                "expected_keywords": ["doorstop", "weight", "art", "exercise", "weapon", "paperweight", "hammer", "step", "decoration"],
+                "expected_keywords": [
+                    "doorstop",
+                    "weight",
+                    "art",
+                    "exercise",
+                    "weapon",
+                    "paperweight",
+                    "hammer",
+                    "step",
+                    "decoration",
+                ],
                 "category": "creativity",
                 "check_exact": False,
-                "score_creativity": True
+                "score_creativity": True,
             },
             {
                 "question": "If you could combine a bicycle and an umbrella, what new invention would you create and what would it do?",
                 "answer": "creative",
-                "expected_keywords": ["rain", "ride", "cover", "protect", "weather", "pedal", "travel"],
+                "expected_keywords": [
+                    "rain",
+                    "ride",
+                    "cover",
+                    "protect",
+                    "weather",
+                    "pedal",
+                    "travel",
+                ],
                 "category": "creativity",
                 "check_exact": False,
-                "score_creativity": True
+                "score_creativity": True,
             },
             {
                 "question": "Complete this story creatively: 'A robot woke up one day and realized it could feel emotions. The first thing it felt was...'",
                 "answer": "creative",
-                "expected_keywords": ["curious", "confused", "happy", "sad", "scared", "wonder", "surprise", "loneliness"],
+                "expected_keywords": [
+                    "curious",
+                    "confused",
+                    "happy",
+                    "sad",
+                    "scared",
+                    "wonder",
+                    "surprise",
+                    "loneliness",
+                ],
                 "category": "creativity",
                 "check_exact": False,
-                "score_creativity": True
+                "score_creativity": True,
             },
-
             # === SOCIAL INTELLIGENCE ===
             {
                 "question": "A friend says 'I'm fine' with a sad face and tears. What do they likely really feel?",
                 "answer": "sad",
-                "expected_keywords": ["sad", "upset", "not fine", "hiding", "pain", "hurt", "unhappy"],
+                "expected_keywords": [
+                    "sad",
+                    "upset",
+                    "not fine",
+                    "hiding",
+                    "pain",
+                    "hurt",
+                    "unhappy",
+                ],
                 "category": "social_intelligence",
-                "check_exact": False
+                "check_exact": False,
             },
             {
                 "question": "Someone keeps checking their phone during your conversation. What might this behavior suggest?",
                 "answer": "distracted",
-                "expected_keywords": ["distracted", "bored", "anxious", "waiting", "rude", "busy", "not interested"],
+                "expected_keywords": [
+                    "distracted",
+                    "bored",
+                    "anxious",
+                    "waiting",
+                    "rude",
+                    "busy",
+                    "not interested",
+                ],
                 "category": "social_intelligence",
-                "check_exact": False
+                "check_exact": False,
             },
         ]
 
@@ -224,9 +266,19 @@ class Benchmark:
 
         # 3. SHOWS REASONING (20% weight)
         reasoning_signals = [
-            "because", "therefore", "so", "thus", "step",
-            "first", "then", "=", "equals", "means",
-            "if", "since", "given"
+            "because",
+            "therefore",
+            "so",
+            "thus",
+            "step",
+            "first",
+            "then",
+            "=",
+            "equals",
+            "means",
+            "if",
+            "since",
+            "given",
         ]
         reasoning_count = sum(1 for s in reasoning_signals if s in response_lower)
         reasoning_score = min(reasoning_count / 3, 1.0)
@@ -249,9 +301,10 @@ class Benchmark:
         # 1. VARIETY (40%) - How many different ideas?
         # Count distinct items/ideas (look for numbering or bullets)
         import re
-        items = re.findall(r'(?:^|\n)\s*(?:\d+[.)]|\-|\*)\s*(.+)', response)
+
+        items = re.findall(r"(?:^|\n)\s*(?:\d+[.)]|\-|\*)\s*(.+)", response)
         if not items:
-            items = response.split(',')
+            items = response.split(",")
         variety_score = min(len(items) / 5, 1.0)  # Expect ~5 ideas
         scores.append(variety_score * 0.4)
 
@@ -265,7 +318,7 @@ class Benchmark:
             scores.append(0.15)
 
         # 3. NOVELTY (30%) - Unusual words/concepts
-        common_words = {'the', 'a', 'is', 'it', 'to', 'and', 'of', 'for', 'you', 'can'}
+        common_words = {"the", "a", "is", "it", "to", "and", "of", "for", "you", "can"}
         words = set(response_lower.split()) - common_words
         novel_words = [w for w in words if len(w) > 5]  # Longer words tend to be more specific
         novelty_score = min(len(novel_words) / 10, 1.0)
@@ -292,9 +345,14 @@ class Benchmark:
 
         # 3. PERSPECTIVE-TAKING SIGNALS (20%)
         perspective_signals = [
-            "thinks", "believes", "would", "expects",
-            "from their perspective", "doesn't know",
-            "unaware", "assumes"
+            "thinks",
+            "believes",
+            "would",
+            "expects",
+            "from their perspective",
+            "doesn't know",
+            "unaware",
+            "assumes",
         ]
         perspective_count = sum(1 for s in perspective_signals if s in response_lower)
         scores.append(min(perspective_count / 2, 1.0) * 0.2)
@@ -313,17 +371,28 @@ class Benchmark:
 
         # 2. EMPATHY SIGNALS (30%)
         empathy_signals = [
-            "feel", "emotion", "might", "could be",
-            "suggests", "indicates", "probably",
-            "they may", "perhaps"
+            "feel",
+            "emotion",
+            "might",
+            "could be",
+            "suggests",
+            "indicates",
+            "probably",
+            "they may",
+            "perhaps",
         ]
         empathy_count = sum(1 for s in empathy_signals if s in response_lower)
         scores.append(min(empathy_count / 2, 1.0) * 0.3)
 
         # 3. NOT TAKING AT FACE VALUE (20%)
         deeper_signals = [
-            "really", "actually", "underneath", "hiding",
-            "not", "more than", "beyond"
+            "really",
+            "actually",
+            "underneath",
+            "hiding",
+            "not",
+            "more than",
+            "beyond",
         ]
         deeper_count = sum(1 for s in deeper_signals if s in response_lower)
         scores.append(min(deeper_count / 2, 1.0) * 0.2)
@@ -376,18 +445,20 @@ class Benchmark:
             "timestamp": datetime.now().isoformat(),
             "tests": [],
             "total_score": 0,
-            "avg_score": 0
+            "avg_score": 0,
         }
 
         total = 0
         for test in self.tests:
             response, score = self.run_test(ai_func, test)
-            results["tests"].append({
-                "question": test["question"],
-                "category": test["category"],
-                "response": response[:200],  # Truncate for storage
-                "score": round(score, 3)
-            })
+            results["tests"].append(
+                {
+                    "question": test["question"],
+                    "category": test["category"],
+                    "response": response[:200],  # Truncate for storage
+                    "score": round(score, 3),
+                }
+            )
             total += score
 
         results["total_score"] = round(total, 3)
@@ -416,7 +487,7 @@ class Benchmark:
             "b_score": score_b,
             "difference": round(score_b - score_a, 3),
             "winner": result_b["name"] if score_b > score_a else result_a["name"],
-            "improvement": round((score_b - score_a) / score_a * 100, 1) if score_a > 0 else 0
+            "improvement": round((score_b - score_a) / score_a * 100, 1) if score_a > 0 else 0,
         }
 
         return comparison
@@ -424,7 +495,7 @@ class Benchmark:
     def _save_history(self):
         """Save benchmark history."""
         path = os.path.join(self.storage_path, "history.json")
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(self.history[-50:], f, indent=2)  # Keep last 50
 
     def _load_history(self):
@@ -432,7 +503,7 @@ class Benchmark:
         path = os.path.join(self.storage_path, "history.json")
         if os.path.exists(path):
             try:
-                with open(path, 'r') as f:
+                with open(path, "r") as f:
                     self.history = json.load(f)
             except:
                 self.history = []
@@ -485,11 +556,13 @@ class SelfBenchmark:
         if comparison["b_score"] > comparison["a_score"]:
             decision = "KEEP"
             reason = f"Improvement of {comparison['improvement']}%"
-            self.improvements_made.append({
-                "modification": modification_name,
-                "improvement": comparison["improvement"],
-                "timestamp": datetime.now().isoformat()
-            })
+            self.improvements_made.append(
+                {
+                    "modification": modification_name,
+                    "improvement": comparison["improvement"],
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
         else:
             decision = "REVERT"
             reason = f"No improvement ({comparison['improvement']}%)"
@@ -500,7 +573,7 @@ class SelfBenchmark:
             "modified_score": comparison["b_score"],
             "decision": decision,
             "reason": reason,
-            "comparison": comparison
+            "comparison": comparison,
         }
 
 

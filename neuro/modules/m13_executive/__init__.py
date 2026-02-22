@@ -14,9 +14,22 @@ from .hot_cold_ef import HotExecutiveFunction, ColdExecutiveFunction, EmotionalR
 
 __version__ = "0.1.0"
 __all__ = [
-    "InhibitionSystem", "ResponseInhibitor", "ImpulseController", "InhibitionParams",
-    "WorkingMemory", "DLPFCNetwork", "CapacityLimitedStore", "WMParams",
-    "CognitiveFlexibility", "TaskSwitcher", "SetShifter", "FlexibilityParams",
-    "ExecutiveNetwork", "PFCController", "ConflictMonitor",
-    "HotExecutiveFunction", "ColdExecutiveFunction", "EmotionalRegulator"
+    "InhibitionSystem",
+    "ResponseInhibitor",
+    "ImpulseController",
+    "InhibitionParams",
+    "WorkingMemory",
+    "DLPFCNetwork",
+    "CapacityLimitedStore",
+    "WMParams",
+    "CognitiveFlexibility",
+    "TaskSwitcher",
+    "SetShifter",
+    "FlexibilityParams",
+    "ExecutiveNetwork",
+    "PFCController",
+    "ConflictMonitor",
+    "HotExecutiveFunction",
+    "ColdExecutiveFunction",
+    "EmotionalRegulator",
 ]

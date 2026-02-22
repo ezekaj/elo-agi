@@ -5,8 +5,9 @@ import pytest
 from neuro.modules.m01_predictive_coding.precision_weighting import (
     PrecisionWeightedError,
     AdaptivePrecision,
-    HierarchicalPrecision
+    HierarchicalPrecision,
 )
+
 
 class TestPrecisionWeightedError:
     """Tests for basic precision-weighted error computation"""
@@ -75,6 +76,7 @@ class TestPrecisionWeightedError:
             pwe.update_precision(np.random.randn(2) * 100)
 
         assert np.all(pwe.precision >= 0.1)
+
 
 class TestAdaptivePrecision:
     """Tests for adaptive precision with volatility tracking"""
@@ -193,6 +195,7 @@ class TestAdaptivePrecision:
         # Just verify it runs without error
         _ = ap.detect_regime_change()
 
+
 class TestHierarchicalPrecision:
     """Tests for hierarchical precision across levels"""
 
@@ -206,9 +209,7 @@ class TestHierarchicalPrecision:
     def test_different_timescales(self):
         """Test different adaptation rates at different levels"""
         hp = HierarchicalPrecision(
-            level_dims=[4, 4, 4],
-            base_learning_rate=0.5,
-            timescale_factor=5.0
+            level_dims=[4, 4, 4], base_learning_rate=0.5, timescale_factor=5.0
         )
 
         # Lower levels should have higher learning rates
@@ -219,11 +220,7 @@ class TestHierarchicalPrecision:
         """Test updating all levels"""
         hp = HierarchicalPrecision(level_dims=[4, 3, 2])
 
-        errors = [
-            np.random.randn(4),
-            np.random.randn(3),
-            np.random.randn(2)
-        ]
+        errors = [np.random.randn(4), np.random.randn(3), np.random.randn(2)]
 
         precisions, volatilities = hp.update(errors)
 
@@ -254,6 +251,7 @@ class TestHierarchicalPrecision:
         confidence = hp.get_overall_confidence()
 
         assert 0.0 <= confidence <= 1.0
+
 
 class TestPrecisionIntegration:
     """Integration tests for precision with prediction"""
@@ -296,5 +294,6 @@ class TestPrecisionIntegration:
         # The implementation clips updates, so we test >= instead of >
         assert high_change >= low_change * 0.9  # Allow small tolerance
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

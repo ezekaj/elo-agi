@@ -18,15 +18,17 @@ from .differentiable_scm import NeuralNetwork, ActivationType
 
 class DisentanglementObjective(Enum):
     """Objectives for disentanglement."""
-    BETA_VAE = "beta_vae"           # KL divergence regularization
-    FACTOR_VAE = "factor_vae"       # Total correlation
-    TC_VAE = "tc_vae"               # Total correlation decomposition
-    INTERVENTION = "intervention"   # Intervention-based
+
+    BETA_VAE = "beta_vae"  # KL divergence regularization
+    FACTOR_VAE = "factor_vae"  # Total correlation
+    TC_VAE = "tc_vae"  # Total correlation decomposition
+    INTERVENTION = "intervention"  # Intervention-based
 
 
 @dataclass
 class CausalFactor:
     """A learned causal factor."""
+
     index: int
     name: str
     mean: float
@@ -38,6 +40,7 @@ class CausalFactor:
 @dataclass
 class CausalEncoderConfig:
     """Configuration for causal encoder."""
+
     input_dim: int
     latent_dim: int
     hidden_dims: List[int] = field(default_factory=lambda: [128, 64])
@@ -93,8 +96,8 @@ class CausalEncoder:
         h = self.encoder.forward(x)
 
         if self.config.variational:
-            mean = h[:self.config.latent_dim]
-            log_var = h[self.config.latent_dim:]
+            mean = h[: self.config.latent_dim]
+            log_var = h[self.config.latent_dim :]
 
             # Reparameterization trick (clamp log_var for numerical stability)
             log_var = np.clip(log_var, -20, 20)
@@ -117,7 +120,7 @@ class CausalEncoder:
         """Encode without sampling (use mean for variational)."""
         h = self.encoder.forward(x)
         if self.config.variational:
-            return h[:self.config.latent_dim]
+            return h[: self.config.latent_dim]
         return h
 
     def _update_stats(self, z: np.ndarray) -> None:
@@ -288,7 +291,7 @@ class CausalRepresentationLearner:
 
         # KL divergence loss (clamp for numerical stability)
         log_var_clamp = np.clip(log_var, -20, 20)
-        kl_loss = -0.5 * np.mean(1 + log_var_clamp - mean ** 2 - np.exp(log_var_clamp))
+        kl_loss = -0.5 * np.mean(1 + log_var_clamp - mean**2 - np.exp(log_var_clamp))
 
         # Total loss
         total_loss = recon_loss + self.beta * kl_loss
@@ -382,7 +385,7 @@ class CausalRepresentationLearner:
             n_batches = 0
 
             for i in range(0, n_samples, batch_size):
-                batch_indices = indices[i:i + batch_size]
+                batch_indices = indices[i : i + batch_size]
                 batch = data[batch_indices]
 
                 # Average loss over batch
@@ -554,6 +557,8 @@ class CausalRepresentationLearner:
             "beta": self.beta,
             "n_train_steps": self._n_train_steps,
             "n_interventions": self._n_interventions,
-            "avg_recon_loss": float(np.mean(self._recon_losses[-100:])) if self._recon_losses else 0.0,
+            "avg_recon_loss": float(np.mean(self._recon_losses[-100:]))
+            if self._recon_losses
+            else 0.0,
             "avg_kl_loss": float(np.mean(self._kl_losses[-100:])) if self._kl_losses else 0.0,
         }

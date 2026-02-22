@@ -18,6 +18,7 @@ from .base_benchmark import Benchmark, BenchmarkConfig, TrialResult
 @dataclass
 class CausalGraph:
     """Simple causal graph representation."""
+
     variables: List[str]
     edges: List[Tuple[str, str]]  # (cause, effect) pairs
     mechanisms: Dict[str, Any] = field(default_factory=dict)
@@ -34,6 +35,7 @@ class CausalGraph:
 @dataclass
 class CausalQuery:
     """A causal reasoning query."""
+
     query_type: str  # "counterfactual", "intervention", "association"
     graph: CausalGraph
     observation: Dict[str, float]  # Observed values
@@ -292,8 +294,16 @@ class CausalDiscoveryBenchmark(Benchmark):
         false_positives = len(predicted_edges - true_edges)
         false_negatives = len(true_edges - predicted_edges)
 
-        precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-        recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
+        precision = (
+            true_positives / (true_positives + false_positives)
+            if (true_positives + false_positives) > 0
+            else 0
+        )
+        recall = (
+            true_positives / (true_positives + false_negatives)
+            if (true_positives + false_negatives) > 0
+            else 0
+        )
 
         if precision + recall == 0:
             f1 = 0.0
@@ -387,11 +397,11 @@ def create_causal_benchmark_suite() -> List[Benchmark]:
 
 
 __all__ = [
-    'CausalGraph',
-    'CausalQuery',
-    'CounterfactualBenchmark',
-    'InterventionBenchmark',
-    'CausalDiscoveryBenchmark',
-    'NestedCounterfactualBenchmark',
-    'create_causal_benchmark_suite',
+    "CausalGraph",
+    "CausalQuery",
+    "CounterfactualBenchmark",
+    "InterventionBenchmark",
+    "CausalDiscoveryBenchmark",
+    "NestedCounterfactualBenchmark",
+    "create_causal_benchmark_suite",
 ]

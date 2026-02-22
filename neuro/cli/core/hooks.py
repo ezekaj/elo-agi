@@ -39,6 +39,7 @@ import re
 
 class HookEvent(Enum):
     """Hook event types."""
+
     SESSION_START = "SessionStart"
     USER_PROMPT_SUBMIT = "UserPromptSubmit"
     PRE_TOOL_USE = "PreToolUse"
@@ -52,6 +53,7 @@ class HookEvent(Enum):
 @dataclass
 class HookMatcher:
     """Matcher to filter when hooks run."""
+
     tool_name: Optional[str] = None  # Match specific tool
     tool_pattern: Optional[str] = None  # Glob pattern for tool names
     file_pattern: Optional[str] = None  # Glob pattern for file paths
@@ -88,6 +90,7 @@ class HookMatcher:
 @dataclass
 class HookHandler:
     """A hook handler configuration."""
+
     type: str = "command"  # "command" or "url"
     command: Optional[str] = None
     url: Optional[str] = None  # For webhook-style hooks
@@ -99,6 +102,7 @@ class HookHandler:
 @dataclass
 class HookResult:
     """Result from running a hook."""
+
     success: bool = True
     decision: Optional[str] = None  # "allow", "deny", "block"
     reason: Optional[str] = None
@@ -172,11 +176,7 @@ class HooksManager:
                 except Exception:
                     pass
 
-    async def run_hook(
-        self,
-        event: Union[HookEvent, str],
-        **context
-    ) -> Dict[str, Any]:
+    async def run_hook(self, event: Union[HookEvent, str], **context) -> Dict[str, Any]:
         """
         Run hooks for an event.
 
@@ -198,11 +198,7 @@ class HooksManager:
             return {"success": True}
 
         # Build input for hooks
-        hook_input = {
-            "event": event.value,
-            "cwd": self.project_dir,
-            **context
-        }
+        hook_input = {"event": event.value, "cwd": self.project_dir, **context}
 
         results = []
         for handler in handlers:
@@ -272,8 +268,7 @@ class HooksManager:
 
             input_json = json.dumps(hook_input).encode()
             stdout, stderr = await asyncio.wait_for(
-                process.communicate(input_json),
-                timeout=handler.timeout
+                process.communicate(input_json), timeout=handler.timeout
             )
 
             exit_code = process.returncode
@@ -378,12 +373,14 @@ class HooksManager:
                     info["url"] = handler.url
                 if handler.matcher:
                     info["matcher"] = {
-                        k: v for k, v in {
+                        k: v
+                        for k, v in {
                             "tool_name": handler.matcher.tool_name,
                             "tool_pattern": handler.matcher.tool_pattern,
                             "file_pattern": handler.matcher.file_pattern,
                             "regex": handler.matcher.regex,
-                        }.items() if v
+                        }.items()
+                        if v
                     }
                 result[event.value].append(info)
         return result

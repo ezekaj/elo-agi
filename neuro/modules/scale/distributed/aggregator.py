@@ -13,18 +13,20 @@ import numpy as np
 
 class AggregationStrategy(Enum):
     """Aggregation strategies."""
-    FIRST = "first"              # Take first result
-    LAST = "last"                # Take last result
-    MEAN = "mean"                # Average numeric results
+
+    FIRST = "first"  # Take first result
+    LAST = "last"  # Take last result
+    MEAN = "mean"  # Average numeric results
     WEIGHTED_MEAN = "weighted_mean"  # Weighted average
-    VOTE = "vote"                # Majority voting
-    CONCAT = "concat"            # Concatenate results
-    CUSTOM = "custom"            # Custom function
+    VOTE = "vote"  # Majority voting
+    CONCAT = "concat"  # Concatenate results
+    CUSTOM = "custom"  # Custom function
 
 
 @dataclass
 class AggregatedResult:
     """Result of aggregation."""
+
     value: Any
     strategy: AggregationStrategy
     n_inputs: int
@@ -339,7 +341,7 @@ class ResultAggregator:
         # Aggregator-based strategies
         if strategy in self._aggregators:
             aggregator = self._aggregators[strategy]
-            if hasattr(aggregator, 'aggregate'):
+            if hasattr(aggregator, "aggregate"):
                 if strategy in [AggregationStrategy.WEIGHTED_MEAN, AggregationStrategy.VOTE]:
                     return aggregator.aggregate(results, weights)
                 return aggregator.aggregate(results)

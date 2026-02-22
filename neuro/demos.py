@@ -26,11 +26,13 @@ def run_medical():
     """Run medical diagnosis demo."""
     import sys
     from pathlib import Path
+
     # Ensure demos directory is in path first
     demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
     sys.path.insert(0, str(demos_dir))
     try:
         from run_demo import demo_medical_diagnosis
+
         demo_medical_diagnosis()
     finally:
         sys.path.remove(str(demos_dir))
@@ -40,10 +42,12 @@ def run_physics():
     """Run physics learning demo."""
     import sys
     from pathlib import Path
+
     demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
     sys.path.insert(0, str(demos_dir))
     try:
         from run_demo import demo_physics_learning
+
         demo_physics_learning()
     finally:
         sys.path.remove(str(demos_dir))
@@ -53,10 +57,12 @@ def run_language():
     """Run language understanding demo."""
     import sys
     from pathlib import Path
+
     demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
     sys.path.insert(0, str(demos_dir))
     try:
         from run_demo import demo_language_concepts
+
         demo_language_concepts()
     finally:
         sys.path.remove(str(demos_dir))
@@ -66,10 +72,12 @@ def run_arc():
     """Run ARC-style reasoning demo."""
     import sys
     from pathlib import Path
+
     demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
     sys.path.insert(0, str(demos_dir))
     try:
         from scenario_arc import demo_arc_reasoning
+
         demo_arc_reasoning()
     except ImportError as e:
         print(f"ARC demo import error: {e}")
@@ -85,10 +93,12 @@ def run_continual():
     """Run continual learning demo."""
     import sys
     from pathlib import Path
+
     demos_dir = Path(__file__).parent.parent / "demos" / "agi_integration"
     sys.path.insert(0, str(demos_dir))
     try:
         from scenario_continual import demo_continual_learning
+
         demo_continual_learning()
     except ImportError as e:
         print(f"Continual learning demo import error: {e}")
@@ -102,9 +112,9 @@ def run_continual():
 
 def run_all():
     """Run all demos."""
-    print("\n" + "#"*60)
-    print("#" + " "*18 + "NEURO AGI DEMOS" + " "*19 + "#")
-    print("#"*60)
+    print("\n" + "#" * 60)
+    print("#" + " " * 18 + "NEURO AGI DEMOS" + " " * 19 + "#")
+    print("#" * 60)
     print(f"\nVersion: {get_version()}")
     print("Running all available demos...\n")
 
@@ -114,9 +124,9 @@ def run_all():
     run_arc()
     run_continual()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("All demos complete!")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 def list_demos():
@@ -137,12 +147,14 @@ def main():
         description="Neuro AGI Demo Runner - Showcase cognitive capabilities",
     )
     parser.add_argument(
-        "-v", "--version",
+        "-v",
+        "--version",
         action="store_true",
         help="Show version and exit",
     )
     parser.add_argument(
-        "-l", "--list",
+        "-l",
+        "--list",
         action="store_true",
         help="List available demos",
     )

@@ -2,7 +2,12 @@
 
 import numpy as np
 import pytest
-from neuro.modules.m10_spatial_cognition.place_cells import PlaceCell, PlaceCellPopulation, PlaceField
+from neuro.modules.m10_spatial_cognition.place_cells import (
+    PlaceCell,
+    PlaceCellPopulation,
+    PlaceField,
+)
+
 
 class TestPlaceCell:
     """Test individual place cell functionality."""
@@ -30,6 +35,7 @@ class TestPlaceCell:
         cell = PlaceCell(center=np.array([0.5, 0.5]), radius=0.2)
         assert cell.is_in_field(np.array([0.5, 0.5]))
         assert not cell.is_in_field(np.array([0.0, 0.0]))
+
 
 class TestPlaceCellPopulation:
     """Test place cell population functionality."""
@@ -81,6 +87,7 @@ class TestPlaceCellPopulation:
         assert X.shape == (20, 20)
         assert Y.shape == (20, 20)
         assert activity_map.shape == (20, 20)
+
 
 class TestPlaceField:
     """Test place field dataclass."""

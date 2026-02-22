@@ -20,39 +20,42 @@ import copy
 
 class ModificationType(Enum):
     """Types of modifications that can be proposed."""
+
     WEIGHT_ADJUSTMENT = "weight_adjustment"  # Modify connection weights
-    ARCHITECTURE = "architecture"            # Add/remove components
-    HYPERPARAMETER = "hyperparameter"        # Adjust hyperparameters
-    ATTENTION = "attention"                  # Modify attention patterns
-    MEMORY = "memory"                        # Modify memory systems
-    LEARNING_RATE = "learning_rate"          # Adjust learning rates
-    ACTIVATION = "activation"                # Modify activation functions
-    CONNECTIVITY = "connectivity"            # Modify module connections
+    ARCHITECTURE = "architecture"  # Add/remove components
+    HYPERPARAMETER = "hyperparameter"  # Adjust hyperparameters
+    ATTENTION = "attention"  # Modify attention patterns
+    MEMORY = "memory"  # Modify memory systems
+    LEARNING_RATE = "learning_rate"  # Adjust learning rates
+    ACTIVATION = "activation"  # Modify activation functions
+    CONNECTIVITY = "connectivity"  # Modify module connections
 
 
 @dataclass
 class GeneratorParams:
     """Parameters for the modification generator."""
-    n_candidates: int = 10           # Candidates per generation
-    mutation_rate: float = 0.1       # Probability of random mutation
-    crossover_rate: float = 0.3      # Probability of combining strategies
-    elite_fraction: float = 0.2      # Fraction of best to keep
+
+    n_candidates: int = 10  # Candidates per generation
+    mutation_rate: float = 0.1  # Probability of random mutation
+    crossover_rate: float = 0.3  # Probability of combining strategies
+    elite_fraction: float = 0.2  # Fraction of best to keep
     exploration_weight: float = 0.3  # Balance exploration vs exploitation
-    novelty_bonus: float = 0.1       # Bonus for novel modifications
-    history_size: int = 1000         # History of past modifications
+    novelty_bonus: float = 0.1  # Bonus for novel modifications
+    history_size: int = 1000  # History of past modifications
 
 
 @dataclass
 class Modification:
     """A proposed modification to the system."""
+
     mod_id: str
     mod_type: ModificationType
-    target_component: str             # Which component to modify
-    changes: Dict[str, Any]           # Specific changes to make
-    expected_improvement: float       # Predicted improvement
-    confidence: float                 # Confidence in prediction
-    complexity_cost: float            # Complexity added
-    reversible: bool                  # Can be undone
+    target_component: str  # Which component to modify
+    changes: Dict[str, Any]  # Specific changes to make
+    expected_improvement: float  # Predicted improvement
+    confidence: float  # Confidence in prediction
+    complexity_cost: float  # Complexity added
+    reversible: bool  # Can be undone
     parent_mods: List[str] = field(default_factory=list)  # Parent modifications
     timestamp: float = field(default_factory=time.time)
 
@@ -94,10 +97,10 @@ class ModificationGenerator:
 
         # Strategy weights (learned over time)
         self._strategy_weights = {
-            'gradient': 0.25,
-            'evolutionary': 0.25,
-            'curiosity': 0.25,
-            'meta': 0.25,
+            "gradient": 0.25,
+            "evolutionary": 0.25,
+            "curiosity": 0.25,
+            "meta": 0.25,
         }
 
         # Counter for unique IDs
@@ -132,13 +135,13 @@ class ModificationGenerator:
         for strategy, weight in self._strategy_weights.items():
             n_candidates = max(1, int(self.params.n_candidates * weight))
 
-            if strategy == 'gradient':
+            if strategy == "gradient":
                 candidates.extend(self._gradient_candidates(n_candidates, context))
-            elif strategy == 'evolutionary':
+            elif strategy == "evolutionary":
                 candidates.extend(self._evolutionary_candidates(n_candidates))
-            elif strategy == 'curiosity':
+            elif strategy == "curiosity":
                 candidates.extend(self._curiosity_candidates(n_candidates))
-            elif strategy == 'meta':
+            elif strategy == "meta":
                 candidates.extend(self._meta_candidates(n_candidates, context))
 
         # Score and rank candidates
@@ -150,7 +153,7 @@ class ModificationGenerator:
         # Sort by net expected value
         candidates.sort(key=lambda m: m.net_expected_value, reverse=True)
 
-        self._current_generation = candidates[:self.params.n_candidates]
+        self._current_generation = candidates[: self.params.n_candidates]
         self._generation_count += 1
 
         return self._current_generation
@@ -177,9 +180,9 @@ class ModificationGenerator:
                 mod_type=ModificationType.WEIGHT_ADJUSTMENT,
                 target_component=component,
                 changes={
-                    'adjustment_scale': np.random.randn() * 0.1,
-                    'target_params': comp_info.get('adjustable_params', ['weights']),
-                    'direction': 'gradient' if context else 'random',
+                    "adjustment_scale": np.random.randn() * 0.1,
+                    "target_params": comp_info.get("adjustable_params", ["weights"]),
+                    "direction": "gradient" if context else "random",
                 },
                 expected_improvement=0.0,  # Will be computed
                 confidence=0.6,
@@ -195,10 +198,7 @@ class ModificationGenerator:
         candidates = []
 
         # Get successful past modifications
-        successful = [
-            (mod, outcome) for mod, outcome in self._modification_history
-            if outcome > 0
-        ]
+        successful = [(mod, outcome) for mod, outcome in self._modification_history if outcome > 0]
 
         for _ in range(n):
             if successful and np.random.rand() < self.params.crossover_rate:
@@ -225,14 +225,12 @@ class ModificationGenerator:
         # Find underexplored components
         component_counts = {}
         for mod, _ in self._modification_history:
-            component_counts[mod.target_component] = component_counts.get(
-                mod.target_component, 0) + 1
+            component_counts[mod.target_component] = (
+                component_counts.get(mod.target_component, 0) + 1
+            )
 
         # Components with fewest modifications
-        unexplored = sorted(
-            self._components.keys(),
-            key=lambda c: component_counts.get(c, 0)
-        )
+        unexplored = sorted(self._components.keys(), key=lambda c: component_counts.get(c, 0))
 
         for i in range(n):
             if unexplored:
@@ -247,8 +245,8 @@ class ModificationGenerator:
                 mod_type=np.random.choice(list(ModificationType)),
                 target_component=component,
                 changes={
-                    'exploration': True,
-                    'novelty_seed': np.random.randint(10000),
+                    "exploration": True,
+                    "novelty_seed": np.random.randint(10000),
                 },
                 expected_improvement=0.0,
                 confidence=0.3,  # Lower confidence for exploration
@@ -273,12 +271,12 @@ class ModificationGenerator:
         for pattern in self._successful_patterns[:n]:
             mod = Modification(
                 mod_id=self._next_id(),
-                mod_type=ModificationType(pattern.get('type', 'weight_adjustment')),
-                target_component=pattern.get('component', 'unknown'),
-                changes=pattern.get('changes', {}),
-                expected_improvement=pattern.get('avg_improvement', 0.1),
+                mod_type=ModificationType(pattern.get("type", "weight_adjustment")),
+                target_component=pattern.get("component", "unknown"),
+                changes=pattern.get("changes", {}),
+                expected_improvement=pattern.get("avg_improvement", 0.1),
                 confidence=0.7,
-                complexity_cost=pattern.get('complexity', 0.02),
+                complexity_cost=pattern.get("complexity", 0.02),
                 reversible=True,
             )
             candidates.append(mod)
@@ -316,7 +314,9 @@ class ModificationGenerator:
         return Modification(
             mod_id=self._next_id(),
             mod_type=parent1.mod_type if np.random.rand() < 0.5 else parent2.mod_type,
-            target_component=parent1.target_component if np.random.rand() < 0.5 else parent2.target_component,
+            target_component=parent1.target_component
+            if np.random.rand() < 0.5
+            else parent2.target_component,
             changes=changes,
             expected_improvement=0.0,
             confidence=(parent1.confidence + parent2.confidence) / 2,
@@ -333,7 +333,7 @@ class ModificationGenerator:
         if changes:
             key = np.random.choice(list(changes.keys()))
             if isinstance(changes[key], (int, float)):
-                changes[key] *= (1 + np.random.randn() * 0.2)
+                changes[key] *= 1 + np.random.randn() * 0.2
             elif isinstance(changes[key], bool):
                 changes[key] = not changes[key]
 
@@ -351,7 +351,9 @@ class ModificationGenerator:
 
     def _random_modification(self) -> Modification:
         """Generate a random modification."""
-        component = np.random.choice(list(self._components.keys())) if self._components else "system"
+        component = (
+            np.random.choice(list(self._components.keys())) if self._components else "system"
+        )
         mod_type = np.random.choice(list(ModificationType))
 
         return Modification(
@@ -359,8 +361,8 @@ class ModificationGenerator:
             mod_type=mod_type,
             target_component=component,
             changes={
-                'random_seed': np.random.randint(10000),
-                'magnitude': np.random.rand(),
+                "random_seed": np.random.randint(10000),
+                "magnitude": np.random.rand(),
             },
             expected_improvement=0.0,
             confidence=0.3,
@@ -370,21 +372,21 @@ class ModificationGenerator:
 
     def _vary_pattern(self, pattern: Dict[str, Any]) -> Modification:
         """Create variation of a learned pattern."""
-        changes = copy.deepcopy(pattern.get('changes', {}))
+        changes = copy.deepcopy(pattern.get("changes", {}))
 
         # Add small variation
         for key in changes:
             if isinstance(changes[key], (int, float)):
-                changes[key] *= (1 + np.random.randn() * 0.1)
+                changes[key] *= 1 + np.random.randn() * 0.1
 
         return Modification(
             mod_id=self._next_id(),
-            mod_type=ModificationType(pattern.get('type', 'weight_adjustment')),
-            target_component=pattern.get('component', 'unknown'),
+            mod_type=ModificationType(pattern.get("type", "weight_adjustment")),
+            target_component=pattern.get("component", "unknown"),
             changes=changes,
-            expected_improvement=pattern.get('avg_improvement', 0.1) * 0.9,
+            expected_improvement=pattern.get("avg_improvement", 0.1) * 0.9,
             confidence=0.6,
-            complexity_cost=pattern.get('complexity', 0.02),
+            complexity_cost=pattern.get("complexity", 0.02),
             reversible=True,
         )
 
@@ -396,9 +398,9 @@ class ModificationGenerator:
         """Predict expected improvement from a modification."""
         # Base prediction from similar past modifications
         similar_mods = [
-            (m, o) for m, o in self._modification_history
-            if m.mod_type == mod.mod_type
-            and m.target_component == mod.target_component
+            (m, o)
+            for m, o in self._modification_history
+            if m.mod_type == mod.mod_type and m.target_component == mod.target_component
         ]
 
         if similar_mods:
@@ -422,20 +424,19 @@ class ModificationGenerator:
         # Update successful patterns
         if outcome > 0:
             pattern = {
-                'type': mod.mod_type.value,
-                'component': mod.target_component,
-                'changes': mod.changes,
-                'avg_improvement': outcome,
-                'complexity': mod.complexity_cost,
+                "type": mod.mod_type.value,
+                "component": mod.target_component,
+                "changes": mod.changes,
+                "avg_improvement": outcome,
+                "complexity": mod.complexity_cost,
             }
 
             # Update or add pattern
             updated = False
             for i, p in enumerate(self._successful_patterns):
-                if (p['type'] == pattern['type'] and
-                        p['component'] == pattern['component']):
+                if p["type"] == pattern["type"] and p["component"] == pattern["component"]:
                     # Running average
-                    p['avg_improvement'] = 0.7 * p['avg_improvement'] + 0.3 * outcome
+                    p["avg_improvement"] = 0.7 * p["avg_improvement"] + 0.3 * outcome
                     updated = True
                     break
 
@@ -448,14 +449,14 @@ class ModificationGenerator:
     def _update_strategy_weights(self, mod: Modification, outcome: float) -> None:
         """Update strategy weights based on modification outcomes."""
         # Determine which strategy produced this modification
-        if 'gradient' in mod.changes.get('direction', ''):
-            strategy = 'gradient'
+        if "gradient" in mod.changes.get("direction", ""):
+            strategy = "gradient"
         elif mod.parent_mods:
-            strategy = 'evolutionary'
-        elif mod.changes.get('exploration'):
-            strategy = 'curiosity'
+            strategy = "evolutionary"
+        elif mod.changes.get("exploration"):
+            strategy = "curiosity"
         else:
-            strategy = 'meta'
+            strategy = "meta"
 
         # Update weight based on outcome
         learning_rate = 0.01
@@ -478,20 +479,20 @@ class ModificationGenerator:
         """Get generator statistics."""
         if not self._modification_history:
             return {
-                'n_modifications': 0,
-                'success_rate': 0.0,
-                'strategy_weights': self._strategy_weights,
+                "n_modifications": 0,
+                "success_rate": 0.0,
+                "strategy_weights": self._strategy_weights,
             }
 
         successful = sum(1 for _, o in self._modification_history if o > 0)
 
         return {
-            'n_modifications': len(self._modification_history),
-            'success_rate': successful / len(self._modification_history),
-            'avg_improvement': float(np.mean([o for _, o in self._modification_history])),
-            'n_patterns': len(self._successful_patterns),
-            'strategy_weights': self._strategy_weights.copy(),
-            'generation_count': self._generation_count,
+            "n_modifications": len(self._modification_history),
+            "success_rate": successful / len(self._modification_history),
+            "avg_improvement": float(np.mean([o for _, o in self._modification_history])),
+            "n_patterns": len(self._successful_patterns),
+            "strategy_weights": self._strategy_weights.copy(),
+            "generation_count": self._generation_count,
         }
 
     def reset(self) -> None:

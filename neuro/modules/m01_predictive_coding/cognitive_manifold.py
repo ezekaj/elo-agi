@@ -18,6 +18,7 @@ from enum import Enum
 
 class FlowType(Enum):
     """Types of gradient flow on the manifold"""
+
     GRADIENT_DESCENT = "gradient_descent"
     NATURAL_GRADIENT = "natural_gradient"
     GEODESIC = "geodesic"
@@ -26,6 +27,7 @@ class FlowType(Enum):
 @dataclass
 class ManifoldPoint:
     """A point on the cognitive manifold with local geometry"""
+
     position: np.ndarray
     tangent: Optional[np.ndarray] = None
     curvature: Optional[float] = None
@@ -39,11 +41,7 @@ class CognitiveState:
     directions - this is key for dual-process emergence.
     """
 
-    def __init__(
-        self,
-        position: np.ndarray,
-        metric: Optional[np.ndarray] = None
-    ):
+    def __init__(self, position: np.ndarray, metric: Optional[np.ndarray] = None):
         """Initialize cognitive state.
 
         Args:
@@ -72,7 +70,7 @@ class CognitiveState:
         """Update inverse metric tensor"""
         self.metric_inv = np.linalg.inv(self.metric + 1e-8 * np.eye(self.dim))
 
-    def distance_to(self, other: 'CognitiveState') -> float:
+    def distance_to(self, other: "CognitiveState") -> float:
         """Compute Riemannian distance to another state.
 
         Uses the metric tensor: d² = (x-y)ᵀ G (x-y)
@@ -106,7 +104,7 @@ class CognitiveState:
         self.position += dt * direction
         self.trajectory.append(self.position.copy())
 
-    def copy(self) -> 'CognitiveState':
+    def copy(self) -> "CognitiveState":
         """Create a copy of this state"""
         new_state = CognitiveState(self.position.copy(), self.metric.copy())
         new_state.velocity = self.velocity.copy()
@@ -125,7 +123,7 @@ class CognitiveManifold:
         dim: int,
         accuracy_weight: float = 1.0,
         parsimony_weight: float = 0.1,
-        utility_weight: float = 0.5
+        utility_weight: float = 0.5,
     ):
         """Initialize the cognitive manifold.
 
@@ -173,7 +171,7 @@ class CognitiveManifold:
         if self.prediction_error is None:
             return 0.0
 
-        return float(np.sum(self.prediction_error ** 2))
+        return float(np.sum(self.prediction_error**2))
 
     def parsimony_potential(self, state: np.ndarray) -> float:
         """Parsimony component: complexity penalty.
@@ -184,7 +182,7 @@ class CognitiveManifold:
         if self._custom_parsimony is not None:
             return self._custom_parsimony(state)
 
-        return float(np.sum(state ** 2))
+        return float(np.sum(state**2))
 
     def utility_potential(self, state: np.ndarray) -> float:
         """Utility component: distance to goal.
@@ -198,7 +196,7 @@ class CognitiveManifold:
             return 0.0
 
         diff = state - self.goal
-        return float(np.sum(diff ** 2))
+        return float(np.sum(diff**2))
 
     def potential(self, state: Optional[np.ndarray] = None) -> float:
         """Total cognitive potential to be minimized.
@@ -209,17 +207,13 @@ class CognitiveManifold:
             state = self.state.position
 
         F = (
-            self.accuracy_weight * self.accuracy_potential(state) +
-            self.parsimony_weight * self.parsimony_potential(state) +
-            self.utility_weight * self.utility_potential(state)
+            self.accuracy_weight * self.accuracy_potential(state)
+            + self.parsimony_weight * self.parsimony_potential(state)
+            + self.utility_weight * self.utility_potential(state)
         )
         return F
 
-    def gradient(
-        self,
-        state: Optional[np.ndarray] = None,
-        eps: float = 1e-5
-    ) -> np.ndarray:
+    def gradient(self, state: Optional[np.ndarray] = None, eps: float = 1e-5) -> np.ndarray:
         """Compute gradient of potential (numerical).
 
         ∇F = direction of steepest ascent
@@ -237,10 +231,7 @@ class CognitiveManifold:
 
         return grad
 
-    def natural_gradient(
-        self,
-        state: Optional[np.ndarray] = None
-    ) -> np.ndarray:
+    def natural_gradient(self, state: Optional[np.ndarray] = None) -> np.ndarray:
         """Compute natural gradient using the metric.
 
         ∇̃F = G⁻¹ ∇F (metric-aware gradient)
@@ -252,7 +243,7 @@ class CognitiveManifold:
         self,
         dt: float = 0.1,
         flow_type: FlowType = FlowType.GRADIENT_DESCENT,
-        momentum: float = 0.0
+        momentum: float = 0.0,
     ) -> np.ndarray:
         """Move state along gradient flow = "thinking".
 
@@ -289,7 +280,7 @@ class CognitiveManifold:
         dt: float = 0.1,
         max_steps: int = 1000,
         tolerance: float = 1e-6,
-        flow_type: FlowType = FlowType.GRADIENT_DESCENT
+        flow_type: FlowType = FlowType.GRADIENT_DESCENT,
     ) -> Tuple[np.ndarray, int]:
         """Flow until potential converges.
 
@@ -338,10 +329,7 @@ class DualProcess:
     """
 
     def __init__(
-        self,
-        manifold: CognitiveManifold,
-        fast_threshold: float = 1.0,
-        slow_threshold: float = 0.1
+        self, manifold: CognitiveManifold, fast_threshold: float = 1.0, slow_threshold: float = 0.1
     ):
         """Initialize dual-process system.
 
@@ -361,7 +349,7 @@ class DualProcess:
         # Steep metric = fast responses (System 1)
         # Flat metric = slow deliberation (System 2)
         self.fast_metric = np.eye(manifold.dim) * 10.0  # Amplifies gradients
-        self.slow_metric = np.eye(manifold.dim) * 0.1   # Dampens gradients
+        self.slow_metric = np.eye(manifold.dim) * 0.1  # Dampens gradients
 
     def get_gradient_magnitude(self) -> float:
         """Get current gradient magnitude (steepness of landscape)"""
@@ -420,10 +408,7 @@ class DualProcess:
         return position, self.current_system
 
     def think(
-        self,
-        max_steps: int = 100,
-        dt: float = 0.1,
-        tolerance: float = 1e-6
+        self, max_steps: int = 100, dt: float = 0.1, tolerance: float = 1e-6
     ) -> Tuple[np.ndarray, List[int]]:
         """Complete a thinking process, switching systems as needed.
 
@@ -475,11 +460,7 @@ class AttractorLandscape:
         self.attractors: List[np.ndarray] = []
         self.attractor_strengths: List[float] = []
 
-    def add_attractor(
-        self,
-        position: np.ndarray,
-        strength: float = 1.0
-    ) -> None:
+    def add_attractor(self, position: np.ndarray, strength: float = 1.0) -> None:
         """Add an attractor (stable state) to the landscape"""
         self.attractors.append(position.copy())
         self.attractor_strengths.append(strength)

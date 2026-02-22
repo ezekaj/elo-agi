@@ -18,8 +18,9 @@ from .differentiable_scm import DifferentiableSCM
 
 class ExplanationType(Enum):
     """Types of causal explanations."""
-    NECESSARY = "necessary"      # X was necessary for Y
-    SUFFICIENT = "sufficient"    # X was sufficient for Y
+
+    NECESSARY = "necessary"  # X was necessary for Y
+    SUFFICIENT = "sufficient"  # X was sufficient for Y
     NECESSARY_SUFFICIENT = "necessary_and_sufficient"
     CONTRIBUTORY = "contributory"  # X contributed to Y
 
@@ -27,6 +28,7 @@ class ExplanationType(Enum):
 @dataclass
 class CounterfactualQuery:
     """A counterfactual query specification."""
+
     evidence: Dict[str, float]  # What we observed
     intervention: Dict[str, float]  # What if we had done this?
     outcome_var: str  # Variable of interest
@@ -36,6 +38,7 @@ class CounterfactualQuery:
 @dataclass
 class CounterfactualResult:
     """Result of a counterfactual query."""
+
     query: CounterfactualQuery
     factual_value: float  # Actual outcome
     counterfactual_value: float  # Counterfactual outcome
@@ -47,6 +50,7 @@ class CounterfactualResult:
 @dataclass
 class ContrastiveExplanation:
     """A contrastive explanation: Why X and not Y?"""
+
     fact: str  # What happened
     foil: str  # What didn't happen (but might have)
     cause: str  # The causal variable
@@ -67,6 +71,7 @@ class NestedCounterfactualQuery:
 
     This represents reasoning about counterfactuals within counterfactuals.
     """
+
     outer_evidence: Dict[str, float]  # Outer world evidence
     outer_intervention: Dict[str, float]  # Primary counterfactual
     inner_evidence: Dict[str, float]  # Inner (nested) evidence
@@ -200,8 +205,7 @@ class NestedCounterfactual:
             "primary_intervention": primary_intervention,
             "secondary_intervention": secondary_intervention,
             "nesting_effect": (
-                nested_cf_values.get(outcome_var, 0.0) -
-                simple_cf_values.get(outcome_var, 0.0)
+                nested_cf_values.get(outcome_var, 0.0) - simple_cf_values.get(outcome_var, 0.0)
             ),
         }
 
@@ -254,9 +258,14 @@ class NestedCounterfactual:
 
         # Generate explanation text
         explanation = self._generate_explanation(
-            cause_variable, actual_cause_value, cf_cause_value,
-            outcome_variable, actual_outcome_value, foil_outcome_value,
-            pn, ps,
+            cause_variable,
+            actual_cause_value,
+            cf_cause_value,
+            outcome_variable,
+            actual_outcome_value,
+            foil_outcome_value,
+            pn,
+            ps,
         )
 
         return ContrastiveExplanation(
@@ -426,8 +435,7 @@ class NestedCounterfactual:
         for _ in range(self.n_monte_carlo):
             # Perturb noise
             perturbed_noise = {
-                var: val + np.random.normal(0, perturbation_std)
-                for var, val in base_noise.items()
+                var: val + np.random.normal(0, perturbation_std) for var, val in base_noise.items()
             }
 
             # Compute counterfactual with perturbed noise
@@ -495,7 +503,7 @@ class NestedCounterfactual:
         actual_cause = evidence.get(cause_var, 0.0)
 
         best_cause = actual_cause
-        best_error = float('inf')
+        best_error = float("inf")
 
         # Grid search around actual value
         for delta in np.linspace(-5, 5, n_search):

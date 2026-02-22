@@ -11,11 +11,32 @@ These tests push the system to its limits and test edge cases:
 
 import numpy as np
 import pytest
-from neuro.modules.m01_predictive_coding.predictive_hierarchy import PredictiveLayer, PredictiveHierarchy
-from neuro.modules.m01_predictive_coding.precision_weighting import PrecisionWeightedError, AdaptivePrecision, HierarchicalPrecision
-from neuro.modules.m01_predictive_coding.cognitive_manifold import CognitiveState, CognitiveManifold, DualProcess, AttractorLandscape
-from neuro.modules.m01_predictive_coding.temporal_dynamics import TemporalLayer, TemporalHierarchy, MultiTimescaleIntegrator
-from neuro.modules.m01_predictive_coding.omission_detector import OmissionDetector, SequenceOmissionDetector, RhythmicOmissionDetector
+from neuro.modules.m01_predictive_coding.predictive_hierarchy import (
+    PredictiveLayer,
+    PredictiveHierarchy,
+)
+from neuro.modules.m01_predictive_coding.precision_weighting import (
+    PrecisionWeightedError,
+    AdaptivePrecision,
+    HierarchicalPrecision,
+)
+from neuro.modules.m01_predictive_coding.cognitive_manifold import (
+    CognitiveState,
+    CognitiveManifold,
+    DualProcess,
+    AttractorLandscape,
+)
+from neuro.modules.m01_predictive_coding.temporal_dynamics import (
+    TemporalLayer,
+    TemporalHierarchy,
+    MultiTimescaleIntegrator,
+)
+from neuro.modules.m01_predictive_coding.omission_detector import (
+    OmissionDetector,
+    SequenceOmissionDetector,
+    RhythmicOmissionDetector,
+)
+
 
 class TestNumericalStability:
     """Tests for numerical stability under extreme conditions"""
@@ -30,8 +51,8 @@ class TestNumericalStability:
         for _ in range(50):
             result = hierarchy.step(large_input, dt=0.1)
             # Should not produce NaN or Inf
-            assert np.all(np.isfinite(result['total_error']))
-            for state in result['states']:
+            assert np.all(np.isfinite(result["total_error"]))
+            for state in result["states"]:
                 assert np.all(np.isfinite(state))
 
     def test_hierarchy_with_tiny_inputs(self):
@@ -43,7 +64,7 @@ class TestNumericalStability:
 
         for _ in range(50):
             result = hierarchy.step(tiny_input, dt=0.1)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_hierarchy_with_mixed_scale_inputs(self):
         """Test hierarchy handles inputs with mixed scales"""
@@ -54,7 +75,7 @@ class TestNumericalStability:
 
         for _ in range(50):
             result = hierarchy.step(mixed_input, dt=0.1)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_precision_with_zero_variance(self):
         """Test precision estimation with constant errors (zero variance)"""
@@ -90,32 +111,26 @@ class TestNumericalStability:
         for _ in range(5000):
             obs = np.random.randn(5) * 0.5
             result = hierarchy.step(obs, dt=0.05)
-            assert np.all(np.isfinite(result['total_error']))
-            assert result['total_error'] < 1e10  # Bounded
+            assert np.all(np.isfinite(result["total_error"]))
+            assert result["total_error"] < 1e10  # Bounded
+
 
 class TestHighDimensional:
     """Tests for high-dimensional scenarios"""
 
     def test_high_dim_hierarchy(self):
         """Test hierarchy with high-dimensional layers"""
-        hierarchy = PredictiveHierarchy(
-            layer_dims=[100, 50, 25, 10],
-            learning_rate=0.05
-        )
+        hierarchy = PredictiveHierarchy(layer_dims=[100, 50, 25, 10], learning_rate=0.05)
 
         obs = np.random.randn(100)
 
         for _ in range(20):
             result = hierarchy.step(obs, dt=0.1)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_high_dim_manifold(self):
         """Test manifold in high dimensions"""
-        manifold = CognitiveManifold(
-            dim=50,
-            parsimony_weight=1.0,
-            utility_weight=0.5
-        )
+        manifold = CognitiveManifold(dim=50, parsimony_weight=1.0, utility_weight=0.5)
 
         manifold.set_goal(np.random.randn(50))
         manifold.state.position = np.random.randn(50)
@@ -126,22 +141,16 @@ class TestHighDimensional:
 
     def test_high_dim_precision(self):
         """Test precision weighting in high dimensions"""
-        hp = HierarchicalPrecision(
-            level_dims=[100, 50, 25],
-            base_learning_rate=0.1
-        )
+        hp = HierarchicalPrecision(level_dims=[100, 50, 25], base_learning_rate=0.1)
 
-        errors = [
-            np.random.randn(100),
-            np.random.randn(50),
-            np.random.randn(25)
-        ]
+        errors = [np.random.randn(100), np.random.randn(50), np.random.randn(25)]
 
         for _ in range(50):
             precs, vols = hp.update(errors)
             for p in precs:
                 assert np.all(np.isfinite(p))
                 assert np.all(p > 0)
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""
@@ -153,8 +162,8 @@ class TestEdgeCases:
         obs = np.random.randn(5)
         result = hierarchy.step(obs)
 
-        assert len(result['errors']) == 1
-        assert len(result['states']) == 1
+        assert len(result["errors"]) == 1
+        assert len(result["states"]) == 1
 
     def test_empty_expectation_omission(self):
         """Test omission detector with no expectations"""
@@ -205,6 +214,7 @@ class TestEdgeCases:
         assert landscape.find_nearest_attractor(np.array([5.0, 5.0])) == 0
         assert landscape.find_nearest_attractor(np.array([-10.0, 10.0])) == 0
 
+
 class TestRapidChanges:
     """Tests for handling rapid changes and regime shifts"""
 
@@ -220,7 +230,7 @@ class TestRapidChanges:
                 obs = -np.ones(5) * 5.0
 
             result = hierarchy.step(obs)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_precision_rapid_variance_change(self):
         """Test precision adaptation to rapid variance changes"""
@@ -249,7 +259,7 @@ class TestRapidChanges:
             np.array([5.0, 0.0]),
             np.array([0.0, 5.0]),
             np.array([-5.0, 0.0]),
-            np.array([0.0, -5.0])
+            np.array([0.0, -5.0]),
         ]
 
         for goal in goals:
@@ -257,6 +267,7 @@ class TestRapidChanges:
             for _ in range(20):
                 manifold.flow(dt=0.1)
                 assert np.all(np.isfinite(manifold.state.position))
+
 
 class TestIntegration:
     """Integration tests combining multiple components"""
@@ -276,13 +287,13 @@ class TestIntegration:
             result = hierarchy.step(obs, dt=0.1)
 
             # Update precision
-            precision.update(result['errors'])
+            precision.update(result["errors"])
 
             # Check for omissions
             omission.receive_input(obs, timestamp=t * 0.1)
 
             # All should remain stable
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_manifold_with_precision(self):
         """Test cognitive manifold with precision-weighted updates"""
@@ -319,6 +330,7 @@ class TestIntegration:
             for state in states:
                 assert np.all(np.isfinite(state))
 
+
 class TestAdversarial:
     """Tests with adversarial/pathological inputs"""
 
@@ -338,7 +350,7 @@ class TestAdversarial:
         result = hierarchy.step(clean_input)
 
         # System should still work
-        assert np.all(np.isfinite(result['total_error']))
+        assert np.all(np.isfinite(result["total_error"]))
 
     def test_inf_handling(self):
         """Test handling of infinite values"""
@@ -361,7 +373,7 @@ class TestAdversarial:
             freq = 100
             obs = np.sin(2 * np.pi * freq * t * 0.001) * np.ones(5)
             result = hierarchy.step(obs, dt=0.001)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_sparse_inputs(self):
         """Test with mostly-zero sparse inputs"""
@@ -374,7 +386,8 @@ class TestAdversarial:
             obs[indices] = np.random.randn(5)
 
             result = hierarchy.step(obs)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
+
 
 class TestPerformance:
     """Performance-related tests"""
@@ -387,7 +400,7 @@ class TestPerformance:
         for i in range(1000):
             obs = np.random.randn(10) * 0.5
             result = hierarchy.step(obs)
-            errors.append(result['total_error'])
+            errors.append(result["total_error"])
 
         # Should remain bounded
         assert max(errors) < 1e6
@@ -396,22 +409,17 @@ class TestPerformance:
     def test_deep_hierarchy(self):
         """Test very deep hierarchy"""
         hierarchy = PredictiveHierarchy(
-            layer_dims=[20, 18, 16, 14, 12, 10, 8, 6, 4],
-            learning_rate=0.02,
-            timescale_factor=1.5
+            layer_dims=[20, 18, 16, 14, 12, 10, 8, 6, 4], learning_rate=0.02, timescale_factor=1.5
         )
 
         for _ in range(100):
             obs = np.random.randn(20) * 0.3
             result = hierarchy.step(obs)
-            assert np.all(np.isfinite(result['total_error']))
+            assert np.all(np.isfinite(result["total_error"]))
 
     def test_multi_timescale_stress(self):
         """Stress test multi-timescale integrator"""
-        integrator = MultiTimescaleIntegrator(
-            dim=10,
-            timescales=[0.001, 0.01, 0.1, 1.0, 10.0]
-        )
+        integrator = MultiTimescaleIntegrator(dim=10, timescales=[0.001, 0.01, 0.1, 1.0, 10.0])
 
         for t in range(1000):
             value = np.random.randn(10)
@@ -419,6 +427,7 @@ class TestPerformance:
 
             for state in states:
                 assert np.all(np.isfinite(state))
+
 
 class TestOmissionEdgeCases:
     """Edge cases for omission detection"""
@@ -430,10 +439,7 @@ class TestOmissionEdgeCases:
         # Add multiple expectations for same time
         for i in range(5):
             detector.add_expectation(
-                np.random.randn(3),
-                time_window=1.0,
-                tolerance=0.5,
-                id=f"exp_{i}"
+                np.random.randn(3), time_window=1.0, tolerance=0.5, id=f"exp_{i}"
             )
 
         # Check all get processed
@@ -453,5 +459,6 @@ class TestOmissionEdgeCases:
         # Period estimate should be uncertain
         assert detector.period_confidence < 0.9
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--tb=short'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

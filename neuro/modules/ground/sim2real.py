@@ -13,12 +13,14 @@ import time
 
 class DomainType(Enum):
     """Domain types."""
+
     SIMULATION = "simulation"
     REALITY = "reality"
 
 
 class RandomizationType(Enum):
     """Types of domain randomization."""
+
     VISUAL = "visual"
     DYNAMICS = "dynamics"
     MORPHOLOGY = "morphology"
@@ -28,6 +30,7 @@ class RandomizationType(Enum):
 @dataclass
 class RandomizationConfig:
     """Configuration for domain randomization."""
+
     visual_noise_std: float = 0.1
     dynamics_friction_range: Tuple[float, float] = (0.5, 1.5)
     dynamics_mass_range: Tuple[float, float] = (0.8, 1.2)
@@ -38,6 +41,7 @@ class RandomizationConfig:
 @dataclass
 class RealityGapMetrics:
     """Metrics for measuring reality gap."""
+
     state_distribution_distance: float
     action_effect_difference: float
     reward_difference: float
@@ -102,10 +106,13 @@ class DomainRandomization:
         # Clip and convert back
         randomized = np.clip(randomized, 0, 255).astype(image.dtype)
 
-        self._record_randomization("visual", {
-            "brightness": brightness,
-            "contrast": contrast,
-        })
+        self._record_randomization(
+            "visual",
+            {
+                "brightness": brightness,
+                "contrast": contrast,
+            },
+        )
 
         return randomized
 
@@ -134,11 +141,14 @@ class DomainRandomization:
         new_friction = friction * friction_scale
         new_damping = damping * damping_scale
 
-        self._record_randomization("dynamics", {
-            "mass_scale": mass_scale,
-            "friction_scale": friction_scale,
-            "damping_scale": damping_scale,
-        })
+        self._record_randomization(
+            "dynamics",
+            {
+                "mass_scale": mass_scale,
+                "friction_scale": friction_scale,
+                "damping_scale": damping_scale,
+            },
+        )
 
         return new_mass, new_friction, new_damping
 
@@ -158,9 +168,12 @@ class DomainRandomization:
         noise = self.rng.randn(*observation.shape) * self.config.sensor_noise_std
         noisy = observation + noise
 
-        self._record_randomization("sensor_noise", {
-            "noise_std": self.config.sensor_noise_std,
-        })
+        self._record_randomization(
+            "sensor_noise",
+            {
+                "noise_std": self.config.sensor_noise_std,
+            },
+        )
 
         return noisy
 
@@ -180,21 +193,20 @@ class DomainRandomization:
             Tuple of (randomized_lengths, randomized_masses)
         """
         length_scales = self.rng.uniform(
-            *self.config.morphology_scale_range,
-            size=link_lengths.shape
+            *self.config.morphology_scale_range, size=link_lengths.shape
         )
-        mass_scales = self.rng.uniform(
-            *self.config.dynamics_mass_range,
-            size=link_masses.shape
-        )
+        mass_scales = self.rng.uniform(*self.config.dynamics_mass_range, size=link_masses.shape)
 
         new_lengths = link_lengths * length_scales
         new_masses = link_masses * mass_scales
 
-        self._record_randomization("morphology", {
-            "length_scales": length_scales.tolist(),
-            "mass_scales": mass_scales.tolist(),
-        })
+        self._record_randomization(
+            "morphology",
+            {
+                "length_scales": length_scales.tolist(),
+                "mass_scales": mass_scales.tolist(),
+            },
+        )
 
         return new_lengths, new_masses
 
@@ -204,11 +216,13 @@ class DomainRandomization:
         params: Dict[str, Any],
     ) -> None:
         """Record applied randomization."""
-        self._randomizations_applied.append({
-            "type": rand_type,
-            "params": params,
-            "timestamp": time.time(),
-        })
+        self._randomizations_applied.append(
+            {
+                "type": rand_type,
+                "params": params,
+                "timestamp": time.time(),
+            }
+        )
 
     def get_history(self) -> List[Dict[str, Any]]:
         """Get randomization history."""
@@ -289,8 +303,8 @@ class RealityGap:
         # Compute MMD with RBF kernel
         def rbf_kernel(x, y, sigma=1.0):
             diff = x[:, np.newaxis, :] - y[np.newaxis, :, :]
-            sq_dist = np.sum(diff ** 2, axis=2)
-            return np.exp(-sq_dist / (2 * sigma ** 2))
+            sq_dist = np.sum(diff**2, axis=2)
+            return np.exp(-sq_dist / (2 * sigma**2))
 
         # Flatten if needed
         if sim_arr.ndim > 2:
@@ -459,11 +473,13 @@ class SimToRealTransfer:
         for obs, reward in zip(real_observations, real_rewards):
             self.reality_gap.add_real_sample(obs, reward)
 
-        self._adaptation_history.append({
-            "timestamp": time.time(),
-            "n_samples": len(real_observations),
-            "mean_reward": np.mean(real_rewards) if real_rewards else 0.0,
-        })
+        self._adaptation_history.append(
+            {
+                "timestamp": time.time(),
+                "n_samples": len(real_observations),
+                "mean_reward": np.mean(real_rewards) if real_rewards else 0.0,
+            }
+        )
 
     def get_adaptation_history(self) -> List[Dict[str, Any]]:
         """Get adaptation history."""

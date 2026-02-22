@@ -15,17 +15,14 @@ from enum import Enum
 
 from .time_circuits import TimeCircuit, TemporalSignal, TimingScale
 from .interval_timing import IntervalTimer, TimingMode, TimingResult
-from .time_modulation import (
-    TimeModulationSystem,
-    EmotionalState,
-    ModulationEffect
-)
+from .time_modulation import TimeModulationSystem, EmotionalState, ModulationEffect
 from .embodied_time import EmbodiedTimeSystem, BodyState
 
 
 @dataclass
 class TemporalEstimate:
     """Complete temporal estimate with all components"""
+
     perceived_duration: float
     actual_duration: float
     error: float
@@ -58,7 +55,7 @@ class SubjectiveTimeSystem:
         circuits: Optional[TimeCircuit] = None,
         interval_timer: Optional[IntervalTimer] = None,
         modulation: Optional[TimeModulationSystem] = None,
-        embodied: Optional[EmbodiedTimeSystem] = None
+        embodied: Optional[EmbodiedTimeSystem] = None,
     ):
         self.circuits = circuits or TimeCircuit()
         self.interval_timer = interval_timer or IntervalTimer()
@@ -66,11 +63,7 @@ class SubjectiveTimeSystem:
         self.embodied = embodied or EmbodiedTimeSystem()
 
         # Integration weights
-        self.component_weights = {
-            'circuits': 0.30,
-            'interval': 0.35,
-            'embodied': 0.35
-        }
+        self.component_weights = {"circuits": 0.30, "interval": 0.35, "embodied": 0.35}
 
         # History
         self.estimate_history: List[TemporalEstimate] = []
@@ -84,7 +77,7 @@ class SubjectiveTimeSystem:
         age: int = 30,
         movement: bool = False,
         external_rhythm: Optional[float] = None,
-        mode: TimingMode = TimingMode.PROSPECTIVE
+        mode: TimingMode = TimingMode.PROSPECTIVE,
     ) -> TemporalEstimate:
         """Estimate subjective duration with all factors.
 
@@ -106,33 +99,28 @@ class SubjectiveTimeSystem:
         # 1. Neural circuits
         circuit_signal = self.circuits.estimate_duration(
             actual_duration,
-            arousal=0.5 if emotional_state is None else
-                   self.modulation.emotional.arousal_effects.get(
-                       emotional_state, (0.5, 1.0)
-                   )[0],
+            arousal=0.5
+            if emotional_state is None
+            else self.modulation.emotional.arousal_effects.get(emotional_state, (0.5, 1.0))[0],
             attention=attention,
-            movement=movement
+            movement=movement,
         )
         circuit_estimate = circuit_signal.duration_estimate
 
         # 2. Interval timing
-        interval_result = self.interval_timer.estimate_duration(
-            actual_duration, attention, mode
-        )
+        interval_result = self.interval_timer.estimate_duration(actual_duration, attention, mode)
         interval_estimate = interval_result.estimated_duration
 
         # 3. Embodied timing
         embodied_estimate, _ = self.embodied.estimate_duration(
-            actual_duration,
-            movement_present=movement,
-            external_rhythm=external_rhythm
+            actual_duration, movement_present=movement, external_rhythm=external_rhythm
         )
 
         # Combine base estimates
         base_estimate = (
-            self.component_weights['circuits'] * circuit_estimate +
-            self.component_weights['interval'] * interval_estimate +
-            self.component_weights['embodied'] * embodied_estimate
+            self.component_weights["circuits"] * circuit_estimate
+            + self.component_weights["interval"] * interval_estimate
+            + self.component_weights["embodied"] * embodied_estimate
         )
 
         # 4. Apply modulation factors
@@ -141,7 +129,7 @@ class SubjectiveTimeSystem:
             emotional_state=emotional_state,
             attention=attention,
             dopamine_level=dopamine,
-            age=age
+            age=age,
         )
 
         # Calculate overall modulation ratio
@@ -149,9 +137,7 @@ class SubjectiveTimeSystem:
 
         # Compute confidence (average of components)
         confidence = (
-            circuit_signal.confidence +
-            interval_result.confidence +
-            0.7  # Embodied baseline
+            circuit_signal.confidence + interval_result.confidence + 0.7  # Embodied baseline
         ) / 3.0
 
         # Adjust confidence based on modulation effects
@@ -184,7 +170,7 @@ class SubjectiveTimeSystem:
             emotional_state=emotional_state.value if emotional_state else None,
             attention_level=attention,
             dopamine_level=dopamine,
-            age=age
+            age=age,
         )
 
         self.estimate_history.append(estimate)
@@ -192,9 +178,7 @@ class SubjectiveTimeSystem:
         return estimate
 
     def produce_duration(
-        self,
-        target_duration: float,
-        emotional_state: Optional[EmotionalState] = None
+        self, target_duration: float, emotional_state: Optional[EmotionalState] = None
     ) -> TemporalEstimate:
         """Produce a target duration (behavioral timing).
 
@@ -219,7 +203,7 @@ class SubjectiveTimeSystem:
             interval_estimate=result.estimated_duration,
             embodied_estimate=result.estimated_duration,
             modulation_ratio=1.0,
-            emotional_state=emotional_state.value if emotional_state else None
+            emotional_state=emotional_state.value if emotional_state else None,
         )
 
     def set_dopamine(self, level: float) -> None:
@@ -240,21 +224,17 @@ class SubjectiveTimeSystem:
     def get_statistics(self) -> Dict:
         """Get timing statistics."""
         if not self.estimate_history:
-            return {
-                'n_estimates': 0,
-                'mean_error': 0.0,
-                'mean_relative_error': 0.0
-            }
+            return {"n_estimates": 0, "mean_error": 0.0, "mean_relative_error": 0.0}
 
         errors = [e.error for e in self.estimate_history]
         rel_errors = [e.relative_error for e in self.estimate_history]
 
         return {
-            'n_estimates': len(self.estimate_history),
-            'mean_error': np.mean(errors),
-            'std_error': np.std(errors),
-            'mean_relative_error': np.mean(rel_errors),
-            'mean_confidence': np.mean([e.confidence for e in self.estimate_history])
+            "n_estimates": len(self.estimate_history),
+            "mean_error": np.mean(errors),
+            "std_error": np.std(errors),
+            "mean_relative_error": np.mean(rel_errors),
+            "mean_confidence": np.mean([e.confidence for e in self.estimate_history]),
         }
 
     def reset(self) -> None:
@@ -277,61 +257,38 @@ class TimePerceptionOrchestrator:
 
         # Scenario presets
         self.scenarios = {
-            'baseline': {
-                'emotional_state': None,
-                'attention': 0.5,
-                'dopamine': 1.0,
-                'age': 30
+            "baseline": {"emotional_state": None, "attention": 0.5, "dopamine": 1.0, "age": 30},
+            "fear": {
+                "emotional_state": EmotionalState.FEAR,
+                "attention": 0.8,
+                "dopamine": 1.2,
+                "age": 30,
             },
-            'fear': {
-                'emotional_state': EmotionalState.FEAR,
-                'attention': 0.8,
-                'dopamine': 1.2,
-                'age': 30
+            "boredom": {
+                "emotional_state": EmotionalState.BOREDOM,
+                "attention": 0.3,
+                "dopamine": 0.9,
+                "age": 30,
             },
-            'boredom': {
-                'emotional_state': EmotionalState.BOREDOM,
-                'attention': 0.3,
-                'dopamine': 0.9,
-                'age': 30
+            "flow": {
+                "emotional_state": EmotionalState.FLOW,
+                "attention": 0.2,  # Attention not on time
+                "dopamine": 1.1,
+                "age": 30,
             },
-            'flow': {
-                'emotional_state': EmotionalState.FLOW,
-                'attention': 0.2,  # Attention not on time
-                'dopamine': 1.1,
-                'age': 30
+            "elderly": {"emotional_state": None, "attention": 0.5, "dopamine": 0.85, "age": 70},
+            "child": {"emotional_state": None, "attention": 0.6, "dopamine": 1.1, "age": 8},
+            "stimulant": {
+                "emotional_state": EmotionalState.EXCITEMENT,
+                "attention": 0.7,
+                "dopamine": 1.5,
+                "age": 30,
             },
-            'elderly': {
-                'emotional_state': None,
-                'attention': 0.5,
-                'dopamine': 0.85,
-                'age': 70
-            },
-            'child': {
-                'emotional_state': None,
-                'attention': 0.6,
-                'dopamine': 1.1,
-                'age': 8
-            },
-            'stimulant': {
-                'emotional_state': EmotionalState.EXCITEMENT,
-                'attention': 0.7,
-                'dopamine': 1.5,
-                'age': 30
-            },
-            'parkinsons': {
-                'emotional_state': None,
-                'attention': 0.5,
-                'dopamine': 0.5,
-                'age': 65
-            }
+            "parkinsons": {"emotional_state": None, "attention": 0.5, "dopamine": 0.5, "age": 65},
         }
 
     def estimate(
-        self,
-        duration: float,
-        scenario: Optional[str] = None,
-        **kwargs
+        self, duration: float, scenario: Optional[str] = None, **kwargs
     ) -> TemporalEstimate:
         """Estimate duration with optional scenario preset.
 
@@ -347,26 +304,24 @@ class TimePerceptionOrchestrator:
         if scenario and scenario in self.scenarios:
             params = self.scenarios[scenario].copy()
         else:
-            params = self.scenarios['baseline'].copy()
+            params = self.scenarios["baseline"].copy()
 
         # Apply overrides
         params.update(kwargs)
 
         return self.subjective_system.estimate_duration(
             duration,
-            emotional_state=params.get('emotional_state'),
-            attention=params.get('attention', 0.5),
-            dopamine=params.get('dopamine', 1.0),
-            age=params.get('age', 30),
-            movement=params.get('movement', False),
-            external_rhythm=params.get('external_rhythm'),
-            mode=params.get('mode', TimingMode.PROSPECTIVE)
+            emotional_state=params.get("emotional_state"),
+            attention=params.get("attention", 0.5),
+            dopamine=params.get("dopamine", 1.0),
+            age=params.get("age", 30),
+            movement=params.get("movement", False),
+            external_rhythm=params.get("external_rhythm"),
+            mode=params.get("mode", TimingMode.PROSPECTIVE),
         )
 
     def compare_scenarios(
-        self,
-        duration: float,
-        scenarios: List[str]
+        self, duration: float, scenarios: List[str]
     ) -> Dict[str, TemporalEstimate]:
         """Compare time perception across scenarios.
 
@@ -386,10 +341,7 @@ class TimePerceptionOrchestrator:
         return results
 
     def simulate_event(
-        self,
-        duration: float,
-        event_type: str,
-        intensity: float = 0.5
+        self, duration: float, event_type: str, intensity: float = 0.5
     ) -> TemporalEstimate:
         """Simulate time perception during an event.
 
@@ -401,40 +353,39 @@ class TimePerceptionOrchestrator:
         Returns:
             Temporal estimate
         """
-        if event_type == 'threatening':
+        if event_type == "threatening":
             return self.estimate(
                 duration,
                 emotional_state=EmotionalState.FEAR,
                 attention=0.9,
-                dopamine=1.0 + intensity * 0.3
+                dopamine=1.0 + intensity * 0.3,
             )
-        elif event_type == 'rewarding':
+        elif event_type == "rewarding":
             return self.estimate(
                 duration,
                 emotional_state=EmotionalState.EXCITEMENT,
                 attention=0.6,
-                dopamine=1.0 + intensity * 0.5
+                dopamine=1.0 + intensity * 0.5,
             )
-        elif event_type == 'boring':
+        elif event_type == "boring":
             return self.estimate(
                 duration,
                 emotional_state=EmotionalState.BOREDOM,
                 attention=0.2 + intensity * 0.2,
-                dopamine=0.9 - intensity * 0.2
+                dopamine=0.9 - intensity * 0.2,
             )
-        elif event_type == 'engaging':
+        elif event_type == "engaging":
             return self.estimate(
                 duration,
                 emotional_state=EmotionalState.FLOW,
                 attention=0.1,  # Absorbed in task, not time
-                dopamine=1.1
+                dopamine=1.1,
             )
         else:
             return self.estimate(duration)
 
     def simulate_day(
-        self,
-        events: List[Tuple[float, str, float]]
+        self, events: List[Tuple[float, str, float]]
     ) -> List[Tuple[str, TemporalEstimate]]:
         """Simulate time perception throughout a day.
 
@@ -453,8 +404,7 @@ class TimePerceptionOrchestrator:
         return results
 
     def get_subjective_day_length(
-        self,
-        events: List[Tuple[float, str, float]]
+        self, events: List[Tuple[float, str, float]]
     ) -> Tuple[float, float]:
         """Calculate subjective vs objective day length.
 

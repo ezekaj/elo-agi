@@ -3,8 +3,12 @@
 import numpy as np
 import pytest
 from neuro.modules.m14_embodied.sensorimotor import (
-    MotorSensoryCoupling, PredictiveProcessor, SensorimotorLoop, SensorimotorParams
+    MotorSensoryCoupling,
+    PredictiveProcessor,
+    SensorimotorLoop,
+    SensorimotorParams,
 )
+
 
 class TestMotorSensoryCoupling:
     """Tests for motor-sensory coupling"""
@@ -47,6 +51,7 @@ class TestMotorSensoryCoupling:
         coupling.update_coupling(motor, predicted, actual, learning_rate=0.1)
 
         assert not np.allclose(coupling.motor_to_sensory, initial_weights)
+
 
 class TestPredictiveProcessor:
     """Tests for predictive processing"""
@@ -101,6 +106,7 @@ class TestPredictiveProcessor:
             processor.receive_sensory(np.random.rand(processor.n_sensory))
 
         assert not np.allclose(processor.forward_model, initial_model)
+
 
 class TestSensorimotorLoop:
     """Tests for complete sensorimotor loop"""
@@ -157,5 +163,6 @@ class TestSensorimotorLoop:
         assert "goal_state" in state
         assert "coupling_strength" in state
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

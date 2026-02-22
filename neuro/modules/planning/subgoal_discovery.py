@@ -17,6 +17,7 @@ from collections import defaultdict
 
 class SubgoalType(Enum):
     """Types of discovered subgoals."""
+
     BOTTLENECK = "bottleneck"
     LANDMARK = "landmark"
     OPTION_TERMINATION = "option_termination"
@@ -27,6 +28,7 @@ class SubgoalType(Enum):
 @dataclass
 class Subgoal:
     """A discovered subgoal."""
+
     name: str
     subgoal_type: SubgoalType
     state_representation: np.ndarray
@@ -58,6 +60,7 @@ class Subgoal:
 @dataclass
 class Trajectory:
     """A trajectory of states, actions, and rewards."""
+
     states: List[np.ndarray]
     actions: List[Any]
     rewards: List[float]
@@ -398,15 +401,11 @@ class SubgoalDiscovery:
             all_subgoals.extend(bottlenecks)
 
         if "termination" in methods:
-            terminations = self._termination_detector.identify_option_terminations(
-                trajectories
-            )
+            terminations = self._termination_detector.identify_option_terminations(trajectories)
             all_subgoals.extend(terminations[:top_k_per_method])
 
         if "cluster" in methods:
-            cluster_subgoals = self._discover_by_clustering(
-                trajectories, top_k_per_method
-            )
+            cluster_subgoals = self._discover_by_clustering(trajectories, top_k_per_method)
             all_subgoals.extend(cluster_subgoals)
 
         for subgoal in all_subgoals:
@@ -489,9 +488,7 @@ class SubgoalDiscovery:
         total_without = 0
 
         for traj in task_distribution:
-            visited_subgoal = any(
-                subgoal.matches(state) for state in traj.states
-            )
+            visited_subgoal = any(subgoal.matches(state) for state in traj.states)
 
             if visited_subgoal:
                 total_with += 1

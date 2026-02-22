@@ -23,6 +23,7 @@ from neuro.modules.causal.differentiable_scm import (
     activation_gradient,
 )
 
+
 class TestActivationFunctions:
     """Test activation functions and their gradients."""
 
@@ -80,6 +81,7 @@ class TestActivationFunctions:
 
             np.testing.assert_allclose(numerical_grad, analytical_grad, rtol=1e-4)
 
+
 class TestNeuralNetwork:
     """Test neural network implementation."""
 
@@ -105,7 +107,7 @@ class TestNeuralNetwork:
         params = nn.parameters()
         # (10*32 + 32) + (32*16 + 16) + (16*5 + 5) = 320+32 + 512+16 + 80+5 = 965
         total_params = sum(p.size for p in params)
-        expected = (10*32 + 32) + (32*16 + 16) + (16*5 + 5)
+        expected = (10 * 32 + 32) + (32 * 16 + 16) + (16 * 5 + 5)
         assert total_params == expected
 
     def test_update_changes_parameters(self):
@@ -134,6 +136,7 @@ class TestNeuralNetwork:
 
         np.testing.assert_array_equal(y1, y2)
 
+
 class TestCausalMechanism:
     """Test causal mechanisms."""
 
@@ -149,6 +152,7 @@ class TestCausalMechanism:
 
     def test_mechanism_with_analytical_function(self):
         """Analytical mechanism should compute correct values."""
+
         def linear_fn(parents, noise):
             return 2 * parents.get("X", 0) + noise
 
@@ -184,6 +188,7 @@ class TestCausalMechanism:
         grads = mechanism.backward(1.0)
 
         assert set(grads.keys()) == {"X1", "X2", "X3"}
+
 
 class TestDifferentiableSCM:
     """Test full SCM implementation."""
@@ -243,10 +248,7 @@ class TestDifferentiableSCM:
         values_natural = scm.forward(noise={v: 0 for v in scm._variables})
 
         # With intervention do(X=5)
-        values_do = scm.forward(
-            noise={v: 0 for v in scm._variables},
-            interventions={"X": 5.0}
-        )
+        values_do = scm.forward(noise={v: 0 for v in scm._variables}, interventions={"X": 5.0})
 
         assert values_do["X"] == 5.0
         assert values_do["Y"] == 10.0  # 2 * 5.0
@@ -259,10 +261,7 @@ class TestDifferentiableSCM:
         scm.add_linear_mechanism("Y", ["X"], {"X": 2.0})  # Y = 2X
 
         # do(X=10) should make Y = 20, regardless of A
-        values = scm.forward(
-            noise={v: 0 for v in scm._variables},
-            interventions={"X": 10.0}
-        )
+        values = scm.forward(noise={v: 0 for v in scm._variables}, interventions={"X": 10.0})
 
         assert values["X"] == 10.0
         assert values["Y"] == 20.0  # Should not depend on A
@@ -391,6 +390,7 @@ class TestDifferentiableSCM:
         # Loss should decrease or stay reasonable
         assert final_loss["Y"] < initial_loss["Y"] * 2  # At least not much worse
 
+
 class TestComplexCausalStructures:
     """Test complex causal structures and edge cases."""
 
@@ -401,11 +401,11 @@ class TestComplexCausalStructures:
         # Create chain: X0 -> X1 -> ... -> X9
         scm.add_variable("X0")
         for i in range(1, 10):
-            scm.add_linear_mechanism(f"X{i}", [f"X{i-1}"], {f"X{i-1}": 1.0})
+            scm.add_linear_mechanism(f"X{i}", [f"X{i - 1}"], {f"X{i - 1}": 1.0})
 
         order = scm._topological_order()
         for i in range(9):
-            assert order.index(f"X{i}") < order.index(f"X{i+1}")
+            assert order.index(f"X{i}") < order.index(f"X{i + 1}")
 
     def test_wide_graph(self):
         """Test graph with many parallel paths."""
@@ -456,6 +456,7 @@ class TestComplexCausalStructures:
 
         # X and Y should NOT be d-separated given C (explaining away)
         assert not scm.is_d_separated("X", "Y", {"C"})
+
 
 class TestEdgeCases:
     """Test edge cases and error handling."""

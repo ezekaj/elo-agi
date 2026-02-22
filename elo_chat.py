@@ -46,15 +46,17 @@ except ImportError:
     from rich.syntax import Syntax
 
 # ELO Theme
-theme = Theme({
-    "info": "cyan",
-    "warning": "yellow",
-    "error": "red bold",
-    "success": "green",
-    "elo": "bold cyan",
-    "dim": "dim white",
-    "tool": "bold magenta",
-})
+theme = Theme(
+    {
+        "info": "cyan",
+        "warning": "yellow",
+        "error": "red bold",
+        "success": "green",
+        "elo": "bold cyan",
+        "dim": "dim white",
+        "tool": "bold magenta",
+    }
+)
 
 console = Console(theme=theme)
 
@@ -72,18 +74,21 @@ PROJECT_AVAILABLE = False
 try:
     from elo_cli.agent import Agent
     from elo_cli.permissions import check_permission
+
     AGENT_AVAILABLE = True
 except ImportError:
     pass
 
 try:
     from elo_cli.sessions import session_manager
+
     SESSIONS_AVAILABLE = True
 except ImportError:
     pass
 
 try:
     from elo_cli.project import detect_project, get_project_summary
+
     PROJECT_AVAILABLE = True
 except ImportError:
     pass
@@ -139,10 +144,7 @@ When you need to use a tool, respond with a JSON object like:
 {"tool": "read_file", "args": {"path": "README.md"}}
 """
 
-    messages.append({
-        "role": "system",
-        "content": system_content
-    })
+    messages.append({"role": "system", "content": system_content})
 
     # Add history
     if history:
@@ -151,16 +153,10 @@ When you need to use a tool, respond with a JSON object like:
 
     messages.append({"role": "user", "content": prompt})
 
-    data = json.dumps({
-        "model": MODEL,
-        "messages": messages,
-        "stream": True
-    }).encode()
+    data = json.dumps({"model": MODEL, "messages": messages, "stream": True}).encode()
 
     req = urllib.request.Request(
-        f"{OLLAMA_URL}/api/chat",
-        data=data,
-        headers={"Content-Type": "application/json"}
+        f"{OLLAMA_URL}/api/chat", data=data, headers={"Content-Type": "application/json"}
     )
 
     full_response = ""
@@ -183,7 +179,9 @@ When you need to use a tool, respond with a JSON object like:
 
 def show_help():
     """Show help."""
-    table = Table(title="[bold cyan]ELO Commands[/bold cyan]", border_style="cyan", show_header=True)
+    table = Table(
+        title="[bold cyan]ELO Commands[/bold cyan]", border_style="cyan", show_header=True
+    )
     table.add_column("Command", style="cyan", width=20)
     table.add_column("Description")
 
@@ -215,7 +213,9 @@ def show_help():
 def show_tools():
     """Show available tools."""
     if not AGENT_AVAILABLE:
-        console.print("[warning]Agent tools not available. Install with: pip install -e .[/warning]")
+        console.print(
+            "[warning]Agent tools not available. Install with: pip install -e .[/warning]"
+        )
         return
 
     from elo_cli.tools import registry
@@ -260,6 +260,7 @@ def run_command(cmd: str) -> None:
     """Run a shell command and display output."""
     if AGENT_AVAILABLE:
         from elo_cli.tools import BashTool
+
         tool = BashTool()
 
         # Check if safe
@@ -275,6 +276,7 @@ def run_command(cmd: str) -> None:
             console.print(Panel(result.error, title=f"[error]{cmd}[/error]", border_style="red"))
     else:
         import subprocess
+
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
             output = result.stdout + result.stderr
@@ -287,6 +289,7 @@ def list_directory(path: str = ".") -> None:
     """List directory contents."""
     if AGENT_AVAILABLE:
         from elo_cli.tools import LsTool
+
         tool = LsTool()
         result = tool.execute(path=path)
         console.print(result.output)
@@ -311,16 +314,30 @@ def read_file_display(path: str) -> None:
         content = p.read_text()
 
         # Detect language from extension
-        ext = p.suffix.lstrip('.')
+        ext = p.suffix.lstrip(".")
         lang_map = {
-            'py': 'python', 'js': 'javascript', 'ts': 'typescript',
-            'rs': 'rust', 'go': 'go', 'rb': 'ruby', 'java': 'java',
-            'c': 'c', 'cpp': 'cpp', 'h': 'c', 'hpp': 'cpp',
-            'sh': 'bash', 'bash': 'bash', 'zsh': 'bash',
-            'json': 'json', 'yaml': 'yaml', 'yml': 'yaml',
-            'md': 'markdown', 'html': 'html', 'css': 'css',
+            "py": "python",
+            "js": "javascript",
+            "ts": "typescript",
+            "rs": "rust",
+            "go": "go",
+            "rb": "ruby",
+            "java": "java",
+            "c": "c",
+            "cpp": "cpp",
+            "h": "c",
+            "hpp": "cpp",
+            "sh": "bash",
+            "bash": "bash",
+            "zsh": "bash",
+            "json": "json",
+            "yaml": "yaml",
+            "yml": "yaml",
+            "md": "markdown",
+            "html": "html",
+            "css": "css",
         }
-        lang = lang_map.get(ext, 'text')
+        lang = lang_map.get(ext, "text")
 
         syntax = Syntax(content, lang, line_numbers=True, theme="monokai")
         console.print(Panel(syntax, title=f"[cyan]{path}[/cyan]", border_style="cyan"))
@@ -331,7 +348,7 @@ def read_file_display(path: str) -> None:
 def save_history(history: list):
     """Save conversation history."""
     try:
-        with open(HISTORY_FILE, 'w') as f:
+        with open(HISTORY_FILE, "w") as f:
             json.dump(history[-50:], f)
     except:
         pass
@@ -365,7 +382,9 @@ def run_with_agent(prompt: str, history: list) -> str:
 
     # Load previous history into agent
     if history:
-        agent.messages = [{"role": "system", "content": agent.messages[0]["content"] if agent.messages else ""}]
+        agent.messages = [
+            {"role": "system", "content": agent.messages[0]["content"] if agent.messages else ""}
+        ]
         agent.messages.extend(history[-10:])
 
     response_text = ""
@@ -399,27 +418,31 @@ def main():
         SpinnerColumn(),
         TextColumn("[cyan]Connecting to Ollama...[/cyan]"),
         console=console,
-        transient=True
+        transient=True,
     ) as progress:
         task = progress.add_task("", total=None)
         connected, models = check_ollama()
 
     if not connected:
-        console.print(Panel(
-            "[error]Could not connect to Ollama![/error]\n\n"
-            "1. Install Ollama: [cyan]https://ollama.ai[/cyan]\n"
-            "2. Start Ollama: [code]ollama serve[/code]\n"
-            "3. Pull a model: [code]ollama pull mistral[/code]",
-            title="Setup Required",
-            border_style="red"
-        ))
+        console.print(
+            Panel(
+                "[error]Could not connect to Ollama![/error]\n\n"
+                "1. Install Ollama: [cyan]https://ollama.ai[/cyan]\n"
+                "2. Start Ollama: [code]ollama serve[/code]\n"
+                "3. Pull a model: [code]ollama pull mistral[/code]",
+                title="Setup Required",
+                border_style="red",
+            )
+        )
         return
 
     # Check if model exists
     if MODEL not in models and models:
         MODEL = models[0]
 
-    agent_status = "[green]✓ Agent mode[/green]" if AGENT_AVAILABLE else "[yellow]Basic mode[/yellow]"
+    agent_status = (
+        "[green]✓ Agent mode[/green]" if AGENT_AVAILABLE else "[yellow]Basic mode[/yellow]"
+    )
     console.print(f"[success]✓[/success] Connected! Using [cyan]{MODEL}[/cyan] | {agent_status}")
 
     # Show project info if available
@@ -497,7 +520,9 @@ def main():
                         messages = session_manager.resume(arg)
                         if messages:
                             history = messages
-                            console.print(f"[success]✓[/success] Resumed session [cyan]{arg}[/cyan] ({len(messages)} messages)")
+                            console.print(
+                                f"[success]✓[/success] Resumed session [cyan]{arg}[/cyan] ({len(messages)} messages)"
+                            )
                         else:
                             console.print(f"[error]Session '{arg}' not found[/error]")
                     else:
@@ -544,22 +569,28 @@ def main():
                     if arg:
                         current_file, current_content = load_file(arg)
                         if current_content:
-                            lines = len(current_content.split('\n'))
-                            console.print(f"[success]✓[/success] Loaded [cyan]{current_file}[/cyan] ({lines} lines)")
+                            lines = len(current_content.split("\n"))
+                            console.print(
+                                f"[success]✓[/success] Loaded [cyan]{current_file}[/cyan] ({lines} lines)"
+                            )
                     else:
                         console.print("[warning]Usage: /file <path>[/warning]")
                     continue
 
                 elif cmd == "/explain":
                     if current_content:
-                        user_input = f"Explain this code in detail:\n\n```\n{current_content[:4000]}\n```"
+                        user_input = (
+                            f"Explain this code in detail:\n\n```\n{current_content[:4000]}\n```"
+                        )
                     else:
                         console.print("[warning]Load a file first: /file <path>[/warning]")
                         continue
 
                 elif cmd == "/fix":
                     if current_content:
-                        user_input = f"Find and fix bugs in this code:\n\n```\n{current_content[:4000]}\n```"
+                        user_input = (
+                            f"Find and fix bugs in this code:\n\n```\n{current_content[:4000]}\n```"
+                        )
                     else:
                         console.print("[warning]Load a file first: /file <path>[/warning]")
                         continue
@@ -601,7 +632,9 @@ def main():
             response_text = ""
 
             try:
-                with Live(console=console, refresh_per_second=15, vertical_overflow="visible") as live:
+                with Live(
+                    console=console, refresh_per_second=15, vertical_overflow="visible"
+                ) as live:
                     for token in stream_chat(prompt, history):
                         response_text += token
                         try:

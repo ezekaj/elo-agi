@@ -9,9 +9,9 @@ console = Console()
 
 
 class Permission(Enum):
-    ALLOW = "allow"   # Auto-approve
-    ASK = "ask"       # Prompt user
-    DENY = "deny"     # Block entirely
+    ALLOW = "allow"  # Auto-approve
+    ASK = "ask"  # Prompt user
+    DENY = "deny"  # Block entirely
 
 
 # Default permissions per tool
@@ -27,22 +27,45 @@ TOOL_PERMISSIONS = {
 
 # Dangerous command patterns - always require permission
 DANGEROUS_PATTERNS = [
-    "rm ", "rm -", "rmdir",
-    "sudo", "chmod", "chown",
-    "git push", "git reset --hard",
-    "> /", ">> /",
-    "curl | ", "wget |",
-    "mv /", "cp /",
+    "rm ",
+    "rm -",
+    "rmdir",
+    "sudo",
+    "chmod",
+    "chown",
+    "git push",
+    "git reset --hard",
+    "> /",
+    ">> /",
+    "curl | ",
+    "wget |",
+    "mv /",
+    "cp /",
 ]
 
 # Safe bash commands - auto-approve
 SAFE_COMMANDS = [
-    "ls", "pwd", "echo", "cat", "head", "tail", "wc",
-    "git status", "git log", "git branch", "git diff",
-    "which", "whoami", "date", "uname",
-    "python --version", "python3 --version",
-    "node --version", "npm --version",
-    "pip list", "pip show",
+    "ls",
+    "pwd",
+    "echo",
+    "cat",
+    "head",
+    "tail",
+    "wc",
+    "git status",
+    "git log",
+    "git branch",
+    "git diff",
+    "which",
+    "whoami",
+    "date",
+    "uname",
+    "python --version",
+    "python3 --version",
+    "node --version",
+    "npm --version",
+    "pip list",
+    "pip show",
 ]
 
 

@@ -14,6 +14,7 @@ import numpy as np
 
 class SurpriseType(Enum):
     """Types of surprise."""
+
     REWARD = "reward"
     STATE = "state"
     ACTION = "action"
@@ -23,6 +24,7 @@ class SurpriseType(Enum):
 @dataclass
 class SurpriseConfig:
     """Configuration for surprise modulation."""
+
     base_learning_rate: float = 0.01
     min_learning_rate: float = 0.001
     max_learning_rate: float = 0.1
@@ -34,6 +36,7 @@ class SurpriseConfig:
 @dataclass
 class SurpriseMetrics:
     """Metrics from a surprise computation."""
+
     predicted: Any
     actual: Any
     surprise_value: float
@@ -179,7 +182,8 @@ class SurpriseModulatedLearning:
             Adaptive learning rate
         """
         metrics = self.compute_surprise(
-            predicted, actual,
+            predicted,
+            actual,
             surprise_type=SurpriseType.OUTCOME,
             context_key=module_id,
         )
@@ -310,9 +314,7 @@ class SurpriseModulatedLearning:
         return {
             "total_surprises": self._total_surprises,
             "consolidation_triggers": self._consolidation_triggers,
-            "consolidation_rate": (
-                self._consolidation_triggers / max(1, self._total_surprises)
-            ),
+            "consolidation_rate": (self._consolidation_triggers / max(1, self._total_surprises)),
             "average_surprise": self.get_average_surprise(),
             "contexts_tracked": len(self._running_mean),
             "history_size": len(self._surprise_history),

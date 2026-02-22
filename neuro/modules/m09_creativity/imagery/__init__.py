@@ -7,14 +7,14 @@ from .tactile_imagery import TactileImagery, TactileImage
 from .imagery_system import ImagerySystem, MultimodalImage
 
 __all__ = [
-    'VisualImagery',
-    'VisualImage',
-    'AuditoryImagery',
-    'AuditoryImage',
-    'MotorImagery',
-    'MotorImage',
-    'TactileImagery',
-    'TactileImage',
-    'ImagerySystem',
-    'MultimodalImage',
+    "VisualImagery",
+    "VisualImage",
+    "AuditoryImagery",
+    "AuditoryImage",
+    "MotorImagery",
+    "MotorImage",
+    "TactileImagery",
+    "TactileImage",
+    "ImagerySystem",
+    "MultimodalImage",
 ]

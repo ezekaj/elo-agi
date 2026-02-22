@@ -18,36 +18,109 @@ from contextlib import redirect_stdout, redirect_stderr
 
 
 BLOCKED_IMPORTS = {
-    "subprocess", "shutil", "socket", "http", "urllib",
-    "requests", "ftplib", "smtplib", "telnetlib",
-    "ctypes", "multiprocessing", "signal", "resource",
-    "os", "pathlib", "importlib", "code", "codeop",
-    "pickle", "shelve", "marshal", "tempfile",
-    "webbrowser", "antigravity", "turtle", "tkinter",
-    "gc", "inspect", "ast", "dis", "sys",
+    "subprocess",
+    "shutil",
+    "socket",
+    "http",
+    "urllib",
+    "requests",
+    "ftplib",
+    "smtplib",
+    "telnetlib",
+    "ctypes",
+    "multiprocessing",
+    "signal",
+    "resource",
+    "os",
+    "pathlib",
+    "importlib",
+    "code",
+    "codeop",
+    "pickle",
+    "shelve",
+    "marshal",
+    "tempfile",
+    "webbrowser",
+    "antigravity",
+    "turtle",
+    "tkinter",
+    "gc",
+    "inspect",
+    "ast",
+    "dis",
+    "sys",
 }
 
 BLOCKED_ATTRIBUTES = {
-    "__class__", "__bases__", "__subclasses__", "__globals__",
-    "__code__", "__closure__", "__func__", "__self__",
-    "__dict__", "__module__", "__mro__", "__init_subclass__",
+    "__class__",
+    "__bases__",
+    "__subclasses__",
+    "__globals__",
+    "__code__",
+    "__closure__",
+    "__func__",
+    "__self__",
+    "__dict__",
+    "__module__",
+    "__mro__",
+    "__init_subclass__",
 }
 
 SAFE_BUILTINS = {
-    "print", "len", "range", "str", "int", "float",
-    "list", "dict", "tuple", "set", "bool",
-    "abs", "round", "min", "max", "sum",
-    "sorted", "reversed", "enumerate", "zip", "map", "filter",
-    "isinstance", "hasattr",
-    "True", "False", "None",
-    "frozenset", "bytes", "bytearray",
-    "hex", "oct", "bin", "ord", "chr",
-    "all", "any", "repr", "hash",
-    "slice", "complex",
-    "ValueError", "TypeError", "KeyError", "IndexError",
-    "AttributeError", "RuntimeError", "StopIteration",
-    "ZeroDivisionError", "OverflowError", "ImportError",
-    "Exception", "ArithmeticError", "LookupError",
+    "print",
+    "len",
+    "range",
+    "str",
+    "int",
+    "float",
+    "list",
+    "dict",
+    "tuple",
+    "set",
+    "bool",
+    "abs",
+    "round",
+    "min",
+    "max",
+    "sum",
+    "sorted",
+    "reversed",
+    "enumerate",
+    "zip",
+    "map",
+    "filter",
+    "isinstance",
+    "hasattr",
+    "True",
+    "False",
+    "None",
+    "frozenset",
+    "bytes",
+    "bytearray",
+    "hex",
+    "oct",
+    "bin",
+    "ord",
+    "chr",
+    "all",
+    "any",
+    "repr",
+    "hash",
+    "slice",
+    "complex",
+    "ValueError",
+    "TypeError",
+    "KeyError",
+    "IndexError",
+    "AttributeError",
+    "RuntimeError",
+    "StopIteration",
+    "ZeroDivisionError",
+    "OverflowError",
+    "ImportError",
+    "Exception",
+    "ArithmeticError",
+    "LookupError",
 }
 
 MAX_OUTPUT_BYTES = 10 * 1024  # 10KB
@@ -56,14 +129,14 @@ DEFAULT_TIMEOUT = 10
 
 
 def _make_safe_globals() -> Dict[str, Any]:
-    builtins_source = __builtins__.__dict__ if hasattr(__builtins__, '__dict__') else __builtins__
+    builtins_source = __builtins__.__dict__ if hasattr(__builtins__, "__dict__") else __builtins__
 
     safe_builtins = {}
     for name in SAFE_BUILTINS:
         if name in builtins_source:
             safe_builtins[name] = builtins_source[name]
 
-    original_import = __builtins__.__import__ if hasattr(__builtins__, '__import__') else __import__
+    original_import = __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
 
     def safe_import(name, *args, **kwargs):
         top_level = name.split(".")[0]
@@ -213,6 +286,7 @@ def _setup_neuro_modules(globals_dict: Dict[str, Any]):
 
     try:
         import neuro as neuro_agi
+
         globals_dict["neuro_agi"] = neuro_agi
         globals_dict["neuro"] = neuro_agi
     except Exception:
@@ -220,6 +294,7 @@ def _setup_neuro_modules(globals_dict: Dict[str, Any]):
 
     try:
         import numpy as np
+
         globals_dict["np"] = np
         globals_dict["numpy"] = np
     except ImportError:
@@ -227,12 +302,14 @@ def _setup_neuro_modules(globals_dict: Dict[str, Any]):
 
     try:
         from neuro.benchmark import Benchmark
+
         globals_dict["Benchmark"] = Benchmark
     except ImportError:
         pass
 
     try:
         from neuro.emotions import EmotionSystem, BasicEmotion
+
         globals_dict["EmotionSystem"] = EmotionSystem
         globals_dict["BasicEmotion"] = BasicEmotion
     except ImportError:

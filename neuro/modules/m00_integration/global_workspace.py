@@ -49,15 +49,17 @@ except ImportError:
 
 class WorkspaceMode(Enum):
     """Operating modes for the global workspace."""
-    NORMAL = "normal"           # Standard competition and broadcast
-    FOCUSED = "focused"         # Enhanced competition, fewer broadcasts
-    DIFFUSE = "diffuse"         # Relaxed competition, more broadcasts
+
+    NORMAL = "normal"  # Standard competition and broadcast
+    FOCUSED = "focused"  # Enhanced competition, fewer broadcasts
+    DIFFUSE = "diffuse"  # Relaxed competition, more broadcasts
     MAINTENANCE = "maintenance"  # Holding current content, minimal updates
 
 
 @dataclass
 class WorkspaceParams:
     """Parameters for the global workspace."""
+
     n_features: int = 64
     buffer_capacity: int = 7  # Miller's magical number (7 ± 2)
     ignition_threshold: float = 0.7
@@ -70,6 +72,7 @@ class WorkspaceParams:
 @dataclass
 class WorkspaceState:
     """Current state of the global workspace."""
+
     buffer: List[ModuleProposal]
     current_broadcast: Optional[ModuleProposal]
     ignition_active: bool
@@ -82,13 +85,13 @@ class WorkspaceState:
     def get_summary(self) -> Dict[str, Any]:
         """Get a summary of the workspace state."""
         return {
-            'buffer_size': len(self.buffer),
-            'buffer_capacity': 7,
-            'ignition_active': self.ignition_active,
-            'activation': self.activation_level,
-            'mode': self.mode.value,
-            'module_count': len(self.registered_modules),
-            'step_count': self.step_count,
+            "buffer_size": len(self.buffer),
+            "buffer_capacity": 7,
+            "ignition_active": self.ignition_active,
+            "activation": self.activation_level,
+            "mode": self.mode.value,
+            "module_count": len(self.registered_modules),
+            "step_count": self.step_count,
         }
 
 
@@ -128,16 +131,22 @@ class GlobalWorkspace:
         self.params = params or WorkspaceParams()
 
         # Core components
-        self.competition = AttentionCompetition(CompetitionParams(
-            n_features=self.params.n_features,
-            capacity=self.params.buffer_capacity,
-        ))
-        self.broadcast_system = BroadcastSystem(BroadcastParams(
-            broadcast_strength=self.params.broadcast_strength,
-        ))
-        self.ignition_detector = IgnitionDetector(IgnitionParams(
-            threshold=self.params.ignition_threshold,
-        ))
+        self.competition = AttentionCompetition(
+            CompetitionParams(
+                n_features=self.params.n_features,
+                capacity=self.params.buffer_capacity,
+            )
+        )
+        self.broadcast_system = BroadcastSystem(
+            BroadcastParams(
+                broadcast_strength=self.params.broadcast_strength,
+            )
+        )
+        self.ignition_detector = IgnitionDetector(
+            IgnitionParams(
+                threshold=self.params.ignition_threshold,
+            )
+        )
 
         # Registered modules
         self._modules: Dict[ModuleType, CognitiveModule] = {}
@@ -384,7 +393,9 @@ class GlobalWorkspace:
 
         return self.get_state()
 
-    def run_cycle(self, input_state: np.ndarray, dt: float = 0.1) -> Tuple[List[ModuleProposal], Optional[ModuleProposal]]:
+    def run_cycle(
+        self, input_state: np.ndarray, dt: float = 0.1
+    ) -> Tuple[List[ModuleProposal], Optional[ModuleProposal]]:
         """
         Run a complete workspace cycle.
 
@@ -455,11 +466,11 @@ class GlobalWorkspace:
         """Get human-readable buffer contents."""
         return [
             {
-                'source': p.source_module.name,
-                'type': p.content_type.value,
-                'activation': p.activation,
-                'confidence': p.confidence,
-                'priority': p.priority,
+                "source": p.source_module.name,
+                "type": p.content_type.value,
+                "activation": p.activation,
+                "confidence": p.confidence,
+                "priority": p.priority,
             }
             for p in self._buffer
         ]
@@ -467,11 +478,12 @@ class GlobalWorkspace:
     def get_statistics(self) -> Dict[str, Any]:
         """Get workspace statistics."""
         return {
-            'step_count': self._step_count,
-            'total_broadcasts': len(self._broadcast_history),
-            'ignition_rate': sum(1 for _, i in self._ignition_history if i) / max(1, len(self._ignition_history)),
-            'module_count': len(self._modules),
-            'buffer_utilization': len(self._buffer) / self.params.buffer_capacity,
-            'current_activation': self._activation_level,
-            'mode': self._mode.value,
+            "step_count": self._step_count,
+            "total_broadcasts": len(self._broadcast_history),
+            "ignition_rate": sum(1 for _, i in self._ignition_history if i)
+            / max(1, len(self._ignition_history)),
+            "module_count": len(self._modules),
+            "buffer_utilization": len(self._buffer) / self.params.buffer_capacity,
+            "current_activation": self._activation_level,
+            "mode": self._mode.value,
         }

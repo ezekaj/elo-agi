@@ -18,6 +18,7 @@ from .base_benchmark import Benchmark, BenchmarkConfig
 @dataclass
 class MemoryConfig(BenchmarkConfig):
     """Configuration for memory benchmarks."""
+
     sequence_length: int = 7  # Miller's magic number
     retention_delay: int = 5  # Steps between encoding and recall
     n_items: int = 10
@@ -66,12 +67,12 @@ class WorkingMemoryTest(MemoryBenchmark):
         for _ in range(self.memory_config.retention_delay):
             a = self._rng.integers(1, 10)
             b = self._rng.integers(1, 10)
-            distractors.append({'question': f"{a} + {b} = ?", 'answer': a + b})
+            distractors.append({"question": f"{a} + {b} = ?", "answer": a + b})
 
         trial_data = {
-            'sequence': sequence,
-            'distractors': distractors,
-            'delay': self.memory_config.retention_delay,
+            "sequence": sequence,
+            "distractors": distractors,
+            "delay": self.memory_config.retention_delay,
         }
 
         return trial_data, sequence
@@ -122,53 +123,53 @@ class EpisodicRecall(MemoryBenchmark):
     def generate_trial(self, trial_id: int) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """Generate an episodic recall trial."""
         # Create episodes (event + context)
-        locations = ['kitchen', 'office', 'garden', 'bedroom', 'garage']
-        objects = ['apple', 'book', 'key', 'phone', 'cup']
-        actions = ['found', 'placed', 'moved', 'saw', 'picked up']
+        locations = ["kitchen", "office", "garden", "bedroom", "garage"]
+        objects = ["apple", "book", "key", "phone", "cup"]
+        actions = ["found", "placed", "moved", "saw", "picked up"]
 
         n_episodes = self._rng.integers(3, 6)
         episodes = []
 
         for i in range(n_episodes):
             episode = {
-                'id': i,
-                'location': self._rng.choice(locations),
-                'object': self._rng.choice(objects),
-                'action': self._rng.choice(actions),
-                'time': i,
+                "id": i,
+                "location": self._rng.choice(locations),
+                "object": self._rng.choice(objects),
+                "action": self._rng.choice(actions),
+                "time": i,
             }
             episodes.append(episode)
 
         # Choose query type
-        query_type = self._rng.choice(['location', 'object', 'action'])
+        query_type = self._rng.choice(["location", "object", "action"])
 
         # Find target episode
         target_idx = self._rng.integers(0, len(episodes))
         target = episodes[target_idx]
 
-        if query_type == 'location':
+        if query_type == "location":
             query = f"What happened in the {target['location']}?"
             expected = {
-                'object': target['object'],
-                'action': target['action'],
+                "object": target["object"],
+                "action": target["action"],
             }
-        elif query_type == 'object':
+        elif query_type == "object":
             query = f"Where was the {target['object']}?"
             expected = {
-                'location': target['location'],
-                'action': target['action'],
+                "location": target["location"],
+                "action": target["action"],
             }
         else:
             query = f"What did you {target['action']}?"
             expected = {
-                'location': target['location'],
-                'object': target['object'],
+                "location": target["location"],
+                "object": target["object"],
             }
 
         trial_data = {
-            'episodes': episodes,
-            'query': query,
-            'query_type': query_type,
+            "episodes": episodes,
+            "query": query,
+            "query_type": query_type,
         }
 
         return trial_data, expected
@@ -215,29 +216,29 @@ class SequenceMemory(MemoryBenchmark):
     def generate_trial(self, trial_id: int) -> Tuple[Dict[str, Any], List[str]]:
         """Generate a sequence memory trial."""
         # Different sequence types
-        seq_type = self._rng.choice(['numeric', 'letter', 'pattern', 'mixed'])
+        seq_type = self._rng.choice(["numeric", "letter", "pattern", "mixed"])
 
         length = self._rng.integers(4, 9)
 
-        if seq_type == 'numeric':
+        if seq_type == "numeric":
             sequence = [str(self._rng.integers(0, 10)) for _ in range(length)]
-        elif seq_type == 'letter':
-            letters = 'ABCDEFGHIJ'
+        elif seq_type == "letter":
+            letters = "ABCDEFGHIJ"
             sequence = [self._rng.choice(list(letters)) for _ in range(length)]
-        elif seq_type == 'pattern':
+        elif seq_type == "pattern":
             # Repeating pattern
             pattern_len = self._rng.integers(2, 4)
             pattern = [str(self._rng.integers(0, 5)) for _ in range(pattern_len)]
             sequence = (pattern * ((length // pattern_len) + 1))[:length]
         else:
             # Mixed
-            chars = list('ABCD0123')
+            chars = list("ABCD0123")
             sequence = [self._rng.choice(chars) for _ in range(length)]
 
         trial_data = {
-            'sequence': sequence,
-            'type': seq_type,
-            'length': length,
+            "sequence": sequence,
+            "type": seq_type,
+            "length": length,
         }
 
         return trial_data, sequence
@@ -290,10 +291,16 @@ class AssociativeMemory(MemoryBenchmark):
         """Generate an associative memory trial."""
         # Word pairs to learn
         word_pairs = [
-            ('cat', 'dog'), ('sun', 'moon'), ('book', 'page'),
-            ('tree', 'leaf'), ('car', 'road'), ('pen', 'paper'),
-            ('fish', 'water'), ('bird', 'sky'), ('fire', 'smoke'),
-            ('door', 'key'),
+            ("cat", "dog"),
+            ("sun", "moon"),
+            ("book", "page"),
+            ("tree", "leaf"),
+            ("car", "road"),
+            ("pen", "paper"),
+            ("fish", "water"),
+            ("bird", "sky"),
+            ("fire", "smoke"),
+            ("door", "key"),
         ]
 
         n_pairs = self._rng.integers(3, 7)
@@ -313,8 +320,8 @@ class AssociativeMemory(MemoryBenchmark):
             expected = cue_word
 
         trial_data = {
-            'pairs': pairs,
-            'cue': cue,
+            "pairs": pairs,
+            "cue": cue,
         }
 
         return trial_data, expected
@@ -333,6 +340,7 @@ class AssociativeMemory(MemoryBenchmark):
 
             # Partial credit for close matches (edit distance)
             from difflib import SequenceMatcher
+
             ratio = SequenceMatcher(None, actual_str, expected_str).ratio()
 
             return ratio > 0.8, ratio

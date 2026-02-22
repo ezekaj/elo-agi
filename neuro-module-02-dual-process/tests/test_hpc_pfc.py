@@ -2,7 +2,13 @@
 
 import pytest
 import numpy as np
-from neuro.modules.m02_dual_process.hpc_pfc_complex import Hippocampus, PrefrontalCortex, HPCPFCComplex, Episode
+from neuro.modules.m02_dual_process.hpc_pfc_complex import (
+    Hippocampus,
+    PrefrontalCortex,
+    HPCPFCComplex,
+    Episode,
+)
+
 
 class TestHippocampus:
     """Tests for episodic encoding and cognitive maps"""
@@ -12,7 +18,7 @@ class TestHippocampus:
 
         episode = hpc.encode_episode(
             content="met friend at cafe",
-            context={"location": "cafe", "time": "afternoon", "emotion": "happy"}
+            context={"location": "cafe", "time": "afternoon", "emotion": "happy"},
         )
 
         assert episode.id is not None
@@ -37,10 +43,7 @@ class TestHippocampus:
         hpc.encode_episode("dinner", {"location": "restaurant", "meal": "dinner"})
 
         # Retrieve by context
-        results = hpc.retrieve_episode(
-            None,
-            context={"location": "restaurant"}
-        )
+        results = hpc.retrieve_episode(None, context={"location": "restaurant"})
 
         assert len(results) >= 1
 
@@ -49,11 +52,7 @@ class TestHippocampus:
         hpc = Hippocampus()
 
         # Single encoding
-        hpc.encode_episode(
-            "unique_event",
-            {"key": "unique_context"},
-            strength=1.0
-        )
+        hpc.encode_episode("unique_event", {"key": "unique_context"}, strength=1.0)
 
         # Should be retrievable immediately
         results = hpc.retrieve_episode("unique_event")
@@ -83,6 +82,7 @@ class TestHippocampus:
 
         assert e1.encoding_strength >= original_strength
 
+
 class TestPrefrontalCortex:
     """Tests for schema extraction and abstraction"""
 
@@ -91,9 +91,18 @@ class TestPrefrontalCortex:
 
         # Create similar episodes
         episodes = [
-            Episode("e1", "restaurant visit", {"type": "meal", "location": "restaurant", "food": "pizza"}, 0),
-            Episode("e2", "cafe visit", {"type": "meal", "location": "cafe", "food": "sandwich"}, 0),
-            Episode("e3", "diner visit", {"type": "meal", "location": "diner", "food": "burger"}, 0),
+            Episode(
+                "e1",
+                "restaurant visit",
+                {"type": "meal", "location": "restaurant", "food": "pizza"},
+                0,
+            ),
+            Episode(
+                "e2", "cafe visit", {"type": "meal", "location": "cafe", "food": "sandwich"}, 0
+            ),
+            Episode(
+                "e3", "diner visit", {"type": "meal", "location": "diner", "food": "burger"}, 0
+            ),
         ]
 
         schema = pfc.extract_schema(episodes)
@@ -109,11 +118,12 @@ class TestPrefrontalCortex:
 
         # Manually create a schema
         from neuro.modules.m02_dual_process.hpc_pfc_complex import Schema
+
         schema = Schema(
             id="test_schema",
             structure={"type": "greeting", "target": "<SLOT:target>"},
             slot_fillers={"target": ["friend", "colleague"]},
-            source_episodes=[]
+            source_episodes=[],
         )
         pfc.schemas[schema.id] = schema
 
@@ -127,12 +137,13 @@ class TestPrefrontalCortex:
         pfc = PrefrontalCortex()
 
         from neuro.modules.m02_dual_process.hpc_pfc_complex import Schema
+
         schema = Schema(
             id="meal_schema",
             structure={"type": "meal", "location": "<SLOT:location>"},
             slot_fillers={},
             source_episodes=[],
-            confidence=0.8
+            confidence=0.8,
         )
         pfc.schemas[schema.id] = schema
 
@@ -141,6 +152,7 @@ class TestPrefrontalCortex:
 
         assert result is not None
         assert result[0].id == "meal_schema"
+
 
 class TestHPCPFCComplex:
     """Tests for integrated HPC-PFC system"""
@@ -151,8 +163,7 @@ class TestHPCPFCComplex:
         # Encode multiple similar experiences
         for food in ["pizza", "pasta", "salad"]:
             complex.encode_and_abstract(
-                f"ate {food}",
-                {"type": "meal", "food": food, "location": "restaurant"}
+                f"ate {food}", {"type": "meal", "food": food, "location": "restaurant"}
             )
 
         # Should have extracted some schema
@@ -187,20 +198,22 @@ class TestHPCPFCComplex:
         if recent:
             assert recent[-1].encoding_strength >= 1.0
 
+
 class TestCompositionalThinking:
     """Tests specifically for compositional 'jump twice' capability"""
 
     def test_jump_twice_binding(self):
         """Core test: can we bind 'jump' with 'twice'?"""
-        from neuro.modules.m02_dual_process.system2.relational_reasoning import RelationalReasoning, RelationType
+        from neuro.modules.m02_dual_process.system2.relational_reasoning import (
+            RelationalReasoning,
+            RelationType,
+        )
 
         rr = RelationalReasoning()
 
         # Create concepts
-        jump = rr.create_element("jump", type_tag="action",
-                                  features={"repeatable": True})
-        twice = rr.create_element(2, type_tag="modifier",
-                                   features={"modifier_type": "repetition"})
+        jump = rr.create_element("jump", type_tag="action", features={"repeatable": True})
+        twice = rr.create_element(2, type_tag="modifier", features={"modifier_type": "repetition"})
 
         # Bind them
         jump_twice = rr.bind_modifier(jump, twice)
@@ -214,14 +227,12 @@ class TestCompositionalThinking:
         """Test that novel combinations can be encoded"""
         complex = HPCPFCComplex()
 
-        result = complex.compose_novel(
-            concepts=["jump", 2],
-            relation="repeat"
-        )
+        result = complex.compose_novel(concepts=["jump", 2], relation="repeat")
 
         # Should be marked as novel
         assert result["novel"] is True
         assert result["components"] == ["jump", 2]
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -12,6 +12,7 @@ from neuro.modules.planning.subgoal_discovery import (
     SubgoalDiscovery,
 )
 
+
 class TestTrajectory:
     """Tests for Trajectory class."""
 
@@ -37,6 +38,7 @@ class TestTrajectory:
 
         returns_discounted = traj.get_returns(discount=0.5)
         assert returns_discounted[0] == pytest.approx(1 + 0.5 + 0.25)
+
 
 class TestSubgoal:
     """Tests for Subgoal class."""
@@ -69,6 +71,7 @@ class TestSubgoal:
         subgoal.update_statistics(visited=True, reached_goal=True)
         assert subgoal.frequency == 1
         assert subgoal.utility > 0
+
 
 class TestBottleneckDetector:
     """Tests for BottleneckDetector class."""
@@ -145,6 +148,7 @@ class TestBottleneckDetector:
         stats = detector.statistics()
         assert stats["success_states"] > 0
 
+
 class TestOptionTerminationDetector:
     """Tests for OptionTerminationDetector class."""
 
@@ -203,6 +207,7 @@ class TestOptionTerminationDetector:
 
         terminations = detector.identify_option_terminations(trajectories)
         assert isinstance(terminations, list)
+
 
 class TestSubgoalDiscovery:
     """Tests for SubgoalDiscovery class."""
@@ -364,6 +369,7 @@ class TestSubgoalDiscovery:
         assert "total_subgoals" in stats
         assert "trajectories_processed" in stats
         assert stats["trajectories_processed"] == 10
+
 
 class TestMultipleMethodDiscovery:
     """Tests for combining multiple discovery methods."""

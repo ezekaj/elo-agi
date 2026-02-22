@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 try:
     import aiohttp
+
     AIOHTTP_AVAILABLE = True
 except ImportError:
     AIOHTTP_AVAILABLE = False
@@ -21,6 +22,7 @@ except ImportError:
 @dataclass
 class StreamConfig:
     """Configuration for streaming."""
+
     base_url: str = "http://localhost:11434"
     model: str = "ministral-3:8b"
     timeout: int = 120
@@ -31,6 +33,7 @@ class StreamConfig:
 @dataclass
 class StreamChunk:
     """A single chunk from the stream."""
+
     content: str
     done: bool = False
     model: str = ""
@@ -99,7 +102,7 @@ class StreamHandler:
             "stream": True,
             "options": {
                 "temperature": self.config.temperature,
-            }
+            },
         }
 
         if self.config.max_tokens:
@@ -109,10 +112,7 @@ class StreamHandler:
             async with session.post(url, json=payload) as response:
                 if response.status != 200:
                     error_text = await response.text()
-                    yield StreamChunk(
-                        content=f"Error: {response.status} - {error_text}",
-                        done=True
-                    )
+                    yield StreamChunk(content=f"Error: {response.status} - {error_text}", done=True)
                     return
 
                 full_response = ""
@@ -121,7 +121,7 @@ class StreamHandler:
                         continue
 
                     try:
-                        data = json.loads(line.decode('utf-8'))
+                        data = json.loads(line.decode("utf-8"))
                     except json.JSONDecodeError:
                         continue
 
@@ -146,12 +146,14 @@ class StreamHandler:
 
                     if done:
                         if on_done:
-                            on_done({
-                                "full_response": full_response,
-                                "model": chunk.model,
-                                "total_duration": chunk.total_duration,
-                                "eval_count": chunk.eval_count,
-                            })
+                            on_done(
+                                {
+                                    "full_response": full_response,
+                                    "model": chunk.model,
+                                    "total_duration": chunk.total_duration,
+                                    "eval_count": chunk.eval_count,
+                                }
+                            )
                         break
 
         except aiohttp.ClientError as e:
@@ -160,8 +162,7 @@ class StreamHandler:
             yield StreamChunk(content="Request timed out", done=True)
 
     async def _sync_fallback(
-        self,
-        messages: List[Dict[str, str]]
+        self, messages: List[Dict[str, str]]
     ) -> AsyncGenerator[StreamChunk, None]:
         """Sync fallback using requests (yields chunks from full response)."""
         import requests
@@ -187,10 +188,7 @@ class StreamHandler:
                         model=data.get("model", ""),
                     )
             else:
-                yield StreamChunk(
-                    content=f"Error: {response.status_code}",
-                    done=True
-                )
+                yield StreamChunk(content=f"Error: {response.status_code}", done=True)
         except Exception as e:
             yield StreamChunk(content=f"Error: {e}", done=True)
 
@@ -255,6 +253,7 @@ class TerminalStreamer:
     def on_start(self, phase: str = "Thinking"):
         """Called when streaming starts."""
         import time
+
         self.start_time = time.time()
         self.token_count = 0
         if self.show_thinking:
@@ -268,11 +267,14 @@ class TerminalStreamer:
     def on_done(self, stats: Dict[str, Any]):
         """Called when streaming completes."""
         import time
+
         duration = time.time() - self.start_time if self.start_time else 0
         print()  # New line after response
         if self.show_thinking:
             tokens_per_sec = self.token_count / max(0.1, duration)
-            print(f"  {self.DIM}[{self.token_count} tokens, {tokens_per_sec:.1f} tok/s]{self.RESET}")
+            print(
+                f"  {self.DIM}[{self.token_count} tokens, {tokens_per_sec:.1f} tok/s]{self.RESET}"
+            )
 
     async def stream_to_terminal(
         self,
@@ -292,6 +294,7 @@ class TerminalStreamer:
 
 
 # Convenience functions for simple usage
+
 
 async def stream_chat(
     query: str,
@@ -363,10 +366,7 @@ if __name__ == "__main__":
         print("\nTest 1: Basic streaming")
         print("-" * 40)
 
-        response = await stream_chat(
-            "What is 2 + 2? Answer in one sentence.",
-            print_tokens=True
-        )
+        response = await stream_chat("What is 2 + 2? Answer in one sentence.", print_tokens=True)
 
         print(f"\nFull response: {response}")
 
@@ -380,7 +380,10 @@ if __name__ == "__main__":
         streamer = TerminalStreamer(show_thinking=True)
 
         messages = [
-            {"role": "system", "content": "You are NEURO, a neuroscience-inspired AI. Be helpful and direct."},
+            {
+                "role": "system",
+                "content": "You are NEURO, a neuroscience-inspired AI. Be helpful and direct.",
+            },
             {"role": "user", "content": "Explain recursion briefly."},
         ]
 

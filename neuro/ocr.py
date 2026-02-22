@@ -24,6 +24,7 @@ from datetime import datetime
 @dataclass
 class OCRResult:
     """Result from OCR processing."""
+
     text: str
     source: str
     confidence: float = 0.0
@@ -41,10 +42,12 @@ class DeepSeekOCR:
     Uses deepseek-ocr:latest via Ollama.
     """
 
-    def __init__(self,
-                 model: str = "deepseek-ocr:latest",
-                 base_url: str = "http://localhost:11434",
-                 timeout: int = 60):
+    def __init__(
+        self,
+        model: str = "deepseek-ocr:latest",
+        base_url: str = "http://localhost:11434",
+        timeout: int = 60,
+    ):
         self.model = model
         self.base_url = base_url
         self.timeout = timeout
@@ -57,8 +60,8 @@ class DeepSeekOCR:
             return None
 
         try:
-            with open(path, 'rb') as f:
-                return base64.b64encode(f.read()).decode('utf-8')
+            with open(path, "rb") as f:
+                return base64.b64encode(f.read()).decode("utf-8")
         except Exception:
             return None
 
@@ -74,13 +77,13 @@ class DeepSeekOCR:
                     "stream": False,
                     "options": {
                         "temperature": 0.1,  # Low temp for accuracy
-                    }
+                    },
                 },
-                timeout=self.timeout
+                timeout=self.timeout,
             )
 
             if response.status_code == 200:
-                return response.json().get('response', '')
+                return response.json().get("response", "")
             return None
         except Exception as e:
             print(f"[OCR] Ollama error: {e}")
@@ -103,7 +106,7 @@ class DeepSeekOCR:
                 text="",
                 source=image_path,
                 confidence=0.0,
-                metadata={"error": "Could not read image"}
+                metadata={"error": "Could not read image"},
             )
 
         if prompt is None:
@@ -120,27 +123,19 @@ Return the text exactly as it appears, preserving structure where possible."""
         result = self._call_ollama(prompt, image_b64)
 
         if result:
-            self.history.append({
-                'path': image_path,
-                'time': datetime.now().isoformat(),
-                'text_length': len(result)
-            })
+            self.history.append(
+                {"path": image_path, "time": datetime.now().isoformat(), "text_length": len(result)}
+            )
 
             return OCRResult(
                 text=result,
                 source=image_path,
                 confidence=0.9,
-                metadata={
-                    'model': self.model,
-                    'prompt': prompt[:100]
-                }
+                metadata={"model": self.model, "prompt": prompt[:100]},
             )
 
         return OCRResult(
-            text="",
-            source=image_path,
-            confidence=0.0,
-            metadata={"error": "OCR failed"}
+            text="", source=image_path, confidence=0.0, metadata={"error": "OCR failed"}
         )
 
     def analyze_image(self, image_path: str, question: str) -> OCRResult:
@@ -170,7 +165,7 @@ Provide a detailed, accurate answer based on what you see in the image."""
             text=result or "",
             source=image_path,
             confidence=0.85 if result else 0.0,
-            metadata={'question': question}
+            metadata={"question": question},
         )
 
     def extract_code(self, image_path: str) -> OCRResult:
@@ -190,7 +185,7 @@ Preserve the exact syntax and structure."""
             text=result or "",
             source=image_path,
             confidence=0.9 if result else 0.0,
-            metadata={'type': 'code'}
+            metadata={"type": "code"},
         )
 
     def extract_diagram(self, image_path: str) -> OCRResult:
@@ -213,7 +208,7 @@ Provide a structured description."""
             text=result or "",
             source=image_path,
             confidence=0.85 if result else 0.0,
-            metadata={'type': 'diagram'}
+            metadata={"type": "diagram"},
         )
 
     def extract_for_learning(self, image_path: str) -> Dict[str, Any]:
@@ -224,7 +219,7 @@ Provide a structured description."""
         """
         image_b64 = self._encode_image(image_path)
         if not image_b64:
-            return {'error': 'Could not read image'}
+            return {"error": "Could not read image"}
 
         prompt = """Analyze this image and extract knowledge in JSON format:
 
@@ -247,24 +242,20 @@ Return ONLY valid JSON."""
             try:
                 # Clean up response
                 result = result.strip()
-                if result.startswith('```'):
-                    result = result.split('```')[1]
-                    if result.startswith('json'):
+                if result.startswith("```"):
+                    result = result.split("```")[1]
+                    if result.startswith("json"):
                         result = result[4:]
 
                 data = json.loads(result)
-                data['source'] = image_path
-                data['extracted_at'] = datetime.now().isoformat()
+                data["source"] = image_path
+                data["extracted_at"] = datetime.now().isoformat()
                 return data
             except json.JSONDecodeError:
                 # Return as plain text
-                return {
-                    'type': 'text',
-                    'content': result,
-                    'source': image_path
-                }
+                return {"type": "text", "content": result, "source": image_path}
 
-        return {'error': 'OCR extraction failed'}
+        return {"error": "OCR extraction failed"}
 
     def batch_process(self, image_paths: List[str]) -> List[OCRResult]:
         """Process multiple images."""
@@ -277,13 +268,10 @@ Return ONLY valid JSON."""
     def is_available(self) -> bool:
         """Check if DeepSeek OCR is available."""
         try:
-            response = requests.get(
-                f"{self.base_url}/api/tags",
-                timeout=5
-            )
+            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
             if response.status_code == 200:
-                models = response.json().get('models', [])
-                return any(self.model in m.get('name', '') for m in models)
+                models = response.json().get("models", [])
+                return any(self.model in m.get("name", "") for m in models)
             return False
         except Exception:
             return False
@@ -291,9 +279,9 @@ Return ONLY valid JSON."""
     def get_stats(self) -> Dict:
         """Get OCR statistics."""
         return {
-            'model': self.model,
-            'images_processed': len(self.history),
-            'available': self.is_available()
+            "model": self.model,
+            "images_processed": len(self.history),
+            "available": self.is_available(),
         }
 
 
@@ -322,6 +310,7 @@ if __name__ == "__main__":
 
     # Test with a sample image if provided
     import sys
+
     if len(sys.argv) > 1:
         image_path = sys.argv[1]
         print(f"\nProcessing: {image_path}")

@@ -15,9 +15,9 @@ from typing import List, Dict, Any, Tuple
 
 def demo_continual_learning():
     """Run the continual learning demonstration."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCENARIO: Continual Learning")
-    print("="*60)
+    print("=" * 60)
     print("\nDemonstrating catastrophic forgetting prevention")
     print("across 3 sequential learning tasks.")
 
@@ -42,9 +42,9 @@ def demo_continual_learning():
 
     np.random.seed(42)
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Setup: Initializing Continual Learning System")
-    print("-"*60)
+    print("-" * 60)
 
     # Initialize forgetting prevention
     config = ForgettingPreventionConfig(
@@ -96,9 +96,9 @@ def demo_continual_learning():
         },
     ]
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Learning Phase: Sequential Task Learning")
-    print("-"*60)
+    print("-" * 60)
 
     # Simulate neural network parameters
     param_dim = 256
@@ -113,7 +113,7 @@ def demo_continual_learning():
     initial_performance: Dict[str, float] = {}
 
     for task_idx, task in enumerate(tasks):
-        print(f"\n2.{task_idx+1} Learning {task['name']}...")
+        print(f"\n2.{task_idx + 1} Learning {task['name']}...")
 
         # Generate task data
         X = np.random.randn(task["n_samples"], task["n_features"])
@@ -134,19 +134,14 @@ def demo_continual_learning():
 
         # Compute Fisher information for previous parameters
         if task_idx > 0:
-            fisher_info = forgetting_prevention.compute_fisher_information(
-                params, samples
-            )
+            fisher_info = forgetting_prevention.compute_fisher_information(params, samples)
             print(f"      Computed Fisher information for {len(fisher_info)} layers")
 
         # Simulate learning (update parameters)
         learning_rate = 0.1
         for epoch in range(10):
             # Compute gradients (simulated)
-            gradients = {
-                name: np.random.randn(*p.shape) * 0.01
-                for name, p in params.items()
-            }
+            gradients = {name: np.random.randn(*p.shape) * 0.01 for name, p in params.items()}
 
             # Apply combined loss penalty if not first task
             if task_idx > 0:
@@ -172,7 +167,7 @@ def demo_continual_learning():
                 state=X[i],
                 action=int(y[i]),
                 reward=1.0,
-                next_state=X[(i+1) % len(X)],
+                next_state=X[(i + 1) % len(X)],
                 done=False,
                 task_id=task["name"],
             )
@@ -193,9 +188,9 @@ def demo_continual_learning():
             task_performance[prev_task["name"]].append(prev_acc)
             print(f"      {prev_task['name']} accuracy: {prev_acc:.1%}")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Evaluation Phase: Measuring Forgetting")
-    print("-"*60)
+    print("-" * 60)
 
     print("\n3. Final performance on all tasks:")
 
@@ -216,9 +211,9 @@ def demo_continual_learning():
     avg_forgetting = np.mean(forgetting_rates)
     max_forgetting = np.max(forgetting_rates)
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Analysis: Replay Buffer Statistics")
-    print("-"*60)
+    print("-" * 60)
 
     replay_stats = replay.statistics()
     print(f"\n4. Experience replay buffer:")
@@ -226,7 +221,7 @@ def demo_continual_learning():
     print(f"      Buffer capacity: {replay_stats['max_size']}")
 
     # Sample from replay buffer
-    if replay_stats['buffer_size'] > 0:
+    if replay_stats["buffer_size"] > 0:
         batch = replay.sample_batch(batch_size=32)
         print(f"      Sampled batch size: {len(batch)}")
         task_dist = {}
@@ -235,18 +230,18 @@ def demo_continual_learning():
             task_dist[tid] = task_dist.get(tid, 0) + 1
         print(f"      Task distribution in batch: {task_dist}")
 
-    print("\n" + "-"*60)
+    print("\n" + "-" * 60)
     print("Analysis: Task Inference Statistics")
-    print("-"*60)
+    print("-" * 60)
 
     inference_stats = task_inference.statistics()
     print(f"\n5. Task inference system:")
     print(f"      Registered tasks: {inference_stats['total_tasks']}")
     print(f"      Task changes detected: {inference_stats['task_changes']}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Continual Learning Demo Summary")
-    print("="*60)
+    print("=" * 60)
 
     success = avg_forgetting < 10.0 and max_forgetting < 15.0
 
@@ -268,11 +263,11 @@ def demo_continual_learning():
         "max_forgetting_pct": round(max_forgetting, 2),
         "target_forgetting_pct": 10.0,
         "success": success,
-        "replay_buffer_size": replay_stats['buffer_size'],
+        "replay_buffer_size": replay_stats["buffer_size"],
     }
 
     print(f"\n   Statistics: {stats}")
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     return stats
 

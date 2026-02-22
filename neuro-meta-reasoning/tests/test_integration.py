@@ -12,6 +12,7 @@ from neuro.modules.meta_reasoning.problem_classifier import ProblemType
 from neuro.modules.meta_reasoning.style_selector import ReasoningStyle
 from neuro.modules.meta_reasoning.fallacy_detector import ReasoningStep
 
+
 class TestMetaReasoningConfig:
     """Tests for MetaReasoningConfig class."""
 
@@ -29,6 +30,7 @@ class TestMetaReasoningConfig:
         )
         assert config.embedding_dim == 64
         assert config.time_limit_seconds == 30.0
+
 
 class TestMetaReasoningController:
     """Tests for MetaReasoningController class."""
@@ -244,6 +246,7 @@ class TestMetaReasoningController:
         assert "style_selector" in stats
         assert "orchestrator" in stats
         assert "fallacy_detector" in stats
+
 
 class TestEndToEndMetaReasoning:
     """End-to-end tests for meta-reasoning."""

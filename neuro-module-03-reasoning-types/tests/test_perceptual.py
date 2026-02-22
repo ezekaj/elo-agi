@@ -3,14 +3,21 @@
 import pytest
 import numpy as np
 from neuro.modules.m03_reasoning_types.perceptual.visual_features import (
-    VisualFeatureExtractor, FeatureMap, Feature, FeatureType
+    VisualFeatureExtractor,
+    FeatureMap,
+    Feature,
+    FeatureType,
 )
 from neuro.modules.m03_reasoning_types.perceptual.multimodal_integration import (
-    MultimodalIntegrator, SensoryInput, Modality
+    MultimodalIntegrator,
+    SensoryInput,
+    Modality,
 )
 from neuro.modules.m03_reasoning_types.perceptual.object_recognition import (
-    ObjectRecognizer, CategoryLevel
+    ObjectRecognizer,
+    CategoryLevel,
 )
+
 
 class TestVisualFeatures:
     def test_edge_detection(self):
@@ -35,7 +42,7 @@ class TestVisualFeatures:
 
         assert len(textures) > 0
         assert all(t.feature_type == FeatureType.TEXTURE for t in textures)
-        assert all('variance' in t.properties for t in textures)
+        assert all("variance" in t.properties for t in textures)
 
     def test_feature_map_query(self):
         """Test feature map region queries"""
@@ -43,9 +50,7 @@ class TestVisualFeatures:
 
         for i in range(10):
             feature = Feature(
-                feature_type=FeatureType.EDGE,
-                location=(i * 10, i * 10),
-                magnitude=1.0
+                feature_type=FeatureType.EDGE, location=(i * 10, i * 10), magnitude=1.0
             )
             feature_map.add_feature(feature)
 
@@ -67,6 +72,7 @@ class TestVisualFeatures:
 
         assert len(motion) >= 0
 
+
 class TestMultimodalIntegration:
     def test_visual_audio_binding(self):
         """Test binding visual and auditory inputs"""
@@ -76,14 +82,14 @@ class TestMultimodalIntegration:
             modality=Modality.VISUAL,
             timestamp=0.0,
             location=(1.0, 1.0, 0.0),
-            features={'color': 'red'}
+            features={"color": "red"},
         )
 
         audio = SensoryInput(
             modality=Modality.AUDITORY,
             timestamp=0.01,
             location=(1.1, 1.0, 0.0),
-            features={'frequency': 440}
+            features={"frequency": 440},
         )
 
         percept = integrator.bind_visual_audio(visual, audio)
@@ -99,17 +105,11 @@ class TestMultimodalIntegration:
 
         inputs = {
             Modality.VISUAL: SensoryInput(
-                modality=Modality.VISUAL,
-                timestamp=0.0,
-                location=(1.0, 0.0, 0.0),
-                confidence=0.9
+                modality=Modality.VISUAL, timestamp=0.0, location=(1.0, 0.0, 0.0), confidence=0.9
             ),
             Modality.AUDITORY: SensoryInput(
-                modality=Modality.AUDITORY,
-                timestamp=0.0,
-                location=(2.0, 0.0, 0.0),
-                confidence=0.6
-            )
+                modality=Modality.AUDITORY, timestamp=0.0, location=(2.0, 0.0, 0.0), confidence=0.6
+            ),
         }
 
         location, status = integrator.resolve_conflict(inputs)
@@ -127,14 +127,14 @@ class TestMultimodalIntegration:
                 modality=Modality.VISUAL,
                 timestamp=0.0,
                 location=(1.0, 1.0, 1.0),
-                features={'shape': 'round'}
+                features={"shape": "round"},
             ),
             Modality.TACTILE: SensoryInput(
                 modality=Modality.TACTILE,
                 timestamp=0.0,
                 location=(1.0, 1.0, 1.0),
-                features={'texture': 'smooth'}
-            )
+                features={"texture": "smooth"},
+            ),
         }
 
         percept = integrator.create_unified_percept(inputs)
@@ -142,43 +142,43 @@ class TestMultimodalIntegration:
         assert percept is not None
         assert len(percept.modalities) == 2
 
+
 class TestObjectRecognition:
     def test_category_learning(self):
         """Test learning a new category from examples"""
         recognizer = ObjectRecognizer()
 
         examples = [
-            {'color': 'red', 'shape': 'round', 'size': 0.5},
-            {'color': 'red', 'shape': 'round', 'size': 0.6},
-            {'color': 'red', 'shape': 'round', 'size': 0.4}
+            {"color": "red", "shape": "round", "size": 0.5},
+            {"color": "red", "shape": "round", "size": 0.6},
+            {"color": "red", "shape": "round", "size": 0.4},
         ]
 
-        recognizer.learn_category('apple', examples, CategoryLevel.BASIC)
+        recognizer.learn_category("apple", examples, CategoryLevel.BASIC)
 
-        assert 'apple' in recognizer.categories
-        assert recognizer.categories['apple'].n_observations == 3
+        assert "apple" in recognizer.categories
+        assert recognizer.categories["apple"].n_observations == 3
 
     def test_recognition(self):
         """Test recognizing an object"""
         recognizer = ObjectRecognizer(recognition_threshold=0.3)
 
-        recognizer.learn_category('ball', [
-            {'roundness': 0.9, 'size': 0.5},
-            {'roundness': 0.95, 'size': 0.4}
-        ])
+        recognizer.learn_category(
+            "ball", [{"roundness": 0.9, "size": 0.5}, {"roundness": 0.95, "size": 0.4}]
+        )
 
-        result = recognizer.recognize({'roundness': 0.92, 'size': 0.45})
+        result = recognizer.recognize({"roundness": 0.92, "size": 0.45})
 
         if result:
-            assert result.category_id == 'ball'
+            assert result.category_id == "ball"
             assert result.confidence > 0
 
     def test_invariant_recognition(self):
         """Test scale-invariant recognition"""
         recognizer = ObjectRecognizer(use_invariance=True)
 
-        features_small = {'width': 10, 'height': 10, 'aspect_ratio': 1.0}
-        features_large = {'width': 100, 'height': 100, 'aspect_ratio': 1.0}
+        features_small = {"width": 10, "height": 10, "aspect_ratio": 1.0}
+        features_large = {"width": 100, "height": 100, "aspect_ratio": 1.0}
 
         normalized_small = recognizer.invariant_processor.scale_invariance(
             features_small, reference_size=50
@@ -187,7 +187,8 @@ class TestObjectRecognition:
             features_large, reference_size=50
         )
 
-        assert normalized_small['width'] != features_small['width']
+        assert normalized_small["width"] != features_small["width"]
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

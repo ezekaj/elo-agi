@@ -16,13 +16,19 @@ from pathlib import Path
 from neuro.modules.system.config import SystemConfig, ModuleConfig, DEFAULT_CONFIG
 from neuro.modules.system.module_loader import ModuleLoader, ModuleStatus, ModuleStub
 from neuro.modules.system.sensory_interface import SensoryInterface, SensoryInput, InputType
-from neuro.modules.system.motor_interface import MotorInterface, MotorOutput, OutputType, ActionCategory
+from neuro.modules.system.motor_interface import (
+    MotorInterface,
+    MotorOutput,
+    OutputType,
+    ActionCategory,
+)
 from neuro.modules.system.active_inference import ActiveInferenceController, Policy, EFEResult
 from neuro.modules.system.cognitive_core import CognitiveCore, CognitiveState, CycleResult
 
 # =============================================================================
 # Unit Tests: Config
 # =============================================================================
+
 
 class TestConfig:
     """Tests for SystemConfig."""
@@ -57,9 +63,11 @@ class TestConfig:
         config.enable_module("05")
         assert config.module_configs["05"].enabled
 
+
 # =============================================================================
 # Unit Tests: Module Loader
 # =============================================================================
+
 
 class TestModuleLoader:
     """Tests for ModuleLoader."""
@@ -82,8 +90,8 @@ class TestModuleLoader:
         """Test getting loader statistics."""
         loader = ModuleLoader()
         stats = loader.get_statistics()
-        assert 'total_modules' in stats
-        assert 'loaded' in stats
+        assert "total_modules" in stats
+        assert "loaded" in stats
 
     def test_module_stub(self):
         """Test module stub functionality."""
@@ -92,9 +100,11 @@ class TestModuleLoader:
         stub.receive_broadcast()  # Should not raise
         stub.process()  # Should not raise
 
+
 # =============================================================================
 # Unit Tests: Sensory Interface
 # =============================================================================
+
 
 class TestSensoryInterface:
     """Tests for SensoryInterface."""
@@ -158,9 +168,11 @@ class TestSensoryInterface:
         combined = interface.get_combined_input(3)
         assert len(combined) == interface.config.input_dim
 
+
 # =============================================================================
 # Unit Tests: Motor Interface
 # =============================================================================
+
 
 class TestMotorInterface:
     """Tests for MotorInterface."""
@@ -210,9 +222,11 @@ class TestMotorInterface:
         selected = interface.select_action()
         assert selected is not None
 
+
 # =============================================================================
 # Unit Tests: Active Inference Controller
 # =============================================================================
+
 
 class TestActiveInference:
     """Tests for ActiveInferenceController."""
@@ -272,9 +286,11 @@ class TestActiveInference:
         assert isinstance(action, np.ndarray)
         assert len(action) == controller.config.output_dim
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for the full system."""
@@ -345,9 +361,11 @@ class TestIntegration:
         for r in results:
             assert isinstance(r, CycleResult)
 
+
 # =============================================================================
 # Stress Tests
 # =============================================================================
+
 
 class TestStress:
     """Stress tests for system stability."""
@@ -383,7 +401,7 @@ class TestStress:
 
         # Should handle without errors
         stats = core.get_statistics()
-        assert stats['error_count'] == 0
+        assert stats["error_count"] == 0
 
     def test_reset_stability(self):
         """Test system stability after reset."""
@@ -407,9 +425,11 @@ class TestStress:
 
         assert core.state.cycle_count == 10
 
+
 # =============================================================================
 # Additional Tests
 # =============================================================================
+
 
 class TestCognitiveCore:
     """Additional tests for CognitiveCore."""
@@ -426,7 +446,7 @@ class TestCognitiveCore:
         stats = core.initialize()
 
         assert core._initialized
-        assert 'total_modules' in stats
+        assert "total_modules" in stats
 
     def test_get_state(self):
         """Test getting cognitive state."""
@@ -445,12 +465,12 @@ class TestCognitiveCore:
 
         stats = core.get_statistics()
 
-        assert 'initialized' in stats
-        assert 'cycle_count' in stats
-        assert 'loader' in stats
-        assert 'sensory' in stats
-        assert 'motor' in stats
-        assert 'controller' in stats
+        assert "initialized" in stats
+        assert "cycle_count" in stats
+        assert "loader" in stats
+        assert "sensory" in stats
+        assert "motor" in stats
+        assert "controller" in stats
 
     def test_shutdown(self):
         """Test system shutdown."""
@@ -461,6 +481,7 @@ class TestCognitiveCore:
 
         assert not core._initialized
         assert len(core._modules) == 0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

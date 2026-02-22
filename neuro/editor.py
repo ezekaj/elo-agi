@@ -25,6 +25,7 @@ try:
     from rich.table import Table
     from rich.prompt import Confirm
     from rich.text import Text
+
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -33,8 +34,9 @@ except ImportError:
 @dataclass
 class Edit:
     """A single edit operation."""
+
     line_start: int  # 1-indexed
-    line_end: int    # 1-indexed, inclusive
+    line_end: int  # 1-indexed, inclusive
     new_content: str
     description: str = ""
 
@@ -42,6 +44,7 @@ class Edit:
 @dataclass
 class EditResult:
     """Result of an edit operation."""
+
     success: bool
     file_path: str
     diff: str
@@ -53,6 +56,7 @@ class EditResult:
 @dataclass
 class FileState:
     """State of a file before/after editing."""
+
     path: str
     content: str
     lines: List[str] = field(default_factory=list)
@@ -92,7 +96,7 @@ class CodeEditor:
         if not os.path.exists(path):
             return FileState(path=path, content="", exists=False)
 
-        with open(path, 'r', encoding='utf-8', errors='replace') as f:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
 
         return FileState(path=path, content=content, exists=True)
@@ -102,12 +106,12 @@ class CodeEditor:
         path = os.path.expanduser(path)
 
         # Create parent directories if needed
-        os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
 
         # Write to temp file first, then rename (atomic on most systems)
-        fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(path) or '.')
+        fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(path) or ".")
         try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write(content)
             shutil.move(temp_path, path)
             return True
@@ -143,8 +147,8 @@ class CodeEditor:
         lines = content.splitlines(keepends=True)
 
         # Ensure last line has newline
-        if lines and not lines[-1].endswith('\n'):
-            lines[-1] += '\n'
+        if lines and not lines[-1].endswith("\n"):
+            lines[-1] += "\n"
 
         # Sort edits by line number (descending) to apply from bottom up
         # This prevents line number shifts from affecting later edits
@@ -156,33 +160,24 @@ class CodeEditor:
 
             # Prepare new content
             new_lines = edit.new_content.splitlines(keepends=True)
-            if new_lines and not new_lines[-1].endswith('\n'):
-                new_lines[-1] += '\n'
+            if new_lines and not new_lines[-1].endswith("\n"):
+                new_lines[-1] += "\n"
 
             # Replace lines
             lines[start:end] = new_lines
 
-        return ''.join(lines)
+        return "".join(lines)
 
-    def generate_diff(
-        self,
-        old_content: str,
-        new_content: str,
-        filename: str = "file"
-    ) -> str:
+    def generate_diff(self, old_content: str, new_content: str, filename: str = "file") -> str:
         """Generate unified diff."""
         old_lines = old_content.splitlines(keepends=True)
         new_lines = new_content.splitlines(keepends=True)
 
         diff = difflib.unified_diff(
-            old_lines,
-            new_lines,
-            fromfile=f"a/{filename}",
-            tofile=f"b/{filename}",
-            lineterm=""
+            old_lines, new_lines, fromfile=f"a/{filename}", tofile=f"b/{filename}", lineterm=""
         )
 
-        return ''.join(diff)
+        return "".join(diff)
 
     def display_diff(self, diff: str, filename: str = ""):
         """Display diff with colors."""
@@ -193,25 +188,25 @@ class CodeEditor:
 
     def _display_diff_rich(self, diff: str, filename: str):
         """Display diff using rich."""
-        lines = diff.split('\n')
+        lines = diff.split("\n")
         text = Text()
 
         for line in lines:
-            if line.startswith('+++') or line.startswith('---'):
-                text.append(line + '\n', style="bold")
-            elif line.startswith('@@'):
-                text.append(line + '\n', style="cyan")
-            elif line.startswith('+'):
-                text.append(line + '\n', style="green")
-            elif line.startswith('-'):
-                text.append(line + '\n', style="red")
+            if line.startswith("+++") or line.startswith("---"):
+                text.append(line + "\n", style="bold")
+            elif line.startswith("@@"):
+                text.append(line + "\n", style="cyan")
+            elif line.startswith("+"):
+                text.append(line + "\n", style="green")
+            elif line.startswith("-"):
+                text.append(line + "\n", style="red")
             else:
-                text.append(line + '\n', style="dim")
+                text.append(line + "\n", style="dim")
 
         panel = Panel(
             text,
             title=f"[bold]Changes to {filename}[/bold]" if filename else "[bold]Diff[/bold]",
-            border_style="blue"
+            border_style="blue",
         )
         self.console.print(panel)
 
@@ -227,14 +222,14 @@ class CodeEditor:
         print(f"{BOLD}DIFF{RESET}")
         print("=" * 60)
 
-        for line in diff.split('\n'):
-            if line.startswith('+++') or line.startswith('---'):
+        for line in diff.split("\n"):
+            if line.startswith("+++") or line.startswith("---"):
                 print(f"{BOLD}{line}{RESET}")
-            elif line.startswith('@@'):
+            elif line.startswith("@@"):
                 print(f"{CYAN}{line}{RESET}")
-            elif line.startswith('+'):
+            elif line.startswith("+"):
                 print(f"{GREEN}{line}{RESET}")
-            elif line.startswith('-'):
+            elif line.startswith("-"):
                 print(f"{RED}{line}{RESET}")
             else:
                 print(line)
@@ -252,14 +247,9 @@ class CodeEditor:
             return Confirm.ask("[bold]Apply these changes?[/bold]", default=True)
         else:
             response = input("Apply these changes? [Y/n]: ").strip().lower()
-            return response in ('', 'y', 'yes')
+            return response in ("", "y", "yes")
 
-    def edit(
-        self,
-        file_path: str,
-        edits: List[Edit],
-        confirm: bool = True
-    ) -> EditResult:
+    def edit(self, file_path: str, edits: List[Edit], confirm: bool = True) -> EditResult:
         """
         Apply edits to a file with optional confirmation.
 
@@ -282,7 +272,7 @@ class CodeEditor:
                 file_path=file_path,
                 diff="",
                 lines_changed=0,
-                error=f"File not found: {file_path}"
+                error=f"File not found: {file_path}",
             )
 
         # Apply edits
@@ -297,12 +287,13 @@ class CodeEditor:
                 file_path=file_path,
                 diff="",
                 lines_changed=0,
-                error="No changes to apply"
+                error="No changes to apply",
             )
 
         # Count changed lines
-        lines_changed = sum(1 for line in diff.split('\n')
-                          if line.startswith('+') or line.startswith('-'))
+        lines_changed = sum(
+            1 for line in diff.split("\n") if line.startswith("+") or line.startswith("-")
+        )
 
         # Confirm with user
         if confirm and not self.auto_confirm:
@@ -312,7 +303,7 @@ class CodeEditor:
                     file_path=file_path,
                     diff=diff,
                     lines_changed=lines_changed,
-                    error="User rejected changes"
+                    error="User rejected changes",
                 )
 
         # Create backup
@@ -326,7 +317,7 @@ class CodeEditor:
                 file_path=file_path,
                 diff=diff,
                 lines_changed=lines_changed,
-                backup_path=backup_path
+                backup_path=backup_path,
             )
         except Exception as e:
             # Restore from backup on failure
@@ -337,7 +328,7 @@ class CodeEditor:
                 file_path=file_path,
                 diff=diff,
                 lines_changed=lines_changed,
-                error=str(e)
+                error=str(e),
             )
 
     def edit_lines(
@@ -347,7 +338,7 @@ class CodeEditor:
         line_end: int,
         new_content: str,
         description: str = "",
-        confirm: bool = True
+        confirm: bool = True,
     ) -> EditResult:
         """
         Edit specific lines in a file.
@@ -364,16 +355,12 @@ class CodeEditor:
             line_start=line_start,
             line_end=line_end,
             new_content=new_content,
-            description=description
+            description=description,
         )
         return self.edit(file_path, [edit], confirm=confirm)
 
     def insert_lines(
-        self,
-        file_path: str,
-        after_line: int,
-        content: str,
-        confirm: bool = True
+        self, file_path: str, after_line: int, content: str, confirm: bool = True
     ) -> EditResult:
         """Insert lines after a specific line."""
         state = self.read_file(file_path)
@@ -383,15 +370,15 @@ class CodeEditor:
                 file_path=file_path,
                 diff="",
                 lines_changed=0,
-                error=f"File not found: {file_path}"
+                error=f"File not found: {file_path}",
             )
 
         # Get the existing line (to preserve it)
         lines = state.content.splitlines(keepends=True)
         if after_line > 0 and after_line <= len(lines):
             existing = lines[after_line - 1]
-            if not existing.endswith('\n'):
-                existing += '\n'
+            if not existing.endswith("\n"):
+                existing += "\n"
             new_content = existing + content
         else:
             new_content = content
@@ -400,32 +387,24 @@ class CodeEditor:
             line_start=max(1, after_line),
             line_end=max(1, after_line),
             new_content=new_content,
-            description=f"Insert after line {after_line}"
+            description=f"Insert after line {after_line}",
         )
         return self.edit(file_path, [edit], confirm=confirm)
 
     def delete_lines(
-        self,
-        file_path: str,
-        line_start: int,
-        line_end: int,
-        confirm: bool = True
+        self, file_path: str, line_start: int, line_end: int, confirm: bool = True
     ) -> EditResult:
         """Delete specific lines from a file."""
         edit = Edit(
             line_start=line_start,
             line_end=line_end,
             new_content="",
-            description=f"Delete lines {line_start}-{line_end}"
+            description=f"Delete lines {line_start}-{line_end}",
         )
         return self.edit(file_path, [edit], confirm=confirm)
 
     def replace_text(
-        self,
-        file_path: str,
-        old_text: str,
-        new_text: str,
-        confirm: bool = True
+        self, file_path: str, old_text: str, new_text: str, confirm: bool = True
     ) -> EditResult:
         """Replace text throughout a file."""
         state = self.read_file(file_path)
@@ -435,7 +414,7 @@ class CodeEditor:
                 file_path=file_path,
                 diff="",
                 lines_changed=0,
-                error=f"File not found: {file_path}"
+                error=f"File not found: {file_path}",
             )
 
         if old_text not in state.content:
@@ -444,14 +423,15 @@ class CodeEditor:
                 file_path=file_path,
                 diff="",
                 lines_changed=0,
-                error=f"Text not found: {old_text[:50]}..."
+                error=f"Text not found: {old_text[:50]}...",
             )
 
         new_content = state.content.replace(old_text, new_text)
         diff = self.generate_diff(state.content, new_content, os.path.basename(file_path))
 
-        lines_changed = sum(1 for line in diff.split('\n')
-                          if line.startswith('+') or line.startswith('-'))
+        lines_changed = sum(
+            1 for line in diff.split("\n") if line.startswith("+") or line.startswith("-")
+        )
 
         if confirm and not self.auto_confirm:
             if not self.confirm_edit(diff, os.path.basename(file_path)):
@@ -460,7 +440,7 @@ class CodeEditor:
                     file_path=file_path,
                     diff=diff,
                     lines_changed=lines_changed,
-                    error="User rejected changes"
+                    error="User rejected changes",
                 )
 
         backup_path = self.create_backup(file_path)
@@ -472,7 +452,7 @@ class CodeEditor:
                 file_path=file_path,
                 diff=diff,
                 lines_changed=lines_changed,
-                backup_path=backup_path
+                backup_path=backup_path,
             )
         except Exception as e:
             if backup_path:
@@ -482,11 +462,12 @@ class CodeEditor:
                 file_path=file_path,
                 diff=diff,
                 lines_changed=lines_changed,
-                error=str(e)
+                error=str(e),
             )
 
 
 # Convenience functions
+
 
 def show_diff(old: str, new: str, filename: str = "file"):
     """Show diff between two strings."""
@@ -497,11 +478,7 @@ def show_diff(old: str, new: str, filename: str = "file"):
 
 
 def edit_file(
-    path: str,
-    line_start: int,
-    line_end: int,
-    new_content: str,
-    auto_confirm: bool = False
+    path: str, line_start: int, line_end: int, new_content: str, auto_confirm: bool = False
 ) -> EditResult:
     """Edit specific lines in a file."""
     editor = CodeEditor(auto_confirm=auto_confirm)
@@ -520,7 +497,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     # Create a test file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write("""def hello():
     print("Hello")
     return True
@@ -551,7 +528,7 @@ if __name__ == "__main__":
         test_file,
         line_start=2,
         line_end=3,
-        new_content='    print("Hello, World!")\n    # Modified line\n    return True\n'
+        new_content='    print("Hello, World!")\n    # Modified line\n    return True\n',
     )
 
     print(f"\nResult: {'SUCCESS' if result.success else 'FAILED'}")

@@ -16,6 +16,7 @@ import re
 @dataclass
 class Skill:
     """A loaded skill."""
+
     name: str
     description: str
     prompt: str
@@ -79,7 +80,6 @@ RULES:
 - Show the diff summary before committing
 - Let user approve the message""",
         ),
-
         "review": Skill(
             name="review",
             description="Review code changes for issues and improvements",
@@ -106,7 +106,6 @@ Brief overview of the changes
 ## Verdict
 APPROVE / REQUEST_CHANGES / COMMENT""",
         ),
-
         "test": Skill(
             name="test",
             description="Run tests and analyze results",
@@ -125,7 +124,6 @@ If tests fail, provide:
 - Why they might be failing
 - Suggested fixes""",
         ),
-
         "explain": Skill(
             name="explain",
             description="Explain how code works",
@@ -141,7 +139,6 @@ INCLUDE:
 
 Keep explanations clear and accessible.""",
         ),
-
         "refactor": Skill(
             name="refactor",
             description="Suggest and implement code refactoring",
@@ -162,7 +159,6 @@ For each suggestion:
 
 Ask before making changes.""",
         ),
-
         "doc": Skill(
             name="doc",
             description="Generate documentation for code",
@@ -355,7 +351,7 @@ Match the project's documentation style if one exists.""",
         # Save
         file_path = os.path.join(skills_dir, f"{name}.md")
         try:
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 f.write(content)
 
             # Add to loaded skills

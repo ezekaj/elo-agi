@@ -12,6 +12,7 @@ import numpy as np
 @dataclass
 class TaskDistribution:
     """Distribution of tasks for meta-learning."""
+
     name: str
     task_generator: Callable[[], Dict[str, Any]]
     n_samples: int = 100
@@ -22,6 +23,7 @@ class TaskDistribution:
 @dataclass
 class AdaptationResult:
     """Result of adapting to a new task."""
+
     task_id: str
     initial_loss: float
     final_loss: float
@@ -33,6 +35,7 @@ class AdaptationResult:
 @dataclass
 class LearningStrategy:
     """A learned strategy for approaching tasks."""
+
     id: str
     name: str
     applicable_tasks: List[str]
@@ -330,12 +333,14 @@ class MetaLearner:
             task_batch = []
             for _ in range(batch_size):
                 task = distribution.task_generator()
-                task_batch.append((
-                    task["support_x"],
-                    task["support_y"],
-                    task["query_x"],
-                    task["query_y"],
-                ))
+                task_batch.append(
+                    (
+                        task["support_x"],
+                        task["support_y"],
+                        task["query_x"],
+                        task["query_y"],
+                    )
+                )
 
             # Meta-train step
             loss = self.maml.meta_train_step(task_batch)
@@ -448,10 +453,7 @@ class MetaLearner:
         task_type: str,
     ) -> Optional[LearningStrategy]:
         """Get the best strategy for a task type."""
-        applicable = [
-            s for s in self._strategies.values()
-            if task_type in s.applicable_tasks
-        ]
+        applicable = [s for s in self._strategies.values() if task_type in s.applicable_tasks]
 
         if not applicable:
             return None

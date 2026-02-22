@@ -14,6 +14,7 @@ import numpy as np
 
 class EmotionCategory(Enum):
     """Categories of emotional responses."""
+
     JOY = "joy"
     SATISFACTION = "satisfaction"
     DISAPPOINTMENT = "disappointment"
@@ -28,6 +29,7 @@ class EmotionCategory(Enum):
 
 class OutcomeType(Enum):
     """Types of outcomes that generate emotions."""
+
     REWARD_RECEIVED = "reward_received"
     REWARD_OMITTED = "reward_omitted"
     PUNISHMENT_RECEIVED = "punishment_received"
@@ -39,6 +41,7 @@ class OutcomeType(Enum):
 @dataclass
 class Outcome:
     """Represents an outcome event."""
+
     outcome_type: OutcomeType
     magnitude: float  # 0-1
     expected: bool
@@ -59,14 +62,15 @@ class EmotionalResponse:
     - Arousal: calm to excited
     - Specific emotion category
     """
+
     valence: float  # -1 to 1
     arousal: float  # 0 to 1
     emotion_type: EmotionCategory
     intensity: float = 1.0  # Overall intensity
-    duration: float = 1.0   # Expected duration
+    duration: float = 1.0  # Expected duration
     trigger: Optional[Outcome] = None
 
-    def decay(self, rate: float = 0.1) -> 'EmotionalResponse':
+    def decay(self, rate: float = 0.1) -> "EmotionalResponse":
         """Return decayed version of this emotion."""
         return EmotionalResponse(
             valence=self.valence * (1 - rate),
@@ -74,7 +78,7 @@ class EmotionalResponse:
             emotion_type=self.emotion_type,
             intensity=self.intensity * (1 - rate),
             duration=self.duration,
-            trigger=self.trigger
+            trigger=self.trigger,
         )
 
 
@@ -91,7 +95,7 @@ class OutcomeEvaluator:
 
     def __init__(self, sensitivity: float = 1.0):
         self.sensitivity = sensitivity  # Emotional reactivity
-        self.expectation_weight = 0.5   # How much expectations matter
+        self.expectation_weight = 0.5  # How much expectations matter
         self.history: List[EmotionalResponse] = []
 
     def evaluate(self, outcome: Outcome) -> EmotionalResponse:
@@ -110,10 +114,7 @@ class OutcomeEvaluator:
             return self._unexpected_punishment(outcome)
         else:
             return EmotionalResponse(
-                valence=0.0,
-                arousal=0.0,
-                emotion_type=EmotionCategory.NEUTRAL,
-                trigger=outcome
+                valence=0.0, arousal=0.0, emotion_type=EmotionCategory.NEUTRAL, trigger=outcome
             )
 
     def _reward_received(self, outcome: Outcome) -> EmotionalResponse:
@@ -134,7 +135,7 @@ class OutcomeEvaluator:
             arousal=arousal,
             emotion_type=emotion,
             intensity=outcome.magnitude * self.sensitivity,
-            trigger=outcome
+            trigger=outcome,
         )
         self.history.append(response)
         return response
@@ -158,7 +159,7 @@ class OutcomeEvaluator:
             arousal=arousal,
             emotion_type=emotion,
             intensity=outcome.magnitude * self.sensitivity,
-            trigger=outcome
+            trigger=outcome,
         )
         self.history.append(response)
         return response
@@ -167,7 +168,7 @@ class OutcomeEvaluator:
         """Generate fear/anger from receiving punishment."""
         valence = -outcome.magnitude * self.sensitivity
 
-        controllability = outcome.context.get('controllable', True)
+        controllability = outcome.context.get("controllable", True)
 
         if controllability:
             # Controllable punishment: anger (approach motivation)
@@ -187,7 +188,7 @@ class OutcomeEvaluator:
             arousal=arousal,
             emotion_type=emotion,
             intensity=outcome.magnitude * self.sensitivity,
-            trigger=outcome
+            trigger=outcome,
         )
         self.history.append(response)
         return response
@@ -202,7 +203,7 @@ class OutcomeEvaluator:
             arousal=0.4,  # Relief is moderately arousing
             emotion_type=EmotionCategory.RELIEF,
             intensity=outcome.magnitude * self.sensitivity,
-            trigger=outcome
+            trigger=outcome,
         )
         self.history.append(response)
         return response
@@ -216,7 +217,7 @@ class OutcomeEvaluator:
             arousal=0.7 + outcome.magnitude * 0.3,  # Surprise is arousing
             emotion_type=EmotionCategory.SURPRISE,
             intensity=outcome.magnitude * self.sensitivity,
-            trigger=outcome
+            trigger=outcome,
         )
         self.history.append(response)
         return response
@@ -230,7 +231,7 @@ class OutcomeEvaluator:
             arousal=0.9,  # Very arousing
             emotion_type=EmotionCategory.FEAR,
             intensity=outcome.magnitude * self.sensitivity,
-            trigger=outcome
+            trigger=outcome,
         )
         self.history.append(response)
         return response
@@ -247,15 +248,10 @@ class EmotionalDynamics:
     """
 
     def __init__(
-        self,
-        baseline_valence: float = 0.0,
-        baseline_arousal: float = 0.3,
-        decay_rate: float = 0.1
+        self, baseline_valence: float = 0.0, baseline_arousal: float = 0.3, decay_rate: float = 0.1
     ):
         self.baseline = EmotionalResponse(
-            valence=baseline_valence,
-            arousal=baseline_arousal,
-            emotion_type=EmotionCategory.NEUTRAL
+            valence=baseline_valence, arousal=baseline_arousal, emotion_type=EmotionCategory.NEUTRAL
         )
         self.current_emotion = self.baseline
         self.decay_rate = decay_rate
@@ -269,7 +265,9 @@ class EmotionalDynamics:
         self.emotion_history.append(self.current_emotion)
         self.current_emotion = emotion
 
-    def step(self, new_outcome: Optional[Outcome] = None, evaluator: Optional[OutcomeEvaluator] = None):
+    def step(
+        self, new_outcome: Optional[Outcome] = None, evaluator: Optional[OutcomeEvaluator] = None
+    ):
         """
         Advance time by one step.
 
@@ -282,9 +280,7 @@ class EmotionalDynamics:
             new_emotion = evaluator.evaluate(new_outcome)
             # Blend with current emotion (emotional inertia)
             self.current_emotion = self._blend_emotions(
-                self.current_emotion,
-                new_emotion,
-                weight_new=0.7
+                self.current_emotion, new_emotion, weight_new=0.7
             )
         else:
             # Decay toward baseline
@@ -296,10 +292,8 @@ class EmotionalDynamics:
         """Decay current emotion toward baseline."""
         decay = self.decay_rate
 
-        new_valence = self.current_emotion.valence * (1 - decay) + \
-                      self.baseline.valence * decay
-        new_arousal = self.current_emotion.arousal * (1 - decay) + \
-                      self.baseline.arousal * decay
+        new_valence = self.current_emotion.valence * (1 - decay) + self.baseline.valence * decay
+        new_arousal = self.current_emotion.arousal * (1 - decay) + self.baseline.arousal * decay
         new_intensity = self.current_emotion.intensity * (1 - decay)
 
         # Determine emotion type based on remaining intensity
@@ -313,14 +307,11 @@ class EmotionalDynamics:
             arousal=new_arousal,
             emotion_type=emotion_type,
             intensity=new_intensity,
-            duration=self.current_emotion.duration
+            duration=self.current_emotion.duration,
         )
 
     def _blend_emotions(
-        self,
-        current: EmotionalResponse,
-        new: EmotionalResponse,
-        weight_new: float = 0.5
+        self, current: EmotionalResponse, new: EmotionalResponse, weight_new: float = 0.5
     ) -> EmotionalResponse:
         """Blend two emotions (emotional inertia)."""
         weight_current = 1 - weight_new
@@ -340,7 +331,7 @@ class EmotionalDynamics:
             arousal=blended_arousal,
             emotion_type=emotion_type,
             intensity=blended_intensity,
-            trigger=new.trigger
+            trigger=new.trigger,
         )
 
     def emotion_regulation(self, strategy: str) -> EmotionalResponse:
@@ -355,33 +346,33 @@ class EmotionalDynamics:
         """
         current = self.current_emotion
 
-        if strategy == 'reappraisal':
+        if strategy == "reappraisal":
             # Cognitive reappraisal: reduce intensity toward baseline
             regulated = EmotionalResponse(
                 valence=current.valence * 0.5,
                 arousal=current.arousal * 0.6,
                 emotion_type=current.emotion_type,
-                intensity=current.intensity * 0.5
+                intensity=current.intensity * 0.5,
             )
-        elif strategy == 'suppression':
+        elif strategy == "suppression":
             # Suppression: reduce arousal but valence lingers
             regulated = EmotionalResponse(
                 valence=current.valence * 0.9,
                 arousal=current.arousal * 0.5,
                 emotion_type=current.emotion_type,
-                intensity=current.intensity * 0.8
+                intensity=current.intensity * 0.8,
             )
-        elif strategy == 'distraction':
+        elif strategy == "distraction":
             # Distraction: accelerate decay
             regulated = self._decay_toward_baseline()
             regulated = regulated.decay(0.2)  # Extra decay
-        elif strategy == 'acceptance':
+        elif strategy == "acceptance":
             # Acceptance: slight calming, allows natural processing
             regulated = EmotionalResponse(
                 valence=current.valence,
                 arousal=current.arousal * 0.85,
                 emotion_type=current.emotion_type,
-                intensity=current.intensity * 0.95
+                intensity=current.intensity * 0.95,
             )
         else:
             regulated = current
@@ -396,21 +387,17 @@ class EmotionalDynamics:
         Mood is slower-changing than emotion.
         """
         if not self.emotion_history:
-            return {'valence': 0.0, 'arousal': self.baseline.arousal}
+            return {"valence": 0.0, "arousal": self.baseline.arousal}
 
         # Weight recent emotions more
         weights = np.exp(-np.arange(len(self.emotion_history)) * 0.1)[::-1]
         weights = weights / weights.sum()
 
-        avg_valence = sum(
-            e.valence * w for e, w in zip(self.emotion_history, weights)
-        )
-        avg_arousal = sum(
-            e.arousal * w for e, w in zip(self.emotion_history, weights)
-        )
+        avg_valence = sum(e.valence * w for e, w in zip(self.emotion_history, weights))
+        avg_arousal = sum(e.arousal * w for e, w in zip(self.emotion_history, weights))
 
         return {
-            'valence': avg_valence,
-            'arousal': avg_arousal,
-            'history_length': len(self.emotion_history)
+            "valence": avg_valence,
+            "arousal": avg_arousal,
+            "history_length": len(self.emotion_history),
         }

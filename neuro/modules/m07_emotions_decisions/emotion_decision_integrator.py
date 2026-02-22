@@ -25,6 +25,7 @@ from .value_computation import VMPFCIntegrator, OFCValueComputer, ValueSignal
 
 class SituationType(Enum):
     """Types of situations requiring decision."""
+
     THREAT = "threat"
     REWARD = "reward"
     MORAL_DILEMMA = "moral_dilemma"
@@ -37,6 +38,7 @@ class Situation:
     """
     A situation requiring emotional evaluation and decision.
     """
+
     stimulus: np.ndarray
     situation_type: SituationType
     context: Dict[str, Any] = field(default_factory=dict)
@@ -45,7 +47,7 @@ class Situation:
 
     def __post_init__(self):
         if not self.options:
-            self.options = ['act', 'dont_act']
+            self.options = ["act", "dont_act"]
 
 
 @dataclass
@@ -53,6 +55,7 @@ class Decision:
     """
     Result of emotional decision-making process.
     """
+
     action: str
     confidence: float
     value: float
@@ -96,24 +99,23 @@ class EmotionDecisionSystem:
 
         # 1. Fast emotional evaluation (dual routes)
         fast_response, slow_response = self.dual_routes.process(
-            situation.stimulus,
-            situation.context
+            situation.stimulus, situation.context
         )
 
         # 2. Full emotion circuit evaluation
-        emotional_state = self.emotion_circuit.process(
-            situation.stimulus,
-            situation.context
-        )
+        emotional_state = self.emotion_circuit.process(situation.stimulus, situation.context)
         self.current_emotional_state = emotional_state
 
         # 2b. Update emotional dynamics for mood tracking
         from .emotional_states import EmotionalResponse, EmotionCategory
+
         emotion_response = EmotionalResponse(
             valence=emotional_state.valence,
             arousal=emotional_state.arousal,
-            emotion_type=EmotionCategory(emotional_state.emotion_type.value) if hasattr(emotional_state.emotion_type, 'value') else EmotionCategory.NEUTRAL,
-            intensity=emotional_state.arousal
+            emotion_type=EmotionCategory(emotional_state.emotion_type.value)
+            if hasattr(emotional_state.emotion_type, "value")
+            else EmotionCategory.NEUTRAL,
+            intensity=emotional_state.arousal,
         )
         self.emotional_dynamics.set_emotion(emotion_response)
 
@@ -124,9 +126,7 @@ class EmotionDecisionSystem:
         moral_decision = None
         if situation.situation_type == SituationType.MORAL_DILEMMA:
             if situation.moral_scenario:
-                moral_decision = self.moral_processor.process_dilemma(
-                    situation.moral_scenario
-                )
+                moral_decision = self.moral_processor.process_dilemma(situation.moral_scenario)
                 base_value = self._incorporate_moral(base_value, moral_decision)
 
         # 5. Compute motivation
@@ -140,7 +140,7 @@ class EmotionDecisionSystem:
             emotional_state,
             fast_response,
             slow_response,
-            moral_decision
+            moral_decision,
         )
 
         # Processing time based on route
@@ -159,16 +159,14 @@ class EmotionDecisionSystem:
             moral_decision=moral_decision,
             motivation=motivation,
             processing_time_ms=processing_time,
-            reasoning=reasoning
+            reasoning=reasoning,
         )
 
         self.decision_history.append(decision)
         return decision
 
     def _compute_situation_value(
-        self,
-        situation: Situation,
-        emotional_state: EmotionalEvaluation
+        self, situation: Situation, emotional_state: EmotionalEvaluation
     ) -> float:
         """Compute overall value of acting in situation."""
         # Base value from stimulus
@@ -180,21 +178,19 @@ class EmotionDecisionSystem:
             certainty=emotional_state.confidence,
             temporal_distance=0.0,
             emotional_weight=emotional_state.valence,
-            social_weight=situation.context.get('social_relevance', 0.0),
-            source="situation"
+            social_weight=situation.context.get("social_relevance", 0.0),
+            source="situation",
         )
 
         # Integrate with emotion and social context
         social_context = {
-            'fairness': situation.context.get('fairness', 0.0),
-            'reciprocity': situation.context.get('reciprocity', 0.0),
-            'reputation_impact': situation.context.get('reputation', 0.0)
+            "fairness": situation.context.get("fairness", 0.0),
+            "reciprocity": situation.context.get("reciprocity", 0.0),
+            "reputation_impact": situation.context.get("reputation", 0.0),
         }
 
         integrated_value = self.value_integrator.integrate(
-            value_signal,
-            emotional_state.valence,
-            social_context
+            value_signal, emotional_state.valence, social_context
         )
 
         return integrated_value
@@ -214,31 +210,22 @@ class EmotionDecisionSystem:
         return base_value * (1 - moral_weight) + moral_value * moral_weight
 
     def _compute_motivation(
-        self,
-        situation: Situation,
-        emotional_state: EmotionalEvaluation
+        self, situation: Situation, emotional_state: EmotionalEvaluation
     ) -> Dict[str, Any]:
         """Compute motivational state for situation."""
         # Approach vs avoid
         if emotional_state.threat_level > 0.5:
-            avoid_strength = self.motivational.avoidance_tendency(
-                emotional_state.threat_level
-            )
+            avoid_strength = self.motivational.avoidance_tendency(emotional_state.threat_level)
             approach_strength = 0.0
         elif emotional_state.reward_level > 0.3:
-            approach_strength = self.motivational.approach_tendency(
-                emotional_state.reward_level
-            )
+            approach_strength = self.motivational.approach_tendency(emotional_state.reward_level)
             avoid_strength = 0.0
         else:
             approach_strength = emotional_state.reward_level * 0.5
             avoid_strength = emotional_state.threat_level * 0.5
 
         # Resolve conflict
-        resolution = self.motivational.resolve_conflict(
-            approach_strength,
-            avoid_strength
-        )
+        resolution = self.motivational.resolve_conflict(approach_strength, avoid_strength)
 
         return resolution
 
@@ -250,57 +237,55 @@ class EmotionDecisionSystem:
         emotional_state: EmotionalEvaluation,
         fast_response: Optional[EmotionRouteResponse],
         slow_response: Optional[EmotionRouteResponse],
-        moral_decision: Optional[MoralDecision]
+        moral_decision: Optional[MoralDecision],
     ) -> Tuple[str, float, str]:
         """Make final decision based on all inputs."""
         reasoning_parts = []
 
         # Start with motivation
-        base_action = motivation['decision']
-        base_confidence = motivation['confidence']
+        base_action = motivation["decision"]
+        base_confidence = motivation["confidence"]
         reasoning_parts.append(f"Motivation: {base_action} (conf={base_confidence:.2f})")
 
         # THREAT situation type override - high threat = avoidance
         if situation.situation_type == SituationType.THREAT:
             if emotional_state.threat_level > 0.3 or emotional_state.valence < -0.2:
-                reasoning_parts.append(f"Threat situation (level={emotional_state.threat_level:.2f})")
-                return 'avoid', 0.9, "; ".join(reasoning_parts)
+                reasoning_parts.append(
+                    f"Threat situation (level={emotional_state.threat_level:.2f})"
+                )
+                return "avoid", 0.9, "; ".join(reasoning_parts)
 
         # Fast emotional override for threats
         if fast_response and fast_response.response_type == ResponseType.THREAT:
             if fast_response.intensity > 0.6:
                 # Strong threat - immediate avoidance
                 reasoning_parts.append("Fast threat response triggered")
-                return 'avoid', 0.9, "; ".join(reasoning_parts)
+                return "avoid", 0.9, "; ".join(reasoning_parts)
 
         # Moral override
         if moral_decision:
             if not moral_decision.action_taken and moral_decision.confidence > 0.7:
                 reasoning_parts.append(f"Moral: {moral_decision.reasoning}")
-                return 'dont_act', moral_decision.confidence, "; ".join(reasoning_parts)
+                return "dont_act", moral_decision.confidence, "; ".join(reasoning_parts)
 
         # Value-based decision
         if value > 0.3:
-            action = 'act'
+            action = "act"
             confidence = min(0.9, value + 0.3)
             reasoning_parts.append(f"Value positive ({value:.2f})")
         elif value < -0.3:
-            action = 'dont_act'
+            action = "dont_act"
             confidence = min(0.9, abs(value) + 0.3)
             reasoning_parts.append(f"Value negative ({value:.2f})")
         else:
             # Ambiguous - use motivation
-            action = base_action if base_action != 'freeze' else 'dont_act'
+            action = base_action if base_action != "freeze" else "dont_act"
             confidence = base_confidence
             reasoning_parts.append("Ambiguous value, using motivation")
 
         return action, confidence, "; ".join(reasoning_parts)
 
-    def learn_from_outcome(
-        self,
-        decision: Decision,
-        outcome: Outcome
-    ):
+    def learn_from_outcome(self, decision: Decision, outcome: Outcome):
         """Update system based on experienced outcome."""
         # Generate emotional response to outcome
         emotional_response = self.outcome_evaluator.evaluate(outcome)
@@ -314,7 +299,7 @@ class EmotionDecisionSystem:
             action=decision.action,
             outcome=outcome.magnitude,
             valence=emotional_response.valence,
-            arousal=emotional_response.arousal
+            arousal=emotional_response.arousal,
         )
 
         # Update motivation based on outcome
@@ -332,18 +317,18 @@ class EmotionDecisionSystem:
 
         Regions: 'vmpfc', 'amygdala', 'acc', 'insula'
         """
-        if region == 'vmpfc':
+        if region == "vmpfc":
             self.emotion_circuit.lesion_vmpfc()
             self.value_integrator.lesion()
             self.moral_processor.vmpfc_intact = False
-        elif region == 'amygdala':
+        elif region == "amygdala":
             # Reduce amygdala sensitivity
             self.emotion_circuit.amygdala.threat_threshold = 0.9
             self.emotion_circuit.amygdala.reward_threshold = 0.9
-        elif region == 'acc':
+        elif region == "acc":
             # Reduce error detection
             self.emotion_circuit.acc.error_threshold = 0.9
-        elif region == 'insula':
+        elif region == "insula":
             # Reset body state influence
             self.emotion_circuit.insula.current_body_state.heart_rate = 0.5
             self.emotion_circuit.insula.current_body_state.muscle_tension = 0.0
@@ -372,13 +357,14 @@ class EmotionDecisionSystem:
 
 # Convenience functions for creating test situations
 
+
 def create_threat_situation(intensity: float = 0.7) -> Situation:
     """Create a threat situation for testing."""
     return Situation(
         stimulus=np.array([intensity, intensity * 0.8, intensity * 0.9, 0.1]),
         situation_type=SituationType.THREAT,
-        context={'known_danger': True},
-        options=['flee', 'freeze', 'fight']
+        context={"known_danger": True},
+        options=["flee", "freeze", "fight"],
     )
 
 
@@ -387,8 +373,8 @@ def create_reward_situation(value: float = 0.6) -> Situation:
     return Situation(
         stimulus=np.array([value, value * 0.9, value * 0.5, 0.8]),
         situation_type=SituationType.REWARD,
-        context={'safe_environment': True},
-        options=['approach', 'ignore']
+        context={"safe_environment": True},
+        options=["approach", "ignore"],
     )
 
 
@@ -397,7 +383,7 @@ def create_moral_situation(scenario: MoralScenario) -> Situation:
     return Situation(
         stimulus=np.array([0.5, 0.5, 0.5, 0.5]),
         situation_type=SituationType.MORAL_DILEMMA,
-        context={'moral_weight': 1.0},
-        options=['act', 'dont_act'],
-        moral_scenario=scenario
+        context={"moral_weight": 1.0},
+        options=["act", "dont_act"],
+        moral_scenario=scenario,
     )

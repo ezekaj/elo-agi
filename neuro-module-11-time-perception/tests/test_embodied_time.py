@@ -7,8 +7,9 @@ from neuro.modules.m11_time_perception.embodied_time import (
     MotorTimer,
     BodyEnvironmentCoupler,
     EmbodiedTimeSystem,
-    BodyState
+    BodyState,
 )
+
 
 class TestInteroceptiveTimer:
     """Tests for interoceptive timing"""
@@ -79,6 +80,7 @@ class TestInteroceptiveTimer:
 
         assert timer.body_state.heart_rate > baseline_hr
 
+
 class TestMotorTimer:
     """Tests for motor timing"""
 
@@ -123,13 +125,11 @@ class TestMotorTimer:
         """Test synchronization to external beat"""
         timer = MotorTimer()
 
-        taps, asynchrony = timer.synchronize_to_beat(
-            beat_interval=0.5,
-            n_beats=10
-        )
+        taps, asynchrony = timer.synchronize_to_beat(beat_interval=0.5, n_beats=10)
 
         assert len(taps) == 10
         assert asynchrony < 0.2  # Reasonable synchronization
+
 
 class TestBodyEnvironmentCoupler:
     """Tests for body-environment coupling"""
@@ -182,13 +182,12 @@ class TestBodyEnvironmentCoupler:
         coupler = BodyEnvironmentCoupler()
 
         estimate, entrainment = coupler.modulate_timing(
-            duration=10.0,
-            body_rhythm=1.0,
-            env_rhythm=1.0
+            duration=10.0, body_rhythm=1.0, env_rhythm=1.0
         )
 
         assert estimate > 0
         assert entrainment > 0
+
 
 class TestEmbodiedTimeSystem:
     """Tests for integrated embodied time system"""
@@ -206,45 +205,34 @@ class TestEmbodiedTimeSystem:
         system = EmbodiedTimeSystem()
 
         estimate, components = system.estimate_duration(
-            actual_duration=10.0,
-            movement_present=False
+            actual_duration=10.0, movement_present=False
         )
 
         assert estimate > 0
-        assert 'interoceptive' in components
+        assert "interoceptive" in components
 
     def test_with_movement(self):
         """Test estimation with movement"""
         system = EmbodiedTimeSystem()
 
-        estimate, components = system.estimate_duration(
-            actual_duration=10.0,
-            movement_present=True
-        )
+        estimate, components = system.estimate_duration(actual_duration=10.0, movement_present=True)
 
-        assert 'motor' in components
+        assert "motor" in components
 
     def test_with_external_rhythm(self):
         """Test estimation with external rhythm"""
         system = EmbodiedTimeSystem()
 
-        estimate, components = system.estimate_duration(
-            actual_duration=10.0,
-            external_rhythm=1.0
-        )
+        estimate, components = system.estimate_duration(actual_duration=10.0, external_rhythm=1.0)
 
-        assert 'coupling' in components
-        assert 'entrainment' in components
+        assert "coupling" in components
+        assert "entrainment" in components
 
     def test_body_state_update(self):
         """Test updating body state"""
         system = EmbodiedTimeSystem()
 
-        state = BodyState(
-            heart_rate=90,
-            breathing_rate=20,
-            metabolic_rate=1.2
-        )
+        state = BodyState(heart_rate=90, breathing_rate=20, metabolic_rate=1.2)
 
         system.set_body_state(state)
 
@@ -259,8 +247,9 @@ class TestEmbodiedTimeSystem:
 
         stats = system.get_statistics()
 
-        assert stats['heartbeat_count'] > 0
-        assert stats['action_count'] > 0
+        assert stats["heartbeat_count"] > 0
+        assert stats["action_count"] > 0
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

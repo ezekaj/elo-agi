@@ -19,6 +19,7 @@ from enum import Enum
 
 class TactileProperty(Enum):
     """Properties of tactile sensations"""
+
     TEXTURE = "texture"
     TEMPERATURE = "temperature"
     PRESSURE = "pressure"
@@ -31,6 +32,7 @@ class TactileProperty(Enum):
 @dataclass
 class TactileImage:
     """A mental tactile image - simulated touch sensation"""
+
     id: str
     description: str
     properties: Dict[TactileProperty, Any]
@@ -58,12 +60,14 @@ class TactileImagery:
         self.sensations: Dict[str, TactileImage] = {}
         self.default_vividness = default_vividness
 
-    def imagine_touch(self,
-                      touch_id: str,
-                      description: str,
-                      properties: Optional[Dict[TactileProperty, Any]] = None,
-                      body_location: str = "hand",
-                      intensity: float = 0.5) -> TactileImage:
+    def imagine_touch(
+        self,
+        touch_id: str,
+        description: str,
+        properties: Optional[Dict[TactileProperty, Any]] = None,
+        body_location: str = "hand",
+        intensity: float = 0.5,
+    ) -> TactileImage:
         """
         Imagine a tactile sensation.
 
@@ -76,7 +80,7 @@ class TactileImagery:
             vividness=self.default_vividness,
             intensity=intensity,
             body_location=body_location,
-            semantic_associations=[]
+            semantic_associations=[],
         )
 
         self.sensations[touch_id] = tactile
@@ -100,7 +104,7 @@ class TactileImagery:
             vividness=self.default_vividness,
             intensity=0.6,
             body_location="fingertips",
-            semantic_associations=associations
+            semantic_associations=associations,
         )
 
         self.sensations[texture_id] = tactile
@@ -168,9 +172,7 @@ class TactileImagery:
 
         return list(set(associations))
 
-    def feel_temperature(self,
-                         temperature: str,
-                         body_location: str = "skin") -> TactileImage:
+    def feel_temperature(self, temperature: str, body_location: str = "skin") -> TactileImage:
         """
         Imagine a temperature sensation.
         """
@@ -192,15 +194,13 @@ class TactileImagery:
             vividness=self.default_vividness,
             intensity=0.6,
             body_location=body_location,
-            semantic_associations=associations
+            semantic_associations=associations,
         )
 
         self.sensations[temp_id] = tactile
         return tactile
 
-    def feel_pressure(self,
-                      pressure_level: str,
-                      body_location: str = "hand") -> TactileImage:
+    def feel_pressure(self, pressure_level: str, body_location: str = "hand") -> TactileImage:
         """
         Imagine pressure sensation.
         """
@@ -221,14 +221,13 @@ class TactileImagery:
             vividness=self.default_vividness,
             intensity=0.5 if pressure_level in ["light", "gentle"] else 0.8,
             body_location=body_location,
-            semantic_associations=associations
+            semantic_associations=associations,
         )
 
         self.sensations[pressure_id] = tactile
         return tactile
 
-    def combine_sensations(self,
-                           sensation_ids: List[str]) -> TactileImage:
+    def combine_sensations(self, sensation_ids: List[str]) -> TactileImage:
         """
         Combine multiple tactile sensations.
 
@@ -247,9 +246,7 @@ class TactileImagery:
             merged_props.update(s.properties)
 
         # Merge associations
-        all_associations = list(set(
-            assoc for s in sensations for assoc in s.semantic_associations
-        ))
+        all_associations = list(set(assoc for s in sensations for assoc in s.semantic_associations))
 
         combined = TactileImage(
             id=combined_id,
@@ -258,7 +255,7 @@ class TactileImagery:
             vividness=np.mean([s.vividness for s in sensations]),
             intensity=np.mean([s.intensity for s in sensations]),
             body_location=sensations[0].body_location,
-            semantic_associations=all_associations
+            semantic_associations=all_associations,
         )
 
         self.sensations[combined_id] = combined

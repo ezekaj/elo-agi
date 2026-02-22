@@ -14,32 +14,35 @@ import numpy as np
 @dataclass
 class ShapeDescriptor:
     """Description of a visual shape."""
-    curvature: np.ndarray      # Curvature values around contour
-    angles: np.ndarray         # Angles at key points
+
+    curvature: np.ndarray  # Curvature values around contour
+    angles: np.ndarray  # Angles at key points
     aspect_ratio: float
-    convexity: float           # 0-1, how convex
-    symmetry: float            # 0-1, bilateral symmetry
-    complexity: float          # Number of inflection points
+    convexity: float  # 0-1, how convex
+    symmetry: float  # 0-1, bilateral symmetry
+    complexity: float  # Number of inflection points
     embedding: Optional[np.ndarray] = None
 
 
 @dataclass
 class ObjectRepresentation:
     """Representation of a recognized object."""
+
     identity: str
     confidence: float
     features: Dict[str, float]
     embedding: np.ndarray
-    parts: List['ObjectRepresentation'] = field(default_factory=list)
+    parts: List["ObjectRepresentation"] = field(default_factory=list)
     viewpoint: Optional[Tuple[float, float, float]] = None  # yaw, pitch, roll
 
 
 @dataclass
 class V4Output:
     """Output from V4 processing."""
-    shape_map: np.ndarray          # Shape-selective responses
-    curvature_map: np.ndarray      # Detailed curvature
-    color_shape: np.ndarray        # Color-form conjunctions
+
+    shape_map: np.ndarray  # Shape-selective responses
+    curvature_map: np.ndarray  # Detailed curvature
+    color_shape: np.ndarray  # Color-form conjunctions
     intermediate_forms: List[ShapeDescriptor] = field(default_factory=list)
     size: Tuple[int, int] = (0, 0)
 
@@ -47,8 +50,9 @@ class V4Output:
 @dataclass
 class ITOutput:
     """Output from IT cortex processing."""
-    object_responses: np.ndarray      # Responses to object categories
-    identity_embeddings: np.ndarray   # View-invariant embeddings
+
+    object_responses: np.ndarray  # Responses to object categories
+    identity_embeddings: np.ndarray  # View-invariant embeddings
     detected_objects: List[ObjectRepresentation] = field(default_factory=list)
     size: Tuple[int, int] = (0, 0)
 
@@ -88,8 +92,8 @@ class V4Processor:
         size = 16
 
         # Circle
-        y, x = np.ogrid[-size//2:size//2, -size//2:size//2]
-        circle = (x**2 + y**2) < (size//3)**2
+        y, x = np.ogrid[-size // 2 : size // 2, -size // 2 : size // 2]
+        circle = (x**2 + y**2) < (size // 3) ** 2
         templates.append(circle.astype(float))
 
         # Square
@@ -105,18 +109,18 @@ class V4Processor:
         for i in range(size):
             width = int((i / size) * size * 0.8)
             start = (size - width) // 2
-            triangle[i, start:start+max(1,width)] = 1
+            triangle[i, start : start + max(1, width)] = 1
         templates.append(triangle)
 
         # Add more basic shapes
         # Horizontal line
         h_line = np.zeros((size, size))
-        h_line[size//2-1:size//2+1, 2:-2] = 1
+        h_line[size // 2 - 1 : size // 2 + 1, 2:-2] = 1
         templates.append(h_line)
 
         # Vertical line
         v_line = np.zeros((size, size))
-        v_line[2:-2, size//2-1:size//2+1] = 1
+        v_line[2:-2, size // 2 - 1 : size // 2 + 1] = 1
         templates.append(v_line)
 
         return templates
@@ -196,7 +200,7 @@ class V4Processor:
             template_norm = template_norm / (np.sqrt(np.sum(template_norm**2)) + 1e-8)
 
             # Cross-correlation (simple template matching)
-            response = convolve(contour_map, template_norm, mode='constant')
+            response = convolve(contour_map, template_norm, mode="constant")
             responses[:, :, i] = np.maximum(0, response)
 
         return np.max(responses, axis=2)
@@ -217,6 +221,7 @@ class V4Processor:
 
         # Get connected components (simplified)
         from scipy.ndimage import label
+
         labeled, n_regions = label(regions)
 
         for region_id in range(1, min(n_regions + 1, 10)):  # Limit to 10 regions
@@ -251,10 +256,12 @@ class V4Processor:
             # Resize to match
             min_w = min(left.shape[1], right_flipped.shape[1])
             if min_w > 0:
-                symmetry = 1.0 - np.abs(
-                    left[:, :min_w].astype(float) -
-                    right_flipped[:, :min_w].astype(float)
-                ).mean()
+                symmetry = (
+                    1.0
+                    - np.abs(
+                        left[:, :min_w].astype(float) - right_flipped[:, :min_w].astype(float)
+                    ).mean()
+                )
             else:
                 symmetry = 0.5
 
@@ -314,8 +321,16 @@ class ITProcessor:
         np.random.seed(42)  # For reproducibility
 
         categories = [
-            "face", "car", "house", "animal", "tool",
-            "plant", "body", "food", "furniture", "vehicle",
+            "face",
+            "car",
+            "house",
+            "animal",
+            "tool",
+            "plant",
+            "body",
+            "food",
+            "furniture",
+            "vehicle",
         ]
 
         for cat in categories:
@@ -346,14 +361,16 @@ class ITProcessor:
             embedding = self._forms_to_embedding(v4_output.intermediate_forms)
         else:
             # Fallback: use pooled features
-            embedding = np.concatenate([
-                pooled_shape.flatten()[:self.embedding_dim//2],
-                pooled_curvature.flatten()[:self.embedding_dim//2],
-            ])
+            embedding = np.concatenate(
+                [
+                    pooled_shape.flatten()[: self.embedding_dim // 2],
+                    pooled_curvature.flatten()[: self.embedding_dim // 2],
+                ]
+            )
             if len(embedding) < self.embedding_dim:
                 embedding = np.pad(embedding, (0, self.embedding_dim - len(embedding)))
             elif len(embedding) > self.embedding_dim:
-                embedding = embedding[:self.embedding_dim]
+                embedding = embedding[: self.embedding_dim]
             embedding = embedding / (np.linalg.norm(embedding) + 1e-8)
 
         # Compute category responses

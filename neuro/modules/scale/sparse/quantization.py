@@ -12,16 +12,18 @@ import numpy as np
 
 class QuantizationLevel(Enum):
     """Quantization precision levels."""
-    FP32 = 32   # Full precision
-    FP16 = 16   # Half precision
-    INT8 = 8    # 8-bit integer
-    INT4 = 4    # 4-bit integer
+
+    FP32 = 32  # Full precision
+    FP16 = 16  # Half precision
+    INT8 = 8  # 8-bit integer
+    INT4 = 4  # 4-bit integer
     BINARY = 1  # Binary
 
 
 @dataclass
 class QuantizationConfig:
     """Configuration for quantization."""
+
     level: QuantizationLevel = QuantizationLevel.INT8
     symmetric: bool = True
     per_channel: bool = False
@@ -31,8 +33,9 @@ class QuantizationConfig:
 @dataclass
 class QuantizedTensor:
     """A quantized tensor with scale and zero-point."""
-    data: np.ndarray        # Quantized values
-    scale: np.ndarray       # Scale factor(s)
+
+    data: np.ndarray  # Quantized values
+    scale: np.ndarray  # Scale factor(s)
     zero_point: np.ndarray  # Zero point(s)
     original_dtype: np.dtype
     level: QuantizationLevel
@@ -45,6 +48,7 @@ class QuantizedTensor:
 @dataclass
 class QuantizedModel:
     """A quantized model."""
+
     weights: Dict[str, QuantizedTensor]
     level: QuantizationLevel
     memory_reduction: float
@@ -241,10 +245,7 @@ class Quantizer:
         qmodel: QuantizedModel,
     ) -> Dict[str, np.ndarray]:
         """Dequantize all weights in a model."""
-        return {
-            name: qtensor.dequantize()
-            for name, qtensor in qmodel.weights.items()
-        }
+        return {name: qtensor.dequantize() for name, qtensor in qmodel.weights.items()}
 
     def compute_quantization_error(
         self,
@@ -259,7 +260,7 @@ class Quantizer:
         max_error = np.max(np.abs(original - dequantized))
 
         # Signal-to-noise ratio
-        signal_power = np.mean(original ** 2)
+        signal_power = np.mean(original**2)
         noise_power = mse
         snr_db = 10 * np.log10(signal_power / (noise_power + 1e-10))
 
@@ -287,7 +288,7 @@ class Quantizer:
         """
         # Collect activation statistics
         all_vals = []
-        for data in calibration_data[:self.config.calibration_samples]:
+        for data in calibration_data[: self.config.calibration_samples]:
             all_vals.extend(data.flatten())
 
         all_vals = np.array(all_vals)

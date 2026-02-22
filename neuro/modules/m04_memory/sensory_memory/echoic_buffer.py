@@ -17,6 +17,7 @@ from collections import deque
 @dataclass
 class AudioSegment:
     """A single audio segment in the echoic buffer"""
+
     data: np.ndarray
     timestamp: float
     duration: float  # seconds
@@ -55,9 +56,7 @@ class EchoicBuffer:
             duration = len(audio_chunk) / self.sample_rate
 
         segment = AudioSegment(
-            data=np.copy(audio_chunk),
-            timestamp=self._time_fn(),
-            duration=duration
+            data=np.copy(audio_chunk), timestamp=self._time_fn(), duration=duration
         )
         self._segments.append(segment)
 
@@ -94,10 +93,7 @@ class EchoicBuffer:
         cutoff = current_time - duration
 
         # Collect segments within the requested window
-        segments_in_window = [
-            seg.data for seg in self._segments
-            if seg.timestamp >= cutoff
-        ]
+        segments_in_window = [seg.data for seg in self._segments if seg.timestamp >= cutoff]
 
         if not segments_in_window:
             return None

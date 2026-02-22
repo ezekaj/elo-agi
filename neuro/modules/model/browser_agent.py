@@ -25,6 +25,7 @@ BROWSER_TYPE = None
 
 try:
     from playwright.sync_api import sync_playwright
+
     BROWSER_AVAILABLE = True
     BROWSER_TYPE = "playwright"
 except ImportError:
@@ -35,6 +36,7 @@ if not BROWSER_AVAILABLE:
         from selenium import webdriver
         from selenium.webdriver.common.by import By
         from selenium.webdriver.chrome.options import Options
+
         BROWSER_AVAILABLE = True
         BROWSER_TYPE = "selenium"
     except ImportError:
@@ -141,11 +143,11 @@ class BrowserAgent:
         """
         if not self.page:
             if not self.start():
-                return {'success': False, 'error': 'Browser not available'}
+                return {"success": False, "error": "Browser not available"}
 
         # Ensure URL has protocol
-        if not url.startswith(('http://', 'https://')):
-            url = 'https://' + url
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
 
         try:
             if BROWSER_TYPE == "playwright":
@@ -156,21 +158,14 @@ class BrowserAgent:
                 self.browser.get(url)
                 title = self.browser.title
 
-            self.history.append({
-                'action': 'goto',
-                'url': url,
-                'title': title,
-                'time': datetime.now().isoformat()
-            })
+            self.history.append(
+                {"action": "goto", "url": url, "title": title, "time": datetime.now().isoformat()}
+            )
 
-            return {
-                'success': True,
-                'url': url,
-                'title': title
-            }
+            return {"success": True, "url": url, "title": title}
 
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def get_content(self, max_length: int = 5000) -> str:
         """
@@ -192,10 +187,10 @@ class BrowserAgent:
                 content = self.browser.page_source
 
             # Extract text from HTML
-            text = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL)
-            text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
-            text = re.sub(r'<[^>]+>', ' ', text)
-            text = re.sub(r'\s+', ' ', text).strip()
+            text = re.sub(r"<script[^>]*>.*?</script>", "", content, flags=re.DOTALL)
+            text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL)
+            text = re.sub(r"<[^>]+>", " ", text)
+            text = re.sub(r"\s+", " ", text).strip()
 
             return text[:max_length]
 
@@ -240,7 +235,7 @@ class BrowserAgent:
             Dict with result
         """
         if not self.page:
-            return {'success': False, 'error': 'No page loaded'}
+            return {"success": False, "error": "No page loaded"}
 
         try:
             if BROWSER_TYPE == "playwright":
@@ -251,22 +246,21 @@ class BrowserAgent:
                     self.page.click(f"text={selector}", timeout=timeout)
             else:
                 from selenium.webdriver.common.by import By
+
                 try:
                     element = self.browser.find_element(By.CSS_SELECTOR, selector)
                 except Exception:
                     element = self.browser.find_element(By.LINK_TEXT, selector)
                 element.click()
 
-            self.history.append({
-                'action': 'click',
-                'selector': selector,
-                'time': datetime.now().isoformat()
-            })
+            self.history.append(
+                {"action": "click", "selector": selector, "time": datetime.now().isoformat()}
+            )
 
-            return {'success': True, 'clicked': selector}
+            return {"success": True, "clicked": selector}
 
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def fill(self, selector: str, text: str) -> Dict:
         """
@@ -280,28 +274,31 @@ class BrowserAgent:
             Dict with result
         """
         if not self.page:
-            return {'success': False, 'error': 'No page loaded'}
+            return {"success": False, "error": "No page loaded"}
 
         try:
             if BROWSER_TYPE == "playwright":
                 self.page.fill(selector, text)
             else:
                 from selenium.webdriver.common.by import By
+
                 element = self.browser.find_element(By.CSS_SELECTOR, selector)
                 element.clear()
                 element.send_keys(text)
 
-            self.history.append({
-                'action': 'fill',
-                'selector': selector,
-                'text_length': len(text),
-                'time': datetime.now().isoformat()
-            })
+            self.history.append(
+                {
+                    "action": "fill",
+                    "selector": selector,
+                    "text_length": len(text),
+                    "time": datetime.now().isoformat(),
+                }
+            )
 
-            return {'success': True, 'filled': selector}
+            return {"success": True, "filled": selector}
 
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def type_text(self, selector: str, text: str, delay: int = 50) -> Dict:
         """
@@ -316,22 +313,23 @@ class BrowserAgent:
             Dict with result
         """
         if not self.page:
-            return {'success': False, 'error': 'No page loaded'}
+            return {"success": False, "error": "No page loaded"}
 
         try:
             if BROWSER_TYPE == "playwright":
                 self.page.type(selector, text, delay=delay)
             else:
                 from selenium.webdriver.common.by import By
+
                 element = self.browser.find_element(By.CSS_SELECTOR, selector)
                 for char in text:
                     element.send_keys(char)
                     time.sleep(delay / 1000)
 
-            return {'success': True, 'typed': len(text)}
+            return {"success": True, "typed": len(text)}
 
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def scroll(self, direction: str = "down", amount: int = 500) -> Dict:
         """
@@ -345,7 +343,7 @@ class BrowserAgent:
             Dict with result
         """
         if not self.page:
-            return {'success': False, 'error': 'No page loaded'}
+            return {"success": False, "error": "No page loaded"}
 
         try:
             scroll_amount = amount if direction == "down" else -amount
@@ -355,10 +353,10 @@ class BrowserAgent:
             else:
                 self.browser.execute_script(f"window.scrollBy(0, {scroll_amount})")
 
-            return {'success': True, 'scrolled': direction, 'amount': amount}
+            return {"success": True, "scrolled": direction, "amount": amount}
 
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def screenshot(self, name: str = None, full_page: bool = False) -> str:
         """
@@ -404,26 +402,23 @@ class BrowserAgent:
         try:
             if BROWSER_TYPE == "playwright":
                 links = self.page.eval_on_selector_all(
-                    'a[href]',
-                    'elements => elements.map(e => ({text: e.innerText.trim(), href: e.href}))'
+                    "a[href]",
+                    "elements => elements.map(e => ({text: e.innerText.trim(), href: e.href}))",
                 )
             else:
                 from selenium.webdriver.common.by import By
-                elements = self.browser.find_elements(By.TAG_NAME, 'a')
+
+                elements = self.browser.find_elements(By.TAG_NAME, "a")
                 links = []
                 for e in elements:
                     try:
-                        links.append({
-                            'text': e.text.strip(),
-                            'href': e.get_attribute('href')
-                        })
+                        links.append({"text": e.text.strip(), "href": e.get_attribute("href")})
                     except Exception:
                         pass
 
             # Filter valid links
             valid_links = [
-                l for l in links
-                if l.get('href') and l.get('text') and len(l['text']) > 0
+                l for l in links if l.get("href") and l.get("text") and len(l["text"]) > 0
             ]
 
             return valid_links[:max_links]
@@ -444,10 +439,11 @@ class BrowserAgent:
         """
         # URL encode the query
         from urllib.parse import quote_plus
+
         encoded_query = quote_plus(query)
 
         result = self.goto(f"https://www.google.com/search?q={encoded_query}")
-        if not result.get('success'):
+        if not result.get("success"):
             return []
 
         time.sleep(2)  # Wait for results to load
@@ -458,11 +454,13 @@ class BrowserAgent:
         # Filter to actual search results (not Google internal links)
         results = []
         for link in links:
-            href = link.get('href', '')
-            if (href and
-                'google.com' not in href and
-                '/search?' not in href and
-                href.startswith('http')):
+            href = link.get("href", "")
+            if (
+                href
+                and "google.com" not in href
+                and "/search?" not in href
+                and href.startswith("http")
+            ):
                 results.append(link)
 
         return results[:num_results]
@@ -492,6 +490,7 @@ class BrowserAgent:
                 from selenium.webdriver.support.ui import WebDriverWait
                 from selenium.webdriver.support import expected_conditions as EC
                 from selenium.webdriver.common.by import By
+
                 WebDriverWait(self.browser, timeout / 1000).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, selector))
                 )
@@ -523,13 +522,13 @@ class BrowserAgent:
     def get_stats(self) -> Dict:
         """Get browser agent statistics."""
         return {
-            'available': BROWSER_AVAILABLE,
-            'backend': BROWSER_TYPE,
-            'is_running': self.browser is not None,
-            'history_count': len(self.history),
-            'current_url': self.get_url(),
-            'current_title': self.get_title(),
-            'screenshots_dir': str(self.screenshots_dir)
+            "available": BROWSER_AVAILABLE,
+            "backend": BROWSER_TYPE,
+            "is_running": self.browser is not None,
+            "history_count": len(self.history),
+            "current_url": self.get_url(),
+            "current_title": self.get_title(),
+            "screenshots_dir": str(self.screenshots_dir),
         }
 
     def __enter__(self):
@@ -558,7 +557,7 @@ def run_browser_command(agent: BrowserAgent, command: str) -> str:
     if command.startswith("go to ") or command.startswith("open "):
         url = command.split(" ", 2)[-1]
         result = agent.goto(url)
-        if result.get('success'):
+        if result.get("success"):
             return f"Opened: {result['title']}"
         return f"Error: {result.get('error')}"
 
@@ -578,7 +577,7 @@ def run_browser_command(agent: BrowserAgent, command: str) -> str:
     elif command.startswith("click "):
         target = command[6:]
         result = agent.click(target)
-        if result.get('success'):
+        if result.get("success"):
             return f"Clicked: {target}"
         return f"Error: {result.get('error')}"
 

@@ -13,6 +13,7 @@ import threading
 
 class ToolStatus(Enum):
     """Tool execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -24,6 +25,7 @@ class ToolStatus(Enum):
 @dataclass
 class ToolExecution:
     """Result of a tool execution."""
+
     name: str
     args: Dict[str, Any]
     status: ToolStatus = ToolStatus.PENDING
@@ -120,9 +122,7 @@ class ToolExecutor:
         # 1. Run PreToolUse hook
         if self.hooks:
             hook_result = await self.hooks.run_hook(
-                "PreToolUse",
-                tool_name=tool_name,
-                tool_input=args
+                "PreToolUse", tool_name=tool_name, tool_input=args
             )
             if hook_result.get("decision") == "block":
                 execution.status = ToolStatus.BLOCKED

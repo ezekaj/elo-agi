@@ -18,8 +18,11 @@ SM-2 Reference:
 import pytest
 import numpy as np
 from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
-    SpacedRepetitionScheduler, RepetitionSchedule, ReviewQuality,
+    SpacedRepetitionScheduler,
+    RepetitionSchedule,
+    ReviewQuality,
 )
+
 
 class TestSM2EasinessFormula:
     """Tests for SM-2 easiness factor updates."""
@@ -99,6 +102,7 @@ class TestSM2EasinessFormula:
 
         assert scheduler.get_schedule("mem1").easiness <= 2.5
 
+
 class TestSM2IntervalProgression:
     """Tests for SM-2 interval progression."""
 
@@ -165,6 +169,7 @@ class TestSM2IntervalProgression:
         # Should reset to ~initial interval (1 day)
         assert reset_interval == pytest.approx(1.0, rel=0.1)
 
+
 class TestSM2RepetitionCount:
     """Tests for repetition count tracking."""
 
@@ -192,6 +197,7 @@ class TestSM2RepetitionCount:
 
         scheduler.schedule_review("mem1", ReviewQuality.INCORRECT)
         assert scheduler.get_schedule("mem1").repetition_count == 0
+
 
 class TestSM2QualityBoundaries:
     """Tests for quality rating boundaries."""
@@ -221,6 +227,7 @@ class TestSM2QualityBoundaries:
         assert scheduler.get_schedule("mem1").repetition_count == 0
         assert scheduler.get_schedule("mem1").streak == 0
 
+
 class TestSM2Integration:
     """Integration tests for SM-2 algorithm over multiple reviews."""
 
@@ -232,9 +239,9 @@ class TestSM2Integration:
         # Simulate: mostly good reviews with occasional struggles
         qualities = [
             ReviewQuality.CORRECT_WITH_EFFORT,  # Day 1: struggle
-            ReviewQuality.EASY_CORRECT,         # Day 2: better
-            ReviewQuality.EASY_CORRECT,         # Day ~8: good
-            ReviewQuality.PERFECT,              # Day ~20: mastered
+            ReviewQuality.EASY_CORRECT,  # Day 2: better
+            ReviewQuality.EASY_CORRECT,  # Day ~8: good
+            ReviewQuality.PERFECT,  # Day ~20: mastered
         ]
 
         intervals = []
@@ -244,8 +251,9 @@ class TestSM2Integration:
 
         # Intervals should generally increase
         for i in range(1, len(intervals)):
-            assert intervals[i] >= intervals[i-1] * 0.5, \
-                f"Interval {i} ({intervals[i]}) shouldn't drop too much from {intervals[i-1]}"
+            assert intervals[i] >= intervals[i - 1] * 0.5, (
+                f"Interval {i} ({intervals[i]}) shouldn't drop too much from {intervals[i - 1]}"
+            )
 
     def test_relearning_after_lapse(self):
         """Test that relearning is faster after lapse (preserved EF)."""

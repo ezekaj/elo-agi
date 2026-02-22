@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class SimulationParams:
     """Parameters for action simulation"""
+
     n_motor_units: int = 50
     n_action_types: int = 10
     simulation_strength: float = 0.5
@@ -64,7 +65,7 @@ class MotorSimulator:
             "success": True,
             "action": action_name,
             "activation": self.simulation_activation.copy(),
-            "inhibited": True
+            "inhibited": True,
         }
 
     def predict_outcome(self, action_name: str) -> np.ndarray:
@@ -88,7 +89,7 @@ class MotorSimulator:
         return {
             "simulating": self.simulating,
             "activation": self.simulation_activation.copy(),
-            "inhibition": self.inhibition_level
+            "inhibition": self.inhibition_level,
         }
 
 
@@ -150,7 +151,7 @@ class MirrorSystem:
         return {
             "recognized_action": best_match,
             "confidence": best_similarity,
-            "mirror_activation": self.mirror_activation.copy()
+            "mirror_activation": self.mirror_activation.copy(),
         }
 
     def execute_action(self, action_name: str) -> Dict:
@@ -163,11 +164,7 @@ class MirrorSystem:
         # Full activation during execution
         self.mirror_activation = self.action_mirrors[action_name].copy()
 
-        return {
-            "success": True,
-            "action": action_name,
-            "activation": self.mirror_activation.copy()
-        }
+        return {"success": True, "action": action_name, "activation": self.mirror_activation.copy()}
 
     def get_resonance(self) -> float:
         """Get current motor resonance level"""
@@ -175,7 +172,7 @@ class MirrorSystem:
 
     def decay(self, dt: float = 1.0):
         """Decay mirror activation"""
-        self.mirror_activation *= (1 - self.params.decay_rate * dt)
+        self.mirror_activation *= 1 - self.params.decay_rate * dt
         if np.max(np.abs(self.mirror_activation)) < 0.01:
             self.mode = "idle"
 
@@ -209,9 +206,7 @@ class ActionUnderstanding:
         # If recognized, simulate to predict outcome
         predicted_outcome = None
         if mirror_result["recognized_action"]:
-            predicted_outcome = self.simulator.predict_outcome(
-                mirror_result["recognized_action"]
-            )
+            predicted_outcome = self.simulator.predict_outcome(mirror_result["recognized_action"])
 
         self.understood_action = mirror_result["recognized_action"]
         self.understanding_confidence = mirror_result["confidence"]
@@ -220,7 +215,7 @@ class ActionUnderstanding:
             "action": mirror_result["recognized_action"],
             "confidence": mirror_result["confidence"],
             "motor_resonance": self.mirror_system.get_resonance(),
-            "predicted_outcome": predicted_outcome
+            "predicted_outcome": predicted_outcome,
         }
 
     def predict_intention(self, action_sequence: List[np.ndarray]) -> str:
@@ -236,6 +231,7 @@ class ActionUnderstanding:
         if understood:
             # Return most common action as "intention"
             from collections import Counter
+
             counter = Counter(understood)
             return counter.most_common(1)[0][0]
 
@@ -245,7 +241,7 @@ class ActionUnderstanding:
         """Update system state"""
         self.mirror_system.decay(dt)
         if not self.mirror_system.mode == "observing":
-            self.understanding_confidence *= (1 - self.params.decay_rate * dt)
+            self.understanding_confidence *= 1 - self.params.decay_rate * dt
 
     def get_state(self) -> Dict:
         """Get understanding state"""
@@ -253,5 +249,5 @@ class ActionUnderstanding:
             "understood_action": self.understood_action,
             "confidence": self.understanding_confidence,
             "mirror_resonance": self.mirror_system.get_resonance(),
-            "simulation_state": self.simulator.get_simulation_state()
+            "simulation_state": self.simulator.get_simulation_state(),
         }

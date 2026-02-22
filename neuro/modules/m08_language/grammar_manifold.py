@@ -16,6 +16,7 @@ from enum import Enum
 
 class ConstraintType(Enum):
     """Types of grammatical constraints"""
+
     STRUCTURAL = "structural"  # Structure dependence
     HIERARCHICAL = "hierarchical"  # Hierarchy requirements
     RECURSIVE = "recursive"  # Recursion constraints
@@ -26,6 +27,7 @@ class ConstraintType(Enum):
 @dataclass
 class GrammarConstraint:
     """A constraint on possible grammars"""
+
     name: str
     constraint_type: ConstraintType
     weight: float = 1.0
@@ -35,6 +37,7 @@ class GrammarConstraint:
 @dataclass
 class GrammarState:
     """Point in grammar space"""
+
     parameters: np.ndarray
     is_possible: bool
     violation_score: float = 0.0
@@ -73,25 +76,25 @@ class GrammarConstraintManifold:
                 name="structure_dependence",
                 constraint_type=ConstraintType.STRUCTURAL,
                 weight=2.0,
-                is_hard=True
+                is_hard=True,
             ),
             GrammarConstraint(
                 name="hierarchical_organization",
                 constraint_type=ConstraintType.HIERARCHICAL,
                 weight=1.5,
-                is_hard=True
+                is_hard=True,
             ),
             GrammarConstraint(
                 name="recursive_embedding",
                 constraint_type=ConstraintType.RECURSIVE,
                 weight=1.0,
-                is_hard=False
+                is_hard=False,
             ),
             GrammarConstraint(
                 name="bounded_recursion",
                 constraint_type=ConstraintType.RECURSIVE,
                 weight=1.0,
-                is_hard=True
+                is_hard=True,
             ),
         ]
 
@@ -109,7 +112,7 @@ class GrammarConstraintManifold:
         if len(params) < self.dim:
             params = np.pad(params, (0, self.dim - len(params)))
         elif len(params) > self.dim:
-            params = params[:self.dim]
+            params = params[: self.dim]
 
         # Transform through constraint space
         transformed = np.tanh(self.W_constraint @ params)
@@ -127,7 +130,9 @@ class GrammarConstraintManifold:
             constraint_violation += constraint.weight * violation
 
         # Combined score
-        total_violation = 0.5 * normalized_distance + 0.5 * (constraint_violation / len(self.constraints))
+        total_violation = 0.5 * normalized_distance + 0.5 * (
+            constraint_violation / len(self.constraints)
+        )
         return float(np.clip(total_violation, 0, 2))
 
     def _check_constraint(self, params: np.ndarray, constraint: GrammarConstraint) -> float:
@@ -138,7 +143,9 @@ class GrammarConstraintManifold:
         if constraint.constraint_type == ConstraintType.STRUCTURAL:
             # Structure dependence: only violate for extreme anti-correlation
             if len(params) >= 4:
-                correlation = np.corrcoef(params[:len(params)//2], params[len(params)//2:])[0, 1]
+                correlation = np.corrcoef(params[: len(params) // 2], params[len(params) // 2 :])[
+                    0, 1
+                ]
                 if np.isnan(correlation):
                     return 0.0  # No violation if can't compute
                 # Only violate if strongly anti-correlated
@@ -147,8 +154,8 @@ class GrammarConstraintManifold:
 
         elif constraint.constraint_type == ConstraintType.HIERARCHICAL:
             # Hierarchical: only violate for extreme variance ratios
-            var1 = np.var(params[:len(params)//2]) + 1e-8
-            var2 = np.var(params[len(params)//2:]) + 1e-8
+            var1 = np.var(params[: len(params) // 2]) + 1e-8
+            var2 = np.var(params[len(params) // 2 :]) + 1e-8
             log_ratio = np.abs(np.log(var1 / var2))
             return min(1.0, max(0.0, log_ratio - 3) / 3)  # Violate only above ratio of 20x
 
@@ -174,7 +181,7 @@ class GrammarConstraintManifold:
         if len(params) < self.dim:
             params = np.pad(params, (0, self.dim - len(params)))
         elif len(params) > self.dim:
-            params = params[:self.dim]
+            params = params[: self.dim]
 
         if self.is_possible_grammar(params):
             return params
@@ -217,7 +224,7 @@ class GrammarConstraintManifold:
             parameters=params.copy(),
             is_possible=is_possible,
             violation_score=violation,
-            nearest_possible=nearest
+            nearest_possible=nearest,
         )
 
         self.evaluation_history.append(state)
@@ -243,17 +250,17 @@ class UniversalGrammar:
 
         # Core UG principles
         self.principles: Dict[str, Callable] = {
-            'structure_dependence': self._check_structure_dependence,
-            'subjacency': self._check_subjacency,
-            'c_command': self._check_c_command,
-            'binding': self._check_binding,
+            "structure_dependence": self._check_structure_dependence,
+            "subjacency": self._check_subjacency,
+            "c_command": self._check_c_command,
+            "binding": self._check_binding,
         }
 
         # Parameters (in Principles & Parameters framework)
         self.parameters: Dict[str, float] = {
-            'head_direction': 0.0,  # -1 = head-final, +1 = head-initial
-            'pro_drop': 0.0,  # Allow null subjects?
-            'wh_movement': 0.0,  # Overt wh-movement?
+            "head_direction": 0.0,  # -1 = head-final, +1 = head-initial
+            "pro_drop": 0.0,  # Allow null subjects?
+            "wh_movement": 0.0,  # Overt wh-movement?
         }
 
     def evaluate(self, grammar_params: np.ndarray) -> Dict[str, float]:
@@ -263,13 +270,13 @@ class UniversalGrammar:
         for name, check_fn in self.principles.items():
             results[name] = check_fn(grammar_params)
 
-        results['overall'] = np.mean(list(results.values()))
+        results["overall"] = np.mean(list(results.values()))
         return results
 
     def is_ug_compatible(self, grammar_params: np.ndarray) -> bool:
         """Check if grammar is compatible with Universal Grammar"""
         results = self.evaluate(grammar_params)
-        return bool(results['overall'] >= 0.25)  # More lenient threshold, explicit Python bool
+        return bool(results["overall"] >= 0.25)  # More lenient threshold, explicit Python bool
 
     def _check_structure_dependence(self, params: np.ndarray) -> float:
         """Check structure dependence principle
@@ -281,8 +288,8 @@ class UniversalGrammar:
             return 0.5
 
         # Structure-dependent: local dependencies stronger than distant
-        local_var = np.var(np.diff(params[:len(params)//2]))
-        distant_var = np.var(params[:len(params)//2] - params[len(params)//2:])
+        local_var = np.var(np.diff(params[: len(params) // 2]))
+        distant_var = np.var(params[: len(params) // 2] - params[len(params) // 2 :])
 
         return float(local_var < distant_var)
 
@@ -296,7 +303,7 @@ class UniversalGrammar:
             return 0.5
 
         # Check for bounded vs unbounded dependencies
-        autocorr = np.correlate(params, params, mode='full')
+        autocorr = np.correlate(params, params, mode="full")
         decay_rate = np.abs(np.diff(autocorr)).mean()
 
         return float(decay_rate > 0.1)  # Should decay, not persist
@@ -310,8 +317,8 @@ class UniversalGrammar:
             return 0.5
 
         # Check for asymmetric dominance
-        first_half = params[:len(params)//2]
-        second_half = params[len(params)//2:]
+        first_half = params[: len(params) // 2]
+        second_half = params[len(params) // 2 :]
 
         asymmetry = np.abs(np.mean(first_half) - np.mean(second_half))
         return float(asymmetry > 0.1)
@@ -361,7 +368,7 @@ class ImpossibleGrammarGenerator:
             projected = self.manifold.center + np.random.randn(self.dim) * 0.1
         return self.manifold.center.copy()  # Fallback to center
 
-    def generate_impossible(self, violation_type: str = 'random') -> np.ndarray:
+    def generate_impossible(self, violation_type: str = "random") -> np.ndarray:
         """Generate an impossible grammar
 
         Args:
@@ -370,34 +377,33 @@ class ImpossibleGrammarGenerator:
                 - 'structure': Violates structure dependence
                 - 'unbounded': Violates bounded recursion
         """
-        if violation_type == 'random':
+        if violation_type == "random":
             # Far from possible region
             params = self.manifold.center + np.random.randn(self.dim) * 5.0
             return params
 
-        elif violation_type == 'structure':
+        elif violation_type == "structure":
             # Violates structure dependence (linear order only)
             params = np.zeros(self.dim)
-            params[:self.dim//2] = np.arange(self.dim//2)  # Linear pattern
-            params[self.dim//2:] = np.random.randn(self.dim//2)  # Uncorrelated
+            params[: self.dim // 2] = np.arange(self.dim // 2)  # Linear pattern
+            params[self.dim // 2 :] = np.random.randn(self.dim // 2)  # Uncorrelated
             return params
 
-        elif violation_type == 'unbounded':
+        elif violation_type == "unbounded":
             # Violates bounded recursion
             params = np.zeros(self.dim)
             # Create unbounded self-reference
             for i in range(self.dim):
-                params[i] = params[i-1] if i > 0 else 1.0
+                params[i] = params[i - 1] if i > 0 else 1.0
             return params * 10  # Amplify to make clearly impossible
 
         return np.random.randn(self.dim) * 3.0
 
-    def generate_test_set(self, n_possible: int = 10, n_impossible: int = 10) -> Dict[str, List[np.ndarray]]:
+    def generate_test_set(
+        self, n_possible: int = 10, n_impossible: int = 10
+    ) -> Dict[str, List[np.ndarray]]:
         """Generate test set of possible and impossible grammars"""
         possible = [self.generate_possible() for _ in range(n_possible)]
         impossible = [self.generate_impossible() for _ in range(n_impossible)]
 
-        return {
-            'possible': possible,
-            'impossible': impossible
-        }
+        return {"possible": possible, "impossible": impossible}

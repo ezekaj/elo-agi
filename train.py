@@ -43,18 +43,12 @@ class OllamaChat:
         """Send chat request to Ollama."""
         try:
             url = f"{self.base_url}/api/generate"
-            data = {
-                "model": self.model,
-                "prompt": prompt,
-                "stream": False
-            }
+            data = {"model": self.model, "prompt": prompt, "stream": False}
             if system:
                 data["system"] = system
 
             req = urllib.request.Request(
-                url,
-                data=json.dumps(data).encode(),
-                headers={"Content-Type": "application/json"}
+                url, data=json.dumps(data).encode(), headers={"Content-Type": "application/json"}
             )
 
             with urllib.request.urlopen(req, timeout=60) as response:
@@ -75,66 +69,66 @@ class Benchmark:
                 "question": "A store sells apples for $2 each. If John buys 5 apples and pays with a $20 bill, how much change does he get?",
                 "answer": "10",
                 "keywords": ["10", "dollar", "change"],
-                "category": "math"
+                "category": "math",
             },
             {
                 "question": "A train travels at 60 mph. How far does it travel in 2.5 hours?",
                 "answer": "150",
                 "keywords": ["150", "miles"],
-                "category": "math"
+                "category": "math",
             },
             {
                 "question": "If a rectangle has length 8 and width 5, what is its area?",
                 "answer": "40",
                 "keywords": ["40"],
-                "category": "math"
+                "category": "math",
             },
             # Logic
             {
                 "question": "All cats are mammals. All mammals are animals. Is a cat an animal? Answer yes or no and explain.",
                 "answer": "yes",
                 "keywords": ["yes", "mammal", "animal", "therefore"],
-                "category": "logic"
+                "category": "logic",
             },
             {
                 "question": "If it rains, the ground gets wet. The ground is wet. Can we conclude it rained? Answer yes or no.",
                 "answer": "no",
                 "keywords": ["no", "not necessarily", "other"],
-                "category": "logic"
+                "category": "logic",
             },
             # Common sense
             {
                 "question": "A person puts ice cream in the oven at 400 degrees. What happens?",
                 "answer": "melts",
                 "keywords": ["melt", "liquid", "heat"],
-                "category": "common_sense"
+                "category": "common_sense",
             },
             # Trick questions
             {
                 "question": "A farmer has 17 sheep. All but 9 run away. How many sheep does he have left?",
                 "answer": "9",
                 "keywords": ["9"],
-                "category": "trick"
+                "category": "trick",
             },
             {
                 "question": "If you have 3 apples and you take away 2, how many apples do YOU have?",
                 "answer": "2",
                 "keywords": ["2"],
-                "category": "trick"
+                "category": "trick",
             },
             # Chain of thought
             {
                 "question": "If Alice is twice as old as Bob, and Bob is 15, how old will Alice be in 5 years?",
                 "answer": "35",
                 "keywords": ["30", "35", "twice"],
-                "category": "chain_of_thought"
+                "category": "chain_of_thought",
             },
             # Theory of mind
             {
                 "question": "Sally puts a marble in her basket and leaves. Anne moves it to her box. When Sally returns, where will she LOOK for the marble?",
                 "answer": "basket",
                 "keywords": ["basket", "think", "believe"],
-                "category": "theory_of_mind"
+                "category": "theory_of_mind",
             },
         ]
 
@@ -175,11 +169,13 @@ class Benchmark:
                 response = f"[Error: {e}]"
                 score = 0.0
 
-            results["tests"].append({
-                "category": test["category"],
-                "question": test["question"][:50],
-                "score": round(score, 3)
-            })
+            results["tests"].append(
+                {
+                    "category": test["category"],
+                    "question": test["question"][:50],
+                    "score": round(score, 3),
+                }
+            )
             results["total"] += score
 
         results["avg"] = round(results["total"] / len(self.tests), 3)
@@ -190,42 +186,42 @@ class DataCollector:
     """Collect training data from multiple sources."""
 
     def __init__(self):
-        self.sources = ['benchmark', 'arxiv', 'web', 'wikipedia']
+        self.sources = ["benchmark", "arxiv", "web", "wikipedia"]
 
     def fetch_benchmark_qa(self) -> List[Dict]:
         """Get Q&A pairs from benchmark questions with explanations."""
         qa_pairs = [
             {
                 "prompt": "If you buy 5 apples for $2 each and pay with $20, how much change do you get?",
-                "completion": "Step 1: Calculate total cost: 5 apples × $2 = $10\nStep 2: Calculate change: $20 - $10 = $10\nAnswer: $10 in change"
+                "completion": "Step 1: Calculate total cost: 5 apples × $2 = $10\nStep 2: Calculate change: $20 - $10 = $10\nAnswer: $10 in change",
             },
             {
                 "prompt": "A train travels at 60 mph for 2.5 hours. How far does it go?",
-                "completion": "Distance = Speed × Time\nDistance = 60 mph × 2.5 hours = 150 miles\nAnswer: 150 miles"
+                "completion": "Distance = Speed × Time\nDistance = 60 mph × 2.5 hours = 150 miles\nAnswer: 150 miles",
             },
             {
                 "prompt": "All cats are mammals. All mammals are animals. Is a cat an animal?",
-                "completion": "Yes. This is a syllogism:\n1. All cats are mammals\n2. All mammals are animals\n3. Therefore, all cats are animals\nAnswer: Yes"
+                "completion": "Yes. This is a syllogism:\n1. All cats are mammals\n2. All mammals are animals\n3. Therefore, all cats are animals\nAnswer: Yes",
             },
             {
                 "prompt": "If it rains, the ground gets wet. The ground is wet. Did it rain?",
-                "completion": "No, we cannot conclude it rained. This is the fallacy of 'affirming the consequent'. The ground could be wet from:\n- Sprinklers\n- Spilled water\n- Dew\n- Flooding\nAnswer: No, not necessarily"
+                "completion": "No, we cannot conclude it rained. This is the fallacy of 'affirming the consequent'. The ground could be wet from:\n- Sprinklers\n- Spilled water\n- Dew\n- Flooding\nAnswer: No, not necessarily",
             },
             {
                 "prompt": "A farmer has 17 sheep. All but 9 run away. How many are left?",
-                "completion": "This is a trick question. 'All but 9' means 9 remain.\nAnswer: 9 sheep"
+                "completion": "This is a trick question. 'All but 9' means 9 remain.\nAnswer: 9 sheep",
             },
             {
                 "prompt": "You have 3 apples and take away 2. How many do YOU have?",
-                "completion": "You took 2 apples, so YOU have 2 apples. The question asks what YOU have, not what's left.\nAnswer: 2 apples"
+                "completion": "You took 2 apples, so YOU have 2 apples. The question asks what YOU have, not what's left.\nAnswer: 2 apples",
             },
             {
                 "prompt": "Alice is twice as old as Bob. Bob is 15. How old will Alice be in 5 years?",
-                "completion": "Step 1: Bob's age = 15\nStep 2: Alice's age = 2 × 15 = 30\nStep 3: Alice in 5 years = 30 + 5 = 35\nAnswer: 35 years old"
+                "completion": "Step 1: Bob's age = 15\nStep 2: Alice's age = 2 × 15 = 30\nStep 3: Alice in 5 years = 30 + 5 = 35\nAnswer: 35 years old",
             },
             {
                 "prompt": "Sally puts a marble in basket. Anne moves it to box. Where will Sally look for it?",
-                "completion": "Sally will look in the BASKET. This is Theory of Mind - Sally doesn't know Anne moved it. She will look where SHE left it.\nAnswer: Basket"
+                "completion": "Sally will look in the BASKET. This is Theory of Mind - Sally doesn't know Anne moved it. She will look where SHE left it.\nAnswer: Basket",
             },
         ]
         return qa_pairs
@@ -234,26 +230,28 @@ class DataCollector:
         """Fetch papers from ArXiv."""
         items = []
         try:
-            url = f'http://export.arxiv.org/api/query?search_query=cat:{category}&start={random.randint(0,30)}&max_results=5'
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            url = f"http://export.arxiv.org/api/query?search_query=cat:{category}&start={random.randint(0, 30)}&max_results=5"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
 
             with urllib.request.urlopen(req, timeout=15) as response:
-                data = response.read().decode('utf-8')
+                data = response.read().decode("utf-8")
 
-            entries = re.findall(r'<entry>(.*?)</entry>', data, re.DOTALL)
+            entries = re.findall(r"<entry>(.*?)</entry>", data, re.DOTALL)
             for entry in entries:
-                title = re.search(r'<title>(.*?)</title>', entry, re.DOTALL)
-                summary = re.search(r'<summary>(.*?)</summary>', entry, re.DOTALL)
+                title = re.search(r"<title>(.*?)</title>", entry, re.DOTALL)
+                summary = re.search(r"<summary>(.*?)</summary>", entry, re.DOTALL)
 
                 if title and summary:
                     title_text = html.unescape(title.group(1).strip()[:100])
                     summary_text = html.unescape(summary.group(1).strip()[:500])
 
-                    items.append({
-                        "prompt": f"What is {title_text}?",
-                        "completion": summary_text,
-                        "source": "arxiv"
-                    })
+                    items.append(
+                        {
+                            "prompt": f"What is {title_text}?",
+                            "completion": summary_text,
+                            "source": "arxiv",
+                        }
+                    )
         except Exception:
             pass
         return items
@@ -263,25 +261,25 @@ class DataCollector:
         items = []
         try:
             url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(query)}&format=json&no_html=1"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
 
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode())
 
-            if data.get('Abstract'):
-                items.append({
-                    "prompt": f"Explain {query}",
-                    "completion": data['Abstract'],
-                    "source": "web"
-                })
+            if data.get("Abstract"):
+                items.append(
+                    {"prompt": f"Explain {query}", "completion": data["Abstract"], "source": "web"}
+                )
 
-            for topic in data.get('RelatedTopics', [])[:3]:
-                if isinstance(topic, dict) and topic.get('Text'):
-                    items.append({
-                        "prompt": f"What do you know about {query}?",
-                        "completion": topic['Text'],
-                        "source": "web"
-                    })
+            for topic in data.get("RelatedTopics", [])[:3]:
+                if isinstance(topic, dict) and topic.get("Text"):
+                    items.append(
+                        {
+                            "prompt": f"What do you know about {query}?",
+                            "completion": topic["Text"],
+                            "source": "web",
+                        }
+                    )
         except Exception:
             pass
         return items
@@ -291,17 +289,19 @@ class DataCollector:
         items = []
         try:
             url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(topic)}"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
 
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode())
 
-            if data.get('extract'):
-                items.append({
-                    "prompt": f"Tell me about {topic}",
-                    "completion": data['extract'][:500],
-                    "source": "wikipedia"
-                })
+            if data.get("extract"):
+                items.append(
+                    {
+                        "prompt": f"Tell me about {topic}",
+                        "completion": data["extract"][:500],
+                        "source": "wikipedia",
+                    }
+                )
         except Exception:
             pass
         return items
@@ -315,7 +315,7 @@ class DataCollector:
         print(f"  [benchmark] {len(all_data)} Q&A pairs")
 
         # ArXiv
-        categories = ['cs.AI', 'cs.LG', 'cs.CL']
+        categories = ["cs.AI", "cs.LG", "cs.CL"]
         for cat in categories:
             items = self.fetch_arxiv(cat)
             all_data.extend(items)
@@ -323,9 +323,15 @@ class DataCollector:
 
         # Web and Wikipedia
         topics = topics or [
-            'artificial intelligence', 'machine learning', 'neural networks',
-            'natural language processing', 'reasoning', 'logic',
-            'mathematics', 'problem solving', 'critical thinking'
+            "artificial intelligence",
+            "machine learning",
+            "neural networks",
+            "natural language processing",
+            "reasoning",
+            "logic",
+            "mathematics",
+            "problem solving",
+            "critical thinking",
         ]
 
         for topic in topics[:5]:  # Limit to avoid rate limiting
@@ -379,11 +385,11 @@ class NeuroTrainer:
             "prompt": prompt,
             "completion": completion,
             "source": source,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-        with open(self.training_file, 'a') as f:
-            f.write(json.dumps(pair) + '\n')
+        with open(self.training_file, "a") as f:
+            f.write(json.dumps(pair) + "\n")
 
         # Also save to knowledge base
         self.trainer.learn(prompt[:50], completion[:500], source)
@@ -422,10 +428,12 @@ class NeuroTrainer:
         print(f"\n  Overall: {results['avg']:.0%}")
 
         # Record in evolution
-        weak_areas = [(cat, sum(s)/len(s)) for cat, s in categories.items() if sum(s)/len(s) < 0.7]
-        self.evolution.record_benchmark(results['avg'], {'weak_areas': weak_areas})
+        weak_areas = [
+            (cat, sum(s) / len(s)) for cat, s in categories.items() if sum(s) / len(s) < 0.7
+        ]
+        self.evolution.record_benchmark(results["avg"], {"weak_areas": weak_areas})
 
-        return results['avg']
+        return results["avg"]
 
     def collect_and_learn(self, topics: List[str] = None) -> int:
         """Collect data and learn unique facts."""
@@ -435,10 +443,14 @@ class NeuroTrainer:
 
         unique_count = 0
         for item in data:
-            if self.save_training_pair(item["prompt"], item["completion"], item.get("source", "collected")):
+            if self.save_training_pair(
+                item["prompt"], item["completion"], item.get("source", "collected")
+            ):
                 unique_count += 1
 
-        print(f"\n[LEARNED] {unique_count} unique facts (total: {self.evolution.get_stats()['total_facts']})")
+        print(
+            f"\n[LEARNED] {unique_count} unique facts (total: {self.evolution.get_stats()['total_facts']})"
+        )
         return unique_count
 
     def train_mlx(self) -> bool:
@@ -452,7 +464,7 @@ class NeuroTrainer:
 
         result = self.evolution.run_mlx_training(self.model)
 
-        if result['success']:
+        if result["success"]:
             print(f"[TRAINING] MLX fine-tuning completed!")
             return True
         else:
@@ -462,9 +474,9 @@ class NeuroTrainer:
     def run_cycle(self, topics: List[str] = None) -> Dict:
         """Run one training cycle."""
         stats = self.evolution.get_stats()
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"NEURO TRAINING - Cycle {stats['cycle']}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Facts learned: {stats['total_facts']}")
         print(f"Training pairs: {stats['training_pairs']}")
 
@@ -481,22 +493,22 @@ class NeuroTrainer:
         print(self.evolution.reflect())
 
         return {
-            'cycle': stats['cycle'],
-            'unique_facts': unique,
-            'score': score,
-            'improvement': self.evolution.get_improvement()
+            "cycle": stats["cycle"],
+            "unique_facts": unique,
+            "score": score,
+            "improvement": self.evolution.get_improvement(),
         }
 
     def run_until_crushed(self, target_score: float = 0.85, delay: int = 30):
         """Run training continuously until benchmark target is reached."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("NEURO CONTINUOUS TRAINING - CRUSH MODE")
-        print("="*60)
+        print("=" * 60)
         print(f"Model: {self.model}")
         print(f"Target score: {target_score:.0%}")
         print(f"Delay between cycles: {delay}s")
         print("Will run FOREVER until target is reached!")
-        print("="*60)
+        print("=" * 60)
 
         cycle = 0
         best_score = 0
@@ -508,7 +520,7 @@ class NeuroTrainer:
 
             try:
                 result = self.run_cycle()
-                current_score = result['score']
+                current_score = result["score"]
 
                 if current_score > best_score:
                     best_score = current_score
@@ -516,18 +528,18 @@ class NeuroTrainer:
 
                 if current_score >= target_score:
                     elapsed = datetime.now() - start_time
-                    print("\n" + "="*60)
+                    print("\n" + "=" * 60)
                     print("BENCHMARK CRUSHED!")
-                    print("="*60)
+                    print("=" * 60)
                     print(f"Final score: {current_score:.0%}")
                     print(f"Target was: {target_score:.0%}")
                     print(f"Total cycles: {cycle}")
                     print(f"Time elapsed: {elapsed}")
-                    print("="*60)
+                    print("=" * 60)
                     break
 
                 # Adaptive delay - faster when improving
-                if result['improvement'] > 0.02:
+                if result["improvement"] > 0.02:
                     actual_delay = delay // 2
                     print(f"Improving fast! Reducing delay to {actual_delay}s")
                 else:
@@ -551,21 +563,21 @@ class NeuroTrainer:
 
     def run_continuous(self, cycles: int = 10, delay: int = 30):
         """Run multiple training cycles continuously."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("NEURO CONTINUOUS TRAINING")
-        print("="*60)
+        print("=" * 60)
         print(f"Model: {self.model}")
         print(f"Cycles: {cycles}")
         print(f"Delay between cycles: {delay}s")
-        print("="*60)
+        print("=" * 60)
 
         for i in range(cycles):
-            print(f"\n>>> CYCLE {i+1}/{cycles}")
+            print(f"\n>>> CYCLE {i + 1}/{cycles}")
 
             try:
                 result = self.run_cycle()
 
-                if result['improvement'] > 0.05:
+                if result["improvement"] > 0.05:
                     print(f"\n*** SIGNIFICANT IMPROVEMENT: {result['improvement']:.1%} ***")
 
             except KeyboardInterrupt:
@@ -581,14 +593,14 @@ class NeuroTrainer:
 
         # Final summary
         stats = self.evolution.get_stats()
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TRAINING COMPLETE")
-        print("="*60)
+        print("=" * 60)
         print(f"Total facts learned: {stats['total_facts']}")
         print(f"Training pairs: {stats['training_pairs']}")
         print(f"MLX trainings: {stats['trainings']}")
         print(f"Final improvement: {stats['improvement']:+.1%}")
-        print("="*60)
+        print("=" * 60)
 
 
 def main():
@@ -620,9 +632,9 @@ def main():
         return
 
     # Interactive mode
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("NEURO LLM TRAINING")
-    print("="*60)
+    print("=" * 60)
     print(f"Model: {model}")
     print("\nCommands:")
     print("  1   - Run single training cycle")
@@ -633,36 +645,36 @@ def main():
     print("  c   - Collect data only")
     print("  s   - Show stats")
     print("  q   - Quit")
-    print("="*60)
+    print("=" * 60)
 
     while True:
         try:
             cmd = input("\n> ").strip().lower()
 
-            if cmd == 'q' or cmd == 'quit':
+            if cmd == "q" or cmd == "quit":
                 print("Saving and exiting...")
                 trainer.trainer.save()
                 break
 
-            elif cmd == '1':
+            elif cmd == "1":
                 trainer.run_cycle()
 
-            elif cmd == '5':
+            elif cmd == "5":
                 trainer.run_continuous(cycles=5)
 
-            elif cmd == '10':
+            elif cmd == "10":
                 trainer.run_continuous(cycles=10)
 
-            elif cmd == 'x' or cmd == 'crush':
+            elif cmd == "x" or cmd == "crush":
                 trainer.run_until_crushed(target_score=0.85, delay=30)
 
-            elif cmd == 'b':
+            elif cmd == "b":
                 trainer.run_benchmark()
 
-            elif cmd == 'c':
+            elif cmd == "c":
                 trainer.collect_and_learn()
 
-            elif cmd == 's':
+            elif cmd == "s":
                 stats = trainer.evolution.get_stats()
                 print(f"\nFacts: {stats['total_facts']}")
                 print(f"Training pairs: {stats['training_pairs']}")

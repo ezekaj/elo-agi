@@ -11,9 +11,19 @@ from .meta_learner import MetaLearner, MetaParams, LearningStrategy
 from .darwin_godel import DarwinGodelMachine, DGMParams, ImprovementCycle
 
 __all__ = [
-    'ModificationGenerator', 'GeneratorParams', 'Modification',
-    'ChangeVerifier', 'VerifierParams', 'VerificationResult',
-    'SystemUpdater', 'UpdaterParams', 'UpdateResult',
-    'MetaLearner', 'MetaParams', 'LearningStrategy',
-    'DarwinGodelMachine', 'DGMParams', 'ImprovementCycle',
+    "ModificationGenerator",
+    "GeneratorParams",
+    "Modification",
+    "ChangeVerifier",
+    "VerifierParams",
+    "VerificationResult",
+    "SystemUpdater",
+    "UpdaterParams",
+    "UpdateResult",
+    "MetaLearner",
+    "MetaParams",
+    "LearningStrategy",
+    "DarwinGodelMachine",
+    "DGMParams",
+    "ImprovementCycle",
 ]

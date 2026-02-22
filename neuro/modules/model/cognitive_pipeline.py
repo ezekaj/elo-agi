@@ -20,6 +20,7 @@ from datetime import datetime
 @dataclass
 class PipelineResponse:
     """Response from the cognitive pipeline."""
+
     content: str
     cognitive_analysis: Dict[str, Any]
     knowledge_used: List[str]
@@ -59,11 +60,14 @@ class CognitivePipeline:
         # Cognitive Orchestrator (loads ALL 38+ modules)
         try:
             from cognitive_orchestrator import CognitiveOrchestrator
+
             self.orchestrator = CognitiveOrchestrator(verbose=False)
             stats = self.orchestrator.get_stats()
-            self._cognitive_modules = stats['total_modules']
+            self._cognitive_modules = stats["total_modules"]
             self._active_components.append("cognitive_orchestrator")
-            self._log(f"Cognitive Orchestrator: {stats['active_modules']} active, {stats['fallback_modules']} fallback")
+            self._log(
+                f"Cognitive Orchestrator: {stats['active_modules']} active, {stats['fallback_modules']} fallback"
+            )
         except Exception as e:
             self._log(f"Cognitive Orchestrator: failed ({e})")
             self.orchestrator = None
@@ -71,6 +75,7 @@ class CognitivePipeline:
         # Knowledge Base
         try:
             from knowledge_base import SelfTrainer
+
             self.knowledge = SelfTrainer()
             self._active_components.append("knowledge_base")
             self._log("Knowledge Base: loaded")
@@ -81,6 +86,7 @@ class CognitivePipeline:
         # Episodic Memory
         try:
             from episodic_memory import EpisodicMemoryStore
+
             self.episodic = EpisodicMemoryStore()
             self._active_components.append("episodic_memory")
             self._log("Episodic Memory: loaded")
@@ -91,6 +97,7 @@ class CognitivePipeline:
         # Two-Stage Retrieval
         try:
             from retrieval import TwoStageRetriever
+
             self.retriever = TwoStageRetriever()
             self._active_components.append("retrieval")
             self._log("Two-Stage Retrieval: loaded")
@@ -101,6 +108,7 @@ class CognitivePipeline:
         # Bayesian Surprise
         try:
             from bayesian_surprise import BayesianSurprise, Observation
+
             self.surprise = BayesianSurprise(surprise_threshold=0.3)
             self._active_components.append("bayesian_surprise")
             self._log("Bayesian Surprise: loaded")
@@ -111,6 +119,7 @@ class CognitivePipeline:
         # Continual Learning
         try:
             from continual_learning import SimpleContinualLearner
+
             self.learner = SimpleContinualLearner()
             self._active_components.append("continual_learning")
             self._log("Continual Learning: loaded")
@@ -121,6 +130,7 @@ class CognitivePipeline:
         # UltraThink
         try:
             from ultrathink import UltraThink
+
             self.ultrathink = UltraThink(verbose=False)
             self._active_components.append("ultrathink")
             self._log("UltraThink: loaded")
@@ -131,6 +141,7 @@ class CognitivePipeline:
         # Tools
         try:
             from tools import Tools
+
             self.tools = Tools()
             self._active_components.append("tools")
             self._log("Tools: loaded")
@@ -139,10 +150,7 @@ class CognitivePipeline:
             self.tools = None
 
     def process(
-        self,
-        query: str,
-        context: Dict[str, Any] = None,
-        use_deep_thinking: bool = False
+        self, query: str, context: Dict[str, Any] = None, use_deep_thinking: bool = False
     ) -> PipelineResponse:
         """
         Process a query through the full cognitive pipeline.
@@ -180,6 +188,7 @@ class CognitivePipeline:
         if self.surprise:
             try:
                 from bayesian_surprise import Observation
+
                 obs = Observation(type="query", value=query[:50])
                 result = self.surprise.compute_surprise(obs)
                 surprise_level = result.surprise
@@ -197,7 +206,7 @@ class CognitivePipeline:
                     "modules_used": ultra_result.modules_used,
                     "confidence": ultra_result.confidence,
                     "insights": ultra_result.insights,
-                    "reasoning_steps": len(ultra_result.reasoning_chain)
+                    "reasoning_steps": len(ultra_result.reasoning_chain),
                 }
                 confidence = ultra_result.confidence
                 suggested_actions = ultra_result.suggested_actions
@@ -208,7 +217,7 @@ class CognitivePipeline:
                     "type": analysis.get("type", "unknown"),
                     "style": analysis.get("style", "analytical"),
                     "complexity": analysis.get("complexity", 0.5),
-                    "confidence": analysis.get("confidence", 0.5)
+                    "confidence": analysis.get("confidence", 0.5),
                 }
                 confidence = analysis.get("confidence", 0.5)
                 suggested_actions = analysis.get("suggested_actions", [])
@@ -219,7 +228,7 @@ class CognitivePipeline:
             knowledge=knowledge_used,
             memories=memory_used,
             analysis=cognitive_analysis,
-            surprise=surprise_level
+            surprise=surprise_level,
         )
 
         processing_time = time.time() - start_time
@@ -232,7 +241,7 @@ class CognitivePipeline:
             surprise_level=surprise_level,
             confidence=confidence,
             suggested_actions=suggested_actions,
-            processing_time=processing_time
+            processing_time=processing_time,
         )
 
     def _build_context(
@@ -241,7 +250,7 @@ class CognitivePipeline:
         knowledge: List[str],
         memories: List[str],
         analysis: Dict[str, Any],
-        surprise: float
+        surprise: float,
     ) -> str:
         """Build enhanced context for response generation."""
         parts = []
@@ -270,11 +279,7 @@ class CognitivePipeline:
         return "\n".join(parts) if parts else ""
 
     def learn(
-        self,
-        topic: str,
-        content: str,
-        source: str = "conversation",
-        importance: float = 0.5
+        self, topic: str, content: str, source: str = "conversation", importance: float = 0.5
     ) -> None:
         """Learn new knowledge from an interaction."""
         # Add to knowledge base
@@ -283,11 +288,7 @@ class CognitivePipeline:
 
         # Add to episodic memory
         if self.episodic:
-            self.episodic.store(
-                content=content,
-                topic=topic,
-                importance=importance
-            )
+            self.episodic.store(content=content, topic=topic, importance=importance)
 
         # Add to continual learner
         if self.learner:
@@ -302,6 +303,7 @@ class CognitivePipeline:
         if self.surprise:
             try:
                 from bayesian_surprise import Observation
+
                 obs = Observation(type="topic_learned", value=topic)
                 self.surprise.compute_surprise(obs)
             except Exception:
@@ -317,16 +319,16 @@ class CognitivePipeline:
     def get_stats(self) -> Dict[str, Any]:
         """Get pipeline statistics."""
         # Count total cognitive modules
-        cognitive_count = getattr(self, '_cognitive_modules', 0)
+        cognitive_count = getattr(self, "_cognitive_modules", 0)
         if self.orchestrator:
             orch_stats = self.orchestrator.get_stats()
-            cognitive_count = orch_stats.get('total_modules', 0)
+            cognitive_count = orch_stats.get("total_modules", 0)
 
         stats = {
             "active_components": self._active_components,
             "num_components": len(self._active_components) + cognitive_count,
             "cognitive_modules": cognitive_count,
-            "pipeline_components": len(self._active_components)
+            "pipeline_components": len(self._active_components),
         }
 
         if self.orchestrator:

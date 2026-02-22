@@ -12,6 +12,7 @@ import numpy as np
 
 class TaskDifficulty(Enum):
     """Task difficulty levels."""
+
     TRIVIAL = 1
     EASY = 2
     MEDIUM = 3
@@ -22,6 +23,7 @@ class TaskDifficulty(Enum):
 @dataclass
 class Task:
     """A learning task."""
+
     id: str
     name: str
     domain: str
@@ -36,6 +38,7 @@ class Task:
 @dataclass
 class LearningPath:
     """A sequence of tasks for learning."""
+
     id: str
     name: str
     tasks: List[str]  # Task IDs in order
@@ -46,6 +49,7 @@ class LearningPath:
 @dataclass
 class LearnerState:
     """Current state of a learner."""
+
     skills_mastered: Set[str] = field(default_factory=set)
     tasks_completed: List[str] = field(default_factory=list)
     current_performance: Dict[str, float] = field(default_factory=dict)
@@ -71,12 +75,14 @@ class ProgressTracker:
         time_taken: float,
     ) -> None:
         """Record a task attempt."""
-        self._history.append({
-            "task_id": task_id,
-            "performance": performance,
-            "skills_used": skills_used,
-            "time_taken": time_taken,
-        })
+        self._history.append(
+            {
+                "task_id": task_id,
+                "performance": performance,
+                "skills_used": skills_used,
+                "time_taken": time_taken,
+            }
+        )
 
         if task_id not in self._performance_by_task:
             self._performance_by_task[task_id] = []
@@ -161,10 +167,7 @@ class DifficultyEstimator:
         scores["novelty"] = new_skills / max(len(task.skills_taught), 1)
 
         # Weighted combination
-        difficulty = sum(
-            self._difficulty_weights[k] * scores[k]
-            for k in scores
-        )
+        difficulty = sum(self._difficulty_weights[k] * scores[k] for k in scores)
 
         return min(1.0, max(0.0, difficulty))
 
@@ -370,9 +373,7 @@ class CurriculumLearner:
             raise ValueError(f"Task {task_id} not found")
 
         # Record in progress tracker
-        self.progress_tracker.record(
-            task_id, performance, task.skills_required, time_taken
-        )
+        self.progress_tracker.record(task_id, performance, task.skills_required, time_taken)
 
         # Update learner state
         self._learner_state.tasks_completed.append(task_id)
@@ -389,13 +390,11 @@ class CurriculumLearner:
         # Update difficulty target if doing well
         if performance >= self.mastery_threshold:
             self.task_selector.target_difficulty = min(
-                1.0,
-                self.task_selector.target_difficulty + self._difficulty_increase_rate
+                1.0, self.task_selector.target_difficulty + self._difficulty_increase_rate
             )
         elif performance < 0.5:
             self.task_selector.target_difficulty = max(
-                0.2,
-                self.task_selector.target_difficulty - self._difficulty_increase_rate
+                0.2, self.task_selector.target_difficulty - self._difficulty_increase_rate
             )
 
         return {

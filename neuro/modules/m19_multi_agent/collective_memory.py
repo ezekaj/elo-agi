@@ -21,6 +21,7 @@ import time
 @dataclass
 class MemoryParams:
     """Parameters for collective memory."""
+
     capacity: int = 1000
     decay_rate: float = 0.01
     consolidation_threshold: float = 0.8  # Similarity for merging
@@ -31,6 +32,7 @@ class MemoryParams:
 @dataclass
 class MemoryEntry:
     """A single entry in collective memory."""
+
     key: str
     value: Any
     embedding: np.ndarray
@@ -285,7 +287,7 @@ class CollectiveMemory:
             # Apply decay based on age and access
             age = current_time - entry.last_accessed
             decay = self.params.decay_rate * age / 60  # Per minute
-            entry.confidence *= (1 - decay)
+            entry.confidence *= 1 - decay
 
             # Mark for removal if below threshold
             if entry.confidence < self.params.min_confidence:
@@ -337,10 +339,7 @@ class CollectiveMemory:
             return
 
         # Find oldest
-        oldest_key = min(
-            self._memories.keys(),
-            key=lambda k: self._memories[k].last_accessed
-        )
+        oldest_key = min(self._memories.keys(), key=lambda k: self._memories[k].last_accessed)
 
         del self._memories[oldest_key]
         if oldest_key in self._embeddings:
@@ -358,9 +357,7 @@ class CollectiveMemory:
     def get_top_contributors(self, n: int = 5) -> List[Tuple[str, float]]:
         """Get top contributing agents."""
         sorted_contributors = sorted(
-            self._contribution_scores.items(),
-            key=lambda x: x[1],
-            reverse=True
+            self._contribution_scores.items(), key=lambda x: x[1], reverse=True
         )
         return sorted_contributors[:n]
 
@@ -368,9 +365,9 @@ class CollectiveMemory:
         """Get memory statistics."""
         if not self._memories:
             return {
-                'size': 0,
-                'store_count': self._store_count,
-                'retrieve_count': self._retrieve_count,
+                "size": 0,
+                "store_count": self._store_count,
+                "retrieve_count": self._retrieve_count,
             }
 
         confidences = [m.confidence for m in self._memories.values()]
@@ -378,17 +375,17 @@ class CollectiveMemory:
         access_counts = [m.access_count for m in self._memories.values()]
 
         return {
-            'size': len(self._memories),
-            'capacity': self.params.capacity,
-            'utilization': len(self._memories) / self.params.capacity,
-            'store_count': self._store_count,
-            'retrieve_count': self._retrieve_count,
-            'consolidation_count': self._consolidation_count,
-            'forget_count': self._forget_count,
-            'mean_confidence': float(np.mean(confidences)),
-            'mean_age': float(np.mean(ages)),
-            'mean_access_count': float(np.mean(access_counts)),
-            'n_contributors': len(self._contributions),
+            "size": len(self._memories),
+            "capacity": self.params.capacity,
+            "utilization": len(self._memories) / self.params.capacity,
+            "store_count": self._store_count,
+            "retrieve_count": self._retrieve_count,
+            "consolidation_count": self._consolidation_count,
+            "forget_count": self._forget_count,
+            "mean_confidence": float(np.mean(confidences)),
+            "mean_age": float(np.mean(ages)),
+            "mean_access_count": float(np.mean(access_counts)),
+            "n_contributors": len(self._contributions),
         }
 
     def reset(self) -> None:

@@ -16,9 +16,16 @@ from .structural_plasticity import StructuralPlasticity, SynapticPruning, Dendri
 from .homeostatic import HomeostaticRegulation, SynapticScaling
 
 __all__ = [
-    'HebbianLearning', 'HebbianNetwork',
-    'STDPRule', 'STDPSynapse', 'STDPNetwork',
-    'RewardModulatedSTDP', 'DopamineSystem',
-    'StructuralPlasticity', 'SynapticPruning', 'DendriticGrowth',
-    'HomeostaticRegulation', 'SynapticScaling'
+    "HebbianLearning",
+    "HebbianNetwork",
+    "STDPRule",
+    "STDPSynapse",
+    "STDPNetwork",
+    "RewardModulatedSTDP",
+    "DopamineSystem",
+    "StructuralPlasticity",
+    "SynapticPruning",
+    "DendriticGrowth",
+    "HomeostaticRegulation",
+    "SynapticScaling",
 ]

@@ -12,14 +12,16 @@ import numpy as np
 
 class RelationOrder(Enum):
     """Order of relations (first-order, higher-order)."""
-    FIRST = 1    # Relations between objects (e.g., larger(sun, moon))
-    SECOND = 2   # Relations between relations (e.g., cause(heat, expand))
-    THIRD = 3    # Relations between second-order relations
+
+    FIRST = 1  # Relations between objects (e.g., larger(sun, moon))
+    SECOND = 2  # Relations between relations (e.g., cause(heat, expand))
+    THIRD = 3  # Relations between second-order relations
 
 
 @dataclass
 class Predicate:
     """A predicate in a relational structure."""
+
     name: str
     arguments: List[str]  # Object or relation names
     order: RelationOrder = RelationOrder.FIRST
@@ -39,6 +41,7 @@ class RelationalStructure:
 
     Contains objects and relations between them.
     """
+
     name: str
     objects: Set[str] = field(default_factory=set)
     predicates: List[Predicate] = field(default_factory=list)
@@ -75,6 +78,7 @@ class RelationalStructure:
 @dataclass
 class Mapping:
     """A mapping between two objects/relations."""
+
     source: str
     target: str
     confidence: float = 1.0
@@ -88,6 +92,7 @@ class StructuralAlignment:
 
     Contains object and relation mappings.
     """
+
     source: RelationalStructure
     target: RelationalStructure
     object_mappings: Dict[str, str] = field(default_factory=dict)  # source -> target
@@ -97,10 +102,7 @@ class StructuralAlignment:
 
     def get_target_for(self, source_item: str) -> Optional[str]:
         """Get target mapping for a source item."""
-        return self.object_mappings.get(
-            source_item,
-            self.relation_mappings.get(source_item)
-        )
+        return self.object_mappings.get(source_item, self.relation_mappings.get(source_item))
 
 
 @dataclass
@@ -110,6 +112,7 @@ class Analogy:
 
     Includes the alignment and any inferences drawn.
     """
+
     source_domain: RelationalStructure
     target_domain: RelationalStructure
     alignment: StructuralAlignment
@@ -181,8 +184,7 @@ class StructureMapper:
 
         # Score the alignment
         score = self._score_alignment(
-            object_mappings, relation_mappings, matched_preds,
-            source, target
+            object_mappings, relation_mappings, matched_preds, source, target
         )
 
         return StructuralAlignment(
@@ -392,7 +394,8 @@ class StructureMapper:
 
         # Check if similar predicates exist
         similar = [
-            p for p in target.predicates
+            p
+            for p in target.predicates
             if p.name == inference.name or p.arity() == inference.arity()
         ]
 

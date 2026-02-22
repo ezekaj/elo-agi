@@ -26,6 +26,7 @@ from .system2.cognitive_control import Response, ConflictLevel
 @dataclass
 class System1Output:
     """Bundled output from System 1 processing"""
+
     patterns: List[PatternMatch]
     habit_response: Optional[HabitResponse]
     emotional_valence: Valence
@@ -36,6 +37,7 @@ class System1Output:
 @dataclass
 class System2Output:
     """Bundled output from System 2 processing"""
+
     working_memory_state: Dict[str, Any]
     reasoning_result: Any
     deliberation_steps: int
@@ -45,6 +47,7 @@ class System2Output:
 @dataclass
 class DualProcessOutput:
     """Final output from dual-process system"""
+
     response: Any
     system_used: str  # "system1", "system2", or "hybrid"
     confidence: float
@@ -62,9 +65,7 @@ class System1Bundle:
         self.habit_executor = HabitExecutor()
         self.emotional_valuation = EmotionalValuation()
 
-    def process(self,
-                input_vector: np.ndarray,
-                context: Optional[Any] = None) -> System1Output:
+    def process(self, input_vector: np.ndarray, context: Optional[Any] = None) -> System1Output:
         """
         Fast, parallel System 1 processing.
 
@@ -95,7 +96,7 @@ class System1Bundle:
             habit_response=habit_response,
             emotional_valence=emotional_valence,
             confidence=overall_confidence,
-            processing_time=processing_time
+            processing_time=processing_time,
         )
 
 
@@ -107,10 +108,9 @@ class System2Bundle:
         self.cognitive_control = CognitiveControl()
         self.relational_reasoning = RelationalReasoning()
 
-    def deliberate(self,
-                   input_data: Any,
-                   s1_output: System1Output,
-                   max_steps: int = 10) -> System2Output:
+    def deliberate(
+        self, input_data: Any, s1_output: System1Output, max_steps: int = 10
+    ) -> System2Output:
         """
         Slow, serial System 2 deliberation.
 
@@ -153,7 +153,7 @@ class System2Bundle:
             working_memory_state=wm_state,
             reasoning_result=result,
             deliberation_steps=steps,
-            processing_time=processing_time
+            processing_time=processing_time,
         )
 
     def _deliberation_step(self, s1_output: System1Output) -> Optional[Any]:
@@ -162,18 +162,22 @@ class System2Bundle:
         responses = []
 
         for pattern in s1_output.patterns:
-            responses.append(Response(
-                id=f"pattern_{pattern.pattern_id}",
-                activation=pattern.confidence,
-                source="pattern_recognition"
-            ))
+            responses.append(
+                Response(
+                    id=f"pattern_{pattern.pattern_id}",
+                    activation=pattern.confidence,
+                    source="pattern_recognition",
+                )
+            )
 
         if s1_output.habit_response and s1_output.habit_response.triggered:
-            responses.append(Response(
-                id=f"habit_{s1_output.habit_response.action.id}",
-                activation=s1_output.habit_response.confidence,
-                source="habit"
-            ))
+            responses.append(
+                Response(
+                    id=f"habit_{s1_output.habit_response.action.id}",
+                    activation=s1_output.habit_response.confidence,
+                    source="habit",
+                )
+            )
 
         # If no conflict, accept S1 output
         conflict = self.cognitive_control.detect_conflict(responses)
@@ -205,9 +209,7 @@ class DualProcessController:
     be engaged and how to integrate their outputs.
     """
 
-    def __init__(self,
-                 conflict_threshold: float = 0.4,
-                 s2_engagement_cost: float = 0.1):
+    def __init__(self, conflict_threshold: float = 0.4, s2_engagement_cost: float = 0.1):
         self.system1 = System1Bundle()
         self.system2 = System2Bundle()
 
@@ -219,10 +221,9 @@ class DualProcessController:
         self._s2_engagement_count = 0
         self._total_processing_count = 0
 
-    def process(self,
-                input_data: Any,
-                context: Optional[Any] = None,
-                force_s2: bool = False) -> DualProcessOutput:
+    def process(
+        self, input_data: Any, context: Optional[Any] = None, force_s2: bool = False
+    ) -> DualProcessOutput:
         """
         Main processing pipeline.
 
@@ -248,10 +249,10 @@ class DualProcessController:
         uncertainty = 1.0 - s1_output.confidence
 
         engage_s2 = (
-            force_s2 or
-            conflict_detected or
-            uncertainty > self.conflict_threshold or
-            s1_output.emotional_valence.threat > 0.7  # High threat triggers careful processing
+            force_s2
+            or conflict_detected
+            or uncertainty > self.conflict_threshold
+            or s1_output.emotional_valence.threat > 0.7  # High threat triggers careful processing
         )
 
         # Step 3: Maybe engage System 2
@@ -291,7 +292,7 @@ class DualProcessController:
             s1_output=s1_output,
             s2_output=s2_output,
             conflict_detected=conflict_detected,
-            override_occurred=override_occurred
+            override_occurred=override_occurred,
         )
 
         self.processing_history.append(output)
@@ -303,9 +304,7 @@ class DualProcessController:
 
         # Check pattern conflicts
         if len(s1_output.patterns) > 1:
-            top_patterns = sorted(s1_output.patterns,
-                                  key=lambda p: p.confidence,
-                                  reverse=True)[:3]
+            top_patterns = sorted(s1_output.patterns, key=lambda p: p.confidence, reverse=True)[:3]
             if len(top_patterns) >= 2:
                 # Close confidence scores suggest conflict
                 spread = top_patterns[0].confidence - top_patterns[-1].confidence
@@ -320,8 +319,7 @@ class DualProcessController:
                 return True
 
         # Check emotional conflict (approach-avoid)
-        if (s1_output.emotional_valence.threat > 0.3 and
-            s1_output.emotional_valence.reward > 0.3):
+        if s1_output.emotional_valence.threat > 0.3 and s1_output.emotional_valence.reward > 0.3:
             return True
 
         return False
@@ -330,9 +328,7 @@ class DualProcessController:
         """Force System 2 to override System 1"""
         return self.process(input_data, force_s2=True)
 
-    def trust_gut(self,
-                  input_data: Any,
-                  context: Optional[Any] = None) -> DualProcessOutput:
+    def trust_gut(self, input_data: Any, context: Optional[Any] = None) -> DualProcessOutput:
         """Use System 1 response even if conflict detected"""
         # Convert input
         if isinstance(input_data, np.ndarray):
@@ -357,7 +353,7 @@ class DualProcessController:
             s1_output=s1_output,
             s2_output=None,
             conflict_detected=self._check_conflict(s1_output),
-            override_occurred=False
+            override_occurred=False,
         )
 
     def get_s2_engagement_rate(self) -> float:
@@ -371,39 +367,29 @@ class DualProcessController:
         if not self.processing_history:
             return {}
 
-        s1_times = [h.s1_output.processing_time
-                    for h in self.processing_history
-                    if h.s1_output]
-        s2_times = [h.s2_output.processing_time
-                    for h in self.processing_history
-                    if h.s2_output]
+        s1_times = [h.s1_output.processing_time for h in self.processing_history if h.s1_output]
+        s2_times = [h.s2_output.processing_time for h in self.processing_history if h.s2_output]
 
         return {
             "total_processed": self._total_processing_count,
             "s2_engagement_rate": self.get_s2_engagement_rate(),
             "avg_s1_time": np.mean(s1_times) if s1_times else 0.0,
             "avg_s2_time": np.mean(s2_times) if s2_times else 0.0,
-            "conflict_rate": sum(1 for h in self.processing_history if h.conflict_detected) / len(self.processing_history),
-            "override_rate": sum(1 for h in self.processing_history if h.override_occurred) / len(self.processing_history)
+            "conflict_rate": sum(1 for h in self.processing_history if h.conflict_detected)
+            / len(self.processing_history),
+            "override_rate": sum(1 for h in self.processing_history if h.override_occurred)
+            / len(self.processing_history),
         }
 
-    def train_habit(self,
-                    stimulus: np.ndarray,
-                    action: Action,
-                    repetitions: int = 10):
+    def train_habit(self, stimulus: np.ndarray, action: Action, repetitions: int = 10):
         """Train a habit through repetition"""
         for _ in range(repetitions):
             self.system1.habit_executor.strengthen(stimulus, action)
 
-    def learn_pattern(self,
-                      pattern_id: str,
-                      examples: List[np.ndarray]):
+    def learn_pattern(self, pattern_id: str, examples: List[np.ndarray]):
         """Learn a new pattern"""
         self.system1.pattern_recognition.learn_pattern(pattern_id, examples)
 
-    def learn_emotional_association(self,
-                                    stimulus: np.ndarray,
-                                    threat: float,
-                                    reward: float):
+    def learn_emotional_association(self, stimulus: np.ndarray, threat: float, reward: float):
         """Learn emotional association"""
         self.system1.emotional_valuation.learn_association(stimulus, threat, reward)

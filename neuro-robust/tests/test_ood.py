@@ -3,8 +3,12 @@
 import pytest
 import numpy as np
 from neuro.modules.robust.ood_detection import (
-    SimpleClassifier, OODDetector, OODMethod, OODResult,
+    SimpleClassifier,
+    OODDetector,
+    OODMethod,
+    OODResult,
 )
+
 
 class TestSimpleClassifier:
     """Tests for SimpleClassifier."""
@@ -36,6 +40,7 @@ class TestSimpleClassifier:
         probs = model.predict_proba(x)
         assert np.all(probs >= 0)
         assert np.isclose(np.sum(probs), 1.0)
+
 
 class TestOODDetector:
     """Tests for OODDetector."""
@@ -205,6 +210,7 @@ class TestOODDetector:
         rate = detector.detection_rate()
         assert 0 <= rate <= 1
 
+
 class TestOODMethods:
     """Tests for different OOD methods."""
 
@@ -222,8 +228,12 @@ class TestOODMethods:
 
         for method in OODMethod:
             detector = OODDetector(model, method=method)
-            if method in [OODMethod.MAHALANOBIS, OODMethod.LIKELIHOOD_RATIO,
-                         OODMethod.ISOLATION_FOREST, OODMethod.ENSEMBLE]:
+            if method in [
+                OODMethod.MAHALANOBIS,
+                OODMethod.LIKELIHOOD_RATIO,
+                OODMethod.ISOLATION_FOREST,
+                OODMethod.ENSEMBLE,
+            ]:
                 detector.fit(in_dist_data)
 
             score = detector.compute_score(x)
@@ -244,8 +254,12 @@ class TestOODMethods:
 
         for method in OODMethod:
             detector = OODDetector(model, method=method)
-            if method in [OODMethod.MAHALANOBIS, OODMethod.LIKELIHOOD_RATIO,
-                         OODMethod.ISOLATION_FOREST, OODMethod.ENSEMBLE]:
+            if method in [
+                OODMethod.MAHALANOBIS,
+                OODMethod.LIKELIHOOD_RATIO,
+                OODMethod.ISOLATION_FOREST,
+                OODMethod.ENSEMBLE,
+            ]:
                 detector.fit(in_dist_data)
 
             in_scores = [detector.compute_score(x) for x, _ in in_dist_data[:20]]
@@ -257,6 +271,7 @@ class TestOODMethods:
             median_ood = np.median(ood_scores)
             # At least the median OOD should be higher than median in-dist
             assert median_ood >= median_in - 0.5, f"Method {method} failed"
+
 
 class TestIsolationForest:
     """Tests specifically for Isolation Forest implementation."""
@@ -299,6 +314,7 @@ class TestIsolationForest:
 
         # Anomaly should have higher score (shorter path -> higher score)
         assert score_anomaly > score_normal
+
 
 class TestOODEdgeCases:
     """Edge case tests for OOD detection."""

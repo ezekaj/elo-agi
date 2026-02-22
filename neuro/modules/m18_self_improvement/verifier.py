@@ -22,27 +22,30 @@ from .generator import Modification, ModificationType
 
 class VerificationMethod(Enum):
     """Methods for verifying modifications."""
-    SIMULATION = "simulation"     # Simulate change effects
-    ROLLBACK_TEST = "rollback"    # Apply and test with rollback option
-    PROOF = "proof"               # Formal verification (limited)
-    STATISTICAL = "statistical"   # Statistical significance testing
-    ENSEMBLE = "ensemble"         # Multiple verification methods
+
+    SIMULATION = "simulation"  # Simulate change effects
+    ROLLBACK_TEST = "rollback"  # Apply and test with rollback option
+    PROOF = "proof"  # Formal verification (limited)
+    STATISTICAL = "statistical"  # Statistical significance testing
+    ENSEMBLE = "ensemble"  # Multiple verification methods
 
 
 @dataclass
 class VerifierParams:
     """Parameters for the verifier."""
-    min_improvement: float = 0.01      # Minimum improvement to accept
+
+    min_improvement: float = 0.01  # Minimum improvement to accept
     confidence_threshold: float = 0.7  # Minimum confidence required
-    max_regression_risk: float = 0.1   # Maximum acceptable regression risk
-    n_simulations: int = 10            # Simulations for statistical tests
-    rollback_on_failure: bool = True   # Auto-rollback if fails
-    require_reversibility: bool = True # Only accept reversible changes
+    max_regression_risk: float = 0.1  # Maximum acceptable regression risk
+    n_simulations: int = 10  # Simulations for statistical tests
+    rollback_on_failure: bool = True  # Auto-rollback if fails
+    require_reversibility: bool = True  # Only accept reversible changes
 
 
 @dataclass
 class VerificationResult:
     """Result of verification."""
+
     modification: Modification
     verified: bool
     method_used: VerificationMethod
@@ -141,8 +144,8 @@ class ChangeVerifier:
                 measured_improvement=0.0,
                 confidence=0.0,
                 regression_risk=1.0,
-                validation_details={'reason': 'not_reversible'},
-                warnings=['Modification is not reversible'],
+                validation_details={"reason": "not_reversible"},
+                warnings=["Modification is not reversible"],
             )
 
         # Get baseline if not cached
@@ -182,7 +185,8 @@ class ChangeVerifier:
         """Verify by simulating effects without actual application."""
         # Estimate improvement based on modification type and history
         similar_mods = [
-            r for r in self._verification_history
+            r
+            for r in self._verification_history
             if r.modification.mod_type == modification.mod_type
         ]
 
@@ -201,8 +205,8 @@ class ChangeVerifier:
             measured_improvement=float(avg_improvement),
             confidence=confidence,
             regression_risk=0.1,  # Low risk since no actual change
-            validation_details={'simulated': True, 'similar_mods': len(similar_mods)},
-            warnings=['Verification by simulation only'],
+            validation_details={"simulated": True, "similar_mods": len(similar_mods)},
+            warnings=["Verification by simulation only"],
         )
 
     def _verify_rollback(
@@ -226,8 +230,8 @@ class ChangeVerifier:
                 measured_improvement=0.0,
                 confidence=0.0,
                 regression_risk=1.0,
-                validation_details={'apply_error': str(e)},
-                warnings=[f'Failed to apply: {e}'],
+                validation_details={"apply_error": str(e)},
+                warnings=[f"Failed to apply: {e}"],
             )
 
         # Run tests
@@ -242,30 +246,27 @@ class ChangeVerifier:
                 measured_improvement=0.0,
                 confidence=0.0,
                 regression_risk=1.0,
-                validation_details={'test_error': str(e)},
-                warnings=[f'Tests failed: {e}'],
+                validation_details={"test_error": str(e)},
+                warnings=[f"Tests failed: {e}"],
             )
 
         improvement = new_performance - baseline
 
         # Check for regression
         if improvement < -self.params.max_regression_risk:
-            warnings.append('Significant regression detected')
+            warnings.append("Significant regression detected")
 
         # Rollback to assess if reversible
         try:
             rollback_fn()
             rollback_performance = self._run_tests()
             if abs(rollback_performance - baseline) > 0.01:
-                warnings.append('Rollback did not restore baseline')
+                warnings.append("Rollback did not restore baseline")
         except Exception as e:
-            warnings.append(f'Rollback failed: {e}')
+            warnings.append(f"Rollback failed: {e}")
 
         # Re-apply if verified (caller will decide)
-        verified = (
-            improvement >= self.params.min_improvement
-            and len(warnings) == 0
-        )
+        verified = improvement >= self.params.min_improvement and len(warnings) == 0
 
         return VerificationResult(
             modification=modification,
@@ -275,8 +276,8 @@ class ChangeVerifier:
             confidence=0.9,  # High confidence from actual testing
             regression_risk=max(0, -improvement) if improvement < 0 else 0.0,
             validation_details={
-                'baseline': baseline,
-                'new_performance': new_performance,
+                "baseline": baseline,
+                "new_performance": new_performance,
             },
             warnings=warnings,
         )
@@ -307,8 +308,8 @@ class ChangeVerifier:
                 measured_improvement=0.0,
                 confidence=0.0,
                 regression_risk=1.0,
-                validation_details={'apply_error': str(e)},
-                warnings=[f'Failed to apply: {e}'],
+                validation_details={"apply_error": str(e)},
+                warnings=[f"Failed to apply: {e}"],
             )
 
         modified_samples = []
@@ -346,10 +347,10 @@ class ChangeVerifier:
             confidence=float(confidence),
             regression_risk=max(0, -improvement),
             validation_details={
-                'baseline_mean': float(baseline_mean),
-                'modified_mean': float(modified_mean),
-                'effect_size': float(effect_size),
-                'n_samples': n_trials,
+                "baseline_mean": float(baseline_mean),
+                "modified_mean": float(modified_mean),
+                "effect_size": float(effect_size),
+                "n_samples": n_trials,
             },
             warnings=[],
         )
@@ -387,8 +388,8 @@ class ChangeVerifier:
             confidence=float(avg_confidence),
             regression_risk=float(max_risk),
             validation_details={
-                'methods_used': [r.method_used.value for r in results],
-                'votes': verified_count,
+                "methods_used": [r.method_used.value for r in results],
+                "votes": verified_count,
             },
             warnings=list(set(all_warnings)),
         )
@@ -414,9 +415,9 @@ class ChangeVerifier:
         for i, constraint in enumerate(self._constraints):
             try:
                 if not constraint():
-                    violations.append(f'Constraint {i} violated')
+                    violations.append(f"Constraint {i} violated")
             except Exception as e:
-                violations.append(f'Constraint {i} error: {e}')
+                violations.append(f"Constraint {i} error: {e}")
 
         return violations
 
@@ -424,24 +425,22 @@ class ChangeVerifier:
         """Get verifier statistics."""
         if not self._verification_history:
             return {
-                'n_verifications': 0,
-                'approval_rate': 0.0,
-                'avg_improvement': 0.0,
+                "n_verifications": 0,
+                "approval_rate": 0.0,
+                "avg_improvement": 0.0,
             }
 
         verified = [r for r in self._verification_history if r.verified]
 
         return {
-            'n_verifications': len(self._verification_history),
-            'approval_rate': len(verified) / len(self._verification_history),
-            'avg_improvement': float(np.mean([
-                r.measured_improvement for r in self._verification_history
-            ])),
-            'avg_confidence': float(np.mean([
-                r.confidence for r in self._verification_history
-            ])),
-            'n_test_suites': len(self._test_suites),
-            'n_constraints': len(self._constraints),
+            "n_verifications": len(self._verification_history),
+            "approval_rate": len(verified) / len(self._verification_history),
+            "avg_improvement": float(
+                np.mean([r.measured_improvement for r in self._verification_history])
+            ),
+            "avg_confidence": float(np.mean([r.confidence for r in self._verification_history])),
+            "n_test_suites": len(self._test_suites),
+            "n_constraints": len(self._constraints),
         }
 
     def reset(self) -> None:

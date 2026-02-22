@@ -11,6 +11,7 @@ import subprocess
 @dataclass
 class Tool:
     """A registered tool."""
+
     name: str
     description: str
     func: Callable
@@ -37,11 +38,9 @@ class ToolRegistry:
             func=self._read_file,
             schema={
                 "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File path"}
-                },
-                "required": ["path"]
-            }
+                "properties": {"path": {"type": "string", "description": "File path"}},
+                "required": ["path"],
+            },
         )
 
         self.register(
@@ -50,12 +49,9 @@ class ToolRegistry:
             func=self._write_file,
             schema={
                 "type": "object",
-                "properties": {
-                    "path": {"type": "string"},
-                    "content": {"type": "string"}
-                },
-                "required": ["path", "content"]
-            }
+                "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
+                "required": ["path", "content"],
+            },
         )
 
         self.register(
@@ -67,22 +63,17 @@ class ToolRegistry:
                 "properties": {
                     "path": {"type": "string"},
                     "old_text": {"type": "string"},
-                    "new_text": {"type": "string"}
+                    "new_text": {"type": "string"},
                 },
-                "required": ["path", "old_text", "new_text"]
-            }
+                "required": ["path", "old_text", "new_text"],
+            },
         )
 
         self.register(
             name="list_files",
             description="List files in a directory",
             func=self._list_files,
-            schema={
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "default": "."}
-                }
-            }
+            schema={"type": "object", "properties": {"path": {"type": "string", "default": "."}}},
         )
 
         # Shell
@@ -92,11 +83,9 @@ class ToolRegistry:
             func=self._run_command,
             schema={
                 "type": "object",
-                "properties": {
-                    "command": {"type": "string"}
-                },
-                "required": ["command"]
-            }
+                "properties": {"command": {"type": "string"}},
+                "required": ["command"],
+            },
         )
 
         # Git
@@ -119,11 +108,9 @@ class ToolRegistry:
             func=self._web_search,
             schema={
                 "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Search query"}
-                },
-                "required": ["query"]
-            }
+                "properties": {"query": {"type": "string", "description": "Search query"}},
+                "required": ["query"],
+            },
         )
 
         # Web fetch
@@ -133,11 +120,9 @@ class ToolRegistry:
             func=self._web_fetch,
             schema={
                 "type": "object",
-                "properties": {
-                    "url": {"type": "string", "description": "URL to fetch"}
-                },
-                "required": ["url"]
-            }
+                "properties": {"url": {"type": "string", "description": "URL to fetch"}},
+                "required": ["url"],
+            },
         )
 
         # Self-improvement
@@ -148,10 +133,13 @@ class ToolRegistry:
             schema={
                 "type": "object",
                 "properties": {
-                    "area": {"type": "string", "description": "Area to improve (e.g., 'learning', 'tools', 'ui')"}
+                    "area": {
+                        "type": "string",
+                        "description": "Area to improve (e.g., 'learning', 'tools', 'ui')",
+                    }
                 },
-                "required": ["area"]
-            }
+                "required": ["area"],
+            },
         )
 
     def register(
@@ -196,7 +184,7 @@ class ToolRegistry:
         if not os.path.exists(path):
             return f"Error: File not found: {path}"
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 content = f.read()
             return content[:50000]  # Limit size
         except Exception as e:
@@ -207,7 +195,7 @@ class ToolRegistry:
         path = os.path.expanduser(path)
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write(content)
             return f"Successfully wrote {len(content)} characters to {path}"
         except Exception as e:
@@ -219,7 +207,7 @@ class ToolRegistry:
         if not os.path.exists(path):
             return f"Error: File not found: {path}"
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 content = f.read()
 
             if old_text not in content:
@@ -227,7 +215,7 @@ class ToolRegistry:
 
             new_content = content.replace(old_text, new_text, 1)
 
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write(new_content)
 
             return f"Successfully edited {path}"
@@ -292,7 +280,7 @@ class ToolRegistry:
             encoded_query = urllib.parse.quote(query)
             url = f"https://api.duckduckgo.com/?q={encoded_query}&format=json&no_html=1"
 
-            req = urllib.request.Request(url, headers={'User-Agent': 'NEURO/3.0'})
+            req = urllib.request.Request(url, headers={"User-Agent": "NEURO/3.0"})
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode())
 
@@ -328,17 +316,20 @@ class ToolRegistry:
             encoded_query = urllib.parse.quote(query)
             url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
 
-            req = urllib.request.Request(url, headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-            })
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                },
+            )
             with urllib.request.urlopen(req, timeout=10) as response:
-                html = response.read().decode('utf-8', errors='ignore')
+                html = response.read().decode("utf-8", errors="ignore")
 
             # Extract result snippets
             results = []
             snippets = re.findall(r'class="result__snippet"[^>]*>([^<]+)', html)
             for snippet in snippets[:5]:
-                clean = re.sub(r'<[^>]+>', '', snippet).strip()
+                clean = re.sub(r"<[^>]+>", "", snippet).strip()
                 if clean:
                     results.append(f"- {clean[:200]}")
 
@@ -356,7 +347,9 @@ class ToolRegistry:
 
         # Get path to neuro/ directory (this file is in neuro/cli/tools/)
         this_file = os.path.abspath(__file__)  # .../neuro/cli/tools/registry.py
-        neuro_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(this_file))))  # .../neuro project root
+        neuro_root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(this_file)))
+        )  # .../neuro project root
 
         areas = {
             "learning": [
@@ -376,7 +369,7 @@ class ToolRegistry:
                 "neuro/cli/main.py",
                 "neuro/cli/core/stream.py",
             ],
-            "all": []  # Will scan everything
+            "all": [],  # Will scan everything
         }
 
         target_files = areas.get(area.lower(), areas.get("core", []))
@@ -391,12 +384,12 @@ class ToolRegistry:
                 try:
                     with open(full_path) as f:
                         content = f.read()
-                    lines = len(content.split('\n'))
+                    lines = len(content.split("\n"))
                     result.append(f"File: {rel_path} ({lines} lines)")
 
                     # Find TODOs and FIXMEs
-                    for i, line in enumerate(content.split('\n'), 1):
-                        if 'TODO' in line or 'FIXME' in line or 'HACK' in line:
+                    for i, line in enumerate(content.split("\n"), 1):
+                        if "TODO" in line or "FIXME" in line or "HACK" in line:
                             result.append(f"  Line {i}: {line.strip()[:80]}")
 
                 except Exception as e:
@@ -414,17 +407,20 @@ class ToolRegistry:
             import urllib.request
             import re
 
-            req = urllib.request.Request(url, headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-            })
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                },
+            )
             with urllib.request.urlopen(req, timeout=15) as response:
-                html = response.read().decode('utf-8', errors='ignore')
+                html = response.read().decode("utf-8", errors="ignore")
 
             # Strip HTML tags for basic text extraction
-            text = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL)
-            text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
-            text = re.sub(r'<[^>]+>', ' ', text)
-            text = re.sub(r'\s+', ' ', text).strip()
+            text = re.sub(r"<script[^>]*>.*?</script>", "", html, flags=re.DOTALL)
+            text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL)
+            text = re.sub(r"<[^>]+>", " ", text)
+            text = re.sub(r"\s+", " ", text).strip()
 
             return text[:15000]  # Limit size
 

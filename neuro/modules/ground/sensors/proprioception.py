@@ -13,21 +13,23 @@ import time
 
 class JointType(Enum):
     """Types of joints."""
-    REVOLUTE = "revolute"    # Rotational
+
+    REVOLUTE = "revolute"  # Rotational
     PRISMATIC = "prismatic"  # Linear
     SPHERICAL = "spherical"  # Ball joint
-    FIXED = "fixed"          # No movement
+    FIXED = "fixed"  # No movement
 
 
 @dataclass
 class JointState:
     """State of a single joint."""
+
     joint_id: str
     joint_type: JointType
-    position: float          # Radians for revolute, meters for prismatic
-    velocity: float          # rad/s or m/s
-    acceleration: float      # rad/s^2 or m/s^2
-    torque: float           # Nm or N
+    position: float  # Radians for revolute, meters for prismatic
+    velocity: float  # rad/s or m/s
+    acceleration: float  # rad/s^2 or m/s^2
+    torque: float  # Nm or N
     min_position: float
     max_position: float
     timestamp: float = field(default_factory=time.time)
@@ -36,8 +38,9 @@ class JointState:
 @dataclass
 class EndEffectorState:
     """State of an end effector (hand, foot, etc.)."""
+
     effector_id: str
-    position: np.ndarray     # 3D position
+    position: np.ndarray  # 3D position
     orientation: np.ndarray  # Quaternion (w, x, y, z)
     linear_velocity: np.ndarray
     angular_velocity: np.ndarray
@@ -48,6 +51,7 @@ class EndEffectorState:
 @dataclass
 class BodyState:
     """Complete body state."""
+
     timestamp: float
     joint_states: Dict[str, JointState]
     end_effectors: Dict[str, EndEffectorState]
@@ -61,6 +65,7 @@ class BodyState:
 @dataclass
 class IMUReading:
     """Inertial measurement unit reading."""
+
     timestamp: float
     acceleration: np.ndarray  # m/s^2, body frame
     angular_velocity: np.ndarray  # rad/s, body frame
@@ -178,16 +183,20 @@ class ProprioceptionSensor:
 
         # Update end effector
         for name, ee in self._end_effectors.items():
-            ee.position = np.array([
-                0.5 + 0.1 * np.sin(self._sim_time),
-                0.1 * np.sin(self._sim_time * 0.5),
-                0.5 + 0.05 * np.cos(self._sim_time),
-            ])
-            ee.linear_velocity = np.array([
-                0.1 * np.cos(self._sim_time),
-                0.05 * np.cos(self._sim_time * 0.5),
-                -0.05 * np.sin(self._sim_time),
-            ])
+            ee.position = np.array(
+                [
+                    0.5 + 0.1 * np.sin(self._sim_time),
+                    0.1 * np.sin(self._sim_time * 0.5),
+                    0.5 + 0.05 * np.cos(self._sim_time),
+                ]
+            )
+            ee.linear_velocity = np.array(
+                [
+                    0.1 * np.cos(self._sim_time),
+                    0.05 * np.cos(self._sim_time * 0.5),
+                    -0.05 * np.sin(self._sim_time),
+                ]
+            )
 
     def read_joint(self, joint_id: str) -> Optional[JointState]:
         """Read state of a single joint."""
@@ -366,11 +375,11 @@ class ProprioceptionProcessor:
         jacobian = np.zeros((2, n_joints))  # 2D position
 
         for i in range(n_joints):
-            angle_sum = np.sum(joint_positions[:i + 1])
+            angle_sum = np.sum(joint_positions[: i + 1])
 
             for j in range(i, n_joints):
-                jacobian[0, i] -= link_lengths[j] * np.sin(np.sum(joint_positions[:j + 1]))
-                jacobian[1, i] += link_lengths[j] * np.cos(np.sum(joint_positions[:j + 1]))
+                jacobian[0, i] -= link_lengths[j] * np.sin(np.sum(joint_positions[: j + 1]))
+                jacobian[1, i] += link_lengths[j] * np.cos(np.sum(joint_positions[: j + 1]))
 
         return jacobian
 
@@ -461,7 +470,7 @@ class ProprioceptionProcessor:
         kinetic = 0.0
         for joint in state.joint_states.values():
             # Assume unit inertia
-            kinetic += 0.5 * joint.velocity ** 2
+            kinetic += 0.5 * joint.velocity**2
 
         # Potential energy from height
         potential = state.total_mass * 9.81 * state.center_of_mass[2]

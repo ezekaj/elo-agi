@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from neuro.modules.m12_learning.stdp import STDPRule, STDPSynapse, STDPNetwork, STDPParams
 
+
 class TestSTDPRule:
     """Tests for STDP rule"""
 
@@ -62,6 +63,7 @@ class TestSTDPRule:
         assert dW[0, 0] > 0  # Pre at 10, post at 15 -> LTP
         assert dW[1, 1] < 0  # Pre at 20, post at 18 -> LTD
 
+
 class TestSTDPSynapse:
     """Tests for single STDP synapse"""
 
@@ -109,6 +111,7 @@ class TestSTDPSynapse:
         assert syn.weight <= 1.0
         assert syn.weight >= 0.0
 
+
 class TestSTDPNetwork:
     """Tests for STDP network"""
 
@@ -152,9 +155,7 @@ class TestSTDPNetwork:
         post_patterns = np.random.rand(20, 5) > 0.5
 
         weight_changes = net.train(
-            pre_patterns.astype(float),
-            post_patterns.astype(float),
-            n_epochs=3
+            pre_patterns.astype(float), post_patterns.astype(float), n_epochs=3
         )
 
         assert len(weight_changes) == 3
@@ -169,5 +170,6 @@ class TestSTDPNetwork:
 
         assert post_response.shape == (5,)
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

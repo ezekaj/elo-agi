@@ -22,6 +22,7 @@ class ActionOutcome(Enum):
 @dataclass
 class Action:
     """An action that can be taken"""
+
     action_id: str
     name: str
     parameters: Dict[str, Any] = field(default_factory=dict)
@@ -31,6 +32,7 @@ class Action:
 @dataclass
 class State:
     """A state of the environment"""
+
     state_id: str
     features: Dict[str, Any] = field(default_factory=dict)
 
@@ -42,6 +44,7 @@ class State:
 @dataclass
 class Experience:
     """A single experience (state, action, outcome, next_state)"""
+
     state: State
     action: Action
     outcome: ActionOutcome
@@ -53,10 +56,12 @@ class Experience:
 class AdaptivePolicy:
     """A policy that improves from feedback"""
 
-    def __init__(self,
-                 learning_rate: float = 0.1,
-                 discount_factor: float = 0.9,
-                 exploration_rate: float = 0.2):
+    def __init__(
+        self,
+        learning_rate: float = 0.1,
+        discount_factor: float = 0.9,
+        exploration_rate: float = 0.2,
+    ):
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
@@ -66,11 +71,9 @@ class AdaptivePolicy:
         self.total_reward = 0.0
         self.n_updates = 0
 
-    def select_action(self,
-                      state: State,
-                      available_actions: List[Action],
-                      explore: bool = True
-                      ) -> Action:
+    def select_action(
+        self, state: State, available_actions: List[Action], explore: bool = True
+    ) -> Action:
         """Select an action using epsilon-greedy policy"""
         if not available_actions:
             return None
@@ -81,14 +84,16 @@ class AdaptivePolicy:
             return np.random.choice(available_actions)
 
         best_action = None
-        best_value = float('-inf')
+        best_value = float("-inf")
 
         for action in available_actions:
             value = self.q_values[state_key][action.action_id]
 
             count = self.action_counts[state_key][action.action_id]
             if count > 0:
-                value += np.sqrt(2 * np.log(sum(self.action_counts[state_key].values()) + 1) / count)
+                value += np.sqrt(
+                    2 * np.log(sum(self.action_counts[state_key].values()) + 1) / count
+                )
 
             if value > best_value:
                 best_value = value
@@ -96,12 +101,14 @@ class AdaptivePolicy:
 
         return best_action or available_actions[0]
 
-    def update(self,
-               state: State,
-               action: Action,
-               reward: float,
-               next_state: State,
-               next_actions: List[Action] = None):
+    def update(
+        self,
+        state: State,
+        action: Action,
+        reward: float,
+        next_state: State,
+        next_actions: List[Action] = None,
+    ):
         """Update Q-values based on experience (Q-learning)"""
         state_key = state.to_tuple()
         next_state_key = next_state.to_tuple()
@@ -111,12 +118,15 @@ class AdaptivePolicy:
         current_q = self.q_values[state_key][action.action_id]
 
         if next_actions:
-            max_next_q = max(
-                self.q_values[next_state_key][a.action_id]
-                for a in next_actions
-            ) if next_actions else 0
+            max_next_q = (
+                max(self.q_values[next_state_key][a.action_id] for a in next_actions)
+                if next_actions
+                else 0
+            )
         else:
-            max_next_q = max(self.q_values[next_state_key].values()) if self.q_values[next_state_key] else 0
+            max_next_q = (
+                max(self.q_values[next_state_key].values()) if self.q_values[next_state_key] else 0
+            )
 
         new_q = current_q + self.learning_rate * (
             reward + self.discount_factor * max_next_q - current_q
@@ -145,13 +155,8 @@ class FeedbackAdapter:
     Continuous adaptation through experience.
     """
 
-    def __init__(self,
-                 learning_rate: float = 0.1,
-                 exploration_rate: float = 0.3):
-        self.policy = AdaptivePolicy(
-            learning_rate=learning_rate,
-            exploration_rate=exploration_rate
-        )
+    def __init__(self, learning_rate: float = 0.1, exploration_rate: float = 0.3):
+        self.policy = AdaptivePolicy(learning_rate=learning_rate, exploration_rate=exploration_rate)
         self.experiences: List[Experience] = []
         self.current_state: Optional[State] = None
         self.available_actions: List[Action] = []
@@ -169,17 +174,12 @@ class FeedbackAdapter:
     def act(self, action: Action = None) -> Action:
         """Select and return an action"""
         if action is None:
-            action = self.policy.select_action(
-                self.current_state,
-                self.available_actions
-            )
+            action = self.policy.select_action(self.current_state, self.available_actions)
         return action
 
-    def observe_outcome(self,
-                        action: Action,
-                        outcome: ActionOutcome,
-                        reward: float,
-                        next_state: State):
+    def observe_outcome(
+        self, action: Action, outcome: ActionOutcome, reward: float, next_state: State
+    ):
         """Observe the outcome of an action"""
         experience = Experience(
             state=self.current_state,
@@ -187,18 +187,20 @@ class FeedbackAdapter:
             outcome=outcome,
             reward=reward,
             next_state=next_state,
-            timestamp=len(self.experiences)
+            timestamp=len(self.experiences),
         )
         self.experiences.append(experience)
 
         return experience
 
-    def update_model(self,
-                     action: Action,
-                     outcome: ActionOutcome,
-                     reward: float,
-                     next_state: State,
-                     next_actions: List[Action] = None):
+    def update_model(
+        self,
+        action: Action,
+        outcome: ActionOutcome,
+        reward: float,
+        next_state: State,
+        next_actions: List[Action] = None,
+    ):
         """Update internal model from experience"""
         # Record experience first
         experience = Experience(
@@ -207,18 +209,12 @@ class FeedbackAdapter:
             outcome=outcome,
             reward=reward,
             next_state=next_state,
-            timestamp=len(self.experiences)
+            timestamp=len(self.experiences),
         )
         self.experiences.append(experience)
 
         # Update policy
-        self.policy.update(
-            self.current_state,
-            action,
-            reward,
-            next_state,
-            next_actions
-        )
+        self.policy.update(self.current_state, action, reward, next_state, next_actions)
 
         state_key = str(self.current_state.to_tuple())
         action_key = action.action_id
@@ -234,10 +230,9 @@ class FeedbackAdapter:
 
         self.current_state = next_state
 
-    def exploration_exploitation(self,
-                                  state: State,
-                                  available_actions: List[Action]
-                                  ) -> Tuple[Action, str]:
+    def exploration_exploitation(
+        self, state: State, available_actions: List[Action]
+    ) -> Tuple[Action, str]:
         """Decide between exploration and exploitation"""
         state_key = state.to_tuple()
 
@@ -246,14 +241,12 @@ class FeedbackAdapter:
                 return action, "explore_novel"
 
         total_uncertainty = sum(
-            1.0 / (self.policy.action_counts[state_key][a.action_id] + 1)
-            for a in available_actions
+            1.0 / (self.policy.action_counts[state_key][a.action_id] + 1) for a in available_actions
         )
 
         if total_uncertainty > len(available_actions) * 0.5:
             least_tried = min(
-                available_actions,
-                key=lambda a: self.policy.action_counts[state_key][a.action_id]
+                available_actions, key=lambda a: self.policy.action_counts[state_key][a.action_id]
             )
             return least_tried, "explore_uncertain"
 
@@ -272,16 +265,13 @@ class FeedbackAdapter:
         success_prob = np.mean(outcomes)
 
         rewards = [
-            exp.reward for exp in self.experiences
-            if exp.action.action_id == action.action_id
+            exp.reward for exp in self.experiences if exp.action.action_id == action.action_id
         ]
         expected_reward = np.mean(rewards) if rewards else 0.0
 
         return success_prob, expected_reward
 
-    def adapt_strategy(self,
-                       recent_window: int = 10
-                       ) -> Dict[str, Any]:
+    def adapt_strategy(self, recent_window: int = 10) -> Dict[str, Any]:
         """Analyze recent performance and adapt strategy"""
         if len(self.experiences) < recent_window:
             return {"status": "insufficient_data"}
@@ -289,10 +279,9 @@ class FeedbackAdapter:
         recent = self.experiences[-recent_window:]
 
         avg_reward = np.mean([exp.reward for exp in recent])
-        success_rate = np.mean([
-            1.0 if exp.outcome == ActionOutcome.SUCCESS else 0.0
-            for exp in recent
-        ])
+        success_rate = np.mean(
+            [1.0 if exp.outcome == ActionOutcome.SUCCESS else 0.0 for exp in recent]
+        )
 
         if success_rate < 0.3:
             self.policy.exploration_rate = min(0.5, self.policy.exploration_rate * 1.2)
@@ -307,12 +296,10 @@ class FeedbackAdapter:
             "avg_reward": avg_reward,
             "success_rate": success_rate,
             "exploration_rate": self.policy.exploration_rate,
-            "strategy_change": strategy_change
+            "strategy_change": strategy_change,
         }
 
-    def replay_experiences(self,
-                           n_replays: int = 10,
-                           prioritized: bool = True):
+    def replay_experiences(self, n_replays: int = 10, prioritized: bool = True):
         """Replay past experiences to improve learning"""
         if not self.experiences:
             return
@@ -330,15 +317,8 @@ class FeedbackAdapter:
             to_replay = [exp for _, exp in surprises[:n_replays]]
         else:
             to_replay = np.random.choice(
-                self.experiences,
-                size=min(n_replays, len(self.experiences)),
-                replace=False
+                self.experiences, size=min(n_replays, len(self.experiences)), replace=False
             )
 
         for exp in to_replay:
-            self.policy.update(
-                exp.state,
-                exp.action,
-                exp.reward,
-                exp.next_state
-            )
+            self.policy.update(exp.state, exp.action, exp.reward, exp.next_state)

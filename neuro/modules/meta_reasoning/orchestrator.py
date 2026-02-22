@@ -24,6 +24,7 @@ except ImportError:
 
 class PlanStatus(Enum):
     """Status of an orchestration plan."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -33,6 +34,7 @@ class PlanStatus(Enum):
 
 class CheckpointAction(Enum):
     """Actions at checkpoints."""
+
     CONTINUE = "continue"
     SWITCH_MODULE = "switch_module"
     SWITCH_STYLE = "switch_style"
@@ -43,6 +45,7 @@ class CheckpointAction(Enum):
 @dataclass
 class OrchestratorConfig:
     """Configuration for orchestration."""
+
     max_steps: int = 100
     checkpoint_frequency: int = 5
     switch_threshold: float = 0.3
@@ -53,6 +56,7 @@ class OrchestratorConfig:
 @dataclass
 class OrchestrationStep:
     """A step in the orchestration plan."""
+
     step_id: int
     module: str
     style: ReasoningStyle
@@ -63,6 +67,7 @@ class OrchestrationStep:
 @dataclass
 class OrchestrationPlan:
     """Plan for orchestrating reasoning."""
+
     plan_id: str
     problem_type: ProblemType
     primary_style: ReasoningStyle
@@ -75,6 +80,7 @@ class OrchestrationPlan:
 @dataclass
 class ExecutionResult:
     """Result of plan execution."""
+
     plan_id: str
     final_progress: float
     final_quality: float
@@ -244,10 +250,14 @@ class DynamicOrchestrator:
             )
 
             if i % self.config.checkpoint_frequency == 0:
-                action = self.checkpoint_evaluation(plan, i, {
-                    "progress": current_progress,
-                    "quality": current_quality,
-                })
+                action = self.checkpoint_evaluation(
+                    plan,
+                    i,
+                    {
+                        "progress": current_progress,
+                        "quality": current_quality,
+                    },
+                )
 
                 if action == CheckpointAction.TERMINATE:
                     break

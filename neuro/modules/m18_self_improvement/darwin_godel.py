@@ -24,28 +24,31 @@ from .meta_learner import MetaLearner, MetaParams, LearningStrategy
 
 class ImprovementPhase(Enum):
     """Phases of the improvement cycle."""
-    IDLE = "idle"                   # Waiting for trigger
-    GENERATING = "generating"       # Generating candidates
-    VERIFYING = "verifying"         # Verifying candidates
-    APPLYING = "applying"           # Applying modifications
-    EVALUATING = "evaluating"       # Evaluating results
-    LEARNING = "learning"           # Meta-learning
+
+    IDLE = "idle"  # Waiting for trigger
+    GENERATING = "generating"  # Generating candidates
+    VERIFYING = "verifying"  # Verifying candidates
+    APPLYING = "applying"  # Applying modifications
+    EVALUATING = "evaluating"  # Evaluating results
+    LEARNING = "learning"  # Meta-learning
 
 
 @dataclass
 class DGMParams:
     """Parameters for the Darwin Gödel Machine."""
-    auto_improve: bool = True           # Automatically run improvement cycles
+
+    auto_improve: bool = True  # Automatically run improvement cycles
     improvement_interval: float = 60.0  # Seconds between improvement attempts
     min_improvement_threshold: float = 0.01
-    max_failed_attempts: int = 10       # Stop after N consecutive failures
-    safety_mode: bool = True            # Enable safety constraints
+    max_failed_attempts: int = 10  # Stop after N consecutive failures
+    safety_mode: bool = True  # Enable safety constraints
     log_all_attempts: bool = True
 
 
 @dataclass
 class ImprovementCycle:
     """Record of an improvement cycle."""
+
     cycle_id: int
     phase: ImprovementPhase
     start_time: float
@@ -147,7 +150,7 @@ class DarwinGodelMachine:
             self._rollback_fn = lambda: None  # No-op
 
         # Set up verifier
-        self.verifier.register_test_suite('main', performance_fn)
+        self.verifier.register_test_suite("main", performance_fn)
         self.verifier.update_baseline(performance_fn())
 
         # Set up updater
@@ -164,13 +167,16 @@ class DarwinGodelMachine:
             return
 
         # Try to discover components
-        if hasattr(self._target_system, '__dict__'):
+        if hasattr(self._target_system, "__dict__"):
             for name, value in self._target_system.__dict__.items():
-                if not name.startswith('_'):
-                    self.generator.register_component(name, {
-                        'type': type(value).__name__,
-                        'adjustable_params': ['weights', 'bias'],
-                    })
+                if not name.startswith("_"):
+                    self.generator.register_component(
+                        name,
+                        {
+                            "type": type(value).__name__,
+                            "adjustable_params": ["weights", "bias"],
+                        },
+                    )
 
     def run_improvement_cycle(self) -> ImprovementCycle:
         """
@@ -200,11 +206,10 @@ class DarwinGodelMachine:
             strategy = self.meta_learner.select_strategy()
 
             candidates = self.generator.generate_candidates(
-                cycle.initial_performance,
-                context={'strategy': strategy.strategy_id}
+                cycle.initial_performance, context={"strategy": strategy.strategy_id}
             )
             cycle.candidates_generated = len(candidates)
-            cycle.details['strategy'] = strategy.strategy_id
+            cycle.details["strategy"] = strategy.strategy_id
 
             if not candidates:
                 cycle.phase = ImprovementPhase.IDLE
@@ -280,7 +285,7 @@ class DarwinGodelMachine:
                     self._rollback_fn()
 
         except Exception as e:
-            cycle.details['error'] = str(e)
+            cycle.details["error"] = str(e)
             self._consecutive_failures += 1
 
         finally:
@@ -352,31 +357,33 @@ class DarwinGodelMachine:
         """Get summary of improvement progress."""
         if not self._cycle_history:
             return {
-                'total_cycles': 0,
-                'successful_cycles': 0,
-                'total_improvement': 0.0,
+                "total_cycles": 0,
+                "successful_cycles": 0,
+                "total_improvement": 0.0,
             }
 
         successful = [c for c in self._cycle_history if c.improvement > 0]
 
         return {
-            'total_cycles': len(self._cycle_history),
-            'successful_cycles': len(successful),
-            'success_rate': len(successful) / len(self._cycle_history),
-            'total_improvement': self._total_improvement,
-            'avg_improvement_per_cycle': self._total_improvement / len(self._cycle_history),
-            'consecutive_failures': self._consecutive_failures,
-            'current_performance': self._performance_fn() if self._performance_fn else 0.0,
-            'best_cycle': max(self._cycle_history, key=lambda c: c.improvement).cycle_id if self._cycle_history else None,
+            "total_cycles": len(self._cycle_history),
+            "successful_cycles": len(successful),
+            "success_rate": len(successful) / len(self._cycle_history),
+            "total_improvement": self._total_improvement,
+            "avg_improvement_per_cycle": self._total_improvement / len(self._cycle_history),
+            "consecutive_failures": self._consecutive_failures,
+            "current_performance": self._performance_fn() if self._performance_fn else 0.0,
+            "best_cycle": max(self._cycle_history, key=lambda c: c.improvement).cycle_id
+            if self._cycle_history
+            else None,
         }
 
     def get_component_statistics(self) -> Dict[str, Dict[str, Any]]:
         """Get statistics from all components."""
         return {
-            'generator': self.generator.get_statistics(),
-            'verifier': self.verifier.get_statistics(),
-            'updater': self.updater.get_statistics(),
-            'meta_learner': self.meta_learner.get_statistics(),
+            "generator": self.generator.get_statistics(),
+            "verifier": self.verifier.get_statistics(),
+            "updater": self.updater.get_statistics(),
+            "meta_learner": self.meta_learner.get_statistics(),
         }
 
     def get_recent_cycles(self, n: int = 10) -> List[ImprovementCycle]:
@@ -400,16 +407,16 @@ class DarwinGodelMachine:
     def save_state(self) -> Dict[str, Any]:
         """Save current state for persistence."""
         return {
-            'cycle_count': self._cycle_count,
-            'total_improvement': self._total_improvement,
-            'consecutive_failures': self._consecutive_failures,
-            'generator_stats': self.generator.get_statistics(),
-            'meta_learner_stats': self.meta_learner.get_statistics(),
-            'cycle_history_summary': [
+            "cycle_count": self._cycle_count,
+            "total_improvement": self._total_improvement,
+            "consecutive_failures": self._consecutive_failures,
+            "generator_stats": self.generator.get_statistics(),
+            "meta_learner_stats": self.meta_learner.get_statistics(),
+            "cycle_history_summary": [
                 {
-                    'cycle_id': c.cycle_id,
-                    'improvement': c.improvement,
-                    'duration': c.duration,
+                    "cycle_id": c.cycle_id,
+                    "improvement": c.improvement,
+                    "duration": c.duration,
                 }
                 for c in self._cycle_history[-100:]
             ],
@@ -418,11 +425,11 @@ class DarwinGodelMachine:
     def get_statistics(self) -> Dict[str, Any]:
         """Get overall DGM statistics."""
         return {
-            'phase': self._phase.value,
-            'cycle_count': self._cycle_count,
-            'total_improvement': self._total_improvement,
-            'consecutive_failures': self._consecutive_failures,
-            'auto_improve': self.params.auto_improve,
-            'safety_mode': self.params.safety_mode,
+            "phase": self._phase.value,
+            "cycle_count": self._cycle_count,
+            "total_improvement": self._total_improvement,
+            "consecutive_failures": self._consecutive_failures,
+            "auto_improve": self.params.auto_improve,
+            "safety_mode": self.params.safety_mode,
             **self.get_improvement_summary(),
         }

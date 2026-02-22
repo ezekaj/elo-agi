@@ -23,27 +23,30 @@ from .transition_model import TransitionModel, Transition
 
 class RolloutStrategy(Enum):
     """Strategies for imagination rollout."""
-    GREEDY = "greedy"           # Always take best action
+
+    GREEDY = "greedy"  # Always take best action
     EPSILON_GREEDY = "epsilon"  # Mostly best, sometimes random
-    SAMPLING = "sampling"       # Sample from policy
-    RANDOM = "random"           # Random actions
-    GOAL_DIRECTED = "goal"      # Actions toward goal
+    SAMPLING = "sampling"  # Sample from policy
+    RANDOM = "random"  # Random actions
+    GOAL_DIRECTED = "goal"  # Actions toward goal
 
 
 @dataclass
 class ImaginationParams:
     """Parameters for imagination."""
-    max_horizon: int = 50         # Maximum rollout length
-    n_rollouts: int = 10          # Number of parallel rollouts
-    discount: float = 0.99        # Discount factor for rewards
+
+    max_horizon: int = 50  # Maximum rollout length
+    n_rollouts: int = 10  # Number of parallel rollouts
+    discount: float = 0.99  # Discount factor for rewards
     uncertainty_penalty: float = 0.1  # Penalty for uncertain predictions
     pruning_threshold: float = 0.8  # Prune branches above this uncertainty
-    temperature: float = 1.0      # Temperature for action sampling
+    temperature: float = 1.0  # Temperature for action sampling
 
 
 @dataclass
 class Rollout:
     """A single imagination rollout."""
+
     initial_state: np.ndarray
     actions: List[np.ndarray]
     states: List[np.ndarray]
@@ -67,6 +70,7 @@ class Rollout:
 @dataclass
 class Trajectory:
     """Collection of rollouts for analysis."""
+
     rollouts: List[Rollout]
     best_rollout: Optional[Rollout]
     best_return: float
@@ -172,7 +176,7 @@ class Imagination:
             uncertainties.append(transition.uncertainty)
 
             # Compute discounted return
-            discount = self.params.discount ** t
+            discount = self.params.discount**t
             adjusted_reward = transition.predicted_reward
             adjusted_reward -= self.params.uncertainty_penalty * transition.uncertainty
             total_return += discount * adjusted_reward
@@ -244,7 +248,7 @@ class Imagination:
         elif strategy == RolloutStrategy.GOAL_DIRECTED:
             if self._goal_state is not None:
                 # Simple goal-directed: action toward goal
-                direction = self._goal_state[:self._action_dim] - state[:self._action_dim]
+                direction = self._goal_state[: self._action_dim] - state[: self._action_dim]
                 norm = np.linalg.norm(direction)
                 if norm > 0:
                     direction = direction / norm
@@ -311,7 +315,7 @@ class Imagination:
 
         Uses random shooting with trajectory evaluation.
         """
-        best_return = float('-inf')
+        best_return = float("-inf")
         best_actions = []
 
         for _ in range(n_candidates):
@@ -370,22 +374,22 @@ class Imagination:
         """Get imagination statistics."""
         if not self._rollout_history:
             return {
-                'n_rollouts': 0,
-                'avg_return': 0.0,
-                'avg_length': 0.0,
-                'prune_rate': 0.0,
+                "n_rollouts": 0,
+                "avg_return": 0.0,
+                "avg_length": 0.0,
+                "prune_rate": 0.0,
             }
 
         recent = self._rollout_history[-1000:]
         pruned = [r for r in recent if r.was_pruned]
 
         return {
-            'n_rollouts': len(self._rollout_history),
-            'avg_return': float(np.mean([r.total_return for r in recent])),
-            'avg_length': float(np.mean([r.length for r in recent])),
-            'avg_uncertainty': float(np.mean([r.avg_uncertainty for r in recent])),
-            'prune_rate': len(pruned) / len(recent),
-            'n_trajectories': len(self._trajectory_history),
+            "n_rollouts": len(self._rollout_history),
+            "avg_return": float(np.mean([r.total_return for r in recent])),
+            "avg_length": float(np.mean([r.length for r in recent])),
+            "avg_uncertainty": float(np.mean([r.avg_uncertainty for r in recent])),
+            "prune_rate": len(pruned) / len(recent),
+            "n_trajectories": len(self._trajectory_history),
         }
 
     def reset(self) -> None:

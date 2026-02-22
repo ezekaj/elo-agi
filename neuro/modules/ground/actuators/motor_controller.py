@@ -13,6 +13,7 @@ import time
 
 class ControlMode(Enum):
     """Motor control modes."""
+
     POSITION = "position"
     VELOCITY = "velocity"
     TORQUE = "torque"
@@ -21,6 +22,7 @@ class ControlMode(Enum):
 
 class TrajectoryType(Enum):
     """Trajectory interpolation types."""
+
     LINEAR = "linear"
     CUBIC = "cubic"
     QUINTIC = "quintic"
@@ -30,6 +32,7 @@ class TrajectoryType(Enum):
 @dataclass
 class MotorConfig:
     """Configuration for motor control."""
+
     control_mode: ControlMode = ControlMode.POSITION
     max_velocity: float = 1.0  # rad/s
     max_acceleration: float = 5.0  # rad/s^2
@@ -42,6 +45,7 @@ class MotorConfig:
 @dataclass
 class MotorCommand:
     """A command to a motor."""
+
     motor_id: str
     target_position: Optional[float] = None
     target_velocity: Optional[float] = None
@@ -55,6 +59,7 @@ class MotorCommand:
 @dataclass
 class MotorState:
     """Current state of a motor."""
+
     motor_id: str
     position: float
     velocity: float
@@ -67,6 +72,7 @@ class MotorState:
 @dataclass
 class Trajectory:
     """A motion trajectory."""
+
     motor_id: str
     waypoints: np.ndarray  # Nx1 or Nx3 (pos, vel, acc)
     timestamps: np.ndarray
@@ -155,9 +161,7 @@ class MotorController:
         if command.target_position is not None:
             if command.motor_id in self._limits:
                 min_pos, max_pos = self._limits[command.motor_id]
-                command.target_position = np.clip(
-                    command.target_position, min_pos, max_pos
-                )
+                command.target_position = np.clip(command.target_position, min_pos, max_pos)
 
         # Store command
         self._command_history.append(command)
@@ -182,7 +186,7 @@ class MotorController:
             velocity = np.clip(
                 self.config.position_gain * error,
                 -self.config.max_velocity,
-                self.config.max_velocity
+                self.config.max_velocity,
             )
             state.velocity = velocity
             state.position += velocity * self.config.dt
@@ -191,18 +195,14 @@ class MotorController:
 
         elif command.target_velocity is not None:
             state.velocity = np.clip(
-                command.target_velocity,
-                -self.config.max_velocity,
-                self.config.max_velocity
+                command.target_velocity, -self.config.max_velocity, self.config.max_velocity
             )
             state.position += state.velocity * self.config.dt
             state.is_moving = abs(state.velocity) > 0.001
 
         elif command.target_torque is not None:
             state.torque = np.clip(
-                command.target_torque,
-                -self.config.max_torque,
-                self.config.max_torque
+                command.target_torque, -self.config.max_torque, self.config.max_torque
             )
 
     def _execute_real_command(self, command: MotorCommand) -> None:
@@ -253,10 +253,12 @@ class MotorController:
             target = self._interpolate_trajectory(traj, elapsed)
 
             # Send position command
-            self.send_command(MotorCommand(
-                motor_id=motor_id,
-                target_position=target,
-            ))
+            self.send_command(
+                MotorCommand(
+                    motor_id=motor_id,
+                    target_position=target,
+                )
+            )
 
     def _interpolate_trajectory(
         self,
@@ -265,9 +267,7 @@ class MotorController:
     ) -> float:
         """Interpolate trajectory at time t."""
         # Find surrounding waypoints
-        idx = np.searchsorted(
-            trajectory.timestamps - trajectory.timestamps[0], t
-        )
+        idx = np.searchsorted(trajectory.timestamps - trajectory.timestamps[0], t)
         idx = np.clip(idx, 1, len(trajectory.waypoints) - 1)
 
         t0 = trajectory.timestamps[idx - 1] - trajectory.timestamps[0]
@@ -305,10 +305,12 @@ class MotorController:
 
         # Stop all motors
         for motor_id in self._motors:
-            self.send_command(MotorCommand(
-                motor_id=motor_id,
-                target_velocity=0.0,
-            ))
+            self.send_command(
+                MotorCommand(
+                    motor_id=motor_id,
+                    target_velocity=0.0,
+                )
+            )
 
     def reset_emergency_stop(self) -> None:
         """Reset emergency stop."""
@@ -545,7 +547,10 @@ class TrajectoryPlanner:
         acceleration = np.diff(velocity) / dt[:-1]
 
         if np.any(np.abs(acceleration) > max_acceleration):
-            return False, f"Acceleration exceeds limit: {np.max(np.abs(acceleration)):.2f} > {max_acceleration}"
+            return (
+                False,
+                f"Acceleration exceeds limit: {np.max(np.abs(acceleration)):.2f} > {max_acceleration}",
+            )
 
         return True, None
 

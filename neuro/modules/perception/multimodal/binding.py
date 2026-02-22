@@ -13,6 +13,7 @@ import numpy as np
 
 class Modality(Enum):
     """Sensory modalities."""
+
     VISUAL = "visual"
     AUDITORY = "auditory"
     TACTILE = "tactile"
@@ -22,8 +23,9 @@ class Modality(Enum):
 @dataclass
 class ModalityInput:
     """Input from a single modality."""
+
     modality: Modality
-    features: np.ndarray       # Feature vector
+    features: np.ndarray  # Feature vector
     spatial_location: Optional[Tuple[float, float, float]] = None
     timestamp: float = 0.0
     confidence: float = 1.0
@@ -32,6 +34,7 @@ class ModalityInput:
 @dataclass
 class BoundPercept:
     """A unified percept binding multiple modalities."""
+
     id: str
     modalities: Set[Modality]
     unified_features: np.ndarray
@@ -44,9 +47,10 @@ class BoundPercept:
 @dataclass
 class BindingOutput:
     """Output from binding process."""
+
     percepts: List[BoundPercept]
     binding_map: np.ndarray  # (n_inputs, n_inputs) binding strength
-    coherence: float         # Overall binding coherence
+    coherence: float  # Overall binding coherence
 
 
 class TemporalBinder:
@@ -160,7 +164,7 @@ class SpatialBinder:
                 dist = np.linalg.norm(loc_i - loc_j)
 
                 # Gaussian binding
-                binding[i, j] = np.exp(-dist**2 / (2 * self.spatial_sigma**2))
+                binding[i, j] = np.exp(-(dist**2) / (2 * self.spatial_sigma**2))
 
         return binding
 
@@ -197,14 +201,14 @@ class FeatureBinder:
                 if features.shape[0] < proj.shape[1]:
                     features = np.pad(features, (0, proj.shape[1] - features.shape[0]))
                 else:
-                    features = features[:proj.shape[1]]
+                    features = features[: proj.shape[1]]
             unified = proj @ features
         else:
             # Default: pad/truncate to unified_dim
             if len(features) < self.unified_dim:
                 unified = np.pad(features, (0, self.unified_dim - len(features)))
             else:
-                unified = features[:self.unified_dim]
+                unified = features[: self.unified_dim]
 
         # Normalize
         unified = unified / (np.linalg.norm(unified) + 1e-8)

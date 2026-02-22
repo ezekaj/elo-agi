@@ -28,7 +28,7 @@ def encode_test_memories(orchestrator: SleepCycleOrchestrator, n_memories: int =
 
     for i in range(n_memories):
         pattern = np.zeros(20)
-        pattern[i * 2:(i * 2) + 2] = 1.0
+        pattern[i * 2 : (i * 2) + 2] = 1.0
         pattern += np.random.randn(20) * 0.1
         experiences.append(pattern)
 
@@ -60,9 +60,7 @@ def demo_sws_deprivation():
     print("\n--- SWS Deprivation Condition ---")
     sws_deprived = SleepCycleOrchestrator(n_neurons=100, memory_dim=20)
     memories_deprived = encode_test_memories(sws_deprived)
-    deprived_stats = sws_deprived.simulate_sleep_deprivation(
-        skip_stages=[SleepStage.SWS]
-    )
+    deprived_stats = sws_deprived.simulate_sleep_deprivation(skip_stages=[SleepStage.SWS])
 
     # Compare results
     print("\n" + "=" * 50)
@@ -72,11 +70,26 @@ def demo_sws_deprivation():
     comparisons = [
         ("Total SWS (min)", full_stats.total_sws_minutes, deprived_stats.total_sws_minutes),
         ("Total REM (min)", full_stats.total_rem_minutes, deprived_stats.total_rem_minutes),
-        ("Memories Replayed", full_stats.total_memories_replayed, deprived_stats.total_memories_replayed),
-        ("Memories Consolidated", full_stats.total_memories_consolidated, deprived_stats.total_memories_consolidated),
-        ("Cortical Transfer", full_stats.total_memories_transferred, deprived_stats.total_memories_transferred),
-        ("Synaptic Reduction", full_stats.wake_synaptic_strength - full_stats.post_sleep_synaptic_strength,
-         deprived_stats.wake_synaptic_strength - deprived_stats.post_sleep_synaptic_strength),
+        (
+            "Memories Replayed",
+            full_stats.total_memories_replayed,
+            deprived_stats.total_memories_replayed,
+        ),
+        (
+            "Memories Consolidated",
+            full_stats.total_memories_consolidated,
+            deprived_stats.total_memories_consolidated,
+        ),
+        (
+            "Cortical Transfer",
+            full_stats.total_memories_transferred,
+            deprived_stats.total_memories_transferred,
+        ),
+        (
+            "Synaptic Reduction",
+            full_stats.wake_synaptic_strength - full_stats.post_sleep_synaptic_strength,
+            deprived_stats.wake_synaptic_strength - deprived_stats.post_sleep_synaptic_strength,
+        ),
     ]
 
     for name, full_val, deprived_val in comparisons:
@@ -106,9 +119,7 @@ def demo_rem_deprivation():
     print("\n--- REM Deprivation Condition ---")
     rem_deprived = SleepCycleOrchestrator(n_neurons=100, memory_dim=20)
     memories_deprived = encode_test_memories(rem_deprived)
-    deprived_stats = rem_deprived.simulate_sleep_deprivation(
-        skip_stages=[SleepStage.REM]
-    )
+    deprived_stats = rem_deprived.simulate_sleep_deprivation(skip_stages=[SleepStage.REM])
 
     # Compare results
     print("\n" + "=" * 50)
@@ -119,7 +130,11 @@ def demo_rem_deprivation():
         ("Total SWS (min)", full_stats.total_sws_minutes, deprived_stats.total_sws_minutes),
         ("Total REM (min)", full_stats.total_rem_minutes, deprived_stats.total_rem_minutes),
         ("Dreams Generated", full_stats.total_dreams, deprived_stats.total_dreams),
-        ("Memories Replayed", full_stats.total_memories_replayed, deprived_stats.total_memories_replayed),
+        (
+            "Memories Replayed",
+            full_stats.total_memories_replayed,
+            deprived_stats.total_memories_replayed,
+        ),
     ]
 
     for name, full_val, deprived_val in comparisons:
@@ -176,42 +191,42 @@ def demo_partial_sleep():
     # Sleep duration breakdown
     x = np.arange(len(names))
     width = 0.35
-    axes[0, 0].bar(x - width/2, sws_times, width, label='SWS', color='navy')
-    axes[0, 0].bar(x + width/2, rem_times, width, label='REM', color='coral')
-    axes[0, 0].set_xlabel('Sleep Condition')
-    axes[0, 0].set_ylabel('Duration (minutes)')
-    axes[0, 0].set_title('Sleep Stage Duration by Condition')
+    axes[0, 0].bar(x - width / 2, sws_times, width, label="SWS", color="navy")
+    axes[0, 0].bar(x + width / 2, rem_times, width, label="REM", color="coral")
+    axes[0, 0].set_xlabel("Sleep Condition")
+    axes[0, 0].set_ylabel("Duration (minutes)")
+    axes[0, 0].set_title("Sleep Stage Duration by Condition")
     axes[0, 0].set_xticks(x)
     axes[0, 0].set_xticklabels([n.split()[0] for n in names], rotation=15)
     axes[0, 0].legend()
     axes[0, 0].grid(True, alpha=0.3)
 
     # Consolidation by sleep duration
-    axes[0, 1].plot(hours, consolidated, 'g-o', linewidth=2, markersize=10)
-    axes[0, 1].set_xlabel('Sleep Duration (hours)')
-    axes[0, 1].set_ylabel('Memories Consolidated')
-    axes[0, 1].set_title('Consolidation vs Sleep Duration')
+    axes[0, 1].plot(hours, consolidated, "g-o", linewidth=2, markersize=10)
+    axes[0, 1].set_xlabel("Sleep Duration (hours)")
+    axes[0, 1].set_ylabel("Memories Consolidated")
+    axes[0, 1].set_title("Consolidation vs Sleep Duration")
     axes[0, 1].grid(True, alpha=0.3)
 
     # Replays by sleep duration
-    axes[1, 0].plot(hours, replayed, 'b-s', linewidth=2, markersize=10)
-    axes[1, 0].set_xlabel('Sleep Duration (hours)')
-    axes[1, 0].set_ylabel('Memories Replayed')
-    axes[1, 0].set_title('Memory Replay vs Sleep Duration')
+    axes[1, 0].plot(hours, replayed, "b-s", linewidth=2, markersize=10)
+    axes[1, 0].set_xlabel("Sleep Duration (hours)")
+    axes[1, 0].set_ylabel("Memories Replayed")
+    axes[1, 0].set_title("Memory Replay vs Sleep Duration")
     axes[1, 0].grid(True, alpha=0.3)
 
     # SWS to REM ratio
     ratios = [sws / (rem + 0.1) for sws, rem in zip(sws_times, rem_times)]
-    axes[1, 1].bar(x, ratios, color='purple')
-    axes[1, 1].set_xlabel('Sleep Condition')
-    axes[1, 1].set_ylabel('SWS/REM Ratio')
-    axes[1, 1].set_title('SWS/REM Balance by Condition')
+    axes[1, 1].bar(x, ratios, color="purple")
+    axes[1, 1].set_xlabel("Sleep Condition")
+    axes[1, 1].set_ylabel("SWS/REM Ratio")
+    axes[1, 1].set_title("SWS/REM Balance by Condition")
     axes[1, 1].set_xticks(x)
     axes[1, 1].set_xticklabels([n.split()[0] for n in names], rotation=15)
     axes[1, 1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('partial_sleep_effects.png', dpi=150)
+    plt.savefig("partial_sleep_effects.png", dpi=150)
     print("\nFigure saved: partial_sleep_effects.png")
 
     return results
@@ -239,7 +254,9 @@ def demo_synaptic_homeostasis_disruption():
         normal_cycle.sleep_consolidation(duration=8.0)
         normal_strengths.append(normal_cycle.homeostasis.measure_total_strength())
 
-        print(f"   Cycle {i+1}: Wake → {normal_strengths[-2]:.1f}, Sleep → {normal_strengths[-1]:.1f}")
+        print(
+            f"   Cycle {i + 1}: Wake → {normal_strengths[-2]:.1f}, Sleep → {normal_strengths[-1]:.1f}"
+        )
 
     # Sleep deprived condition
     print("\n--- Sleep Deprived (No Sleep) ---")
@@ -254,46 +271,48 @@ def demo_synaptic_homeostasis_disruption():
         deprived_cycle.homeostasis.downscale(factor=0.99)  # Minimal
         deprived_strengths.append(deprived_cycle.homeostasis.measure_total_strength())
 
-        print(f"   Cycle {i+1}: Wake → {deprived_strengths[-2]:.1f}, No Sleep → {deprived_strengths[-1]:.1f}")
+        print(
+            f"   Cycle {i + 1}: Wake → {deprived_strengths[-2]:.1f}, No Sleep → {deprived_strengths[-1]:.1f}"
+        )
 
     # Visualize
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     # Synaptic strength over time
     time_points = np.arange(len(normal_strengths))
-    axes[0].plot(time_points, normal_strengths, 'g-o', linewidth=2, label='Normal Sleep')
-    axes[0].plot(time_points, deprived_strengths, 'r-s', linewidth=2, label='Sleep Deprived')
+    axes[0].plot(time_points, normal_strengths, "g-o", linewidth=2, label="Normal Sleep")
+    axes[0].plot(time_points, deprived_strengths, "r-s", linewidth=2, label="Sleep Deprived")
 
     # Mark wake/sleep transitions
     for i in range(1, len(time_points), 2):
-        axes[0].axvline(x=i, color='gray', linestyle='--', alpha=0.3)
+        axes[0].axvline(x=i, color="gray", linestyle="--", alpha=0.3)
 
-    axes[0].set_xlabel('Time Point (alternating Wake/Sleep)')
-    axes[0].set_ylabel('Total Synaptic Strength')
-    axes[0].set_title('Synaptic Strength: Normal vs Sleep Deprived')
+    axes[0].set_xlabel("Time Point (alternating Wake/Sleep)")
+    axes[0].set_ylabel("Total Synaptic Strength")
+    axes[0].set_title("Synaptic Strength: Normal vs Sleep Deprived")
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
 
     # Final comparison
-    conditions = ['Normal\nSleep', 'Sleep\nDeprived']
+    conditions = ["Normal\nSleep", "Sleep\nDeprived"]
     final_strengths = [normal_strengths[-1], deprived_strengths[-1]]
-    colors = ['green', 'red']
+    colors = ["green", "red"]
 
     axes[1].bar(conditions, final_strengths, color=colors)
-    axes[1].set_ylabel('Final Synaptic Strength')
-    axes[1].set_title('Final State After 5 Cycles')
+    axes[1].set_ylabel("Final Synaptic Strength")
+    axes[1].set_title("Final State After 5 Cycles")
     axes[1].grid(True, alpha=0.3)
 
     # Add percentage increase
     initial = normal_strengths[0]
     for i, (cond, strength) in enumerate(zip(conditions, final_strengths)):
         pct = (strength / initial - 1) * 100
-        axes[1].annotate(f'{pct:+.1f}%',
-                        xy=(i, strength), xytext=(0, 5),
-                        textcoords='offset points', ha='center')
+        axes[1].annotate(
+            f"{pct:+.1f}%", xy=(i, strength), xytext=(0, 5), textcoords="offset points", ha="center"
+        )
 
     plt.tight_layout()
-    plt.savefig('homeostasis_disruption.png', dpi=150)
+    plt.savefig("homeostasis_disruption.png", dpi=150)
     print("\nFigure saved: homeostasis_disruption.png")
 
     print("\nKey finding: Without sleep, synaptic strength accumulates")
@@ -331,13 +350,17 @@ def demo_comprehensive_comparison():
     print("\n" + "=" * 70)
     print("SUMMARY TABLE")
     print("=" * 70)
-    print(f"{'Condition':<20} {'SWS(min)':<10} {'REM(min)':<10} {'Replay':<10} {'Consol':<10} {'Dreams':<10}")
+    print(
+        f"{'Condition':<20} {'SWS(min)':<10} {'REM(min)':<10} {'Replay':<10} {'Consol':<10} {'Dreams':<10}"
+    )
     print("-" * 70)
 
     for name, stats in results.items():
-        print(f"{name:<20} {stats.total_sws_minutes:<10.1f} {stats.total_rem_minutes:<10.1f} "
-              f"{stats.total_memories_replayed:<10} {stats.total_memories_consolidated:<10} "
-              f"{stats.total_dreams:<10}")
+        print(
+            f"{name:<20} {stats.total_sws_minutes:<10.1f} {stats.total_rem_minutes:<10.1f} "
+            f"{stats.total_memories_replayed:<10} {stats.total_memories_consolidated:<10} "
+            f"{stats.total_dreams:<10}"
+        )
 
     # Visualize
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -350,10 +373,10 @@ def demo_comprehensive_comparison():
     rem = [results[n].total_rem_minutes for n in names]
 
     width = 0.35
-    axes[0, 0].bar(x - width/2, sws, width, label='SWS', color='navy')
-    axes[0, 0].bar(x + width/2, rem, width, label='REM', color='coral')
-    axes[0, 0].set_ylabel('Duration (minutes)')
-    axes[0, 0].set_title('Sleep Stage Duration')
+    axes[0, 0].bar(x - width / 2, sws, width, label="SWS", color="navy")
+    axes[0, 0].bar(x + width / 2, rem, width, label="REM", color="coral")
+    axes[0, 0].set_ylabel("Duration (minutes)")
+    axes[0, 0].set_title("Sleep Stage Duration")
     axes[0, 0].set_xticks(x)
     axes[0, 0].set_xticklabels(names, rotation=15)
     axes[0, 0].legend()
@@ -361,31 +384,31 @@ def demo_comprehensive_comparison():
 
     # Memory replay
     replay = [results[n].total_memories_replayed for n in names]
-    colors = ['green', 'orange', 'orange', 'red']
+    colors = ["green", "orange", "orange", "red"]
     axes[0, 1].bar(names, replay, color=colors)
-    axes[0, 1].set_ylabel('Memories Replayed')
-    axes[0, 1].set_title('Memory Replay Count')
-    axes[0, 1].tick_params(axis='x', rotation=15)
+    axes[0, 1].set_ylabel("Memories Replayed")
+    axes[0, 1].set_title("Memory Replay Count")
+    axes[0, 1].tick_params(axis="x", rotation=15)
     axes[0, 1].grid(True, alpha=0.3)
 
     # Consolidation
     consol = [results[n].total_memories_consolidated for n in names]
     axes[1, 0].bar(names, consol, color=colors)
-    axes[1, 0].set_ylabel('Memories Consolidated')
-    axes[1, 0].set_title('Consolidation Success')
-    axes[1, 0].tick_params(axis='x', rotation=15)
+    axes[1, 0].set_ylabel("Memories Consolidated")
+    axes[1, 0].set_title("Consolidation Success")
+    axes[1, 0].tick_params(axis="x", rotation=15)
     axes[1, 0].grid(True, alpha=0.3)
 
     # Dreams
     dreams = [results[n].total_dreams for n in names]
     axes[1, 1].bar(names, dreams, color=colors)
-    axes[1, 1].set_ylabel('Dreams Generated')
-    axes[1, 1].set_title('Dream Generation')
-    axes[1, 1].tick_params(axis='x', rotation=15)
+    axes[1, 1].set_ylabel("Dreams Generated")
+    axes[1, 1].set_title("Dream Generation")
+    axes[1, 1].tick_params(axis="x", rotation=15)
     axes[1, 1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('comprehensive_comparison.png', dpi=150)
+    plt.savefig("comprehensive_comparison.png", dpi=150)
     print("\nFigure saved: comprehensive_comparison.png")
 
 
@@ -413,5 +436,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

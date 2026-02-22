@@ -18,6 +18,7 @@ from .base_benchmark import Benchmark, BenchmarkConfig
 @dataclass
 class OODSample:
     """An out-of-distribution detection sample."""
+
     features: np.ndarray
     is_ood: bool  # True if out-of-distribution
     domain: str  # "in_distribution", "near_ood", "far_ood"
@@ -26,6 +27,7 @@ class OODSample:
 @dataclass
 class CalibrationSample:
     """A calibration evaluation sample."""
+
     features: np.ndarray
     true_class: int
     n_classes: int
@@ -34,6 +36,7 @@ class CalibrationSample:
 @dataclass
 class AdversarialSample:
     """An adversarial robustness sample."""
+
     original: np.ndarray
     perturbation: np.ndarray
     true_class: int
@@ -148,7 +151,7 @@ class CalibrationBenchmark(Benchmark):
 
         # Create class centroid
         centroid = np.zeros(self.feature_dim)
-        centroid[true_class * 6:(true_class + 1) * 6] = 1.0
+        centroid[true_class * 6 : (true_class + 1) * 6] = 1.0
 
         # Add noise
         features = centroid + self._rng.normal(0, 0.5, self.feature_dim)
@@ -220,7 +223,7 @@ class AdversarialBenchmark(Benchmark):
         # Create clean input (one-hot encoded with some structure)
         original = np.zeros(self.feature_dim)
         class_start = true_class * 6
-        original[class_start:class_start + 6] = self._rng.uniform(0.5, 1.0, 6)
+        original[class_start : class_start + 6] = self._rng.uniform(0.5, 1.0, 6)
         original += self._rng.normal(0, 0.1, self.feature_dim)
 
         # Vary epsilon based on trial difficulty
@@ -234,8 +237,8 @@ class AdversarialBenchmark(Benchmark):
         wrong_class = (true_class + 1) % self.n_classes
         wrong_start = wrong_class * 6
 
-        perturbation[class_start:class_start + 6] = -epsilon
-        perturbation[wrong_start:wrong_start + 6] = epsilon
+        perturbation[class_start : class_start + 6] = -epsilon
+        perturbation[wrong_start : wrong_start + 6] = epsilon
 
         # Clip to epsilon ball
         perturbation = np.clip(perturbation, -epsilon, epsilon)
@@ -294,7 +297,7 @@ class UncertaintyBenchmark(Benchmark):
 
         true_class = self._rng.integers(0, self.n_classes)
         centroid = np.zeros(self.feature_dim)
-        centroid[true_class * 6:(true_class + 1) * 6] = 1.0
+        centroid[true_class * 6 : (true_class + 1) * 6] = 1.0
 
         if difficulty == "easy":
             # Clear signal, low expected uncertainty
@@ -310,7 +313,7 @@ class UncertaintyBenchmark(Benchmark):
             # Mix two classes
             other_class = (true_class + 1) % self.n_classes
             other_centroid = np.zeros(self.feature_dim)
-            other_centroid[other_class * 6:(other_class + 1) * 6] = 1.0
+            other_centroid[other_class * 6 : (other_class + 1) * 6] = 1.0
             centroid = 0.5 * centroid + 0.5 * other_centroid
             noise_scale = 0.3
             expected_uncertainty = 0.8
@@ -389,7 +392,7 @@ class SelectivePredictionBenchmark(Benchmark):
             should_abstain = True
 
         centroid = np.zeros(self.feature_dim)
-        centroid[true_class * 6:(true_class + 1) * 6] = 1.0
+        centroid[true_class * 6 : (true_class + 1) * 6] = 1.0
         features = centroid + self._rng.normal(0, noise, self.feature_dim)
 
         task = {
@@ -457,13 +460,13 @@ def create_robustness_benchmark_suite() -> List[Benchmark]:
 
 
 __all__ = [
-    'OODSample',
-    'CalibrationSample',
-    'AdversarialSample',
-    'OODDetectionBenchmark',
-    'CalibrationBenchmark',
-    'AdversarialBenchmark',
-    'UncertaintyBenchmark',
-    'SelectivePredictionBenchmark',
-    'create_robustness_benchmark_suite',
+    "OODSample",
+    "CalibrationSample",
+    "AdversarialSample",
+    "OODDetectionBenchmark",
+    "CalibrationBenchmark",
+    "AdversarialBenchmark",
+    "UncertaintyBenchmark",
+    "SelectivePredictionBenchmark",
+    "create_robustness_benchmark_suite",
 ]

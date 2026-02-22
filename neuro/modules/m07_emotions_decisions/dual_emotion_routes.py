@@ -18,6 +18,7 @@ import numpy as np
 
 class ResponseType(Enum):
     """Type of emotional response."""
+
     THREAT = "threat"
     REWARD = "reward"
     NEUTRAL = "neutral"
@@ -27,6 +28,7 @@ class ResponseType(Enum):
 @dataclass
 class EmotionRouteResponse:
     """Response from an emotion processing route."""
+
     response_type: ResponseType
     intensity: float  # 0-1
     latency_ms: float
@@ -69,12 +71,14 @@ class ThalamusRelay:
         # Coarse representation: downsample/summarize
         if len(self.current_input) > 4:
             # Take key statistics instead of full detail
-            coarse = np.array([
-                np.mean(self.current_input),
-                np.max(self.current_input),
-                np.min(self.current_input),
-                np.std(self.current_input)
-            ])
+            coarse = np.array(
+                [
+                    np.mean(self.current_input),
+                    np.max(self.current_input),
+                    np.min(self.current_input),
+                    np.std(self.current_input),
+                ]
+            )
         else:
             coarse = self.current_input
 
@@ -110,10 +114,10 @@ class FastEmotionRoute:
 
         # Innate threat detectors (evolutionary)
         self.innate_threat_features = {
-            'high_contrast': 0.3,
-            'rapid_approach': 0.5,
-            'large_size': 0.2,
-            'sudden_onset': 0.4
+            "high_contrast": 0.3,
+            "rapid_approach": 0.5,
+            "large_size": 0.2,
+            "sudden_onset": 0.4,
         }
 
         # Learned threat patterns
@@ -143,10 +147,10 @@ class FastEmotionRoute:
                 latency_ms=self.LATENCY_MS,
                 confidence=0.6,  # Fast route has lower confidence
                 details={
-                    'innate_threat': innate_threat,
-                    'learned_threat': learned_threat,
-                    'path': 'fast_subcortical'
-                }
+                    "innate_threat": innate_threat,
+                    "learned_threat": learned_threat,
+                    "path": "fast_subcortical",
+                },
             )
         else:
             # Check for reward signals
@@ -157,7 +161,7 @@ class FastEmotionRoute:
                     intensity=reward,
                     latency_ms=self.LATENCY_MS,
                     confidence=0.5,
-                    details={'path': 'fast_subcortical'}
+                    details={"path": "fast_subcortical"},
                 )
 
             return EmotionRouteResponse(
@@ -165,7 +169,7 @@ class FastEmotionRoute:
                 intensity=0.0,
                 latency_ms=self.LATENCY_MS,
                 confidence=0.4,
-                details={'path': 'fast_subcortical'}
+                details={"path": "fast_subcortical"},
             )
 
     def _detect_innate_threats(self, stimulus: np.ndarray) -> float:
@@ -175,15 +179,15 @@ class FastEmotionRoute:
         # High contrast (potential predator)
         contrast = np.max(stimulus) - np.min(stimulus) if len(stimulus) > 1 else 0
         if contrast > 0.7:
-            threat_score += self.innate_threat_features['high_contrast']
+            threat_score += self.innate_threat_features["high_contrast"]
 
         # Sudden large values (looming)
         if np.max(np.abs(stimulus)) > 0.8:
-            threat_score += self.innate_threat_features['large_size']
+            threat_score += self.innate_threat_features["large_size"]
 
         # High variance (unpredictable)
         if np.std(stimulus) > 0.4:
-            threat_score += self.innate_threat_features['sudden_onset']
+            threat_score += self.innate_threat_features["sudden_onset"]
 
         return min(1.0, threat_score)
 
@@ -223,11 +227,7 @@ class SlowEmotionRoute:
         # Safety overrides (things that look threatening but aren't)
         self.safety_overrides: Dict[int, str] = {}
 
-    def process(
-        self,
-        stimulus: np.ndarray,
-        context: Dict[str, Any] = None
-    ) -> EmotionRouteResponse:
+    def process(self, stimulus: np.ndarray, context: Dict[str, Any] = None) -> EmotionRouteResponse:
         """
         Detailed contextual evaluation.
 
@@ -244,9 +244,9 @@ class SlowEmotionRoute:
                 latency_ms=self.LATENCY_MS,
                 confidence=0.9,
                 details={
-                    'override_reason': self.safety_overrides[stimulus_hash],
-                    'path': 'slow_cortical'
-                }
+                    "override_reason": self.safety_overrides[stimulus_hash],
+                    "path": "slow_cortical",
+                },
             )
 
         # Detailed feature analysis
@@ -254,10 +254,10 @@ class SlowEmotionRoute:
         reward_assessment = self._detailed_reward_analysis(stimulus, context)
 
         # Context modulation
-        if context.get('safe_environment', False):
+        if context.get("safe_environment", False):
             threat_assessment *= 0.5
 
-        if context.get('known_danger', False):
+        if context.get("known_danger", False):
             threat_assessment = max(threat_assessment, 0.8)
 
         # Determine response
@@ -277,18 +277,14 @@ class SlowEmotionRoute:
             latency_ms=self.LATENCY_MS,
             confidence=0.85,  # Slow route has higher confidence
             details={
-                'threat_assessment': threat_assessment,
-                'reward_assessment': reward_assessment,
-                'context_used': list(context.keys()),
-                'path': 'slow_cortical'
-            }
+                "threat_assessment": threat_assessment,
+                "reward_assessment": reward_assessment,
+                "context_used": list(context.keys()),
+                "path": "slow_cortical",
+            },
         )
 
-    def _detailed_threat_analysis(
-        self,
-        stimulus: np.ndarray,
-        context: Dict[str, Any]
-    ) -> float:
+    def _detailed_threat_analysis(self, stimulus: np.ndarray, context: Dict[str, Any]) -> float:
         """
         Detailed threat analysis using full stimulus and context.
         """
@@ -308,7 +304,7 @@ class SlowEmotionRoute:
             base_threat += 0.3
 
         # Context modulation
-        past_experiences = context.get('past_experiences', [])
+        past_experiences = context.get("past_experiences", [])
         if past_experiences:
             avg_outcome = np.mean(past_experiences)
             if avg_outcome < 0:
@@ -316,11 +312,7 @@ class SlowEmotionRoute:
 
         return min(1.0, base_threat)
 
-    def _detailed_reward_analysis(
-        self,
-        stimulus: np.ndarray,
-        context: Dict[str, Any]
-    ) -> float:
+    def _detailed_reward_analysis(self, stimulus: np.ndarray, context: Dict[str, Any]) -> float:
         """Detailed reward analysis using full stimulus and context."""
         base_reward = 0.0
 
@@ -332,7 +324,7 @@ class SlowEmotionRoute:
             base_reward += mean_val
 
         # Context: known rewarding situation
-        if context.get('reward_context', False):
+        if context.get("reward_context", False):
             base_reward += 0.3
 
         return min(1.0, base_reward)
@@ -370,10 +362,7 @@ class DualRouteProcessor:
         self.stress_level = stress_level
 
     def process(
-        self,
-        stimulus: np.ndarray,
-        context: Dict[str, Any] = None,
-        wait_for_slow: bool = True
+        self, stimulus: np.ndarray, context: Dict[str, Any] = None, wait_for_slow: bool = True
     ) -> Tuple[EmotionRouteResponse, Optional[EmotionRouteResponse]]:
         """
         Process stimulus through both routes.
@@ -409,9 +398,7 @@ class DualRouteProcessor:
         return fast_response, slow_response
 
     def get_final_response(
-        self,
-        stimulus: np.ndarray,
-        context: Dict[str, Any] = None
+        self, stimulus: np.ndarray, context: Dict[str, Any] = None
     ) -> EmotionRouteResponse:
         """
         Get the final reconciled response from both routes.
@@ -425,9 +412,7 @@ class DualRouteProcessor:
         return self._reconcile(fast_response, slow_response)
 
     def _reconcile(
-        self,
-        fast: EmotionRouteResponse,
-        slow: EmotionRouteResponse
+        self, fast: EmotionRouteResponse, slow: EmotionRouteResponse
     ) -> EmotionRouteResponse:
         """
         Reconcile fast and slow route responses.
@@ -445,18 +430,17 @@ class DualRouteProcessor:
                 latency_ms=slow.latency_ms,
                 confidence=slow.confidence,
                 details={
-                    'reconciled': True,
-                    'fast_overridden': True,
-                    'override_reason': slow.details.get('override_reason', 'unknown')
-                }
+                    "reconciled": True,
+                    "fast_overridden": True,
+                    "override_reason": slow.details.get("override_reason", "unknown"),
+                },
             )
 
         # If both agree on response type
         if fast.response_type == slow.response_type:
             # Combine intensities weighted by confidence
             combined_intensity = (
-                fast.intensity * fast.confidence +
-                slow.intensity * slow.confidence
+                fast.intensity * fast.confidence + slow.intensity * slow.confidence
             ) / (fast.confidence + slow.confidence)
 
             combined_confidence = (fast.confidence + slow.confidence) / 2
@@ -467,11 +451,11 @@ class DualRouteProcessor:
                 latency_ms=slow.latency_ms,
                 confidence=combined_confidence,
                 details={
-                    'reconciled': True,
-                    'agreement': True,
-                    'fast_intensity': fast.intensity,
-                    'slow_intensity': slow.intensity
-                }
+                    "reconciled": True,
+                    "agreement": True,
+                    "fast_intensity": fast.intensity,
+                    "slow_intensity": slow.intensity,
+                },
             )
 
         # Disagreement: weight by confidence and stress
@@ -494,11 +478,11 @@ class DualRouteProcessor:
             latency_ms=slow.latency_ms,
             confidence=abs(fast_weight - slow_weight) / (fast_weight + slow_weight),
             details={
-                'reconciled': True,
-                'agreement': False,
-                'winner': 'fast' if winner == fast else 'slow',
-                'stress_level': self.stress_level
-            }
+                "reconciled": True,
+                "agreement": False,
+                "winner": "fast" if winner == fast else "slow",
+                "stress_level": self.stress_level,
+            },
         )
 
     def set_stress_level(self, level: float):

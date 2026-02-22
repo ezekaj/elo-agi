@@ -30,6 +30,7 @@ class SpatialRelationType(Enum):
 @dataclass
 class SpatialObject:
     """An object with spatial properties"""
+
     object_id: str
     position: np.ndarray
     rotation: np.ndarray = field(default_factory=lambda: np.eye(3))
@@ -62,6 +63,7 @@ class SpatialObject:
 @dataclass
 class SpatialRelation:
     """A relation between two spatial objects"""
+
     relation_type: SpatialRelationType
     object1_id: str
     object2_id: str
@@ -76,99 +78,131 @@ class SpatialRelations:
         self.near_threshold = near_threshold
         self.touch_threshold = touch_threshold
 
-    def compute_relation(self,
-                         obj1: SpatialObject,
-                         obj2: SpatialObject
-                         ) -> List[SpatialRelation]:
+    def compute_relation(self, obj1: SpatialObject, obj2: SpatialObject) -> List[SpatialRelation]:
         """Compute all applicable relations between two objects"""
         relations = []
         diff = obj2.position - obj1.position
         distance = np.linalg.norm(diff)
 
         if distance < self.touch_threshold:
-            relations.append(SpatialRelation(
-                SpatialRelationType.TOUCHING, obj1.object_id, obj2.object_id,
-                strength=1.0 - distance / self.touch_threshold
-            ))
+            relations.append(
+                SpatialRelation(
+                    SpatialRelationType.TOUCHING,
+                    obj1.object_id,
+                    obj2.object_id,
+                    strength=1.0 - distance / self.touch_threshold,
+                )
+            )
         elif distance < self.near_threshold:
-            relations.append(SpatialRelation(
-                SpatialRelationType.NEAR, obj1.object_id, obj2.object_id,
-                strength=1.0 - distance / self.near_threshold
-            ))
+            relations.append(
+                SpatialRelation(
+                    SpatialRelationType.NEAR,
+                    obj1.object_id,
+                    obj2.object_id,
+                    strength=1.0 - distance / self.near_threshold,
+                )
+            )
         else:
-            relations.append(SpatialRelation(
-                SpatialRelationType.FAR, obj1.object_id, obj2.object_id,
-                strength=distance / self.near_threshold
-            ))
+            relations.append(
+                SpatialRelation(
+                    SpatialRelationType.FAR,
+                    obj1.object_id,
+                    obj2.object_id,
+                    strength=distance / self.near_threshold,
+                )
+            )
 
         if abs(diff[0]) > abs(diff[1]) and abs(diff[0]) > abs(diff[2]):
             if diff[0] > 0:
-                relations.append(SpatialRelation(
-                    SpatialRelationType.RIGHT, obj1.object_id, obj2.object_id,
-                    strength=abs(diff[0]) / (distance + 0.001)
-                ))
+                relations.append(
+                    SpatialRelation(
+                        SpatialRelationType.RIGHT,
+                        obj1.object_id,
+                        obj2.object_id,
+                        strength=abs(diff[0]) / (distance + 0.001),
+                    )
+                )
             else:
-                relations.append(SpatialRelation(
-                    SpatialRelationType.LEFT, obj1.object_id, obj2.object_id,
-                    strength=abs(diff[0]) / (distance + 0.001)
-                ))
+                relations.append(
+                    SpatialRelation(
+                        SpatialRelationType.LEFT,
+                        obj1.object_id,
+                        obj2.object_id,
+                        strength=abs(diff[0]) / (distance + 0.001),
+                    )
+                )
 
         if abs(diff[1]) > abs(diff[0]) and abs(diff[1]) > abs(diff[2]):
             if diff[1] > 0:
-                relations.append(SpatialRelation(
-                    SpatialRelationType.ABOVE, obj1.object_id, obj2.object_id,
-                    strength=abs(diff[1]) / (distance + 0.001)
-                ))
+                relations.append(
+                    SpatialRelation(
+                        SpatialRelationType.ABOVE,
+                        obj1.object_id,
+                        obj2.object_id,
+                        strength=abs(diff[1]) / (distance + 0.001),
+                    )
+                )
             else:
-                relations.append(SpatialRelation(
-                    SpatialRelationType.BELOW, obj1.object_id, obj2.object_id,
-                    strength=abs(diff[1]) / (distance + 0.001)
-                ))
+                relations.append(
+                    SpatialRelation(
+                        SpatialRelationType.BELOW,
+                        obj1.object_id,
+                        obj2.object_id,
+                        strength=abs(diff[1]) / (distance + 0.001),
+                    )
+                )
 
         if abs(diff[2]) > abs(diff[0]) and abs(diff[2]) > abs(diff[1]):
             if diff[2] > 0:
-                relations.append(SpatialRelation(
-                    SpatialRelationType.FRONT, obj1.object_id, obj2.object_id,
-                    strength=abs(diff[2]) / (distance + 0.001)
-                ))
+                relations.append(
+                    SpatialRelation(
+                        SpatialRelationType.FRONT,
+                        obj1.object_id,
+                        obj2.object_id,
+                        strength=abs(diff[2]) / (distance + 0.001),
+                    )
+                )
             else:
-                relations.append(SpatialRelation(
-                    SpatialRelationType.BEHIND, obj1.object_id, obj2.object_id,
-                    strength=abs(diff[2]) / (distance + 0.001)
-                ))
+                relations.append(
+                    SpatialRelation(
+                        SpatialRelationType.BEHIND,
+                        obj1.object_id,
+                        obj2.object_id,
+                        strength=abs(diff[2]) / (distance + 0.001),
+                    )
+                )
 
         min1, max1 = obj1.transformed_bounds()
         min2, max2 = obj2.transformed_bounds()
 
         overlap = np.all(max1 >= min2) and np.all(max2 >= min1)
         if overlap:
-            relations.append(SpatialRelation(
-                SpatialRelationType.OVERLAPPING, obj1.object_id, obj2.object_id
-            ))
+            relations.append(
+                SpatialRelation(SpatialRelationType.OVERLAPPING, obj1.object_id, obj2.object_id)
+            )
 
-            if (np.all(min2 >= min1) and np.all(max2 <= max1)):
-                relations.append(SpatialRelation(
-                    SpatialRelationType.INSIDE, obj2.object_id, obj1.object_id
-                ))
-            elif (np.all(min1 >= min2) and np.all(max1 <= max2)):
-                relations.append(SpatialRelation(
-                    SpatialRelationType.INSIDE, obj1.object_id, obj2.object_id
-                ))
+            if np.all(min2 >= min1) and np.all(max2 <= max1):
+                relations.append(
+                    SpatialRelation(SpatialRelationType.INSIDE, obj2.object_id, obj1.object_id)
+                )
+            elif np.all(min1 >= min2) and np.all(max1 <= max2):
+                relations.append(
+                    SpatialRelation(SpatialRelationType.INSIDE, obj1.object_id, obj2.object_id)
+                )
 
         return relations
 
-    def satisfy_constraints(self,
-                            objects: Dict[str, SpatialObject],
-                            constraints: List[SpatialRelation],
-                            max_iterations: int = 100
-                            ) -> Dict[str, SpatialObject]:
+    def satisfy_constraints(
+        self,
+        objects: Dict[str, SpatialObject],
+        constraints: List[SpatialRelation],
+        max_iterations: int = 100,
+    ) -> Dict[str, SpatialObject]:
         """Arrange objects to satisfy spatial constraints"""
-        objects = {k: SpatialObject(
-            v.object_id,
-            v.position.copy(),
-            v.rotation.copy(),
-            v.scale.copy()
-        ) for k, v in objects.items()}
+        objects = {
+            k: SpatialObject(v.object_id, v.position.copy(), v.rotation.copy(), v.scale.copy())
+            for k, v in objects.items()
+        }
 
         for iteration in range(max_iterations):
             total_adjustment = 0
@@ -189,11 +223,9 @@ class SpatialRelations:
 
         return objects
 
-    def _compute_adjustment(self,
-                            obj1: SpatialObject,
-                            obj2: SpatialObject,
-                            constraint: SpatialRelation
-                            ) -> np.ndarray:
+    def _compute_adjustment(
+        self, obj1: SpatialObject, obj2: SpatialObject, constraint: SpatialRelation
+    ) -> np.ndarray:
         """Compute position adjustment to satisfy a constraint"""
         adjustment = np.zeros(3)
         diff = obj2.position - obj1.position
@@ -240,11 +272,9 @@ class SpatialReasoner:
         """Add an object to the spatial representation"""
         self.objects[obj.object_id] = obj
 
-    def mental_rotation(self,
-                        object_id: str,
-                        angle: float,
-                        axis: np.ndarray = None
-                        ) -> Tuple[SpatialObject, float]:
+    def mental_rotation(
+        self, object_id: str, angle: float, axis: np.ndarray = None
+    ) -> Tuple[SpatialObject, float]:
         """
         Mentally rotate an object.
         Returns rotated object and simulated "mental rotation time".
@@ -264,28 +294,31 @@ class SpatialReasoner:
         s = np.sin(angle)
         x, y, z = axis
 
-        rotation_matrix = np.array([
-            [c + x*x*(1-c), x*y*(1-c) - z*s, x*z*(1-c) + y*s],
-            [y*x*(1-c) + z*s, c + y*y*(1-c), y*z*(1-c) - x*s],
-            [z*x*(1-c) - y*s, z*y*(1-c) + x*s, c + z*z*(1-c)]
-        ])
+        rotation_matrix = np.array(
+            [
+                [c + x * x * (1 - c), x * y * (1 - c) - z * s, x * z * (1 - c) + y * s],
+                [y * x * (1 - c) + z * s, c + y * y * (1 - c), y * z * (1 - c) - x * s],
+                [z * x * (1 - c) - y * s, z * y * (1 - c) + x * s, c + z * z * (1 - c)],
+            ]
+        )
 
         obj = self.objects[object_id]
         rotated = SpatialObject(
             object_id=obj.object_id + "_rotated",
             position=obj.position.copy(),
             rotation=rotation_matrix @ obj.rotation,
-            scale=obj.scale.copy()
+            scale=obj.scale.copy(),
         )
 
         return rotated, rotation_time
 
-    def spatial_transformation(self,
-                               object_id: str,
-                               translation: np.ndarray = None,
-                               rotation: np.ndarray = None,
-                               scale: np.ndarray = None
-                               ) -> SpatialObject:
+    def spatial_transformation(
+        self,
+        object_id: str,
+        translation: np.ndarray = None,
+        rotation: np.ndarray = None,
+        scale: np.ndarray = None,
+    ) -> SpatialObject:
         """Apply a general spatial transformation"""
         if object_id not in self.objects:
             raise ValueError(f"Object {object_id} not found")
@@ -307,15 +340,16 @@ class SpatialReasoner:
             object_id=obj.object_id + "_transformed",
             position=new_position,
             rotation=new_rotation,
-            scale=new_scale
+            scale=new_scale,
         )
 
-    def navigation(self,
-                   start: Tuple[float, float, float],
-                   goal: Tuple[float, float, float],
-                   obstacles: List[SpatialObject] = None,
-                   grid_resolution: float = 0.5
-                   ) -> List[np.ndarray]:
+    def navigation(
+        self,
+        start: Tuple[float, float, float],
+        goal: Tuple[float, float, float],
+        obstacles: List[SpatialObject] = None,
+        grid_resolution: float = 0.5,
+    ) -> List[np.ndarray]:
         """
         Plan a path from start to goal avoiding obstacles.
         Uses A* algorithm on a discretized grid.
@@ -380,10 +414,9 @@ class SpatialReasoner:
 
         return [start, goal]
 
-    def perspective_taking(self,
-                           viewpoint: Tuple[float, float, float],
-                           look_at: Tuple[float, float, float]
-                           ) -> Dict[str, np.ndarray]:
+    def perspective_taking(
+        self, viewpoint: Tuple[float, float, float], look_at: Tuple[float, float, float]
+    ) -> Dict[str, np.ndarray]:
         """
         Compute how objects appear from a different viewpoint.
         Returns transformed positions relative to the viewpoint.
@@ -412,11 +445,9 @@ class SpatialReasoner:
 
         return transformed
 
-    def compare_objects(self,
-                        obj1_id: str,
-                        obj2_id: str,
-                        allow_rotation: bool = True
-                        ) -> Tuple[bool, float, float]:
+    def compare_objects(
+        self, obj1_id: str, obj2_id: str, allow_rotation: bool = True
+    ) -> Tuple[bool, float, float]:
         """
         Compare two objects for shape similarity.
         Returns (are_same, similarity_score, rotation_time).
@@ -438,7 +469,9 @@ class SpatialReasoner:
             rotated, rot_time = self.mental_rotation(obj1_id, angle)
             total_rotation += rot_time
 
-            similarity = 1.0 - np.linalg.norm(rotated.scale - obj2.scale) / np.linalg.norm(obj1.scale)
+            similarity = 1.0 - np.linalg.norm(rotated.scale - obj2.scale) / np.linalg.norm(
+                obj1.scale
+            )
 
             if similarity > best_similarity:
                 best_similarity = similarity

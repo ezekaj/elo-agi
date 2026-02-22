@@ -8,11 +8,16 @@ Demonstrates:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.moral_reasoning import (
-    MoralDilemmaProcessor, VMPFCLesionModel, MoralFramework,
-    create_trolley_switch, create_trolley_push, create_crying_baby
+    MoralDilemmaProcessor,
+    VMPFCLesionModel,
+    MoralFramework,
+    create_trolley_switch,
+    create_trolley_push,
+    create_crying_baby,
 )
 
 
@@ -73,10 +78,18 @@ def demo_switch_vs_push():
     print("=" * 70)
     print(f"\n                    SWITCH         PUSH")
     print(f"Same utility:       5-1=+4         5-1=+4")
-    print(f"Would act:          {'Yes' if switch_decision.action_taken else 'No':14} {'Yes' if push_decision.action_taken else 'No'}")
-    print(f"Deont weight:       {switch_decision.deontological_weight:.2f}           {push_decision.deontological_weight:.2f}")
-    print(f"Util weight:        {switch_decision.utilitarian_weight:.2f}           {push_decision.utilitarian_weight:.2f}")
-    print(f"Emotion:            {switch_decision.emotional_response:+.2f}          {push_decision.emotional_response:+.2f}")
+    print(
+        f"Would act:          {'Yes' if switch_decision.action_taken else 'No':14} {'Yes' if push_decision.action_taken else 'No'}"
+    )
+    print(
+        f"Deont weight:       {switch_decision.deontological_weight:.2f}           {push_decision.deontological_weight:.2f}"
+    )
+    print(
+        f"Util weight:        {switch_decision.utilitarian_weight:.2f}           {push_decision.utilitarian_weight:.2f}"
+    )
+    print(
+        f"Emotion:            {switch_decision.emotional_response:+.2f}          {push_decision.emotional_response:+.2f}"
+    )
 
     print("\nKey insight: Same utilitarian calculus, but personal harm")
     print("triggers VMPFC-driven deontological override!")

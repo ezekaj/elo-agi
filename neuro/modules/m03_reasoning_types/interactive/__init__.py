@@ -5,7 +5,10 @@ from .theory_of_mind import TheoryOfMind, MentalStateModel
 from .collaborative import CollaborativeReasoner, JointAttention
 
 __all__ = [
-    'FeedbackAdapter', 'AdaptivePolicy',
-    'TheoryOfMind', 'MentalStateModel',
-    'CollaborativeReasoner', 'JointAttention'
+    "FeedbackAdapter",
+    "AdaptivePolicy",
+    "TheoryOfMind",
+    "MentalStateModel",
+    "CollaborativeReasoner",
+    "JointAttention",
 ]

@@ -12,6 +12,7 @@ from neuro.modules.credit.blame_assignment import (
     CounterfactualBlame,
 )
 
+
 class TestFailure:
     """Tests for Failure class."""
 
@@ -25,6 +26,7 @@ class TestFailure:
         assert failure.failure_type == FailureType.GOAL_UNREACHED
         assert failure.severity == 0.8
 
+
 class TestModuleAction:
     """Tests for ModuleAction class."""
 
@@ -37,6 +39,7 @@ class TestModuleAction:
             timestamp=10,
         )
         assert action.module_id == "mod1"
+
 
 class TestCounterfactualBlame:
     """Tests for CounterfactualBlame class."""
@@ -59,9 +62,7 @@ class TestCounterfactualBlame:
             ModuleAction("m1", 1, 1, 2, 1),
         ]
 
-        outcome, simulated = cf.compute_counterfactual(
-            trajectory, "m1", [2, 2]
-        )
+        outcome, simulated = cf.compute_counterfactual(trajectory, "m1", [2, 2])
 
         assert len(simulated) == 2
 
@@ -70,12 +71,11 @@ class TestCounterfactualBlame:
 
         trajectory = [ModuleAction("m1", 1, 0, 1, 0)]
 
-        outcome, simulated = cf.compute_counterfactual(
-            trajectory, "m1", [2]
-        )
+        outcome, simulated = cf.compute_counterfactual(trajectory, "m1", [2])
 
         assert outcome == 0.0
         assert len(simulated) == 0
+
 
 class TestBlameAssignment:
     """Tests for BlameAssignment class."""
@@ -87,9 +87,7 @@ class TestBlameAssignment:
     def test_identify_root_cause(self):
         ba = BlameAssignment(random_seed=42)
 
-        failure = Failure(
-            FailureType.GOAL_UNREACHED, "Test failure", 100, 1.0
-        )
+        failure = Failure(FailureType.GOAL_UNREACHED, "Test failure", 100, 1.0)
 
         trajectory = [
             ModuleAction("m1", "a", "s", "s'", 95),
@@ -97,9 +95,7 @@ class TestBlameAssignment:
             ModuleAction("m1", "c", "s", "s'", 99),
         ]
 
-        root, confidence = ba.identify_root_cause(
-            failure, trajectory, ["m1", "m2"]
-        )
+        root, confidence = ba.identify_root_cause(failure, trajectory, ["m1", "m2"])
 
         assert root in ["m1", "m2"]
         assert 0 <= confidence <= 1
@@ -107,9 +103,7 @@ class TestBlameAssignment:
     def test_compute_blame(self):
         ba = BlameAssignment(random_seed=42)
 
-        failure = Failure(
-            FailureType.CONSTRAINT_VIOLATION, "Violated constraint", 50, 0.9
-        )
+        failure = Failure(FailureType.CONSTRAINT_VIOLATION, "Violated constraint", 50, 0.9)
 
         trajectory = [
             ModuleAction("m1", "a", "s1", "s2", 45),
@@ -187,6 +181,7 @@ class TestBlameAssignment:
         assert "total_failures" in stats
         assert "total_blame_assignments" in stats
         assert stats["total_blame_assignments"] == 1
+
 
 class TestBlameWithWorldModel:
     """Tests for blame assignment with world model."""

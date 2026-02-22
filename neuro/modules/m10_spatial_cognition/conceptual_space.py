@@ -24,6 +24,7 @@ from .grid_cells import GridParameters
 @dataclass
 class ConceptFeatures:
     """Feature vector representing a concept"""
+
     name: str
     features: np.ndarray  # High-dimensional feature vector
     category: str = ""
@@ -43,7 +44,7 @@ class ConceptCell:
         concept_center: np.ndarray,
         concept_radius: float = 0.3,
         associated_concept: str = "",
-        peak_activation: float = 1.0
+        peak_activation: float = 1.0,
     ):
         self.concept_center = np.array(concept_center)
         self.concept_radius = concept_radius
@@ -66,7 +67,7 @@ class ConceptCell:
 
         # Gaussian activation
         self.activation = self.peak_activation * np.exp(
-            -distance**2 / (2 * self.concept_radius**2)
+            -(distance**2) / (2 * self.concept_radius**2)
         )
         return self.activation
 
@@ -88,13 +89,10 @@ class ConceptualGrid:
         spacing: float = 0.3,
         orientation: float = 0.0,
         dimensions: int = 2,
-        peak_activation: float = 1.0
+        peak_activation: float = 1.0,
     ):
         self.params = GridParameters(
-            spacing=spacing,
-            orientation=orientation,
-            phase=np.zeros(dimensions),
-            scale=1
+            spacing=spacing, orientation=orientation, phase=np.zeros(dimensions), scale=1
         )
         self.dimensions = dimensions
         self.peak_activation = peak_activation
@@ -117,16 +115,18 @@ class ConceptualGrid:
         # Rotate
         cos_theta = np.cos(self.params.orientation)
         sin_theta = np.sin(self.params.orientation)
-        rotated = np.array([
-            cos_theta * pos_2d[0] + sin_theta * pos_2d[1],
-            -sin_theta * pos_2d[0] + cos_theta * pos_2d[1]
-        ])
+        rotated = np.array(
+            [
+                cos_theta * pos_2d[0] + sin_theta * pos_2d[1],
+                -sin_theta * pos_2d[0] + cos_theta * pos_2d[1],
+            ]
+        )
 
         # Spatial frequency
         k = 2 * np.pi / self.params.spacing
 
         # Three gratings for hexagonal pattern
-        angles = [0, np.pi/3, 2*np.pi/3]
+        angles = [0, np.pi / 3, 2 * np.pi / 3]
         response = 0.0
         for angle in angles:
             direction = np.array([np.cos(angle), np.sin(angle)])
@@ -134,16 +134,12 @@ class ConceptualGrid:
 
         # Normalize
         response = (response + 3) / 6
-        response = response ** 2
+        response = response**2
 
         self.activation = self.peak_activation * response
         return self.activation
 
-    def compute_conceptual_distance(
-        self,
-        concept_a: np.ndarray,
-        concept_b: np.ndarray
-    ) -> float:
+    def compute_conceptual_distance(self, concept_a: np.ndarray, concept_b: np.ndarray) -> float:
         """Compute distance between concepts in this grid's metric"""
         return np.linalg.norm(np.array(concept_a) - np.array(concept_b))
 
@@ -158,11 +154,7 @@ class SocialDistanceGrid:
     - Trust
     """
 
-    def __init__(
-        self,
-        dimensions: int = 2,
-        dimension_names: Optional[List[str]] = None
-    ):
+    def __init__(self, dimensions: int = 2, dimension_names: Optional[List[str]] = None):
         self.dimensions = dimensions
         self.dimension_names = dimension_names or ["power", "affiliation"]
 
@@ -170,16 +162,9 @@ class SocialDistanceGrid:
         self._social_positions: Dict[str, np.ndarray] = {}
 
         # Grid for measuring social distance
-        self._grid = ConceptualGrid(
-            spacing=0.25,
-            dimensions=dimensions
-        )
+        self._grid = ConceptualGrid(spacing=0.25, dimensions=dimensions)
 
-    def set_social_position(
-        self,
-        person: str,
-        position: np.ndarray
-    ) -> None:
+    def set_social_position(self, person: str, position: np.ndarray) -> None:
         """Set someone's position in social space"""
         self._social_positions[person] = np.array(position)
 
@@ -187,11 +172,7 @@ class SocialDistanceGrid:
         """Get someone's position in social space"""
         return self._social_positions.get(person)
 
-    def compute_social_distance(
-        self,
-        person_a: str,
-        person_b: str
-    ) -> Optional[float]:
+    def compute_social_distance(self, person_a: str, person_b: str) -> Optional[float]:
         """Compute social distance between two people"""
         pos_a = self._social_positions.get(person_a)
         pos_b = self._social_positions.get(person_b)
@@ -208,11 +189,7 @@ class SocialDistanceGrid:
             return 0.0
         return self._grid.get_activation(pos)
 
-    def find_socially_similar(
-        self,
-        person: str,
-        threshold: float = 0.3
-    ) -> List[Tuple[str, float]]:
+    def find_socially_similar(self, person: str, threshold: float = 0.3) -> List[Tuple[str, float]]:
         """Find people who are socially similar"""
         pos = self._social_positions.get(person)
         if pos is None:
@@ -242,7 +219,7 @@ class ConceptualMap:
         concept_dimensions: int = 10,
         n_concept_cells: int = 100,
         n_grids: int = 3,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ):
         self.concept_dimensions = concept_dimensions
         self.n_concept_cells = n_concept_cells
@@ -272,10 +249,7 @@ class ConceptualMap:
         for _ in range(self.n_concept_cells):
             center = np.random.randn(self.concept_dimensions) * 0.5
 
-            cell = ConceptCell(
-                concept_center=center,
-                concept_radius=0.3
-            )
+            cell = ConceptCell(concept_center=center, concept_radius=0.3)
             self.concept_cells.append(cell)
 
     def _create_grids(self, n_grids: int) -> None:
@@ -283,22 +257,16 @@ class ConceptualMap:
         self.conceptual_grids = []
 
         for i in range(n_grids):
-            spacing = 0.2 * (1.4 ** i)  # Increasing spacing
+            spacing = 0.2 * (1.4**i)  # Increasing spacing
             orientation = np.random.uniform(0, np.pi / 3)
 
             grid = ConceptualGrid(
-                spacing=spacing,
-                orientation=orientation,
-                dimensions=self.concept_dimensions
+                spacing=spacing, orientation=orientation, dimensions=self.concept_dimensions
             )
             self.conceptual_grids.append(grid)
 
     def embed_concept(
-        self,
-        name: str,
-        features: np.ndarray,
-        category: str = "",
-        **metadata
+        self, name: str, features: np.ndarray, category: str = "", **metadata
     ) -> np.ndarray:
         """
         Embed a concept into conceptual space.
@@ -311,14 +279,11 @@ class ConceptualMap:
         if len(features) < self.concept_dimensions:
             features = np.pad(features, (0, self.concept_dimensions - len(features)))
         else:
-            features = features[:self.concept_dimensions]
+            features = features[: self.concept_dimensions]
 
         # Store concept
         concept = ConceptFeatures(
-            name=name,
-            features=features,
-            category=category,
-            metadata=metadata
+            name=name, features=features, category=category, metadata=metadata
         )
         self._concepts[name] = concept
 
@@ -338,11 +303,7 @@ class ConceptualMap:
         """Get a concept's position in concept space"""
         return self._concept_positions.get(name)
 
-    def find_similar(
-        self,
-        concept_name: str,
-        n: int = 5
-    ) -> List[Tuple[str, float]]:
+    def find_similar(self, concept_name: str, n: int = 5) -> List[Tuple[str, float]]:
         """Find n most similar concepts"""
         position = self._concept_positions.get(concept_name)
         if position is None:
@@ -358,12 +319,7 @@ class ConceptualMap:
         distances.sort(key=lambda x: x[1])
         return distances[:n]
 
-    def navigate_concepts(
-        self,
-        start: str,
-        goal: str,
-        steps: int = 10
-    ) -> List[np.ndarray]:
+    def navigate_concepts(self, start: str, goal: str, steps: int = 10) -> List[np.ndarray]:
         """
         Compute path through concept space from start to goal.
 
@@ -384,12 +340,7 @@ class ConceptualMap:
 
         return path
 
-    def compute_analogy(
-        self,
-        a: str,
-        b: str,
-        c: str
-    ) -> Optional[Tuple[str, float]]:
+    def compute_analogy(self, a: str, b: str, c: str) -> Optional[Tuple[str, float]]:
         """
         Compute analogy: a:b :: c:?
 
@@ -407,7 +358,7 @@ class ConceptualMap:
 
         # Find closest concept to target
         best_match = None
-        best_distance = float('inf')
+        best_distance = float("inf")
 
         for name, pos in self._concept_positions.items():
             if name in [a, b, c]:
@@ -421,34 +372,23 @@ class ConceptualMap:
             return (best_match, best_distance)
         return None
 
-    def get_concept_activations(
-        self,
-        concept_name: str
-    ) -> np.ndarray:
+    def get_concept_activations(self, concept_name: str) -> np.ndarray:
         """Get concept cell activations for a concept"""
         position = self._concept_positions.get(concept_name)
         if position is None:
             return np.zeros(len(self.concept_cells))
 
-        return np.array([
-            cell.compute_activation(position)
-            for cell in self.concept_cells
-        ])
+        return np.array([cell.compute_activation(position) for cell in self.concept_cells])
 
     def get_active_concept_cells(
-        self,
-        concept_name: str,
-        threshold: float = 0.1
+        self, concept_name: str, threshold: float = 0.1
     ) -> List[ConceptCell]:
         """Get concept cells active for a concept"""
         position = self._concept_positions.get(concept_name)
         if position is None:
             return []
 
-        return [
-            cell for cell in self.concept_cells
-            if cell.is_active(position, threshold)
-        ]
+        return [cell for cell in self.concept_cells if cell.is_active(position, threshold)]
 
     def conceptual_distance(self, concept_a: str, concept_b: str) -> Optional[float]:
         """Compute conceptual distance between two concepts"""
@@ -461,9 +401,7 @@ class ConceptualMap:
         return np.linalg.norm(pos_a - pos_b)
 
     def map_physical_to_conceptual(
-        self,
-        spatial_position: np.ndarray,
-        scaling: float = 1.0
+        self, spatial_position: np.ndarray, scaling: float = 1.0
     ) -> np.ndarray:
         """
         Transfer from physical space to concept space.
@@ -474,9 +412,9 @@ class ConceptualMap:
         spatial_position = np.array(spatial_position)
         if len(spatial_position) < self.concept_dimensions:
             conceptual = np.zeros(self.concept_dimensions)
-            conceptual[:len(spatial_position)] = spatial_position * scaling
+            conceptual[: len(spatial_position)] = spatial_position * scaling
         else:
-            conceptual = spatial_position[:self.concept_dimensions] * scaling
+            conceptual = spatial_position[: self.concept_dimensions] * scaling
 
         return conceptual
 

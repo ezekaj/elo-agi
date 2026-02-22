@@ -20,6 +20,7 @@ from .semantic_bridge import SemanticBridge, SemanticConfig
 @dataclass
 class GroundingConfig:
     """Configuration for language grounding."""
+
     internal_dim: int = 64
     perceptual_dim: int = 32
     action_dim: int = 32
@@ -31,16 +32,19 @@ class GroundingConfig:
 @dataclass
 class GroundedConcept:
     """A concept grounded in perception and action."""
+
     name: str
     text: str
     perceptual_features: np.ndarray  # What it looks like
-    action_affordances: np.ndarray   # What you can do with it
-    goal_relevance: np.ndarray       # How it relates to goals
+    action_affordances: np.ndarray  # What you can do with it
+    goal_relevance: np.ndarray  # How it relates to goals
     confidence: float = 0.5
     occurrences: int = 1
     last_updated: float = field(default_factory=time.time)
 
-    def update(self, perceptual: np.ndarray, action: np.ndarray, goal: np.ndarray, lr: float = 0.1) -> None:
+    def update(
+        self, perceptual: np.ndarray, action: np.ndarray, goal: np.ndarray, lr: float = 0.1
+    ) -> None:
         """Update grounding based on new experience."""
         self.perceptual_features = (1 - lr) * self.perceptual_features + lr * perceptual
         self.action_affordances = (1 - lr) * self.action_affordances + lr * action
@@ -126,23 +130,20 @@ class LanguageGrounding:
         if observation is not None:
             perceptual = self._extract_perceptual(observation)
             concept.perceptual_features = (
-                (1 - self.config.learning_rate) * concept.perceptual_features +
-                self.config.learning_rate * perceptual
-            )
+                1 - self.config.learning_rate
+            ) * concept.perceptual_features + self.config.learning_rate * perceptual
 
         if action is not None:
             action_features = self._extract_action(action)
             concept.action_affordances = (
-                (1 - self.config.learning_rate) * concept.action_affordances +
-                self.config.learning_rate * action_features
-            )
+                1 - self.config.learning_rate
+            ) * concept.action_affordances + self.config.learning_rate * action_features
 
         if goal is not None:
             goal_features = self._resize(goal, self.config.internal_dim)
             concept.goal_relevance = (
-                (1 - self.config.learning_rate) * concept.goal_relevance +
-                self.config.learning_rate * goal_features
-            )
+                1 - self.config.learning_rate
+            ) * concept.goal_relevance + self.config.learning_rate * goal_features
 
         concept.occurrences += 1
         concept.last_updated = time.time()
@@ -152,11 +153,7 @@ class LanguageGrounding:
 
         return concept
 
-    def unground(
-        self,
-        concept: GroundedConcept,
-        modality: str = "all"
-    ) -> Dict[str, Any]:
+    def unground(self, concept: GroundedConcept, modality: str = "all") -> Dict[str, Any]:
         """
         Generate descriptions from grounded concept.
 
@@ -174,11 +171,11 @@ class LanguageGrounding:
             # Describe perceptual features
             activation = np.mean(np.abs(concept.perceptual_features))
             if activation > 0.5:
-                descriptions['perceptual'] = f"{concept.text} appears prominent and salient"
+                descriptions["perceptual"] = f"{concept.text} appears prominent and salient"
             elif activation > 0.2:
-                descriptions['perceptual'] = f"{concept.text} is moderately visible"
+                descriptions["perceptual"] = f"{concept.text} is moderately visible"
             else:
-                descriptions['perceptual'] = f"{concept.text} is barely noticeable"
+                descriptions["perceptual"] = f"{concept.text} is barely noticeable"
 
         if modality in ["action", "all"]:
             # Describe action affordances
@@ -186,19 +183,19 @@ class LanguageGrounding:
             action_names = ["approach", "avoid", "manipulate", "observe"]
             if max_action < len(action_names):
                 action_name = action_names[max_action % len(action_names)]
-                descriptions['action'] = f"You can {action_name} {concept.text}"
+                descriptions["action"] = f"You can {action_name} {concept.text}"
             else:
-                descriptions['action'] = f"Interactions with {concept.text} are possible"
+                descriptions["action"] = f"Interactions with {concept.text} are possible"
 
         if modality in ["goal", "all"]:
             # Describe goal relevance
             relevance = np.mean(concept.goal_relevance)
             if relevance > 0.5:
-                descriptions['goal'] = f"{concept.text} is highly relevant to current goals"
+                descriptions["goal"] = f"{concept.text} is highly relevant to current goals"
             elif relevance > 0.2:
-                descriptions['goal'] = f"{concept.text} may be useful"
+                descriptions["goal"] = f"{concept.text} may be useful"
             else:
-                descriptions['goal'] = f"{concept.text} seems unrelated to goals"
+                descriptions["goal"] = f"{concept.text} seems unrelated to goals"
 
         return descriptions
 
@@ -213,7 +210,7 @@ class LanguageGrounding:
 
         for word in words:
             # Skip common words
-            if len(word) < 3 or word in ['the', 'a', 'an', 'is', 'are', 'was', 'were']:
+            if len(word) < 3 or word in ["the", "a", "an", "is", "are", "was", "were"]:
                 continue
 
             if observation is not None:
@@ -228,9 +225,7 @@ class LanguageGrounding:
             if action is not None:
                 action_features = self._extract_action(action)
                 if word in self._word_action:
-                    self._word_action[word] = (
-                        0.9 * self._word_action[word] + 0.1 * action_features
-                    )
+                    self._word_action[word] = 0.9 * self._word_action[word] + 0.1 * action_features
                 else:
                     self._word_action[word] = action_features.copy()
 
@@ -309,8 +304,8 @@ class LanguageGrounding:
                 matched_concepts.append(concept)
 
         if matched_concepts:
-            parsed['grounded_concepts'] = [c.name for c in matched_concepts]
-            parsed['action_affordances'] = np.mean(
+            parsed["grounded_concepts"] = [c.name for c in matched_concepts]
+            parsed["action_affordances"] = np.mean(
                 [c.action_affordances for c in matched_concepts], axis=0
             ).tolist()
 
@@ -333,11 +328,11 @@ class LanguageGrounding:
         action = self.bridge.text_to_action(instruction)
 
         # Modify based on grounded concepts
-        if 'action_affordances' in parsed:
-            affordances = np.array(parsed['action_affordances'], dtype=np.float32)
+        if "action_affordances" in parsed:
+            affordances = np.array(parsed["action_affordances"], dtype=np.float32)
             affordances = self._resize(affordances, self.config.action_dim)
-            action[:self.config.action_dim] = (
-                0.5 * action[:self.config.action_dim] + 0.5 * affordances
+            action[: self.config.action_dim] = (
+                0.5 * action[: self.config.action_dim] + 0.5 * affordances
             )
 
         return action
@@ -425,13 +420,13 @@ class LanguageGrounding:
     def get_statistics(self) -> Dict[str, Any]:
         """Get grounding statistics."""
         return {
-            'concept_count': len(self._concepts),
-            'word_perceptual_count': len(self._word_perceptual),
-            'word_action_count': len(self._word_action),
-            'experience_buffer_size': len(self._experience_buffer),
-            'ground_count': self._ground_count,
-            'unground_count': self._unground_count,
-            'bridge_stats': self.bridge.get_statistics(),
+            "concept_count": len(self._concepts),
+            "word_perceptual_count": len(self._word_perceptual),
+            "word_action_count": len(self._word_action),
+            "experience_buffer_size": len(self._experience_buffer),
+            "ground_count": self._ground_count,
+            "unground_count": self._unground_count,
+            "bridge_stats": self.bridge.get_statistics(),
         }
 
     def reset(self) -> None:

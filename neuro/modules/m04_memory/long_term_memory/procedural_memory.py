@@ -16,6 +16,7 @@ import numpy as np
 @dataclass
 class Pattern:
     """Trigger pattern for procedure activation"""
+
     features: Dict[str, Any] = field(default_factory=dict)
     weights: Dict[str, float] = field(default_factory=dict)
 
@@ -43,6 +44,7 @@ class Pattern:
 @dataclass
 class Action:
     """Single action in a procedure"""
+
     name: str
     parameters: Dict[str, Any] = field(default_factory=dict)
     duration: float = 0.1  # seconds
@@ -55,6 +57,7 @@ class Action:
 @dataclass
 class Procedure:
     """Skill or habit representation"""
+
     name: str
     trigger: Pattern
     action_sequence: List[Action] = field(default_factory=list)
@@ -84,11 +87,7 @@ class ProceduralMemory:
         self._time_fn = time.time
 
     def encode(
-        self,
-        name: str,
-        trigger: Pattern,
-        actions: List[Action],
-        initial_strength: float = 0.1
+        self, name: str, trigger: Pattern, actions: List[Action], initial_strength: float = 0.1
     ) -> Procedure:
         """
         Create new procedure (initially weak).
@@ -103,19 +102,13 @@ class ProceduralMemory:
             The created Procedure
         """
         procedure = Procedure(
-            name=name,
-            trigger=trigger,
-            action_sequence=actions,
-            strength=initial_strength
+            name=name, trigger=trigger, action_sequence=actions, strength=initial_strength
         )
         self._procedures[name] = procedure
         return procedure
 
     def encode_simple(
-        self,
-        name: str,
-        trigger_features: Dict[str, Any],
-        action_names: List[str]
+        self, name: str, trigger_features: Dict[str, Any], action_names: List[str]
     ) -> Procedure:
         """
         Simplified procedure creation.
@@ -167,9 +160,7 @@ class ProceduralMemory:
         return results
 
     def get_matching(
-        self,
-        stimulus: Dict[str, Any],
-        threshold: float = 0.5
+        self, stimulus: Dict[str, Any], threshold: float = 0.5
     ) -> List[Tuple[Procedure, float]]:
         """
         Find all procedures that could fire.

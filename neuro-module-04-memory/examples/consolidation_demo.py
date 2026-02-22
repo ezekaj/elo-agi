@@ -9,14 +9,11 @@ Demonstrates:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 import numpy as np
-from src import (
-    MemoryController,
-    EpisodicMemory,
-    SemanticMemory
-)
+from src import MemoryController, EpisodicMemory, SemanticMemory
 from src.memory_processes import MemoryConsolidator
 
 
@@ -55,9 +52,9 @@ def demo_consolidation():
                 "food": exp.get("food"),
                 "topic": exp.get("topic"),
                 "location": exp["location"],
-                "time": current_time
+                "time": current_time,
             },
-            emotional_valence=exp["valence"]
+            emotional_valence=exp["valence"],
         )
         print(f"  - {exp['event']} at {exp['location']}")
 
@@ -124,7 +121,7 @@ def demo_consolidation():
             mc.learn_concept(
                 name=f"familiar_{loc}",
                 features={"visits": float(count), "familiar": 1.0},
-                relations=[("is-a", "location", 1.0)]
+                relations=[("is-a", "location", 1.0)],
             )
 
     print(f"\nSemantic concepts created: {len(mc.semantic)}")

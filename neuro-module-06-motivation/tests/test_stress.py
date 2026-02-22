@@ -3,20 +3,36 @@
 import numpy as np
 import pytest
 from neuro.modules.m06_motivation.intrinsic_motivation import (
-    PathEntropyMaximizer, PossibilitySpace, ActionDiversityTracker, DriveType
+    PathEntropyMaximizer,
+    PossibilitySpace,
+    ActionDiversityTracker,
+    DriveType,
 )
 from neuro.modules.m06_motivation.dopamine_system import (
-    DopamineSystem, PredictionErrorComputer, IncentiveSalience, BenefitCostEvaluator
+    DopamineSystem,
+    PredictionErrorComputer,
+    IncentiveSalience,
+    BenefitCostEvaluator,
 )
 from neuro.modules.m06_motivation.curiosity_drive import (
-    CuriosityModule, NoveltyDetector, InformationValue, ExplorationController
+    CuriosityModule,
+    NoveltyDetector,
+    InformationValue,
+    ExplorationController,
 )
 from neuro.modules.m06_motivation.homeostatic_regulation import (
-    HomeostaticState, NeedBasedValuation, InternalStateTracker, NeedType
+    HomeostaticState,
+    NeedBasedValuation,
+    InternalStateTracker,
+    NeedType,
 )
 from neuro.modules.m06_motivation.effort_valuation import (
-    EffortCostModel, ParadoxicalEffort, MotivationalTransform, EffortProfile
+    EffortCostModel,
+    ParadoxicalEffort,
+    MotivationalTransform,
+    EffortProfile,
 )
+
 
 class TestNumericalStability:
     """Tests for numerical stability under extreme conditions"""
@@ -31,8 +47,8 @@ class TestNumericalStability:
             maximizer.observe(state, action)
 
         metrics = maximizer.get_metrics()
-        assert np.isfinite(metrics['intrinsic_motivation'])
-        assert np.isfinite(metrics['path_entropy'])
+        assert np.isfinite(metrics["intrinsic_motivation"])
+        assert np.isfinite(metrics["path_entropy"])
 
     def test_path_entropy_tiny_states(self):
         """Test with very small state values"""
@@ -44,7 +60,7 @@ class TestNumericalStability:
             maximizer.observe(state, action)
 
         metrics = maximizer.get_metrics()
-        assert np.isfinite(metrics['intrinsic_motivation'])
+        assert np.isfinite(metrics["intrinsic_motivation"])
 
     def test_dopamine_extreme_rewards(self):
         """Test dopamine system with extreme reward values"""
@@ -56,7 +72,7 @@ class TestNumericalStability:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=1000.0,
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         assert np.isfinite(dopamine.tonic_level)
@@ -68,7 +84,7 @@ class TestNumericalStability:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=-1000.0,
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         assert np.isfinite(dopamine.tonic_level)
@@ -82,11 +98,11 @@ class TestNumericalStability:
             curiosity.process_stimulus(np.array([1.0, 1.0, 1.0]) + np.random.randn(3) * 1e-10)
 
         metrics = curiosity.get_metrics()
-        assert np.isfinite(metrics['curiosity_level'])
+        assert np.isfinite(metrics["curiosity_level"])
 
         # Suddenly very different
         result = curiosity.process_stimulus(np.array([1e6, 1e6, 1e6]))
-        assert np.isfinite(result['novelty'])
+        assert np.isfinite(result["novelty"])
 
     def test_homeostatic_extreme_depletion(self):
         """Test homeostatic state under extreme depletion"""
@@ -109,15 +125,12 @@ class TestNumericalStability:
         model = EffortCostModel()
 
         # Very high effort
-        profile = EffortProfile(
-            physical=100.0,
-            cognitive=100.0,
-            emotional=100.0
-        )
+        profile = EffortProfile(physical=100.0, cognitive=100.0, emotional=100.0)
 
         cost = model.compute_cost(profile)
         assert np.isfinite(cost)
         assert cost > 0
+
 
 class TestHighDimensional:
     """Tests for high-dimensional state/action spaces"""
@@ -132,7 +145,7 @@ class TestHighDimensional:
             maximizer.observe(state, action)
 
         metrics = maximizer.get_metrics()
-        assert np.isfinite(metrics['possibility_volume'])
+        assert np.isfinite(metrics["possibility_volume"])
 
     def test_high_dim_curiosity(self):
         """Test curiosity in high dimensions"""
@@ -140,7 +153,7 @@ class TestHighDimensional:
 
         for _ in range(50):
             result = curiosity.process_stimulus(np.random.randn(100))
-            assert np.isfinite(result['novelty'])
+            assert np.isfinite(result["novelty"])
 
     def test_high_dim_dopamine(self):
         """Test dopamine system in high dimensions"""
@@ -152,9 +165,10 @@ class TestHighDimensional:
                 action=np.random.randn(20),
                 reward=np.random.randn(),
                 next_state=np.random.randn(50),
-                cue=np.random.randn(30)
+                cue=np.random.randn(30),
             )
             assert np.isfinite(signal.prediction_error)
+
 
 class TestLongRunning:
     """Tests for long-running stability"""
@@ -170,7 +184,7 @@ class TestLongRunning:
 
             if i % 100 == 0:
                 metrics = maximizer.get_metrics()
-                assert np.isfinite(metrics['intrinsic_motivation'])
+                assert np.isfinite(metrics["intrinsic_motivation"])
 
     def test_dopamine_long_run(self):
         """Test dopamine system over many transitions"""
@@ -181,7 +195,7 @@ class TestLongRunning:
                 state=np.random.randn(3),
                 action=np.random.randn(2),
                 reward=np.random.randn(),
-                next_state=np.random.randn(3)
+                next_state=np.random.randn(3),
             )
 
             if i % 50 == 0:
@@ -196,8 +210,8 @@ class TestLongRunning:
             result = curiosity.process_stimulus(np.random.randn(5))
 
             if i % 50 == 0:
-                assert np.isfinite(result['curiosity_level'])
-                assert 0 <= result['curiosity_level'] <= 1
+                assert np.isfinite(result["curiosity_level"])
+                assert 0 <= result["curiosity_level"] <= 1
 
     def test_homeostatic_long_run(self):
         """Test homeostatic regulation over long time"""
@@ -215,6 +229,7 @@ class TestLongRunning:
             if i % 100 == 0:
                 wellbeing = state.get_overall_wellbeing()
                 assert np.isfinite(wellbeing)
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""
@@ -235,7 +250,7 @@ class TestEdgeCases:
         maximizer.observe(np.array([1.0, 0.0]), np.array([0.5]))
 
         metrics = maximizer.get_metrics()
-        assert np.isfinite(metrics['intrinsic_motivation'])
+        assert np.isfinite(metrics["intrinsic_motivation"])
 
     def test_identical_observations(self):
         """Test with all identical observations"""
@@ -260,7 +275,7 @@ class TestEdgeCases:
                 state=np.random.randn(2),
                 action=np.random.randn(2),
                 reward=0.0,
-                next_state=np.random.randn(2)
+                next_state=np.random.randn(2),
             )
 
         assert np.isfinite(dopamine.get_motivation_level())
@@ -286,6 +301,7 @@ class TestEdgeCases:
 
         cost = model.compute_cost(profile)
         assert cost == 0.0
+
 
 class TestRapidChanges:
     """Tests for rapid state changes"""
@@ -320,7 +336,7 @@ class TestRapidChanges:
         novelties = []
         for _ in range(30):
             result = curiosity.process_stimulus(stimulus + np.random.randn(3) * 0.01)
-            novelties.append(result['novelty'])
+            novelties.append(result["novelty"])
 
         # Novelty should decrease with habituation
         assert novelties[-1] < novelties[0]
@@ -344,6 +360,7 @@ class TestRapidChanges:
         assert recovered_level > depleted_level
         # Drive should have decreased (or stayed same if both maxed)
         assert recovered_drive <= depleted_drive
+
 
 class TestIntegration:
     """Integration tests combining multiple systems"""
@@ -393,10 +410,7 @@ class TestIntegration:
 
         for _ in range(100):
             dopamine.process_transition(
-                np.random.randn(3),
-                np.random.randn(2),
-                np.random.randn(),
-                np.random.randn(3)
+                np.random.randn(3), np.random.randn(2), np.random.randn(), np.random.randn(3)
             )
             curiosity.process_stimulus(np.random.randn(3))
 
@@ -419,18 +433,15 @@ class TestIntegration:
         transform.set_context(deadline=0.1, importance=0.2, autonomy=0.2)
 
         profile = EffortProfile(cognitive=0.5, attentional=0.3)
-        low_motivation_cost = transform.transform_effort_cost(
-            effort_model.compute_cost(profile)
-        )
+        low_motivation_cost = transform.transform_effort_cost(effort_model.compute_cost(profile))
 
         # High motivation context
         transform.set_context(deadline=0.9, importance=0.9, autonomy=0.8)
-        high_motivation_cost = transform.transform_effort_cost(
-            effort_model.compute_cost(profile)
-        )
+        high_motivation_cost = transform.transform_effort_cost(effort_model.compute_cost(profile))
 
         # High motivation should reduce perceived cost
         assert high_motivation_cost < low_motivation_cost
+
 
 class TestAdversarial:
     """Adversarial tests with unusual inputs"""
@@ -464,17 +475,12 @@ class TestAdversarial:
         # Normal transitions
         for _ in range(20):
             dopamine.process_transition(
-                np.random.randn(2),
-                np.random.randn(2),
-                np.random.randn(),
-                np.random.randn(2)
+                np.random.randn(2), np.random.randn(2), np.random.randn(), np.random.randn(2)
             )
 
         # Inf reward
         try:
-            dopamine.process_transition(
-                np.zeros(2), np.zeros(2), np.inf, np.zeros(2)
-            )
+            dopamine.process_transition(np.zeros(2), np.zeros(2), np.inf, np.zeros(2))
         except (ValueError, FloatingPointError):
             pass
 
@@ -496,6 +502,7 @@ class TestAdversarial:
             wellbeing = homeostatic.get_overall_wellbeing()
             assert np.isfinite(wellbeing)
 
+
 class TestBehavioralPredictions:
     """Tests for behavioral predictions from the theory"""
 
@@ -515,7 +522,7 @@ class TestBehavioralPredictions:
             hard_reward=hard_reward,
             easy_effort=0.1,
             hard_effort=0.6,
-            skill=skill
+            skill=skill,
         )
 
         # With challenge preference, should often choose harder
@@ -567,22 +574,17 @@ class TestBehavioralPredictions:
 
         # High effort with success
         high_effort_value = paradox.compute_effort_value(
-            effort_expended=0.8,
-            task_difficulty=0.7,
-            skill_level=0.6,
-            success=True
+            effort_expended=0.8, task_difficulty=0.7, skill_level=0.6, success=True
         )
 
         # Low effort with success
         low_effort_value = paradox.compute_effort_value(
-            effort_expended=0.1,
-            task_difficulty=0.2,
-            skill_level=0.6,
-            success=True
+            effort_expended=0.1, task_difficulty=0.2, skill_level=0.6, success=True
         )
 
         # High effort should add more value (effort justification)
         assert high_effort_value > low_effort_value
+
 
 class TestPerformance:
     """Performance and scalability tests"""
@@ -609,7 +611,7 @@ class TestPerformance:
 
         # Should still work efficiently
         metrics = curiosity.get_metrics()
-        assert np.isfinite(metrics['curiosity_level'])
+        assert np.isfinite(metrics["curiosity_level"])
 
     def test_deep_value_computation(self):
         """Test deep reward value computations"""
@@ -626,7 +628,8 @@ class TestPerformance:
 
         # Check value function has learned
         summary = dopamine.get_state_summary()
-        assert np.isfinite(summary['recent_rpe_mean'])
+        assert np.isfinite(summary["recent_rpe_mean"])
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

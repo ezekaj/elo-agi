@@ -13,6 +13,7 @@ import time
 @dataclass
 class BatchConfig:
     """Configuration for batch inference."""
+
     batch_size: int = 32
     max_wait_ms: float = 10.0
     dynamic_batching: bool = True
@@ -23,6 +24,7 @@ class BatchConfig:
 @dataclass
 class InferenceBatch:
     """A batch of inference requests."""
+
     id: str
     inputs: List[np.ndarray]
     request_ids: List[str]
@@ -36,6 +38,7 @@ class InferenceBatch:
 @dataclass
 class BatchResult:
     """Result of batch inference."""
+
     batch_id: str
     outputs: List[np.ndarray]
     request_ids: List[str]

@@ -11,7 +11,8 @@ Based on research showing:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.hpc_pfc_complex import HPCPFCComplex
 from src.system2.relational_reasoning import RelationalReasoning, RelationType
@@ -29,20 +30,11 @@ def demo_basic_composition():
     jump = rr.create_element(
         content="jump",
         type_tag="action",
-        features={
-            "repeatable": True,
-            "physical": True,
-            "discrete": True
-        }
+        features={"repeatable": True, "physical": True, "discrete": True},
     )
 
     twice = rr.create_element(
-        content=2,
-        type_tag="modifier",
-        features={
-            "modifier_type": "repetition",
-            "value": 2
-        }
+        content=2, type_tag="modifier", features={"modifier_type": "repetition", "value": 2}
     )
 
     print(f"Concept 1: {jump.content} (type: {jump.type_tag})")
@@ -80,19 +72,17 @@ def demo_action_with_roles():
     print(f"  Patient: {cat.content}")
 
     # Create action structure with roles
-    structure = rr.create_action_structure(
-        action=bite,
-        agent=dog,
-        patient=cat
-    )
+    structure = rr.create_action_structure(action=bite, agent=dog, patient=cat)
 
     print(f"\nAction frame structure:")
     print(f"  Elements: {list(structure.elements.keys())}")
     for rel in structure.relations:
         source = structure.elements.get(rel.source)
         target = structure.elements.get(rel.target)
-        print(f"  {source.content if source else '?'} --[{rel.relation_type.value}]--> "
-              f"{target.content if target else '?'}")
+        print(
+            f"  {source.content if source else '?'} --[{rel.relation_type.value}]--> "
+            f"{target.content if target else '?'}"
+        )
 
     print("✓ Complex sentence structure represented compositionally")
     print()
@@ -119,9 +109,7 @@ def demo_nested_composition():
 
     # Create a wrapper element for the composed action
     composed_action = rr.create_element(
-        content=jump_twice,
-        type_tag="composed_action",
-        element_id="jump_twice_action"
+        content=jump_twice, type_tag="composed_action", element_id="jump_twice_action"
     )
 
     final = rr.bind(quickly, RelationType.MODIFIER, composed_action)
@@ -185,8 +173,7 @@ def demo_novel_combination():
 
     # Now compose novel combination never seen before
     novel = complex.compose_novel(
-        concepts=["jump", "twice", "backward"],
-        relation="modified_action"
+        concepts=["jump", "twice", "backward"], relation="modified_action"
     )
 
     print("Known concepts:")
@@ -232,8 +219,10 @@ def demo_analogical_composition():
         for rel in analogical.relations:
             src = analogical.elements.get(rel.source)
             tgt = analogical.elements.get(rel.target)
-            print(f"  {src.content if src else '?'} --[{rel.relation_type.value}]--> "
-                  f"{tgt.content if tgt else '?'}")
+            print(
+                f"  {src.content if src else '?'} --[{rel.relation_type.value}]--> "
+                f"{tgt.content if tgt else '?'}"
+            )
         print(f"\n  (Confidence in analogy: {analogical.relations[0].strength:.2f})")
 
     print("✓ Relational structure transferred across domains")
@@ -254,10 +243,7 @@ def demo_decomposition():
     the_apple = rr.create_element("the apple", type_tag="entity")
 
     eat_apple = rr.bind(eat, RelationType.PATIENT, the_apple)
-    full_structure = rr.compose(
-        rr.bind(quickly, RelationType.MODIFIER, eat),
-        eat_apple
-    )
+    full_structure = rr.compose(rr.bind(quickly, RelationType.MODIFIER, eat), eat_apple)
 
     print("Complex structure: 'quickly eat the apple'")
     print(f"  Total elements: {len(full_structure.elements)}")

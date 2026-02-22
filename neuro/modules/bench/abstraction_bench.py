@@ -18,6 +18,7 @@ from .base_benchmark import Benchmark, BenchmarkConfig
 @dataclass
 class SymbolBindingTask:
     """A symbol binding task."""
+
     symbols: List[str]
     neural_vectors: Dict[str, np.ndarray]
     roles: Dict[str, str]  # symbol -> role (e.g., "dog" -> "agent")
@@ -29,6 +30,7 @@ class SymbolBindingTask:
 @dataclass
 class CompositionTask:
     """A compositional generalization task."""
+
     primitives: List[str]
     train_compositions: List[Tuple[str, ...]]
     test_composition: Tuple[str, ...]
@@ -39,6 +41,7 @@ class CompositionTask:
 @dataclass
 class AnalogyTask:
     """An analogy completion task (A:B :: C:?)."""
+
     a: str
     b: str
     c: str
@@ -255,14 +258,14 @@ class ProgramSynthesisBenchmark(Benchmark):
         """Generate a program synthesis trial."""
         # Define target functions of increasing complexity
         target_fns = [
-            lambda x: x + 1,                    # increment
-            lambda x: x * 2,                    # double
-            lambda x: x * x,                    # square
-            lambda x: (x * 2) + 1,              # 2x + 1
-            lambda x: (x + 1) * 2,              # (x+1) * 2
-            lambda x: x * x + x,                # x^2 + x
-            lambda x: (x + 2) * (x + 2),        # (x+2)^2
-            lambda x: x * 3 - 1,                # 3x - 1
+            lambda x: x + 1,  # increment
+            lambda x: x * 2,  # double
+            lambda x: x * x,  # square
+            lambda x: (x * 2) + 1,  # 2x + 1
+            lambda x: (x + 1) * 2,  # (x+1) * 2
+            lambda x: x * x + x,  # x^2 + x
+            lambda x: (x + 2) * (x + 2),  # (x+2)^2
+            lambda x: x * 3 - 1,  # 3x - 1
         ]
 
         target_fn = target_fns[trial_id % len(target_fns)]
@@ -464,13 +467,13 @@ def create_abstraction_benchmark_suite() -> List[Benchmark]:
 
 
 __all__ = [
-    'SymbolBindingTask',
-    'CompositionTask',
-    'AnalogyTask',
-    'SymbolBindingBenchmark',
-    'CompositionalBenchmark',
-    'ProgramSynthesisBenchmark',
-    'AnalogyBenchmark',
-    'AbstractionLevelBenchmark',
-    'create_abstraction_benchmark_suite',
+    "SymbolBindingTask",
+    "CompositionTask",
+    "AnalogyTask",
+    "SymbolBindingBenchmark",
+    "CompositionalBenchmark",
+    "ProgramSynthesisBenchmark",
+    "AnalogyBenchmark",
+    "AbstractionLevelBenchmark",
+    "create_abstraction_benchmark_suite",
 ]

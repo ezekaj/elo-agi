@@ -3,8 +3,13 @@
 import numpy as np
 import pytest
 from neuro.modules.m12_learning.hebbian import (
-    HebbianLearning, OjaRule, BCMRule, HebbianNetwork, LearningParams
+    HebbianLearning,
+    OjaRule,
+    BCMRule,
+    HebbianNetwork,
+    LearningParams,
 )
+
 
 class TestHebbianLearning:
     """Tests for basic Hebbian learning"""
@@ -55,6 +60,7 @@ class TestHebbianLearning:
         assert np.all(weights <= 1.0)
         assert np.all(weights >= 0.0)
 
+
 class TestOjaRule:
     """Tests for Oja's normalized Hebbian rule"""
 
@@ -87,6 +93,7 @@ class TestOjaRule:
 
         # Weight vector should have reasonable magnitude
         assert np.linalg.norm(weights) < 10
+
 
 class TestBCMRule:
     """Tests for BCM learning rule"""
@@ -130,6 +137,7 @@ class TestBCMRule:
 
         assert np.mean(dW_high) > np.mean(dW_low)
 
+
 class TestHebbianNetwork:
     """Tests for Hebbian network"""
 
@@ -166,7 +174,7 @@ class TestHebbianNetwork:
 
     def test_different_rules(self):
         """Test network works with different rules"""
-        for rule in ['basic', 'oja', 'bcm']:
+        for rule in ["basic", "oja", "bcm"]:
             net = HebbianNetwork([5, 3], learning_rule=rule)
             x = np.random.rand(5)
             output = net.train_step(x)
@@ -182,5 +190,6 @@ class TestHebbianNetwork:
         assert len(errors) == 5
         assert all(np.isfinite(e) for e in errors)
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

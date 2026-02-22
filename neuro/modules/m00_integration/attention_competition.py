@@ -24,6 +24,7 @@ except ImportError:
 @dataclass
 class CompetitionParams:
     """Parameters for attention competition."""
+
     n_features: int = 64
     capacity: int = 7  # Maximum winners (workspace capacity)
     temperature: float = 1.0  # Softmax temperature for selection
@@ -36,6 +37,7 @@ class CompetitionParams:
 @dataclass
 class CompetitionResult:
     """Result of attention competition."""
+
     winners: List[ModuleProposal]
     all_scores: List[Tuple[ModuleProposal, float]]
     max_score: float
@@ -69,16 +71,16 @@ class AttentionCompetition:
 
         # Priority weights for different content types
         self._content_priorities: Dict[ContentType, float] = {
-            ContentType.ERROR: 1.5,        # Prediction errors are important
-            ContentType.EMOTION: 1.3,      # Emotions get priority
-            ContentType.INTENTION: 1.2,    # Goals are important
-            ContentType.QUERY: 1.1,        # Information requests
-            ContentType.PERCEPT: 1.0,      # Standard sensory
-            ContentType.BELIEF: 1.0,       # Beliefs
-            ContentType.MEMORY: 0.9,       # Retrieved memories
-            ContentType.PREDICTION: 0.9,   # Predictions
-            ContentType.ACTION: 0.8,       # Motor commands
-            ContentType.RESPONSE: 0.8,     # Responses
+            ContentType.ERROR: 1.5,  # Prediction errors are important
+            ContentType.EMOTION: 1.3,  # Emotions get priority
+            ContentType.INTENTION: 1.2,  # Goals are important
+            ContentType.QUERY: 1.1,  # Information requests
+            ContentType.PERCEPT: 1.0,  # Standard sensory
+            ContentType.BELIEF: 1.0,  # Beliefs
+            ContentType.MEMORY: 0.9,  # Retrieved memories
+            ContentType.PREDICTION: 0.9,  # Predictions
+            ContentType.ACTION: 0.8,  # Motor commands
+            ContentType.RESPONSE: 0.8,  # Responses
             ContentType.METACOGNITIVE: 1.4,  # Self-reflection is important
         }
 
@@ -146,11 +148,7 @@ class AttentionCompetition:
         Score = (bottom_up_salience * w_bu + top_down_bias * w_td) * type_priority
         """
         # Bottom-up salience (based on proposal properties)
-        bottom_up = (
-            proposal.activation * 0.4 +
-            proposal.confidence * 0.3 +
-            proposal.relevance * 0.3
-        )
+        bottom_up = proposal.activation * 0.4 + proposal.confidence * 0.3 + proposal.relevance * 0.3
 
         # Top-down attention bias
         top_down = self._compute_top_down_match(proposal)
@@ -160,8 +158,7 @@ class AttentionCompetition:
 
         # Combined score
         score = (
-            self.params.bottom_up_weight * bottom_up +
-            self.params.top_down_weight * top_down
+            self.params.bottom_up_weight * bottom_up + self.params.top_down_weight * top_down
         ) * type_priority
 
         return float(np.clip(score, 0, 2))

@@ -33,6 +33,7 @@ from neuro.git import GitAutomator, GitResult, GitStatus
 try:
     from neuro.autonomous import AutonomousLoop, WebLearner
     from neuro.benchmark import Benchmark
+
     AUTONOMOUS_AVAILABLE = True
 except ImportError:
     AUTONOMOUS_AVAILABLE = False
@@ -41,6 +42,7 @@ except ImportError:
 @dataclass
 class EngineConfig:
     """Configuration for the NEURO engine."""
+
     model: str = "ministral-3:8b"
     base_url: str = "http://localhost:11434"
     timeout: int = 120
@@ -54,6 +56,7 @@ class EngineConfig:
 @dataclass
 class ProcessResult:
     """Result of processing a query."""
+
     query: str
     response: str
     tools_used: List[str] = field(default_factory=list)
@@ -87,7 +90,7 @@ class NeuroEngine:
             base_url=self.config.base_url,
             model=self.config.model,
             timeout=self.config.timeout,
-            temperature=self.config.temperature
+            temperature=self.config.temperature,
         )
         self.streamer = StreamHandler(stream_config)
         self.terminal = TerminalStreamer(show_thinking=self.config.show_thinking)
@@ -131,6 +134,7 @@ class NeuroEngine:
         if self._tools is None:
             try:
                 from tools import Tools
+
                 self._tools = Tools()
             except ImportError:
                 self._tools = None
@@ -141,8 +145,7 @@ class NeuroEngine:
         """Lazy load executor."""
         if self._executor is None:
             self._executor = ParallelExecutor(
-                self.tools,
-                max_parallel=self.config.max_parallel_tools
+                self.tools, max_parallel=self.config.max_parallel_tools
             )
         return self._executor
 
@@ -152,6 +155,7 @@ class NeuroEngine:
         if self._pipeline is None:
             try:
                 from cognitive_pipeline import CognitivePipeline
+
                 self._pipeline = CognitivePipeline(verbose=False)
             except ImportError:
                 self._pipeline = None
@@ -163,6 +167,7 @@ class NeuroEngine:
         if self._emotions is None:
             try:
                 from emotions import EmotionSystem
+
                 self._emotions = EmotionSystem(dim=64)
             except ImportError:
                 self._emotions = None
@@ -174,6 +179,7 @@ class NeuroEngine:
         if self._sleep is None:
             try:
                 from sleep import SleepConsolidationSystem
+
                 self._sleep = SleepConsolidationSystem(dim=64)
             except ImportError:
                 self._sleep = None
@@ -185,6 +191,7 @@ class NeuroEngine:
         if self._social is None:
             try:
                 from social import SocialCognitionSystem
+
                 self._social = SocialCognitionSystem(dim=64)
             except ImportError:
                 self._social = None
@@ -196,6 +203,7 @@ class NeuroEngine:
         if self._embodied is None:
             try:
                 from embodied import EmbodiedCognitionSystem
+
                 self._embodied = EmbodiedCognitionSystem(dim=64)
             except ImportError:
                 self._embodied = None
@@ -207,6 +215,7 @@ class NeuroEngine:
         if self._trainer is None:
             try:
                 from self_training import SelfTrainer
+
                 self._trainer = SelfTrainer()
             except ImportError:
                 self._trainer = None
@@ -218,6 +227,7 @@ class NeuroEngine:
         if self._evolution is None:
             try:
                 from self_evolution import SelfEvolution
+
                 self._evolution = SelfEvolution()
             except ImportError:
                 self._evolution = None
@@ -239,6 +249,7 @@ class NeuroEngine:
         if self._ocr is None:
             try:
                 from ocr import DeepSeekOCR
+
                 self._ocr = DeepSeekOCR()
             except ImportError:
                 self._ocr = None
@@ -256,7 +267,7 @@ class NeuroEngine:
                     benchmark=self.benchmark,
                     verbose=self.config.verbose,
                     on_activity=self._on_activity,
-                    ocr=self.ocr  # Pass OCR for image learning
+                    ocr=self.ocr,  # Pass OCR for image learning
                 )
             else:
                 self._autonomous = None
@@ -372,13 +383,15 @@ To use a tool, respond with:
         if self.pipeline is not None:
             try:
                 result = self.pipeline.process(query)
-                context.update({
-                    "memories": result.memory_used,
-                    "knowledge": result.knowledge_used,
-                    "confidence": result.confidence,
-                    "surprise": result.surprise_level,
-                    "analysis": result.cognitive_analysis
-                })
+                context.update(
+                    {
+                        "memories": result.memory_used,
+                        "knowledge": result.knowledge_used,
+                        "confidence": result.confidence,
+                        "surprise": result.surprise_level,
+                        "analysis": result.cognitive_analysis,
+                    }
+                )
             except Exception as e:
                 if self.config.verbose:
                     print(f"  [engine] Pipeline context error: {e}")
@@ -404,7 +417,7 @@ To use a tool, respond with:
         query: str,
         history: Optional[List[Dict[str, str]]] = None,
         on_token: Optional[Callable[[str], None]] = None,
-        include_cognitive: bool = True
+        include_cognitive: bool = True,
     ) -> AsyncGenerator[StreamChunk, None]:
         """
         Stream a chat response.
@@ -440,7 +453,7 @@ To use a tool, respond with:
         self,
         query: str,
         history: Optional[List[Dict[str, str]]] = None,
-        stream_to_terminal: bool = True
+        stream_to_terminal: bool = True,
     ) -> str:
         """
         Chat with streaming to terminal.
@@ -473,9 +486,7 @@ To use a tool, respond with:
         return full_response
 
     async def execute_tools(
-        self,
-        tool_calls: List[Dict[str, Any]],
-        parallel: bool = True
+        self, tool_calls: List[Dict[str, Any]], parallel: bool = True
     ) -> List[ToolResult]:
         """
         Execute tool calls.
@@ -487,10 +498,7 @@ To use a tool, respond with:
         Returns:
             List of ToolResult
         """
-        calls = [
-            ToolCall(name=c["name"], args=c.get("args", {}))
-            for c in tool_calls
-        ]
+        calls = [ToolCall(name=c["name"], args=c.get("args", {})) for c in tool_calls]
 
         if parallel and len(calls) > 1:
             return await self.executor.execute_parallel(calls)
@@ -502,12 +510,7 @@ To use a tool, respond with:
             return results
 
     async def edit_file(
-        self,
-        file_path: str,
-        line_start: int,
-        line_end: int,
-        new_content: str,
-        confirm: bool = True
+        self, file_path: str, line_start: int, line_end: int, new_content: str, confirm: bool = True
     ) -> EditResult:
         """
         Edit a file with diff display.
@@ -522,19 +525,10 @@ To use a tool, respond with:
         Returns:
             EditResult
         """
-        return self.editor.edit_lines(
-            file_path,
-            line_start,
-            line_end,
-            new_content,
-            confirm=confirm
-        )
+        return self.editor.edit_lines(file_path, line_start, line_end, new_content, confirm=confirm)
 
     async def commit_changes(
-        self,
-        files: List[str],
-        message: str,
-        check_secrets: bool = True
+        self, files: List[str], message: str, check_secrets: bool = True
     ) -> GitResult:
         """
         Safely commit changes.
@@ -549,11 +543,7 @@ To use a tool, respond with:
         """
         return self.git.safe_commit(files, message, check_secrets=check_secrets)
 
-    async def push_changes(
-        self,
-        remote: str = "origin",
-        branch: Optional[str] = None
-    ) -> GitResult:
+    async def push_changes(self, remote: str = "origin", branch: Optional[str] = None) -> GitResult:
         """
         Push changes to remote.
 
@@ -572,7 +562,7 @@ To use a tool, respond with:
         history: Optional[List[Dict[str, str]]] = None,
         stream: bool = True,
         execute_tools: bool = True,
-        max_tool_rounds: int = 5
+        max_tool_rounds: int = 5,
     ) -> ProcessResult:
         """
         Full processing pipeline: chat → tools → edit → learn.
@@ -589,6 +579,7 @@ To use a tool, respond with:
         """
         import time
         import re
+
         start_time = time.time()
 
         result = ProcessResult(query=query)
@@ -627,7 +618,9 @@ To use a tool, respond with:
                 tool_context = self._format_tool_results(tool_results)
 
                 # Get follow-up response
-                follow_up_query = f"Tool results:\n{tool_context}\n\nContinue based on these results."
+                follow_up_query = (
+                    f"Tool results:\n{tool_context}\n\nContinue based on these results."
+                )
                 if stream:
                     current_response = await self.chat(follow_up_query, history)
                 else:
@@ -650,7 +643,7 @@ To use a tool, respond with:
 
         tools = []
         # Match <tool>name</tool>\n<args>{...}</args>
-        pattern = r'<tool>(\w+)</tool>\s*<args>(.*?)</args>'
+        pattern = r"<tool>(\w+)</tool>\s*<args>(.*?)</args>"
         matches = re.findall(pattern, response, re.DOTALL)
 
         for name, args_str in matches:
@@ -687,20 +680,20 @@ To use a tool, respond with:
                 facts = self._extract_facts(result.response)
                 for fact in facts:
                     # Check for duplicates via evolution
-                    if self.evolution and self.evolution.is_duplicate(fact['content']):
+                    if self.evolution and self.evolution.is_duplicate(fact["content"]):
                         continue
 
                     # Add to knowledge base
                     self.trainer.learn(
-                        topic=fact.get('topic', query[:50]),
-                        content=fact['content'],
-                        source="conversation"
+                        topic=fact.get("topic", query[:50]),
+                        content=fact["content"],
+                        source="conversation",
                     )
                     learned_count += 1
 
                     # Mark as learned in evolution tracker
                     if self.evolution:
-                        self.evolution.mark_learned(fact['content'])
+                        self.evolution.mark_learned(fact["content"])
 
                 # Save periodically
                 if learned_count > 0:
@@ -717,7 +710,7 @@ To use a tool, respond with:
                     topic="interaction",
                     content=f"Q: {query[:100]} A: {result.response[:200]}",
                     source="conversation",
-                    importance=0.7
+                    importance=0.7,
                 )
             except Exception:
                 pass
@@ -725,7 +718,9 @@ To use a tool, respond with:
         # 3. Check if we should benchmark/evolve
         if self.evolution and self.evolution.should_benchmark():
             if self.config.verbose:
-                print(f"  [evolution] Cycle complete - {self.evolution.state['facts_this_cycle']} facts learned")
+                print(
+                    f"  [evolution] Cycle complete - {self.evolution.state['facts_this_cycle']} facts learned"
+                )
             self.evolution.start_new_cycle()
 
         return learned_count
@@ -736,22 +731,20 @@ To use a tool, respond with:
 
         # Split into sentences
         import re
-        sentences = re.split(r'[.!?]\s+', response)
+
+        sentences = re.split(r"[.!?]\s+", response)
 
         for sentence in sentences:
             sentence = sentence.strip()
             # Skip short sentences or questions
-            if len(sentence) < 20 or sentence.endswith('?'):
+            if len(sentence) < 20 or sentence.endswith("?"):
                 continue
             # Skip meta-commentary
-            if any(skip in sentence.lower() for skip in ['i will', 'let me', 'here\'s', 'option']):
+            if any(skip in sentence.lower() for skip in ["i will", "let me", "here's", "option"]):
                 continue
             # This looks like a fact
             if len(sentence) < 500:
-                facts.append({
-                    'content': sentence,
-                    'topic': sentence[:50]
-                })
+                facts.append({"content": sentence, "topic": sentence[:50]})
 
         return facts[:5]  # Limit to 5 facts per response
 
@@ -878,11 +871,11 @@ To use a tool, respond with:
 
         # Extract structured content
         data = self.ocr.extract_for_learning(image_path)
-        if 'error' in data:
+        if "error" in data:
             return False
 
         # Learn the extracted content
-        content = data.get('content', '') or data.get('summary', '')
+        content = data.get("content", "") or data.get("summary", "")
         if not content:
             return False
 
@@ -891,11 +884,11 @@ To use a tool, respond with:
             return False
 
         # Learn main content
-        topic = data.get('title', 'image_content')
+        topic = data.get("title", "image_content")
         self.trainer.learn(topic, content, f"ocr:{image_path}")
 
         # Learn individual facts
-        for fact in data.get('facts', []):
+        for fact in data.get("facts", []):
             if fact and not (self.evolution and self.evolution.is_duplicate(fact)):
                 self.trainer.learn(topic, fact, f"ocr:{image_path}")
                 if self.evolution:
@@ -909,6 +902,7 @@ To use a tool, respond with:
 
 
 # Convenience functions for simple usage
+
 
 async def chat(query: str, stream: bool = True) -> str:
     """Simple chat function."""
@@ -940,10 +934,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     async def test():
-        config = EngineConfig(
-            verbose=True,
-            show_thinking=True
-        )
+        config = EngineConfig(verbose=True, show_thinking=True)
         engine = NeuroEngine(config)
 
         print("\nEngine Stats:")

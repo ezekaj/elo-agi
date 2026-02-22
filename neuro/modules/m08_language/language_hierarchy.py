@@ -18,6 +18,7 @@ from dataclasses import dataclass
 @dataclass
 class LayerActivation:
     """Activation state of a language layer"""
+
     state: np.ndarray
     prediction: np.ndarray
     error: np.ndarray
@@ -34,7 +35,7 @@ class LanguageLayer:
         output_dim: int,
         timescale: float,
         learning_rate: float = 0.1,
-        name: str = "layer"
+        name: str = "layer",
     ):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
@@ -84,7 +85,7 @@ class LanguageLayer:
         if len(error) < self.input_dim:
             error = np.pad(error, (0, self.input_dim - len(error)))
         elif len(error) > self.input_dim:
-            error = error[:self.input_dim]
+            error = error[: self.input_dim]
         self.prediction_error = error
         self.error_history.append(error.copy())
         if len(self.error_history) > 100:
@@ -125,14 +126,16 @@ class PhonologicalLayer(LanguageLayer):
     Predicts upcoming sounds based on phonotactic constraints.
     """
 
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1):
+    def __init__(
+        self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1
+    ):
         super().__init__(
             input_dim=input_dim,
             hidden_dim=hidden_dim,
             output_dim=output_dim,
             timescale=0.01,  # 10ms
             learning_rate=learning_rate,
-            name="phonological"
+            name="phonological",
         )
 
         # Phoneme representations
@@ -159,14 +162,16 @@ class SyntacticLayer(LanguageLayer):
     Tracks grammatical dependencies and structure.
     """
 
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1):
+    def __init__(
+        self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1
+    ):
         super().__init__(
             input_dim=input_dim,
             hidden_dim=hidden_dim,
             output_dim=output_dim,
             timescale=0.1,  # 100ms
             learning_rate=learning_rate,
-            name="syntactic"
+            name="syntactic",
         )
 
         # Syntactic state tracking
@@ -206,14 +211,16 @@ class SemanticLayer(LanguageLayer):
     Handles lexical semantics and composition.
     """
 
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1):
+    def __init__(
+        self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1
+    ):
         super().__init__(
             input_dim=input_dim,
             hidden_dim=hidden_dim,
             output_dim=output_dim,
             timescale=0.3,  # 300ms
             learning_rate=learning_rate,
-            name="semantic"
+            name="semantic",
         )
 
         # Semantic memory
@@ -237,7 +244,11 @@ class SemanticLayer(LanguageLayer):
             return self.state
 
         # Use context to disambiguate
-        context = np.mean(self.context_buffer, axis=0) if self.context_buffer else np.zeros(self.hidden_dim)
+        context = (
+            np.mean(self.context_buffer, axis=0)
+            if self.context_buffer
+            else np.zeros(self.hidden_dim)
+        )
 
         best_idx = 0
         best_score = -np.inf
@@ -265,24 +276,30 @@ class PragmaticLayer(LanguageLayer):
     Infers speaker intent and handles discourse.
     """
 
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1):
+    def __init__(
+        self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float = 0.1
+    ):
         super().__init__(
             input_dim=input_dim,
             hidden_dim=hidden_dim,
             output_dim=output_dim,
             timescale=1.0,  # 1000ms
             learning_rate=learning_rate,
-            name="pragmatic"
+            name="pragmatic",
         )
 
         # Discourse state
         self.discourse_state = np.zeros(hidden_dim)
         self.speaker_model = np.zeros(hidden_dim)
 
-    def interpret_context(self, semantic_output: np.ndarray, situation: Optional[np.ndarray] = None) -> np.ndarray:
+    def interpret_context(
+        self, semantic_output: np.ndarray, situation: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         """Interpret meaning in context"""
         if situation is not None:
-            combined = np.concatenate([semantic_output, situation[:len(semantic_output)]])[:self.input_dim]
+            combined = np.concatenate([semantic_output, situation[: len(semantic_output)]])[
+                : self.input_dim
+            ]
         else:
             combined = semantic_output
 
@@ -297,9 +314,7 @@ class PragmaticLayer(LanguageLayer):
         """Infer speaker's communicative intent"""
         # Combine utterance with speaker model
         intent = np.tanh(
-            0.5 * utterance_repr +
-            0.3 * self.speaker_model +
-            0.2 * self.discourse_state
+            0.5 * utterance_repr + 0.3 * self.speaker_model + 0.2 * self.discourse_state
         )
         return intent
 
@@ -323,7 +338,7 @@ class LanguageProcessingHierarchy:
         syntactic_dim: int = 48,
         semantic_dim: int = 64,
         pragmatic_dim: int = 32,
-        learning_rate: float = 0.1
+        learning_rate: float = 0.1,
     ):
         self.input_dim = input_dim
 
@@ -332,28 +347,28 @@ class LanguageProcessingHierarchy:
             input_dim=input_dim,
             hidden_dim=phonological_dim,
             output_dim=syntactic_dim,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
         )
 
         self.syntactic = SyntacticLayer(
             input_dim=syntactic_dim,
             hidden_dim=syntactic_dim,
             output_dim=semantic_dim,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
         )
 
         self.semantic = SemanticLayer(
             input_dim=semantic_dim,
             hidden_dim=semantic_dim,
             output_dim=pragmatic_dim,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
         )
 
         self.pragmatic = PragmaticLayer(
             input_dim=pragmatic_dim,
             hidden_dim=pragmatic_dim,
             output_dim=pragmatic_dim,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
         )
 
         self.layers = [self.phonological, self.syntactic, self.semantic, self.pragmatic]
@@ -371,8 +386,12 @@ class LanguageProcessingHierarchy:
 
         # Compute error from syntactic prediction
         syn_pred = self.syntactic.predict_input()
-        phon_error = phon_out - syn_pred[:len(phon_out)] if len(syn_pred) >= len(phon_out) else phon_out - np.pad(syn_pred, (0, len(phon_out) - len(syn_pred)))
-        self.phonological.receive_error(phon_error[:self.phonological.input_dim])
+        phon_error = (
+            phon_out - syn_pred[: len(phon_out)]
+            if len(syn_pred) >= len(phon_out)
+            else phon_out - np.pad(syn_pred, (0, len(phon_out) - len(syn_pred)))
+        )
+        self.phonological.receive_error(phon_error[: self.phonological.input_dim])
         self.layer_errors.append(phon_error)
 
         # Syntactic processing
@@ -380,8 +399,12 @@ class LanguageProcessingHierarchy:
 
         # Compute error from semantic prediction
         sem_pred = self.semantic.predict_input()
-        syn_error = syn_out - sem_pred[:len(syn_out)] if len(sem_pred) >= len(syn_out) else syn_out - np.pad(sem_pred, (0, len(syn_out) - len(sem_pred)))
-        self.syntactic.receive_error(syn_error[:self.syntactic.input_dim])
+        syn_error = (
+            syn_out - sem_pred[: len(syn_out)]
+            if len(sem_pred) >= len(syn_out)
+            else syn_out - np.pad(sem_pred, (0, len(syn_out) - len(sem_pred)))
+        )
+        self.syntactic.receive_error(syn_error[: self.syntactic.input_dim])
         self.layer_errors.append(syn_error)
 
         # Semantic processing
@@ -389,24 +412,30 @@ class LanguageProcessingHierarchy:
 
         # Compute error from pragmatic prediction
         prag_pred = self.pragmatic.predict_input()
-        sem_error = sem_out - prag_pred[:len(sem_out)] if len(prag_pred) >= len(sem_out) else sem_out - np.pad(prag_pred, (0, len(sem_out) - len(prag_pred)))
-        self.semantic.receive_error(sem_error[:self.semantic.input_dim])
+        sem_error = (
+            sem_out - prag_pred[: len(sem_out)]
+            if len(prag_pred) >= len(sem_out)
+            else sem_out - np.pad(prag_pred, (0, len(sem_out) - len(prag_pred)))
+        )
+        self.semantic.receive_error(sem_error[: self.semantic.input_dim])
         self.layer_errors.append(sem_error)
 
         # Pragmatic processing
         prag_out = self.pragmatic.interpret_context(sem_out)
-        self.layer_errors.append(np.zeros_like(prag_out))  # Top layer has no prediction error from above
+        self.layer_errors.append(
+            np.zeros_like(prag_out)
+        )  # Top layer has no prediction error from above
 
         # Total error
-        self.total_error = sum(np.sum(e ** 2) for e in self.layer_errors)
+        self.total_error = sum(np.sum(e**2) for e in self.layer_errors)
 
         return {
-            'phonological': phon_out,
-            'syntactic': syn_out,
-            'semantic': sem_out,
-            'pragmatic': prag_out,
-            'errors': self.layer_errors,
-            'total_error': self.total_error
+            "phonological": phon_out,
+            "syntactic": syn_out,
+            "semantic": sem_out,
+            "pragmatic": prag_out,
+            "errors": self.layer_errors,
+            "total_error": self.total_error,
         }
 
     def backward(self) -> List[np.ndarray]:
@@ -418,10 +447,7 @@ class LanguageProcessingHierarchy:
         return predictions
 
     def step(
-        self,
-        acoustic_input: np.ndarray,
-        dt: float = 0.1,
-        update_weights: bool = True
+        self, acoustic_input: np.ndarray, dt: float = 0.1, update_weights: bool = True
     ) -> Dict[str, np.ndarray]:
         """Complete processing cycle"""
         result = self.forward(acoustic_input, dt)

@@ -14,6 +14,7 @@ import numpy as np
 @dataclass
 class Entity:
     """An entity in the knowledge graph."""
+
     name: str
     entity_type: str = "entity"
     embedding: Optional[np.ndarray] = None
@@ -31,13 +32,14 @@ class Entity:
 @dataclass
 class Relation:
     """A relation type in the knowledge graph."""
+
     name: str
     embedding: Optional[np.ndarray] = None
     symmetric: bool = False
     transitive: bool = False
     inverse: Optional[str] = None
     domain: Optional[str] = None  # Entity type for subject
-    range: Optional[str] = None   # Entity type for object
+    range: Optional[str] = None  # Entity type for object
 
     def __hash__(self):
         return hash(self.name)
@@ -46,6 +48,7 @@ class Relation:
 @dataclass
 class GraphEmbedding:
     """Embedding of an entity or relation."""
+
     name: str
     vector: np.ndarray
     is_entity: bool = True
@@ -54,6 +57,7 @@ class GraphEmbedding:
 @dataclass
 class GraphQuery:
     """A query against the knowledge graph."""
+
     head: Optional[str] = None
     relation: Optional[str] = None
     tail: Optional[str] = None
@@ -255,10 +259,10 @@ class KnowledgeGraph:
         t = self._entities.get(tail)
 
         if not h or not r or not t:
-            return float('inf')
+            return float("inf")
 
         if h.embedding is None or r.embedding is None or t.embedding is None:
-            return float('inf')
+            return float("inf")
 
         # TransE: h + r ≈ t
         # Score = ||h + r - t||
@@ -409,8 +413,8 @@ class KnowledgeGraph:
                     neg_t = self._entities.get(neg_tail)
                     if neg_t and neg_t.embedding is not None:
                         gradient = self.learning_rate * (
-                            (h.embedding + r.embedding - t.embedding) / (pos_score + 1e-8) -
-                            (h.embedding + r.embedding - neg_t.embedding) / (neg_score + 1e-8)
+                            (h.embedding + r.embedding - t.embedding) / (pos_score + 1e-8)
+                            - (h.embedding + r.embedding - neg_t.embedding) / (neg_score + 1e-8)
                         )
 
                         h.embedding -= gradient

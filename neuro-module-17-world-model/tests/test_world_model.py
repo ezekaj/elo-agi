@@ -15,21 +15,40 @@ import os
 import time
 
 from neuro.modules.m17_world_model.state_encoder import (
-    StateEncoder, EncoderParams, EncodedState, Modality
+    StateEncoder,
+    EncoderParams,
+    EncodedState,
+    Modality,
 )
 from neuro.modules.m17_world_model.transition_model import (
-    TransitionModel, TransitionParams, Transition, ActionType
+    TransitionModel,
+    TransitionParams,
+    Transition,
+    ActionType,
 )
 from neuro.modules.m17_world_model.imagination import (
-    Imagination, ImaginationParams, Rollout, Trajectory, RolloutStrategy
+    Imagination,
+    ImaginationParams,
+    Rollout,
+    Trajectory,
+    RolloutStrategy,
 )
 from neuro.modules.m17_world_model.counterfactual import (
-    CounterfactualEngine, CounterfactualParams, Counterfactual, CounterfactualType
+    CounterfactualEngine,
+    CounterfactualParams,
+    Counterfactual,
+    CounterfactualType,
 )
 from neuro.modules.m17_world_model.world_memory import (
-    WorldMemory, MemoryParams, WorldState, Entity, Relation,
-    EntityType, RelationType
+    WorldMemory,
+    MemoryParams,
+    WorldState,
+    Entity,
+    Relation,
+    EntityType,
+    RelationType,
 )
+
 
 class TestStateEncoder:
     """Tests for the state encoder."""
@@ -43,9 +62,7 @@ class TestStateEncoder:
     def test_encode_single_modality(self):
         """Test encoding a single modality."""
         encoder = StateEncoder(EncoderParams(n_latent=64))
-        observations = {
-            Modality.VISUAL: np.random.randn(64)
-        }
+        observations = {Modality.VISUAL: np.random.randn(64)}
         encoded = encoder.encode(observations)
         assert isinstance(encoded, EncodedState)
         assert len(encoded.sample) == 64
@@ -109,6 +126,7 @@ class TestStateEncoder:
         kl = encoded.kl_divergence()
         assert kl >= 0
 
+
 class TestTransitionModel:
     """Tests for the transition model."""
 
@@ -152,9 +170,7 @@ class TestTransitionModel:
 
     def test_training_improves_predictions(self):
         """Test that training reduces prediction error."""
-        model = TransitionModel(TransitionParams(
-            n_latent=32, n_action=8, learning_rate=0.01
-        ))
+        model = TransitionModel(TransitionParams(n_latent=32, n_action=8, learning_rate=0.01))
 
         # Generate consistent data
         np.random.seed(42)
@@ -200,6 +216,7 @@ class TestTransitionModel:
 
         # Note: This test may be flaky due to random initialization
         assert isinstance(unfamiliar.ensemble_variance, float)
+
 
 class TestImagination:
     """Tests for the imagination module."""
@@ -294,6 +311,7 @@ class TestImagination:
         assert isinstance(actual, Rollout)
         assert isinstance(cf, Rollout)
 
+
 class TestCounterfactualEngine:
     """Tests for counterfactual reasoning."""
 
@@ -340,10 +358,7 @@ class TestCounterfactualEngine:
         actions = [np.random.randn(8) for _ in range(5)]
 
         cf = engine.what_if_intervention(
-            initial, actions,
-            intervention_variable=0,
-            intervention_value=1.0,
-            intervention_time=2
+            initial, actions, intervention_variable=0, intervention_value=1.0, intervention_time=2
         )
 
         assert cf.query_type == CounterfactualType.INTERVENTION
@@ -370,9 +385,10 @@ class TestCounterfactualEngine:
 
         analysis = engine.regret_analysis(initial, actual, candidates)
 
-        assert 'actual_outcome' in analysis
-        assert 'regret' in analysis
-        assert 'could_have_improved' in analysis
+        assert "actual_outcome" in analysis
+        assert "regret" in analysis
+        assert "could_have_improved" in analysis
+
 
 class TestWorldMemory:
     """Tests for world memory."""
@@ -403,8 +419,7 @@ class TestWorldMemory:
 
         assert "obj1" in memory._entities
         # Entity should be updated, not duplicated
-        assert len([e for e in memory._entities.values()
-                    if e.entity_id == "obj1"]) == 1
+        assert len([e for e in memory._entities.values() if e.entity_id == "obj1"]) == 1
 
     def test_add_relation(self):
         """Test adding relations."""
@@ -492,6 +507,7 @@ class TestWorldMemory:
         assert predicted is not None
         assert len(predicted) == 128
 
+
 class TestStress:
     """Stress tests for the world model."""
 
@@ -505,15 +521,18 @@ class TestStress:
             transition = model.predict(state, action)
 
         stats = model.get_statistics()
-        assert stats['n_predictions'] == 1000
+        assert stats["n_predictions"] == 1000
 
     def test_long_rollouts(self):
         """Test very long imagination rollouts."""
         model = TransitionModel(TransitionParams(n_latent=32, n_action=8))
-        imagination = Imagination(model, ImaginationParams(
-            max_horizon=200,
-            pruning_threshold=0.99  # High threshold to avoid pruning
-        ))
+        imagination = Imagination(
+            model,
+            ImaginationParams(
+                max_horizon=200,
+                pruning_threshold=0.99,  # High threshold to avoid pruning
+            ),
+        )
 
         rollout = imagination.imagine(np.random.randn(32), horizon=100)
         assert rollout.length <= 100
@@ -580,7 +599,8 @@ class TestStress:
             engine.what_if_action(initial, actions, alt, 2)
 
         stats = engine.get_statistics()
-        assert stats['n_counterfactuals'] == 50
+        assert stats["n_counterfactuals"] == 50
+
 
 class TestIntegration:
     """Integration tests combining all components."""
@@ -604,15 +624,14 @@ class TestIntegration:
 
         # Imagine future
         trajectory = imagination.imagine_multiple(encoded.sample, n_rollouts=3)
-        best_action = trajectory.best_rollout.actions[0] if trajectory.best_rollout.actions else np.zeros(16)
+        best_action = (
+            trajectory.best_rollout.actions[0] if trajectory.best_rollout.actions else np.zeros(16)
+        )
 
         # Counterfactual: what if different action?
         alt_action = np.random.randn(16)
         cf = counterfactual.what_if_action(
-            encoded.sample,
-            [best_action] + [np.random.randn(16) for _ in range(4)],
-            alt_action,
-            0
+            encoded.sample, [best_action] + [np.random.randn(16) for _ in range(4)], alt_action, 0
         )
 
         assert trajectory.best_rollout is not None
@@ -644,8 +663,9 @@ class TestIntegration:
         transition.predict(experiences[0][0], experiences[0][1])
 
         stats = transition.get_statistics()
-        assert stats['n_predictions'] >= 1
-        assert stats['prediction_errors']['mean'] > 0  # Training was done
+        assert stats["n_predictions"] >= 1
+        assert stats["prediction_errors"]["mean"] > 0  # Training was done
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

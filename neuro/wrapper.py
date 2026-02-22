@@ -25,9 +25,15 @@ from typing import Dict, List, Optional, Any
 import numpy as np
 
 from neuro.modules.llm.llm_interface import (
-    LLMOracle, LLMConfig, LLMResponse, MockLLM,
-    AnthropicLLM, OpenAILLM, create_llm,
-    HAS_ANTHROPIC, HAS_OPENAI,
+    LLMOracle,
+    LLMConfig,
+    LLMResponse,
+    MockLLM,
+    AnthropicLLM,
+    OpenAILLM,
+    create_llm,
+    HAS_ANTHROPIC,
+    HAS_OPENAI,
 )
 from neuro.modules.llm.semantic_bridge import SemanticBridge
 
@@ -35,6 +41,7 @@ from neuro.modules.llm.semantic_bridge import SemanticBridge
 @dataclass
 class SmartResponse:
     """Response from the Smart Wrapper."""
+
     text: str
     modules_used: List[str]
     cognitive_context: Dict[str, Any]
@@ -53,13 +60,12 @@ class SmartResponse:
         modules_html = " ".join(
             f'<span style="display:inline-block;background:#e3f2fd;color:#1565c0;'
             f'padding:2px 8px;border-radius:12px;font-size:12px;margin:2px;">'
-            f'{html_mod.escape(m)}</span>'
+            f"{html_mod.escape(m)}</span>"
             for m in self.modules_used
         )
 
         steps_html = "\n".join(
-            f"<li style='margin:2px 0;font-size:13px;color:#555;'>"
-            f"{html_mod.escape(s)}</li>"
+            f"<li style='margin:2px 0;font-size:13px;color:#555;'>{html_mod.escape(s)}</li>"
             for s in self.processing_steps
         )
 
@@ -69,27 +75,27 @@ class SmartResponse:
             f'<div style="font-family:system-ui,sans-serif;border:1px solid #e0e0e0;'
             f'border-radius:8px;padding:16px;margin:8px 0;max-width:800px;">'
             f'  <div style="font-size:15px;line-height:1.6;margin-bottom:12px;">'
-            f'{escaped_text}</div>'
+            f"{escaped_text}</div>"
             f'  <div style="margin-bottom:8px;">'
             f'    <span style="font-size:12px;color:#888;margin-right:8px;">Modules:</span>'
-            f'{modules_html}</div>'
+            f"{modules_html}</div>"
             f'  <div style="margin-bottom:8px;">'
             f'    <span style="font-size:12px;color:#888;margin-right:8px;">'
-            f'Confidence: {conf_pct}%</span>'
+            f"Confidence: {conf_pct}%</span>"
             f'    <div style="display:inline-block;width:120px;height:8px;'
             f'background:#eee;border-radius:4px;vertical-align:middle;">'
             f'      <div style="width:{conf_pct}%;height:100%;background:{conf_color};'
             f'border-radius:4px;"></div>'
-            f'    </div>'
-            f'  </div>'
+            f"    </div>"
+            f"  </div>"
             f'  <div style="font-size:12px;color:#999;margin-bottom:4px;">'
-            f'{self.provider} | {self.latency:.2f}s</div>'
+            f"{self.provider} | {self.latency:.2f}s</div>"
             f'  <details style="margin-top:8px;">'
             f'    <summary style="cursor:pointer;font-size:12px;color:#888;">'
-            f'Processing steps ({len(self.processing_steps)})</summary>'
+            f"Processing steps ({len(self.processing_steps)})</summary>"
             f'    <ol style="margin:4px 0;padding-left:20px;">{steps_html}</ol>'
-            f'  </details>'
-            f'</div>'
+            f"  </details>"
+            f"</div>"
         )
 
 
@@ -118,15 +124,17 @@ class OllamaLLM(LLMOracle):
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
 
-        payload = json.dumps({
-            "model": self.config.model,
-            "messages": messages,
-            "stream": False,
-            "options": {
-                "temperature": self.config.temperature,
-                "num_predict": self.config.max_tokens,
-            },
-        }).encode("utf-8")
+        payload = json.dumps(
+            {
+                "model": self.config.model,
+                "messages": messages,
+                "stream": False,
+                "options": {
+                    "temperature": self.config.temperature,
+                    "num_predict": self.config.max_tokens,
+                },
+            }
+        ).encode("utf-8")
 
         try:
             req = urllib.request.Request(
@@ -158,10 +166,12 @@ class OllamaLLM(LLMOracle):
         import urllib.request
         import json
 
-        payload = json.dumps({
-            "model": self.config.model,
-            "input": text,
-        }).encode("utf-8")
+        payload = json.dumps(
+            {
+                "model": self.config.model,
+                "input": text,
+            }
+        ).encode("utf-8")
 
         try:
             req = urllib.request.Request(
@@ -176,7 +186,7 @@ class OllamaLLM(LLMOracle):
             full = np.array(embeddings[0], dtype=np.float32)
 
             if len(full) > self.config.embedding_dim:
-                return full[:self.config.embedding_dim]
+                return full[: self.config.embedding_dim]
             elif len(full) < self.config.embedding_dim:
                 return np.pad(full, (0, self.config.embedding_dim - len(full)))
             return full
@@ -194,6 +204,7 @@ class OllamaLLM(LLMOracle):
 def _check_ollama_available() -> bool:
     """Check if Ollama is running locally."""
     import urllib.request
+
     try:
         host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
         req = urllib.request.Request(f"{host}/api/tags")
@@ -274,6 +285,7 @@ class SmartWrapper:
     def _get_core(self):
         if self._core is None:
             from neuro.modules.system.cognitive_core import CognitiveCore
+
             self._core = CognitiveCore()
             self._core.initialize()
         return self._core
@@ -281,6 +293,7 @@ class SmartWrapper:
     def _get_memory(self):
         if self._memory is None:
             from neuro.modules.m04_memory.memory_controller import MemoryController
+
             self._memory = MemoryController()
         return self._memory
 
@@ -289,6 +302,7 @@ class SmartWrapper:
             from neuro.modules.m03_reasoning_types.reasoning_orchestrator import (
                 ReasoningOrchestrator,
             )
+
             self._reasoning = ReasoningOrchestrator()
         return self._reasoning
 
@@ -328,8 +342,10 @@ class SmartWrapper:
                 "confidence": task_analysis.confidence,
             }
             modules_used.append("reasoning_orchestrator")
-            steps.append(f"  Primary reasoning: {task_analysis.primary_type.value} "
-                        f"(complexity: {task_analysis.complexity:.2f})")
+            steps.append(
+                f"  Primary reasoning: {task_analysis.primary_type.value} "
+                f"(complexity: {task_analysis.complexity:.2f})"
+            )
         except Exception as e:
             context["reasoning"] = {"error": str(e)}
             steps.append(f"  Reasoning analysis skipped: {e}")
@@ -340,7 +356,7 @@ class SmartWrapper:
         try:
             memory = self._get_memory()
             # Store input in sensory memory
-            memory.process_visual(input_vector[:min(len(input_vector), 64)])
+            memory.process_visual(input_vector[: min(len(input_vector), 64)])
             attended = memory.attend("visual")
             if attended is not None:
                 memory_context.append("Recent sensory input attended")
@@ -380,8 +396,9 @@ class SmartWrapper:
             system_prompt = self._build_system_prompt(context)
             response = self.llm.query(enriched_prompt, system=system_prompt)
             text = response.text
-            steps.append(f"  Response generated ({response.tokens_used} tokens, "
-                        f"{response.latency:.2f}s)")
+            steps.append(
+                f"  Response generated ({response.tokens_used} tokens, {response.latency:.2f}s)"
+            )
         except Exception as e:
             text = f"I encountered an error processing your request: {e}"
             steps.append(f"  LLM error: {e}")
@@ -421,25 +438,33 @@ class SmartWrapper:
         # Add reasoning guidance
         reasoning = context.get("reasoning", {})
         if "primary_type" in reasoning:
-            parts.append(f"Reasoning analysis suggests using {reasoning['primary_type']} reasoning.")
+            parts.append(
+                f"Reasoning analysis suggests using {reasoning['primary_type']} reasoning."
+            )
             if reasoning.get("required_types"):
-                parts.append(f"Additional reasoning types: {', '.join(reasoning['required_types'])}")
+                parts.append(
+                    f"Additional reasoning types: {', '.join(reasoning['required_types'])}"
+                )
             parts.append("")
 
         # Add cognitive state
         cognitive = context.get("cognitive", {})
         if "active_modules" in cognitive:
             n_modules = len(cognitive["active_modules"])
-            parts.append(f"Cognitive state: {n_modules} modules active, "
-                        f"{cognitive.get('workspace_proposals', 0)} workspace proposals.")
+            parts.append(
+                f"Cognitive state: {n_modules} modules active, "
+                f"{cognitive.get('workspace_proposals', 0)} workspace proposals."
+            )
             parts.append("")
 
-        parts.extend([
-            "Respond thoughtfully and clearly. When appropriate, show your reasoning process.",
-            "If the query involves causal relationships, explain the chain of causation.",
-            "If it involves planning, break down the steps.",
-            "If it involves memory or past context, reference relevant information.",
-        ])
+        parts.extend(
+            [
+                "Respond thoughtfully and clearly. When appropriate, show your reasoning process.",
+                "If the query involves causal relationships, explain the chain of causation.",
+                "If it involves planning, break down the steps.",
+                "If it involves memory or past context, reference relevant information.",
+            ]
+        )
 
         return "\n".join(parts)
 
@@ -468,7 +493,9 @@ class SmartWrapper:
         # Add cognitive insights
         reasoning = context.get("reasoning", {})
         if reasoning.get("primary_type"):
-            parts.append(f"[Cognitive insight: This requires {reasoning['primary_type']} reasoning]")
+            parts.append(
+                f"[Cognitive insight: This requires {reasoning['primary_type']} reasoning]"
+            )
 
         parts.append(message)
         return "\n".join(parts)

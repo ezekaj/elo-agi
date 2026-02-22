@@ -12,15 +12,17 @@ import re
 
 class PermissionMode(Enum):
     """Permission modes."""
-    DEFAULT = "default"           # Prompt for each action
+
+    DEFAULT = "default"  # Prompt for each action
     ACCEPT_EDITS = "acceptEdits"  # Auto-accept file edits
-    DONT_ASK = "dontAsk"          # Auto-deny (only pre-allowed tools)
+    DONT_ASK = "dontAsk"  # Auto-deny (only pre-allowed tools)
     BYPASS = "bypassPermissions"  # Allow all (dangerous)
-    PLAN = "plan"                 # Read-only, no modifications
+    PLAN = "plan"  # Read-only, no modifications
 
 
 class PermissionDecision(Enum):
     """Permission decision types."""
+
     ALLOW = "allow"
     DENY = "deny"
     ASK = "ask"
@@ -29,6 +31,7 @@ class PermissionDecision(Enum):
 @dataclass
 class PermissionRule:
     """A permission rule (e.g., 'Bash(npm *)' or 'Edit')."""
+
     tool: str
     specifier: Optional[str] = None
     decision: PermissionDecision = PermissionDecision.ASK
@@ -36,7 +39,7 @@ class PermissionRule:
     @classmethod
     def parse(cls, rule_str: str, decision: PermissionDecision) -> "PermissionRule":
         """Parse rule like 'Bash(npm *)' or 'Edit'."""
-        match = re.match(r'(\w+)(?:\((.*)\))?', rule_str)
+        match = re.match(r"(\w+)(?:\((.*)\))?", rule_str)
         if match:
             tool = match.group(1)
             specifier = match.group(2)
@@ -197,19 +200,18 @@ class PermissionManager:
 
         try:
             import asyncio
+
             loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None, lambda: input("  > ").strip().lower()
-            )
+            response = await loop.run_in_executor(None, lambda: input("  > ").strip().lower())
         except (EOFError, KeyboardInterrupt):
             return False
 
-        if response in ('y', 'yes', ''):
+        if response in ("y", "yes", ""):
             return True
-        elif response in ('a', 'always'):
+        elif response in ("a", "always"):
             self._session_allows.add(tool_name)
             return True
-        elif response in ('d', 'never'):
+        elif response in ("d", "never"):
             self._session_denies.add(tool_name)
             return False
         else:

@@ -17,6 +17,7 @@ import hashlib
 @dataclass
 class GridParameters:
     """Parameters defining a grid cell's firing pattern"""
+
     spacing: float  # Distance between grid nodes (cm or normalized)
     orientation: float  # Rotation angle of grid (radians)
     phase: np.ndarray  # (x, y) offset of grid pattern
@@ -43,16 +44,13 @@ class GridCell:
         orientation: float = 0.0,
         phase: Optional[np.ndarray] = None,
         scale: int = 1,
-        peak_rate: float = 15.0
+        peak_rate: float = 15.0,
     ):
         if phase is None:
             phase = np.zeros(2)
 
         self.params = GridParameters(
-            spacing=spacing,
-            orientation=orientation,
-            phase=np.array(phase),
-            scale=scale
+            spacing=spacing, orientation=orientation, phase=np.array(phase), scale=scale
         )
         self.peak_rate = peak_rate
         self.firing_rate = 0.0
@@ -69,17 +67,19 @@ class GridCell:
         # Rotate position by grid orientation
         cos_theta = np.cos(self.params.orientation)
         sin_theta = np.sin(self.params.orientation)
-        rotated = np.array([
-            cos_theta * position[0] + sin_theta * position[1],
-            -sin_theta * position[0] + cos_theta * position[1]
-        ])
+        rotated = np.array(
+            [
+                cos_theta * position[0] + sin_theta * position[1],
+                -sin_theta * position[0] + cos_theta * position[1],
+            ]
+        )
 
         # Spatial frequency
         k = 2 * np.pi / self.params.spacing
 
         # Three gratings at 0, 60, 120 degrees create hexagonal pattern
         # Using the formula from Solstad et al. (2006)
-        angles = [0, np.pi/3, 2*np.pi/3]
+        angles = [0, np.pi / 3, 2 * np.pi / 3]
 
         response = 0.0
         for angle in angles:
@@ -90,15 +90,13 @@ class GridCell:
         response = (response + 3) / 6
 
         # Apply nonlinearity to sharpen peaks
-        response = response ** 2
+        response = response**2
 
         self.firing_rate = self.peak_rate * response
         return self.firing_rate
 
     def get_grid_nodes(
-        self,
-        environment_bounds: Tuple[float, float, float, float],
-        threshold: float = 0.5
+        self, environment_bounds: Tuple[float, float, float, float], threshold: float = 0.5
     ) -> List[np.ndarray]:
         """Get all grid node positions within environment bounds"""
         x_min, x_max, y_min, y_max = environment_bounds
@@ -137,7 +135,7 @@ class GridCellModule:
         n_cells: int = 20,
         spacing: float = 0.3,
         orientation: float = 0.0,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ):
         self.n_cells = n_cells
         self.spacing = spacing
@@ -155,16 +153,11 @@ class GridCellModule:
 
         for _ in range(self.n_cells):
             # Random phase offset within one grid period
-            phase = np.array([
-                np.random.uniform(0, self.spacing),
-                np.random.uniform(0, self.spacing)
-            ])
-
-            cell = GridCell(
-                spacing=self.spacing,
-                orientation=self.orientation,
-                phase=phase
+            phase = np.array(
+                [np.random.uniform(0, self.spacing), np.random.uniform(0, self.spacing)]
             )
+
+            cell = GridCell(spacing=self.spacing, orientation=self.orientation, phase=phase)
             self.cells.append(cell)
 
     def get_module_activity(self, position: np.ndarray) -> np.ndarray:
@@ -187,7 +180,7 @@ class GridCellPopulation:
         cells_per_module: int = 20,
         base_spacing: float = 0.2,
         scale_ratio: float = 1.4,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ):
         self.n_modules = n_modules
         self.cells_per_module = cells_per_module
@@ -209,13 +202,11 @@ class GridCellPopulation:
         self.modules = []
 
         for i in range(self.n_modules):
-            spacing = self.base_spacing * (self.scale_ratio ** i)
+            spacing = self.base_spacing * (self.scale_ratio**i)
             orientation = np.random.uniform(0, np.pi / 3)  # Random within 60 deg
 
             module = GridCellModule(
-                n_cells=self.cells_per_module,
-                spacing=spacing,
-                orientation=orientation
+                n_cells=self.cells_per_module, spacing=spacing, orientation=orientation
             )
             self.modules.append(module)
 
@@ -227,9 +218,7 @@ class GridCellPopulation:
         return np.array(activities)
 
     def compute_displacement(
-        self,
-        start_activity: np.ndarray,
-        end_activity: np.ndarray
+        self, start_activity: np.ndarray, end_activity: np.ndarray
     ) -> np.ndarray:
         """
         Estimate displacement vector from change in population activity.
@@ -249,8 +238,8 @@ class GridCellPopulation:
 
         idx = 0
         for module in self.modules:
-            module_start = start_activity[idx:idx + len(module.cells)]
-            module_end = end_activity[idx:idx + len(module.cells)]
+            module_start = start_activity[idx : idx + len(module.cells)]
+            module_end = end_activity[idx : idx + len(module.cells)]
             idx += len(module.cells)
 
             # Weight by spacing (finer scales more precise for small movements)
@@ -290,7 +279,7 @@ class GridCellPopulation:
         self,
         cell_idx: int,
         environment_bounds: Tuple[float, float, float, float] = (0, 1, 0, 1),
-        resolution: int = 100
+        resolution: int = 100,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate 2D firing rate map for a specific cell.

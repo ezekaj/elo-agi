@@ -24,6 +24,7 @@ from .verifier import VerificationResult
 
 class UpdateStatus(Enum):
     """Status of an update."""
+
     PENDING = "pending"
     APPLYING = "applying"
     APPLIED = "applied"
@@ -34,16 +35,18 @@ class UpdateStatus(Enum):
 @dataclass
 class UpdaterParams:
     """Parameters for the updater."""
-    max_concurrent_updates: int = 1     # Max simultaneous updates
-    checkpoint_interval: int = 10       # Create checkpoint every N updates
-    max_rollback_history: int = 100     # Max rollback points to keep
-    gradual_application: bool = True    # Apply changes gradually
-    gradual_steps: int = 5              # Steps for gradual application
+
+    max_concurrent_updates: int = 1  # Max simultaneous updates
+    checkpoint_interval: int = 10  # Create checkpoint every N updates
+    max_rollback_history: int = 100  # Max rollback points to keep
+    gradual_application: bool = True  # Apply changes gradually
+    gradual_steps: int = 5  # Steps for gradual application
 
 
 @dataclass
 class Checkpoint:
     """A system checkpoint for rollback."""
+
     checkpoint_id: str
     timestamp: float
     state_snapshot: Dict[str, Any]
@@ -54,6 +57,7 @@ class Checkpoint:
 @dataclass
 class UpdateResult:
     """Result of an update operation."""
+
     modification: Modification
     status: UpdateStatus
     applied_at: Optional[float]
@@ -175,8 +179,9 @@ class SystemUpdater:
             UpdateResult
         """
         # Check for concurrent update limit
-        active_count = sum(1 for u in self._active_updates.values()
-                          if u.status == UpdateStatus.APPLYING)
+        active_count = sum(
+            1 for u in self._active_updates.values() if u.status == UpdateStatus.APPLYING
+        )
         if active_count >= self.params.max_concurrent_updates:
             return UpdateResult(
                 modification=modification,
@@ -185,7 +190,7 @@ class SystemUpdater:
                 rollback_available=False,
                 checkpoint_id=None,
                 performance_delta=0.0,
-                details={'reason': 'concurrent_limit'},
+                details={"reason": "concurrent_limit"},
             )
 
         # Create checkpoint if interval reached
@@ -228,11 +233,11 @@ class SystemUpdater:
                     result.performance_delta = new_performance - baseline
             else:
                 result.status = UpdateStatus.FAILED
-                result.details['reason'] = 'handler_failed'
+                result.details["reason"] = "handler_failed"
 
         except Exception as e:
             result.status = UpdateStatus.FAILED
-            result.details['error'] = str(e)
+            result.details["error"] = str(e)
 
         # Move to history
         del self._active_updates[modification.mod_id]
@@ -295,11 +300,11 @@ class SystemUpdater:
             return True
 
         state = self._get_state()
-        scale = modification.changes.get('adjustment_scale', 0.1) * blend_factor
+        scale = modification.changes.get("adjustment_scale", 0.1) * blend_factor
 
         # Apply small random adjustment (placeholder)
-        if 'weights' in state:
-            state['weights'] = state['weights'] * (1 + scale * np.random.randn())
+        if "weights" in state:
+            state["weights"] = state["weights"] * (1 + scale * np.random.randn())
 
         self._set_state(state)
         return True
@@ -335,9 +340,9 @@ class SystemUpdater:
 
         state = self._get_state()
 
-        if 'learning_rate' in state:
-            multiplier = modification.changes.get('multiplier', 1.0)
-            state['learning_rate'] *= (1 + (multiplier - 1) * blend_factor)
+        if "learning_rate" in state:
+            multiplier = modification.changes.get("multiplier", 1.0)
+            state["learning_rate"] *= 1 + (multiplier - 1) * blend_factor
 
         self._set_state(state)
         return True
@@ -359,8 +364,7 @@ class SystemUpdater:
             checkpoint = self._checkpoints[-1]
         else:
             checkpoint = next(
-                (c for c in self._checkpoints if c.checkpoint_id == checkpoint_id),
-                None
+                (c for c in self._checkpoints if c.checkpoint_id == checkpoint_id), None
             )
             if checkpoint is None:
                 return False
@@ -377,10 +381,7 @@ class SystemUpdater:
 
     def rollback_modification(self, mod_id: str) -> bool:
         """Rollback a specific modification."""
-        update = next(
-            (u for u in self._update_history if u.modification.mod_id == mod_id),
-            None
-        )
+        update = next((u for u in self._update_history if u.modification.mod_id == mod_id), None)
 
         if update is None or update.checkpoint_id is None:
             return False
@@ -389,10 +390,7 @@ class SystemUpdater:
 
     def get_applied_modifications(self) -> List[Modification]:
         """Get list of currently applied modifications."""
-        return [
-            u.modification for u in self._update_history
-            if u.status == UpdateStatus.APPLIED
-        ]
+        return [u.modification for u in self._update_history if u.status == UpdateStatus.APPLIED]
 
     def get_update_status(self, mod_id: str) -> Optional[UpdateStatus]:
         """Get status of a modification."""
@@ -409,9 +407,9 @@ class SystemUpdater:
         """Get updater statistics."""
         if not self._update_history:
             return {
-                'n_updates': 0,
-                'success_rate': 0.0,
-                'n_checkpoints': len(self._checkpoints),
+                "n_updates": 0,
+                "success_rate": 0.0,
+                "n_checkpoints": len(self._checkpoints),
             }
 
         applied = [u for u in self._update_history if u.status == UpdateStatus.APPLIED]
@@ -419,14 +417,16 @@ class SystemUpdater:
         rolled_back = [u for u in self._update_history if u.status == UpdateStatus.ROLLED_BACK]
 
         return {
-            'n_updates': len(self._update_history),
-            'n_applied': len(applied),
-            'n_failed': len(failed),
-            'n_rolled_back': len(rolled_back),
-            'success_rate': len(applied) / len(self._update_history),
-            'avg_performance_delta': float(np.mean([u.performance_delta for u in applied])) if applied else 0.0,
-            'n_checkpoints': len(self._checkpoints),
-            'n_active': len(self._active_updates),
+            "n_updates": len(self._update_history),
+            "n_applied": len(applied),
+            "n_failed": len(failed),
+            "n_rolled_back": len(rolled_back),
+            "success_rate": len(applied) / len(self._update_history),
+            "avg_performance_delta": float(np.mean([u.performance_delta for u in applied]))
+            if applied
+            else 0.0,
+            "n_checkpoints": len(self._checkpoints),
+            "n_active": len(self._active_updates),
         }
 
     def reset(self) -> None:

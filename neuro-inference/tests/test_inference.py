@@ -7,37 +7,62 @@ import numpy as np
 import os
 
 from neuro.modules.inference.bayesian.networks import (
-    BayesianNetwork, DiscreteNode, ContinuousNode, CPT, NetworkQuery,
+    BayesianNetwork,
+    DiscreteNode,
+    ContinuousNode,
+    CPT,
+    NetworkQuery,
 )
 from neuro.modules.inference.bayesian.belief_prop import (
-    BeliefPropagation, Message, FactorGraph, Factor,
+    BeliefPropagation,
+    Message,
+    FactorGraph,
+    Factor,
 )
 from neuro.modules.inference.bayesian.learning import (
-    StructureLearner, ParameterLearner, BayesianScore,
+    StructureLearner,
+    ParameterLearner,
+    BayesianScore,
 )
 from neuro.modules.inference.causal.scm import (
-    StructuralCausalModel, CausalVariable, StructuralEquation, VariableType,
+    StructuralCausalModel,
+    CausalVariable,
+    StructuralEquation,
+    VariableType,
 )
 from neuro.modules.inference.causal.intervention import (
-    Intervention, InterventionEngine, DoOperator,
+    Intervention,
+    InterventionEngine,
+    DoOperator,
 )
 from neuro.modules.inference.causal.counterfactual import (
-    CounterfactualReasoner, CounterfactualQuery, PotentialOutcome,
+    CounterfactualReasoner,
+    CounterfactualQuery,
+    PotentialOutcome,
 )
 from neuro.modules.inference.analogical.mapping import (
-    StructureMapper, Analogy, StructuralAlignment,
-    RelationalStructure, Predicate, RelationOrder,
+    StructureMapper,
+    Analogy,
+    StructuralAlignment,
+    RelationalStructure,
+    Predicate,
+    RelationOrder,
 )
 from neuro.modules.inference.analogical.retrieval import (
-    AnalogyRetriever, CaseLibrary, Case,
+    AnalogyRetriever,
+    CaseLibrary,
+    Case,
 )
 from neuro.modules.inference.integration import (
-    ProbabilisticReasoner, InferenceResult, ReasoningType,
+    ProbabilisticReasoner,
+    InferenceResult,
+    ReasoningType,
 )
 
 # =============================================================================
 # Bayesian Network Tests
 # =============================================================================
+
 
 class TestCPT:
     """Tests for Conditional Probability Table."""
@@ -66,6 +91,7 @@ class TestCPT:
         assert cpt.get_probability("yes", {"rain": "yes"}) == 0.9
         assert cpt.get_probability("yes", {"rain": "no"}) == 0.1
 
+
 class TestDiscreteNode:
     """Tests for DiscreteNode."""
 
@@ -77,6 +103,7 @@ class TestDiscreteNode:
         )
         assert node.name == "weather"
         assert len(node.values) == 3
+
 
 class TestBayesianNetwork:
     """Tests for BayesianNetwork."""
@@ -158,7 +185,7 @@ class TestBayesianNetwork:
         """Test Markov blanket computation."""
         blanket = simple_bn.get_markov_blanket("sprinkler")
         assert "rain" in blanket  # Parent
-        assert "wet" in blanket   # Child
+        assert "wet" in blanket  # Child
 
     def test_statistics(self, simple_bn):
         """Test network statistics."""
@@ -166,9 +193,11 @@ class TestBayesianNetwork:
         assert stats["n_nodes"] == 3
         assert stats["n_edges"] == 3
 
+
 # =============================================================================
 # Belief Propagation Tests
 # =============================================================================
+
 
 class TestFactor:
     """Tests for Factor class."""
@@ -182,16 +211,21 @@ class TestFactor:
 
     def test_factor_marginalize(self):
         """Test factor marginalization."""
-        f = Factor("f1", ["A", "B"], {
-            (("A", 0), ("B", 0)): 0.2,
-            (("A", 0), ("B", 1)): 0.3,
-            (("A", 1), ("B", 0)): 0.1,
-            (("A", 1), ("B", 1)): 0.4,
-        })
+        f = Factor(
+            "f1",
+            ["A", "B"],
+            {
+                (("A", 0), ("B", 0)): 0.2,
+                (("A", 0), ("B", 1)): 0.3,
+                (("A", 1), ("B", 0)): 0.1,
+                (("A", 1), ("B", 1)): 0.4,
+            },
+        )
         marg = f.marginalize("B", [0, 1])
         # P(A=0) = 0.2 + 0.3 = 0.5
         # P(A=1) = 0.1 + 0.4 = 0.5
         assert "B" not in marg.variables
+
 
 class TestFactorGraph:
     """Tests for FactorGraph."""
@@ -217,6 +251,7 @@ class TestFactorGraph:
         # A--f_AB--B is a tree
         assert fg.is_tree()
 
+
 class TestBeliefPropagation:
     """Tests for BeliefPropagation."""
 
@@ -227,12 +262,16 @@ class TestBeliefPropagation:
         fg.add_variable("A", [0, 1])
         fg.add_variable("B", [0, 1])
 
-        f = Factor("f_AB", ["A", "B"], {
-            (("A", 0), ("B", 0)): 0.9,
-            (("A", 0), ("B", 1)): 0.1,
-            (("A", 1), ("B", 0)): 0.2,
-            (("A", 1), ("B", 1)): 0.8,
-        })
+        f = Factor(
+            "f_AB",
+            ["A", "B"],
+            {
+                (("A", 0), ("B", 0)): 0.9,
+                (("A", 0), ("B", 1)): 0.1,
+                (("A", 1), ("B", 0)): 0.2,
+                (("A", 1), ("B", 1)): 0.8,
+            },
+        )
         fg.add_factor(f)
         return fg
 
@@ -249,9 +288,11 @@ class TestBeliefPropagation:
         belief = bp.get_belief("A")
         assert 0 in belief or 1 in belief
 
+
 # =============================================================================
 # Structure Learning Tests
 # =============================================================================
+
 
 class TestParameterLearner:
     """Tests for ParameterLearner."""
@@ -274,6 +315,7 @@ class TestParameterLearner:
         # P(wet=yes | rain=no) should be low
         assert cpt.get_probability("yes", {"rain": "no"}) < 0.2
 
+
 class TestStructureLearner:
     """Tests for StructureLearner."""
 
@@ -295,9 +337,11 @@ class TestStructureLearner:
         assert structure is not None
         assert "A" in structure
 
+
 # =============================================================================
 # Structural Causal Model Tests
 # =============================================================================
+
 
 class TestStructuralCausalModel:
     """Tests for StructuralCausalModel."""
@@ -336,6 +380,7 @@ class TestStructuralCausalModel:
         assert "X" in simple_scm.get_ancestors("Y")
         assert "Y" in simple_scm.get_descendants("X")
 
+
 class TestIntervention:
     """Tests for Intervention classes."""
 
@@ -350,6 +395,7 @@ class TestIntervention:
         do = DoOperator.multiple({"X": 1, "Z": 2})
         assert "X" in do.variables
         assert "Z" in do.variables
+
 
 class TestInterventionEngine:
     """Tests for InterventionEngine."""
@@ -376,9 +422,11 @@ class TestInterventionEngine:
         # True ATE is 1
         assert 0.5 < ate < 1.5
 
+
 # =============================================================================
 # Counterfactual Tests
 # =============================================================================
+
 
 class TestCounterfactualReasoner:
     """Tests for CounterfactualReasoner."""
@@ -406,6 +454,7 @@ class TestCounterfactualReasoner:
         # Result should exist
         assert "outcomes" in result or "error" in result
 
+
 class TestPotentialOutcome:
     """Tests for PotentialOutcome."""
 
@@ -419,9 +468,11 @@ class TestPotentialOutcome:
         )
         assert "Y(X=1)" in str(po)
 
+
 # =============================================================================
 # Analogical Reasoning Tests
 # =============================================================================
+
 
 class TestRelationalStructure:
     """Tests for RelationalStructure."""
@@ -435,6 +486,7 @@ class TestRelationalStructure:
 
         assert "sun" in structure.objects
         assert len(structure.predicates) == 1
+
 
 class TestStructureMapper:
     """Tests for StructureMapper."""
@@ -468,8 +520,10 @@ class TestStructureMapper:
         alignment = mapper.map(solar_system, atom)
 
         # Should map sun->nucleus, earth->electron
-        assert alignment.object_mappings.get("sun") == "nucleus" or \
-               alignment.object_mappings.get("earth") == "electron"
+        assert (
+            alignment.object_mappings.get("sun") == "nucleus"
+            or alignment.object_mappings.get("earth") == "electron"
+        )
 
     def test_make_analogy(self, solar_system, atom):
         """Test full analogy creation."""
@@ -479,6 +533,7 @@ class TestStructureMapper:
         assert analogy.similarity > 0
         # Should have high systematicity due to causal structure
         assert analogy.systematicity >= 0
+
 
 class TestCaseLibrary:
     """Tests for CaseLibrary."""
@@ -504,6 +559,7 @@ class TestCaseLibrary:
 
         retrieved = library.get_case("test_case")
         assert retrieved.name == "test_case"
+
 
 class TestAnalogyRetriever:
     """Tests for AnalogyRetriever."""
@@ -551,9 +607,11 @@ class TestAnalogyRetriever:
         results = retriever.retrieve(query, top_k=2)
         assert len(results) >= 1
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestProbabilisticReasoner:
     """Tests for ProbabilisticReasoner."""
@@ -613,6 +671,7 @@ class TestProbabilisticReasoner:
         stats = reasoner.statistics()
         assert "has_bayesian_network" in stats
 
+
 class TestInferenceResult:
     """Tests for InferenceResult."""
 
@@ -627,6 +686,7 @@ class TestInferenceResult:
         summary = result.summary()
         assert "P(A)" in summary
         assert "0.9" in summary
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

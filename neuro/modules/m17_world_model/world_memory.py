@@ -20,6 +20,7 @@ import time
 
 class EntityType(Enum):
     """Types of entities in the world model."""
+
     OBJECT = "object"
     AGENT = "agent"
     LOCATION = "location"
@@ -30,22 +31,24 @@ class EntityType(Enum):
 
 class RelationType(Enum):
     """Types of relationships between entities."""
-    SPATIAL = "spatial"       # X is near/far from Y
-    TEMPORAL = "temporal"     # X happened before/after Y
-    CAUSAL = "causal"         # X caused Y
-    PART_OF = "part_of"       # X is part of Y
-    OWNS = "owns"             # X owns Y
-    SIMILAR = "similar"       # X is similar to Y
-    INTERACTS = "interacts"   # X interacts with Y
+
+    SPATIAL = "spatial"  # X is near/far from Y
+    TEMPORAL = "temporal"  # X happened before/after Y
+    CAUSAL = "causal"  # X caused Y
+    PART_OF = "part_of"  # X is part of Y
+    OWNS = "owns"  # X owns Y
+    SIMILAR = "similar"  # X is similar to Y
+    INTERACTS = "interacts"  # X interacts with Y
 
 
 @dataclass
 class MemoryParams:
     """Parameters for world memory."""
-    n_features: int = 128       # Feature dimensionality
-    max_entities: int = 1000    # Maximum tracked entities
+
+    n_features: int = 128  # Feature dimensionality
+    max_entities: int = 1000  # Maximum tracked entities
     max_relations: int = 10000  # Maximum relations
-    decay_rate: float = 0.999   # Activation decay
+    decay_rate: float = 0.999  # Activation decay
     consolidation_threshold: float = 0.3  # Below this, memories fade
     attention_boost: float = 0.2  # Boost from attention
 
@@ -53,6 +56,7 @@ class MemoryParams:
 @dataclass
 class Entity:
     """An entity in the world model."""
+
     entity_id: str
     entity_type: EntityType
     features: np.ndarray
@@ -78,6 +82,7 @@ class Entity:
 @dataclass
 class Relation:
     """A relation between entities."""
+
     source_id: str
     target_id: str
     relation_type: RelationType
@@ -93,6 +98,7 @@ class Relation:
 @dataclass
 class WorldState:
     """Snapshot of the current world state."""
+
     entities: Dict[str, Entity]
     relations: List[Relation]
     self_state: np.ndarray
@@ -200,8 +206,7 @@ class WorldMemory:
 
         # Remove relations involving this entity
         self._relations = [
-            r for r in self._relations
-            if r.source_id != entity_id and r.target_id != entity_id
+            r for r in self._relations if r.source_id != entity_id and r.target_id != entity_id
         ]
 
         # Update relation index
@@ -209,7 +214,8 @@ class WorldMemory:
             del self._relation_index[entity_id]
         for other_id in self._relation_index:
             self._relation_index[other_id] = {
-                i for i, r in enumerate(self._relations)
+                i
+                for i, r in enumerate(self._relations)
                 if r.source_id == other_id or r.target_id == other_id
             }
 
@@ -230,8 +236,11 @@ class WorldMemory:
 
         # Check for existing relation
         for r in self._relations:
-            if (r.source_id == source_id and r.target_id == target_id
-                    and r.relation_type == relation_type):
+            if (
+                r.source_id == source_id
+                and r.target_id == target_id
+                and r.relation_type == relation_type
+            ):
                 # Update existing
                 r.strength = 0.7 * r.strength + 0.3 * strength
                 r.evidence = 0.7 * r.evidence + 0.3 * evidence
@@ -356,8 +365,10 @@ class WorldMemory:
         # Consolidate or evict weak entities
         to_remove = []
         for entity_id, entity in self._entities.items():
-            if (entity.entity_id != "self" and
-                    entity.activation < self.params.consolidation_threshold):
+            if (
+                entity.entity_id != "self"
+                and entity.activation < self.params.consolidation_threshold
+            ):
                 to_remove.append(entity_id)
 
         for entity_id in to_remove[:10]:  # Limit removals per step
@@ -368,7 +379,7 @@ class WorldMemory:
     def _evict_weakest_entity(self) -> None:
         """Evict the entity with lowest activation."""
         weakest_id = None
-        weakest_activation = float('inf')
+        weakest_activation = float("inf")
 
         for entity_id, entity in self._entities.items():
             if entity_id == "self":
@@ -385,8 +396,7 @@ class WorldMemory:
         if not self._relations:
             return
 
-        weakest_idx = min(range(len(self._relations)),
-                          key=lambda i: self._relations[i].strength)
+        weakest_idx = min(range(len(self._relations)), key=lambda i: self._relations[i].strength)
 
         r = self._relations[weakest_idx]
         if r.source_id in self._relation_index:
@@ -433,7 +443,7 @@ class WorldMemory:
         related = self.get_related_entities(entity_id, RelationType.CAUSAL)
 
         # Simple prediction: current state with decay
-        predicted = entity.features * (self.params.decay_rate ** time_delta)
+        predicted = entity.features * (self.params.decay_rate**time_delta)
 
         # Add influence from causal relations
         for related_entity, relation in related:
@@ -445,18 +455,19 @@ class WorldMemory:
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get memory statistics."""
-        active_entities = [e for e in self._entities.values()
-                          if e.activation > self.params.consolidation_threshold]
+        active_entities = [
+            e for e in self._entities.values() if e.activation > self.params.consolidation_threshold
+        ]
 
         return {
-            'n_entities': len(self._entities),
-            'n_active_entities': len(active_entities),
-            'n_relations': len(self._relations),
-            'update_count': self._update_count,
-            'avg_activation': float(np.mean([e.activation for e in self._entities.values()])),
-            'attention_focus': self._attention_focus,
-            'current_location': self._current_location,
-            'entity_types': {
+            "n_entities": len(self._entities),
+            "n_active_entities": len(active_entities),
+            "n_relations": len(self._relations),
+            "update_count": self._update_count,
+            "avg_activation": float(np.mean([e.activation for e in self._entities.values()])),
+            "attention_focus": self._attention_focus,
+            "current_location": self._current_location,
+            "entity_types": {
                 et.value: sum(1 for e in self._entities.values() if e.entity_type == et)
                 for et in EntityType
             },

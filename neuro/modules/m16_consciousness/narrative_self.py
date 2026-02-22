@@ -12,6 +12,7 @@ from typing import Optional, Dict, List
 @dataclass
 class NarrativeParams:
     """Parameters for narrative self"""
+
     n_features: int = 50
     memory_capacity: int = 100
     consolidation_rate: float = 0.1
@@ -36,8 +37,9 @@ class AutobiographicalMemory:
         # Temporal context
         self.current_time = 0
 
-    def encode_episode(self, content: np.ndarray, context: Dict,
-                      emotional_salience: float = 0.5) -> int:
+    def encode_episode(
+        self, content: np.ndarray, context: Dict, emotional_salience: float = 0.5
+    ) -> int:
         """Encode a new autobiographical memory"""
         if len(content) != self.params.n_features:
             content = np.resize(content, self.params.n_features)
@@ -47,15 +49,13 @@ class AutobiographicalMemory:
             "context": context.copy(),
             "time": self.current_time,
             "salience": emotional_salience,
-            "retrieval_count": 0
+            "retrieval_count": 0,
         }
 
         self.episodes.append(episode)
 
         # Hippocampal encoding
-        self.hippocampal_activation = np.tanh(
-            self.hippocampal_activation * 0.3 + content * 0.7
-        )
+        self.hippocampal_activation = np.tanh(self.hippocampal_activation * 0.3 + content * 0.7)
 
         # Manage capacity
         if len(self.episodes) > self.params.memory_capacity:
@@ -80,7 +80,7 @@ class AutobiographicalMemory:
                 np.linalg.norm(cue) * np.linalg.norm(episode["content"]) + 1e-8
             )
             # Salience boosts retrieval
-            sim *= (1 + episode["salience"] * 0.5)
+            sim *= 1 + episode["salience"] * 0.5
             similarities.append((i, sim))
 
         # Sort by similarity
@@ -91,10 +91,7 @@ class AutobiographicalMemory:
         for idx, sim in similarities[:n]:
             if sim > self.params.retrieval_threshold:
                 self.episodes[idx]["retrieval_count"] += 1
-                results.append({
-                    "episode": self.episodes[idx],
-                    "similarity": sim
-                })
+                results.append({"episode": self.episodes[idx], "similarity": sim})
 
         return results
 
@@ -151,9 +148,7 @@ class SelfConcept:
             stimulus = np.resize(stimulus, self.params.n_features)
 
         # mPFC activation for self-reference
-        self.mpfc_activation = np.tanh(
-            self.mpfc_activation * 0.3 + stimulus * 0.7
-        )
+        self.mpfc_activation = np.tanh(self.mpfc_activation * 0.3 + stimulus * 0.7)
 
         # Self-relevance = similarity to self-schema
         relevance = np.dot(stimulus, self.self_schema) / (
@@ -165,10 +160,7 @@ class SelfConcept:
             self.self_schema = 0.9 * self.self_schema + 0.1 * stimulus
             self.self_schema = self.self_schema / (np.linalg.norm(self.self_schema) + 1e-8)
 
-        return {
-            "self_relevance": relevance,
-            "mpfc_activity": np.mean(self.mpfc_activation)
-        }
+        return {"self_relevance": relevance, "mpfc_activity": np.mean(self.mpfc_activation)}
 
     def get_self_description(self) -> Dict:
         """Get description of self-concept"""
@@ -176,7 +168,7 @@ class SelfConcept:
             "traits": self.traits.copy(),
             "roles": self.roles.copy(),
             "values": self.values.copy(),
-            "schema_summary": np.mean(self.self_schema)
+            "schema_summary": np.mean(self.self_schema),
         }
 
 
@@ -198,16 +190,15 @@ class NarrativeSelf:
         # Current life chapter/theme
         self.current_theme = "default"
 
-    def experience_event(self, event: np.ndarray, context: Dict,
-                        emotional_impact: float = 0.5) -> Dict:
+    def experience_event(
+        self, event: np.ndarray, context: Dict, emotional_impact: float = 0.5
+    ) -> Dict:
         """Experience and encode a life event"""
         # Process self-relevance
         relevance = self.self_concept.process_self_relevant(event)
 
         # Encode in autobiographical memory
-        memory_idx = self.memory.encode_episode(
-            event, context, emotional_salience=emotional_impact
-        )
+        memory_idx = self.memory.encode_episode(event, context, emotional_salience=emotional_impact)
 
         # Update narrative coherence
         if relevance["self_relevance"] > 0.5:
@@ -218,7 +209,7 @@ class NarrativeSelf:
         return {
             "memory_encoded": memory_idx,
             "self_relevance": relevance,
-            "narrative_coherence": self.narrative_coherence
+            "narrative_coherence": self.narrative_coherence,
         }
 
     def recall_life_period(self, cue: np.ndarray) -> Dict:
@@ -233,7 +224,7 @@ class NarrativeSelf:
         return {
             "memories": memories,
             "count": len(memories),
-            "narrative_coherence": self.narrative_coherence
+            "narrative_coherence": self.narrative_coherence,
         }
 
     def reflect_on_self(self) -> Dict:
@@ -244,15 +235,13 @@ class NarrativeSelf:
 
         # Update self-concept based on memories
         if relevant_memories:
-            memory_content = np.mean([
-                m["episode"]["content"] for m in relevant_memories
-            ], axis=0)
+            memory_content = np.mean([m["episode"]["content"] for m in relevant_memories], axis=0)
             self.self_concept.process_self_relevant(memory_content)
 
         return {
             "self_concept": self.self_concept.get_self_description(),
             "relevant_memories": len(relevant_memories),
-            "narrative_coherence": self.narrative_coherence
+            "narrative_coherence": self.narrative_coherence,
         }
 
     def get_narrative_self_state(self) -> Dict:
@@ -263,5 +252,5 @@ class NarrativeSelf:
             "narrative_coherence": self.narrative_coherence,
             "current_theme": self.current_theme,
             "mpfc_activity": np.mean(self.self_concept.mpfc_activation),
-            "hippocampal_activity": np.mean(self.memory.hippocampal_activation)
+            "hippocampal_activity": np.mean(self.memory.hippocampal_activation),
         }

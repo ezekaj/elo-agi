@@ -15,6 +15,7 @@ import numpy as np
 @dataclass
 class GAEConfig:
     """Configuration for Generalized Advantage Estimation."""
+
     gamma: float = 0.99
     lambda_param: float = 0.95
     normalize_advantages: bool = True
@@ -25,6 +26,7 @@ class GAEConfig:
 @dataclass
 class Advantage:
     """Computed advantage for a state-action pair."""
+
     state_index: int
     advantage: float
     value_target: float
@@ -35,6 +37,7 @@ class Advantage:
 @dataclass
 class PolicyGradientResult:
     """Result of policy gradient computation."""
+
     policy_loss: float
     value_loss: float
     entropy: float
@@ -168,9 +171,7 @@ class CrossModulePolicyGradient:
             Value loss
         """
         if old_values is not None and clip_range is not None:
-            clipped_values = old_values + np.clip(
-                values - old_values, -clip_range, clip_range
-            )
+            clipped_values = old_values + np.clip(values - old_values, -clip_range, clip_range)
             loss_unclipped = (values - value_targets) ** 2
             loss_clipped = (clipped_values - value_targets) ** 2
             loss = 0.5 * np.mean(np.maximum(loss_unclipped, loss_clipped))
@@ -348,9 +349,11 @@ class CrossModulePolicyGradient:
                 state_index=i,
                 advantage=float(advantages_arr[i]),
                 value_target=float(value_targets[i]),
-                td_error=float(rewards[i] + self.config.gamma * (
-                    values[i + 1] if i + 1 < len(values) else 0
-                ) - values[i]),
+                td_error=float(
+                    rewards[i]
+                    + self.config.gamma * (values[i + 1] if i + 1 < len(values) else 0)
+                    - values[i]
+                ),
                 module_id=module_id,
             )
             for i in range(len(advantages_arr))
@@ -387,7 +390,5 @@ class CrossModulePolicyGradient:
             "total_trajectories": self._total_trajectories,
             "total_gradient_steps": self._total_gradient_steps,
             "modules_with_gradients": len(self._accumulated_gradients),
-            "gradient_counts": {
-                k: len(v) for k, v in self._accumulated_gradients.items()
-            },
+            "gradient_counts": {k: len(v) for k, v in self._accumulated_gradients.items()},
         }

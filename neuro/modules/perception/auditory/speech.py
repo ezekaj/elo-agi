@@ -13,6 +13,7 @@ import numpy as np
 
 class PhonemeCategory(Enum):
     """Categories of phonemes."""
+
     VOWEL = "vowel"
     STOP = "stop"
     FRICATIVE = "fricative"
@@ -25,6 +26,7 @@ class PhonemeCategory(Enum):
 @dataclass
 class PhonemeFeatures:
     """Acoustic features of a phoneme."""
+
     category: PhonemeCategory
     voiced: bool
     formants: List[float]  # F1, F2, F3
@@ -36,6 +38,7 @@ class PhonemeFeatures:
 @dataclass
 class PhonemeDetection:
     """Detected phoneme with timing."""
+
     phoneme: str
     features: PhonemeFeatures
     start_time: float
@@ -46,11 +49,12 @@ class PhonemeDetection:
 @dataclass
 class SpeechOutput:
     """Output from speech processing."""
+
     phonemes: List[PhonemeDetection]
     formant_tracks: np.ndarray  # (3, n_frames) F1, F2, F3
-    voicing: np.ndarray         # (n_frames,) voicing probability
-    energy: np.ndarray          # (n_frames,) energy contour
-    pitch: np.ndarray           # (n_frames,) F0 estimate
+    voicing: np.ndarray  # (n_frames,) voicing probability
+    energy: np.ndarray  # (n_frames,) energy contour
+    pitch: np.ndarray  # (n_frames,) F0 estimate
     n_frames: int
 
 
@@ -69,9 +73,9 @@ class FormantTracker:
 
         # Expected formant ranges (Hz)
         self.formant_ranges = [
-            (200, 1000),    # F1
-            (800, 2500),    # F2
-            (1500, 3500),   # F3
+            (200, 1000),  # F1
+            (800, 2500),  # F2
+            (1500, 3500),  # F3
         ]
 
     def track(self, spectrum: np.ndarray, frequencies: np.ndarray) -> np.ndarray:
@@ -172,8 +176,8 @@ class VoicingDetector:
             if len(frame) < max_lag:
                 continue
 
-            autocorr = np.correlate(frame, frame, mode='full')
-            autocorr = autocorr[len(autocorr)//2:]
+            autocorr = np.correlate(frame, frame, mode="full")
+            autocorr = autocorr[len(autocorr) // 2 :]
 
             # Find peak in pitch range
             search_region = autocorr[min_lag:max_lag]
@@ -208,15 +212,15 @@ class PhonemeRecognizer:
 
         # Vowels (voiced, distinct formants)
         vowels = {
-            "AA": ([700, 1100, 2500], True),   # "father"
-            "AE": ([700, 1800, 2500], True),   # "cat"
-            "AH": ([600, 1200, 2500], True),   # "but"
-            "EH": ([500, 1800, 2500], True),   # "bed"
-            "IY": ([300, 2300, 3000], True),   # "beet"
-            "IH": ([400, 1900, 2500], True),   # "bit"
-            "UW": ([300, 800, 2300], True),    # "boot"
-            "UH": ([400, 1100, 2300], True),   # "book"
-            "OW": ([500, 800, 2500], True),    # "boat"
+            "AA": ([700, 1100, 2500], True),  # "father"
+            "AE": ([700, 1800, 2500], True),  # "cat"
+            "AH": ([600, 1200, 2500], True),  # "but"
+            "EH": ([500, 1800, 2500], True),  # "bed"
+            "IY": ([300, 2300, 3000], True),  # "beet"
+            "IH": ([400, 1900, 2500], True),  # "bit"
+            "UW": ([300, 800, 2300], True),  # "boot"
+            "UH": ([400, 1100, 2300], True),  # "book"
+            "OW": ([500, 800, 2500], True),  # "boat"
         }
 
         for phone, (formants, voiced) in vowels.items():
@@ -246,7 +250,7 @@ class PhonemeRecognizer:
                 formants=[0, 0, 0],
                 duration=dur,
                 energy=0.3 if not voiced else 0.5,
-                spectral_centroid=2000 if phone in ['T', 'D'] else 1500,
+                spectral_centroid=2000 if phone in ["T", "D"] else 1500,
             )
 
         # Fricatives
@@ -328,24 +332,24 @@ class PhonemeRecognizer:
 
             # Find best matching phoneme
             best_phone = None
-            best_score = float('inf')
+            best_score = float("inf")
 
             for phone, template in self._phoneme_templates.items():
-                score = self._match_score(
-                    seg_formants, seg_voicing, seg_energy, template
-                )
+                score = self._match_score(seg_formants, seg_voicing, seg_energy, template)
                 if score < best_score:
                     best_score = score
                     best_phone = phone
 
             if best_phone and best_score < 1000:
-                detections.append(PhonemeDetection(
-                    phoneme=best_phone,
-                    features=self._phoneme_templates[best_phone],
-                    start_time=start / frame_rate,
-                    end_time=end / frame_rate,
-                    confidence=1.0 / (1.0 + best_score),
-                ))
+                detections.append(
+                    PhonemeDetection(
+                        phoneme=best_phone,
+                        features=self._phoneme_templates[best_phone],
+                        start_time=start / frame_rate,
+                        end_time=end / frame_rate,
+                        confidence=1.0 / (1.0 + best_score),
+                    )
+                )
 
         # Merge consecutive identical phonemes
         detections = self._merge_detections(detections)
@@ -452,8 +456,7 @@ class SpeechProcessor:
         energy = energy / (energy.max() + 1e-8)
 
         # Voicing detection (from onset map as proxy)
-        voicing = 1.0 - (a1_output.onset_map.mean(axis=0) /
-                        (a1_output.onset_map.max() + 1e-8))
+        voicing = 1.0 - (a1_output.onset_map.mean(axis=0) / (a1_output.onset_map.max() + 1e-8))
 
         # Pitch (from rate responses - lower rates correlate with pitch)
         pitch = a1_output.rate_map.mean(axis=0) * 200  # Scale to Hz
@@ -462,9 +465,7 @@ class SpeechProcessor:
         frame_rate = n_time  # Approximate
 
         # Recognize phonemes
-        phonemes = self.phoneme_recognizer.recognize(
-            formant_tracks, voicing, energy, frame_rate
-        )
+        phonemes = self.phoneme_recognizer.recognize(formant_tracks, voicing, energy, frame_rate)
 
         return SpeechOutput(
             phonemes=phonemes,

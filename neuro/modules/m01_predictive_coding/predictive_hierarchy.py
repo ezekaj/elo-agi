@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 @dataclass
 class LayerState:
     """Container for layer state information"""
+
     hidden: np.ndarray
     prediction: Optional[np.ndarray] = None
     error: Optional[np.ndarray] = None
@@ -36,7 +37,7 @@ class PredictiveLayer:
         output_dim: int,
         learning_rate: float = 0.1,
         timescale: float = 1.0,
-        nonlinearity: Callable = np.tanh
+        nonlinearity: Callable = np.tanh,
     ):
         self.state_dim = state_dim
         self.output_dim = output_dim
@@ -100,7 +101,7 @@ class PredictiveLayer:
         # Jacobian of nonlinearity
         activated = self.nonlinearity(self.hidden_state)
         if self.nonlinearity == np.tanh:
-            d_nonlin = 1 - activated ** 2
+            d_nonlin = 1 - activated**2
         else:
             d_nonlin = np.ones_like(self.hidden_state)
 
@@ -200,10 +201,7 @@ class PredictiveHierarchy:
     """
 
     def __init__(
-        self,
-        layer_dims: List[int],
-        learning_rate: float = 0.1,
-        timescale_factor: float = 2.0
+        self, layer_dims: List[int], learning_rate: float = 0.1, timescale_factor: float = 2.0
     ):
         """Initialize the hierarchy.
 
@@ -218,12 +216,12 @@ class PredictiveHierarchy:
         # Create layers with increasing timescales
         self.layers: List[PredictiveLayer] = []
         for i in range(self.n_layers):
-            timescale = timescale_factor ** i
+            timescale = timescale_factor**i
             layer = PredictiveLayer(
                 state_dim=layer_dims[i + 1],
                 output_dim=layer_dims[i],
                 learning_rate=learning_rate,
-                timescale=timescale
+                timescale=timescale,
             )
             self.layers.append(layer)
 
@@ -278,12 +276,7 @@ class PredictiveHierarchy:
 
         return predictions
 
-    def step(
-        self,
-        observation: np.ndarray,
-        dt: float = 0.1,
-        update_weights: bool = True
-    ) -> dict:
+    def step(self, observation: np.ndarray, dt: float = 0.1, update_weights: bool = True) -> dict:
         """One complete cycle of prediction-error-update.
 
         Args:
@@ -316,7 +309,7 @@ class PredictiveHierarchy:
             "errors": errors,
             "predictions": predictions,
             "states": states,
-            "total_error": sum(np.sum(e ** 2) for e in errors)
+            "total_error": sum(np.sum(e**2) for e in errors),
         }
 
     def predict_next(self) -> np.ndarray:

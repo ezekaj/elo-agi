@@ -2,7 +2,11 @@
 
 import numpy as np
 import pytest
-from neuro.modules.m16_consciousness.consciousness_network import GlobalWorkspace, ConsciousnessNetwork
+from neuro.modules.m16_consciousness.consciousness_network import (
+    GlobalWorkspace,
+    ConsciousnessNetwork,
+)
+
 
 class TestGlobalWorkspace:
     """Tests for global workspace"""
@@ -61,6 +65,7 @@ class TestGlobalWorkspace:
         workspace.decay(rate=0.5)
 
         assert workspace.activations.get("content", 0) < initial
+
 
 class TestConsciousnessNetwork:
     """Tests for full consciousness network"""
@@ -158,5 +163,6 @@ class TestConsciousnessNetwork:
         assert "introspection" in state
         assert "workspace_contents" in state
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

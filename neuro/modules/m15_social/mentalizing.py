@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class MentalizingParams:
     """Parameters for mentalizing"""
+
     n_features: int = 50
     inference_strength: float = 0.7
     learning_rate: float = 0.1
@@ -47,12 +48,16 @@ class IntentionInference:
         # Check for known action type
         if action_type in self.action_intention_map:
             learned_intention = self.action_intention_map[action_type]
-            inferred = learned_intention * self.params.inference_strength + \
-                      self.intention_priors * self.params.prior_strength
+            inferred = (
+                learned_intention * self.params.inference_strength
+                + self.intention_priors * self.params.prior_strength
+            )
         else:
             # Infer from action pattern
-            inferred = action * self.params.inference_strength + \
-                      self.intention_priors * self.params.prior_strength
+            inferred = (
+                action * self.params.inference_strength
+                + self.intention_priors * self.params.prior_strength
+            )
 
         inferred = np.tanh(inferred)
 
@@ -60,7 +65,7 @@ class IntentionInference:
             "action_type": action_type,
             "inferred_intention": inferred,
             "psts_activity": np.mean(self.psts_activation),
-            "confidence": self.params.inference_strength
+            "confidence": self.params.inference_strength,
         }
 
     def learn_action_intention(self, action_type: str, intention: np.ndarray):
@@ -77,9 +82,8 @@ class IntentionInference:
 
         mean_intention = np.mean(observed_intentions, axis=0)
         self.intention_priors = (
-            (1 - self.params.learning_rate) * self.intention_priors +
-            self.params.learning_rate * mean_intention
-        )
+            1 - self.params.learning_rate
+        ) * self.intention_priors + self.params.learning_rate * mean_intention
 
 
 class DesireModeling:
@@ -94,8 +98,9 @@ class DesireModeling:
         # Goal states inferred for agents
         self.agent_goals: Dict[str, List[np.ndarray]] = {}
 
-    def infer_desire(self, agent: str, behavior: np.ndarray,
-                    outcome: Optional[np.ndarray] = None) -> Dict:
+    def infer_desire(
+        self, agent: str, behavior: np.ndarray, outcome: Optional[np.ndarray] = None
+    ) -> Dict:
         """Infer desire from behavior and outcome"""
         if len(behavior) != self.params.n_features:
             behavior = np.resize(behavior, self.params.n_features)
@@ -112,16 +117,14 @@ class DesireModeling:
 
         # Update agent's modeled desires
         if agent in self.agent_desires:
-            self.agent_desires[agent] = (
-                0.7 * self.agent_desires[agent] + 0.3 * inferred_desire
-            )
+            self.agent_desires[agent] = 0.7 * self.agent_desires[agent] + 0.3 * inferred_desire
         else:
             self.agent_desires[agent] = inferred_desire
 
         return {
             "agent": agent,
             "inferred_desire": inferred_desire,
-            "desire_strength": np.mean(np.abs(inferred_desire))
+            "desire_strength": np.mean(np.abs(inferred_desire)),
         }
 
     def add_goal(self, agent: str, goal: np.ndarray):
@@ -168,8 +171,9 @@ class MentalizingNetwork:
         # mPFC activation for mentalizing
         self.mpfc_activation = np.zeros(self.params.n_features)
 
-    def mentalize(self, agent: str, behavior: np.ndarray,
-                 context: Optional[np.ndarray] = None) -> Dict:
+    def mentalize(
+        self, agent: str, behavior: np.ndarray, context: Optional[np.ndarray] = None
+    ) -> Dict:
         """Full mentalizing: infer beliefs, desires, intentions"""
         if len(behavior) != self.params.n_features:
             behavior = np.resize(behavior, self.params.n_features)
@@ -201,7 +205,7 @@ class MentalizingNetwork:
             "desire": desire_result["inferred_desire"],
             "belief": inferred_belief,
             "mpfc_activity": np.mean(self.mpfc_activation),
-            "psts_activity": intention_result["psts_activity"]
+            "psts_activity": intention_result["psts_activity"],
         }
 
     def predict_behavior(self, agent: str) -> Dict:
@@ -226,13 +230,13 @@ class MentalizingNetwork:
             "predicted_behavior": predicted,
             "based_on_intention": intention,
             "based_on_desire": desire,
-            "based_on_belief": belief
+            "based_on_belief": belief,
         }
 
     def update(self, dt: float = 1.0):
         """Update mentalizing network"""
-        self.mpfc_activation *= (1 - 0.1 * dt)
-        self.intention_inference.psts_activation *= (1 - 0.1 * dt)
+        self.mpfc_activation *= 1 - 0.1 * dt
+        self.intention_inference.psts_activation *= 1 - 0.1 * dt
 
     def get_state(self) -> Dict:
         """Get network state"""
@@ -240,5 +244,5 @@ class MentalizingNetwork:
             "mpfc_activity": np.mean(self.mpfc_activation),
             "psts_activity": np.mean(self.intention_inference.psts_activation),
             "tracked_agents": list(self.agent_beliefs.keys()),
-            "known_action_types": list(self.intention_inference.action_intention_map.keys())
+            "known_action_types": list(self.intention_inference.action_intention_map.keys()),
         }

@@ -22,6 +22,7 @@ class FeatureType(Enum):
 @dataclass
 class Feature:
     """A detected visual feature"""
+
     feature_type: FeatureType
     location: Tuple[int, int]
     orientation: float = 0.0
@@ -29,17 +30,18 @@ class Feature:
     scale: float = 1.0
     properties: Dict = field(default_factory=dict)
 
-    def distance_to(self, other: 'Feature') -> float:
+    def distance_to(self, other: "Feature") -> float:
         """Euclidean distance to another feature"""
         return np.sqrt(
-            (self.location[0] - other.location[0])**2 +
-            (self.location[1] - other.location[1])**2
+            (self.location[0] - other.location[0]) ** 2
+            + (self.location[1] - other.location[1]) ** 2
         )
 
 
 @dataclass
 class FeatureMap:
     """Spatial arrangement of detected features"""
+
     width: int
     height: int
     features: Dict[Tuple[int, int], List[Feature]] = field(default_factory=dict)
@@ -68,7 +70,9 @@ class FeatureMap:
                     result.append(f)
         return result
 
-    def find_pattern(self, template: List[Feature], tolerance: float = 0.1) -> List[Tuple[int, int]]:
+    def find_pattern(
+        self, template: List[Feature], tolerance: float = 0.1
+    ) -> List[Tuple[int, int]]:
         """Find locations where a pattern of features matches"""
         if not template:
             return []
@@ -82,21 +86,23 @@ class FeatureMap:
 
             offset = (
                 anchor.location[0] - template[0].location[0],
-                anchor.location[1] - template[0].location[1]
+                anchor.location[1] - template[0].location[1],
             )
 
             matched = True
             for t_feature in template[1:]:
                 expected_loc = (
                     t_feature.location[0] + offset[0],
-                    t_feature.location[1] + offset[1]
+                    t_feature.location[1] + offset[1],
                 )
 
                 found = False
                 for f in all_features:
-                    if (f.feature_type == t_feature.feature_type and
-                        abs(f.location[0] - expected_loc[0]) <= tolerance * self.width and
-                        abs(f.location[1] - expected_loc[1]) <= tolerance * self.height):
+                    if (
+                        f.feature_type == t_feature.feature_type
+                        and abs(f.location[0] - expected_loc[0]) <= tolerance * self.width
+                        and abs(f.location[1] - expected_loc[1]) <= tolerance * self.height
+                    ):
                         found = True
                         break
 
@@ -121,10 +127,9 @@ class VisualFeatureExtractor:
     4. Motion detection (MT/V5)
     """
 
-    def __init__(self,
-                 edge_threshold: float = 0.1,
-                 texture_window: int = 5,
-                 shape_min_edges: int = 3):
+    def __init__(
+        self, edge_threshold: float = 0.1, texture_window: int = 5, shape_min_edges: int = 3
+    ):
         self.edge_threshold = edge_threshold
         self.texture_window = texture_window
         self.shape_min_edges = shape_min_edges
@@ -163,14 +168,14 @@ class VisualFeatureExtractor:
         edges = []
         h, w = image.shape
 
-        padded = np.pad(image, 1, mode='edge')
+        padded = np.pad(image, 1, mode="edge")
 
         gx = np.zeros_like(image)
         gy = np.zeros_like(image)
 
         for i in range(h):
             for j in range(w):
-                region = padded[i:i+3, j:j+3]
+                region = padded[i : i + 3, j : j + 3]
                 gx[i, j] = np.sum(region * self.sobel_x)
                 gy[i, j] = np.sum(region * self.sobel_y)
 
@@ -183,12 +188,14 @@ class VisualFeatureExtractor:
         for i in range(h):
             for j in range(w):
                 if magnitude[i, j] > self.edge_threshold:
-                    edges.append(Feature(
-                        feature_type=FeatureType.EDGE,
-                        location=(j, i),
-                        orientation=orientation[i, j],
-                        magnitude=magnitude[i, j]
-                    ))
+                    edges.append(
+                        Feature(
+                            feature_type=FeatureType.EDGE,
+                            location=(j, i),
+                            orientation=orientation[i, j],
+                            magnitude=magnitude[i, j],
+                        )
+                    )
 
         return edges
 
@@ -203,7 +210,7 @@ class VisualFeatureExtractor:
 
         for i in range(0, h - win, win):
             for j in range(0, w - win, win):
-                region = image[i:i+win, j:j+win]
+                region = image[i : i + win, j : j + win]
 
                 variance = np.var(region)
                 mean_val = np.mean(region)
@@ -212,18 +219,20 @@ class VisualFeatureExtractor:
                 dy = np.diff(region, axis=0)
                 gradient_energy = np.mean(dx**2) + np.mean(dy**2)
 
-                textures.append(Feature(
-                    feature_type=FeatureType.TEXTURE,
-                    location=(j + win//2, i + win//2),
-                    magnitude=variance,
-                    scale=float(win),
-                    properties={
-                        'variance': float(variance),
-                        'mean': float(mean_val),
-                        'gradient_energy': float(gradient_energy),
-                        'smoothness': 1.0 / (1.0 + variance)
-                    }
-                ))
+                textures.append(
+                    Feature(
+                        feature_type=FeatureType.TEXTURE,
+                        location=(j + win // 2, i + win // 2),
+                        magnitude=variance,
+                        scale=float(win),
+                        properties={
+                            "variance": float(variance),
+                            "mean": float(mean_val),
+                            "gradient_energy": float(gradient_energy),
+                            "smoothness": 1.0 / (1.0 + variance),
+                        },
+                    )
+                )
 
         return textures
 
@@ -270,22 +279,24 @@ class VisualFeatureExtractor:
                 ori_variance = np.var(orientations)
 
                 if ori_variance < 0.1:
-                    shape_type = 'line'
+                    shape_type = "line"
                 elif ori_variance < 0.5:
-                    shape_type = 'curve'
+                    shape_type = "curve"
                 else:
-                    shape_type = 'corner'
+                    shape_type = "corner"
 
-                shapes.append(Feature(
-                    feature_type=FeatureType.SHAPE,
-                    location=(int(center_x), int(center_y)),
-                    magnitude=len(cluster_edges),
-                    properties={
-                        'shape_type': shape_type,
-                        'n_edges': len(cluster_edges),
-                        'orientation_variance': float(ori_variance)
-                    }
-                ))
+                shapes.append(
+                    Feature(
+                        feature_type=FeatureType.SHAPE,
+                        location=(int(center_x), int(center_y)),
+                        magnitude=len(cluster_edges),
+                        properties={
+                            "shape_type": shape_type,
+                            "n_edges": len(cluster_edges),
+                            "orientation_variance": float(ori_variance),
+                        },
+                    )
+                )
 
         return shapes
 
@@ -300,7 +311,7 @@ class VisualFeatureExtractor:
         motion_features = []
 
         for t in range(1, len(image_sequence)):
-            prev = image_sequence[t-1].astype(float)
+            prev = image_sequence[t - 1].astype(float)
             curr = image_sequence[t].astype(float)
 
             if len(prev.shape) == 3:
@@ -314,22 +325,21 @@ class VisualFeatureExtractor:
 
             for i in range(0, h - block_size, block_size):
                 for j in range(0, w - block_size, block_size):
-                    block = diff[i:i+block_size, j:j+block_size]
+                    block = diff[i : i + block_size, j : j + block_size]
                     motion_mag = np.sqrt(np.mean(block**2))
 
                     if motion_mag > 0.05:
                         gy, gx = np.gradient(block)
                         motion_dir = np.arctan2(np.mean(gy), np.mean(gx))
 
-                        motion_features.append(Feature(
-                            feature_type=FeatureType.MOTION,
-                            location=(j + block_size//2, i + block_size//2),
-                            orientation=motion_dir,
-                            magnitude=motion_mag,
-                            properties={
-                                'frame': t,
-                                'velocity': float(motion_mag)
-                            }
-                        ))
+                        motion_features.append(
+                            Feature(
+                                feature_type=FeatureType.MOTION,
+                                location=(j + block_size // 2, i + block_size // 2),
+                                orientation=motion_dir,
+                                magnitude=motion_mag,
+                                properties={"frame": t, "velocity": float(motion_mag)},
+                            )
+                        )
 
         return motion_features

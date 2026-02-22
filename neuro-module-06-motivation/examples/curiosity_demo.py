@@ -10,11 +10,15 @@ Demonstrates key findings from https://www.sciencedirect.com/science/article/pii
 
 import numpy as np
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.curiosity_drive import (
-    CuriosityModule, NoveltyDetector, InformationValue,
-    ExplorationController, InformationPacket
+    CuriosityModule,
+    NoveltyDetector,
+    InformationValue,
+    ExplorationController,
+    InformationPacket,
 )
 
 
@@ -61,8 +65,8 @@ def demo_information_value():
     info_value = InformationValue()
 
     # Set up knowledge gaps
-    info_value.set_uncertainty('quantum_physics', 0.9)  # High uncertainty
-    info_value.set_uncertainty('cooking', 0.2)          # Low uncertainty
+    info_value.set_uncertainty("quantum_physics", 0.9)  # High uncertainty
+    info_value.set_uncertainty("cooking", 0.2)  # Low uncertainty
 
     print("\n1. Value of information depends on knowledge gaps:")
 
@@ -72,24 +76,16 @@ def demo_information_value():
         novelty=0.6,
         relevance=0.7,
         uncertainty_reduction=0.3,
-        source='quantum_physics'
+        source="quantum_physics",
     )
 
     # Information about low-uncertainty topic
     cooking_info = InformationPacket(
-        content=np.zeros(3),
-        novelty=0.6,
-        relevance=0.7,
-        uncertainty_reduction=0.3,
-        source='cooking'
+        content=np.zeros(3), novelty=0.6, relevance=0.7, uncertainty_reduction=0.3, source="cooking"
     )
 
-    quantum_value = info_value.compute_information_value(
-        quantum_info, topics=['quantum_physics']
-    )
-    cooking_value = info_value.compute_information_value(
-        cooking_info, topics=['cooking']
-    )
+    quantum_value = info_value.compute_information_value(quantum_info, topics=["quantum_physics"])
+    cooking_value = info_value.compute_information_value(cooking_info, topics=["cooking"])
 
     print(f"   Quantum physics info value: {quantum_value:.3f}")
     print(f"   Cooking info value: {cooking_value:.3f}")
@@ -141,9 +137,7 @@ def demo_exploration_vs_exploitation():
     print("\n1. Exploration rate varies with curiosity:")
     for curiosity in [0.1, 0.3, 0.5, 0.7, 0.9]:
         rate = controller.compute_exploration_rate(
-            curiosity_level=curiosity,
-            dopamine_level=0.5,
-            uncertainty=0.5
+            curiosity_level=curiosity, dopamine_level=0.5, uncertainty=0.5
         )
         bar = "#" * int(rate * 20)
         print(f"   Curiosity={curiosity}: rate={rate:.3f} {bar}")
@@ -157,9 +151,7 @@ def demo_exploration_vs_exploitation():
         controller2.update_boredom(same_action)
 
     rate_bored = controller2.compute_exploration_rate(
-        curiosity_level=0.3,
-        dopamine_level=0.5,
-        uncertainty=0.5
+        curiosity_level=0.3, dopamine_level=0.5, uncertainty=0.5
     )
 
     print(f"   Boredom level: {controller2.boredom_level:.3f}")
@@ -178,8 +170,8 @@ def demo_full_curiosity_system():
     module = CuriosityModule(state_dim=3)
 
     print("\n1. Registering curiosity targets (knowledge gaps):")
-    module.register_curiosity_target('machine_learning', intensity=0.9)
-    module.register_curiosity_target('history', intensity=0.4)
+    module.register_curiosity_target("machine_learning", intensity=0.9)
+    module.register_curiosity_target("history", intensity=0.4)
 
     gaps = module.get_knowledge_gaps()
     print(f"   Knowledge gaps: {gaps}")
@@ -244,7 +236,7 @@ def demo_dopamine_novelty_connection():
     print("   even without explicit rewards - information IS the reward!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_novelty_detection()
     demo_information_value()
     demo_curiosity_memory_enhancement()

@@ -21,6 +21,7 @@ from .planning_search import HierarchicalMCTS, MCTSConfig, PlanResult, WorldMode
 @dataclass
 class PlanningConfig:
     """Configuration for the integrated planning system."""
+
     state_dim: int = 64
     action_dim: int = 4
     mcts_simulations: int = 100
@@ -288,6 +289,7 @@ class PlanningIntegration:
         )
 
         from .planning_search import WorldModelAdapter as MCTSWorldModel
+
         mcts_world_model = MCTSWorldModel(
             transition_fn=self._world_model.predict_transition,
             reward_fn=self._world_model.predict_reward,
@@ -388,9 +390,7 @@ class PlanningIntegration:
         methods: Optional[List[str]] = None,
     ) -> List[Subgoal]:
         """Discover subgoals from experience."""
-        return self._subgoal_discovery.discover_subgoals(
-            trajectories, methods=methods
-        )
+        return self._subgoal_discovery.discover_subgoals(trajectories, methods=methods)
 
     def learn_from_trajectory(
         self,
@@ -420,8 +420,7 @@ class PlanningIntegration:
                 next_state = trajectory.states[i + 1]
 
                 self._options.update_from_transition(
-                    state, action, reward, next_state,
-                    terminated=(i == len(trajectory.states) - 2)
+                    state, action, reward, next_state, terminated=(i == len(trajectory.states) - 2)
                 )
 
             results["option_updates"] = trajectory.length - 1
@@ -441,10 +440,7 @@ class PlanningIntegration:
 
     def statistics(self) -> Dict[str, Any]:
         """Get integration statistics."""
-        success_rate = (
-            self._successful_plans / self._total_plans
-            if self._total_plans > 0 else 0.0
-        )
+        success_rate = self._successful_plans / self._total_plans if self._total_plans > 0 else 0.0
 
         return {
             "total_plans": self._total_plans,

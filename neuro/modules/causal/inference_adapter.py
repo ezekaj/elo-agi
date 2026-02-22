@@ -17,6 +17,7 @@ from .causal_discovery import CausalDiscovery
 @dataclass
 class AdapterConfig:
     """Configuration for the inference adapter."""
+
     learning_rate: float = 0.01
     abduction_iterations: int = 100
     n_effect_samples: int = 100
@@ -91,16 +92,16 @@ class InferenceSCMAdapter:
         }
 
         # Create corresponding mechanism in DifferentiableSCM
-        if hasattr(equation, 'coefficients') and equation.coefficients:
+        if hasattr(equation, "coefficients") and equation.coefficients:
             # Linear equation
             self._dscm.add_linear_mechanism(
                 name=variable,
                 parents=parents,
                 coefficients=equation.coefficients,
-                intercept=getattr(equation, 'intercept', 0.0),
+                intercept=getattr(equation, "intercept", 0.0),
                 noise_std=1.0,
             )
-        elif hasattr(equation, 'function') and equation.function:
+        elif hasattr(equation, "function") and equation.function:
             # Custom function
             mechanism = CausalMechanism(
                 variable=variable,
@@ -214,10 +215,7 @@ class InferenceSCMAdapter:
 
     def get_causal_graph(self) -> Dict[str, List[str]]:
         """Get the causal graph as adjacency list."""
-        return {
-            v: self._dscm.get_children(v)
-            for v in self._dscm._variables
-        }
+        return {v: self._dscm.get_children(v) for v in self._dscm._variables}
 
     # ========== Enhanced capabilities from neuro-causal ==========
 
@@ -274,7 +272,7 @@ class InferenceSCMAdapter:
     def intervene_model(
         self,
         interventions: Dict[str, float],
-    ) -> 'InferenceSCMAdapter':
+    ) -> "InferenceSCMAdapter":
         """
         Create an intervened model do(X=x).
 
@@ -407,7 +405,8 @@ class CausalInferenceEnhanced:
             self._counterfactual_engine = NestedCounterfactual(self.scm._dscm)
 
         return self._counterfactual_engine.probability_of_necessity(
-            cause, effect,
+            cause,
+            effect,
             cause_value=evidence.get(cause, 1.0),
             effect_value=evidence.get(effect, 1.0),
             n_samples=n_samples,
@@ -432,7 +431,8 @@ class CausalInferenceEnhanced:
             self._counterfactual_engine = NestedCounterfactual(self.scm._dscm)
 
         return self._counterfactual_engine.probability_of_sufficiency(
-            cause, effect,
+            cause,
+            effect,
             cause_value=evidence.get(cause, 1.0),
             effect_value=evidence.get(effect, 0.0),
             n_samples=n_samples,
@@ -493,7 +493,7 @@ class CausalInferenceEnhanced:
 
 
 __all__ = [
-    'AdapterConfig',
-    'InferenceSCMAdapter',
-    'CausalInferenceEnhanced',
+    "AdapterConfig",
+    "InferenceSCMAdapter",
+    "CausalInferenceEnhanced",
 ]

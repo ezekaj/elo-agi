@@ -13,6 +13,7 @@ from rich.console import Console
 @dataclass
 class StatusBarState:
     """Status bar state."""
+
     mode: str = "default"
     model: str = ""
     tokens: int = 0

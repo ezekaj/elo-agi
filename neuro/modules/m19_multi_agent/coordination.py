@@ -23,15 +23,17 @@ from .agent import CognitiveAgent, AgentRole, ModuleProposal, ContentType
 
 class CoordinationMechanism(Enum):
     """Types of coordination mechanisms."""
-    STIGMERGY = "stigmergy"      # Indirect via environment
-    DIRECT = "direct"            # Explicit messages
-    BROADCAST = "broadcast"      # One-to-all
-    CONSENSUS = "consensus"      # Voting/agreement
+
+    STIGMERGY = "stigmergy"  # Indirect via environment
+    DIRECT = "direct"  # Explicit messages
+    BROADCAST = "broadcast"  # One-to-all
+    CONSENSUS = "consensus"  # Voting/agreement
 
 
 @dataclass
 class Action:
     """An action to be taken by an agent."""
+
     agent_id: str
     action_type: str
     parameters: Dict[str, Any]
@@ -42,6 +44,7 @@ class Action:
 @dataclass
 class Task:
     """A task to be solved collectively."""
+
     task_id: str
     description: str
     requirements: np.ndarray  # Required capabilities
@@ -52,6 +55,7 @@ class Task:
 @dataclass
 class EmergentPattern:
     """A detected emergent coordination pattern."""
+
     pattern_type: str
     agents_involved: List[str]
     strength: float
@@ -63,6 +67,7 @@ class EmergentPattern:
 @dataclass
 class CoordinationParams:
     """Parameters for coordination."""
+
     mechanism: CoordinationMechanism = CoordinationMechanism.BROADCAST
     consensus_threshold: float = 0.6  # Required agreement level
     voting_rounds: int = 3
@@ -168,11 +173,7 @@ class EmergentCoordination:
                 intention = self._compute_intention(agent, goal)
                 for other in agents:
                     if other.agent_id != agent.agent_id:
-                        agent.send_message(
-                            other.agent_id,
-                            intention,
-                            ContentType.OBSERVATION
-                        )
+                        agent.send_message(other.agent_id, intention, ContentType.OBSERVATION)
 
         # Compute final actions based on negotiation
         for agent in agents:
@@ -271,25 +272,24 @@ class EmergentCoordination:
 
     def _read_environment(self, agent_id: str) -> Dict[str, Any]:
         """Read relevant environment state for an agent."""
-        return {k: v for k, v in self._environment.items()
-                if not k.startswith(agent_id)}
+        return {k: v for k, v in self._environment.items() if not k.startswith(agent_id)}
 
     def _leave_trace(self, agent_id: str, action: Action) -> None:
         """Leave a trace in the environment."""
         key = f"{agent_id}_trace_{time.time()}"
         self._environment[key] = {
-            'action': action.action_type,
-            'params': action.parameters,
-            'strength': 1.0,
+            "action": action.action_type,
+            "params": action.parameters,
+            "strength": 1.0,
         }
 
     def _decay_environment(self) -> None:
         """Decay environmental traces."""
         keys_to_remove = []
         for key, value in self._environment.items():
-            if isinstance(value, dict) and 'strength' in value:
-                value['strength'] *= (1 - self.params.stigmergy_decay)
-                if value['strength'] < 0.01:
+            if isinstance(value, dict) and "strength" in value:
+                value["strength"] *= 1 - self.params.stigmergy_decay
+                if value["strength"] < 0.01:
                     keys_to_remove.append(key)
 
         for key in keys_to_remove:
@@ -311,7 +311,7 @@ class EmergentCoordination:
         return Action(
             agent_id=agent.agent_id,
             action_type="explore",
-            parameters={'direction': direction.tolist()},
+            parameters={"direction": direction.tolist()},
             priority=agent.params.curiosity,
         )
 
@@ -327,14 +327,14 @@ class EmergentCoordination:
         max_strength = 0
 
         for trace in env_state.values():
-            if isinstance(trace, dict) and trace.get('strength', 0) > max_strength:
-                max_strength = trace['strength']
+            if isinstance(trace, dict) and trace.get("strength", 0) > max_strength:
+                max_strength = trace["strength"]
                 strongest = trace
 
-        if strongest and 'params' in strongest:
-            params = strongest['params']
+        if strongest and "params" in strongest:
+            params = strongest["params"]
         else:
-            params = {'direction': goal.tolist()}
+            params = {"direction": goal.tolist()}
 
         return Action(
             agent_id=agent.agent_id,
@@ -361,7 +361,7 @@ class EmergentCoordination:
         return Action(
             agent_id=agent.agent_id,
             action_type="execute",
-            parameters={'goal': goal.tolist()},
+            parameters={"goal": goal.tolist()},
             priority=agent._activation,
         )
 
@@ -376,8 +376,8 @@ class EmergentCoordination:
             agent_id=agent.agent_id,
             action_type="align",
             parameters={
-                'goal': goal.tolist(),
-                'alignment': proposal.source_agent,
+                "goal": goal.tolist(),
+                "alignment": proposal.source_agent,
             },
             priority=proposal.priority,
         )
@@ -394,7 +394,7 @@ class EmergentCoordination:
         return Action(
             agent_id=agent.agent_id,
             action_type="independent",
-            parameters={'direction': direction.tolist()},
+            parameters={"direction": direction.tolist()},
             priority=agent._activation,
         )
 
@@ -407,7 +407,7 @@ class EmergentCoordination:
         return Action(
             agent_id=agent.agent_id,
             action_type="default",
-            parameters={'goal': goal.tolist()},
+            parameters={"goal": goal.tolist()},
             priority=0.5,
         )
 
@@ -546,7 +546,10 @@ class EmergentCoordination:
             spec = np.resize(agent.params.specialization, len(task.requirements))
 
             # Explorer fitness: curiosity * (1 - expertise)
-            expertise = float(np.dot(spec, task.requirements) / (np.linalg.norm(spec) * np.linalg.norm(task.requirements) + 1e-8))
+            expertise = float(
+                np.dot(spec, task.requirements)
+                / (np.linalg.norm(spec) * np.linalg.norm(task.requirements) + 1e-8)
+            )
             expertise = (expertise + 1) / 2  # Normalize
             fit_explorer = agent.params.curiosity * (1 - expertise)
 
@@ -575,12 +578,12 @@ class EmergentCoordination:
     def get_statistics(self) -> Dict[str, Any]:
         """Get coordination statistics."""
         return {
-            'mechanism': self.params.mechanism.value,
-            'coordination_count': self._coordination_count,
-            'pattern_count': self._pattern_count,
-            'environment_size': len(self._environment),
-            'vote_history_size': len(self._vote_history),
-            'detected_patterns': len(self._detected_patterns),
+            "mechanism": self.params.mechanism.value,
+            "coordination_count": self._coordination_count,
+            "pattern_count": self._pattern_count,
+            "environment_size": len(self._environment),
+            "vote_history_size": len(self._vote_history),
+            "detected_patterns": len(self._detected_patterns),
         }
 
     def reset(self) -> None:

@@ -15,6 +15,7 @@ import numpy as np
 
 class TaskStatus(Enum):
     """Status of a distributed task."""
+
     PENDING = "pending"
     SCHEDULED = "scheduled"
     RUNNING = "running"
@@ -25,15 +26,17 @@ class TaskStatus(Enum):
 
 class SchedulingPolicy(Enum):
     """Task scheduling policies."""
-    FIFO = "fifo"                    # First in, first out
-    PRIORITY = "priority"            # Priority-based
+
+    FIFO = "fifo"  # First in, first out
+    PRIORITY = "priority"  # Priority-based
     LOAD_BALANCED = "load_balanced"  # Balance across workers
-    LOCALITY = "locality"            # Prefer local data
+    LOCALITY = "locality"  # Prefer local data
 
 
 @dataclass
 class CoordinatorConfig:
     """Configuration for task coordinator."""
+
     max_workers: int = 4
     max_queue_size: int = 1000
     scheduling_policy: SchedulingPolicy = SchedulingPolicy.LOAD_BALANCED
@@ -45,6 +48,7 @@ class CoordinatorConfig:
 @dataclass
 class DistributedTask:
     """A task to be distributed across workers."""
+
     id: str
     name: str
     function: Callable
@@ -65,6 +69,7 @@ class DistributedTask:
 @dataclass
 class WorkerInfo:
     """Information about a worker."""
+
     id: str
     status: str
     load: float  # 0-1
@@ -151,7 +156,7 @@ class LoadBalancer:
             return None
 
         # Select worker with lowest load
-        min_load = float('inf')
+        min_load = float("inf")
         best_worker = None
 
         for worker_id in available_workers:
@@ -279,7 +284,8 @@ class TaskCoordinator:
         with self._lock:
             # Get available workers
             available = [
-                w_id for w_id, info in self._workers.items()
+                w_id
+                for w_id, info in self._workers.items()
                 if info.load < 1.0 and info.status != "busy"
             ]
 

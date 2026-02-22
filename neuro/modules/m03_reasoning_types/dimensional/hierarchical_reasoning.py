@@ -23,6 +23,7 @@ class AbstractionLevel(Enum):
 @dataclass
 class Rule:
     """A rule that can be applied to instances"""
+
     rule_id: str
     name: str
     level: AbstractionLevel
@@ -51,6 +52,7 @@ class Rule:
 @dataclass
 class MetaRule:
     """A rule about rules"""
+
     meta_rule_id: str
     name: str
     rule_selector: Callable[[List[Rule], Any, Dict], Rule]
@@ -70,33 +72,34 @@ class RuleHierarchy:
 
     def _initialize_default_meta_rules(self):
         """Set up default meta-rules"""
-        self.meta_rules['priority'] = MetaRule(
-            meta_rule_id='priority',
-            name='Priority Selection',
-            rule_selector=lambda rules, inst, ctx:
-                max(rules, key=lambda r: r.priority) if rules else None,
-            description='Select rule with highest priority'
+        self.meta_rules["priority"] = MetaRule(
+            meta_rule_id="priority",
+            name="Priority Selection",
+            rule_selector=lambda rules, inst, ctx: (
+                max(rules, key=lambda r: r.priority) if rules else None
+            ),
+            description="Select rule with highest priority",
         )
 
-        self.meta_rules['specificity'] = MetaRule(
-            meta_rule_id='specificity',
-            name='Specificity Selection',
-            rule_selector=lambda rules, inst, ctx:
-                max(rules, key=lambda r: len(r.context_requirements)) if rules else None,
-            description='Select most specific rule'
+        self.meta_rules["specificity"] = MetaRule(
+            meta_rule_id="specificity",
+            name="Specificity Selection",
+            rule_selector=lambda rules, inst, ctx: (
+                max(rules, key=lambda r: len(r.context_requirements)) if rules else None
+            ),
+            description="Select most specific rule",
         )
 
-        self.meta_rules['abstraction'] = MetaRule(
-            meta_rule_id='abstraction',
-            name='Abstraction Level Selection',
-            rule_selector=lambda rules, inst, ctx:
-                min(rules, key=lambda r: r.level.value) if rules else None,
-            description='Prefer concrete rules over abstract'
+        self.meta_rules["abstraction"] = MetaRule(
+            meta_rule_id="abstraction",
+            name="Abstraction Level Selection",
+            rule_selector=lambda rules, inst, ctx: (
+                min(rules, key=lambda r: r.level.value) if rules else None
+            ),
+            description="Prefer concrete rules over abstract",
         )
 
-    def add_rule(self,
-                 rule: Rule,
-                 parent_rule_id: Optional[str] = None):
+    def add_rule(self, rule: Rule, parent_rule_id: Optional[str] = None):
         """Add a rule to the hierarchy"""
         self.rules[rule.rule_id] = rule
 
@@ -109,10 +112,7 @@ class RuleHierarchy:
         """Add a meta-rule"""
         self.meta_rules[meta_rule.meta_rule_id] = meta_rule
 
-    def get_applicable_rules(self,
-                             instance: Any,
-                             context: Dict = None
-                             ) -> List[Rule]:
+    def get_applicable_rules(self, instance: Any, context: Dict = None) -> List[Rule]:
         """Find all rules that apply to an instance"""
         context = context or self.default_context
         applicable = []
@@ -131,11 +131,9 @@ class RuleHierarchy:
 
         return applicable
 
-    def select_rule(self,
-                    instance: Any,
-                    context: Dict = None,
-                    meta_rule_id: str = 'priority'
-                    ) -> Optional[Rule]:
+    def select_rule(
+        self, instance: Any, context: Dict = None, meta_rule_id: str = "priority"
+    ) -> Optional[Rule]:
         """Select the best rule to apply"""
         applicable = self.get_applicable_rules(instance, context)
 
@@ -146,9 +144,7 @@ class RuleHierarchy:
             return applicable[0]
 
         if meta_rule_id in self.meta_rules:
-            return self.meta_rules[meta_rule_id].rule_selector(
-                applicable, instance, context or {}
-            )
+            return self.meta_rules[meta_rule_id].rule_selector(applicable, instance, context or {})
 
         return applicable[0]
 
@@ -185,10 +181,7 @@ class HierarchicalReasoner:
             return self.context_stack.pop()
         return self.context_stack[0]
 
-    def apply_rule(self,
-                   rule_id: str,
-                   instance: Any
-                   ) -> Tuple[Any, bool]:
+    def apply_rule(self, rule_id: str, instance: Any) -> Tuple[Any, bool]:
         """Apply a specific rule to an instance"""
         if rule_id not in self.rule_hierarchy.rules:
             return instance, False
@@ -201,14 +194,9 @@ class HierarchicalReasoner:
         result = rule.apply(instance)
         return result, True
 
-    def reason(self,
-               instance: Any,
-               meta_rule_id: str = 'priority'
-               ) -> Tuple[Any, Optional[str]]:
+    def reason(self, instance: Any, meta_rule_id: str = "priority") -> Tuple[Any, Optional[str]]:
         """Apply the best applicable rule to an instance"""
-        rule = self.rule_hierarchy.select_rule(
-            instance, self.current_context, meta_rule_id
-        )
+        rule = self.rule_hierarchy.select_rule(instance, self.current_context, meta_rule_id)
 
         if rule is None:
             return instance, None
@@ -216,11 +204,9 @@ class HierarchicalReasoner:
         result = rule.apply(instance)
         return result, rule.rule_id
 
-    def abstract_rule(self,
-                      instances: List[Any],
-                      results: List[Any],
-                      rule_name: str = "learned_rule"
-                      ) -> Optional[Rule]:
+    def abstract_rule(
+        self, instances: List[Any], results: List[Any], rule_name: str = "learned_rule"
+    ) -> Optional[Rule]:
         """
         Generalize a rule from specific instances.
         This is inductive learning at the rule level.
@@ -250,7 +236,7 @@ class HierarchicalReasoner:
             name=rule_name,
             level=AbstractionLevel.INTERMEDIATE,
             condition=learned_condition,
-            action=learned_action
+            action=learned_action,
         )
 
         self.learned_rules.append(rule)
@@ -269,27 +255,28 @@ class HierarchicalReasoner:
             common = dict(first)
             for inst in instances[1:]:
                 if isinstance(inst, dict):
-                    common = {k: v for k, v in common.items()
-                             if k in inst and inst[k] == v}
+                    common = {k: v for k, v in common.items() if k in inst and inst[k] == v}
             return common
 
-        if hasattr(first, '__dict__'):
+        if hasattr(first, "__dict__"):
             common = dict(first.__dict__)
             for inst in instances[1:]:
-                if hasattr(inst, '__dict__'):
-                    common = {k: v for k, v in common.items()
-                             if hasattr(inst, k) and getattr(inst, k) == v}
+                if hasattr(inst, "__dict__"):
+                    common = {
+                        k: v
+                        for k, v in common.items()
+                        if hasattr(inst, k) and getattr(inst, k) == v
+                    }
             return common
 
         return {}
 
-    def _infer_transformation(self,
-                              inputs: List[Any],
-                              outputs: List[Any]
-                              ) -> Callable[[Any], Any]:
+    def _infer_transformation(self, inputs: List[Any], outputs: List[Any]) -> Callable[[Any], Any]:
         """Infer a transformation function from input-output pairs"""
-        if all(isinstance(i, (int, float)) and isinstance(o, (int, float))
-               for i, o in zip(inputs, outputs)):
+        if all(
+            isinstance(i, (int, float)) and isinstance(o, (int, float))
+            for i, o in zip(inputs, outputs)
+        ):
             diffs = [o - i for i, o in zip(inputs, outputs)]
             if all(abs(d - diffs[0]) < 0.001 for d in diffs):
                 offset = diffs[0]
@@ -303,14 +290,11 @@ class HierarchicalReasoner:
 
         return lambda x: x
 
-    def compose_rules(self,
-                      rule1_id: str,
-                      rule2_id: str,
-                      composition_name: str = "composed_rule"
-                      ) -> Optional[Rule]:
+    def compose_rules(
+        self, rule1_id: str, rule2_id: str, composition_name: str = "composed_rule"
+    ) -> Optional[Rule]:
         """Combine two rules into a sequence"""
-        if (rule1_id not in self.rule_hierarchy.rules or
-            rule2_id not in self.rule_hierarchy.rules):
+        if rule1_id not in self.rule_hierarchy.rules or rule2_id not in self.rule_hierarchy.rules:
             return None
 
         rule1 = self.rule_hierarchy.rules[rule1_id]
@@ -325,8 +309,7 @@ class HierarchicalReasoner:
                 return rule2.apply(intermediate)
             return intermediate
 
-        combined_context = {**rule1.context_requirements,
-                          **rule2.context_requirements}
+        combined_context = {**rule1.context_requirements, **rule2.context_requirements}
 
         composed = Rule(
             rule_id=f"composed_{rule1_id}_{rule2_id}",
@@ -335,17 +318,15 @@ class HierarchicalReasoner:
             condition=composed_condition,
             action=composed_action,
             priority=min(rule1.priority, rule2.priority),
-            context_requirements=combined_context
+            context_requirements=combined_context,
         )
 
         self.rule_hierarchy.add_rule(composed)
         return composed
 
-    def find_applicable_sequence(self,
-                                 instance: Any,
-                                 goal: Callable[[Any], bool],
-                                 max_depth: int = 5
-                                 ) -> List[str]:
+    def find_applicable_sequence(
+        self, instance: Any, goal: Callable[[Any], bool], max_depth: int = 5
+    ) -> List[str]:
         """Find a sequence of rules that transforms instance to satisfy goal"""
         if goal(instance):
             return []
@@ -364,9 +345,7 @@ class HierarchicalReasoner:
                 continue
             visited.add(state_key)
 
-            applicable = self.rule_hierarchy.get_applicable_rules(
-                current, self.current_context
-            )
+            applicable = self.rule_hierarchy.get_applicable_rules(current, self.current_context)
 
             for rule in applicable:
                 try:

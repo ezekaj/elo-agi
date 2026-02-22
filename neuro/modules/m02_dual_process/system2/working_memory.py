@@ -21,6 +21,7 @@ from collections import OrderedDict
 @dataclass
 class MemorySlot:
     """A single item in working memory"""
+
     id: str
     content: Any
     encoding_time: float
@@ -39,6 +40,7 @@ class MemorySlot:
 @dataclass
 class ChunkedItem:
     """Multiple items grouped as one chunk"""
+
     items: List[Any]
     chunk_code: str
 
@@ -54,10 +56,7 @@ class WorkingMemory:
     - Can chunk items to fit more in
     """
 
-    def __init__(self,
-                 capacity: int = 7,
-                 decay_rate: float = 0.1,
-                 decay_threshold: float = 0.3):
+    def __init__(self, capacity: int = 7, decay_rate: float = 0.1, decay_threshold: float = 0.3):
         self.capacity = capacity
         self.decay_rate = decay_rate
         self.decay_threshold = decay_threshold
@@ -66,10 +65,7 @@ class WorkingMemory:
         self.slots: OrderedDict[str, MemorySlot] = OrderedDict()
         self._last_decay_time = time.time()
 
-    def store(self,
-              item_id: str,
-              content: Any,
-              priority: float = 0.5) -> MemorySlot:
+    def store(self, item_id: str, content: Any, priority: float = 0.5) -> MemorySlot:
         """
         Store item in working memory.
 
@@ -97,7 +93,7 @@ class WorkingMemory:
             content=content,
             encoding_time=current_time,
             last_accessed=current_time,
-            activation=priority
+            activation=priority,
         )
 
         self.slots[item_id] = slot
@@ -191,10 +187,7 @@ class WorkingMemory:
         chunked = ChunkedItem(items=items, chunk_code=chunk_id)
         return self.store(chunk_id, chunked, priority=0.8)
 
-    def bind(self,
-             item_id: str,
-             binding_name: str,
-             binding_value: Any) -> bool:
+    def bind(self, item_id: str, binding_name: str, binding_value: Any) -> bool:
         """
         Create binding between WM items.
 
@@ -213,9 +206,7 @@ class WorkingMemory:
             return {}
         return self.slots[item_id].bindings.copy()
 
-    def query_by_binding(self,
-                         binding_name: str,
-                         binding_value: Any) -> List[str]:
+    def query_by_binding(self, binding_name: str, binding_value: Any) -> List[str]:
         """Find items with specific binding"""
         matches = []
         for item_id, slot in self.slots.items():

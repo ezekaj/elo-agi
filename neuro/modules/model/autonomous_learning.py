@@ -22,11 +22,13 @@ import numpy as np
 
 # Import curiosity module
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "neuro-module-06-motivation" / "src"))
 
 try:
     from curiosity_drive import CuriosityModule, CuriosityType
     from intrinsic_motivation import PathEntropyMaximizer, DriveType
+
     CURIOSITY_AVAILABLE = True
 except ImportError:
     CURIOSITY_AVAILABLE = False
@@ -35,6 +37,7 @@ except ImportError:
 @dataclass
 class Topic:
     """A topic the AGI is curious about."""
+
     name: str
     first_mentioned: float
     times_discussed: int = 1
@@ -47,6 +50,7 @@ class Topic:
 @dataclass
 class Memory:
     """A piece of learned information."""
+
     content: str
     source: str
     topic: str
@@ -66,7 +70,7 @@ class AutonomousLearner:
         self,
         memory_path: str = "~/.neuro/memories",
         search_interval: float = 300.0,  # 5 minutes between auto-searches
-        max_memories: int = 1000
+        max_memories: int = 1000,
     ):
         self.memory_path = Path(memory_path).expanduser()
         self.memory_path.mkdir(parents=True, exist_ok=True)
@@ -143,11 +147,9 @@ class AutonomousLearner:
             Dict with extracted topics and curiosity state
         """
         # Store in history
-        self.conversation_history.append({
-            "role": role,
-            "content": message,
-            "timestamp": time.time()
-        })
+        self.conversation_history.append(
+            {"role": role, "content": message, "timestamp": time.time()}
+        )
 
         # Extract potential topics (simple keyword extraction)
         topics = self._extract_topics(message)
@@ -157,14 +159,11 @@ class AutonomousLearner:
             if topic_name in self.topics:
                 self.topics[topic_name].times_discussed += 1
                 self.topics[topic_name].curiosity_level = min(
-                    1.0,
-                    self.topics[topic_name].curiosity_level + 0.1
+                    1.0, self.topics[topic_name].curiosity_level + 0.1
                 )
             else:
                 self.topics[topic_name] = Topic(
-                    name=topic_name,
-                    first_mentioned=time.time(),
-                    curiosity_level=0.5
+                    name=topic_name, first_mentioned=time.time(), curiosity_level=0.5
                 )
 
         # Update curiosity module if available
@@ -181,7 +180,7 @@ class AutonomousLearner:
             "extracted_topics": list(topics),
             "total_topics": len(self.topics),
             "curiosity_level": self.curiosity.curiosity_level if self.curiosity else 0.5,
-            "knowledge_gaps": self.curiosity.get_knowledge_gaps() if self.curiosity else []
+            "knowledge_gaps": self.curiosity.get_knowledge_gaps() if self.curiosity else [],
         }
 
     def _extract_topics(self, text: str) -> Set[str]:
@@ -193,23 +192,57 @@ class AutonomousLearner:
 
         for i, word in enumerate(words):
             # Clean word
-            clean = word.strip('.,!?()[]{}"\':;').lower()
+            clean = word.strip(".,!?()[]{}\"':;").lower()
 
             if len(clean) < 3:
                 continue
 
             # Skip common words
-            common = {'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all',
-                     'can', 'had', 'her', 'was', 'one', 'our', 'out', 'has',
-                     'have', 'been', 'would', 'could', 'should', 'this', 'that',
-                     'with', 'they', 'from', 'what', 'when', 'where', 'which',
-                     'their', 'will', 'each', 'about', 'into', 'than', 'them'}
+            common = {
+                "the",
+                "and",
+                "for",
+                "are",
+                "but",
+                "not",
+                "you",
+                "all",
+                "can",
+                "had",
+                "her",
+                "was",
+                "one",
+                "our",
+                "out",
+                "has",
+                "have",
+                "been",
+                "would",
+                "could",
+                "should",
+                "this",
+                "that",
+                "with",
+                "they",
+                "from",
+                "what",
+                "when",
+                "where",
+                "which",
+                "their",
+                "will",
+                "each",
+                "about",
+                "into",
+                "than",
+                "them",
+            }
 
             if clean in common:
                 continue
 
             # Technical terms (contains numbers, underscores, or is camelCase)
-            if '_' in clean or any(c.isdigit() for c in clean):
+            if "_" in clean or any(c.isdigit() for c in clean):
                 topics.add(clean)
 
             # Capitalized words in middle of sentence might be important
@@ -233,7 +266,7 @@ class AutonomousLearner:
         sorted_topics = sorted(
             self.topics.values(),
             key=lambda t: t.curiosity_level * (1 + 0.1 * t.times_discussed),
-            reverse=True
+            reverse=True,
         )
         return sorted_topics[:limit]
 
@@ -256,7 +289,7 @@ class AutonomousLearner:
             source=source,
             topic=topic,
             timestamp=time.time(),
-            importance=importance
+            importance=importance,
         )
 
         self.memories.append(memory)
@@ -270,7 +303,7 @@ class AutonomousLearner:
         if len(self.memories) > self.max_memories:
             # Remove least important
             self.memories.sort(key=lambda m: m.importance, reverse=True)
-            self.memories = self.memories[:self.max_memories]
+            self.memories = self.memories[: self.max_memories]
 
         # Save to disk
         self._save_memories()
@@ -323,7 +356,7 @@ class AutonomousLearner:
             "knowledge_gaps": self.get_knowledge_gaps()[:5],
             "pending_searches": len(self.pending_searches),
             "curiosity_level": self.curiosity.curiosity_level if self.curiosity else 0.5,
-            "running": self.running
+            "running": self.running,
         }
 
     def _save_memories(self) -> None:
@@ -337,7 +370,7 @@ class AutonomousLearner:
                     "source": m.source,
                     "topic": m.topic,
                     "timestamp": m.timestamp,
-                    "importance": m.importance
+                    "importance": m.importance,
                 }
                 for m in self.memories[-500:]  # Save last 500
             ],
@@ -349,14 +382,14 @@ class AutonomousLearner:
                     "curiosity_level": t.curiosity_level,
                     "last_searched": t.last_searched,
                     "knowledge": t.knowledge[-10:],  # Last 10 pieces
-                    "related_topics": list(t.related_topics)
+                    "related_topics": list(t.related_topics),
                 }
                 for name, t in self.topics.items()
-            }
+            },
         }
 
         try:
-            with open(memory_file, 'w') as f:
+            with open(memory_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception:
             pass
@@ -374,13 +407,15 @@ class AutonomousLearner:
 
             # Load memories
             for m in data.get("memories", []):
-                self.memories.append(Memory(
-                    content=m["content"],
-                    source=m["source"],
-                    topic=m["topic"],
-                    timestamp=m["timestamp"],
-                    importance=m.get("importance", 0.5)
-                ))
+                self.memories.append(
+                    Memory(
+                        content=m["content"],
+                        source=m["source"],
+                        topic=m["topic"],
+                        timestamp=m["timestamp"],
+                        importance=m.get("importance", 0.5),
+                    )
+                )
 
             # Load topics
             for name, t in data.get("topics", {}).items():
@@ -391,7 +426,7 @@ class AutonomousLearner:
                     curiosity_level=t["curiosity_level"],
                     last_searched=t.get("last_searched", 0),
                     knowledge=t.get("knowledge", []),
-                    related_topics=set(t.get("related_topics", []))
+                    related_topics=set(t.get("related_topics", [])),
                 )
         except Exception:
             pass
@@ -410,7 +445,7 @@ class AutonomousLearner:
             prompt_parts.append(f"I have knowledge gaps about: {', '.join(gaps[:3])}")
 
         if curious_topics:
-            topics_str = ', '.join(t.name for t in curious_topics)
+            topics_str = ", ".join(t.name for t in curious_topics)
             prompt_parts.append(f"I'm curious about: {topics_str}")
 
         if self.memories:

@@ -19,6 +19,7 @@ from enum import Enum
 
 class ConflictLevel(Enum):
     """Degree of conflict detected"""
+
     NONE = 0
     LOW = 1
     MODERATE = 2
@@ -29,6 +30,7 @@ class ConflictLevel(Enum):
 @dataclass
 class Response:
     """A potential response/action"""
+
     id: str
     activation: float
     source: str  # "system1", "system2", "habit", etc.
@@ -38,6 +40,7 @@ class Response:
 @dataclass
 class ConflictSignal:
     """Signal indicating response conflict"""
+
     level: ConflictLevel
     conflicting_responses: List[Response]
     recommended_action: str  # "proceed", "engage_s2", "inhibit", "abort"
@@ -47,6 +50,7 @@ class ConflictSignal:
 @dataclass
 class ErrorSignal:
     """Signal indicating prediction error or mistake"""
+
     expected: Any
     actual: Any
     magnitude: float
@@ -64,10 +68,12 @@ class CognitiveControl:
     - Inhibits inappropriate responses
     """
 
-    def __init__(self,
-                 conflict_threshold: float = 0.4,
-                 error_threshold: float = 0.3,
-                 inhibition_strength: float = 0.6):
+    def __init__(
+        self,
+        conflict_threshold: float = 0.4,
+        error_threshold: float = 0.3,
+        inhibition_strength: float = 0.6,
+    ):
         self.conflict_threshold = conflict_threshold
         self.error_threshold = error_threshold
         self.inhibition_strength = inhibition_strength
@@ -92,7 +98,7 @@ class CognitiveControl:
                 level=ConflictLevel.NONE,
                 conflicting_responses=[],
                 recommended_action="proceed",
-                conflict_energy=0.0
+                conflict_energy=0.0,
             )
 
         # Sort by activation
@@ -102,7 +108,7 @@ class CognitiveControl:
         # High energy when multiple responses have similar high activation
         conflict_energy = 0.0
         for i, r1 in enumerate(sorted_responses):
-            for r2 in sorted_responses[i + 1:]:
+            for r2 in sorted_responses[i + 1 :]:
                 # Conflict is highest when both are similarly activated
                 energy = r1.activation * r2.activation
                 conflict_energy += energy
@@ -140,16 +146,15 @@ class CognitiveControl:
             level=level,
             conflicting_responses=sorted_responses[:3],  # Top conflicting
             recommended_action=action,
-            conflict_energy=conflict_energy
+            conflict_energy=conflict_energy,
         )
 
         self.conflict_history.append(signal)
         return signal
 
-    def error_signal(self,
-                     expected: Any,
-                     actual: Any,
-                     error_type: str = "prediction") -> ErrorSignal:
+    def error_signal(
+        self, expected: Any, actual: Any, error_type: str = "prediction"
+    ) -> ErrorSignal:
         """
         Generate error signal when outcome doesn't match expectation.
 
@@ -165,10 +170,7 @@ class CognitiveControl:
             magnitude = 0.0 if expected == actual else 1.0
 
         signal = ErrorSignal(
-            expected=expected,
-            actual=actual,
-            magnitude=magnitude,
-            error_type=error_type
+            expected=expected, actual=actual, magnitude=magnitude, error_type=error_type
         )
 
         if magnitude > self.error_threshold:
@@ -193,9 +195,7 @@ class CognitiveControl:
         else:
             return (False, remaining)
 
-    def inhibit_all_except(self,
-                           responses: List[Response],
-                           keep_id: str) -> List[Response]:
+    def inhibit_all_except(self, responses: List[Response], keep_id: str) -> List[Response]:
         """
         Inhibit all responses except the specified one.
 
@@ -206,27 +206,25 @@ class CognitiveControl:
         for r in responses:
             if r.id == keep_id:
                 # Boost the selected response
-                result.append(Response(
-                    id=r.id,
-                    activation=min(1.0, r.activation * 1.3),
-                    source=r.source,
-                    content=r.content
-                ))
+                result.append(
+                    Response(
+                        id=r.id,
+                        activation=min(1.0, r.activation * 1.3),
+                        source=r.source,
+                        content=r.content,
+                    )
+                )
             else:
                 # Inhibit competitors
                 success, remaining = self.inhibit(r)
                 if not success:
-                    result.append(Response(
-                        id=r.id,
-                        activation=remaining,
-                        source=r.source,
-                        content=r.content
-                    ))
+                    result.append(
+                        Response(id=r.id, activation=remaining, source=r.source, content=r.content)
+                    )
 
         return result
 
-    def allocate_attention(self,
-                           targets: Dict[str, float]) -> Dict[str, float]:
+    def allocate_attention(self, targets: Dict[str, float]) -> Dict[str, float]:
         """
         Allocate limited attention resources.
 
@@ -249,9 +247,7 @@ class CognitiveControl:
         """Get current attention allocated to target"""
         return self.attention_allocation.get(target, 0.0)
 
-    def should_engage_system2(self,
-                              responses: List[Response],
-                              uncertainty: float = 0.0) -> bool:
+    def should_engage_system2(self, responses: List[Response], uncertainty: float = 0.0) -> bool:
         """
         Decide if System 2 should be engaged.
 
@@ -268,8 +264,7 @@ class CognitiveControl:
             return True
 
         # Recent errors -> engage S2 (be more careful)
-        recent_errors = [e for e in self.error_history[-10:]
-                         if e.magnitude > self.error_threshold]
+        recent_errors = [e for e in self.error_history[-10:] if e.magnitude > self.error_threshold]
         if len(recent_errors) >= 3:
             return True
 
@@ -289,8 +284,11 @@ class CognitiveControl:
             return 0.0
 
         recent = self.conflict_history[-window:]
-        return sum(1 for c in recent
-                   if c.level in [ConflictLevel.MODERATE, ConflictLevel.HIGH, ConflictLevel.SEVERE]) / len(recent)
+        return sum(
+            1
+            for c in recent
+            if c.level in [ConflictLevel.MODERATE, ConflictLevel.HIGH, ConflictLevel.SEVERE]
+        ) / len(recent)
 
     def reset_monitoring(self):
         """Reset error and conflict history"""

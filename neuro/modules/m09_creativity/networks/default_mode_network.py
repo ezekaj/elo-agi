@@ -22,6 +22,7 @@ import time
 @dataclass
 class Concept:
     """A concept in semantic memory"""
+
     id: str
     content: Any
     features: Dict[str, float] = field(default_factory=dict)
@@ -33,6 +34,7 @@ class Concept:
 @dataclass
 class Association:
     """An association between concepts"""
+
     source_id: str
     target_id: str
     strength: float
@@ -43,6 +45,7 @@ class Association:
 @dataclass
 class SpontaneousThought:
     """A thought generated spontaneously by the DMN"""
+
     concepts: List[str]
     associations_used: List[Association]
     novelty_score: float
@@ -53,6 +56,7 @@ class SpontaneousThought:
 @dataclass
 class HypotheticalScenario:
     """A mental simulation of a hypothetical situation"""
+
     premise: str
     elements: List[Concept]
     transformations: List[str]
@@ -77,10 +81,12 @@ class DefaultModeNetwork:
     - Support mental simulation
     """
 
-    def __init__(self,
-                 spreading_activation_decay: float = 0.7,
-                 association_threshold: float = 0.3,
-                 novelty_bonus: float = 0.5):
+    def __init__(
+        self,
+        spreading_activation_decay: float = 0.7,
+        association_threshold: float = 0.3,
+        novelty_bonus: float = 0.5,
+    ):
         self.concepts: Dict[str, Concept] = {}
         self.associations: List[Association] = []
         self.spreading_activation_decay = spreading_activation_decay
@@ -95,24 +101,21 @@ class DefaultModeNetwork:
         self._wandering = False
         self._current_thought_chain: List[str] = []
 
-    def add_concept(self,
-                    concept_id: str,
-                    content: Any,
-                    features: Optional[Dict[str, float]] = None) -> Concept:
+    def add_concept(
+        self, concept_id: str, content: Any, features: Optional[Dict[str, float]] = None
+    ) -> Concept:
         """Add a concept to semantic memory"""
-        concept = Concept(
-            id=concept_id,
-            content=content,
-            features=features or {}
-        )
+        concept = Concept(id=concept_id, content=content, features=features or {})
         self.concepts[concept_id] = concept
         return concept
 
-    def create_association(self,
-                          source_id: str,
-                          target_id: str,
-                          strength: float = 0.5,
-                          association_type: str = "semantic") -> Optional[Association]:
+    def create_association(
+        self,
+        source_id: str,
+        target_id: str,
+        strength: float = 0.5,
+        association_type: str = "semantic",
+    ) -> Optional[Association]:
         """Create association between concepts"""
         if source_id not in self.concepts or target_id not in self.concepts:
             return None
@@ -122,7 +125,7 @@ class DefaultModeNetwork:
             target_id=target_id,
             strength=strength,
             association_type=association_type,
-            creation_time=time.time()
+            creation_time=time.time(),
         )
 
         self.associations.append(assoc)
@@ -134,7 +137,7 @@ class DefaultModeNetwork:
             target_id=source_id,
             strength=strength * 0.8,  # Slightly weaker reverse
             association_type=association_type,
-            creation_time=time.time()
+            creation_time=time.time(),
         )
         self.associations.append(reverse_assoc)
         self._association_index[target_id].append(reverse_assoc)
@@ -145,10 +148,9 @@ class DefaultModeNetwork:
 
         return assoc
 
-    def spreading_activation(self,
-                            seed_concepts: List[str],
-                            steps: int = 3,
-                            top_k: int = 10) -> Dict[str, float]:
+    def spreading_activation(
+        self, seed_concepts: List[str], steps: int = 3, top_k: int = 10
+    ) -> Dict[str, float]:
         """
         Spread activation through concept network.
 
@@ -172,10 +174,7 @@ class DefaultModeNetwork:
                 # Spread to associated concepts
                 for assoc in self._association_index.get(concept_id, []):
                     spread = activation * assoc.strength * self.spreading_activation_decay
-                    new_activations[assoc.target_id] = max(
-                        new_activations[assoc.target_id],
-                        spread
-                    )
+                    new_activations[assoc.target_id] = max(new_activations[assoc.target_id], spread)
 
             activations = new_activations
 
@@ -189,9 +188,9 @@ class DefaultModeNetwork:
         sorted_activations = sorted(activations.items(), key=lambda x: x[1], reverse=True)
         return dict(sorted_activations[:top_k])
 
-    def generate_spontaneous_thought(self,
-                                     seed: Optional[str] = None,
-                                     association_steps: int = 4) -> SpontaneousThought:
+    def generate_spontaneous_thought(
+        self, seed: Optional[str] = None, association_steps: int = 4
+    ) -> SpontaneousThought:
         """
         Generate a spontaneous thought through mind-wandering.
 
@@ -237,7 +236,7 @@ class DefaultModeNetwork:
 
                 # Novelty bonus for distant/unusual associations
                 if assoc.target_id not in self._get_recent_activations():
-                    prob *= (1.0 + self.novelty_bonus)
+                    prob *= 1.0 + self.novelty_bonus
 
                 candidates.append(assoc)
                 probs.append(prob)
@@ -271,7 +270,7 @@ class DefaultModeNetwork:
             concepts=thought_chain,
             associations_used=associations_used,
             novelty_score=novelty,
-            coherence_score=coherence
+            coherence_score=coherence,
         )
 
     def _get_recent_activations(self, window: int = 20) -> Set[str]:
@@ -324,10 +323,9 @@ class DefaultModeNetwork:
 
         return total_strength / max(pairs, 1)
 
-    def generate_hypothetical_scenario(self,
-                                       premise: str,
-                                       seed_concepts: List[str],
-                                       transformations: List[str]) -> HypotheticalScenario:
+    def generate_hypothetical_scenario(
+        self, premise: str, seed_concepts: List[str], transformations: List[str]
+    ) -> HypotheticalScenario:
         """
         Generate a hypothetical scenario (mental simulation).
 
@@ -338,10 +336,7 @@ class DefaultModeNetwork:
         activations = self.spreading_activation(seed_concepts, steps=2)
 
         # Get activated concepts as scenario elements
-        elements = [
-            self.concepts[cid] for cid in activations.keys()
-            if cid in self.concepts
-        ]
+        elements = [self.concepts[cid] for cid in activations.keys() if cid in self.concepts]
 
         # Generate outcome predictions based on associations
         outcome_predictions = []
@@ -366,13 +361,12 @@ class DefaultModeNetwork:
             elements=elements[:10],
             transformations=transformations,
             outcome_predictions=outcome_predictions,
-            plausibility=plausibility
+            plausibility=plausibility,
         )
 
-    def find_distant_associations(self,
-                                  concept_id: str,
-                                  min_distance: int = 3,
-                                  max_results: int = 5) -> List[Tuple[str, float, List[str]]]:
+    def find_distant_associations(
+        self, concept_id: str, min_distance: int = 3, max_results: int = 5
+    ) -> List[Tuple[str, float, List[str]]]:
         """
         Find distant but potentially creative associations.
 
@@ -401,9 +395,7 @@ class DefaultModeNetwork:
 
         # Filter to distant concepts
         distant = [
-            (cid, dist, path)
-            for cid, (dist, path) in visited.items()
-            if dist >= min_distance
+            (cid, dist, path) for cid, (dist, path) in visited.items() if dist >= min_distance
         ]
 
         # Score by novelty potential
@@ -433,8 +425,7 @@ class DefaultModeNetwork:
         for _ in range(duration_steps):
             # Generate spontaneous thought
             thought = self.generate_spontaneous_thought(
-                seed=current_seed,
-                association_steps=random.randint(2, 5)
+                seed=current_seed, association_steps=random.randint(2, 5)
             )
             thoughts.append(thought)
 

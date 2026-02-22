@@ -3,9 +3,12 @@
 import pytest
 import numpy as np
 from neuro.modules.robust.calibration import (
-    ConfidenceCalibrator, CalibrationMethod, CalibrationResult,
+    ConfidenceCalibrator,
+    CalibrationMethod,
+    CalibrationResult,
 )
 from neuro.modules.robust.uncertainty import SimpleDropoutNN
+
 
 class TestConfidenceCalibrator:
     """Tests for ConfidenceCalibrator."""
@@ -161,6 +164,7 @@ class TestConfidenceCalibrator:
         stats = calibrator.statistics()
         assert stats["n_calibrations"] == 2
 
+
 class TestCalibrationMethods:
     """Tests comparing calibration methods."""
 
@@ -172,8 +176,9 @@ class TestCalibrationMethods:
     def logits_and_labels(self, model):
         np.random.seed(42)
         n_samples = 200
-        logits = np.array([model.forward(np.random.randn(10), apply_dropout=False)
-                          for _ in range(n_samples)])
+        logits = np.array(
+            [model.forward(np.random.randn(10), apply_dropout=False) for _ in range(n_samples)]
+        )
         labels = np.array([i % 3 for i in range(n_samples)])
         return logits, labels
 
@@ -203,6 +208,7 @@ class TestCalibrationMethods:
             # Ranking should be preserved
             assert np.argmax(probs_t1) == np.argmax(probs_t3)
 
+
 class TestCalibrationEdgeCases:
     """Edge case tests for calibration."""
 
@@ -223,7 +229,7 @@ class TestCalibrationEdgeCases:
         logits = np.array([1.0, 1.0, 1.0])
         result = calibrator.calibrate(logits)
         # Should be uniform
-        assert np.allclose(result.calibrated_probs, [1/3, 1/3, 1/3])
+        assert np.allclose(result.calibrated_probs, [1 / 3, 1 / 3, 1 / 3])
 
     def test_small_calibration_set(self):
         """Test calibration with small dataset."""
@@ -259,13 +265,14 @@ class TestCalibrationEdgeCases:
         """Test zero logits."""
         logits = np.zeros(3)
         result = calibrator.calibrate(logits)
-        assert np.allclose(result.calibrated_probs, [1/3, 1/3, 1/3])
+        assert np.allclose(result.calibrated_probs, [1 / 3, 1 / 3, 1 / 3])
 
     def test_single_class_logits(self, calibrator):
         """Test single element logits."""
         logits = np.array([1.0])
         result = calibrator.calibrate(logits)
         assert result.calibrated_probs[0] == 1.0
+
 
 class TestECEComputation:
     """Detailed tests for ECE computation."""
@@ -330,6 +337,7 @@ class TestECEComputation:
 
             brier = calibrator.brier_score(probs, labels)
             assert 0 <= brier <= 2
+
 
 class TestFittingBehavior:
     """Tests for calibration fitting behavior."""

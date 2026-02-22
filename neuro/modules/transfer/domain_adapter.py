@@ -12,6 +12,7 @@ import numpy as np
 @dataclass
 class DomainEmbedding:
     """Embedding space for a domain."""
+
     domain_name: str
     embedding_dim: int
     examples: np.ndarray  # (n_examples, embedding_dim)
@@ -22,6 +23,7 @@ class DomainEmbedding:
 @dataclass
 class DomainAlignment:
     """Alignment between two domains."""
+
     source_domain: str
     target_domain: str
     transformation: np.ndarray  # (embedding_dim, embedding_dim)
@@ -33,6 +35,7 @@ class DomainAlignment:
 @dataclass
 class TransferMapping:
     """A learned mapping for transfer."""
+
     id: str
     source_domain: str
     target_domain: str
@@ -44,6 +47,7 @@ class TransferMapping:
 @dataclass
 class AdaptedRepresentation:
     """A representation adapted to a new domain."""
+
     original: np.ndarray
     adapted: np.ndarray
     source_domain: str
@@ -387,7 +391,7 @@ class DomainAdapter:
         d2 = self._domains.get(domain2)
 
         if d1 is None or d2 is None:
-            return float('inf')
+            return float("inf")
 
         # Maximum Mean Discrepancy (simplified)
         mean1 = d1.examples.mean(axis=0)
@@ -403,7 +407,7 @@ class DomainAdapter:
         query_mean = query_examples.mean(axis=0)
 
         best_domain = None
-        best_distance = float('inf')
+        best_distance = float("inf")
 
         for name, domain in self._domains.items():
             dist = np.linalg.norm(query_mean - domain.centroid)
@@ -428,7 +432,12 @@ class DomainAdapter:
             "n_mappings": len(self._mappings),
             "domains": list(self._domains.keys()),
             "mappings": [
-                {"id": m.id, "source": m.source_domain, "target": m.target_domain, "quality": m.quality_score}
+                {
+                    "id": m.id,
+                    "source": m.source_domain,
+                    "target": m.target_domain,
+                    "quality": m.quality_score,
+                }
                 for m in self._mappings.values()
             ],
         }

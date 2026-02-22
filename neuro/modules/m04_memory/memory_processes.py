@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 @dataclass
 class EncodedMemory:
     """Result of encoding process"""
+
     pattern: np.ndarray
     modality: str
     timestamp: float
@@ -64,9 +65,7 @@ class MemoryEncoder:
 
         # Resize to pattern size
         pattern = np.interp(
-            np.linspace(0, 1, self.pattern_size),
-            np.linspace(0, 1, len(flat)),
-            flat
+            np.linspace(0, 1, self.pattern_size), np.linspace(0, 1, len(flat)), flat
         )
 
         return EncodedMemory(
@@ -74,7 +73,7 @@ class MemoryEncoder:
             modality="visual",
             timestamp=self._time_fn(),
             content=image,
-            metadata={"shape": image.shape}
+            metadata={"shape": image.shape},
         )
 
     def encode_auditory(self, audio: np.ndarray) -> EncodedMemory:
@@ -94,9 +93,7 @@ class MemoryEncoder:
 
         # Resize to pattern size
         pattern = np.interp(
-            np.linspace(0, 1, self.pattern_size),
-            np.linspace(0, 1, len(flat)),
-            flat
+            np.linspace(0, 1, self.pattern_size), np.linspace(0, 1, len(flat)), flat
         )
 
         return EncodedMemory(
@@ -104,7 +101,7 @@ class MemoryEncoder:
             modality="auditory",
             timestamp=self._time_fn(),
             content=audio,
-            metadata={"length": len(audio)}
+            metadata={"length": len(audio)},
         )
 
     def encode_semantic(self, text: str) -> EncodedMemory:
@@ -136,7 +133,7 @@ class MemoryEncoder:
             modality="semantic",
             timestamp=self._time_fn(),
             content=text,
-            metadata={"length": len(text)}
+            metadata={"length": len(text)},
         )
 
     def encode_episodic(self, experience: Any, context: Dict[str, Any]) -> EncodedMemory:
@@ -170,7 +167,7 @@ class MemoryEncoder:
             modality="episodic",
             timestamp=self._time_fn(),
             content=experience,
-            metadata={"context": context}
+            metadata={"context": context},
         )
 
     def encode_procedural(self, trigger: Dict, actions: List) -> EncodedMemory:
@@ -200,7 +197,7 @@ class MemoryEncoder:
             modality="procedural",
             timestamp=self._time_fn(),
             content={"trigger": trigger, "actions": actions},
-            metadata={"n_actions": len(actions)}
+            metadata={"n_actions": len(actions)},
         )
 
     def set_time_function(self, time_fn) -> None:
@@ -251,11 +248,11 @@ class MemoryConsolidator:
         for memory in self.replay_queue:
             for _ in range(iterations):
                 # If memory has engram, consolidate it
-                if hasattr(memory, 'engram') and memory.engram is not None:
+                if hasattr(memory, "engram") and memory.engram is not None:
                     memory.engram.consolidate()
 
                 # If memory has strength attribute, increase it
-                if hasattr(memory, 'strength'):
+                if hasattr(memory, "strength"):
                     memory.strength = min(1.0, memory.strength + 0.1)
 
             consolidated += 1
@@ -276,11 +273,11 @@ class MemoryConsolidator:
         Returns:
             True if transfer successful
         """
-        if hasattr(memory_store, 'encode'):
+        if hasattr(memory_store, "encode"):
             # Episodic memory
             memory_store.encode(memory)
             return True
-        elif hasattr(memory_store, 'store'):
+        elif hasattr(memory_store, "store"):
             # Semantic or procedural
             memory_store.store(memory)
             return True
@@ -298,7 +295,7 @@ class MemoryConsolidator:
 
         for idx in indices:
             memory = memories[idx]
-            if hasattr(memory, 'engram') and memory.engram is not None:
+            if hasattr(memory, "engram") and memory.engram is not None:
                 memory.engram.consolidate()
 
     def set_time_function(self, time_fn) -> None:
@@ -333,16 +330,16 @@ class MemoryRetriever:
             Matching memory or None
         """
         # Try different retrieval methods based on store type
-        if hasattr(memory_store, 'retrieve_by_cue'):
+        if hasattr(memory_store, "retrieve_by_cue"):
             results = memory_store.retrieve_by_cue(cue)
             return results[0] if results else None
 
-        if hasattr(memory_store, 'retrieve'):
+        if hasattr(memory_store, "retrieve"):
             return memory_store.retrieve(cue)
 
         return None
 
-    def pattern_complete(self, partial_cue: np.ndarray, engram: 'Engram') -> np.ndarray:
+    def pattern_complete(self, partial_cue: np.ndarray, engram: "Engram") -> np.ndarray:
         """
         Fill in missing information from partial cue.
 
@@ -355,7 +352,7 @@ class MemoryRetriever:
         """
         return engram.reactivate(partial_cue)
 
-    def reconstruct(self, fragments: List[np.ndarray], engrams: List['Engram']) -> np.ndarray:
+    def reconstruct(self, fragments: List[np.ndarray], engrams: List["Engram"]) -> np.ndarray:
         """
         Piece together memory from multiple sources.
 
@@ -387,7 +384,7 @@ class MemoryRetriever:
         Returns:
             List of matching memories
         """
-        if hasattr(memory_store, 'retrieve_by_context'):
+        if hasattr(memory_store, "retrieve_by_context"):
             return memory_store.retrieve_by_context(context)
         return []
 
@@ -420,10 +417,10 @@ class MemoryReconsolidator:
         Returns:
             The reactivated memory
         """
-        if hasattr(memory, 'engram') and memory.engram is not None:
+        if hasattr(memory, "engram") and memory.engram is not None:
             memory.engram.destabilize()
 
-        if hasattr(memory, 'last_retrieval'):
+        if hasattr(memory, "last_retrieval"):
             memory.last_retrieval = self._time_fn()
 
         return memory
@@ -442,19 +439,19 @@ class MemoryReconsolidator:
             Modified memory
         """
         # Check if memory is labile
-        if hasattr(memory, 'engram') and memory.engram is not None:
+        if hasattr(memory, "engram") and memory.engram is not None:
             if not memory.engram.is_labile():
                 return memory  # Cannot modify consolidated memory
 
         # Apply updates
-        if hasattr(memory, 'content') and 'content' in update:
-            memory.content = update['content']
+        if hasattr(memory, "content") and "content" in update:
+            memory.content = update["content"]
 
-        if hasattr(memory, 'context') and 'context' in update:
-            memory.context.update(update['context'])
+        if hasattr(memory, "context") and "context" in update:
+            memory.context.update(update["context"])
 
-        if hasattr(memory, 'emotional_valence') and 'emotional_valence' in update:
-            memory.emotional_valence = update['emotional_valence']
+        if hasattr(memory, "emotional_valence") and "emotional_valence" in update:
+            memory.emotional_valence = update["emotional_valence"]
 
         return memory
 
@@ -465,9 +462,9 @@ class MemoryReconsolidator:
         Args:
             memory: Memory to restabilize
         """
-        if hasattr(memory, 'engram') and memory.engram is not None:
+        if hasattr(memory, "engram") and memory.engram is not None:
             # Get current content as new pattern
-            if hasattr(memory, 'content'):
+            if hasattr(memory, "content"):
                 # Re-encode content (simplified)
                 content_str = str(memory.content)
                 pattern = np.array([ord(c) for c in content_str[:100]])
@@ -486,11 +483,11 @@ class MemoryReconsolidator:
         Returns:
             True if memory can be modified
         """
-        if hasattr(memory, 'engram') and memory.engram is not None:
+        if hasattr(memory, "engram") and memory.engram is not None:
             return memory.engram.is_labile()
 
         # Check time-based lability
-        if hasattr(memory, 'last_retrieval') and memory.last_retrieval is not None:
+        if hasattr(memory, "last_retrieval") and memory.last_retrieval is not None:
             elapsed = self._time_fn() - memory.last_retrieval
             return elapsed < self.labile_window
 
@@ -536,11 +533,11 @@ class Forgetter:
         """
         rate = rate or self.decay_rate
 
-        if hasattr(memory, 'strength'):
+        if hasattr(memory, "strength"):
             memory.strength = max(0.0, memory.strength - rate)
             return memory.strength
 
-        if hasattr(memory, 'vividness'):
+        if hasattr(memory, "vividness"):
             memory.vividness = max(0.0, memory.vividness - rate)
             return memory.vividness
 
@@ -560,15 +557,15 @@ class Forgetter:
         """
         interference = similarity * 0.3  # Max 30% interference
 
-        if hasattr(old_memory, 'strength'):
+        if hasattr(old_memory, "strength"):
             old_memory.strength = max(0.0, old_memory.strength - interference)
 
-        if hasattr(old_memory, 'vividness'):
+        if hasattr(old_memory, "vividness"):
             old_memory.vividness = max(0.0, old_memory.vividness - interference * 0.5)
 
         return interference
 
-    def prune(self, engram: 'Engram', threshold: Optional[float] = None) -> int:
+    def prune(self, engram: "Engram", threshold: Optional[float] = None) -> int:
         """
         Remove weak connections from engram.
 
@@ -593,11 +590,11 @@ class Forgetter:
         Returns:
             True if suppression applied
         """
-        if hasattr(memory, 'strength'):
-            memory.strength *= (1 - suppression_strength)
+        if hasattr(memory, "strength"):
+            memory.strength *= 1 - suppression_strength
             return True
 
-        if hasattr(memory, 'engram') and memory.engram is not None:
+        if hasattr(memory, "engram") and memory.engram is not None:
             # Prune more aggressively
             memory.engram.prune(self.prune_threshold * 2)
             return True
@@ -605,10 +602,7 @@ class Forgetter:
         return False
 
     def retrieve_induced_forgetting(
-        self,
-        retrieved: Any,
-        competitors: List[Any],
-        rif_strength: float = 0.2
+        self, retrieved: Any, competitors: List[Any], rif_strength: float = 0.2
     ) -> int:
         """
         Recalling one memory weakens similar competing memories.
@@ -625,7 +619,7 @@ class Forgetter:
 
         for comp in competitors:
             if comp is not retrieved:
-                if hasattr(comp, 'strength'):
+                if hasattr(comp, "strength"):
                     comp.strength = max(0.0, comp.strength - rif_strength)
                     affected += 1
 

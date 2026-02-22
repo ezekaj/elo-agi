@@ -34,41 +34,45 @@ import time
 
 class BeliefType(Enum):
     """Types of beliefs about others."""
-    FIRST_ORDER = auto()   # I believe X
+
+    FIRST_ORDER = auto()  # I believe X
     SECOND_ORDER = auto()  # I believe you believe X
-    THIRD_ORDER = auto()   # I believe you believe I believe X
+    THIRD_ORDER = auto()  # I believe you believe I believe X
 
 
 class MoralFoundation(Enum):
     """Haidt's Moral Foundations."""
-    CARE = auto()          # Harm/care
-    FAIRNESS = auto()      # Cheating/fairness
-    LOYALTY = auto()       # Betrayal/loyalty
-    AUTHORITY = auto()     # Subversion/authority
-    SANCTITY = auto()      # Degradation/sanctity
-    LIBERTY = auto()       # Oppression/liberty
+
+    CARE = auto()  # Harm/care
+    FAIRNESS = auto()  # Cheating/fairness
+    LOYALTY = auto()  # Betrayal/loyalty
+    AUTHORITY = auto()  # Subversion/authority
+    SANCTITY = auto()  # Degradation/sanctity
+    LIBERTY = auto()  # Oppression/liberty
 
 
 @dataclass
 class MentalState:
     """Representation of another agent's mental state."""
+
     agent_id: str
     beliefs: Dict[str, Tuple[Any, float]]  # belief -> (value, confidence)
-    desires: Dict[str, float]              # goal -> strength
-    intentions: List[str]                  # planned actions
-    emotions: Dict[str, float]             # emotion -> intensity
+    desires: Dict[str, float]  # goal -> strength
+    intentions: List[str]  # planned actions
+    emotions: Dict[str, float]  # emotion -> intensity
     last_updated: float = field(default_factory=time.time)
 
 
 @dataclass
 class SocialAgent:
     """Representation of another agent in social world."""
+
     agent_id: str
     name: str
-    embedding: np.ndarray                  # Identity embedding
+    embedding: np.ndarray  # Identity embedding
     mental_state: MentalState
-    relationship_strength: float = 0.0     # -1 (enemy) to 1 (close friend)
-    trust: float = 0.5                     # 0-1
+    relationship_strength: float = 0.0  # -1 (enemy) to 1 (close friend)
+    trust: float = 0.5  # 0-1
     reputation: Dict[str, float] = field(default_factory=dict)
     group_memberships: Set[str] = field(default_factory=set)
     interaction_history: List[Dict] = field(default_factory=list)
@@ -77,24 +81,26 @@ class SocialAgent:
 @dataclass
 class SocialNorm:
     """A social norm/rule."""
+
     name: str
     description: str
-    situation_embedding: np.ndarray        # When does this norm apply?
-    prescribed_action: str                 # What should one do?
-    proscribed_action: str                 # What should one not do?
-    enforcement_strength: float            # How strongly enforced?
-    internalized: bool = False             # Is it part of own values?
+    situation_embedding: np.ndarray  # When does this norm apply?
+    prescribed_action: str  # What should one do?
+    proscribed_action: str  # What should one not do?
+    enforcement_strength: float  # How strongly enforced?
+    internalized: bool = False  # Is it part of own values?
 
 
 @dataclass
 class MoralJudgment:
     """A moral evaluation of an action."""
+
     action: str
     agent: str
     foundations_violated: Dict[MoralFoundation, float]
     foundations_upheld: Dict[MoralFoundation, float]
-    overall_judgment: float                # -1 (wrong) to 1 (right)
-    punishment_deserved: float             # 0-1
+    overall_judgment: float  # -1 (wrong) to 1 (right)
+    punishment_deserved: float  # 0-1
 
 
 class TheoryOfMind:
@@ -119,21 +125,13 @@ class TheoryOfMind:
 
     def create_mental_model(self, agent_id: str) -> MentalState:
         """Create initial mental model for new agent."""
-        model = MentalState(
-            agent_id=agent_id,
-            beliefs={},
-            desires={},
-            intentions=[],
-            emotions={}
-        )
+        model = MentalState(agent_id=agent_id, beliefs={}, desires={}, intentions=[], emotions={})
         self.mental_models[agent_id] = model
         return model
 
-    def attribute_belief(self,
-                         agent_id: str,
-                         belief_key: str,
-                         belief_value: Any,
-                         confidence: float = 0.5):
+    def attribute_belief(
+        self, agent_id: str, belief_key: str, belief_value: Any, confidence: float = 0.5
+    ):
         """Attribute a belief to another agent."""
         if agent_id not in self.mental_models:
             self.create_mental_model(agent_id)
@@ -157,10 +155,9 @@ class TheoryOfMind:
         self.mental_models[agent_id].emotions[emotion] = intensity
         self.mental_models[agent_id].last_updated = time.time()
 
-    def infer_intention(self,
-                        agent_id: str,
-                        observed_actions: List[str],
-                        context: Dict[str, Any]) -> List[str]:
+    def infer_intention(
+        self, agent_id: str, observed_actions: List[str], context: Dict[str, Any]
+    ) -> List[str]:
         """Infer agent's intentions from observed actions."""
         if agent_id not in self.mental_models:
             self.create_mental_model(agent_id)
@@ -182,7 +179,7 @@ class TheoryOfMind:
     def predict_action(self, agent_id: str, situation_embedding: np.ndarray) -> Tuple[str, float]:
         """Predict what action another agent will take."""
         if agent_id not in self.mental_models:
-            return 'unknown', 0.0
+            return "unknown", 0.0
 
         model = self.mental_models[agent_id]
 
@@ -194,19 +191,18 @@ class TheoryOfMind:
             confidence = strongest_desire[1]
             return predicted_action, confidence
 
-        return 'wait', 0.3
+        return "wait", 0.3
 
-    def simulate_perspective(self,
-                             agent_id: str,
-                             situation: Dict[str, Any],
-                             depth: int = 1) -> Dict[str, Any]:
+    def simulate_perspective(
+        self, agent_id: str, situation: Dict[str, Any], depth: int = 1
+    ) -> Dict[str, Any]:
         """
         Simulate another agent's perspective (perspective-taking).
 
         What would agent_id think/do in this situation?
         """
         if depth > self.max_recursion:
-            return {'warning': 'max_recursion_reached'}
+            return {"warning": "max_recursion_reached"}
 
         if agent_id not in self.mental_models:
             self.create_mental_model(agent_id)
@@ -229,20 +225,18 @@ class TheoryOfMind:
         likely_action, confidence = self.predict_action(agent_id, np.zeros(self.dim))
 
         result = {
-            'agent_id': agent_id,
-            'simulated_beliefs': simulated_beliefs,
-            'simulated_emotions': simulated_emotions,
-            'likely_action': likely_action,
-            'confidence': confidence,
-            'depth': depth
+            "agent_id": agent_id,
+            "simulated_beliefs": simulated_beliefs,
+            "simulated_emotions": simulated_emotions,
+            "likely_action": likely_action,
+            "confidence": confidence,
+            "depth": depth,
         }
 
         self.simulation_results[agent_id] = result
         return result
 
-    def detect_false_belief(self,
-                            agent_id: str,
-                            true_state: Dict[str, Any]) -> List[str]:
+    def detect_false_belief(self, agent_id: str, true_state: Dict[str, Any]) -> List[str]:
         """
         Detect where another agent has false beliefs.
 
@@ -293,17 +287,17 @@ class JointAttention:
         # Gaze following capability
         self.gaze_tracking_enabled = True
 
-    def establish_joint_attention(self,
-                                   other_agent: str,
-                                   target_embedding: np.ndarray) -> bool:
+    def establish_joint_attention(self, other_agent: str, target_embedding: np.ndarray) -> bool:
         """Establish joint attention with another agent."""
         self.joint_targets[other_agent] = target_embedding.copy()
         return True
 
-    def follow_gaze(self,
-                    other_agent: str,
-                    gaze_direction: np.ndarray,
-                    scene_objects: List[Tuple[str, np.ndarray]]) -> Optional[str]:
+    def follow_gaze(
+        self,
+        other_agent: str,
+        gaze_direction: np.ndarray,
+        scene_objects: List[Tuple[str, np.ndarray]],
+    ) -> Optional[str]:
         """
         Follow another agent's gaze to identify their attention target.
         """
@@ -312,7 +306,7 @@ class JointAttention:
 
         # Find object most aligned with gaze direction
         best_object = None
-        best_alignment = -float('inf')
+        best_alignment = -float("inf")
 
         for obj_id, obj_position in scene_objects:
             alignment = np.dot(gaze_direction, obj_position) / (
@@ -325,8 +319,7 @@ class JointAttention:
         if best_alignment > 0.7 and best_object:
             # Establish joint attention
             obj_embedding = next(
-                (pos for name, pos in scene_objects if name == best_object),
-                np.zeros(self.dim)
+                (pos for name, pos in scene_objects if name == best_object), np.zeros(self.dim)
             )
             self.joint_targets[other_agent] = obj_embedding
 
@@ -352,16 +345,20 @@ class SocialLearning:
         self.dim = dim
 
         # Learned behaviors from others
-        self.imitated_behaviors: Dict[str, Tuple[np.ndarray, str]] = {}  # behavior -> (embedding, source)
+        self.imitated_behaviors: Dict[
+            str, Tuple[np.ndarray, str]
+        ] = {}  # behavior -> (embedding, source)
 
         # Teaching capability
         self.teachable_skills: Set[str] = set()
 
-    def observe_and_imitate(self,
-                            demonstrator_id: str,
-                            action_sequence: List[np.ndarray],
-                            outcome: np.ndarray,
-                            behavior_name: str) -> bool:
+    def observe_and_imitate(
+        self,
+        demonstrator_id: str,
+        action_sequence: List[np.ndarray],
+        outcome: np.ndarray,
+        behavior_name: str,
+    ) -> bool:
         """Learn behavior by imitating demonstrated action."""
         # Encode the action sequence
         if action_sequence:
@@ -374,9 +371,7 @@ class SocialLearning:
 
         return True
 
-    def emulate_goal(self,
-                     demonstrator_id: str,
-                     goal_achieved: np.ndarray) -> np.ndarray:
+    def emulate_goal(self, demonstrator_id: str, goal_achieved: np.ndarray) -> np.ndarray:
         """
         Emulation: Learn the goal, not the specific actions.
 
@@ -385,16 +380,18 @@ class SocialLearning:
         # Return goal embedding for own planning
         return goal_achieved.copy()
 
-    def social_referencing(self,
-                           trusted_agent_id: str,
-                           agent_reaction: Dict[str, float],
-                           novel_object_embedding: np.ndarray) -> float:
+    def social_referencing(
+        self,
+        trusted_agent_id: str,
+        agent_reaction: Dict[str, float],
+        novel_object_embedding: np.ndarray,
+    ) -> float:
         """
         Social referencing: Learn valence of novel object from trusted other's reaction.
         """
         # If trusted agent shows positive emotion, object is good
-        positive_emotions = ['joy', 'interest', 'trust']
-        negative_emotions = ['fear', 'disgust', 'anger']
+        positive_emotions = ["joy", "interest", "trust"]
+        negative_emotions = ["fear", "disgust", "anger"]
 
         positive_score = sum(agent_reaction.get(e, 0) for e in positive_emotions)
         negative_score = sum(agent_reaction.get(e, 0) for e in negative_emotions)
@@ -403,20 +400,19 @@ class SocialLearning:
 
         return valence
 
-    def teach(self,
-              learner_id: str,
-              skill_name: str,
-              demonstration: List[np.ndarray]) -> Dict[str, Any]:
+    def teach(
+        self, learner_id: str, skill_name: str, demonstration: List[np.ndarray]
+    ) -> Dict[str, Any]:
         """Teach a skill to another agent."""
         if skill_name not in self.teachable_skills:
-            return {'success': False, 'reason': 'skill_not_teachable'}
+            return {"success": False, "reason": "skill_not_teachable"}
 
         # Package teaching demonstration
         return {
-            'success': True,
-            'skill': skill_name,
-            'demonstration': demonstration,
-            'teacher': 'self'
+            "success": True,
+            "skill": skill_name,
+            "demonstration": demonstration,
+            "teacher": "self",
         }
 
 
@@ -441,10 +437,7 @@ class ReputationSystem:
         # Bayesian-ish update
         self.direct_trust[agent_id] = 0.8 * current + 0.2 * interaction_outcome
 
-    def receive_reputation_info(self,
-                                 about_agent: str,
-                                 from_agent: str,
-                                 reputation: float):
+    def receive_reputation_info(self, about_agent: str, from_agent: str, reputation: float):
         """Receive reputation information (gossip)."""
         if about_agent not in self.reputation_scores:
             self.reputation_scores[about_agent] = {}
@@ -493,47 +486,39 @@ class MoralCognition:
         # Learned moral rules
         self.moral_rules: List[Tuple[str, MoralFoundation, float]] = []
 
-    def evaluate_action(self,
-                        action: str,
-                        actor: str,
-                        affected_parties: List[str],
-                        context: Dict[str, Any]) -> MoralJudgment:
+    def evaluate_action(
+        self, action: str, actor: str, affected_parties: List[str], context: Dict[str, Any]
+    ) -> MoralJudgment:
         """Evaluate moral status of an action."""
         violated = {}
         upheld = {}
 
         # Check each foundation
         # Care/Harm
-        if 'harm' in action.lower() or context.get('causes_harm', False):
+        if "harm" in action.lower() or context.get("causes_harm", False):
             violated[MoralFoundation.CARE] = 0.8
-        if 'help' in action.lower() or context.get('helps_others', False):
+        if "help" in action.lower() or context.get("helps_others", False):
             upheld[MoralFoundation.CARE] = 0.7
 
         # Fairness
-        if context.get('unfair', False) or 'cheat' in action.lower():
+        if context.get("unfair", False) or "cheat" in action.lower():
             violated[MoralFoundation.FAIRNESS] = 0.9
-        if context.get('fair', False) or 'share' in action.lower():
+        if context.get("fair", False) or "share" in action.lower():
             upheld[MoralFoundation.FAIRNESS] = 0.6
 
         # Loyalty
-        if context.get('betrayal', False):
+        if context.get("betrayal", False):
             violated[MoralFoundation.LOYALTY] = 0.8
-        if context.get('loyal', False):
+        if context.get("loyal", False):
             upheld[MoralFoundation.LOYALTY] = 0.6
 
         # Liberty
-        if context.get('coercion', False) or 'force' in action.lower():
+        if context.get("coercion", False) or "force" in action.lower():
             violated[MoralFoundation.LIBERTY] = 0.7
 
         # Calculate overall judgment
-        violated_score = sum(
-            v * self.foundation_weights.get(f, 0.5)
-            for f, v in violated.items()
-        )
-        upheld_score = sum(
-            v * self.foundation_weights.get(f, 0.5)
-            for f, v in upheld.items()
-        )
+        violated_score = sum(v * self.foundation_weights.get(f, 0.5) for f, v in violated.items())
+        upheld_score = sum(v * self.foundation_weights.get(f, 0.5) for f, v in upheld.items())
 
         overall = (upheld_score - violated_score) / (upheld_score + violated_score + 1e-8)
         punishment = max(0, violated_score - 0.3)  # Threshold for punishment
@@ -544,7 +529,7 @@ class MoralCognition:
             foundations_violated=violated,
             foundations_upheld=upheld,
             overall_judgment=overall,
-            punishment_deserved=min(1.0, punishment)
+            punishment_deserved=min(1.0, punishment),
         )
 
     def should_punish(self, judgment: MoralJudgment) -> Tuple[bool, float]:
@@ -566,13 +551,15 @@ class SocialNormSystem:
         # Norm violation history
         self.violations: List[Tuple[str, SocialNorm, float]] = []
 
-    def learn_norm(self,
-                   name: str,
-                   description: str,
-                   situation_embedding: np.ndarray,
-                   prescribed: str,
-                   proscribed: str,
-                   strength: float = 0.5):
+    def learn_norm(
+        self,
+        name: str,
+        description: str,
+        situation_embedding: np.ndarray,
+        prescribed: str,
+        proscribed: str,
+        strength: float = 0.5,
+    ):
         """Learn a new social norm."""
         norm = SocialNorm(
             name=name,
@@ -580,28 +567,27 @@ class SocialNormSystem:
             situation_embedding=situation_embedding.copy(),
             prescribed_action=prescribed,
             proscribed_action=proscribed,
-            enforcement_strength=strength
+            enforcement_strength=strength,
         )
         self.norms.append(norm)
 
-    def check_applicable_norms(self,
-                                situation_embedding: np.ndarray) -> List[SocialNorm]:
+    def check_applicable_norms(self, situation_embedding: np.ndarray) -> List[SocialNorm]:
         """Find norms that apply to current situation."""
         applicable = []
 
         for norm in self.norms:
             similarity = np.dot(norm.situation_embedding, situation_embedding) / (
-                np.linalg.norm(norm.situation_embedding) *
-                np.linalg.norm(situation_embedding) + 1e-8
+                np.linalg.norm(norm.situation_embedding) * np.linalg.norm(situation_embedding)
+                + 1e-8
             )
             if similarity > 0.5:
                 applicable.append(norm)
 
         return applicable
 
-    def evaluate_action_compliance(self,
-                                    action: str,
-                                    situation_embedding: np.ndarray) -> Dict[str, Any]:
+    def evaluate_action_compliance(
+        self, action: str, situation_embedding: np.ndarray
+    ) -> Dict[str, Any]:
         """Check if action complies with applicable norms."""
         applicable_norms = self.check_applicable_norms(situation_embedding)
 
@@ -615,10 +601,10 @@ class SocialNormSystem:
                 compliance.append(norm)
 
         return {
-            'violations': [n.name for n in violations],
-            'compliance': [n.name for n in compliance],
-            'violation_severity': sum(n.enforcement_strength for n in violations),
-            'should_proceed': len(violations) == 0
+            "violations": [n.name for n in violations],
+            "compliance": [n.name for n in compliance],
+            "violation_severity": sum(n.enforcement_strength for n in violations),
+            "should_proceed": len(violations) == 0,
         }
 
 
@@ -646,11 +632,9 @@ class SocialCognitionSystem:
         # Group memberships
         self.own_groups: Set[str] = set()
 
-    def meet_agent(self,
-                   agent_id: str,
-                   name: str,
-                   embedding: np.ndarray,
-                   groups: Optional[Set[str]] = None) -> SocialAgent:
+    def meet_agent(
+        self, agent_id: str, name: str, embedding: np.ndarray, groups: Optional[Set[str]] = None
+    ) -> SocialAgent:
         """Initialize tracking of a new agent."""
         mental_state = self.theory_of_mind.create_mental_model(agent_id)
 
@@ -659,21 +643,21 @@ class SocialCognitionSystem:
             name=name,
             embedding=embedding.copy(),
             mental_state=mental_state,
-            group_memberships=groups or set()
+            group_memberships=groups or set(),
         )
 
         self.known_agents[agent_id] = agent
         return agent
 
-    def process_social_situation(self,
-                                  situation: Dict[str, Any],
-                                  observed_agents: List[str]) -> Dict[str, Any]:
+    def process_social_situation(
+        self, situation: Dict[str, Any], observed_agents: List[str]
+    ) -> Dict[str, Any]:
         """Process a social situation."""
         results = {
-            'mental_state_inferences': {},
-            'predicted_actions': {},
-            'applicable_norms': [],
-            'trust_levels': {}
+            "mental_state_inferences": {},
+            "predicted_actions": {},
+            "applicable_norms": [],
+            "trust_levels": {},
         }
 
         # Update mental models based on observations
@@ -681,38 +665,32 @@ class SocialCognitionSystem:
             if agent_id in self.known_agents:
                 # Simulate their perspective
                 perspective = self.theory_of_mind.simulate_perspective(agent_id, situation)
-                results['mental_state_inferences'][agent_id] = perspective
+                results["mental_state_inferences"][agent_id] = perspective
 
                 # Predict their next action
-                action, conf = self.theory_of_mind.predict_action(
-                    agent_id, np.zeros(self.dim)
-                )
-                results['predicted_actions'][agent_id] = (action, conf)
+                action, conf = self.theory_of_mind.predict_action(agent_id, np.zeros(self.dim))
+                results["predicted_actions"][agent_id] = (action, conf)
 
                 # Get trust level
-                results['trust_levels'][agent_id] = self.reputation.get_trust(agent_id)
+                results["trust_levels"][agent_id] = self.reputation.get_trust(agent_id)
 
         # Check applicable social norms
-        if 'situation_embedding' in situation:
-            norms = self.norms.check_applicable_norms(situation['situation_embedding'])
-            results['applicable_norms'] = [n.name for n in norms]
+        if "situation_embedding" in situation:
+            norms = self.norms.check_applicable_norms(situation["situation_embedding"])
+            results["applicable_norms"] = [n.name for n in norms]
 
         return results
 
-    def evaluate_social_action(self,
-                                action: str,
-                                actor: str,
-                                affected: List[str],
-                                context: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate_social_action(
+        self, action: str, actor: str, affected: List[str], context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Evaluate a social action morally and normatively."""
         # Moral evaluation
-        moral_judgment = self.moral_cognition.evaluate_action(
-            action, actor, affected, context
-        )
+        moral_judgment = self.moral_cognition.evaluate_action(action, actor, affected, context)
 
         # Norm compliance
         norm_compliance = self.norms.evaluate_action_compliance(
-            action, context.get('situation_embedding', np.zeros(self.dim))
+            action, context.get("situation_embedding", np.zeros(self.dim))
         )
 
         # Update trust based on action
@@ -721,44 +699,39 @@ class SocialCognitionSystem:
             self.reputation.update_trust(actor, 0.5 + trust_delta)
 
         return {
-            'moral_judgment': {
-                'overall': moral_judgment.overall_judgment,
-                'violations': {f.name: v for f, v in moral_judgment.foundations_violated.items()},
-                'upheld': {f.name: v for f, v in moral_judgment.foundations_upheld.items()},
-                'punishment_warranted': moral_judgment.punishment_deserved > 0.3
+            "moral_judgment": {
+                "overall": moral_judgment.overall_judgment,
+                "violations": {f.name: v for f, v in moral_judgment.foundations_violated.items()},
+                "upheld": {f.name: v for f, v in moral_judgment.foundations_upheld.items()},
+                "punishment_warranted": moral_judgment.punishment_deserved > 0.3,
             },
-            'norm_compliance': norm_compliance,
-            'updated_trust': self.reputation.get_trust(actor) if actor in self.known_agents else None
+            "norm_compliance": norm_compliance,
+            "updated_trust": self.reputation.get_trust(actor)
+            if actor in self.known_agents
+            else None,
         }
 
-    def interact(self,
-                 other_agent: str,
-                 interaction_type: str,
-                 outcome: float) -> Dict[str, Any]:
+    def interact(self, other_agent: str, interaction_type: str, outcome: float) -> Dict[str, Any]:
         """Record an interaction with another agent."""
         if other_agent not in self.known_agents:
-            return {'error': 'unknown_agent'}
+            return {"error": "unknown_agent"}
 
         # Update relationship
         agent = self.known_agents[other_agent]
-        agent.relationship_strength = np.clip(
-            agent.relationship_strength + outcome * 0.1, -1, 1
-        )
+        agent.relationship_strength = np.clip(agent.relationship_strength + outcome * 0.1, -1, 1)
 
         # Update trust
         self.reputation.update_trust(other_agent, outcome)
 
         # Record interaction
-        agent.interaction_history.append({
-            'type': interaction_type,
-            'outcome': outcome,
-            'time': time.time()
-        })
+        agent.interaction_history.append(
+            {"type": interaction_type, "outcome": outcome, "time": time.time()}
+        )
 
         return {
-            'agent': other_agent,
-            'new_relationship_strength': agent.relationship_strength,
-            'new_trust': self.reputation.get_trust(other_agent)
+            "agent": other_agent,
+            "new_relationship_strength": agent.relationship_strength,
+            "new_trust": self.reputation.get_trust(other_agent),
         }
 
     def is_in_group(self, agent_id: str) -> bool:
@@ -772,10 +745,10 @@ class SocialCognitionSystem:
     def get_state(self) -> Dict[str, Any]:
         """Get social cognition state."""
         return {
-            'known_agents': len(self.known_agents),
-            'own_groups': list(self.own_groups),
-            'mental_models': len(self.theory_of_mind.mental_models),
-            'joint_attention_targets': len(self.joint_attention.joint_targets),
-            'learned_behaviors': len(self.social_learning.imitated_behaviors),
-            'social_norms': len(self.norms.norms)
+            "known_agents": len(self.known_agents),
+            "own_groups": list(self.own_groups),
+            "mental_models": len(self.theory_of_mind.mental_models),
+            "joint_attention_targets": len(self.joint_attention.joint_targets),
+            "learned_behaviors": len(self.social_learning.imitated_behaviors),
+            "social_norms": len(self.norms.norms),
         }

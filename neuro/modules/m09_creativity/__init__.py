@@ -16,15 +16,15 @@ from .imagery import VisualImagery, AuditoryImagery, MotorImagery, TactileImager
 from .creative_process import CreativeProcess, Idea, CreativeOutput
 
 __all__ = [
-    'DefaultModeNetwork',
-    'ExecutiveControlNetwork',
-    'SalienceNetwork',
-    'VisualImagery',
-    'AuditoryImagery',
-    'MotorImagery',
-    'TactileImagery',
-    'ImagerySystem',
-    'CreativeProcess',
-    'Idea',
-    'CreativeOutput',
+    "DefaultModeNetwork",
+    "ExecutiveControlNetwork",
+    "SalienceNetwork",
+    "VisualImagery",
+    "AuditoryImagery",
+    "MotorImagery",
+    "TactileImagery",
+    "ImagerySystem",
+    "CreativeProcess",
+    "Idea",
+    "CreativeOutput",
 ]

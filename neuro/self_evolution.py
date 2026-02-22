@@ -35,7 +35,9 @@ class SelfEvolution:
     """
 
     def __init__(self, storage_path: str = None):
-        self.storage_path = Path(storage_path or os.path.expanduser("~/.cognitive_ai_knowledge/evolution"))
+        self.storage_path = Path(
+            storage_path or os.path.expanduser("~/.cognitive_ai_knowledge/evolution")
+        )
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         # Track learned content hashes (no duplicates)
@@ -50,25 +52,27 @@ class SelfEvolution:
 
         # Evolution state
         self.state = {
-            'current_cycle': 0,
-            'facts_this_cycle': 0,
-            'facts_per_cycle': 100,
-            'baseline_score': None,
-            'current_score': None,
-            'total_trainings': 0,
-            'improvements': [],
-            'added_functions': []
+            "current_cycle": 0,
+            "facts_this_cycle": 0,
+            "facts_per_cycle": 100,
+            "baseline_score": None,
+            "current_score": None,
+            "total_trainings": 0,
+            "improvements": [],
+            "added_functions": [],
         }
         self.state_file = self.storage_path / "evolution_state.json"
         self._load_state()
 
         # Training data for MLX
-        self.training_data_file = os.path.expanduser("~/.cognitive_ai_knowledge/training_data.jsonl")
+        self.training_data_file = os.path.expanduser(
+            "~/.cognitive_ai_knowledge/training_data.jsonl"
+        )
 
     def _hash_content(self, content: str) -> str:
         """Create hash of content to detect duplicates."""
         # Normalize: lowercase, remove extra spaces
-        normalized = ' '.join(content.lower().split())
+        normalized = " ".join(content.lower().split())
         return hashlib.md5(normalized.encode()).hexdigest()
 
     def is_duplicate(self, content: str) -> bool:
@@ -82,29 +86,29 @@ class SelfEvolution:
         if h in self.learned_hashes:
             return False
         self.learned_hashes.add(h)
-        self.state['facts_this_cycle'] += 1
+        self.state["facts_this_cycle"] += 1
         self._save_hashes()
         return True
 
     def should_benchmark(self) -> bool:
         """Check if we should run benchmark (every 100 facts)."""
-        return self.state['facts_this_cycle'] >= self.state['facts_per_cycle']
+        return self.state["facts_this_cycle"] >= self.state["facts_per_cycle"]
 
     def record_benchmark(self, score: float, details: Dict = None):
         """Record benchmark result."""
         result = {
-            'timestamp': datetime.now().isoformat(),
-            'score': score,
-            'cycle': self.state['current_cycle'],
-            'facts_learned': len(self.learned_hashes),
-            'details': details or {}
+            "timestamp": datetime.now().isoformat(),
+            "score": score,
+            "cycle": self.state["current_cycle"],
+            "facts_learned": len(self.learned_hashes),
+            "details": details or {},
         }
         self.benchmark_history.append(result)
 
         # Update state
-        if self.state['baseline_score'] is None:
-            self.state['baseline_score'] = score
-        self.state['current_score'] = score
+        if self.state["baseline_score"] is None:
+            self.state["baseline_score"] = score
+        self.state["current_score"] = score
 
         self._save_benchmark_history()
         self._save_state()
@@ -113,9 +117,9 @@ class SelfEvolution:
 
     def get_improvement(self) -> float:
         """Get improvement since baseline (percentage points)."""
-        if self.state['baseline_score'] is None or self.state['current_score'] is None:
+        if self.state["baseline_score"] is None or self.state["current_score"] is None:
             return 0.0
-        return self.state['current_score'] - self.state['baseline_score']
+        return self.state["current_score"] - self.state["baseline_score"]
 
     def should_train(self, min_improvement: float = 0.01) -> Tuple[bool, str]:
         """
@@ -134,7 +138,7 @@ class SelfEvolution:
 
         # Train if we have enough data (500+) even without improvement
         # This bootstraps the model to USE the knowledge
-        if training_count >= 500 and self.state['total_trainings'] == 0:
+        if training_count >= 500 and self.state["total_trainings"] == 0:
             return True, f"First training with {training_count} pairs - bootstrap learning!"
 
         if improvement >= min_improvement:
@@ -150,15 +154,15 @@ class SelfEvolution:
         if not os.path.exists(self.training_data_file):
             return 0
         try:
-            with open(self.training_data_file, 'r') as f:
+            with open(self.training_data_file, "r") as f:
                 return sum(1 for _ in f)
         except:
             return 0
 
     def start_new_cycle(self):
         """Start a new learning cycle."""
-        self.state['current_cycle'] += 1
-        self.state['facts_this_cycle'] = 0
+        self.state["current_cycle"] += 1
+        self.state["facts_this_cycle"] = 0
         self._save_state()
 
     def run_mlx_training(self, model_name: str = "ministral-3:8b") -> Dict:
@@ -167,24 +171,20 @@ class SelfEvolution:
 
         This is REAL training that modifies the model.
         """
-        result = {
-            'success': False,
-            'message': '',
-            'timestamp': datetime.now().isoformat()
-        }
+        result = {"success": False, "message": "", "timestamp": datetime.now().isoformat()}
 
         # Check if MLX is available
         try:
             import mlx
             import mlx.core as mx
         except ImportError:
-            result['message'] = "MLX not installed. Run: pip install mlx mlx-lm"
+            result["message"] = "MLX not installed. Run: pip install mlx mlx-lm"
             return result
 
         # Check training data
         training_count = self._count_training_pairs()
         if training_count < 10:
-            result['message'] = f"Not enough training data: {training_count} pairs"
+            result["message"] = f"Not enough training data: {training_count} pairs"
             return result
 
         # Prepare training data in MLX format
@@ -199,48 +199,57 @@ class SelfEvolution:
             # MLX-LM fine-tuning command
             # Using LoRA for efficient training
             cmd = [
-                "python", "-m", "mlx_lm.lora",
-                "--model", model_name,
-                "--data", str(mlx_data_file),
+                "python",
+                "-m",
+                "mlx_lm.lora",
+                "--model",
+                model_name,
+                "--data",
+                str(mlx_data_file),
                 "--train",
-                "--batch-size", "1",
-                "--lora-layers", "4",
-                "--iters", "100"
+                "--batch-size",
+                "1",
+                "--lora-layers",
+                "4",
+                "--iters",
+                "100",
             ]
 
             process = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 minutes max
+                timeout=600,  # 10 minutes max
             )
 
             if process.returncode == 0:
-                result['success'] = True
-                result['message'] = "MLX fine-tuning completed successfully!"
-                self.state['total_trainings'] += 1
-                self.state['improvements'].append({
-                    'cycle': self.state['current_cycle'],
-                    'improvement': self.get_improvement(),
-                    'timestamp': datetime.now().isoformat()
-                })
+                result["success"] = True
+                result["message"] = "MLX fine-tuning completed successfully!"
+                self.state["total_trainings"] += 1
+                self.state["improvements"].append(
+                    {
+                        "cycle": self.state["current_cycle"],
+                        "improvement": self.get_improvement(),
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                )
                 self._save_state()
             else:
-                result['message'] = f"MLX training failed: {process.stderr[:200]}"
+                result["message"] = f"MLX training failed: {process.stderr[:200]}"
 
         except subprocess.TimeoutExpired:
-            result['message'] = "MLX training timed out (>10 minutes)"
+            result["message"] = "MLX training timed out (>10 minutes)"
         except FileNotFoundError:
-            result['message'] = "mlx_lm not found. Run: pip install mlx-lm"
+            result["message"] = "mlx_lm not found. Run: pip install mlx-lm"
         except Exception as e:
-            result['message'] = f"MLX training error: {str(e)}"
+            result["message"] = f"MLX training error: {str(e)}"
 
         return result
 
     def _prepare_mlx_data(self, output_file: Path):
         """Convert training data to MLX format."""
-        with open(self.training_data_file, 'r') as f_in:
-            with open(output_file, 'w') as f_out:
+        with open(self.training_data_file, "r") as f_in:
+            with open(output_file, "w") as f_out:
                 for line in f_in:
                     try:
                         data = json.loads(line)
@@ -248,7 +257,7 @@ class SelfEvolution:
                         mlx_entry = {
                             "text": f"<s>[INST] {data['prompt']} [/INST] {data['completion']}</s>"
                         }
-                        f_out.write(json.dumps(mlx_entry) + '\n')
+                        f_out.write(json.dumps(mlx_entry) + "\n")
                     except:
                         continue
 
@@ -262,18 +271,16 @@ class SelfEvolution:
 
         try:
             # Append new function
-            with open(functions_file, 'a') as f:
+            with open(functions_file, "a") as f:
                 f.write(f"\n\n# Added: {datetime.now().isoformat()}\n")
                 f.write(f"# Description: {description}\n")
                 f.write(code)
                 f.write("\n")
 
             # Record
-            self.state['added_functions'].append({
-                'name': name,
-                'description': description,
-                'timestamp': datetime.now().isoformat()
-            })
+            self.state["added_functions"].append(
+                {"name": name, "description": description, "timestamp": datetime.now().isoformat()}
+            )
             self._save_state()
 
             return True
@@ -284,12 +291,20 @@ class SelfEvolution:
     def reflect(self) -> str:
         """Generate reflection on current evolution state."""
         improvement = self.get_improvement()
-        cycles = self.state['current_cycle']
+        cycles = self.state["current_cycle"]
         facts = len(self.learned_hashes)
-        trainings = self.state['total_trainings']
+        trainings = self.state["total_trainings"]
 
-        baseline_str = f"{self.state['baseline_score']:.1%}" if self.state['baseline_score'] is not None else 'N/A'
-        current_str = f"{self.state['current_score']:.1%}" if self.state['current_score'] is not None else 'N/A'
+        baseline_str = (
+            f"{self.state['baseline_score']:.1%}"
+            if self.state["baseline_score"] is not None
+            else "N/A"
+        )
+        current_str = (
+            f"{self.state['current_score']:.1%}"
+            if self.state["current_score"] is not None
+            else "N/A"
+        )
 
         reflection = f"""
 === EVOLUTION REFLECTION ===
@@ -299,7 +314,7 @@ Baseline score: {baseline_str}
 Current score: {current_str}
 Improvement: {improvement:+.1%}
 MLX trainings: {trainings}
-Functions added: {len(self.state['added_functions'])}
+Functions added: {len(self.state["added_functions"])}
 
 """
 
@@ -318,14 +333,14 @@ Functions added: {len(self.state['added_functions'])}
     def get_stats(self) -> Dict:
         """Get evolution statistics."""
         return {
-            'cycle': self.state['current_cycle'],
-            'facts_this_cycle': self.state['facts_this_cycle'],
-            'total_facts': len(self.learned_hashes),
-            'baseline_score': self.state['baseline_score'],
-            'current_score': self.state['current_score'],
-            'improvement': self.get_improvement(),
-            'trainings': self.state['total_trainings'],
-            'functions_added': len(self.state['added_functions'])
+            "cycle": self.state["current_cycle"],
+            "facts_this_cycle": self.state["facts_this_cycle"],
+            "total_facts": len(self.learned_hashes),
+            "baseline_score": self.state["baseline_score"],
+            "current_score": self.state["current_score"],
+            "improvement": self.get_improvement(),
+            "trainings": self.state["total_trainings"],
+            "functions_added": len(self.state["added_functions"]),
         }
 
     # Persistence methods
@@ -333,38 +348,38 @@ Functions added: {len(self.state['added_functions'])}
     def _load_hashes(self):
         if self.learned_hashes_file.exists():
             try:
-                with open(self.learned_hashes_file, 'r') as f:
+                with open(self.learned_hashes_file, "r") as f:
                     self.learned_hashes = set(json.load(f))
             except:
                 self.learned_hashes = set()
 
     def _save_hashes(self):
-        with open(self.learned_hashes_file, 'w') as f:
+        with open(self.learned_hashes_file, "w") as f:
             json.dump(list(self.learned_hashes), f)
 
     def _load_benchmark_history(self):
         if self.benchmark_file.exists():
             try:
-                with open(self.benchmark_file, 'r') as f:
+                with open(self.benchmark_file, "r") as f:
                     self.benchmark_history = json.load(f)
             except:
                 self.benchmark_history = []
 
     def _save_benchmark_history(self):
-        with open(self.benchmark_file, 'w') as f:
+        with open(self.benchmark_file, "w") as f:
             json.dump(self.benchmark_history, f, indent=2)
 
     def _load_state(self):
         if self.state_file.exists():
             try:
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file, "r") as f:
                     loaded = json.load(f)
                     self.state.update(loaded)
             except:
                 pass
 
     def _save_state(self):
-        with open(self.state_file, 'w') as f:
+        with open(self.state_file, "w") as f:
             json.dump(self.state, f, indent=2)
 
 
@@ -396,7 +411,7 @@ if __name__ == "__main__":
 
     # Test benchmark
     print("\n2. Testing benchmark tracking:")
-    evo.record_benchmark(0.23, {'math': 0.0, 'logic': 0.1})
+    evo.record_benchmark(0.23, {"math": 0.0, "logic": 0.1})
     print(f"   Baseline: {evo.state['baseline_score']}")
 
     # Simulate improvement

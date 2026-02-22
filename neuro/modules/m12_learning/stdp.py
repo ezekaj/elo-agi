@@ -13,6 +13,7 @@ from dataclasses import dataclass
 @dataclass
 class STDPParams:
     """STDP parameters"""
+
     A_plus: float = 0.005  # LTP amplitude
     A_minus: float = 0.005  # LTD amplitude
     tau_plus: float = 20.0  # LTP time constant (ms)
@@ -53,9 +54,7 @@ class STDPRule:
             return 0.0
 
     def compute_weight_matrix_change(
-        self,
-        pre_times: np.ndarray,
-        post_times: np.ndarray
+        self, pre_times: np.ndarray, post_times: np.ndarray
     ) -> np.ndarray:
         """Compute weight changes for all pre-post pairs
 
@@ -83,11 +82,7 @@ class STDPRule:
 class STDPSynapse:
     """Single synapse with STDP"""
 
-    def __init__(
-        self,
-        weight: float = 0.5,
-        params: Optional[STDPParams] = None
-    ):
+    def __init__(self, weight: float = 0.5, params: Optional[STDPParams] = None):
         self.weight = weight
         self.params = params or STDPParams()
         self.rule = STDPRule(self.params)
@@ -107,11 +102,7 @@ class STDPSynapse:
             delta_t = time - post_t
             if abs(delta_t) < 100:  # Within 100ms
                 dw = self.rule.compute_weight_change(-delta_t)  # Negative because post was before
-                self.weight = np.clip(
-                    self.weight + dw,
-                    self.params.w_min,
-                    self.params.w_max
-                )
+                self.weight = np.clip(self.weight + dw, self.params.w_min, self.params.w_max)
 
     def post_spike(self, time: float) -> None:
         """Record postsynaptic spike"""
@@ -123,11 +114,7 @@ class STDPSynapse:
             delta_t = time - pre_t
             if abs(delta_t) < 100:  # Within 100ms
                 dw = self.rule.compute_weight_change(delta_t)
-                self.weight = np.clip(
-                    self.weight + dw,
-                    self.params.w_min,
-                    self.params.w_max
-                )
+                self.weight = np.clip(self.weight + dw, self.params.w_min, self.params.w_max)
 
     def reset_history(self) -> None:
         """Clear spike history"""
@@ -138,12 +125,7 @@ class STDPSynapse:
 class STDPNetwork:
     """Network of neurons with STDP"""
 
-    def __init__(
-        self,
-        n_pre: int,
-        n_post: int,
-        params: Optional[STDPParams] = None
-    ):
+    def __init__(self, n_pre: int, n_post: int, params: Optional[STDPParams] = None):
         self.n_pre = n_pre
         self.n_post = n_post
         self.params = params or STDPParams()
@@ -159,12 +141,7 @@ class STDPNetwork:
         # Trace decay
         self.trace_decay = 0.95
 
-    def update(
-        self,
-        pre_spikes: np.ndarray,
-        post_spikes: np.ndarray,
-        dt: float = 1.0
-    ) -> None:
+    def update(self, pre_spikes: np.ndarray, post_spikes: np.ndarray, dt: float = 1.0) -> None:
         """Update weights based on spike patterns
 
         Args:
@@ -193,10 +170,7 @@ class STDPNetwork:
         return self.weights @ pre_activity
 
     def train(
-        self,
-        pre_patterns: np.ndarray,
-        post_patterns: np.ndarray,
-        n_epochs: int = 10
+        self, pre_patterns: np.ndarray, post_patterns: np.ndarray, n_epochs: int = 10
     ) -> List[float]:
         """Train network with paired patterns"""
         weight_changes = []

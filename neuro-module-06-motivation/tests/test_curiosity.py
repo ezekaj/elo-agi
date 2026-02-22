@@ -7,8 +7,9 @@ from neuro.modules.m06_motivation.curiosity_drive import (
     NoveltyDetector,
     InformationValue,
     ExplorationController,
-    InformationPacket
+    InformationPacket,
 )
+
 
 class TestNoveltyDetector:
     """Tests for novelty detection"""
@@ -66,6 +67,7 @@ class TestNoveltyDetector:
         far = np.array([10.0, 10.0])
         assert detector.is_novel(far)
 
+
 class TestInformationValue:
     """Tests for information value computation"""
 
@@ -77,10 +79,7 @@ class TestInformationValue:
         info_value = InformationValue()
 
         info = InformationPacket(
-            content=np.zeros(3),
-            novelty=0.8,
-            relevance=0.5,
-            uncertainty_reduction=0.3
+            content=np.zeros(3), novelty=0.8, relevance=0.5, uncertainty_reduction=0.3
         )
 
         value = info_value.compute_information_value(info)
@@ -90,35 +89,36 @@ class TestInformationValue:
         info_value = InformationValue()
 
         # Set up knowledge gap
-        info_value.set_uncertainty('physics', 0.9)
+        info_value.set_uncertainty("physics", 0.9)
 
         info = InformationPacket(
             content=np.zeros(3),
             novelty=0.5,
             relevance=0.5,
             uncertainty_reduction=0.4,
-            source='physics'
+            source="physics",
         )
 
-        value_with_gap = info_value.compute_information_value(info, topics=['physics'])
+        value_with_gap = info_value.compute_information_value(info, topics=["physics"])
 
         # Without matching topic
-        value_without = info_value.compute_information_value(info, topics=['biology'])
+        value_without = info_value.compute_information_value(info, topics=["biology"])
 
         assert value_with_gap > value_without
 
     def test_identify_knowledge_gaps(self):
         info_value = InformationValue()
 
-        info_value.set_uncertainty('topic_a', 0.8)
-        info_value.set_uncertainty('topic_b', 0.3)
-        info_value.set_uncertainty('topic_c', 0.9)
+        info_value.set_uncertainty("topic_a", 0.8)
+        info_value.set_uncertainty("topic_b", 0.3)
+        info_value.set_uncertainty("topic_c", 0.9)
 
         gaps = info_value.identify_knowledge_gaps(threshold=0.5)
 
-        assert 'topic_a' in gaps
-        assert 'topic_c' in gaps
-        assert 'topic_b' not in gaps
+        assert "topic_a" in gaps
+        assert "topic_c" in gaps
+        assert "topic_b" not in gaps
+
 
 class TestExplorationController:
     """Tests for exploration vs exploitation control"""
@@ -131,15 +131,11 @@ class TestExplorationController:
         controller = ExplorationController()
 
         low_rate = controller.compute_exploration_rate(
-            curiosity_level=0.1,
-            dopamine_level=0.5,
-            uncertainty=0.5
+            curiosity_level=0.1, dopamine_level=0.5, uncertainty=0.5
         )
 
         high_rate = controller.compute_exploration_rate(
-            curiosity_level=0.9,
-            dopamine_level=0.5,
-            uncertainty=0.5
+            curiosity_level=0.9, dopamine_level=0.5, uncertainty=0.5
         )
 
         assert high_rate > low_rate
@@ -155,9 +151,7 @@ class TestExplorationController:
         assert controller.boredom_level > 0.5
 
         rate = controller.compute_exploration_rate(
-            curiosity_level=0.5,
-            dopamine_level=0.5,
-            uncertainty=0.5
+            curiosity_level=0.5, dopamine_level=0.5, uncertainty=0.5
         )
 
         # Should be higher than base due to boredom
@@ -176,6 +170,7 @@ class TestExplorationController:
         # Using wider bounds to account for randomness
         assert 20 <= explore_count <= 80
 
+
 class TestCuriosityModule:
     """Tests for integrated curiosity system"""
 
@@ -188,14 +183,13 @@ class TestCuriosityModule:
         module = CuriosityModule(state_dim=3)
 
         result = module.process_stimulus(
-            stimulus=np.array([1.0, 0.0, -1.0]),
-            action=np.array([0.5, -0.5])
+            stimulus=np.array([1.0, 0.0, -1.0]), action=np.array([0.5, -0.5])
         )
 
-        assert 'novelty' in result
-        assert 'info_value' in result
-        assert 'curiosity_level' in result
-        assert 'memory_strength' in result
+        assert "novelty" in result
+        assert "info_value" in result
+        assert "curiosity_level" in result
+        assert "memory_strength" in result
 
     def test_curiosity_increases_with_novelty(self):
         module = CuriosityModule(state_dim=2, base_curiosity=0.5)
@@ -256,12 +250,12 @@ class TestCuriosityModule:
     def test_knowledge_gap_registration(self):
         module = CuriosityModule(state_dim=2)
 
-        module.register_curiosity_target('quantum_mechanics', intensity=0.8)
-        module.register_curiosity_target('cooking', intensity=0.3)
+        module.register_curiosity_target("quantum_mechanics", intensity=0.8)
+        module.register_curiosity_target("cooking", intensity=0.3)
 
         gaps = module.get_knowledge_gaps()
 
-        assert 'quantum_mechanics' in gaps or len(gaps) >= 0  # May or may not exceed threshold
+        assert "quantum_mechanics" in gaps or len(gaps) >= 0  # May or may not exceed threshold
 
     def test_get_state_comprehensive(self):
         module = CuriosityModule(state_dim=2)
@@ -271,9 +265,9 @@ class TestCuriosityModule:
 
         state = module.get_state()
 
-        assert hasattr(state, 'overall_level')
-        assert hasattr(state, 'boredom_level')
-        assert hasattr(state, 'recent_discoveries')
+        assert hasattr(state, "overall_level")
+        assert hasattr(state, "boredom_level")
+        assert hasattr(state, "recent_discoveries")
 
     def test_metrics_available(self):
         module = CuriosityModule(state_dim=2)
@@ -283,9 +277,10 @@ class TestCuriosityModule:
 
         metrics = module.get_metrics()
 
-        assert 'curiosity_level' in metrics
-        assert 'boredom_level' in metrics
-        assert 'novelty_trend' in metrics
+        assert "curiosity_level" in metrics
+        assert "boredom_level" in metrics
+        assert "novelty_trend" in metrics
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

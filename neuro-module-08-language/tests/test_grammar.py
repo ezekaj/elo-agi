@@ -6,8 +6,9 @@ from neuro.modules.m08_language.grammar_manifold import (
     GrammarConstraintManifold,
     UniversalGrammar,
     ImpossibleGrammarGenerator,
-    GrammarState
+    GrammarState,
 )
+
 
 class TestGrammarConstraintManifold:
     """Tests for grammar constraint manifold"""
@@ -25,7 +26,10 @@ class TestGrammarConstraintManifold:
 
         # Near center = possible
         possible_params = manifold.center + np.random.randn(32) * 0.1
-        assert manifold.is_possible_grammar(possible_params) or manifold.get_violation_score(possible_params) < 1.0
+        assert (
+            manifold.is_possible_grammar(possible_params)
+            or manifold.get_violation_score(possible_params) < 1.0
+        )
 
         # Far from center = possibly impossible
         impossible_params = manifold.center + np.random.randn(32) * 10
@@ -72,7 +76,9 @@ class TestGrammarConstraintManifold:
         original_violation = manifold.get_violation_score(impossible)
         projected_violation = manifold.get_violation_score(projected)
 
-        assert projected_violation <= original_violation + 0.1  # May not always decrease due to complexity
+        assert (
+            projected_violation <= original_violation + 0.1
+        )  # May not always decrease due to complexity
 
     def test_distance_to_boundary(self):
         """Test distance to boundary computation"""
@@ -101,6 +107,7 @@ class TestGrammarConstraintManifold:
         assert isinstance(state.is_possible, bool)
         assert np.isfinite(state.violation_score)
 
+
 class TestUniversalGrammar:
     """Tests for Universal Grammar"""
 
@@ -119,8 +126,8 @@ class TestUniversalGrammar:
         params = np.random.randn(32)
         result = ug.evaluate(params)
 
-        assert 'overall' in result
-        assert 0 <= result['overall'] <= 1
+        assert "overall" in result
+        assert 0 <= result["overall"] <= 1
 
         for principle in ug.principles:
             assert principle in result
@@ -139,15 +146,16 @@ class TestUniversalGrammar:
         ug = UniversalGrammar(dim=32)
 
         # Set parameter
-        ug.set_parameter('head_direction', 0.5)
+        ug.set_parameter("head_direction", 0.5)
 
         settings = ug.get_parameter_settings()
-        assert settings['head_direction'] == 0.5
+        assert settings["head_direction"] == 0.5
 
         # Clipping
-        ug.set_parameter('head_direction', 2.0)  # Out of range
+        ug.set_parameter("head_direction", 2.0)  # Out of range
         settings = ug.get_parameter_settings()
-        assert settings['head_direction'] == 1.0  # Clipped
+        assert settings["head_direction"] == 1.0  # Clipped
+
 
 class TestImpossibleGrammarGenerator:
     """Tests for impossible grammar generation"""
@@ -166,15 +174,15 @@ class TestImpossibleGrammarGenerator:
         gen = ImpossibleGrammarGenerator(dim=32)
 
         # Random impossible
-        impossible = gen.generate_impossible('random')
+        impossible = gen.generate_impossible("random")
         assert impossible.shape == (32,)
 
         # Structure-violating
-        structure_impossible = gen.generate_impossible('structure')
+        structure_impossible = gen.generate_impossible("structure")
         assert structure_impossible.shape == (32,)
 
         # Unbounded
-        unbounded_impossible = gen.generate_impossible('unbounded')
+        unbounded_impossible = gen.generate_impossible("unbounded")
         assert unbounded_impossible.shape == (32,)
 
     def test_generate_test_set(self):
@@ -183,10 +191,11 @@ class TestImpossibleGrammarGenerator:
 
         test_set = gen.generate_test_set(n_possible=5, n_impossible=5)
 
-        assert 'possible' in test_set
-        assert 'impossible' in test_set
-        assert len(test_set['possible']) == 5
-        assert len(test_set['impossible']) == 5
+        assert "possible" in test_set
+        assert "impossible" in test_set
+        assert len(test_set["possible"]) == 5
+        assert len(test_set["impossible"]) == 5
+
 
 class TestSelectiveInhibition:
     """Tests verifying selective inhibition for impossible grammars"""
@@ -212,5 +221,6 @@ class TestSelectiveInhibition:
         # This is a soft test as the manifold is randomly initialized
         assert mean_impossible >= mean_possible * 0.5 or mean_possible < 0.3
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

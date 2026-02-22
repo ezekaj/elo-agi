@@ -18,6 +18,7 @@ from .language_grounding import LanguageGrounding, GroundingConfig
 @dataclass
 class DialogueConfig:
     """Configuration for dialogue agent."""
+
     max_history: int = 20
     system_prompt: str = "You are a helpful cognitive agent that can perceive, think, and act."
     use_grounding: bool = True
@@ -28,6 +29,7 @@ class DialogueConfig:
 @dataclass
 class ConversationTurn:
     """A single turn in conversation."""
+
     role: str  # "user" or "agent"
     content: str
     timestamp: float = field(default_factory=time.time)
@@ -104,7 +106,7 @@ class NeuroDialogueAgent:
 
         # Trim history
         if len(self._history) > self.config.max_history * 2:
-            self._history = self._history[-self.config.max_history * 2:]
+            self._history = self._history[-self.config.max_history * 2 :]
 
         return response
 
@@ -122,14 +124,18 @@ class NeuroDialogueAgent:
         self._current_state = self.cognitive_core.state.last_input
 
         # Convert output to action description
-        if hasattr(output, 'value') and isinstance(output.value, np.ndarray):
+        if hasattr(output, "value") and isinstance(output.value, np.ndarray):
             action_vec = output.value
         else:
             action_vec = internal  # Fallback
 
         # Generate response using LLM with cognitive context
         context = self._build_context()
-        state_description = self.bridge.observation_to_text(self._current_state) if self._current_state is not None else ""
+        state_description = (
+            self.bridge.observation_to_text(self._current_state)
+            if self._current_state is not None
+            else ""
+        )
 
         prompt = f"""Based on the conversation and cognitive state, generate a response.
 
@@ -186,24 +192,24 @@ Respond naturally and helpfully:"""
     def _build_context(self) -> Dict[str, Any]:
         """Build context dictionary for response generation."""
         context = {
-            'turn_count': self._turn_count,
-            'history_length': len(self._history),
+            "turn_count": self._turn_count,
+            "history_length": len(self._history),
         }
 
         if self._current_state is not None:
-            context['state_summary'] = {
-                'mean_activation': float(np.mean(np.abs(self._current_state))),
-                'max_activation': float(np.max(np.abs(self._current_state))),
+            context["state_summary"] = {
+                "mean_activation": float(np.mean(np.abs(self._current_state))),
+                "max_activation": float(np.max(np.abs(self._current_state))),
             }
 
         if self.cognitive_core is not None:
-            context['cognitive_stats'] = self.cognitive_core.get_statistics()
+            context["cognitive_stats"] = self.cognitive_core.get_statistics()
 
         return context
 
     def _format_history(self, max_turns: int = 10) -> str:
         """Format conversation history as string."""
-        recent = self._history[-max_turns * 2:]
+        recent = self._history[-max_turns * 2 :]
         lines = []
         for turn in recent:
             prefix = "User" if turn.role == "user" else "Agent"
@@ -252,11 +258,11 @@ Respond naturally and helpfully:"""
             self.cognitive_core.perceive(self.bridge.encode(instruction))
             self.cognitive_core.think()
             output = self.cognitive_core.act()
-            if hasattr(output, 'value') and isinstance(output.value, np.ndarray):
+            if hasattr(output, "value") and isinstance(output.value, np.ndarray):
                 action = output.value
 
         # Describe action
-        action_type = parsed.get('type', 'unknown')
+        action_type = parsed.get("type", "unknown")
         description = f"Executing {action_type} action"
 
         return action, description
@@ -278,12 +284,12 @@ Respond naturally and helpfully:"""
         # Ground goal
         self.grounding.ground(goal_description, goal=goal_vector)
 
-        self._context['current_goal'] = goal_description
+        self._context["current_goal"] = goal_description
 
     def get_goal_description(self) -> str:
         """Get current goal as natural language."""
-        if 'current_goal' in self._context:
-            return self._context['current_goal']
+        if "current_goal" in self._context:
+            return self._context["current_goal"]
 
         if self.cognitive_core is not None and self.cognitive_core.state.goals is not None:
             return self.grounding.goal_to_text(self.cognitive_core.state.goals)
@@ -339,13 +345,13 @@ Respond naturally and helpfully:"""
     def get_statistics(self) -> Dict[str, Any]:
         """Get agent statistics."""
         return {
-            'turn_count': self._turn_count,
-            'total_tokens': self._total_tokens,
-            'history_length': len(self._history),
-            'has_cognitive_core': self.cognitive_core is not None,
-            'grounding_stats': self.grounding.get_statistics(),
-            'bridge_stats': self.bridge.get_statistics(),
-            'llm_stats': self.llm.get_statistics(),
+            "turn_count": self._turn_count,
+            "total_tokens": self._total_tokens,
+            "history_length": len(self._history),
+            "has_cognitive_core": self.cognitive_core is not None,
+            "grounding_stats": self.grounding.get_statistics(),
+            "bridge_stats": self.bridge.get_statistics(),
+            "llm_stats": self.llm.get_statistics(),
         }
 
     def reset(self) -> None:
@@ -388,22 +394,26 @@ class MultiAgentDialogue:
         responses = {}
 
         # Record speaker's message
-        self._conversation_log.append({
-            'speaker': speaker,
-            'message': message,
-            'timestamp': time.time(),
-        })
+        self._conversation_log.append(
+            {
+                "speaker": speaker,
+                "message": message,
+                "timestamp": time.time(),
+            }
+        )
 
         # Get responses from other agents
         for name, agent in self.agents.items():
             if name != speaker:
                 response = agent.respond(f"{speaker} says: {message}")
                 responses[name] = response
-                self._conversation_log.append({
-                    'speaker': name,
-                    'message': response,
-                    'timestamp': time.time(),
-                })
+                self._conversation_log.append(
+                    {
+                        "speaker": name,
+                        "message": response,
+                        "timestamp": time.time(),
+                    }
+                )
 
         return responses
 

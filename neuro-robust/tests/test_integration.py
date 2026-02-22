@@ -3,12 +3,16 @@
 import pytest
 import numpy as np
 from neuro.modules.robust.robust_inference import (
-    RobustInference, AdaptiveThresholdInference,
-    RobustPrediction, SelectivePrediction, RejectionPolicy,
+    RobustInference,
+    AdaptiveThresholdInference,
+    RobustPrediction,
+    SelectivePrediction,
+    RejectionPolicy,
 )
 from neuro.modules.robust.uncertainty import SimpleDropoutNN, UncertaintyQuantifier
 from neuro.modules.robust.ood_detection import OODDetector, OODMethod, SimpleClassifier
 from neuro.modules.robust.calibration import ConfidenceCalibrator, CalibrationMethod
+
 
 class TestRobustInference:
     """Tests for RobustInference."""
@@ -85,6 +89,7 @@ class TestRobustInference:
         """Test inference without OOD check."""
         result = robust_inference.infer(sample_input, check_ood=False)
         assert result.is_ood == False
+
 
 class TestRejectionPolicies:
     """Tests for different rejection policies."""
@@ -166,6 +171,7 @@ class TestRejectionPolicies:
         # Most should be rejected with strict thresholds
         assert rejected_count > 10
 
+
 class TestSelectivePrediction:
     """Tests for selective prediction."""
 
@@ -224,6 +230,7 @@ class TestSelectivePrediction:
         assert isinstance(pred, int)
         assert isinstance(unc, float)
 
+
 class TestRobustAggregation:
     """Tests for robust prediction aggregation."""
 
@@ -269,6 +276,7 @@ class TestRobustAggregation:
         assert winner == 0
         assert conf == 0.0
 
+
 class TestBatchInference:
     """Tests for batch inference."""
 
@@ -299,6 +307,7 @@ class TestBatchInference:
         results_without = robust_inference.batch_infer(batch, return_rejected=False)
 
         assert len(results_with) >= len(results_without)
+
 
 class TestThresholdCalibration:
     """Tests for threshold calibration."""
@@ -337,11 +346,12 @@ class TestThresholdCalibration:
 
         # At least one should change
         changed = (
-            robust_inference.confidence_threshold != initial_conf or
-            robust_inference.uncertainty_threshold != initial_unc
+            robust_inference.confidence_threshold != initial_conf
+            or robust_inference.uncertainty_threshold != initial_unc
         )
         # May not change if already optimal
         assert isinstance(robust_inference.confidence_threshold, float)
+
 
 class TestEvaluation:
     """Tests for evaluation metrics."""
@@ -380,10 +390,8 @@ class TestEvaluation:
     def test_risk_is_complement_of_accuracy(self, robust_inference, test_data):
         """Test risk = 1 - accuracy."""
         metrics = robust_inference.evaluate(test_data)
-        assert np.isclose(
-            metrics["selective_risk"],
-            1.0 - metrics["selective_accuracy"]
-        )
+        assert np.isclose(metrics["selective_risk"], 1.0 - metrics["selective_accuracy"])
+
 
 class TestAdaptiveThresholdInference:
     """Tests for AdaptiveThresholdInference."""
@@ -444,6 +452,7 @@ class TestAdaptiveThresholdInference:
 
         assert 0.3 <= adaptive_inference.confidence_threshold <= 0.99
         assert 0.1 <= adaptive_inference.uncertainty_threshold <= 2.0
+
 
 class TestFullPipeline:
     """End-to-end tests for the full robust inference pipeline."""

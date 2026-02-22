@@ -9,6 +9,7 @@ from neuro.modules.credit.contribution_accounting import (
     ContributionAccountant,
 )
 
+
 class TestShapleyConfig:
     """Tests for ShapleyConfig class."""
 
@@ -20,6 +21,7 @@ class TestShapleyConfig:
     def test_custom_config(self):
         config = ShapleyConfig(use_approximation=False, num_samples=50)
         assert not config.use_approximation
+
 
 class TestContribution:
     """Tests for Contribution class."""
@@ -34,6 +36,7 @@ class TestContribution:
         )
         assert contrib.module_id == "mod1"
         assert contrib.shapley_value == 0.5
+
 
 class TestContributionAccountant:
     """Tests for ContributionAccountant class."""
@@ -133,9 +136,7 @@ class TestContributionAccountant:
             accountant.record_contribution("good", 1.0)
             accountant.record_contribution("bad", 0.1)
 
-        underperforming = accountant.identify_underperforming_modules(
-            threshold=0.5
-        )
+        underperforming = accountant.identify_underperforming_modules(threshold=0.5)
 
         assert "bad" in underperforming
         assert "good" not in underperforming
@@ -218,6 +219,7 @@ class TestContributionAccountant:
         assert "total_modules" in stats
         assert "total_computations" in stats
         assert stats["total_modules"] == 2
+
 
 class TestShapleyProperties:
     """Tests for Shapley value properties."""

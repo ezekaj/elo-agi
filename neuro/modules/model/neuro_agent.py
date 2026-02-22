@@ -25,6 +25,7 @@ from pathlib import Path
 @dataclass
 class AgentState:
     """Current state of the agent."""
+
     query: str = ""
     context: Dict[str, Any] = field(default_factory=dict)
     knowledge: List[str] = field(default_factory=list)
@@ -43,6 +44,7 @@ class AgentState:
 @dataclass
 class ActionResult:
     """Result of an action."""
+
     success: bool
     output: str
     tool: str = ""
@@ -94,6 +96,7 @@ class NeuroAgent:
         # Cognitive Pipeline (knowledge, memory, surprise, etc.)
         try:
             from cognitive_pipeline import CognitivePipeline
+
             self.pipeline = CognitivePipeline(verbose=False)
             self._log("INIT", f"Pipeline: {self.pipeline.get_stats()['num_components']} components")
         except Exception as e:
@@ -103,8 +106,11 @@ class NeuroAgent:
         # UltraThink (deep reasoning)
         try:
             from ultrathink import UltraThink
+
             self.ultrathink = UltraThink(verbose=False)
-            self._log("INIT", f"UltraThink: {self.ultrathink.get_stats()['modules_loaded']} modules")
+            self._log(
+                "INIT", f"UltraThink: {self.ultrathink.get_stats()['modules_loaded']} modules"
+            )
         except Exception as e:
             self._log("INIT", f"UltraThink failed: {e}")
             self.ultrathink = None
@@ -112,9 +118,13 @@ class NeuroAgent:
         # Self-Improver (error recovery, learning)
         try:
             from self_improving_agent import SelfImprovingAgent
+
             self.improver = SelfImprovingAgent()
             stats = self.improver.get_stats()
-            self._log("INIT", f"Self-Improver: {stats['learned_patterns']} patterns, {stats['error_solutions']} solutions")
+            self._log(
+                "INIT",
+                f"Self-Improver: {stats['learned_patterns']} patterns, {stats['error_solutions']} solutions",
+            )
         except Exception as e:
             self._log("INIT", f"Self-Improver failed: {e}")
             self.improver = None
@@ -122,6 +132,7 @@ class NeuroAgent:
         # Tools
         try:
             from tools import Tools
+
             self.tools = Tools()
             self._log("INIT", "Tools: 13 available")
         except Exception as e:
@@ -156,8 +167,14 @@ class NeuroAgent:
                 self.state.memories = result.memory_used
                 self.state.surprise = result.surprise_level
                 self.state.confidence = result.confidence
-                self._log("PERCEIVE", f"Retrieved {len(self.state.knowledge)} knowledge, {len(self.state.memories)} memories")
-                self._log("PERCEIVE", f"Surprise: {self.state.surprise:.2f}, Confidence: {self.state.confidence:.0%}")
+                self._log(
+                    "PERCEIVE",
+                    f"Retrieved {len(self.state.knowledge)} knowledge, {len(self.state.memories)} memories",
+                )
+                self._log(
+                    "PERCEIVE",
+                    f"Surprise: {self.state.surprise:.2f}, Confidence: {self.state.confidence:.0%}",
+                )
             except Exception as e:
                 self._log("PERCEIVE", f"Pipeline error: {e}")
 
@@ -165,7 +182,7 @@ class NeuroAgent:
         if self.improver:
             for pattern, solution in self.improver.learned_patterns.items():
                 if pattern.lower() in query.lower():
-                    self.state.context['learned_pattern'] = solution
+                    self.state.context["learned_pattern"] = solution
                     self._log("PERCEIVE", f"Found learned pattern: {pattern}")
                     break
 
@@ -196,19 +213,22 @@ class NeuroAgent:
                 if deep:
                     result = self.ultrathink.think(query, depth="deep")
                     self.state.analysis = {
-                        'type': 'deep',
-                        'reasoning_steps': len(result.reasoning_chain),
-                        'modules_used': result.modules_used,
-                        'confidence': result.confidence,
-                        'insights': result.insights[:3],
-                        'suggested_actions': result.suggested_actions
+                        "type": "deep",
+                        "reasoning_steps": len(result.reasoning_chain),
+                        "modules_used": result.modules_used,
+                        "confidence": result.confidence,
+                        "insights": result.insights[:3],
+                        "suggested_actions": result.suggested_actions,
                     }
                     self.state.plan = result.suggested_actions
                 else:
                     analysis = self.ultrathink.analyze(query)
                     self.state.analysis = analysis
 
-                self._log("THINK", f"Analysis: type={self.state.analysis.get('type')}, confidence={self.state.analysis.get('confidence', 0):.0%}")
+                self._log(
+                    "THINK",
+                    f"Analysis: type={self.state.analysis.get('type')}, confidence={self.state.analysis.get('confidence', 0):.0%}",
+                )
             except Exception as e:
                 self._log("THINK", f"UltraThink error: {e}")
 
@@ -225,8 +245,10 @@ class NeuroAgent:
         plan = []
 
         # Check if this is a project/directory analysis request
-        is_project_analysis = any(w in query_lower for w in ['analyze', 'project', 'about', 'what is'])
-        has_path = '/' in query or '~' in query
+        is_project_analysis = any(
+            w in query_lower for w in ["analyze", "project", "about", "what is"]
+        )
+        has_path = "/" in query or "~" in query
 
         if is_project_analysis and has_path:
             # For project analysis: list files then read README
@@ -235,31 +257,31 @@ class NeuroAgent:
             return plan
 
         # Detect intent and plan accordingly
-        if any(w in query_lower for w in ['search', 'find', 'look up']):
+        if any(w in query_lower for w in ["search", "find", "look up"]):
             plan.append("web_search")
 
-        if any(w in query_lower for w in ['what is', 'who is', 'explain']) and not has_path:
+        if any(w in query_lower for w in ["what is", "who is", "explain"]) and not has_path:
             plan.append("web_search")
 
-        if any(w in query_lower for w in ['github', 'repo', 'repository']):
+        if any(w in query_lower for w in ["github", "repo", "repository"]):
             plan.append("github_lookup")
 
-        if any(w in query_lower for w in ['file', 'read', 'open', 'show', 'content']):
+        if any(w in query_lower for w in ["file", "read", "open", "show", "content"]):
             plan.append("file_read")
 
-        if any(w in query_lower for w in ['list', 'directory', 'folder']):
+        if any(w in query_lower for w in ["list", "directory", "folder"]):
             plan.append("list_files")
 
-        if any(w in query_lower for w in ['run', 'execute', 'command', 'python', 'calculate']):
+        if any(w in query_lower for w in ["run", "execute", "command", "python", "calculate"]):
             plan.append("execute_code")
 
-        if any(w in query_lower for w in ['browse', 'website', 'webpage', 'url']):
+        if any(w in query_lower for w in ["browse", "website", "webpage", "url"]):
             plan.append("browse_web")
 
-        if any(w in query_lower for w in ['remember', 'store', 'save', 'note']):
+        if any(w in query_lower for w in ["remember", "store", "save", "note"]):
             plan.append("remember")
 
-        if any(w in query_lower for w in ['recall', 'what did', 'retrieve']):
+        if any(w in query_lower for w in ["recall", "what did", "retrieve"]):
             plan.append("recall")
 
         # Default: just respond
@@ -297,10 +319,7 @@ class NeuroAgent:
                 self._handle_error(result.error)
 
         # Build context for response generation
-        tool_context = "\n".join([
-            f"[{r.tool}]: {r.output[:500]}"
-            for r in results if r.success
-        ])
+        tool_context = "\n".join([f"[{r.tool}]: {r.output[:500]}" for r in results if r.success])
 
         # Generate response with LLM if callback provided
         if llm_callback:
@@ -310,7 +329,7 @@ class NeuroAgent:
                     context=tool_context,
                     analysis=self.state.analysis,
                     knowledge=self.state.knowledge,
-                    memories=self.state.memories
+                    memories=self.state.memories,
                 )
             except Exception as e:
                 self.state.errors.append(str(e))
@@ -340,17 +359,23 @@ class NeuroAgent:
                 # Extract username/repo from query
                 words = query.split()
                 for word in words:
-                    if '/' in word:  # repo format
-                        parts = word.split('/')
+                    if "/" in word:  # repo format
+                        parts = word.split("/")
                         if len(parts) == 2:
                             result = self.tools.github_repo_info(parts[0], parts[1])
-                            return ActionResult(result.success, result.output, "github_repo", result.error or "")
-                    elif word.startswith('@'):
+                            return ActionResult(
+                                result.success, result.output, "github_repo", result.error or ""
+                            )
+                    elif word.startswith("@"):
                         result = self.tools.github_user(word[1:])
-                        return ActionResult(result.success, result.output, "github_user", result.error or "")
+                        return ActionResult(
+                            result.success, result.output, "github_user", result.error or ""
+                        )
                 # Default: search for github in query
                 result = self.tools.web_search(f"github {query}")
-                return ActionResult(result.success, result.output, "github_search", result.error or "")
+                return ActionResult(
+                    result.success, result.output, "github_search", result.error or ""
+                )
 
             elif action == "list_files":
                 # Extract path from query or use current dir
@@ -367,7 +392,9 @@ class NeuroAgent:
                 for word in query.split():
                     if "." in word and "/" in word:
                         result = self.tools.read_file(word)
-                        return ActionResult(result.success, result.output, "read_file", result.error or "")
+                        return ActionResult(
+                            result.success, result.output, "read_file", result.error or ""
+                        )
                 return ActionResult(False, "", "file_read", "No file path found in query")
 
             elif action == "execute_code":
@@ -384,7 +411,8 @@ class NeuroAgent:
             elif action == "browse_web":
                 # Extract URL
                 import re
-                urls = re.findall(r'https?://\S+', query)
+
+                urls = re.findall(r"https?://\S+", query)
                 if urls:
                     result = self.tools.browse_web(url=urls[0], action="goto")
                     return ActionResult(result.success, result.output, "browse", result.error or "")
@@ -394,7 +422,9 @@ class NeuroAgent:
                 # Store information
                 key = f"memory_{int(time.time())}"
                 result = self.tools.remember(key, query)
-                return ActionResult(result.success, f"Stored as {key}", "remember", result.error or "")
+                return ActionResult(
+                    result.success, f"Stored as {key}", "remember", result.error or ""
+                )
 
             elif action == "recall":
                 # Try to recall relevant memories
@@ -404,6 +434,7 @@ class NeuroAgent:
             elif action == "read_readme":
                 # Read README from a project directory
                 import os
+
                 path = None
                 for word in query.split():
                     if "/" in word or word.startswith("~"):
@@ -506,12 +537,12 @@ class NeuroAgent:
         if self.pipeline:
             try:
                 # Learn the Q&A pair
-                topic = self.state.analysis.get('type', 'general')
+                topic = self.state.analysis.get("type", "general")
                 self.pipeline.learn(
                     topic=topic,
                     content=f"Q: {query[:100]} A: {response[:200]}",
                     source="conversation",
-                    importance=self.state.confidence
+                    importance=self.state.confidence,
                 )
                 self.state.learnings.append(f"Stored knowledge: {topic}")
                 self._log("LEARN", f"Stored knowledge for topic: {topic}")
@@ -529,13 +560,15 @@ class NeuroAgent:
                 self._log("LEARN", f"Learned pattern: {pattern_key}")
 
         # 3. Add to history
-        self.history.append({
-            'query': query,
-            'response': response[:500],
-            'tools': self.state.tools_used,
-            'confidence': self.state.confidence,
-            'timestamp': datetime.now().isoformat()
-        })
+        self.history.append(
+            {
+                "query": query,
+                "response": response[:500],
+                "tools": self.state.tools_used,
+                "confidence": self.state.confidence,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
         return self.state
 
@@ -543,16 +576,16 @@ class NeuroAgent:
         """Classify query into a pattern type."""
         query_lower = query.lower()
 
-        if 'github' in query_lower:
-            return 'github_queries'
-        elif 'search' in query_lower or 'find' in query_lower:
-            return 'search_queries'
-        elif 'file' in query_lower or 'read' in query_lower:
-            return 'file_queries'
-        elif 'project' in query_lower or 'analyze' in query_lower:
-            return 'analysis_queries'
-        elif 'python' in query_lower or 'code' in query_lower:
-            return 'code_queries'
+        if "github" in query_lower:
+            return "github_queries"
+        elif "search" in query_lower or "find" in query_lower:
+            return "search_queries"
+        elif "file" in query_lower or "read" in query_lower:
+            return "file_queries"
+        elif "project" in query_lower or "analyze" in query_lower:
+            return "analysis_queries"
+        elif "python" in query_lower or "code" in query_lower:
+            return "code_queries"
 
         return None
 
@@ -571,20 +604,20 @@ class NeuroAgent:
         self._log("IMPROVE", "Self-improvement cycle...")
 
         improvements = {
-            'errors_handled': len(self.state.errors),
-            'patterns_learned': 0,
-            'solutions_added': 0
+            "errors_handled": len(self.state.errors),
+            "patterns_learned": 0,
+            "solutions_added": 0,
         }
 
         if self.improver:
             stats = self.improver.get_stats()
-            improvements['total_patterns'] = stats['learned_patterns']
-            improvements['total_solutions'] = stats['error_solutions']
+            improvements["total_patterns"] = stats["learned_patterns"]
+            improvements["total_solutions"] = stats["error_solutions"]
 
         # Consolidate if we have a continual learner
-        if self.pipeline and hasattr(self.pipeline, 'learner') and self.pipeline.learner:
+        if self.pipeline and hasattr(self.pipeline, "learner") and self.pipeline.learner:
             consolidated = self.pipeline.learner.consolidate()
-            improvements['consolidated'] = consolidated
+            improvements["consolidated"] = consolidated
             self._log("IMPROVE", f"Consolidated {consolidated} frequently-accessed items")
 
         return improvements
@@ -593,8 +626,9 @@ class NeuroAgent:
     # MAIN WORKFLOW - The unified loop
     # =========================================================================
 
-    def process(self, query: str, context: Dict = None,
-                deep_think: bool = False, llm_callback=None) -> AgentState:
+    def process(
+        self, query: str, context: Dict = None, deep_think: bool = False, llm_callback=None
+    ) -> AgentState:
         """
         Main workflow: PERCEIVE -> THINK -> ACT -> LEARN -> IMPROVE
 
@@ -626,21 +660,21 @@ class NeuroAgent:
     def get_stats(self) -> Dict[str, Any]:
         """Get agent statistics."""
         stats = {
-            'history_length': len(self.history),
-            'session_learnings': len(self.session_learnings),
-            'components': {
-                'pipeline': self.pipeline is not None,
-                'ultrathink': self.ultrathink is not None,
-                'improver': self.improver is not None,
-                'tools': self.tools is not None
-            }
+            "history_length": len(self.history),
+            "session_learnings": len(self.session_learnings),
+            "components": {
+                "pipeline": self.pipeline is not None,
+                "ultrathink": self.ultrathink is not None,
+                "improver": self.improver is not None,
+                "tools": self.tools is not None,
+            },
         }
 
         if self.pipeline:
-            stats['pipeline_stats'] = self.pipeline.get_stats()
+            stats["pipeline_stats"] = self.pipeline.get_stats()
 
         if self.improver:
-            stats['improver_stats'] = self.improver.get_stats()
+            stats["improver_stats"] = self.improver.get_stats()
 
         return stats
 
@@ -660,9 +694,7 @@ if __name__ == "__main__":
     print("TEST 1: Project Analysis Query")
     print("=" * 70)
 
-    state = agent.process(
-        "Analyze the project structure at /Users/ezekaj/Desktop/forex_2026"
-    )
+    state = agent.process("Analyze the project structure at /Users/ezekaj/Desktop/forex_2026")
 
     print(f"\nResults:")
     print(f"  Query: {state.query[:50]}...")
@@ -675,9 +707,7 @@ if __name__ == "__main__":
     print("TEST 2: Web Search Query")
     print("=" * 70)
 
-    state = agent.process(
-        "Search for the latest news about artificial intelligence"
-    )
+    state = agent.process("Search for the latest news about artificial intelligence")
 
     print(f"\nResults:")
     print(f"  Tools used: {state.tools_used}")

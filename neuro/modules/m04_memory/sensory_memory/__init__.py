@@ -3,4 +3,4 @@
 from .iconic_buffer import IconicBuffer
 from .echoic_buffer import EchoicBuffer
 
-__all__ = ['IconicBuffer', 'EchoicBuffer']
+__all__ = ["IconicBuffer", "EchoicBuffer"]

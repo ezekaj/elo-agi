@@ -10,11 +10,15 @@ Demonstrates key findings from https://arxiv.org/html/2601.10276:
 
 import numpy as np
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 from src.intrinsic_motivation import (
-    PathEntropyMaximizer, PossibilitySpace, ActionDiversityTracker,
-    IntrinsicDrive, DriveType
+    PathEntropyMaximizer,
+    PossibilitySpace,
+    ActionDiversityTracker,
+    IntrinsicDrive,
+    DriveType,
 )
 
 
@@ -112,10 +116,7 @@ def demo_post_satiation_exploration():
 
     # Drive that gets satiated
     exploration_drive = IntrinsicDrive(
-        DriveType.EXPLORATION,
-        base_strength=1.0,
-        satiation_rate=0.1,
-        recovery_rate=0.05
+        DriveType.EXPLORATION, base_strength=1.0, satiation_rate=0.1, recovery_rate=0.05
     )
 
     print("\n1. Drive before satiation:")
@@ -172,7 +173,7 @@ def demo_action_diversity():
     rare_bonus = tracker.get_diversity_bonus(rare_action)
 
     print(f"\n2. Bonus for rare action: {rare_bonus:.3f}")
-    print(f"   Rare actions get {rare_bonus/max(common_bonus, 0.001):.1f}x more bonus!")
+    print(f"   Rare actions get {rare_bonus / max(common_bonus, 0.001):.1f}x more bonus!")
 
 
 def demo_drives_system():
@@ -184,10 +185,10 @@ def demo_drives_system():
     print("=" * 60)
 
     drives = {
-        'exploration': IntrinsicDrive(DriveType.EXPLORATION),
-        'mastery': IntrinsicDrive(DriveType.MASTERY),
-        'autonomy': IntrinsicDrive(DriveType.AUTONOMY),
-        'challenge': IntrinsicDrive(DriveType.CHALLENGE)
+        "exploration": IntrinsicDrive(DriveType.EXPLORATION),
+        "mastery": IntrinsicDrive(DriveType.MASTERY),
+        "autonomy": IntrinsicDrive(DriveType.AUTONOMY),
+        "challenge": IntrinsicDrive(DriveType.CHALLENGE),
     }
 
     print("\n1. Initial drive levels:")
@@ -196,8 +197,8 @@ def demo_drives_system():
 
     # Simulate different satisfactions
     print("\n2. After satisfying exploration and mastery:")
-    drives['exploration'].update(satisfaction=0.9, dt=5.0)
-    drives['mastery'].update(satisfaction=0.7, dt=5.0)
+    drives["exploration"].update(satisfaction=0.9, dt=5.0)
+    drives["mastery"].update(satisfaction=0.7, dt=5.0)
 
     for name, drive in drives.items():
         print(f"   {name.capitalize()}: {drive.level:.3f}")
@@ -214,7 +215,7 @@ def demo_drives_system():
     print("\n   Key insight: Unsatisfied drives naturally increase over time!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_path_entropy_vs_reward()
     demo_children_choose_harder()
     demo_post_satiation_exploration()

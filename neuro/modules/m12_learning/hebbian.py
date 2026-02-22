@@ -13,6 +13,7 @@ from dataclasses import dataclass
 @dataclass
 class LearningParams:
     """Parameters for Hebbian learning"""
+
     learning_rate: float = 0.01
     weight_decay: float = 0.0001
     weight_max: float = 1.0
@@ -33,11 +34,7 @@ class HebbianLearning:
     def __init__(self, params: Optional[LearningParams] = None):
         self.params = params or LearningParams()
 
-    def compute_weight_change(
-        self,
-        pre: np.ndarray,
-        post: np.ndarray
-    ) -> np.ndarray:
+    def compute_weight_change(self, pre: np.ndarray, post: np.ndarray) -> np.ndarray:
         """Compute Hebbian weight change
 
         Args:
@@ -51,12 +48,7 @@ class HebbianLearning:
         dW = self.params.learning_rate * np.outer(post, pre)
         return dW
 
-    def update_weights(
-        self,
-        weights: np.ndarray,
-        pre: np.ndarray,
-        post: np.ndarray
-    ) -> np.ndarray:
+    def update_weights(self, weights: np.ndarray, pre: np.ndarray, post: np.ndarray) -> np.ndarray:
         """Update weights with Hebbian rule
 
         Args:
@@ -90,10 +82,7 @@ class OjaRule(HebbianLearning):
     """
 
     def compute_weight_change(
-        self,
-        pre: np.ndarray,
-        post: np.ndarray,
-        weights: Optional[np.ndarray] = None
+        self, pre: np.ndarray, post: np.ndarray, weights: Optional[np.ndarray] = None
     ) -> np.ndarray:
         """Compute Oja weight change"""
         if weights is None:
@@ -107,12 +96,7 @@ class OjaRule(HebbianLearning):
 
         return dW
 
-    def update_weights(
-        self,
-        weights: np.ndarray,
-        pre: np.ndarray,
-        post: np.ndarray
-    ) -> np.ndarray:
+    def update_weights(self, weights: np.ndarray, pre: np.ndarray, post: np.ndarray) -> np.ndarray:
         """Update with Oja's rule"""
         dW = self.compute_weight_change(pre, post, weights)
         weights = weights + dW
@@ -141,11 +125,7 @@ class BCMRule(HebbianLearning):
         # Threshold tracks recent activity
         self.threshold = np.mean(self.activity_history) ** 2
 
-    def compute_weight_change(
-        self,
-        pre: np.ndarray,
-        post: np.ndarray
-    ) -> np.ndarray:
+    def compute_weight_change(self, pre: np.ndarray, post: np.ndarray) -> np.ndarray:
         """Compute BCM weight change
 
         LTP when post > threshold, LTD when post < threshold
@@ -163,10 +143,7 @@ class HebbianNetwork:
     """Network with Hebbian learning"""
 
     def __init__(
-        self,
-        layer_sizes: List[int],
-        learning_rule: str = 'basic',
-        learning_rate: float = 0.01
+        self, layer_sizes: List[int], learning_rule: str = "basic", learning_rate: float = 0.01
     ):
         self.layer_sizes = layer_sizes
         self.n_layers = len(layer_sizes)
@@ -174,16 +151,16 @@ class HebbianNetwork:
         # Initialize weights
         self.weights = []
         for i in range(self.n_layers - 1):
-            w = np.random.randn(layer_sizes[i+1], layer_sizes[i]) * 0.1
+            w = np.random.randn(layer_sizes[i + 1], layer_sizes[i]) * 0.1
             self.weights.append(w)
 
         # Initialize learning rule
         params = LearningParams(learning_rate=learning_rate)
-        if learning_rule == 'basic':
+        if learning_rule == "basic":
             self.rule = HebbianLearning(params)
-        elif learning_rule == 'oja':
+        elif learning_rule == "oja":
             self.rule = OjaRule(params)
-        elif learning_rule == 'bcm':
+        elif learning_rule == "bcm":
             self.rule = BCMRule(params)
         else:
             raise ValueError(f"Unknown rule: {learning_rule}")
@@ -214,11 +191,7 @@ class HebbianNetwork:
         self.learn()
         return output
 
-    def train(
-        self,
-        data: np.ndarray,
-        n_epochs: int = 10
-    ) -> List[float]:
+    def train(self, data: np.ndarray, n_epochs: int = 10) -> List[float]:
         """Train on dataset"""
         errors = []
 

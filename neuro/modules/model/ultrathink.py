@@ -28,6 +28,7 @@ from .cognitive_adapters import (
 @dataclass
 class ThoughtStep:
     """A single step in the thinking process."""
+
     module: str
     thought: str
     confidence: float
@@ -38,6 +39,7 @@ class ThoughtStep:
 @dataclass
 class UltraThinkResult:
     """Result from deep thinking."""
+
     final_answer: str
     reasoning_chain: List[ThoughtStep]
     modules_used: List[str]
@@ -67,7 +69,9 @@ class UltraThink:
         self.modules = self.factory.get_all()
 
         stats = self.factory.statistics()
-        self._log(f"Loaded {stats['total_modules']} modules ({stats['active_modules']} active, {stats['fallback_modules']} fallback)")
+        self._log(
+            f"Loaded {stats['total_modules']} modules ({stats['active_modules']} active, {stats['fallback_modules']} fallback)"
+        )
 
     def _text_to_embedding(self, text: str, dim: int = 128) -> np.ndarray:
         """Convert text to embedding vector."""
@@ -86,7 +90,7 @@ class UltraThink:
         problem: str,
         context: Optional[str] = None,
         depth: str = "deep",  # "quick", "normal", "deep", "exhaustive"
-        focus_modules: Optional[List[str]] = None
+        focus_modules: Optional[List[str]] = None,
     ) -> UltraThinkResult:
         """
         Think deeply about a problem using all cognitive modules.
@@ -115,7 +119,7 @@ class UltraThink:
         self._log("Phase 1: Perceiving and classifying problem...")
 
         analysis = None
-        classifier = self.modules.get('problem_classifier')
+        classifier = self.modules.get("problem_classifier")
         if classifier:
             step_start = time.time()
             analysis = classifier.classify(embedding)
@@ -131,7 +135,7 @@ class UltraThink:
                 thought=f"Problem type: {analysis.problem_type.value}, Difficulty: {analysis.difficulty.value}",
                 confidence=analysis.type_confidence,
                 duration=time.time() - step_start,
-                insights=insights_list
+                insights=insights_list,
             )
             reasoning_chain.append(step)
             modules_used.append("problem_classifier")
@@ -140,20 +144,22 @@ class UltraThink:
         self._log("Phase 2: Selecting reasoning style...")
 
         style = None
-        style_selector = self.modules.get('style_selector')
+        style_selector = self.modules.get("style_selector")
         if style_selector and analysis:
             step_start = time.time()
             style = style_selector.select_style(analysis)
 
             secondary = style.secondary_styles[:2] if style.secondary_styles else []
-            secondary_str = ", ".join([f"{s[0].value}({s[1]:.0%})" for s in secondary]) if secondary else "none"
+            secondary_str = (
+                ", ".join([f"{s[0].value}({s[1]:.0%})" for s in secondary]) if secondary else "none"
+            )
 
             step = ThoughtStep(
                 module="style_selector",
                 thought=f"Primary style: {style.primary_style.value} ({style.primary_fitness:.0%} fit)",
                 confidence=style.primary_fitness,
                 duration=time.time() - step_start,
-                insights=[f"Secondary styles: {secondary_str}"] if secondary else []
+                insights=[f"Secondary styles: {secondary_str}"] if secondary else [],
             )
             reasoning_chain.append(step)
             modules_used.append("style_selector")
@@ -161,7 +167,7 @@ class UltraThink:
         # === PHASE 3: DUAL PROCESS THINKING ===
         self._log("Phase 3: Dual process thinking (System 1 & 2)...")
 
-        dual_process = self.modules.get('dual_process')
+        dual_process = self.modules.get("dual_process")
         if dual_process:
             step_start = time.time()
             try:
@@ -171,8 +177,11 @@ class UltraThink:
                 step = ThoughtStep(
                     module="dual_process",
                     thought=f"System 1 (intuition): {intuition.get('response', 'activated')}, System 2 (deliberate): {deliberate.get('response', 'engaged')}",
-                    confidence=(intuition.get('confidence', 0.5) + deliberate.get('confidence', 0.5)) / 2,
-                    duration=time.time() - step_start
+                    confidence=(
+                        intuition.get("confidence", 0.5) + deliberate.get("confidence", 0.5)
+                    )
+                    / 2,
+                    duration=time.time() - step_start,
                 )
                 reasoning_chain.append(step)
                 modules_used.append("dual_process")
@@ -182,7 +191,7 @@ class UltraThink:
         # === PHASE 4: PREDICTIVE CODING ===
         self._log("Phase 4: Predictive modeling...")
 
-        predictive = self.modules.get('predictive_coding')
+        predictive = self.modules.get("predictive_coding")
         if predictive:
             step_start = time.time()
             try:
@@ -194,7 +203,9 @@ class UltraThink:
                     thought=f"Free energy: {free_energy:.3f}, Prediction confidence: {prediction.get('confidence', 0.5):.0%}",
                     confidence=1 - min(free_energy, 1.0),
                     duration=time.time() - step_start,
-                    insights=["Low free energy = good model fit"] if free_energy < 0.5 else ["High uncertainty detected"]
+                    insights=["Low free energy = good model fit"]
+                    if free_energy < 0.5
+                    else ["High uncertainty detected"],
                 )
                 reasoning_chain.append(step)
                 modules_used.append("predictive_coding")
@@ -204,7 +215,7 @@ class UltraThink:
         # === PHASE 5: MEMORY INTEGRATION ===
         self._log("Phase 5: Consulting memory...")
 
-        memory = self.modules.get('memory')
+        memory = self.modules.get("memory")
         if memory:
             step_start = time.time()
             try:
@@ -222,7 +233,7 @@ class UltraThink:
                     thought=f"Memory search complete: {len(memory_insights)} relevant memories found",
                     confidence=0.6 if memory_insights else 0.4,
                     duration=time.time() - step_start,
-                    insights=memory_insights
+                    insights=memory_insights,
                 )
                 reasoning_chain.append(step)
                 modules_used.append("memory")
@@ -232,7 +243,7 @@ class UltraThink:
         # === PHASE 6: CURIOSITY CHECK ===
         self._log("Phase 6: Checking curiosity and knowledge gaps...")
 
-        curiosity = self.modules.get('curiosity')
+        curiosity = self.modules.get("curiosity")
         if curiosity:
             step_start = time.time()
             try:
@@ -244,7 +255,7 @@ class UltraThink:
                     thought=f"Curiosity level: {curiosity.curiosity_level:.0%}, Novelty: {curiosity_event.get('novelty', 0):.0%}",
                     confidence=curiosity.curiosity_level,
                     duration=time.time() - step_start,
-                    insights=[f"Knowledge gaps: {', '.join(gaps[:3])}"] if gaps else []
+                    insights=[f"Knowledge gaps: {', '.join(gaps[:3])}"] if gaps else [],
                 )
                 reasoning_chain.append(step)
                 modules_used.append("curiosity")
@@ -257,7 +268,7 @@ class UltraThink:
         # === PHASE 7: MOTIVATION ===
         self._log("Phase 7: Computing motivation...")
 
-        motivation = self.modules.get('motivation')
+        motivation = self.modules.get("motivation")
         if motivation:
             step_start = time.time()
             try:
@@ -267,7 +278,7 @@ class UltraThink:
                     module="motivation",
                     thought=f"Intrinsic motivation: {motivation_level:.0%}",
                     confidence=motivation_level,
-                    duration=time.time() - step_start
+                    duration=time.time() - step_start,
                 )
                 reasoning_chain.append(step)
                 modules_used.append("motivation")
@@ -277,21 +288,23 @@ class UltraThink:
         # === PHASE 8: GLOBAL WORKSPACE BROADCAST ===
         self._log("Phase 8: Broadcasting to global workspace...")
 
-        global_workspace = self.modules.get('global_workspace')
+        global_workspace = self.modules.get("global_workspace")
         if global_workspace:
             step_start = time.time()
             try:
-                broadcast_result = global_workspace.broadcast({
-                    'problem': problem,
-                    'embedding': embedding.tolist(),
-                    'reasoning_so_far': [s.thought for s in reasoning_chain]
-                })
+                broadcast_result = global_workspace.broadcast(
+                    {
+                        "problem": problem,
+                        "embedding": embedding.tolist(),
+                        "reasoning_so_far": [s.thought for s in reasoning_chain],
+                    }
+                )
 
                 step = ThoughtStep(
                     module="global_workspace",
                     thought=f"Broadcast complete, coherence: {broadcast_result.get('coherence', 0.7):.0%}",
-                    confidence=broadcast_result.get('coherence', 0.7),
-                    duration=time.time() - step_start
+                    confidence=broadcast_result.get("coherence", 0.7),
+                    duration=time.time() - step_start,
                 )
                 reasoning_chain.append(step)
                 modules_used.append("global_workspace")
@@ -301,7 +314,7 @@ class UltraThink:
         # === PHASE 9: REASONING ===
         self._log("Phase 9: Applying reasoning...")
 
-        reasoning = self.modules.get('reasoning')
+        reasoning = self.modules.get("reasoning")
         if reasoning and style:
             step_start = time.time()
             try:
@@ -310,8 +323,8 @@ class UltraThink:
                 step = ThoughtStep(
                     module="reasoning",
                     thought=f"Applied {style.primary_style.value} reasoning",
-                    confidence=result.get('confidence', 0.7),
-                    duration=time.time() - step_start
+                    confidence=result.get("confidence", 0.7),
+                    duration=time.time() - step_start,
                 )
                 reasoning_chain.append(step)
                 modules_used.append("reasoning")
@@ -321,7 +334,7 @@ class UltraThink:
         # === PHASE 10: ORCHESTRATION ===
         self._log("Phase 10: Creating execution plan...")
 
-        orchestrator = self.modules.get('orchestrator')
+        orchestrator = self.modules.get("orchestrator")
         if orchestrator and analysis and style:
             step_start = time.time()
             try:
@@ -332,7 +345,7 @@ class UltraThink:
                     thought=f"Created plan with {len(plan.steps)} steps",
                     confidence=plan.estimated_confidence,
                     duration=time.time() - step_start,
-                    insights=[f"Step 1: {plan.steps[0]['name']}"] if plan.steps else []
+                    insights=[f"Step 1: {plan.steps[0]['name']}"] if plan.steps else [],
                 )
                 reasoning_chain.append(step)
                 modules_used.append("orchestrator")
@@ -342,7 +355,7 @@ class UltraThink:
         # === PHASE 11: EXECUTIVE CONTROL ===
         self._log("Phase 11: Executive oversight...")
 
-        executive = self.modules.get('executive')
+        executive = self.modules.get("executive")
         if executive:
             step_start = time.time()
             try:
@@ -353,7 +366,7 @@ class UltraThink:
                     module="executive",
                     thought=f"Executive control: {'inhibiting' if should_inhibit else 'proceeding'}",
                     confidence=0.8,
-                    duration=time.time() - step_start
+                    duration=time.time() - step_start,
                 )
                 reasoning_chain.append(step)
                 modules_used.append("executive")
@@ -364,7 +377,7 @@ class UltraThink:
         if depth in ["deep", "exhaustive"]:
             self._log("Phase 12: Emotional evaluation...")
 
-            emotion = self.modules.get('emotion')
+            emotion = self.modules.get("emotion")
             if emotion:
                 step_start = time.time()
                 try:
@@ -374,7 +387,7 @@ class UltraThink:
                         module="emotion",
                         thought=f"Emotional valence: {emotional_response.get('valence', 0):.2f}, arousal: {emotional_response.get('arousal', 0):.2f}",
                         confidence=0.6,
-                        duration=time.time() - step_start
+                        duration=time.time() - step_start,
                     )
                     reasoning_chain.append(step)
                     modules_used.append("emotion")
@@ -385,7 +398,7 @@ class UltraThink:
         if depth == "exhaustive":
             self._log("Phase 13: Metacognitive reflection...")
 
-            consciousness = self.modules.get('consciousness')
+            consciousness = self.modules.get("consciousness")
             if consciousness:
                 step_start = time.time()
                 try:
@@ -394,8 +407,8 @@ class UltraThink:
                     step = ThoughtStep(
                         module="consciousness",
                         thought=f"Metacognitive state: {introspection.get('state', 'aware')}",
-                        confidence=introspection.get('confidence_in_reasoning', 0.7),
-                        duration=time.time() - step_start
+                        confidence=introspection.get("confidence_in_reasoning", 0.7),
+                        duration=time.time() - step_start,
                     )
                     reasoning_chain.append(step)
                     modules_used.append("consciousness")
@@ -432,7 +445,7 @@ class UltraThink:
             total_time=total_time,
             confidence=overall_confidence,
             insights=list(set(insights)),
-            suggested_actions=suggested_actions
+            suggested_actions=suggested_actions,
         )
 
     def _generate_actions(self, chain: List[ThoughtStep], problem: str) -> List[str]:
@@ -446,21 +459,21 @@ class UltraThink:
 
         # Check for knowledge gaps
         for step in chain:
-            if "knowledge gap" in ' '.join(step.insights).lower():
+            if "knowledge gap" in " ".join(step.insights).lower():
                 actions.append("Use tools to gather missing information")
                 break
 
         # Standard actions based on problem keywords
         problem_lower = problem.lower()
-        if any(w in problem_lower for w in ['github', 'repo', 'code', 'repository']):
+        if any(w in problem_lower for w in ["github", "repo", "code", "repository"]):
             actions.append("Use github_user or github_repos tool")
-        if any(w in problem_lower for w in ['file', 'read', 'write', 'directory']):
+        if any(w in problem_lower for w in ["file", "read", "write", "directory"]):
             actions.append("Use file system tools")
-        if any(w in problem_lower for w in ['search', 'find', 'look up', 'what is', 'who is']):
+        if any(w in problem_lower for w in ["search", "find", "look up", "what is", "who is"]):
             actions.append("Use web_search tool")
-        if any(w in problem_lower for w in ['calculate', 'compute', 'python', 'run', 'execute']):
+        if any(w in problem_lower for w in ["calculate", "compute", "python", "run", "execute"]):
             actions.append("Use run_python tool")
-        if any(w in problem_lower for w in ['browse', 'website', 'page', 'url']):
+        if any(w in problem_lower for w in ["browse", "website", "page", "url"]):
             actions.append("Use browse_web tool")
 
         return actions[:5]
@@ -508,12 +521,12 @@ class UltraThink:
         """Get statistics about loaded modules."""
         stats = self.factory.statistics()
         return {
-            "modules_loaded": stats['total_modules'],
-            "active_modules": stats['active_modules'],
-            "fallback_modules": stats['fallback_modules'],
-            "module_names": stats['active_list'] + stats['fallback_list'],
-            "active_list": stats['active_list'],
-            "fallback_list": stats['fallback_list']
+            "modules_loaded": stats["total_modules"],
+            "active_modules": stats["active_modules"],
+            "fallback_modules": stats["fallback_modules"],
+            "module_names": stats["active_list"] + stats["fallback_list"],
+            "active_list": stats["active_list"],
+            "fallback_list": stats["fallback_list"],
         }
 
     def analyze(self, problem: str, cognitive_context: Dict = None) -> Dict[str, Any]:
@@ -529,46 +542,47 @@ class UltraThink:
             "style": "analytical",
             "confidence": 0.5,
             "complexity": 0.5,
-            "suggested_actions": []
+            "suggested_actions": [],
         }
 
         # Classify problem
-        classifier = self.modules.get('problem_classifier')
+        classifier = self.modules.get("problem_classifier")
         if classifier:
             analysis = classifier.classify(embedding)
-            result['type'] = analysis.problem_type.value
-            result['complexity'] = analysis.complexity
-            result['confidence'] = analysis.type_confidence
+            result["type"] = analysis.problem_type.value
+            result["complexity"] = analysis.complexity
+            result["confidence"] = analysis.type_confidence
 
         # Select style
-        style_selector = self.modules.get('style_selector')
-        if style_selector and 'type' in result:
+        style_selector = self.modules.get("style_selector")
+        if style_selector and "type" in result:
             # Create minimal analysis for style selection
             from cognitive_adapters import ProblemAnalysis, ProblemType, ProblemDifficulty
+
             minimal_analysis = ProblemAnalysis(
-                problem_type=ProblemType(result['type']),
-                type_confidence=result['confidence'],
-                complexity=result['complexity'],
-                difficulty=ProblemDifficulty.MEDIUM
+                problem_type=ProblemType(result["type"]),
+                type_confidence=result["confidence"],
+                complexity=result["complexity"],
+                difficulty=ProblemDifficulty.MEDIUM,
             )
             style = style_selector.select_style(minimal_analysis)
-            result['style'] = style.primary_style.value
+            result["style"] = style.primary_style.value
 
         # Generate actions
-        result['suggested_actions'] = self._generate_actions([], problem)
+        result["suggested_actions"] = self._generate_actions([], problem)
 
         # Add cognitive context if provided
         if cognitive_context:
-            result['cognitive_context'] = cognitive_context
+            result["cognitive_context"] = cognitive_context
 
         return result
 
 
 def main():
     """Test UltraThink."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ULTRATHINK TEST")
-    print("="*60)
+    print("=" * 60)
 
     ultra = UltraThink(verbose=True)
 
@@ -587,9 +601,9 @@ def main():
     ]
 
     for problem in problems:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"PROBLEM: {problem}")
-        print("="*60)
+        print("=" * 60)
 
         result = ultra.think(problem, depth="deep")
 

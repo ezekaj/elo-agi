@@ -25,17 +25,19 @@ from enum import Enum
 
 class DopamineChannel(Enum):
     """Different dopamine signaling channels"""
-    PHASIC = "phasic"        # Fast, burst signaling (prediction error)
-    TONIC = "tonic"          # Slow, background level (motivation state)
-    RAMPING = "ramping"      # Gradual increase toward reward
+
+    PHASIC = "phasic"  # Fast, burst signaling (prediction error)
+    TONIC = "tonic"  # Slow, background level (motivation state)
+    RAMPING = "ramping"  # Gradual increase toward reward
 
 
 @dataclass
 class DopamineSignal:
     """A dopamine signal with multiple components"""
-    prediction_error: float          # RPE: actual - expected
-    incentive_salience: float        # "Wanting" level
-    benefit_cost_ratio: float        # Net value signal
+
+    prediction_error: float  # RPE: actual - expected
+    incentive_salience: float  # "Wanting" level
+    benefit_cost_ratio: float  # Net value signal
     channel: DopamineChannel = DopamineChannel.PHASIC
     timestamp: float = 0.0
 
@@ -43,6 +45,7 @@ class DopamineSignal:
 @dataclass
 class RewardPrediction:
     """Prediction about upcoming reward"""
+
     expected_value: float
     uncertainty: float
     time_to_reward: float
@@ -64,7 +67,7 @@ class PredictionErrorComputer:
         self,
         learning_rate: float = 0.1,
         discount_factor: float = 0.95,
-        eligibility_decay: float = 0.9
+        eligibility_decay: float = 0.9,
     ):
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
@@ -91,7 +94,9 @@ class PredictionErrorComputer:
         key = self._discretize_state(state)
         return self.state_values.get(key, 0.0)
 
-    def predict_reward(self, state: np.ndarray, cues: Optional[np.ndarray] = None) -> RewardPrediction:
+    def predict_reward(
+        self, state: np.ndarray, cues: Optional[np.ndarray] = None
+    ) -> RewardPrediction:
         """Generate prediction about upcoming reward."""
         expected = self.get_value(state)
 
@@ -107,14 +112,11 @@ class PredictionErrorComputer:
             expected_value=expected,
             uncertainty=uncertainty,
             time_to_reward=1.0,  # Would be learned
-            cue_strength=1.0 if cues is None else float(np.linalg.norm(cues))
+            cue_strength=1.0 if cues is None else float(np.linalg.norm(cues)),
         )
 
     def compute_prediction_error(
-        self,
-        actual_reward: float,
-        current_state: np.ndarray,
-        next_state: np.ndarray
+        self, actual_reward: float, current_state: np.ndarray, next_state: np.ndarray
     ) -> float:
         """Compute temporal difference prediction error.
 
@@ -129,11 +131,7 @@ class PredictionErrorComputer:
         self.td_errors.append(td_error)
         return td_error
 
-    def update_values(
-        self,
-        state: np.ndarray,
-        td_error: float
-    ) -> None:
+    def update_values(self, state: np.ndarray, td_error: float) -> None:
         """Update value function using TD error."""
         key = self._discretize_state(state)
 
@@ -143,8 +141,9 @@ class PredictionErrorComputer:
         # Update all states with active traces
         for s_key in list(self.eligibility_traces.keys()):
             trace = self.eligibility_traces[s_key]
-            self.state_values[s_key] = self.state_values.get(s_key, 0.0) + \
-                                        self.learning_rate * td_error * trace
+            self.state_values[s_key] = (
+                self.state_values.get(s_key, 0.0) + self.learning_rate * td_error * trace
+            )
 
             # Decay trace
             self.eligibility_traces[s_key] *= self.eligibility_decay
@@ -173,12 +172,7 @@ class IncentiveSalience:
     - Can become pathologically strong (addiction)
     """
 
-    def __init__(
-        self,
-        cue_dim: int,
-        learning_rate: float = 0.1,
-        decay_rate: float = 0.01
-    ):
+    def __init__(self, cue_dim: int, learning_rate: float = 0.1, decay_rate: float = 0.01):
         self.cue_dim = cue_dim
         self.learning_rate = learning_rate
         self.decay_rate = decay_rate
@@ -197,9 +191,7 @@ class IncentiveSalience:
         return tuple(np.round(cue, 1))
 
     def compute_salience(
-        self,
-        cue: np.ndarray,
-        internal_state: Optional[Dict[str, float]] = None
+        self, cue: np.ndarray, internal_state: Optional[Dict[str, float]] = None
     ) -> float:
         """Compute incentive salience of a cue.
 
@@ -232,12 +224,7 @@ class IncentiveSalience:
 
         return np.clip(modulation, 0.5, 3.0)
 
-    def update_salience(
-        self,
-        cue: np.ndarray,
-        reward: float,
-        prediction_error: float
-    ) -> None:
+    def update_salience(self, cue: np.ndarray, reward: float, prediction_error: float) -> None:
         """Update salience based on cue-reward pairing."""
         key = self._discretize_cue(cue)
 
@@ -256,7 +243,7 @@ class IncentiveSalience:
     def decay_salience(self) -> None:
         """Apply decay to all salience values."""
         for key in list(self.cue_salience.keys()):
-            self.cue_salience[key] *= (1 - self.decay_rate)
+            self.cue_salience[key] *= 1 - self.decay_rate
             if self.cue_salience[key] < 0.01:
                 del self.cue_salience[key]
 
@@ -287,7 +274,7 @@ class BenefitCostEvaluator:
         self,
         default_dopamine_level: float = 0.5,
         benefit_sensitivity: float = 1.0,
-        cost_sensitivity: float = 1.0
+        cost_sensitivity: float = 1.0,
     ):
         self.dopamine_level = default_dopamine_level
         self.benefit_sensitivity = benefit_sensitivity
@@ -301,10 +288,7 @@ class BenefitCostEvaluator:
         self.dopamine_level = np.clip(level, 0.0, 1.0)
 
     def evaluate(
-        self,
-        benefits: List[float],
-        costs: List[float],
-        probabilities: Optional[List[float]] = None
+        self, benefits: List[float], costs: List[float], probabilities: Optional[List[float]] = None
     ) -> float:
         """Evaluate net value given benefits and costs.
 
@@ -332,11 +316,7 @@ class BenefitCostEvaluator:
 
         return net_value
 
-    def compute_effort_willingness(
-        self,
-        reward_magnitude: float,
-        effort_required: float
-    ) -> float:
+    def compute_effort_willingness(self, reward_magnitude: float, effort_required: float) -> float:
         """Compute willingness to exert effort for reward.
 
         Dopamine determines how much effort we're willing to expend.
@@ -352,19 +332,16 @@ class BenefitCostEvaluator:
 
         return np.clip(willingness, 0.0, 1.0)
 
-    def record_decision(
-        self,
-        chosen_value: float,
-        effort: float,
-        outcome: float
-    ) -> None:
+    def record_decision(self, chosen_value: float, effort: float, outcome: float) -> None:
         """Record a decision for learning."""
-        self.decisions.append({
-            'value': chosen_value,
-            'effort': effort,
-            'outcome': outcome,
-            'dopamine': self.dopamine_level
-        })
+        self.decisions.append(
+            {
+                "value": chosen_value,
+                "effort": effort,
+                "outcome": outcome,
+                "dopamine": self.dopamine_level,
+            }
+        )
 
 
 class DopamineSystem:
@@ -381,12 +358,7 @@ class DopamineSystem:
     - Decision-making (via benefit/cost ratio)
     """
 
-    def __init__(
-        self,
-        state_dim: int,
-        cue_dim: int,
-        learning_rate: float = 0.1
-    ):
+    def __init__(self, state_dim: int, cue_dim: int, learning_rate: float = 0.1):
         self.state_dim = state_dim
         self.cue_dim = cue_dim
 
@@ -403,9 +375,9 @@ class DopamineSystem:
 
         # Current internal state (needs)
         self.internal_state: Dict[str, float] = {
-            'energy': 0.7,
-            'social': 0.6,
-            'novelty': 0.5,
+            "energy": 0.7,
+            "social": 0.6,
+            "novelty": 0.5,
         }
 
     def process_transition(
@@ -414,7 +386,7 @@ class DopamineSystem:
         action: np.ndarray,
         reward: float,
         next_state: np.ndarray,
-        cue: Optional[np.ndarray] = None
+        cue: Optional[np.ndarray] = None,
     ) -> DopamineSignal:
         """Process a state transition and generate dopamine signal.
 
@@ -456,7 +428,7 @@ class DopamineSystem:
             prediction_error=rpe,
             incentive_salience=salience,
             benefit_cost_ratio=bc_ratio,
-            channel=DopamineChannel.PHASIC if abs(rpe) > 0.1 else DopamineChannel.TONIC
+            channel=DopamineChannel.PHASIC if abs(rpe) > 0.1 else DopamineChannel.TONIC,
         )
 
         self.phasic_history.append(signal)
@@ -481,9 +453,9 @@ class DopamineSystem:
         """Get current overall motivation level."""
         # Combine tonic level with recent salience
         if self.phasic_history:
-            recent_salience = np.mean([
-                s.incentive_salience for s in list(self.phasic_history)[-10:]
-            ])
+            recent_salience = np.mean(
+                [s.incentive_salience for s in list(self.phasic_history)[-10:]]
+            )
         else:
             recent_salience = 0.0
 
@@ -512,15 +484,19 @@ class DopamineSystem:
     def get_state_summary(self) -> Dict[str, float]:
         """Get summary of dopamine system state."""
         return {
-            'tonic_level': self.tonic_level,
-            'motivation': self.get_motivation_level(),
-            'exploration_bonus': self.get_exploration_bonus(),
-            'recent_rpe_mean': np.mean([
-                s.prediction_error for s in list(self.phasic_history)[-20:]
-            ]) if self.phasic_history else 0.0,
-            'recent_salience_mean': np.mean([
-                s.incentive_salience for s in list(self.phasic_history)[-20:]
-            ]) if self.phasic_history else 0.0,
+            "tonic_level": self.tonic_level,
+            "motivation": self.get_motivation_level(),
+            "exploration_bonus": self.get_exploration_bonus(),
+            "recent_rpe_mean": np.mean(
+                [s.prediction_error for s in list(self.phasic_history)[-20:]]
+            )
+            if self.phasic_history
+            else 0.0,
+            "recent_salience_mean": np.mean(
+                [s.incentive_salience for s in list(self.phasic_history)[-20:]]
+            )
+            if self.phasic_history
+            else 0.0,
         }
 
     def reset(self) -> None:

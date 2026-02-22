@@ -14,6 +14,7 @@ import numpy as np
 @dataclass
 class LatencyProfile:
     """Profile of operation latencies."""
+
     operation: str
     mean_latency_ms: float
     std_latency_ms: float
@@ -27,6 +28,7 @@ class LatencyProfile:
 @dataclass
 class ThroughputMetrics:
     """Throughput metrics."""
+
     operation: str
     samples_per_second: float
     tokens_per_second: Optional[float] = None
@@ -37,6 +39,7 @@ class ThroughputMetrics:
 @dataclass
 class MemoryProfile:
     """Memory usage profile."""
+
     peak_memory_mb: float
     average_memory_mb: float
     memory_by_layer: Dict[str, float] = field(default_factory=dict)
@@ -45,14 +48,17 @@ class MemoryProfile:
 @dataclass
 class OptimizationConfig:
     """Configuration for optimization."""
+
     target_latency_ms: Optional[float] = None
     target_throughput: Optional[float] = None
     max_memory_mb: Optional[float] = None
-    optimization_passes: List[str] = field(default_factory=lambda: [
-        "fuse_operations",
-        "optimize_memory",
-        "parallelize",
-    ])
+    optimization_passes: List[str] = field(
+        default_factory=lambda: [
+            "fuse_operations",
+            "optimize_memory",
+            "parallelize",
+        ]
+    )
 
 
 class Profiler:
@@ -175,10 +181,7 @@ class Profiler:
 
     def summary(self) -> Dict[str, LatencyProfile]:
         """Get summary of all profiles."""
-        return {
-            op: self.get_profile(op)
-            for op in self._latencies
-        }
+        return {op: self.get_profile(op) for op in self._latencies}
 
 
 class OperationFuser:
@@ -272,10 +275,7 @@ class MemoryOptimizer:
             tensor -> buffer offset
         """
         # Sort by lifetime start
-        sorted_tensors = sorted(
-            tensor_lifetimes.keys(),
-            key=lambda t: tensor_lifetimes[t][0]
-        )
+        sorted_tensors = sorted(tensor_lifetimes.keys(), key=lambda t: tensor_lifetimes[t][0])
 
         allocations = {}
         free_regions: List[Tuple[int, int]] = []  # (offset, size)
@@ -426,7 +426,10 @@ class EfficiencyOptimizer:
         recommendations = []
 
         # Latency recommendations
-        if self.config.target_latency_ms and profile.mean_latency_ms > self.config.target_latency_ms:
+        if (
+            self.config.target_latency_ms
+            and profile.mean_latency_ms > self.config.target_latency_ms
+        ):
             recommendations.append("Consider operation fusion to reduce latency")
             recommendations.append("Enable batching to improve throughput")
 
@@ -438,7 +441,9 @@ class EfficiencyOptimizer:
 
         # Variance recommendations
         if profile.std_latency_ms > profile.mean_latency_ms * 0.2:
-            recommendations.append("High latency variance - consider warming up or using deterministic execution")
+            recommendations.append(
+                "High latency variance - consider warming up or using deterministic execution"
+            )
 
         return recommendations
 

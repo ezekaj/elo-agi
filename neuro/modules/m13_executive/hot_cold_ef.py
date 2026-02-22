@@ -12,6 +12,7 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class HotColdParams:
     """Parameters for hot/cold EF systems"""
+
     n_units: int = 50
     emotion_weight: float = 0.5
     reward_sensitivity: float = 0.7
@@ -41,9 +42,9 @@ class HotExecutiveFunction:
         self.reward_history = []
         self.expected_reward = 0.5
 
-    def process_emotional_stimulus(self, stimulus: np.ndarray,
-                                   emotional_intensity: float = 0.5,
-                                   valence: float = 0.0) -> dict:
+    def process_emotional_stimulus(
+        self, stimulus: np.ndarray, emotional_intensity: float = 0.5, valence: float = 0.0
+    ) -> dict:
         """Process emotionally-laden stimulus
 
         Args:
@@ -70,7 +71,7 @@ class HotExecutiveFunction:
             "ofc_activity": np.mean(self.ofc_activation),
             "vmpfc_activity": np.mean(self.vmpfc_activation),
             "emotional_arousal": self.emotional_arousal,
-            "valence": self.valence
+            "valence": self.valence,
         }
 
     def evaluate_reward(self, reward_magnitude: float, delay: float = 0.0) -> float:
@@ -89,14 +90,15 @@ class HotExecutiveFunction:
 
         # Modulate by emotional state
         if self.valence > 0:
-            discounted_value *= (1 + self.valence * 0.2)
+            discounted_value *= 1 + self.valence * 0.2
         else:
-            discounted_value *= (1 + self.valence * 0.1)  # Less impact of negative
+            discounted_value *= 1 + self.valence * 0.1  # Less impact of negative
 
         return discounted_value
 
-    def make_risky_decision(self, safe_option: float,
-                           risky_option: Tuple[float, float, float]) -> dict:
+    def make_risky_decision(
+        self, safe_option: float, risky_option: Tuple[float, float, float]
+    ) -> dict:
         """Make decision between safe and risky options
 
         Args:
@@ -131,7 +133,7 @@ class HotExecutiveFunction:
             "risky_expected": expected_risky,
             "risky_subjective": subjective_risky,
             "risk_modifier": risk_modifier,
-            "emotional_arousal": self.emotional_arousal
+            "emotional_arousal": self.emotional_arousal,
         }
 
     def update_reward_learning(self, received_reward: float):
@@ -147,7 +149,7 @@ class HotExecutiveFunction:
             "valence": self.valence,
             "expected_reward": self.expected_reward,
             "ofc_mean": np.mean(self.ofc_activation),
-            "vmpfc_mean": np.mean(self.vmpfc_activation)
+            "vmpfc_mean": np.mean(self.vmpfc_activation),
         }
 
 
@@ -171,8 +173,7 @@ class ColdExecutiveFunction:
         self.active_rules = []
         self.rule_strength = {}
 
-    def process_abstract_stimulus(self, stimulus: np.ndarray,
-                                  rules: List[str] = None) -> dict:
+    def process_abstract_stimulus(self, stimulus: np.ndarray, rules: List[str] = None) -> dict:
         """Process stimulus according to abstract rules
 
         Args:
@@ -203,11 +204,10 @@ class ColdExecutiveFunction:
             "dlpfc_activity": np.mean(self.dlpfc_activation),
             "vlpfc_activity": np.mean(self.vlpfc_activation),
             "cognitive_load": self.cognitive_load,
-            "active_rules": rules
+            "active_rules": rules,
         }
 
-    def reason_logically(self, premises: List[np.ndarray],
-                        conclusion: np.ndarray) -> dict:
+    def reason_logically(self, premises: List[np.ndarray], conclusion: np.ndarray) -> dict:
         """Evaluate logical conclusion from premises
 
         Args:
@@ -244,7 +244,7 @@ class ColdExecutiveFunction:
             "valid": valid,
             "confidence": similarity,
             "cognitive_load": self.cognitive_load,
-            "threshold": effective_threshold
+            "threshold": effective_threshold,
         }
 
     def solve_problem(self, problem_complexity: float) -> dict:
@@ -279,7 +279,7 @@ class ColdExecutiveFunction:
             "solved": solved,
             "success_probability": success_prob,
             "cognitive_load": self.cognitive_load,
-            "resources_available": available_resources
+            "resources_available": available_resources,
         }
 
     def get_state(self) -> dict:
@@ -289,7 +289,7 @@ class ColdExecutiveFunction:
             "active_rules": self.active_rules.copy(),
             "rule_strengths": self.rule_strength.copy(),
             "dlpfc_mean": np.mean(self.dlpfc_activation),
-            "vlpfc_mean": np.mean(self.vlpfc_activation)
+            "vlpfc_mean": np.mean(self.vlpfc_activation),
         }
 
 
@@ -309,8 +309,7 @@ class EmotionalRegulator:
         self.regulation_strategy = "reappraisal"  # or "suppression"
         self.regulation_effort = 0.0
 
-    def regulate_emotion(self, emotional_intensity: float,
-                        strategy: str = "reappraisal") -> dict:
+    def regulate_emotion(self, emotional_intensity: float, strategy: str = "reappraisal") -> dict:
         """Apply cognitive regulation to emotion
 
         Args:
@@ -346,12 +345,12 @@ class EmotionalRegulator:
             "regulated_intensity": regulated_intensity,
             "regulation_success": regulation_success,
             "cognitive_cost": cognitive_cost,
-            "cognitive_load": self.cold_ef.cognitive_load
+            "cognitive_load": self.cold_ef.cognitive_load,
         }
 
-    def make_hybrid_decision(self, stimulus: np.ndarray,
-                            emotional_content: float,
-                            logical_content: float) -> dict:
+    def make_hybrid_decision(
+        self, stimulus: np.ndarray, emotional_content: float, logical_content: float
+    ) -> dict:
         """Make decision using both hot and cold systems
 
         Args:
@@ -364,9 +363,7 @@ class EmotionalRegulator:
         """
         # Hot processing
         hot_result = self.hot_ef.process_emotional_stimulus(
-            stimulus,
-            emotional_intensity=emotional_content,
-            valence=0.0
+            stimulus, emotional_intensity=emotional_content, valence=0.0
         )
 
         # Cold processing
@@ -378,8 +375,7 @@ class EmotionalRegulator:
 
         # Combined decision signal
         combined_activation = (
-            hot_result["ofc_activity"] * hot_weight +
-            cold_result["dlpfc_activity"] * cold_weight
+            hot_result["ofc_activity"] * hot_weight + cold_result["dlpfc_activity"] * cold_weight
         )
 
         return {
@@ -389,7 +385,7 @@ class EmotionalRegulator:
             "hot_weight": hot_weight,
             "cold_weight": cold_weight,
             "emotional_arousal": self.hot_ef.emotional_arousal,
-            "cognitive_load": self.cold_ef.cognitive_load
+            "cognitive_load": self.cold_ef.cognitive_load,
         }
 
     def get_state(self) -> dict:
@@ -398,5 +394,5 @@ class EmotionalRegulator:
             "hot": self.hot_ef.get_state(),
             "cold": self.cold_ef.get_state(),
             "regulation_strategy": self.regulation_strategy,
-            "regulation_effort": self.regulation_effort
+            "regulation_effort": self.regulation_effort,
         }

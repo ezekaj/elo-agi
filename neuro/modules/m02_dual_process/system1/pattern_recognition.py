@@ -17,6 +17,7 @@ from scipy.spatial.distance import cosine
 @dataclass
 class Pattern:
     """A learned pattern template"""
+
     id: str
     template: np.ndarray
     exemplar_count: int = 1
@@ -27,6 +28,7 @@ class Pattern:
 @dataclass
 class PatternMatch:
     """Result of pattern matching"""
+
     pattern_id: str
     confidence: float
     template: np.ndarray
@@ -43,9 +45,7 @@ class PatternRecognition:
     - Learns statistical regularities from examples
     """
 
-    def __init__(self,
-                 similarity_threshold: float = 0.7,
-                 max_patterns: int = 10000):
+    def __init__(self, similarity_threshold: float = 0.7, max_patterns: int = 10000):
         self.patterns: Dict[str, Pattern] = {}
         self.similarity_threshold = similarity_threshold
         self.max_patterns = max_patterns
@@ -53,10 +53,9 @@ class PatternRecognition:
         self._pattern_ids: List[str] = []
         self._matrix_dirty = True
 
-    def learn_pattern(self,
-                      pattern_id: str,
-                      examples: List[np.ndarray],
-                      contexts: Optional[List[Any]] = None) -> Pattern:
+    def learn_pattern(
+        self, pattern_id: str, examples: List[np.ndarray], contexts: Optional[List[Any]] = None
+    ) -> Pattern:
         """
         Extract statistical regularity from examples.
 
@@ -75,7 +74,7 @@ class PatternRecognition:
             template=template,
             exemplar_count=len(examples),
             variance=variance,
-            contexts=contexts or []
+            contexts=contexts or [],
         )
 
         self.patterns[pattern_id] = pattern
@@ -108,17 +107,16 @@ class PatternRecognition:
 
         self._pattern_ids = list(self.patterns.keys())
         if self._pattern_ids:
-            self._pattern_matrix = np.array([
-                self.patterns[pid].template for pid in self._pattern_ids
-            ])
+            self._pattern_matrix = np.array(
+                [self.patterns[pid].template for pid in self._pattern_ids]
+            )
         else:
             self._pattern_matrix = None
         self._matrix_dirty = False
 
-    def match(self,
-              input_vector: np.ndarray,
-              top_k: Optional[int] = None,
-              context: Optional[Any] = None) -> List[PatternMatch]:
+    def match(
+        self, input_vector: np.ndarray, top_k: Optional[int] = None, context: Optional[Any] = None
+    ) -> List[PatternMatch]:
         """
         Find all matching patterns - PARALLEL operation.
 
@@ -149,11 +147,11 @@ class PatternRecognition:
         matches = []
         for i, (pid, sim) in enumerate(zip(self._pattern_ids, similarities)):
             if sim >= self.similarity_threshold:
-                matches.append(PatternMatch(
-                    pattern_id=pid,
-                    confidence=float(sim),
-                    template=self.patterns[pid].template
-                ))
+                matches.append(
+                    PatternMatch(
+                        pattern_id=pid, confidence=float(sim), template=self.patterns[pid].template
+                    )
+                )
 
         # Sort by confidence (highest first)
         matches.sort(key=lambda m: m.confidence, reverse=True)

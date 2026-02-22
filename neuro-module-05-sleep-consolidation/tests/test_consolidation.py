@@ -2,15 +2,20 @@
 
 import numpy as np
 import pytest
-from neuro.modules.m05_sleep_consolidation.memory_replay import MemoryTrace, HippocampalReplay, ReplayPrioritizer
+from neuro.modules.m05_sleep_consolidation.memory_replay import (
+    MemoryTrace,
+    HippocampalReplay,
+    ReplayPrioritizer,
+)
 from neuro.modules.m05_sleep_consolidation.systems_consolidation import (
     HippocampalStore,
     CorticalStore,
     HippocampalCorticalDialogue,
     ConsolidationWindow,
     MemoryTransformation,
-    StoredMemory
+    StoredMemory,
 )
+
 
 class TestMemoryTrace:
     """Tests for memory trace representation"""
@@ -44,6 +49,7 @@ class TestMemoryTrace:
 
         sim = trace1.similarity_to(trace2)
         assert 0 < sim < 1
+
 
 class TestHippocampalReplay:
     """Tests for hippocampal replay system"""
@@ -120,10 +126,7 @@ class TestHippocampalReplay:
         replay.current_time = 100.0
 
         # Emotional memory
-        emotional = replay.encode_experience(
-            np.random.randn(10),
-            emotional_salience=0.9
-        )
+        emotional = replay.encode_experience(np.random.randn(10), emotional_salience=0.9)
 
         selected = replay.select_for_replay(n_select=2)
 
@@ -134,12 +137,15 @@ class TestHippocampalReplay:
         selected_ids = [id(m) for m in selected]
         assert id(recent) in selected_ids or id(emotional) in selected_ids
 
+
 class TestReplayPrioritizer:
     """Tests for replay prioritization"""
 
     def test_recency_effect(self):
         """Test that recent memories get higher priority"""
-        prioritizer = ReplayPrioritizer(recency_weight=1.0, emotion_weight=0.0, incompleteness_weight=0.0)
+        prioritizer = ReplayPrioritizer(
+            recency_weight=1.0, emotion_weight=0.0, incompleteness_weight=0.0
+        )
 
         recent = MemoryTrace(content=np.array([1.0]), encoding_time=90.0)
         old = MemoryTrace(content=np.array([1.0]), encoding_time=0.0)
@@ -151,7 +157,9 @@ class TestReplayPrioritizer:
 
     def test_emotion_effect(self):
         """Test that emotional memories get higher priority"""
-        prioritizer = ReplayPrioritizer(recency_weight=0.0, emotion_weight=1.0, incompleteness_weight=0.0)
+        prioritizer = ReplayPrioritizer(
+            recency_weight=0.0, emotion_weight=1.0, incompleteness_weight=0.0
+        )
 
         emotional = MemoryTrace(content=np.array([1.0]), emotional_salience=0.9)
         neutral = MemoryTrace(content=np.array([1.0]), emotional_salience=0.0)
@@ -163,7 +171,9 @@ class TestReplayPrioritizer:
 
     def test_incompleteness_effect(self):
         """Test that incomplete learning increases priority"""
-        prioritizer = ReplayPrioritizer(recency_weight=0.0, emotion_weight=0.0, incompleteness_weight=1.0)
+        prioritizer = ReplayPrioritizer(
+            recency_weight=0.0, emotion_weight=0.0, incompleteness_weight=1.0
+        )
 
         incomplete = MemoryTrace(content=np.array([1.0]), learning_complete=0.2)
         complete = MemoryTrace(content=np.array([1.0]), learning_complete=0.9)
@@ -172,6 +182,7 @@ class TestReplayPrioritizer:
         complete_priority = prioritizer.compute_priority(complete, current_time=0.0)
 
         assert incomplete_priority > complete_priority
+
 
 class TestHippocampalStore:
     """Tests for hippocampal memory store"""
@@ -219,6 +230,7 @@ class TestHippocampalStore:
 
         assert retrieved.consolidation_level == 0.3
 
+
 class TestCorticalStore:
     """Tests for cortical memory store"""
 
@@ -264,15 +276,14 @@ class TestCorticalStore:
         similarity = np.corrcoef(schema.flatten(), base.flatten())[0, 1]
         assert similarity > 0.9
 
+
 class TestConsolidationWindow:
     """Tests for consolidation window timing"""
 
     def test_optimal_window(self):
         """Test optimal consolidation window detection"""
         window = ConsolidationWindow(
-            slow_oscillation_phase="up",
-            spindle_present=True,
-            ripple_present=True
+            slow_oscillation_phase="up", spindle_present=True, ripple_present=True
         )
 
         assert window.is_optimal()
@@ -280,9 +291,7 @@ class TestConsolidationWindow:
     def test_suboptimal_window(self):
         """Test suboptimal windows"""
         window = ConsolidationWindow(
-            slow_oscillation_phase="down",
-            spindle_present=True,
-            ripple_present=True
+            slow_oscillation_phase="down", spindle_present=True, ripple_present=True
         )
 
         assert not window.is_optimal()
@@ -290,18 +299,15 @@ class TestConsolidationWindow:
     def test_consolidation_boost(self):
         """Test consolidation boost calculation"""
         optimal = ConsolidationWindow(
-            slow_oscillation_phase="up",
-            spindle_present=True,
-            ripple_present=True
+            slow_oscillation_phase="up", spindle_present=True, ripple_present=True
         )
 
         suboptimal = ConsolidationWindow(
-            slow_oscillation_phase="down",
-            spindle_present=False,
-            ripple_present=False
+            slow_oscillation_phase="down", spindle_present=False, ripple_present=False
         )
 
         assert optimal.get_consolidation_boost() > suboptimal.get_consolidation_boost()
+
 
 class TestHippocampalCorticalDialogue:
     """Tests for hippocampal-cortical memory transfer"""
@@ -363,6 +369,7 @@ class TestHippocampalCorticalDialogue:
         assert "consolidated" in stats
         assert "transferred" in stats
 
+
 class TestMemoryTransformation:
     """Tests for memory transformation during consolidation"""
 
@@ -393,5 +400,6 @@ class TestMemoryTransformation:
         assert np.any(integrated != trace.content)
         assert np.any(integrated != schema)
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

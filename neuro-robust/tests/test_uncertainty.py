@@ -3,9 +3,14 @@
 import pytest
 import numpy as np
 from neuro.modules.robust.uncertainty import (
-    SimpleDropoutNN, UncertaintyQuantifier, UncertaintyEstimate,
-    UncertaintyType, EnsembleUncertainty, EvidentialUncertainty,
+    SimpleDropoutNN,
+    UncertaintyQuantifier,
+    UncertaintyEstimate,
+    UncertaintyType,
+    EnsembleUncertainty,
+    EvidentialUncertainty,
 )
+
 
 class TestSimpleDropoutNN:
     """Tests for SimpleDropoutNN."""
@@ -46,6 +51,7 @@ class TestSimpleDropoutNN:
         out1 = model.forward(x, apply_dropout=True)
         out2 = model.forward(x, apply_dropout=True)
         assert np.allclose(out1, out2)
+
 
 class TestUncertaintyQuantifier:
     """Tests for UncertaintyQuantifier."""
@@ -148,6 +154,7 @@ class TestUncertaintyQuantifier:
         # Higher samples should have lower variance
         assert np.var(estimates_high) <= np.var(estimates_low) + 0.1
 
+
 class TestEnsembleUncertainty:
     """Tests for EnsembleUncertainty."""
 
@@ -215,6 +222,7 @@ class TestEnsembleUncertainty:
         first_model_losses = history["losses"][0]
         assert first_model_losses[-1] < first_model_losses[0]
 
+
 class TestEvidentialUncertainty:
     """Tests for EvidentialUncertainty."""
 
@@ -275,6 +283,7 @@ class TestEvidentialUncertainty:
         stats = evidential.statistics()
         assert stats["n_estimates"] == 2
         assert stats["n_classes"] == 3
+
 
 class TestUncertaintyComparison:
     """Tests comparing uncertainty methods."""

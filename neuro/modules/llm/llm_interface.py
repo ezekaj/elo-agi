@@ -22,6 +22,7 @@ import json
 # Try to import API clients
 try:
     import anthropic
+
     HAS_ANTHROPIC = True
 except ImportError:
     HAS_ANTHROPIC = False
@@ -29,6 +30,7 @@ except ImportError:
 
 try:
     import openai
+
     HAS_OPENAI = True
 except ImportError:
     HAS_OPENAI = False
@@ -38,6 +40,7 @@ except ImportError:
 @dataclass
 class LLMConfig:
     """Configuration for LLM interface."""
+
     provider: str = "mock"  # "anthropic", "openai", "mock"
     model: str = "claude-3-haiku-20240307"
     api_key: Optional[str] = None
@@ -51,6 +54,7 @@ class LLMConfig:
 @dataclass
 class LLMResponse:
     """Response from an LLM query."""
+
     text: str
     tokens_used: int = 0
     latency: float = 0.0
@@ -116,36 +120,36 @@ class LLMOracle(ABC):
         response_lower = response.lower()
 
         action = {
-            'type': 'unknown',
-            'confidence': 0.5,
-            'raw_text': response,
+            "type": "unknown",
+            "confidence": 0.5,
+            "raw_text": response,
         }
 
         # Detect action types
-        if any(w in response_lower for w in ['move', 'go', 'walk', 'travel']):
-            action['type'] = 'move'
+        if any(w in response_lower for w in ["move", "go", "walk", "travel"]):
+            action["type"] = "move"
             # Extract direction
-            for direction in ['north', 'south', 'east', 'west', 'up', 'down']:
+            for direction in ["north", "south", "east", "west", "up", "down"]:
                 if direction in response_lower:
-                    action['direction'] = direction
+                    action["direction"] = direction
                     break
 
-        elif any(w in response_lower for w in ['take', 'grab', 'pick', 'get']):
-            action['type'] = 'take'
+        elif any(w in response_lower for w in ["take", "grab", "pick", "get"]):
+            action["type"] = "take"
 
-        elif any(w in response_lower for w in ['say', 'tell', 'speak', 'respond']):
-            action['type'] = 'speak'
+        elif any(w in response_lower for w in ["say", "tell", "speak", "respond"]):
+            action["type"] = "speak"
             # Extract quoted text if present
             if '"' in response:
                 parts = response.split('"')
                 if len(parts) >= 2:
-                    action['message'] = parts[1]
+                    action["message"] = parts[1]
 
-        elif any(w in response_lower for w in ['wait', 'stay', 'pause']):
-            action['type'] = 'wait'
+        elif any(w in response_lower for w in ["wait", "stay", "pause"]):
+            action["type"] = "wait"
 
-        elif any(w in response_lower for w in ['look', 'observe', 'examine']):
-            action['type'] = 'observe'
+        elif any(w in response_lower for w in ["look", "observe", "examine"]):
+            action["type"] = "observe"
 
         return action
 
@@ -183,12 +187,12 @@ class LLMOracle(ABC):
     def get_statistics(self) -> Dict[str, Any]:
         """Get usage statistics."""
         return {
-            'query_count': self._query_count,
-            'cache_hits': self._cache_hits,
-            'cache_size': len(self._cache),
-            'cache_hit_rate': self._cache_hits / max(1, self._query_count),
-            'provider': self.config.provider,
-            'model': self.config.model,
+            "query_count": self._query_count,
+            "cache_hits": self._cache_hits,
+            "cache_size": len(self._cache),
+            "cache_hit_rate": self._cache_hits / max(1, self._query_count),
+            "provider": self.config.provider,
+            "model": self.config.model,
         }
 
     def clear_cache(self) -> None:
@@ -211,11 +215,11 @@ class MockLLM(LLMOracle):
     def _build_responses(self) -> Dict[str, str]:
         """Build canned responses for common prompts."""
         return {
-            'greeting': "Hello! I'm here to help. What would you like to discuss?",
-            'question': "That's an interesting question. Let me think about it...",
-            'action': "I would suggest taking a careful approach to this situation.",
-            'description': "I can see a complex environment with multiple elements.",
-            'default': "I understand. Please tell me more about what you need.",
+            "greeting": "Hello! I'm here to help. What would you like to discuss?",
+            "question": "That's an interesting question. Let me think about it...",
+            "action": "I would suggest taking a careful approach to this situation.",
+            "description": "I can see a complex environment with multiple elements.",
+            "default": "I understand. Please tell me more about what you need.",
         }
 
     def query(self, prompt: str, system: Optional[str] = None) -> LLMResponse:
@@ -231,16 +235,16 @@ class MockLLM(LLMOracle):
         # Generate mock response
         prompt_lower = prompt.lower()
 
-        if any(w in prompt_lower for w in ['hello', 'hi', 'greet']):
-            text = self._responses['greeting']
-        elif '?' in prompt:
-            text = self._responses['question']
-        elif any(w in prompt_lower for w in ['do', 'action', 'move', 'take']):
-            text = self._responses['action']
-        elif any(w in prompt_lower for w in ['describe', 'what', 'see']):
-            text = self._responses['description']
+        if any(w in prompt_lower for w in ["hello", "hi", "greet"]):
+            text = self._responses["greeting"]
+        elif "?" in prompt:
+            text = self._responses["question"]
+        elif any(w in prompt_lower for w in ["do", "action", "move", "take"]):
+            text = self._responses["action"]
+        elif any(w in prompt_lower for w in ["describe", "what", "see"]):
+            text = self._responses["description"]
         else:
-            text = self._responses['default']
+            text = self._responses["default"]
 
         # Add some variation based on prompt hash
         prompt_hash = hash(prompt) % 100
@@ -416,9 +420,11 @@ class OpenAILLM(LLMOracle):
 
             # Resize to configured dimension
             if len(full_embedding) > self.config.embedding_dim:
-                embedding = full_embedding[:self.config.embedding_dim]
+                embedding = full_embedding[: self.config.embedding_dim]
             else:
-                embedding = np.pad(full_embedding, (0, self.config.embedding_dim - len(full_embedding)))
+                embedding = np.pad(
+                    full_embedding, (0, self.config.embedding_dim - len(full_embedding))
+                )
 
             return embedding
 

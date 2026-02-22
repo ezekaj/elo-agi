@@ -15,20 +15,37 @@ import os
 import time
 
 from neuro.modules.m18_self_improvement.generator import (
-    ModificationGenerator, GeneratorParams, Modification, ModificationType
+    ModificationGenerator,
+    GeneratorParams,
+    Modification,
+    ModificationType,
 )
 from neuro.modules.m18_self_improvement.verifier import (
-    ChangeVerifier, VerifierParams, VerificationResult, VerificationMethod
+    ChangeVerifier,
+    VerifierParams,
+    VerificationResult,
+    VerificationMethod,
 )
 from neuro.modules.m18_self_improvement.updater import (
-    SystemUpdater, UpdaterParams, UpdateResult, UpdateStatus, Checkpoint
+    SystemUpdater,
+    UpdaterParams,
+    UpdateResult,
+    UpdateStatus,
+    Checkpoint,
 )
 from neuro.modules.m18_self_improvement.meta_learner import (
-    MetaLearner, MetaParams, LearningStrategy, StrategyType
+    MetaLearner,
+    MetaParams,
+    LearningStrategy,
+    StrategyType,
 )
 from neuro.modules.m18_self_improvement.darwin_godel import (
-    DarwinGodelMachine, DGMParams, ImprovementCycle, ImprovementPhase
+    DarwinGodelMachine,
+    DGMParams,
+    ImprovementCycle,
+    ImprovementPhase,
 )
+
 
 class MockSystem:
     """Mock system for testing improvements."""
@@ -43,23 +60,24 @@ class MockSystem:
 
     def get_state(self) -> dict:
         return {
-            'weights': self.weights.copy(),
-            'learning_rate': self.learning_rate,
+            "weights": self.weights.copy(),
+            "learning_rate": self.learning_rate,
         }
 
     def set_state(self, state: dict) -> None:
-        self.weights = state['weights']
-        self.learning_rate = state['learning_rate']
+        self.weights = state["weights"]
+        self.learning_rate = state["learning_rate"]
 
     def apply_modification(self, mod: Modification) -> None:
         if mod.mod_type == ModificationType.WEIGHT_ADJUSTMENT:
-            scale = mod.changes.get('adjustment_scale', 0.1)
-            self.weights *= (1 + scale * 0.01)
+            scale = mod.changes.get("adjustment_scale", 0.1)
+            self.weights *= 1 + scale * 0.01
             self.performance += 0.01  # Small improvement
 
     def rollback(self) -> None:
         self.weights = np.random.randn(10)
         self.performance = 0.5
+
 
 class TestModificationGenerator:
     """Tests for the modification generator."""
@@ -102,7 +120,7 @@ class TestModificationGenerator:
             generator.record_outcome(candidates[0], 0.1)
 
         stats = generator.get_statistics()
-        assert stats['n_modifications'] >= 0
+        assert stats["n_modifications"] >= 0
 
     def test_strategy_weights_update(self):
         """Test that strategy weights update."""
@@ -168,6 +186,7 @@ class TestModificationGenerator:
         mutated = generator._mutate(mod)
         assert isinstance(mutated, Modification)
         assert mutated.mod_id != mod.mod_id
+
 
 class TestChangeVerifier:
     """Tests for the change verifier."""
@@ -278,6 +297,7 @@ class TestChangeVerifier:
         assert not result.verified
         assert len(result.warnings) > 0
 
+
 class TestSystemUpdater:
     """Tests for the system updater."""
 
@@ -289,7 +309,7 @@ class TestSystemUpdater:
     def test_create_checkpoint(self):
         """Test checkpoint creation."""
         updater = SystemUpdater()
-        state = {'weights': np.array([1, 2, 3])}
+        state = {"weights": np.array([1, 2, 3])}
         updater.set_state_accessors(lambda: state, lambda s: None)
         updater.set_performance_monitor(lambda: 0.5)
 
@@ -299,7 +319,7 @@ class TestSystemUpdater:
     def test_apply_modification(self):
         """Test modification application."""
         updater = SystemUpdater()
-        state = {'weights': 1.0, 'learning_rate': 0.01}
+        state = {"weights": 1.0, "learning_rate": 0.01}
 
         def get_state():
             return state.copy()
@@ -328,25 +348,23 @@ class TestSystemUpdater:
     def test_rollback(self):
         """Test rollback functionality."""
         updater = SystemUpdater()
-        original = {'value': 100}
+        original = {"value": 100}
         state = original.copy()
 
-        updater.set_state_accessors(
-            lambda: state.copy(),
-            lambda s: state.update(s)
-        )
+        updater.set_state_accessors(lambda: state.copy(), lambda s: state.update(s))
         updater.set_performance_monitor(lambda: 0.5)
 
         # Create checkpoint
         checkpoint = updater.create_checkpoint()
 
         # Modify state
-        state['value'] = 200
+        state["value"] = 200
 
         # Rollback
         success = updater.rollback(checkpoint.checkpoint_id)
         assert success
-        assert state['value'] == 100
+        assert state["value"] == 100
+
 
 class TestMetaLearner:
     """Tests for the meta learner."""
@@ -442,7 +460,8 @@ class TestMetaLearner:
             learner.record_experience(mod, result)
 
         stats = learner.get_statistics()
-        assert stats['n_experiences'] == 20
+        assert stats["n_experiences"] == 20
+
 
 class TestDarwinGodelMachine:
     """Tests for the Darwin Gödel Machine."""
@@ -530,18 +549,18 @@ class TestDarwinGodelMachine:
         dgm.run_improvement_cycle()
 
         summary = dgm.get_improvement_summary()
-        assert 'total_cycles' in summary
-        assert summary['total_cycles'] >= 1
+        assert "total_cycles" in summary
+        assert summary["total_cycles"] >= 1
 
     def test_component_statistics(self):
         """Test getting component statistics."""
         dgm = DarwinGodelMachine()
         stats = dgm.get_component_statistics()
 
-        assert 'generator' in stats
-        assert 'verifier' in stats
-        assert 'updater' in stats
-        assert 'meta_learner' in stats
+        assert "generator" in stats
+        assert "verifier" in stats
+        assert "updater" in stats
+        assert "meta_learner" in stats
 
     def test_reset(self):
         """Test system reset."""
@@ -554,6 +573,7 @@ class TestDarwinGodelMachine:
         dgm.reset()
         assert dgm._cycle_count == 0
         assert len(dgm._cycle_history) == 0
+
 
 class TestStress:
     """Stress tests for the self-improvement module."""
@@ -587,16 +607,13 @@ class TestStress:
             verifier.verify(mod, lambda m: None, lambda: None, VerificationMethod.SIMULATION)
 
         stats = verifier.get_statistics()
-        assert stats['n_verifications'] == 100
+        assert stats["n_verifications"] == 100
 
     def test_many_updates(self):
         """Test many updates."""
         updater = SystemUpdater()
-        state = {'value': 0}
-        updater.set_state_accessors(
-            lambda: state.copy(),
-            lambda s: state.update(s)
-        )
+        state = {"value": 0}
+        updater.set_state_accessors(lambda: state.copy(), lambda s: state.update(s))
         updater.set_performance_monitor(lambda: 0.5)
 
         for i in range(50):
@@ -613,14 +630,16 @@ class TestStress:
             updater.apply(mod)
 
         stats = updater.get_statistics()
-        assert stats['n_updates'] == 50
+        assert stats["n_updates"] == 50
 
     def test_long_running_dgm(self):
         """Test DGM over many cycles."""
-        dgm = DarwinGodelMachine(DGMParams(
-            improvement_interval=0.0,
-            max_failed_attempts=100,
-        ))
+        dgm = DarwinGodelMachine(
+            DGMParams(
+                improvement_interval=0.0,
+                max_failed_attempts=100,
+            )
+        )
         system = MockSystem()
 
         dgm.set_target_system(
@@ -634,7 +653,8 @@ class TestStress:
             dgm.run_improvement_cycle()
 
         stats = dgm.get_statistics()
-        assert stats['cycle_count'] == 20
+        assert stats["cycle_count"] == 20
+
 
 class TestIntegration:
     """Integration tests."""
@@ -646,10 +666,12 @@ class TestIntegration:
         initial_perf = system.get_performance()
 
         # Create DGM
-        dgm = DarwinGodelMachine(DGMParams(
-            improvement_interval=0.0,
-            safety_mode=True,
-        ))
+        dgm = DarwinGodelMachine(
+            DGMParams(
+                improvement_interval=0.0,
+                safety_mode=True,
+            )
+        )
 
         dgm.set_target_system(
             system,
@@ -665,7 +687,7 @@ class TestIntegration:
         # Verify results
         assert len(cycles) <= 10
         summary = dgm.get_improvement_summary()
-        assert 'total_cycles' in summary
+        assert "total_cycles" in summary
 
     def test_meta_learning_integration(self):
         """Test meta-learning integration."""
@@ -685,7 +707,8 @@ class TestIntegration:
 
         # Check meta-learner state
         ml_stats = dgm.meta_learner.get_statistics()
-        assert ml_stats['n_experiences'] > 0
+        assert ml_stats["n_experiences"] > 0
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -41,24 +41,24 @@ from .ignition import (
 
 __all__ = [
     # Module Interface
-    'CognitiveModule',
-    'ModuleProposal',
-    'ModuleState',
-    'ModuleParams',
+    "CognitiveModule",
+    "ModuleProposal",
+    "ModuleState",
+    "ModuleParams",
     # Global Workspace
-    'GlobalWorkspace',
-    'WorkspaceParams',
-    'WorkspaceState',
+    "GlobalWorkspace",
+    "WorkspaceParams",
+    "WorkspaceState",
     # Competition
-    'AttentionCompetition',
-    'CompetitionParams',
-    'CompetitionResult',
+    "AttentionCompetition",
+    "CompetitionParams",
+    "CompetitionResult",
     # Broadcast
-    'BroadcastSystem',
-    'BroadcastParams',
-    'BroadcastEvent',
+    "BroadcastSystem",
+    "BroadcastParams",
+    "BroadcastEvent",
     # Ignition
-    'IgnitionDetector',
-    'IgnitionParams',
-    'IgnitionEvent',
+    "IgnitionDetector",
+    "IgnitionParams",
+    "IgnitionEvent",
 ]

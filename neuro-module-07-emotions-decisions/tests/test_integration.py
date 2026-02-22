@@ -3,11 +3,19 @@
 import numpy as np
 import pytest
 from neuro.modules.m07_emotions_decisions.emotion_decision_integrator import (
-    EmotionDecisionSystem, Situation, SituationType,
-    create_threat_situation, create_reward_situation, create_moral_situation
+    EmotionDecisionSystem,
+    Situation,
+    SituationType,
+    create_threat_situation,
+    create_reward_situation,
+    create_moral_situation,
 )
-from neuro.modules.m07_emotions_decisions.moral_reasoning import create_trolley_push, create_trolley_switch
+from neuro.modules.m07_emotions_decisions.moral_reasoning import (
+    create_trolley_push,
+    create_trolley_switch,
+)
 from neuro.modules.m07_emotions_decisions.emotional_states import Outcome, OutcomeType
+
 
 class TestEmotionDecisionSystem:
     """Test the full integrated system."""
@@ -19,7 +27,7 @@ class TestEmotionDecisionSystem:
         decision = system.process_situation(situation)
 
         # Should avoid threat
-        assert decision.action in ['avoid', 'flee', 'freeze', 'dont_act']
+        assert decision.action in ["avoid", "flee", "freeze", "dont_act"]
         # System avoids when threat_level > 0.3
         assert decision.emotional_state.threat_level > 0.3 or decision.emotional_state.valence < 0
 
@@ -30,7 +38,7 @@ class TestEmotionDecisionSystem:
         decision = system.process_situation(situation)
 
         # Should approach reward
-        assert decision.action in ['act', 'approach']
+        assert decision.action in ["act", "approach"]
         assert decision.value > 0
 
     def test_moral_dilemma_processing(self):
@@ -49,16 +57,13 @@ class TestEmotionDecisionSystem:
         decision = system.process_situation(situation)
 
         # Simulate positive outcome
-        outcome = Outcome(
-            outcome_type=OutcomeType.REWARD_RECEIVED,
-            magnitude=0.8,
-            expected=True
-        )
+        outcome = Outcome(outcome_type=OutcomeType.REWARD_RECEIVED, magnitude=0.8, expected=True)
 
         system.learn_from_outcome(decision, outcome)
 
         # System should have learned
         assert len(system.decision_history) > 0
+
 
 class TestLesionSimulation:
     """Test lesion effects on decision-making."""
@@ -73,17 +78,20 @@ class TestLesionSimulation:
 
         # Lesioned processing
         lesion_system = EmotionDecisionSystem()
-        lesion_system.simulate_lesion('vmpfc')
+        lesion_system.simulate_lesion("vmpfc")
 
         lesion_decision = lesion_system.process_situation(situation)
 
         # Lesioned should have reduced deontological weight
-        assert lesion_decision.moral_decision.deontological_weight <= normal_decision.moral_decision.deontological_weight
+        assert (
+            lesion_decision.moral_decision.deontological_weight
+            <= normal_decision.moral_decision.deontological_weight
+        )
 
     def test_amygdala_lesion_threat_response(self):
         normal_system = EmotionDecisionSystem()
         lesion_system = EmotionDecisionSystem()
-        lesion_system.simulate_lesion('amygdala')
+        lesion_system.simulate_lesion("amygdala")
 
         threat = create_threat_situation(intensity=0.7)
 
@@ -91,7 +99,11 @@ class TestLesionSimulation:
         lesion_decision = lesion_system.process_situation(threat)
 
         # Lesioned should have reduced threat response
-        assert lesion_decision.emotional_state.threat_level <= normal_decision.emotional_state.threat_level
+        assert (
+            lesion_decision.emotional_state.threat_level
+            <= normal_decision.emotional_state.threat_level
+        )
+
 
 class TestStressEffects:
     """Test stress effects on processing."""
@@ -107,6 +119,7 @@ class TestStressEffects:
         # Processing time should be faster
         assert decision.processing_time_ms < 50  # Closer to fast route timing
 
+
 class TestEmotionalDynamics:
     """Test emotional state changes over time."""
 
@@ -120,8 +133,8 @@ class TestEmotionalDynamics:
 
         mood = system.get_mood()
 
-        assert 'valence' in mood
-        assert mood['valence'] < 0  # Negative from threats
+        assert "valence" in mood
+        assert mood["valence"] < 0  # Negative from threats
 
     def test_emotional_state_access(self):
         system = EmotionDecisionSystem()

@@ -9,7 +9,8 @@ Demonstrates:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 import numpy as np
 from src import MemoryController
@@ -123,7 +124,7 @@ def demo_memory_flow():
     episode = mc.encode_experience(
         experience="Had lunch with friend",
         context={"location": "cafe", "person": "John"},
-        emotional_valence=0.7
+        emotional_valence=0.7,
     )
     print(f"Encoded episodic memory: {episode.content}")
 
@@ -131,7 +132,7 @@ def demo_memory_flow():
     concept = mc.learn_concept(
         name="cafe",
         features={"serves_food": 1.0, "serves_drinks": 1.0},
-        relations=[("is-a", "restaurant", 1.0)]
+        relations=[("is-a", "restaurant", 1.0)],
     )
     print(f"Learned concept: {concept.name}")
 
@@ -139,7 +140,7 @@ def demo_memory_flow():
     skill = mc.learn_skill(
         name="order_coffee",
         trigger_features={"location": "cafe", "want": "coffee"},
-        action_names=["approach_counter", "order", "pay", "receive"]
+        action_names=["approach_counter", "order", "pay", "receive"],
     )
     print(f"Learned skill: {skill.name}")
 

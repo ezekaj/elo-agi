@@ -42,28 +42,28 @@ from .coherence_checker import (
 
 __all__ = [
     # Shared Space
-    'SharedSpace',
-    'SemanticEmbedding',
-    'ProjectionLayer',
-    'SharedSpaceConfig',
+    "SharedSpace",
+    "SemanticEmbedding",
+    "ProjectionLayer",
+    "SharedSpaceConfig",
     # Cross-Module Learning
-    'CrossModuleLearner',
-    'LearningSignal',
-    'GradientRouter',
-    'ModuleSynapse',
+    "CrossModuleLearner",
+    "LearningSignal",
+    "GradientRouter",
+    "ModuleSynapse",
     # Conflict Resolution
-    'ConflictResolver',
-    'Conflict',
-    'Resolution',
-    'ResolutionStrategy',
+    "ConflictResolver",
+    "Conflict",
+    "Resolution",
+    "ResolutionStrategy",
     # Evidence Accumulation
-    'EvidenceAccumulator',
-    'Evidence',
-    'EvidenceSource',
-    'AccumulatorConfig',
+    "EvidenceAccumulator",
+    "Evidence",
+    "EvidenceSource",
+    "AccumulatorConfig",
     # Coherence Checking
-    'CoherenceChecker',
-    'Inconsistency',
-    'CoherenceReport',
-    'BeliefNetwork',
+    "CoherenceChecker",
+    "Inconsistency",
+    "CoherenceReport",
+    "BeliefNetwork",
 ]

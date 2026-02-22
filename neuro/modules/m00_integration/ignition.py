@@ -26,28 +26,31 @@ except ImportError:
 
 class IgnitionState(Enum):
     """States of the ignition process."""
-    SUBLIMINAL = "subliminal"    # Below threshold, local processing only
-    THRESHOLD = "threshold"      # Near threshold, may ignite
-    IGNITED = "ignited"          # Above threshold, global broadcast
-    SUSTAINED = "sustained"      # Maintained ignition
-    FADING = "fading"            # Activation declining
+
+    SUBLIMINAL = "subliminal"  # Below threshold, local processing only
+    THRESHOLD = "threshold"  # Near threshold, may ignite
+    IGNITED = "ignited"  # Above threshold, global broadcast
+    SUSTAINED = "sustained"  # Maintained ignition
+    FADING = "fading"  # Activation declining
 
 
 @dataclass
 class IgnitionParams:
     """Parameters for ignition detection."""
-    threshold: float = 0.7            # Activation threshold for ignition
-    hysteresis: float = 0.1           # Hysteresis to prevent oscillation
-    min_duration: float = 0.05        # Minimum duration for valid ignition (seconds)
-    max_sustained: float = 2.0        # Maximum sustained ignition (seconds)
-    coherence_weight: float = 0.3     # Weight of buffer coherence in threshold
-    diversity_bonus: float = 0.1      # Bonus for diverse sources
+
+    threshold: float = 0.7  # Activation threshold for ignition
+    hysteresis: float = 0.1  # Hysteresis to prevent oscillation
+    min_duration: float = 0.05  # Minimum duration for valid ignition (seconds)
+    max_sustained: float = 2.0  # Maximum sustained ignition (seconds)
+    coherence_weight: float = 0.3  # Weight of buffer coherence in threshold
+    diversity_bonus: float = 0.1  # Bonus for diverse sources
     n_features: int = 64
 
 
 @dataclass
 class IgnitionEvent:
     """Record of an ignition event."""
+
     ignited: bool
     activation: float
     threshold_used: float
@@ -284,23 +287,25 @@ class IgnitionDetector:
         """Get ignition statistics."""
         if not self._history:
             return {
-                'total_events': 0,
-                'ignition_rate': 0.0,
-                'avg_duration': 0.0,
-                'avg_activation': 0.0,
-                'current_state': self._state.value,
+                "total_events": 0,
+                "ignition_rate": 0.0,
+                "avg_duration": 0.0,
+                "avg_activation": 0.0,
+                "current_state": self._state.value,
             }
 
         ignited_events = [e for e in self._history if e.ignited]
 
         return {
-            'total_events': len(self._history),
-            'ignition_rate': len(ignited_events) / len(self._history),
-            'avg_duration': np.mean([e.duration for e in ignited_events]) if ignited_events else 0.0,
-            'avg_activation': np.mean([e.activation for e in self._history]),
-            'avg_coherence': np.mean([e.coherence for e in self._history]),
-            'current_state': self._state.value,
-            'current_activation': self._current_activation,
+            "total_events": len(self._history),
+            "ignition_rate": len(ignited_events) / len(self._history),
+            "avg_duration": np.mean([e.duration for e in ignited_events])
+            if ignited_events
+            else 0.0,
+            "avg_activation": np.mean([e.activation for e in self._history]),
+            "avg_coherence": np.mean([e.coherence for e in self._history]),
+            "current_state": self._state.value,
+            "current_activation": self._current_activation,
         }
 
     def reset(self) -> None:

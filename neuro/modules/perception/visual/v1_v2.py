@@ -14,6 +14,7 @@ import numpy as np
 @dataclass
 class OrientationColumn:
     """A column of orientation-selective cells."""
+
     preferred_angle: float  # In radians
     bandwidth: float = 0.5  # Tuning width in radians
     spatial_frequency: float = 0.1
@@ -24,6 +25,7 @@ class OrientationColumn:
 @dataclass
 class SpatialFrequencyFilter:
     """A spatial frequency filter (like a Gabor)."""
+
     frequency: float
     orientation: float
     sigma: float
@@ -34,21 +36,23 @@ class SpatialFrequencyFilter:
 @dataclass
 class V1Output:
     """Output from V1 processing."""
-    orientation_map: np.ndarray      # (H, W, n_orientations)
-    frequency_map: np.ndarray        # (H, W, n_frequencies)
-    edge_map: np.ndarray             # Combined edge detection
-    complex_cells: np.ndarray        # Phase-invariant responses
+
+    orientation_map: np.ndarray  # (H, W, n_orientations)
+    frequency_map: np.ndarray  # (H, W, n_frequencies)
+    edge_map: np.ndarray  # Combined edge detection
+    complex_cells: np.ndarray  # Phase-invariant responses
     size: Tuple[int, int] = (0, 0)
 
 
 @dataclass
 class V2Output:
     """Output from V2 processing."""
-    contour_map: np.ndarray         # Illusory contours, border ownership
-    texture_map: np.ndarray         # Texture segregation
-    corner_map: np.ndarray          # Corner/junction detection
-    curvature_map: np.ndarray       # Curvature estimation
-    depth_cues: np.ndarray          # Monocular depth cues
+
+    contour_map: np.ndarray  # Illusory contours, border ownership
+    texture_map: np.ndarray  # Texture segregation
+    corner_map: np.ndarray  # Corner/junction detection
+    curvature_map: np.ndarray  # Curvature estimation
+    depth_cues: np.ndarray  # Monocular depth cues
     size: Tuple[int, int] = (0, 0)
 
 
@@ -87,26 +91,28 @@ class V1Processor:
 
         orientations = np.linspace(0, np.pi, self.n_orientations, endpoint=False)
         frequencies = np.logspace(
-            np.log10(self.min_frequency),
-            np.log10(self.max_frequency),
-            self.n_frequencies
+            np.log10(self.min_frequency), np.log10(self.max_frequency), self.n_frequencies
         )
 
         for freq in frequencies:
             for theta in orientations:
-                filters.append(SpatialFrequencyFilter(
-                    frequency=freq,
-                    orientation=theta,
-                    sigma=self.gabor_sigma / freq,  # Scale sigma with frequency
-                    phase=0.0,
-                ))
+                filters.append(
+                    SpatialFrequencyFilter(
+                        frequency=freq,
+                        orientation=theta,
+                        sigma=self.gabor_sigma / freq,  # Scale sigma with frequency
+                        phase=0.0,
+                    )
+                )
                 # Add quadrature pair (90° phase shift)
-                filters.append(SpatialFrequencyFilter(
-                    frequency=freq,
-                    orientation=theta,
-                    sigma=self.gabor_sigma / freq,
-                    phase=np.pi / 2,
-                ))
+                filters.append(
+                    SpatialFrequencyFilter(
+                        frequency=freq,
+                        orientation=theta,
+                        sigma=self.gabor_sigma / freq,
+                        phase=np.pi / 2,
+                    )
+                )
 
         return filters
 
@@ -117,7 +123,7 @@ class V1Processor:
     ) -> np.ndarray:
         """Create a Gabor kernel."""
         half = size // 2
-        y, x = np.mgrid[-half:half+1, -half:half+1]
+        y, x = np.mgrid[-half : half + 1, -half : half + 1]
 
         # Rotation
         x_theta = x * np.cos(filt.orientation) + y * np.sin(filt.orientation)
@@ -138,10 +144,7 @@ class V1Processor:
     def _get_kernels(self, size: int = 31) -> List[np.ndarray]:
         """Get or create Gabor kernels."""
         if self._kernels is None:
-            self._kernels = [
-                self._create_gabor_kernel(f, size)
-                for f in self._filters
-            ]
+            self._kernels = [self._create_gabor_kernel(f, size) for f in self._filters]
         return self._kernels
 
     def process(
@@ -162,7 +165,7 @@ class V1Processor:
         from scipy.ndimage import convolve
 
         # Get input (use luminance or combined response)
-        if hasattr(retina_output, 'luminance'):
+        if hasattr(retina_output, "luminance"):
             image = retina_output.luminance
         else:
             image = retina_output
@@ -179,13 +182,13 @@ class V1Processor:
         # Simple cell responses
         simple_responses = []
         for kernel in kernels:
-            response = convolve(image, kernel, mode='constant')
+            response = convolve(image, kernel, mode="constant")
             simple_responses.append(response)
 
         # Complex cell responses (energy model - sum of squared quadrature pair)
         complex_responses = []
         for i in range(0, len(simple_responses), 2):
-            energy = np.sqrt(simple_responses[i]**2 + simple_responses[i+1]**2)
+            energy = np.sqrt(simple_responses[i] ** 2 + simple_responses[i + 1] ** 2)
             complex_responses.append(energy)
 
         # Organize by orientation and frequency
@@ -196,9 +199,7 @@ class V1Processor:
                 orientation_responses[:, :, oi] = np.maximum(
                     orientation_responses[:, :, oi], response
                 )
-                frequency_responses[:, :, fi] = np.maximum(
-                    frequency_responses[:, :, fi], response
-                )
+                frequency_responses[:, :, fi] = np.maximum(frequency_responses[:, :, fi], response)
                 idx += 1
 
         # Edge map (max across orientations and frequencies)
@@ -340,10 +341,7 @@ class V2Processor:
         local_texture = np.zeros((h, w, n_freq))
 
         for i in range(n_freq):
-            local_texture[:, :, i] = uniform_filter(
-                frequency_map[:, :, i],
-                size=window_size
-            )
+            local_texture[:, :, i] = uniform_filter(frequency_map[:, :, i], size=window_size)
 
         # Texture gradient (change in texture)
         texture_gradient = np.zeros((h, w))

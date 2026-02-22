@@ -14,6 +14,7 @@ from dataclasses import dataclass
 @dataclass
 class StructuralParams:
     """Structural plasticity parameters"""
+
     synapse_formation_rate: float = 0.01
     synapse_elimination_rate: float = 0.005
     activity_threshold: float = 0.1
@@ -24,11 +25,7 @@ class StructuralParams:
 class StructuralPlasticity:
     """Structural plasticity - formation and elimination of synapses"""
 
-    def __init__(
-        self,
-        n_neurons: int,
-        params: Optional[StructuralParams] = None
-    ):
+    def __init__(self, n_neurons: int, params: Optional[StructuralParams] = None):
         self.n_neurons = n_neurons
         self.params = params or StructuralParams()
 
@@ -76,8 +73,10 @@ class StructuralPlasticity:
                     continue
 
                 # Form synapse if both neurons are active
-                if (activity[i] > self.params.activity_threshold and
-                    activity[j] > self.params.activity_threshold):
+                if (
+                    activity[i] > self.params.activity_threshold
+                    and activity[j] > self.params.activity_threshold
+                ):
                     if np.random.rand() < self.params.synapse_formation_rate:
                         self.connectivity[i, j] = True
                         self.weights[i, j] = 0.1  # Start weak
@@ -144,10 +143,7 @@ class SynapticPruning:
     """
 
     def __init__(
-        self,
-        weights: np.ndarray,
-        pruning_rate: float = 0.01,
-        activity_threshold: float = 0.1
+        self, weights: np.ndarray, pruning_rate: float = 0.01, activity_threshold: float = 0.1
     ):
         self.weights = weights.copy()
         self.pruning_rate = pruning_rate
@@ -159,8 +155,9 @@ class SynapticPruning:
 
     def record_usage(self, pre_activity: np.ndarray, post_activity: np.ndarray) -> None:
         """Record which synapses were used"""
-        usage = np.outer(post_activity > self.activity_threshold,
-                        pre_activity > self.activity_threshold)
+        usage = np.outer(
+            post_activity > self.activity_threshold, pre_activity > self.activity_threshold
+        )
         self.usage_count += usage.astype(float)
         self.total_updates += 1
 
@@ -196,12 +193,7 @@ class DendriticGrowth:
     Models activity-dependent dendritic growth.
     """
 
-    def __init__(
-        self,
-        n_neurons: int,
-        growth_rate: float = 0.01,
-        retraction_rate: float = 0.005
-    ):
+    def __init__(self, n_neurons: int, growth_rate: float = 0.01, retraction_rate: float = 0.005):
         self.n_neurons = n_neurons
         self.growth_rate = growth_rate
         self.retraction_rate = retraction_rate

@@ -18,6 +18,7 @@ import heapq
 
 class NodeType(Enum):
     """Type of search node."""
+
     STATE = "state"
     ACTION = "action"
     OPTION = "option"
@@ -26,6 +27,7 @@ class NodeType(Enum):
 @dataclass
 class SearchNode:
     """A node in the search tree."""
+
     node_type: NodeType
     state: Optional[np.ndarray] = None
     action: Optional[Any] = None
@@ -65,9 +67,7 @@ class SearchNode:
             return float("inf")
 
         exploitation = self.value
-        exploration = exploration_weight * np.sqrt(
-            np.log(parent_visits + 1) / self.visit_count
-        )
+        exploration = exploration_weight * np.sqrt(np.log(parent_visits + 1) / self.visit_count)
 
         return exploitation + exploration * self.prior
 
@@ -84,7 +84,7 @@ class SearchNode:
 
         while node is not None:
             node.visit_count += 1
-            discounted_value = value * (discount ** depth)
+            discounted_value = value * (discount**depth)
             node.value_sum += discounted_value
             node = node.parent
             depth += 1
@@ -93,6 +93,7 @@ class SearchNode:
 @dataclass
 class MCTSConfig:
     """Configuration for MCTS."""
+
     num_simulations: int = 100
     exploration_weight: float = 1.41
     discount: float = 0.99
@@ -107,6 +108,7 @@ class MCTSConfig:
 @dataclass
 class PlanResult:
     """Result of planning."""
+
     actions: List[Any]
     options: List[str]
     expected_value: float
@@ -218,9 +220,7 @@ class HierarchicalMCTS:
         self.config = config or MCTSConfig()
         self._rng = np.random.default_rng(self.config.random_seed)
 
-        self.world_model = world_model or WorldModelAdapter(
-            random_seed=self.config.random_seed
-        )
+        self.world_model = world_model or WorldModelAdapter(random_seed=self.config.random_seed)
 
         self.action_space = action_space or [0, 1, 2, 3]
         self.option_names = option_names or []
@@ -291,7 +291,7 @@ class HierarchicalMCTS:
                 next_state, reward, terminal, uncertainty = self.world_model.imagine_step(
                     state, node.action
                 )
-                total_reward += (self.config.discount ** depth) * reward
+                total_reward += (self.config.discount**depth) * reward
                 state = next_state
                 depth += 1
 
@@ -302,7 +302,7 @@ class HierarchicalMCTS:
             self._expand(node, state)
 
         rollout_value = self._simulate_rollout(state, goal, depth)
-        total_value = total_reward + (self.config.discount ** depth) * rollout_value
+        total_value = total_reward + (self.config.discount**depth) * rollout_value
 
         node.backpropagate(total_value, self.config.discount)
 
@@ -334,9 +334,7 @@ class HierarchicalMCTS:
 
     def _expand(self, node: SearchNode, state: np.ndarray) -> None:
         """Expand node with children."""
-        n_children = int(
-            (node.visit_count + 1) ** self.config.progressive_widening_alpha
-        )
+        n_children = int((node.visit_count + 1) ** self.config.progressive_widening_alpha)
         n_children = min(n_children, len(self.action_space) + len(self.option_names))
         n_children = max(1, n_children)
 
@@ -349,7 +347,7 @@ class HierarchicalMCTS:
             node.add_child(child)
             self._nodes_expanded += 1
 
-        for option_name in self.option_names[:max(0, n_children - len(self.action_space))]:
+        for option_name in self.option_names[: max(0, n_children - len(self.action_space))]:
             child = SearchNode(
                 node_type=NodeType.OPTION,
                 option=option_name,
@@ -379,15 +377,13 @@ class HierarchicalMCTS:
                 break
 
             action = self._rng.choice(self.action_space)
-            next_state, reward, terminal, _ = self.world_model.imagine_step(
-                current, action
-            )
+            next_state, reward, terminal, _ = self.world_model.imagine_step(current, action)
 
             if goal is not None:
                 goal_distance = np.linalg.norm(next_state - goal)
                 reward += -0.1 * goal_distance
 
-            total_reward += (self.config.discount ** step) * reward
+            total_reward += (self.config.discount**step) * reward
             current = next_state
             depth += 1
 

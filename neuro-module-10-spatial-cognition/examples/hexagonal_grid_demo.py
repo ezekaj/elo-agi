@@ -10,7 +10,8 @@ Demonstrates:
 """
 
 import sys
-sys.path.insert(0, '..')
+
+sys.path.insert(0, "..")
 
 import numpy as np
 from src import (
@@ -47,8 +48,8 @@ def demo_hexagonal_grids():
 
     directions = [
         ("East (0 deg)", 0),
-        ("Northeast (60 deg)", np.pi/3),
-        ("Northwest (120 deg)", 2*np.pi/3),
+        ("Northeast (60 deg)", np.pi / 3),
+        ("Northwest (120 deg)", 2 * np.pi / 3),
     ]
 
     print("Peak count when moving in different directions:")
@@ -71,17 +72,13 @@ def demo_hexagonal_grids():
     print("-" * 40)
 
     pop = GridCellPopulation(
-        n_modules=4,
-        cells_per_module=10,
-        base_spacing=0.15,
-        scale_ratio=1.5,
-        random_seed=42
+        n_modules=4, cells_per_module=10, base_spacing=0.15, scale_ratio=1.5, random_seed=42
     )
 
     print(f"Total cells: {len(pop)}")
     print("\nModule properties:")
     for i, module in enumerate(pop.modules):
-        print(f"  Module {i+1}:")
+        print(f"  Module {i + 1}:")
         print(f"    Spacing: {module.spacing:.3f}")
         print(f"    Cells: {len(module.cells)}")
         print(f"    Orientation: {np.degrees(module.cells[0].params.orientation):.1f} deg")
@@ -121,7 +118,7 @@ def demo_hexagonal_grids():
     for step in range(10):
         pos = pop.path_integrate(velocity=np.array([0.1, 0.0]), dt=1.0)
         if step % 2 == 0:
-            print(f"    {step+1:2d} | ({pos[0]:.2f}, {pos[1]:.2f})")
+            print(f"    {step + 1:2d} | ({pos[0]:.2f}, {pos[1]:.2f})")
 
     print(f"\n  Final position: ({pos[0]:.2f}, {pos[1]:.2f})")
     print(f"  Expected: (1.00, 0.00)")
@@ -140,10 +137,7 @@ def demo_hexagonal_grids():
 
     for i in range(n_steps):
         angle = 2 * np.pi * i / n_steps
-        velocity = 2 * np.pi * radius / n_steps * np.array([
-            -np.sin(angle),
-            np.cos(angle)
-        ])
+        velocity = 2 * np.pi * radius / n_steps * np.array([-np.sin(angle), np.cos(angle)])
         pop.path_integrate(velocity, dt=1.0)
 
     end_pos = pop.get_position_estimate()
@@ -189,7 +183,7 @@ def demo_hexagonal_grids():
     for i, cell in enumerate(module.cells):
         phase = cell.params.phase
         rate = cell.compute_firing(np.array([0.0, 0.0]))
-        print(f"    {i+1}  | ({phase[0]:.2f}, {phase[1]:.2f})  | {rate:.2f} Hz")
+        print(f"    {i + 1}  | ({phase[0]:.2f}, {phase[1]:.2f})  | {rate:.2f} Hz")
 
     print("\n  Different phases = different coverage of space")
     print("  Together they tile the entire environment")

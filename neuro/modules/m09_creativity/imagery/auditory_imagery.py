@@ -16,6 +16,7 @@ from enum import Enum
 
 class AuditoryProperty(Enum):
     """Properties of auditory images"""
+
     PITCH = "pitch"
     VOLUME = "volume"
     TIMBRE = "timbre"
@@ -28,6 +29,7 @@ class AuditoryProperty(Enum):
 @dataclass
 class AuditoryImage:
     """A mental auditory image"""
+
     id: str
     description: str
     properties: Dict[AuditoryProperty, Any]
@@ -35,7 +37,7 @@ class AuditoryImage:
     duration: float  # seconds
     is_speech: bool = False
     is_music: bool = False
-    sequence: List['AuditoryImage'] = field(default_factory=list)
+    sequence: List["AuditoryImage"] = field(default_factory=list)
 
 
 class AuditoryImagery:
@@ -54,13 +56,15 @@ class AuditoryImagery:
         self.default_vividness = default_vividness
         self._inner_voice_active = False
 
-    def create_sound(self,
-                     sound_id: str,
-                     description: str,
-                     properties: Optional[Dict[AuditoryProperty, Any]] = None,
-                     duration: float = 1.0,
-                     is_speech: bool = False,
-                     is_music: bool = False) -> AuditoryImage:
+    def create_sound(
+        self,
+        sound_id: str,
+        description: str,
+        properties: Optional[Dict[AuditoryProperty, Any]] = None,
+        duration: float = 1.0,
+        is_speech: bool = False,
+        is_music: bool = False,
+    ) -> AuditoryImage:
         """Create a mental sound image"""
         sound = AuditoryImage(
             id=sound_id,
@@ -69,7 +73,7 @@ class AuditoryImagery:
             vividness=self.default_vividness,
             duration=duration,
             is_speech=is_speech,
-            is_music=is_music
+            is_music=is_music,
         )
 
         self.sounds[sound_id] = sound
@@ -92,18 +96,17 @@ class AuditoryImagery:
             text,
             properties={
                 AuditoryProperty.VOLUME: 0.5,  # Inner speech is quieter
-                AuditoryProperty.PITCH: "normal"
+                AuditoryProperty.PITCH: "normal",
             },
             duration=duration,
-            is_speech=True
+            is_speech=True,
         )
 
         return speech
 
-    def imagine_music(self,
-                      description: str,
-                      tempo: int = 120,
-                      key: str = "C major") -> AuditoryImage:
+    def imagine_music(
+        self, description: str, tempo: int = 120, key: str = "C major"
+    ) -> AuditoryImage:
         """
         Imagine music - musical mental imagery.
 
@@ -115,10 +118,10 @@ class AuditoryImagery:
             properties={
                 AuditoryProperty.TEMPO: tempo,
                 AuditoryProperty.TIMBRE: "melodic",
-                AuditoryProperty.RHYTHM: "structured"
+                AuditoryProperty.RHYTHM: "structured",
             },
             duration=10.0,  # Default segment
-            is_music=True
+            is_music=True,
         )
 
         return music
@@ -130,10 +133,7 @@ class AuditoryImagery:
         properties = self._extract_properties(description)
 
         return self.create_sound(
-            f"sound_{len(self.sounds)}",
-            description,
-            properties=properties,
-            duration=2.0
+            f"sound_{len(self.sounds)}", description, properties=properties, duration=2.0
         )
 
     def _extract_properties(self, description: str) -> Dict[AuditoryProperty, Any]:
@@ -155,9 +155,7 @@ class AuditoryImagery:
 
         return properties
 
-    def change_pitch(self,
-                     sound_id: str,
-                     semitones: int) -> AuditoryImage:
+    def change_pitch(self, sound_id: str, semitones: int) -> AuditoryImage:
         """Mentally transpose a sound"""
         if sound_id not in self.sounds:
             raise ValueError(f"Sound {sound_id} not found")
@@ -180,15 +178,13 @@ class AuditoryImagery:
             vividness=original.vividness * 0.9,
             duration=original.duration,
             is_speech=original.is_speech,
-            is_music=original.is_music
+            is_music=original.is_music,
         )
 
         self.sounds[transposed_id] = transposed
         return transposed
 
-    def change_tempo(self,
-                     sound_id: str,
-                     factor: float) -> AuditoryImage:
+    def change_tempo(self, sound_id: str, factor: float) -> AuditoryImage:
         """Change the tempo/speed of a sound"""
         if sound_id not in self.sounds:
             raise ValueError(f"Sound {sound_id} not found")
@@ -208,7 +204,7 @@ class AuditoryImagery:
             vividness=original.vividness * 0.9,
             duration=original.duration / factor,
             is_speech=original.is_speech,
-            is_music=original.is_music
+            is_music=original.is_music,
         )
 
         self.sounds[new_id] = modified
@@ -231,12 +227,10 @@ class AuditoryImagery:
         sequence = AuditoryImage(
             id=seq_id,
             description=f"Sequence: {' -> '.join(s.description for s in sounds)}",
-            properties={
-                AuditoryProperty.DURATION: total_duration
-            },
+            properties={AuditoryProperty.DURATION: total_duration},
             vividness=np.mean([s.vividness for s in sounds]),
             duration=total_duration,
-            sequence=sounds
+            sequence=sounds,
         )
 
         self.sounds[seq_id] = sequence
@@ -259,12 +253,10 @@ class AuditoryImagery:
         layered = AuditoryImage(
             id=layer_id,
             description=f"Layered: {' + '.join(s.description for s in sounds)}",
-            properties={
-                AuditoryProperty.DURATION: max_duration
-            },
+            properties={AuditoryProperty.DURATION: max_duration},
             vividness=np.mean([s.vividness for s in sounds]) * 0.8,  # Complexity cost
             duration=max_duration,
-            sequence=sounds
+            sequence=sounds,
         )
 
         self.sounds[layer_id] = layered

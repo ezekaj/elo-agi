@@ -14,9 +14,21 @@ from .consciousness_network import ConsciousnessNetwork, GlobalWorkspace
 
 __version__ = "0.1.0"
 __all__ = [
-    "MinimalSelf", "AgencyDetector", "OwnershipProcessor", "MinimalSelfParams",
-    "NarrativeSelf", "AutobiographicalMemory", "SelfConcept", "NarrativeParams",
-    "MetacognitiveSystem", "ConfidenceEstimator", "PerformanceMonitor", "MetaParams",
-    "IntrospectionSystem", "MentalStateAccessor", "SelfReflection",
-    "ConsciousnessNetwork", "GlobalWorkspace"
+    "MinimalSelf",
+    "AgencyDetector",
+    "OwnershipProcessor",
+    "MinimalSelfParams",
+    "NarrativeSelf",
+    "AutobiographicalMemory",
+    "SelfConcept",
+    "NarrativeParams",
+    "MetacognitiveSystem",
+    "ConfidenceEstimator",
+    "PerformanceMonitor",
+    "MetaParams",
+    "IntrospectionSystem",
+    "MentalStateAccessor",
+    "SelfReflection",
+    "ConsciousnessNetwork",
+    "GlobalWorkspace",
 ]

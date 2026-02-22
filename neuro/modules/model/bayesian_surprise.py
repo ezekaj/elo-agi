@@ -16,6 +16,7 @@ from datetime import datetime
 @dataclass
 class Observation:
     """An observation/event to evaluate for surprise."""
+
     type: str
     value: Any
     context: Dict[str, Any] = field(default_factory=dict)
@@ -25,6 +26,7 @@ class Observation:
 @dataclass
 class SurpriseResult:
     """Result of surprise computation."""
+
     surprise: float
     prior: float
     posterior: float
@@ -45,7 +47,7 @@ class BayesianSurprise:
         self,
         surprise_threshold: float = 0.5,
         learning_rate: float = 0.1,
-        prior_pseudocount: float = 1.0
+        prior_pseudocount: float = 1.0,
     ):
         self.surprise_threshold = surprise_threshold
         self.learning_rate = learning_rate
@@ -129,7 +131,9 @@ class BayesianSurprise:
         # Generate explanation
         if is_surprising:
             if prior < 0.1:
-                explanation = f"Novel event: '{obs_value}' was rarely seen before (prior={prior:.2%})"
+                explanation = (
+                    f"Novel event: '{obs_value}' was rarely seen before (prior={prior:.2%})"
+                )
             elif posterior > prior * 2:
                 explanation = f"Frequency shift: '{obs_value}' is becoming more common"
             else:
@@ -143,7 +147,7 @@ class BayesianSurprise:
             posterior=posterior,
             is_surprising=is_surprising,
             observation=observation,
-            explanation=explanation
+            explanation=explanation,
         )
 
         # Record history
@@ -159,11 +163,7 @@ class BayesianSurprise:
 
     def get_most_surprising(self, k: int = 5) -> List[SurpriseResult]:
         """Get k most surprising events from history."""
-        sorted_history = sorted(
-            self.history,
-            key=lambda x: x.surprise,
-            reverse=True
-        )
+        sorted_history = sorted(self.history, key=lambda x: x.surprise, reverse=True)
         return sorted_history[:k]
 
     def get_average_surprise(self, window: int = 100) -> float:
@@ -181,38 +181,28 @@ class BayesianSurprise:
             total = sum(beliefs.values())
             if total > 0:
                 # Get top 5 values for each type
-                sorted_beliefs = sorted(
-                    beliefs.items(),
-                    key=lambda x: x[1],
-                    reverse=True
-                )[:5]
-                summary[obs_type] = {
-                    k: v / total for k, v in sorted_beliefs
-                }
+                sorted_beliefs = sorted(beliefs.items(), key=lambda x: x[1], reverse=True)[:5]
+                summary[obs_type] = {k: v / total for k, v in sorted_beliefs}
         return summary
 
     def reset_beliefs(self, obs_type: str = None) -> None:
         """Reset beliefs for a specific type or all types."""
         if obs_type:
-            self.type_beliefs[obs_type] = defaultdict(
-                lambda: self.prior_pseudocount
-            )
+            self.type_beliefs[obs_type] = defaultdict(lambda: self.prior_pseudocount)
             self.type_counts[obs_type] = 0
         else:
-            self.type_beliefs = defaultdict(
-                lambda: defaultdict(lambda: self.prior_pseudocount)
-            )
+            self.type_beliefs = defaultdict(lambda: defaultdict(lambda: self.prior_pseudocount))
             self.type_counts = defaultdict(int)
 
     def get_stats(self) -> Dict[str, Any]:
         """Get surprise engine statistics."""
         return {
-            'total_observations': sum(self.type_counts.values()),
-            'observation_types': len(self.type_beliefs),
-            'history_size': len(self.history),
-            'average_surprise': self.get_average_surprise(),
-            'surprising_events': sum(1 for r in self.history if r.is_surprising),
-            'threshold': self.surprise_threshold
+            "total_observations": sum(self.type_counts.values()),
+            "observation_types": len(self.type_beliefs),
+            "history_size": len(self.history),
+            "average_surprise": self.get_average_surprise(),
+            "surprising_events": sum(1 for r in self.history if r.is_surprising),
+            "threshold": self.surprise_threshold,
         }
 
 

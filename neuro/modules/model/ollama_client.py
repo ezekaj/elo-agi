@@ -13,6 +13,7 @@ from typing import Optional, List, Dict, Any, Iterator
 @dataclass
 class OllamaConfig:
     """Configuration for Ollama client."""
+
     base_url: str = "http://localhost:11434"
     default_model: str = "ministral-3:8b"  # Ministral 3 8B - ONLY model
     timeout: int = 120
@@ -34,10 +35,7 @@ class OllamaClient:
     def is_available(self) -> bool:
         """Check if Ollama is running and accessible."""
         try:
-            response = requests.get(
-                f"{self.config.base_url}/api/tags",
-                timeout=5
-            )
+            response = requests.get(f"{self.config.base_url}/api/tags", timeout=5)
             return response.status_code == 200
         except Exception:
             return False
@@ -45,10 +43,7 @@ class OllamaClient:
     def list_models(self) -> List[str]:
         """List available models."""
         try:
-            response = requests.get(
-                f"{self.config.base_url}/api/tags",
-                timeout=10
-            )
+            response = requests.get(f"{self.config.base_url}/api/tags", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 return [m["name"] for m in data.get("models", [])]
@@ -86,7 +81,7 @@ class OllamaClient:
             "stream": False,
             "options": {
                 "temperature": temperature,
-            }
+            },
         }
 
         if max_tokens:
@@ -95,9 +90,7 @@ class OllamaClient:
             payload["system"] = system
 
         response = requests.post(
-            f"{self.config.base_url}/api/generate",
-            json=payload,
-            timeout=self.config.timeout
+            f"{self.config.base_url}/api/generate", json=payload, timeout=self.config.timeout
         )
 
         if response.status_code != 200:
@@ -127,7 +120,7 @@ class OllamaClient:
             "stream": True,
             "options": {
                 "temperature": temperature,
-            }
+            },
         }
 
         if system:
@@ -137,7 +130,7 @@ class OllamaClient:
             f"{self.config.base_url}/api/generate",
             json=payload,
             timeout=self.config.timeout,
-            stream=True
+            stream=True,
         )
 
         if response.status_code != 200:
@@ -179,9 +172,9 @@ class OllamaClient:
                 "stream": False,
                 "options": {
                     "temperature": temperature,
-                }
+                },
             },
-            timeout=self.config.timeout
+            timeout=self.config.timeout,
         )
 
         if response.status_code != 200:
@@ -212,10 +205,10 @@ class OllamaClient:
                 "stream": True,
                 "options": {
                     "temperature": temperature,
-                }
+                },
             },
             timeout=self.config.timeout,
-            stream=True
+            stream=True,
         )
 
         if response.status_code != 200:

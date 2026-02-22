@@ -7,30 +7,57 @@ import numpy as np
 import os
 
 from neuro.modules.knowledge.semantic_network import (
-    SemanticNetwork, Concept, SemanticRelation, RelationType,
+    SemanticNetwork,
+    Concept,
+    SemanticRelation,
+    RelationType,
     ActivationPattern,
 )
 from neuro.modules.knowledge.ontology import (
-    Ontology, OntologyNode, OntologyRelation, HierarchyType, OntologyQuery,
+    Ontology,
+    OntologyNode,
+    OntologyRelation,
+    HierarchyType,
+    OntologyQuery,
 )
 from neuro.modules.knowledge.fact_store import (
-    FactStore, Fact, Triple, FactQuery, FactIndex,
+    FactStore,
+    Fact,
+    Triple,
+    FactQuery,
+    FactIndex,
 )
 from neuro.modules.knowledge.inference_engine import (
-    InferenceEngine, Rule, Pattern, InferenceResult, InferenceChain, InferenceMode,
+    InferenceEngine,
+    Rule,
+    Pattern,
+    InferenceResult,
+    InferenceChain,
+    InferenceMode,
 )
 from neuro.modules.knowledge.knowledge_graph import (
-    KnowledgeGraph, Entity, Relation, GraphEmbedding, GraphQuery,
+    KnowledgeGraph,
+    Entity,
+    Relation,
+    GraphEmbedding,
+    GraphQuery,
 )
 from neuro.modules.knowledge.common_sense import (
-    CommonSenseReasoner, CommonSenseKB, PhysicsReasoner,
-    SocialReasoner, TemporalReasoner, PhysicsProperty,
-    SocialNorm, TemporalRelation, SocialRelation,
+    CommonSenseReasoner,
+    CommonSenseKB,
+    PhysicsReasoner,
+    SocialReasoner,
+    TemporalReasoner,
+    PhysicsProperty,
+    SocialNorm,
+    TemporalRelation,
+    SocialRelation,
 )
 
 # =============================================================================
 # Semantic Network Tests
 # =============================================================================
+
 
 class TestConcept:
     """Tests for Concept class."""
@@ -60,6 +87,7 @@ class TestConcept:
         assert c1 != c3
         assert hash(c1) == hash(c2)
 
+
 class TestSemanticRelation:
     """Tests for SemanticRelation class."""
 
@@ -84,6 +112,7 @@ class TestSemanticRelation:
             weight=0.8,
         )
         assert rel.weight == 0.8
+
 
 class TestSemanticNetwork:
     """Tests for SemanticNetwork class."""
@@ -162,9 +191,11 @@ class TestSemanticNetwork:
         assert stats["n_concepts"] == 4
         assert stats["n_relations"] > 0
 
+
 # =============================================================================
 # Ontology Tests
 # =============================================================================
+
 
 class TestOntologyNode:
     """Tests for OntologyNode class."""
@@ -185,6 +216,7 @@ class TestOntologyNode:
         )
         assert node.properties["warm_blooded"] is True
         assert "has_fur:required" in node.constraints
+
 
 class TestOntology:
     """Tests for Ontology class."""
@@ -281,9 +313,11 @@ class TestOntology:
         assert stats["n_nodes"] == 5
         assert stats["n_relations"] == 4
 
+
 # =============================================================================
 # Fact Store Tests
 # =============================================================================
+
 
 class TestTriple:
     """Tests for Triple class."""
@@ -309,6 +343,7 @@ class TestTriple:
         triple = Triple("dog", "is_a", "animal")
         assert triple.as_tuple() == ("dog", "is_a", "animal")
 
+
 class TestFact:
     """Tests for Fact class."""
 
@@ -327,6 +362,7 @@ class TestFact:
         fact = Fact(triple=triple, valid_from=0, valid_to=1000)
         assert fact.is_valid(500)
         assert not fact.is_valid(2000)
+
 
 class TestFactStore:
     """Tests for FactStore class."""
@@ -431,9 +467,11 @@ class TestFactStore:
         assert stats["n_facts"] == 5
         assert stats["n_subjects"] == 2
 
+
 # =============================================================================
 # Inference Engine Tests
 # =============================================================================
+
 
 class TestPattern:
     """Tests for Pattern class."""
@@ -477,6 +515,7 @@ class TestPattern:
         bindings = pattern.matches(fact)
         assert bindings is None
 
+
 class TestRule:
     """Tests for Rule class."""
 
@@ -506,6 +545,7 @@ class TestRule:
         vars = rule.get_variables()
         assert "?x" in vars
         assert "?y" in vars
+
 
 class TestInferenceEngine:
     """Tests for InferenceEngine class."""
@@ -569,9 +609,11 @@ class TestInferenceEngine:
         assert stats["n_rules"] == 1
         assert stats["inferences_made"] > 0
 
+
 # =============================================================================
 # Knowledge Graph Tests
 # =============================================================================
+
 
 class TestEntity:
     """Tests for Entity class."""
@@ -590,6 +632,7 @@ class TestEntity:
         assert e1 == e2
         assert e1 != e3
         assert hash(e1) == hash(e2)
+
 
 class TestKnowledgeGraph:
     """Tests for KnowledgeGraph class."""
@@ -703,9 +746,11 @@ class TestKnowledgeGraph:
         assert stats["n_relations"] == 2
         assert stats["n_edges"] == 3
 
+
 # =============================================================================
 # Common Sense Tests
 # =============================================================================
+
 
 class TestPhysicsReasoner:
     """Tests for PhysicsReasoner class."""
@@ -741,6 +786,7 @@ class TestPhysicsReasoner:
         """Test getting applicable physics rules."""
         rules = reasoner.get_applicable_rules("object falls")
         assert len(rules) > 0
+
 
 class TestSocialReasoner:
     """Tests for SocialReasoner class."""
@@ -782,6 +828,7 @@ class TestSocialReasoner:
         trust = reasoner.trust_level("doctor", "health advice")
         assert trust > 0.8
 
+
 class TestTemporalReasoner:
     """Tests for TemporalReasoner class."""
 
@@ -821,6 +868,7 @@ class TestTemporalReasoner:
         assert reasoner.is_plausible_duration("eating_meal", 30) is True
         # 500 minutes for eating is not plausible
         assert reasoner.is_plausible_duration("eating_meal", 500) is False
+
 
 class TestCommonSenseKB:
     """Tests for CommonSenseKB class."""
@@ -863,6 +911,7 @@ class TestCommonSenseKB:
         assert role_info["authority"] is True
         assert role_info["trust"] > 0.8
 
+
 class TestCommonSenseReasoner:
     """Tests for CommonSenseReasoner class."""
 
@@ -873,10 +922,7 @@ class TestCommonSenseReasoner:
 
     def test_reason_physics(self, reasoner):
         """Test physics reasoning through main interface."""
-        result = reasoner.reason(
-            "what happens when it falls?",
-            context={"object": "glass"}
-        )
+        result = reasoner.reason("what happens when it falls?", context={"object": "glass"})
         assert result is not None
         assert "physics_effects" in result
 
@@ -909,9 +955,11 @@ class TestCommonSenseReasoner:
         assert stats["physics_rules"] > 0
         assert stats["social_norms"] > 0
 
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestKnowledgeIntegration:
     """Integration tests across knowledge components."""
@@ -970,6 +1018,7 @@ class TestKnowledgeIntegration:
         # Should derive socrates is_a mortal
         derived = engine.query("socrates", "is_a", "mortal")
         assert len(derived) > 0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

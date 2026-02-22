@@ -16,6 +16,7 @@ import numpy as np
 
 class CapabilityStatus(Enum):
     """Status of a capability."""
+
     IMPROVING = "improving"
     STABLE = "stable"
     REGRESSING = "regressing"
@@ -25,6 +26,7 @@ class CapabilityStatus(Enum):
 @dataclass
 class CapabilityConfig:
     """Configuration for capability tracking."""
+
     regression_threshold: float = 0.1
     improvement_threshold: float = 0.05
     history_window: int = 10
@@ -35,6 +37,7 @@ class CapabilityConfig:
 @dataclass
 class CapabilityMetric:
     """Measurement of a capability."""
+
     name: str
     score: float
     timestamp: int
@@ -45,6 +48,7 @@ class CapabilityMetric:
 @dataclass
 class CapabilityRecord:
     """Historical record of a capability."""
+
     name: str
     history: List[CapabilityMetric]
     peak_score: float
@@ -56,6 +60,7 @@ class CapabilityRecord:
 @dataclass
 class InterferenceReport:
     """Report of interference between capabilities."""
+
     capability_a: str
     capability_b: str
     interference_score: float
@@ -158,7 +163,7 @@ class CapabilityTracker:
         record.history.append(metric)
 
         if len(record.history) > self.config.history_window * 2:
-            record.history = record.history[-self.config.history_window * 2:]
+            record.history = record.history[-self.config.history_window * 2 :]
 
         record.current_score = metric.score
         record.peak_score = max(record.peak_score, metric.score)
@@ -173,7 +178,7 @@ class CapabilityTracker:
         if len(record.history) < self.config.min_samples_for_status:
             return CapabilityStatus.UNKNOWN
 
-        recent = record.history[-self.config.history_window:]
+        recent = record.history[-self.config.history_window :]
         scores = [m.score for m in recent]
 
         if len(scores) < 2:
@@ -245,7 +250,7 @@ class CapabilityTracker:
         """
         if pairs is None:
             cap_names = list(self._capabilities.keys())
-            pairs = [(a, b) for i, a in enumerate(cap_names) for b in cap_names[i + 1:]]
+            pairs = [(a, b) for i, a in enumerate(cap_names) for b in cap_names[i + 1 :]]
 
         reports = []
 
@@ -264,13 +269,15 @@ class CapabilityTracker:
 
                 evidence = self._gather_interference_evidence(cap_a, cap_b)
 
-                reports.append(InterferenceReport(
-                    capability_a=cap_a,
-                    capability_b=cap_b,
-                    interference_score=abs(score),
-                    direction=direction,
-                    evidence=evidence,
-                ))
+                reports.append(
+                    InterferenceReport(
+                        capability_a=cap_a,
+                        capability_b=cap_b,
+                        interference_score=abs(score),
+                        direction=direction,
+                        evidence=evidence,
+                    )
+                )
 
         return reports
 
@@ -316,9 +323,15 @@ class CapabilityTracker:
         rec_a = self._capabilities[cap_a]
         rec_b = self._capabilities[cap_b]
 
-        if rec_a.status == CapabilityStatus.REGRESSING and rec_b.status == CapabilityStatus.IMPROVING:
+        if (
+            rec_a.status == CapabilityStatus.REGRESSING
+            and rec_b.status == CapabilityStatus.IMPROVING
+        ):
             evidence.append(f"{cap_a} regressing while {cap_b} improving")
-        elif rec_b.status == CapabilityStatus.REGRESSING and rec_a.status == CapabilityStatus.IMPROVING:
+        elif (
+            rec_b.status == CapabilityStatus.REGRESSING
+            and rec_a.status == CapabilityStatus.IMPROVING
+        ):
             evidence.append(f"{cap_b} regressing while {cap_a} improving")
 
         if rec_a.regression_count > 2:
@@ -363,7 +376,9 @@ class CapabilityTracker:
 
             for report in interferences:
                 if report.interference_score > 0.5:
-                    other = report.capability_b if report.capability_a == name else report.capability_a
+                    other = (
+                        report.capability_b if report.capability_a == name else report.capability_a
+                    )
                     actions.append(f"Reduce concurrent training with {other}")
 
             if not actions:
@@ -384,7 +399,8 @@ class CapabilityTracker:
     def get_regressing_capabilities(self) -> List[str]:
         """Get all regressing capabilities."""
         return [
-            name for name, rec in self._capabilities.items()
+            name
+            for name, rec in self._capabilities.items()
             if rec.status == CapabilityStatus.REGRESSING
         ]
 

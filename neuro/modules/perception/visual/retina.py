@@ -13,39 +13,43 @@ import numpy as np
 
 class PhotoreceptorType(Enum):
     """Types of photoreceptors."""
-    ROD = "rod"           # Low-light, achromatic
-    CONE_L = "cone_l"     # Long wavelength (red)
-    CONE_M = "cone_m"     # Medium wavelength (green)
-    CONE_S = "cone_s"     # Short wavelength (blue)
+
+    ROD = "rod"  # Low-light, achromatic
+    CONE_L = "cone_l"  # Long wavelength (red)
+    CONE_M = "cone_m"  # Medium wavelength (green)
+    CONE_S = "cone_s"  # Short wavelength (blue)
 
 
 class GanglionCellType(Enum):
     """Types of retinal ganglion cells."""
-    MAGNO = "magno"       # Motion, luminance (M pathway)
-    PARVO = "parvo"       # Color, fine detail (P pathway)
-    KONIO = "konio"       # Blue-yellow (K pathway)
+
+    MAGNO = "magno"  # Motion, luminance (M pathway)
+    PARVO = "parvo"  # Color, fine detail (P pathway)
+    KONIO = "konio"  # Blue-yellow (K pathway)
 
 
 @dataclass
 class PhotoreceptorResponse:
     """Response from photoreceptors."""
-    luminance: np.ndarray   # Overall brightness
-    l_cone: np.ndarray      # Long wavelength response
-    m_cone: np.ndarray      # Medium wavelength response
-    s_cone: np.ndarray      # Short wavelength response
+
+    luminance: np.ndarray  # Overall brightness
+    l_cone: np.ndarray  # Long wavelength response
+    m_cone: np.ndarray  # Medium wavelength response
+    s_cone: np.ndarray  # Short wavelength response
     rod: Optional[np.ndarray] = None  # Rod response (low light)
 
 
 @dataclass
 class RetinaOutput:
     """Output from retinal processing."""
-    on_center: np.ndarray   # ON-center ganglion cell responses
+
+    on_center: np.ndarray  # ON-center ganglion cell responses
     off_center: np.ndarray  # OFF-center ganglion cell responses
-    magno: np.ndarray       # Magnocellular pathway (motion)
-    parvo: np.ndarray       # Parvocellular pathway (detail)
-    red_green: np.ndarray   # Red-green opponent channel
-    blue_yellow: np.ndarray # Blue-yellow opponent channel
-    luminance: np.ndarray   # Achromatic luminance
+    magno: np.ndarray  # Magnocellular pathway (motion)
+    parvo: np.ndarray  # Parvocellular pathway (detail)
+    red_green: np.ndarray  # Red-green opponent channel
+    blue_yellow: np.ndarray  # Blue-yellow opponent channel
+    luminance: np.ndarray  # Achromatic luminance
     size: Tuple[int, int] = (0, 0)
 
 
@@ -123,10 +127,7 @@ class Retina:
 
         # Step 4: Color opponent channels
         red_green = self._opponent_channel(adapted.l_cone, adapted.m_cone)
-        blue_yellow = self._opponent_channel(
-            adapted.s_cone,
-            (adapted.l_cone + adapted.m_cone) / 2
-        )
+        blue_yellow = self._opponent_channel(adapted.s_cone, (adapted.l_cone + adapted.m_cone) / 2)
 
         # Step 5: Ganglion cell pathways
         magno = self._magno_pathway(on_center, off_center)
@@ -213,7 +214,7 @@ class Retina:
         surround = gaussian_filter(luminance, self.surround_size)
 
         # Difference of Gaussians
-        on_center = np.maximum(0, center - surround)   # ON-center, OFF-surround
+        on_center = np.maximum(0, center - surround)  # ON-center, OFF-surround
         off_center = np.maximum(0, surround - center)  # OFF-center, ON-surround
 
         return on_center, off_center
@@ -268,9 +269,8 @@ class Retina:
         """Update light adaptation level."""
         mean_lum = luminance.mean()
         self._adaptation_level = (
-            (1 - self.adaptation_rate) * self._adaptation_level +
-            self.adaptation_rate * mean_lum
-        )
+            1 - self.adaptation_rate
+        ) * self._adaptation_level + self.adaptation_rate * mean_lum
 
     def get_receptive_field_map(
         self,

@@ -34,6 +34,7 @@ import time
 
 class BodyPart(Enum):
     """Body parts for schema."""
+
     HEAD = auto()
     TORSO = auto()
     LEFT_ARM = auto()
@@ -48,6 +49,7 @@ class BodyPart(Enum):
 
 class SensoryModality(Enum):
     """Types of sensory input."""
+
     VISUAL = auto()
     AUDITORY = auto()
     TACTILE = auto()
@@ -61,6 +63,7 @@ class SensoryModality(Enum):
 @dataclass
 class BodyState:
     """Current state of body parts."""
+
     positions: Dict[BodyPart, np.ndarray] = field(default_factory=dict)  # 3D positions
     velocities: Dict[BodyPart, np.ndarray] = field(default_factory=dict)
     tensions: Dict[BodyPart, float] = field(default_factory=dict)
@@ -82,22 +85,24 @@ class BodyState:
 @dataclass
 class Affordance:
     """An action possibility offered by environment/object."""
+
     name: str
     object_embedding: np.ndarray
-    action_type: str              # 'grasp', 'push', 'sit', etc.
+    action_type: str  # 'grasp', 'push', 'sit', etc.
     required_body_parts: List[BodyPart]
     success_probability: float
-    effort_required: float        # 0-1
+    effort_required: float  # 0-1
     learned_from_experience: bool = False
 
 
 @dataclass
 class MotorProgram:
     """A learned motor sequence."""
+
     name: str
     body_parts: List[BodyPart]
-    trajectory: np.ndarray        # T x D trajectory
-    timing: np.ndarray            # Time points
+    trajectory: np.ndarray  # T x D trajectory
+    timing: np.ndarray  # Time points
     precision_required: float
     adaptable: bool = True
 
@@ -117,12 +122,12 @@ class BodySchema:
 
         # Body structure (simplified kinematic chain)
         self.joint_limits: Dict[str, Tuple[float, float]] = {
-            'shoulder': (-np.pi, np.pi),
-            'elbow': (0, np.pi),
-            'wrist': (-np.pi/2, np.pi/2),
-            'hip': (-np.pi/2, np.pi/2),
-            'knee': (0, np.pi),
-            'ankle': (-np.pi/4, np.pi/4),
+            "shoulder": (-np.pi, np.pi),
+            "elbow": (0, np.pi),
+            "wrist": (-np.pi / 2, np.pi / 2),
+            "hip": (-np.pi / 2, np.pi / 2),
+            "knee": (0, np.pi),
+            "ankle": (-np.pi / 4, np.pi / 4),
         }
 
         # Peripersonal space (space near body)
@@ -149,8 +154,8 @@ class BodySchema:
         # Interoception updates internal states
         if SensoryModality.INTEROCEPTIVE in sensory_input:
             intero = sensory_input[SensoryModality.INTEROCEPTIVE]
-            if 'tension' in intero:
-                for part, tension in intero['tension'].items():
+            if "tension" in intero:
+                for part, tension in intero["tension"].items():
                     if part in BodyPart.__members__:
                         self.body_state.tensions[BodyPart[part]] = tension
 
@@ -180,9 +185,9 @@ class BodySchema:
     def get_reachable_space(self) -> Dict[str, Any]:
         """Get description of reachable space."""
         return {
-            'radius': self.peripersonal_radius,
-            'center': self.body_state.positions[BodyPart.TORSO].tolist(),
-            'tools_incorporated': list(self.incorporated_tools.keys())
+            "radius": self.peripersonal_radius,
+            "center": self.body_state.positions[BodyPart.TORSO].tolist(),
+            "tools_incorporated": list(self.incorporated_tools.keys()),
         }
 
 
@@ -209,30 +214,40 @@ class AffordanceDetector:
     def _init_basic_affordances(self):
         """Initialize innate/basic affordances."""
         basic = [
-            ('grasp_small', 'grasp', [BodyPart.RIGHT_HAND], 0.8, 0.2),
-            ('grasp_large', 'grasp', [BodyPart.LEFT_HAND, BodyPart.RIGHT_HAND], 0.7, 0.4),
-            ('push', 'push', [BodyPart.RIGHT_ARM], 0.9, 0.3),
-            ('lift_light', 'lift', [BodyPart.RIGHT_ARM], 0.9, 0.2),
-            ('lift_heavy', 'lift', [BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM], 0.6, 0.7),
-            ('sit', 'sit', [BodyPart.TORSO, BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG], 0.95, 0.1),
-            ('walk_on', 'locomote', [BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG], 0.9, 0.3),
-            ('climb', 'locomote', [BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM, BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG], 0.5, 0.8),
+            ("grasp_small", "grasp", [BodyPart.RIGHT_HAND], 0.8, 0.2),
+            ("grasp_large", "grasp", [BodyPart.LEFT_HAND, BodyPart.RIGHT_HAND], 0.7, 0.4),
+            ("push", "push", [BodyPart.RIGHT_ARM], 0.9, 0.3),
+            ("lift_light", "lift", [BodyPart.RIGHT_ARM], 0.9, 0.2),
+            ("lift_heavy", "lift", [BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM], 0.6, 0.7),
+            ("sit", "sit", [BodyPart.TORSO, BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG], 0.95, 0.1),
+            ("walk_on", "locomote", [BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG], 0.9, 0.3),
+            (
+                "climb",
+                "locomote",
+                [BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM, BodyPart.LEFT_LEG, BodyPart.RIGHT_LEG],
+                0.5,
+                0.8,
+            ),
         ]
 
         for name, action, parts, prob, effort in basic:
-            self.affordance_templates.append(Affordance(
-                name=name,
-                object_embedding=np.zeros(self.dim),  # Template, not specific
-                action_type=action,
-                required_body_parts=parts,
-                success_probability=prob,
-                effort_required=effort
-            ))
+            self.affordance_templates.append(
+                Affordance(
+                    name=name,
+                    object_embedding=np.zeros(self.dim),  # Template, not specific
+                    action_type=action,
+                    required_body_parts=parts,
+                    success_probability=prob,
+                    effort_required=effort,
+                )
+            )
 
-    def detect_affordances(self,
-                           object_embedding: np.ndarray,
-                           object_properties: Dict[str, float],
-                           body_state: BodyState) -> List[Affordance]:
+    def detect_affordances(
+        self,
+        object_embedding: np.ndarray,
+        object_properties: Dict[str, float],
+        body_state: BodyState,
+    ) -> List[Affordance]:
         """
         Detect what actions are possible with an object.
 
@@ -254,39 +269,43 @@ class AffordanceDetector:
             adjusted_prob = template.success_probability
 
             # Size affects grasping
-            if 'size' in object_properties:
-                size = object_properties['size']
-                if template.action_type == 'grasp':
+            if "size" in object_properties:
+                size = object_properties["size"]
+                if template.action_type == "grasp":
                     if size > 0.8 and len(template.required_body_parts) == 1:
                         adjusted_prob *= 0.5  # Too big for one hand
                     elif size < 0.2:
                         adjusted_prob *= 0.7  # Too small
 
             # Weight affects lifting
-            if 'weight' in object_properties and template.action_type == 'lift':
-                weight = object_properties['weight']
+            if "weight" in object_properties and template.action_type == "lift":
+                weight = object_properties["weight"]
                 if weight > 0.7 and len(template.required_body_parts) == 1:
                     adjusted_prob *= 0.3
 
             # Create specific affordance
             if adjusted_prob > 0.1:
-                detected.append(Affordance(
-                    name=template.name,
-                    object_embedding=object_embedding.copy(),
-                    action_type=template.action_type,
-                    required_body_parts=template.required_body_parts,
-                    success_probability=adjusted_prob,
-                    effort_required=template.effort_required
-                ))
+                detected.append(
+                    Affordance(
+                        name=template.name,
+                        object_embedding=object_embedding.copy(),
+                        action_type=template.action_type,
+                        required_body_parts=template.required_body_parts,
+                        success_probability=adjusted_prob,
+                        effort_required=template.effort_required,
+                    )
+                )
 
         return detected
 
-    def learn_affordance(self,
-                         object_embedding: np.ndarray,
-                         action_performed: str,
-                         body_parts_used: List[BodyPart],
-                         success: bool,
-                         effort: float):
+    def learn_affordance(
+        self,
+        object_embedding: np.ndarray,
+        action_performed: str,
+        body_parts_used: List[BodyPart],
+        success: bool,
+        effort: float,
+    ):
         """Learn new affordance from experience."""
         # Update or create affordance template
         matching = [a for a in self.affordance_templates if a.action_type == action_performed]
@@ -309,7 +328,7 @@ class AffordanceDetector:
                 required_body_parts=body_parts_used,
                 success_probability=float(success),
                 effort_required=effort,
-                learned_from_experience=True
+                learned_from_experience=True,
             )
             self.affordance_templates.append(new_aff)
 
@@ -334,10 +353,9 @@ class MotorSimulation:
         # Inverse model: computes motor commands for desired outcomes
         self.inverse_model_weights = np.random.randn(dim, dim) * 0.01
 
-    def simulate_action(self,
-                        action_embedding: np.ndarray,
-                        current_state: np.ndarray,
-                        steps: int = 10) -> List[np.ndarray]:
+    def simulate_action(
+        self, action_embedding: np.ndarray, current_state: np.ndarray, steps: int = 10
+    ) -> List[np.ndarray]:
         """
         Mentally simulate action execution.
 
@@ -354,45 +372,43 @@ class MotorSimulation:
 
         return trajectory
 
-    def predict_outcome(self,
-                        action_embedding: np.ndarray,
-                        current_state: np.ndarray) -> np.ndarray:
+    def predict_outcome(
+        self, action_embedding: np.ndarray, current_state: np.ndarray
+    ) -> np.ndarray:
         """Predict final outcome of action."""
         # Simple forward pass
         return current_state + action_embedding @ self.forward_model_weights
 
-    def plan_action(self,
-                    current_state: np.ndarray,
-                    goal_state: np.ndarray) -> np.ndarray:
+    def plan_action(self, current_state: np.ndarray, goal_state: np.ndarray) -> np.ndarray:
         """Use inverse model to plan action achieving goal."""
         desired_delta = goal_state - current_state
         # Inverse model
         action = desired_delta @ self.inverse_model_weights.T
         return action
 
-    def learn_motor_program(self,
-                            name: str,
-                            trajectory: np.ndarray,
-                            timing: np.ndarray,
-                            body_parts: List[BodyPart]):
+    def learn_motor_program(
+        self, name: str, trajectory: np.ndarray, timing: np.ndarray, body_parts: List[BodyPart]
+    ):
         """Store a learned motor program."""
         self.motor_programs[name] = MotorProgram(
             name=name,
             body_parts=body_parts,
             trajectory=trajectory.copy(),
             timing=timing.copy(),
-            precision_required=0.5
+            precision_required=0.5,
         )
 
     def retrieve_motor_program(self, name: str) -> Optional[MotorProgram]:
         """Retrieve stored motor program."""
         return self.motor_programs.get(name)
 
-    def update_forward_model(self,
-                             action: np.ndarray,
-                             predicted_outcome: np.ndarray,
-                             actual_outcome: np.ndarray,
-                             learning_rate: float = 0.01):
+    def update_forward_model(
+        self,
+        action: np.ndarray,
+        predicted_outcome: np.ndarray,
+        actual_outcome: np.ndarray,
+        learning_rate: float = 0.01,
+    ):
         """Update forward model from prediction error."""
         error = actual_outcome - predicted_outcome
         # Gradient update
@@ -411,13 +427,13 @@ class InteroceptionSystem:
 
     def __init__(self):
         # Internal state channels
-        self.heart_rate = 70.0         # BPM
-        self.breathing_rate = 15.0     # Per minute
-        self.hunger = 0.0              # 0-1
-        self.thirst = 0.0              # 0-1
-        self.fatigue = 0.0             # 0-1
-        self.pain = 0.0                # 0-1
-        self.temperature = 37.0        # Celsius
+        self.heart_rate = 70.0  # BPM
+        self.breathing_rate = 15.0  # Per minute
+        self.hunger = 0.0  # 0-1
+        self.thirst = 0.0  # 0-1
+        self.fatigue = 0.0  # 0-1
+        self.pain = 0.0  # 0-1
+        self.temperature = 37.0  # Celsius
 
         # Interoceptive accuracy (how well can we sense)
         self.interoceptive_accuracy = 0.7
@@ -431,13 +447,13 @@ class InteroceptionSystem:
         noise = (1 - self.interoceptive_accuracy) * 0.1
 
         state = {
-            'heart_rate': self.heart_rate + np.random.randn() * noise * 10,
-            'breathing_rate': self.breathing_rate + np.random.randn() * noise * 3,
-            'hunger': np.clip(self.hunger + np.random.randn() * noise, 0, 1),
-            'thirst': np.clip(self.thirst + np.random.randn() * noise, 0, 1),
-            'fatigue': np.clip(self.fatigue + np.random.randn() * noise, 0, 1),
-            'pain': np.clip(self.pain + np.random.randn() * noise, 0, 1),
-            'temperature': self.temperature + np.random.randn() * noise * 0.5,
+            "heart_rate": self.heart_rate + np.random.randn() * noise * 10,
+            "breathing_rate": self.breathing_rate + np.random.randn() * noise * 3,
+            "hunger": np.clip(self.hunger + np.random.randn() * noise, 0, 1),
+            "thirst": np.clip(self.thirst + np.random.randn() * noise, 0, 1),
+            "fatigue": np.clip(self.fatigue + np.random.randn() * noise, 0, 1),
+            "pain": np.clip(self.pain + np.random.randn() * noise, 0, 1),
+            "temperature": self.temperature + np.random.randn() * noise * 0.5,
         }
 
         self.state_history.append((time.time(), state))
@@ -471,11 +487,11 @@ class InteroceptionSystem:
     def get_homeostatic_urgency(self) -> Dict[str, float]:
         """Get urgency of homeostatic needs."""
         return {
-            'eat': self.hunger ** 2,  # Non-linear urgency
-            'drink': self.thirst ** 2,
-            'rest': self.fatigue ** 2,
-            'regulate_temp': abs(self.temperature - 37) / 5,
-            'address_pain': self.pain ** 1.5
+            "eat": self.hunger**2,  # Non-linear urgency
+            "drink": self.thirst**2,
+            "rest": self.fatigue**2,
+            "regulate_temp": abs(self.temperature - 37) / 5,
+            "address_pain": self.pain**1.5,
         }
 
 
@@ -495,40 +511,40 @@ class EmbodiedMetaphors:
 
         # Metaphor mappings: abstract concept -> bodily grounding
         self.metaphors = {
-            'understanding': {
-                'source_domain': 'grasping',
-                'mapping': np.random.randn(dim) * 0.1,
-                'related_body': [BodyPart.RIGHT_HAND]
+            "understanding": {
+                "source_domain": "grasping",
+                "mapping": np.random.randn(dim) * 0.1,
+                "related_body": [BodyPart.RIGHT_HAND],
             },
-            'happiness': {
-                'source_domain': 'up',
-                'mapping': np.array([0, 0, 1] + [0] * (dim - 3)),  # Z-up
-                'related_body': [BodyPart.HEAD, BodyPart.TORSO]
+            "happiness": {
+                "source_domain": "up",
+                "mapping": np.array([0, 0, 1] + [0] * (dim - 3)),  # Z-up
+                "related_body": [BodyPart.HEAD, BodyPart.TORSO],
             },
-            'sadness': {
-                'source_domain': 'down',
-                'mapping': np.array([0, 0, -1] + [0] * (dim - 3)),
-                'related_body': [BodyPart.HEAD, BodyPart.TORSO]
+            "sadness": {
+                "source_domain": "down",
+                "mapping": np.array([0, 0, -1] + [0] * (dim - 3)),
+                "related_body": [BodyPart.HEAD, BodyPart.TORSO],
             },
-            'importance': {
-                'source_domain': 'big/heavy',
-                'mapping': np.random.randn(dim) * 0.1,
-                'related_body': [BodyPart.TORSO]
+            "importance": {
+                "source_domain": "big/heavy",
+                "mapping": np.random.randn(dim) * 0.1,
+                "related_body": [BodyPart.TORSO],
             },
-            'difficulty': {
-                'source_domain': 'heavy',
-                'mapping': np.random.randn(dim) * 0.1,
-                'related_body': [BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM]
+            "difficulty": {
+                "source_domain": "heavy",
+                "mapping": np.random.randn(dim) * 0.1,
+                "related_body": [BodyPart.LEFT_ARM, BodyPart.RIGHT_ARM],
             },
-            'time_future': {
-                'source_domain': 'forward',
-                'mapping': np.array([1, 0, 0] + [0] * (dim - 3)),
-                'related_body': [BodyPart.HEAD]
+            "time_future": {
+                "source_domain": "forward",
+                "mapping": np.array([1, 0, 0] + [0] * (dim - 3)),
+                "related_body": [BodyPart.HEAD],
             },
-            'time_past': {
-                'source_domain': 'behind',
-                'mapping': np.array([-1, 0, 0] + [0] * (dim - 3)),
-                'related_body': [BodyPart.HEAD]
+            "time_past": {
+                "source_domain": "behind",
+                "mapping": np.array([-1, 0, 0] + [0] * (dim - 3)),
+                "related_body": [BodyPart.HEAD],
             },
         }
 
@@ -537,25 +553,23 @@ class EmbodiedMetaphors:
         if concept in self.metaphors:
             metaphor = self.metaphors[concept]
             # Blend abstract embedding with bodily grounding
-            grounded = 0.7 * concept_embedding + 0.3 * metaphor['mapping']
+            grounded = 0.7 * concept_embedding + 0.3 * metaphor["mapping"]
             return {
-                'concept': concept,
-                'source_domain': metaphor['source_domain'],
-                'grounded_embedding': grounded,
-                'body_involvement': metaphor['related_body']
+                "concept": concept,
+                "source_domain": metaphor["source_domain"],
+                "grounded_embedding": grounded,
+                "body_involvement": metaphor["related_body"],
             }
 
         # No specific metaphor - return as is
         return {
-            'concept': concept,
-            'source_domain': 'abstract',
-            'grounded_embedding': concept_embedding,
-            'body_involvement': []
+            "concept": concept,
+            "source_domain": "abstract",
+            "grounded_embedding": concept_embedding,
+            "body_involvement": [],
         }
 
-    def embody_reasoning(self,
-                         premise: np.ndarray,
-                         conclusion: np.ndarray) -> Dict[str, float]:
+    def embody_reasoning(self, premise: np.ndarray, conclusion: np.ndarray) -> Dict[str, float]:
         """
         Evaluate reasoning with embodied intuition.
 
@@ -567,11 +581,11 @@ class EmbodiedMetaphors:
         consistency_scores = {}
 
         for name, metaphor in self.metaphors.items():
-            premise_alignment = np.dot(premise, metaphor['mapping']) / (
-                np.linalg.norm(premise) * np.linalg.norm(metaphor['mapping']) + 1e-8
+            premise_alignment = np.dot(premise, metaphor["mapping"]) / (
+                np.linalg.norm(premise) * np.linalg.norm(metaphor["mapping"]) + 1e-8
             )
-            conclusion_alignment = np.dot(conclusion, metaphor['mapping']) / (
-                np.linalg.norm(conclusion) * np.linalg.norm(metaphor['mapping']) + 1e-8
+            conclusion_alignment = np.dot(conclusion, metaphor["mapping"]) / (
+                np.linalg.norm(conclusion) * np.linalg.norm(metaphor["mapping"]) + 1e-8
             )
 
             # Consistency: if premise has strong alignment, conclusion should too
@@ -631,14 +645,15 @@ class EmbodiedCognitionSystem:
                     )
 
         return {
-            'body_state': self.body_schema.body_state,
-            'interoception': intero_state,
-            'prediction_error': prediction_error,
-            'peripersonal_space': self.body_schema.get_reachable_space()
+            "body_state": self.body_schema.body_state,
+            "interoception": intero_state,
+            "prediction_error": prediction_error,
+            "peripersonal_space": self.body_schema.get_reachable_space(),
         }
 
-    def detect_affordances_in_scene(self,
-                                    objects: List[Tuple[np.ndarray, Dict[str, float]]]) -> Dict[str, List[Affordance]]:
+    def detect_affordances_in_scene(
+        self, objects: List[Tuple[np.ndarray, Dict[str, float]]]
+    ) -> Dict[str, List[Affordance]]:
         """Detect affordances for all objects in scene."""
         affordances = {}
 
@@ -651,42 +666,36 @@ class EmbodiedCognitionSystem:
 
         return affordances
 
-    def plan_and_simulate_action(self,
-                                 goal_state: np.ndarray,
-                                 current_state: np.ndarray) -> Dict[str, Any]:
+    def plan_and_simulate_action(
+        self, goal_state: np.ndarray, current_state: np.ndarray
+    ) -> Dict[str, Any]:
         """Plan action and simulate outcome before executing."""
         # Plan action
         planned_action = self.motor_simulation.plan_action(current_state, goal_state)
 
         # Simulate
-        simulated_trajectory = self.motor_simulation.simulate_action(
-            planned_action, current_state
-        )
+        simulated_trajectory = self.motor_simulation.simulate_action(planned_action, current_state)
 
         # Predict final outcome
-        predicted_outcome = self.motor_simulation.predict_outcome(
-            planned_action, current_state
-        )
+        predicted_outcome = self.motor_simulation.predict_outcome(planned_action, current_state)
 
         # Check if prediction reaches goal
         goal_distance = np.linalg.norm(predicted_outcome - goal_state)
         success_likely = goal_distance < 0.3
 
         return {
-            'planned_action': planned_action,
-            'simulated_trajectory': simulated_trajectory,
-            'predicted_outcome': predicted_outcome,
-            'goal_distance': goal_distance,
-            'success_likely': success_likely
+            "planned_action": planned_action,
+            "simulated_trajectory": simulated_trajectory,
+            "predicted_outcome": predicted_outcome,
+            "goal_distance": goal_distance,
+            "success_likely": success_likely,
         }
 
     def execute_action(self, action: np.ndarray, current_state: np.ndarray) -> np.ndarray:
         """Execute action (or prepare for execution)."""
         # Store for prediction error computation
         self.last_action = action.copy()
-        self.predicted_outcome = self.motor_simulation.predict_outcome(
-            action, current_state
-        )
+        self.predicted_outcome = self.motor_simulation.predict_outcome(action, current_state)
 
         # Update interoception based on effort
         effort = np.linalg.norm(action) / 10  # Normalize
@@ -701,12 +710,12 @@ class EmbodiedCognitionSystem:
     def get_embodied_state(self) -> Dict[str, Any]:
         """Get complete embodied state."""
         return {
-            'body': {
-                'peripersonal_radius': self.body_schema.peripersonal_radius,
-                'tools_incorporated': list(self.body_schema.incorporated_tools.keys()),
+            "body": {
+                "peripersonal_radius": self.body_schema.peripersonal_radius,
+                "tools_incorporated": list(self.body_schema.incorporated_tools.keys()),
             },
-            'interoception': self.interoception.sense(),
-            'homeostatic_needs': self.interoception.get_homeostatic_urgency(),
-            'motor_programs': list(self.motor_simulation.motor_programs.keys()),
-            'affordance_templates': len(self.affordance_detector.affordance_templates)
+            "interoception": self.interoception.sense(),
+            "homeostatic_needs": self.interoception.get_homeostatic_urgency(),
+            "motor_programs": list(self.motor_simulation.motor_programs.keys()),
+            "affordance_templates": len(self.affordance_detector.affordance_templates),
         }

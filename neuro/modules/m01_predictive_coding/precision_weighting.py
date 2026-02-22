@@ -16,6 +16,7 @@ from enum import Enum
 
 class PrecisionMode(Enum):
     """Different strategies for precision estimation"""
+
     FIXED = "fixed"
     VARIANCE = "variance"
     EXPONENTIAL = "exponential"
@@ -25,6 +26,7 @@ class PrecisionMode(Enum):
 @dataclass
 class PrecisionState:
     """Container for precision-related state"""
+
     value: float
     variance_estimate: float
     confidence: float
@@ -43,7 +45,7 @@ class PrecisionWeightedError:
         dim: int,
         initial_precision: float = 1.0,
         min_precision: float = 0.01,
-        max_precision: float = 100.0
+        max_precision: float = 100.0,
     ):
         self.dim = dim
         self.min_precision = min_precision
@@ -57,11 +59,7 @@ class PrecisionWeightedError:
         self.M2 = np.zeros(dim)  # For Welford's algorithm
         self.n_samples = 0
 
-    def compute_error(
-        self,
-        predicted: np.ndarray,
-        actual: np.ndarray
-    ) -> np.ndarray:
+    def compute_error(self, predicted: np.ndarray, actual: np.ndarray) -> np.ndarray:
         """Compute raw prediction error.
 
         Args:
@@ -74,9 +72,7 @@ class PrecisionWeightedError:
         return actual - predicted
 
     def weighted_error(
-        self,
-        predicted: np.ndarray,
-        actual: np.ndarray
+        self, predicted: np.ndarray, actual: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Compute precision-weighted prediction error.
 
@@ -156,7 +152,7 @@ class AdaptivePrecision:
         learning_rate: float = 0.1,
         volatility_learning_rate: float = 0.01,
         initial_precision: float = 1.0,
-        initial_volatility: float = 0.1
+        initial_volatility: float = 0.1,
     ):
         self.dim = dim
         self.learning_rate = learning_rate
@@ -177,9 +173,7 @@ class AdaptivePrecision:
         self.max_history = 50
 
     def update(
-        self,
-        error: np.ndarray,
-        surprise: Optional[np.ndarray] = None
+        self, error: np.ndarray, surprise: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Update precision based on prediction error.
 
@@ -240,7 +234,7 @@ class AdaptivePrecision:
             return False
 
         recent = np.array(self.precision_history[-window:])
-        earlier = np.array(self.precision_history[-window*2:-window])
+        earlier = np.array(self.precision_history[-window * 2 : -window])
 
         recent_var = np.var(recent, axis=0)
         earlier_var = np.var(earlier, axis=0)
@@ -265,29 +259,19 @@ class HierarchicalPrecision:
     """
 
     def __init__(
-        self,
-        level_dims: List[int],
-        base_learning_rate: float = 0.1,
-        timescale_factor: float = 2.0
+        self, level_dims: List[int], base_learning_rate: float = 0.1, timescale_factor: float = 2.0
     ):
         self.n_levels = len(level_dims)
 
         # Create adaptive precision for each level
         self.levels: List[AdaptivePrecision] = []
         for i, dim in enumerate(level_dims):
-            lr = base_learning_rate / (timescale_factor ** i)
+            lr = base_learning_rate / (timescale_factor**i)
             vlr = lr * 0.1
-            level = AdaptivePrecision(
-                dim=dim,
-                learning_rate=lr,
-                volatility_learning_rate=vlr
-            )
+            level = AdaptivePrecision(dim=dim, learning_rate=lr, volatility_learning_rate=vlr)
             self.levels.append(level)
 
-    def update(
-        self,
-        errors: List[np.ndarray]
-    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+    def update(self, errors: List[np.ndarray]) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         """Update precision at all levels.
 
         Args:
@@ -306,15 +290,9 @@ class HierarchicalPrecision:
 
         return precisions, volatilities
 
-    def get_weighted_errors(
-        self,
-        errors: List[np.ndarray]
-    ) -> List[np.ndarray]:
+    def get_weighted_errors(self, errors: List[np.ndarray]) -> List[np.ndarray]:
         """Get precision-weighted errors at all levels"""
-        return [
-            level.get_weighted_error(error)
-            for level, error in zip(self.levels, errors)
-        ]
+        return [level.get_weighted_error(error) for level, error in zip(self.levels, errors)]
 
     def get_overall_confidence(self) -> float:
         """Get overall system confidence (average across levels)"""

@@ -18,6 +18,7 @@ class CounterfactualQuery:
 
     Notation: P(Y_{x'} | X=x, Y=y)
     """
+
     # The counterfactual outcome variable
     outcome: str
 
@@ -43,6 +44,7 @@ class PotentialOutcome:
 
     This is the outcome that would have occurred had treatment been x.
     """
+
     outcome_var: str
     treatment_var: str
     treatment_value: Any
@@ -128,8 +130,7 @@ class CounterfactualReasoner:
         }
 
         # Numeric outcomes
-        numeric_outcomes = [o for o in counterfactual_outcomes
-                          if isinstance(o, (int, float))]
+        numeric_outcomes = [o for o in counterfactual_outcomes if isinstance(o, (int, float))]
         if numeric_outcomes:
             result["mean"] = float(np.mean(numeric_outcomes))
             result["std"] = float(np.std(numeric_outcomes))
@@ -138,16 +139,15 @@ class CounterfactualReasoner:
         # Discrete outcomes
         if query.outcome_value is not None:
             # Probability of specific outcome
-            matches = sum(1 for o in counterfactual_outcomes
-                         if o == query.outcome_value)
+            matches = sum(1 for o in counterfactual_outcomes if o == query.outcome_value)
             result["probability"] = matches / len(counterfactual_outcomes)
         else:
             # Distribution
             from collections import Counter
+
             counts = Counter(counterfactual_outcomes)
             result["distribution"] = {
-                k: v / len(counterfactual_outcomes)
-                for k, v in counts.items()
+                k: v / len(counterfactual_outcomes) for k, v in counts.items()
             }
 
         return result
@@ -216,16 +216,12 @@ class CounterfactualReasoner:
         if "distribution" in result:
             # P(Y_0 != Y | X=1, Y=1)
             counterfactual_absent = result["distribution"].get(
-                1 - outcome_present if isinstance(outcome_present, int) else None,
-                0
+                1 - outcome_present if isinstance(outcome_present, int) else None, 0
             )
             return counterfactual_absent
         elif "outcomes" in result:
             # Probability that outcome differs
-            different = sum(
-                1 for o in result["outcomes"]
-                if o != outcome_present
-            )
+            different = sum(1 for o in result["outcomes"] if o != outcome_present)
             return different / len(result["outcomes"])
 
         return 0.0
@@ -266,10 +262,7 @@ class CounterfactualReasoner:
         if "distribution" in result:
             return result["distribution"].get(outcome_present, 0)
         elif "outcomes" in result:
-            matches = sum(
-                1 for o in result["outcomes"]
-                if o == outcome_present
-            )
+            matches = sum(1 for o in result["outcomes"] if o == outcome_present)
             return matches / len(result["outcomes"])
 
         return 0.0
@@ -302,15 +295,11 @@ class CounterfactualReasoner:
             noise = self.scm.sample_noise()
 
             # Compute Y under X=1
-            values_x1 = self.scm.compute_endogenous(
-                noise, {treatment: treatment_present}
-            )
+            values_x1 = self.scm.compute_endogenous(noise, {treatment: treatment_present})
             y_x1 = values_x1.get(outcome)
 
             # Compute Y under X=0
-            values_x0 = self.scm.compute_endogenous(
-                noise, {treatment: treatment_absent}
-            )
+            values_x0 = self.scm.compute_endogenous(noise, {treatment: treatment_absent})
             y_x0 = values_x0.get(outcome)
 
             # Check if necessary and sufficient
@@ -349,15 +338,11 @@ class CounterfactualReasoner:
 
         for noise in consistent_noise:
             # Y under treatment
-            values_x1 = self.scm.compute_endogenous(
-                noise, {treatment: treatment_present}
-            )
+            values_x1 = self.scm.compute_endogenous(noise, {treatment: treatment_present})
             y1 = values_x1.get(outcome)
 
             # Y under control
-            values_x0 = self.scm.compute_endogenous(
-                noise, {treatment: treatment_absent}
-            )
+            values_x0 = self.scm.compute_endogenous(noise, {treatment: treatment_absent})
             y0 = values_x0.get(outcome)
 
             if y1 is not None and y0 is not None:
@@ -417,11 +402,13 @@ class CounterfactualReasoner:
                 n_samples=500,
             )
 
-            explanations.append({
-                "cause": parent,
-                "value": parent_value,
-                "probability_necessary": pn,
-            })
+            explanations.append(
+                {
+                    "cause": parent,
+                    "value": parent_value,
+                    "probability_necessary": pn,
+                }
+            )
 
         # Sort by necessity
         explanations.sort(key=lambda x: x["probability_necessary"], reverse=True)

@@ -42,56 +42,77 @@ Slash Commands:
   /compact   Compress context
   /clear     Clear history
   /exit      Exit NEURO
-"""
+""",
     )
 
     # Core flags
     parser.add_argument("-v", "--version", action="store_true", help="Show version")
-    parser.add_argument("-p", "--print", action="store_true", dest="print_mode",
-                        help="Print response and exit (non-interactive)")
-    parser.add_argument("-c", "--continue", action="store_true", dest="continue_session",
-                        help="Continue most recent conversation")
-    parser.add_argument("-r", "--resume", type=str, nargs="?", const="", metavar="SESSION",
-                        help="Resume session (most recent if no ID given)")
+    parser.add_argument(
+        "-p",
+        "--print",
+        action="store_true",
+        dest="print_mode",
+        help="Print response and exit (non-interactive)",
+    )
+    parser.add_argument(
+        "-c",
+        "--continue",
+        action="store_true",
+        dest="continue_session",
+        help="Continue most recent conversation",
+    )
+    parser.add_argument(
+        "-r",
+        "--resume",
+        type=str,
+        nargs="?",
+        const="",
+        metavar="SESSION",
+        help="Resume session (most recent if no ID given)",
+    )
 
     # Model flags
-    parser.add_argument("--model", type=str, default="ministral-3:8b",
-                        help="Model to use (default: ministral-3:8b)")
-    parser.add_argument("--fallback-model", type=str,
-                        help="Fallback model if primary unavailable")
+    parser.add_argument(
+        "--model", type=str, default="ministral-3:8b", help="Model to use (default: ministral-3:8b)"
+    )
+    parser.add_argument("--fallback-model", type=str, help="Fallback model if primary unavailable")
 
     # Output flags
-    parser.add_argument("--verbose", action="store_true",
-                        help="Enable verbose logging")
-    parser.add_argument("--output-format", choices=["text", "json", "stream-json"],
-                        default="text", help="Output format (print mode)")
-    parser.add_argument("--no-stream", action="store_true",
-                        help="Disable streaming")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "--output-format",
+        choices=["text", "json", "stream-json"],
+        default="text",
+        help="Output format (print mode)",
+    )
+    parser.add_argument("--no-stream", action="store_true", help="Disable streaming")
 
     # System prompt flags
-    parser.add_argument("--system-prompt", type=str,
-                        help="Custom system prompt (replaces default)")
-    parser.add_argument("--append-system-prompt", type=str,
-                        help="Append to default system prompt")
+    parser.add_argument("--system-prompt", type=str, help="Custom system prompt (replaces default)")
+    parser.add_argument("--append-system-prompt", type=str, help="Append to default system prompt")
 
     # Permission flags
-    parser.add_argument("--permission-mode",
-                        choices=["default", "acceptEdits", "plan", "bypassPermissions"],
-                        default="default", help="Permission mode")
-    parser.add_argument("--dangerously-skip-permissions", action="store_true",
-                        help="Skip all permission prompts")
-    parser.add_argument("--allowed-tools", type=str, nargs="*",
-                        help="Tools that don't require permission")
-    parser.add_argument("--disallowed-tools", type=str, nargs="*",
-                        help="Tools to disable")
+    parser.add_argument(
+        "--permission-mode",
+        choices=["default", "acceptEdits", "plan", "bypassPermissions"],
+        default="default",
+        help="Permission mode",
+    )
+    parser.add_argument(
+        "--dangerously-skip-permissions", action="store_true", help="Skip all permission prompts"
+    )
+    parser.add_argument(
+        "--allowed-tools", type=str, nargs="*", help="Tools that don't require permission"
+    )
+    parser.add_argument("--disallowed-tools", type=str, nargs="*", help="Tools to disable")
 
     # Session flags
-    parser.add_argument("--no-session-persistence", action="store_true",
-                        help="Don't save session to disk")
+    parser.add_argument(
+        "--no-session-persistence", action="store_true", help="Don't save session to disk"
+    )
 
     # MCP flags
-    parser.add_argument("--mcp-config", type=str, nargs="*",
-                        help="MCP config files to load")
+    parser.add_argument("--mcp-config", type=str, nargs="*", help="MCP config files to load")
 
     return parser
 
@@ -114,12 +135,15 @@ def main():
         subcommand = remaining[0]
         if subcommand == "config":
             from .commands.config import cmd_config
+
             return cmd_config(args)
         elif subcommand == "mcp":
             from .commands.mcp import cmd_mcp
+
             return cmd_mcp(args)
         elif subcommand == "doctor":
             from .commands.doctor import cmd_doctor
+
             return cmd_doctor(args)
         elif subcommand == "chat":
             remaining = remaining[1:]  # Remove 'chat' from remaining
@@ -135,7 +159,7 @@ def main():
         verbose=args.verbose,
         permission_mode=args.permission_mode,
         system_prompt=args.system_prompt,
-        no_session_persistence=getattr(args, 'no_session_persistence', False),
+        no_session_persistence=getattr(args, "no_session_persistence", False),
     )
 
     # Handle different modes

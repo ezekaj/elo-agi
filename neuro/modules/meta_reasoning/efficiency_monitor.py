@@ -21,6 +21,7 @@ except ImportError:
 
 class TerminationReason(Enum):
     """Reasons for early termination."""
+
     COMPLETED = "completed"
     TIME_LIMIT = "time_limit"
     COST_LIMIT = "cost_limit"
@@ -32,6 +33,7 @@ class TerminationReason(Enum):
 @dataclass
 class EfficiencyConfig:
     """Configuration for efficiency monitoring."""
+
     time_limit_seconds: float = 60.0
     cost_limit: float = 100.0
     min_progress_rate: float = 0.01
@@ -43,6 +45,7 @@ class EfficiencyConfig:
 @dataclass
 class ReasoningMetrics:
     """Metrics for a reasoning session."""
+
     problem_id: str
     style: ReasoningStyle
     start_time: float
@@ -57,6 +60,7 @@ class ReasoningMetrics:
 @dataclass
 class EfficiencyReport:
     """Report on reasoning efficiency."""
+
     efficiency_score: float
     cost_per_progress: float
     time_per_step: float
@@ -199,7 +203,7 @@ class EfficiencyMonitor:
         if len(history) < self.config.stuck_threshold_steps:
             return False
 
-        recent = history[-self.config.stuck_threshold_steps:]
+        recent = history[-self.config.stuck_threshold_steps :]
         variance = np.var(recent)
 
         return variance < 1e-6
@@ -284,13 +288,11 @@ class EfficiencyMonitor:
         efficiency_score = self.compute_efficiency_score(metrics)
 
         cost_per_progress = (
-            metrics.cost_accumulated / (metrics.progress + 1e-8)
-            if metrics.progress > 0 else 0.0
+            metrics.cost_accumulated / (metrics.progress + 1e-8) if metrics.progress > 0 else 0.0
         )
 
         time_per_step = (
-            metrics.elapsed_time / metrics.steps_taken
-            if metrics.steps_taken > 0 else 0.0
+            metrics.elapsed_time / metrics.steps_taken if metrics.steps_taken > 0 else 0.0
         )
 
         recommendations = self._generate_recommendations(metrics)

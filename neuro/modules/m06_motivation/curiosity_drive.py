@@ -23,15 +23,17 @@ from enum import Enum
 
 class CuriosityType(Enum):
     """Types of curiosity/information-seeking"""
-    PERCEPTUAL = "perceptual"        # Novel sensory stimuli
-    EPISTEMIC = "epistemic"          # Knowledge gaps
-    SPECIFIC = "specific"            # Targeted information need
-    DIVERSIVE = "diversive"          # General exploration/boredom relief
+
+    PERCEPTUAL = "perceptual"  # Novel sensory stimuli
+    EPISTEMIC = "epistemic"  # Knowledge gaps
+    SPECIFIC = "specific"  # Targeted information need
+    DIVERSIVE = "diversive"  # General exploration/boredom relief
 
 
 @dataclass
 class InformationPacket:
     """A piece of information that can satisfy curiosity"""
+
     content: np.ndarray
     novelty: float
     relevance: float
@@ -42,11 +44,12 @@ class InformationPacket:
 @dataclass
 class CuriosityState:
     """Current state of the curiosity system"""
-    overall_level: float              # General curiosity drive
-    specific_targets: List[str]       # What we're curious about
-    knowledge_gaps: List[str]         # Identified unknowns
-    boredom_level: float              # Drives diversive curiosity
-    recent_discoveries: int           # Fuels further curiosity
+
+    overall_level: float  # General curiosity drive
+    specific_targets: List[str]  # What we're curious about
+    knowledge_gaps: List[str]  # Identified unknowns
+    boredom_level: float  # Drives diversive curiosity
+    recent_discoveries: int  # Fuels further curiosity
 
 
 class NoveltyDetector:
@@ -56,12 +59,7 @@ class NoveltyDetector:
     explicit reward prediction.
     """
 
-    def __init__(
-        self,
-        input_dim: int,
-        memory_capacity: int = 1000,
-        novelty_threshold: float = 0.3
-    ):
+    def __init__(self, input_dim: int, memory_capacity: int = 1000, novelty_threshold: float = 0.3):
         self.input_dim = input_dim
         self.memory_capacity = memory_capacity
         self.novelty_threshold = novelty_threshold
@@ -88,7 +86,7 @@ class NoveltyDetector:
             return 1.0  # Everything is novel initially
 
         # Distance to nearest memory
-        min_dist = float('inf')
+        min_dist = float("inf")
         for memory in self.experience_memory:
             dist = np.linalg.norm(stimulus - memory)
             min_dist = min(min_dist, dist)
@@ -139,12 +137,11 @@ class NoveltyDetector:
             self.prototypes.append(stimulus.copy())
         else:
             # Replace least representative prototype
-            min_coverage = float('inf')
+            min_coverage = float("inf")
             min_idx = 0
             for i, proto in enumerate(self.prototypes):
                 # Count how many memories this prototype represents
-                coverage = sum(1 for m in self.experience_memory
-                             if np.linalg.norm(m - proto) < 0.5)
+                coverage = sum(1 for m in self.experience_memory if np.linalg.norm(m - proto) < 0.5)
                 if coverage < min_coverage:
                     min_coverage = coverage
                     min_idx = i
@@ -182,7 +179,7 @@ class InformationValue:
         self,
         base_curiosity: float = 0.5,
         uncertainty_weight: float = 1.0,
-        relevance_weight: float = 0.5
+        relevance_weight: float = 0.5,
     ):
         self.base_curiosity = base_curiosity
         self.uncertainty_weight = uncertainty_weight
@@ -199,9 +196,7 @@ class InformationValue:
         self.uncertainty_map[topic] = np.clip(uncertainty, 0, 1)
 
     def compute_information_value(
-        self,
-        info: InformationPacket,
-        topics: Optional[List[str]] = None
+        self, info: InformationPacket, topics: Optional[List[str]] = None
     ) -> float:
         """Compute intrinsic value of information.
 
@@ -227,17 +222,15 @@ class InformationValue:
 
         return value
 
-    def record_information_received(
-        self,
-        info: InformationPacket,
-        satisfaction: float
-    ) -> None:
+    def record_information_received(self, info: InformationPacket, satisfaction: float) -> None:
         """Record received information and satisfaction level."""
-        self.info_history.append({
-            'novelty': info.novelty,
-            'uncertainty_reduction': info.uncertainty_reduction,
-            'satisfaction': satisfaction
-        })
+        self.info_history.append(
+            {
+                "novelty": info.novelty,
+                "uncertainty_reduction": info.uncertainty_reduction,
+                "satisfaction": satisfaction,
+            }
+        )
 
         # Update uncertainties if info was relevant
         if info.source and info.source in self.uncertainty_map:
@@ -250,7 +243,7 @@ class InformationValue:
             return 0.5
 
         recent = list(self.info_history)[-20:]
-        return np.mean([r['satisfaction'] for r in recent])
+        return np.mean([r["satisfaction"] for r in recent])
 
     def identify_knowledge_gaps(self, threshold: float = 0.5) -> List[str]:
         """Identify topics with high uncertainty (knowledge gaps)."""
@@ -275,7 +268,7 @@ class ExplorationController:
         self,
         base_exploration: float = 0.3,
         curiosity_boost: float = 0.2,
-        boredom_threshold: float = 0.7
+        boredom_threshold: float = 0.7,
     ):
         self.base_exploration = base_exploration
         self.curiosity_boost = curiosity_boost
@@ -289,10 +282,7 @@ class ExplorationController:
         self.exploration_outcomes: deque = deque(maxlen=100)
 
     def compute_exploration_rate(
-        self,
-        curiosity_level: float,
-        dopamine_level: float,
-        uncertainty: float
+        self, curiosity_level: float, dopamine_level: float, uncertainty: float
     ) -> float:
         """Compute current exploration rate.
 
@@ -322,10 +312,7 @@ class ExplorationController:
         return np.clip(rate, 0.05, 0.95)
 
     def should_explore(
-        self,
-        curiosity_level: float,
-        dopamine_level: float,
-        uncertainty: float
+        self, curiosity_level: float, dopamine_level: float, uncertainty: float
     ) -> bool:
         """Decide whether to explore or exploit."""
         rate = self.compute_exploration_rate(curiosity_level, dopamine_level, uncertainty)
@@ -369,10 +356,7 @@ class CuriosityModule:
     """
 
     def __init__(
-        self,
-        state_dim: int,
-        base_curiosity: float = 0.5,
-        memory_boost_factor: float = 1.5
+        self, state_dim: int, base_curiosity: float = 0.5, memory_boost_factor: float = 1.5
     ):
         self.state_dim = state_dim
         self.base_curiosity = base_curiosity
@@ -398,7 +382,7 @@ class CuriosityModule:
         self,
         stimulus: np.ndarray,
         action: Optional[np.ndarray] = None,
-        context: Optional[Dict] = None
+        context: Optional[Dict] = None,
     ) -> Dict[str, float]:
         """Process a stimulus through the curiosity system.
 
@@ -418,11 +402,11 @@ class CuriosityModule:
             content=stimulus,
             novelty=novelty,
             relevance=0.5,  # Would be computed from context
-            uncertainty_reduction=novelty * 0.5
+            uncertainty_reduction=novelty * 0.5,
         )
 
         # Compute information value
-        topics = context.get('topics', []) if context else []
+        topics = context.get("topics", []) if context else []
         info_value = self.info_value.compute_information_value(info, topics)
 
         # Update boredom if action provided
@@ -441,11 +425,11 @@ class CuriosityModule:
 
         # Record event
         event = {
-            'novelty': novelty,
-            'info_value': info_value,
-            'curiosity_level': self.curiosity_level,
-            'memory_strength': memory_strength,
-            'boredom': self.exploration_controller.boredom_level
+            "novelty": novelty,
+            "info_value": info_value,
+            "curiosity_level": self.curiosity_level,
+            "memory_strength": memory_strength,
+            "boredom": self.exploration_controller.boredom_level,
         }
         self.curiosity_history.append(event)
 
@@ -500,14 +484,12 @@ class CuriosityModule:
         if len(self.memory_store) > self.max_memories:
             # Remove least important
             self.memory_store.sort(key=lambda x: x[1], reverse=True)
-            self.memory_store = self.memory_store[:self.max_memories]
+            self.memory_store = self.memory_store[: self.max_memories]
 
     def should_explore(self, dopamine_level: float = 0.5, uncertainty: float = 0.5) -> bool:
         """Decide whether to explore."""
         return self.exploration_controller.should_explore(
-            self.curiosity_level,
-            dopamine_level,
-            uncertainty
+            self.curiosity_level, dopamine_level, uncertainty
         )
 
     def get_exploration_bonus(self, state: np.ndarray) -> float:
@@ -531,21 +513,20 @@ class CuriosityModule:
             specific_targets=list(self.specific_curiosities.keys()),
             knowledge_gaps=self.get_knowledge_gaps(),
             boredom_level=self.exploration_controller.boredom_level,
-            recent_discoveries=sum(
-                1 for e in self.curiosity_history
-                if e.get('novelty', 0) > 0.7
-            )
+            recent_discoveries=sum(1 for e in self.curiosity_history if e.get("novelty", 0) > 0.7),
         )
 
     def get_metrics(self) -> Dict[str, float]:
         """Get curiosity system metrics."""
         return {
-            'curiosity_level': self.curiosity_level,
-            'boredom_level': self.exploration_controller.boredom_level,
-            'novelty_trend': self.novelty_detector.get_novelty_trend(),
-            'exploration_value': self.exploration_controller.get_exploration_value(),
-            'memory_count': len(self.memory_store),
-            'avg_memory_importance': np.mean([m[1] for m in self.memory_store]) if self.memory_store else 0,
+            "curiosity_level": self.curiosity_level,
+            "boredom_level": self.exploration_controller.boredom_level,
+            "novelty_trend": self.novelty_detector.get_novelty_trend(),
+            "exploration_value": self.exploration_controller.get_exploration_value(),
+            "memory_count": len(self.memory_store),
+            "avg_memory_importance": np.mean([m[1] for m in self.memory_store])
+            if self.memory_store
+            else 0,
         }
 
     def reset(self) -> None:

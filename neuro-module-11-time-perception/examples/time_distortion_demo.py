@@ -31,7 +31,7 @@ def demo_emotional_time():
         EmotionalState.EXCITEMENT,
         EmotionalState.BOREDOM,
         EmotionalState.FLOW,
-        EmotionalState.ANXIETY
+        EmotionalState.ANXIETY,
     ]
 
     print(f"\nActual duration: {duration:.1f} seconds\n")
@@ -40,10 +40,7 @@ def demo_emotional_time():
 
     results = {}
     for state in states:
-        estimate = orchestrator.estimate(
-            duration,
-            emotional_state=state
-        )
+        estimate = orchestrator.estimate(duration, emotional_state=state)
         ratio = estimate.perceived_duration / duration
 
         if ratio > 1.1:
@@ -102,7 +99,7 @@ def demo_dopamine_effect():
         ("Depressed (low DA)", 0.7),
         ("Normal", 1.0),
         ("Rewarded", 1.3),
-        ("Stimulant (high DA)", 1.8)
+        ("Stimulant (high DA)", 1.8),
     ]
 
     print(f"\nActual duration: {duration:.1f} seconds")
@@ -159,20 +156,20 @@ def demo_scenarios():
     orchestrator = TimePerceptionOrchestrator()
     duration = 60.0  # 1 minute
 
-    scenarios = ['baseline', 'fear', 'boredom', 'flow', 'elderly', 'child', 'stimulant']
+    scenarios = ["baseline", "fear", "boredom", "flow", "elderly", "child", "stimulant"]
 
     print(f"\nActual duration: {duration:.1f} seconds\n")
     print(f"{'Scenario':<15} {'Perceived (s)':<18} {'Description'}")
     print("-" * 65)
 
     descriptions = {
-        'baseline': "Normal adult, neutral state",
-        'fear': "Threatening situation (time slows)",
-        'boredom': "Waiting, nothing to do (time drags)",
-        'flow': "Absorbed in engaging task (time flies)",
-        'elderly': "70 year old (time accelerates with age)",
-        'child': "8 year old (time feels slower)",
-        'stimulant': "Under stimulant effects (faster clock)"
+        "baseline": "Normal adult, neutral state",
+        "fear": "Threatening situation (time slows)",
+        "boredom": "Waiting, nothing to do (time drags)",
+        "flow": "Absorbed in engaging task (time flies)",
+        "elderly": "70 year old (time accelerates with age)",
+        "child": "8 year old (time feels slower)",
+        "stimulant": "Under stimulant effects (faster clock)",
     }
 
     for scenario in scenarios:
@@ -191,11 +188,11 @@ def demo_day_simulation():
 
     # A typical day's events (duration in seconds, type, intensity)
     day_events = [
-        (3600, 'boring', 0.6),      # Boring meeting (1 hour)
-        (1800, 'engaging', 0.8),    # Fun project work (30 min)
-        (900, 'threatening', 0.7),  # Stressful deadline (15 min)
-        (7200, 'engaging', 0.7),    # Deep work (2 hours)
-        (1800, 'boring', 0.5),      # Admin tasks (30 min)
+        (3600, "boring", 0.6),  # Boring meeting (1 hour)
+        (1800, "engaging", 0.8),  # Fun project work (30 min)
+        (900, "threatening", 0.7),  # Stressful deadline (15 min)
+        (7200, "engaging", 0.7),  # Deep work (2 hours)
+        (1800, "boring", 0.5),  # Admin tasks (30 min)
     ]
 
     print("\nSimulating a work day...")
@@ -207,7 +204,7 @@ def demo_day_simulation():
         "Fun project",
         "Stressful deadline",
         "Deep work",
-        "Admin tasks"
+        "Admin tasks",
     ]
 
     total_actual = 0
@@ -247,17 +244,17 @@ def create_visualization():
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
     # 1. Emotional effects
-    emotions = ['neutral', 'fear', 'excitement', 'boredom', 'flow']
+    emotions = ["neutral", "fear", "excitement", "boredom", "flow"]
     emotion_durations = []
     for e in emotions:
-        state = EmotionalState[e.upper()] if e != 'excitement' else EmotionalState.EXCITEMENT
+        state = EmotionalState[e.upper()] if e != "excitement" else EmotionalState.EXCITEMENT
         est = orchestrator.estimate(duration, emotional_state=state)
         emotion_durations.append(est.perceived_duration)
 
-    axes[0, 0].barh(emotions, emotion_durations, color='steelblue')
-    axes[0, 0].axvline(x=duration, color='red', linestyle='--', label='Actual')
-    axes[0, 0].set_xlabel('Perceived Duration (s)')
-    axes[0, 0].set_title('Emotional Effects on Time')
+    axes[0, 0].barh(emotions, emotion_durations, color="steelblue")
+    axes[0, 0].axvline(x=duration, color="red", linestyle="--", label="Actual")
+    axes[0, 0].set_xlabel("Perceived Duration (s)")
+    axes[0, 0].set_title("Emotional Effects on Time")
     axes[0, 0].legend()
 
     # 2. Attention effects
@@ -267,11 +264,11 @@ def create_visualization():
         est = orchestrator.estimate(duration, attention=att)
         attention_durations.append(est.perceived_duration)
 
-    axes[0, 1].plot(attention_levels, attention_durations, 'b-o')
-    axes[0, 1].axhline(y=duration, color='red', linestyle='--', label='Actual')
-    axes[0, 1].set_xlabel('Attention to Time')
-    axes[0, 1].set_ylabel('Perceived Duration (s)')
-    axes[0, 1].set_title('Attention Effect (Watched Pot)')
+    axes[0, 1].plot(attention_levels, attention_durations, "b-o")
+    axes[0, 1].axhline(y=duration, color="red", linestyle="--", label="Actual")
+    axes[0, 1].set_xlabel("Attention to Time")
+    axes[0, 1].set_ylabel("Perceived Duration (s)")
+    axes[0, 1].set_title("Attention Effect (Watched Pot)")
     axes[0, 1].legend()
     axes[0, 1].grid(True, alpha=0.3)
 
@@ -282,11 +279,11 @@ def create_visualization():
         est = orchestrator.estimate(duration, dopamine=da)
         dopamine_durations.append(est.perceived_duration)
 
-    axes[1, 0].plot(dopamine_levels, dopamine_durations, 'g-o')
-    axes[1, 0].axhline(y=duration, color='red', linestyle='--', label='Actual')
-    axes[1, 0].set_xlabel('Dopamine Level (relative to baseline)')
-    axes[1, 0].set_ylabel('Perceived Duration (s)')
-    axes[1, 0].set_title('Dopamine Effect on Clock Speed')
+    axes[1, 0].plot(dopamine_levels, dopamine_durations, "g-o")
+    axes[1, 0].axhline(y=duration, color="red", linestyle="--", label="Actual")
+    axes[1, 0].set_xlabel("Dopamine Level (relative to baseline)")
+    axes[1, 0].set_ylabel("Perceived Duration (s)")
+    axes[1, 0].set_title("Dopamine Effect on Clock Speed")
     axes[1, 0].legend()
     axes[1, 0].grid(True, alpha=0.3)
 
@@ -297,16 +294,16 @@ def create_visualization():
         est = orchestrator.estimate(duration, age=int(age))
         age_durations.append(est.perceived_duration)
 
-    axes[1, 1].plot(ages, age_durations, 'purple', marker='o')
-    axes[1, 1].axhline(y=duration, color='red', linestyle='--', label='Actual')
-    axes[1, 1].set_xlabel('Age (years)')
-    axes[1, 1].set_ylabel('Perceived Duration (s)')
-    axes[1, 1].set_title('Age Effect (Time Acceleration)')
+    axes[1, 1].plot(ages, age_durations, "purple", marker="o")
+    axes[1, 1].axhline(y=duration, color="red", linestyle="--", label="Actual")
+    axes[1, 1].set_xlabel("Age (years)")
+    axes[1, 1].set_ylabel("Perceived Duration (s)")
+    axes[1, 1].set_title("Age Effect (Time Acceleration)")
     axes[1, 1].legend()
     axes[1, 1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('time_distortion_effects.png', dpi=150)
+    plt.savefig("time_distortion_effects.png", dpi=150)
     print("Figure saved: time_distortion_effects.png")
 
 
@@ -330,5 +327,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

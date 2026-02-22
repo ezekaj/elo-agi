@@ -84,6 +84,7 @@ except ImportError:
 @dataclass
 class MetaReasoningConfig:
     """Configuration for meta-reasoning controller."""
+
     embedding_dim: int = 128
     exploration_rate: float = 0.1
     time_limit_seconds: float = 60.0
@@ -95,6 +96,7 @@ class MetaReasoningConfig:
 @dataclass
 class ReasoningSession:
     """A complete reasoning session."""
+
     session_id: str
     problem_analysis: ProblemAnalysis
     style_selection: StyleSelection

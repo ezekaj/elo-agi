@@ -5,13 +5,18 @@ Tests for Mental Imagery Systems
 import pytest
 import numpy as np
 from neuro.modules.m09_creativity.imagery import (
-    VisualImagery, AuditoryImagery, MotorImagery,
-    TactileImagery, ImagerySystem, MultimodalImage
+    VisualImagery,
+    AuditoryImagery,
+    MotorImagery,
+    TactileImagery,
+    ImagerySystem,
+    MultimodalImage,
 )
 from neuro.modules.m09_creativity.imagery.visual_imagery import VisualProperty
 from neuro.modules.m09_creativity.imagery.auditory_imagery import AuditoryProperty
 from neuro.modules.m09_creativity.imagery.motor_imagery import MotorProperty
 from neuro.modules.m09_creativity.imagery.tactile_imagery import TactileProperty
+
 
 class TestVisualImagery:
     """Tests for Visual Imagery System"""
@@ -28,7 +33,7 @@ class TestVisualImagery:
         img = visual.create_image(
             "sunset",
             "A beautiful sunset over the ocean",
-            properties={VisualProperty.COLOR: "orange", VisualProperty.BRIGHTNESS: 0.8}
+            properties={VisualProperty.COLOR: "orange", VisualProperty.BRIGHTNESS: 0.8},
         )
 
         assert img.id == "sunset"
@@ -90,6 +95,7 @@ class TestVisualImagery:
         assert morphed is not None
         assert "cat" in morphed.description.lower() or "dog" in morphed.description.lower()
 
+
 class TestAuditoryImagery:
     """Tests for Auditory Imagery System"""
 
@@ -105,7 +111,7 @@ class TestAuditoryImagery:
         sound = auditory.create_sound(
             "bell",
             "A ringing bell",
-            properties={AuditoryProperty.PITCH: "high", AuditoryProperty.VOLUME: "loud"}
+            properties={AuditoryProperty.PITCH: "high", AuditoryProperty.VOLUME: "loud"},
         )
 
         assert sound.id == "bell"
@@ -172,6 +178,7 @@ class TestAuditoryImagery:
         assert layered is not None
         assert layered.duration == max(s1.duration, s2.duration)
 
+
 class TestMotorImagery:
     """Tests for Motor Imagery System"""
 
@@ -185,10 +192,7 @@ class TestMotorImagery:
         """Test imagining an action"""
         motor = MotorImagery()
         action = motor.imagine_action(
-            "throw",
-            "Throwing a ball",
-            body_parts=["arm", "hand"],
-            duration=1.0
+            "throw", "Throwing a ball", body_parts=["arm", "hand"], duration=1.0
         )
 
         assert action.id == "throw"
@@ -239,15 +243,12 @@ class TestMotorImagery:
     def test_mirror_action(self):
         """Test mirroring an action"""
         motor = MotorImagery()
-        action = motor.imagine_action(
-            "wave",
-            "Waving right hand",
-            body_parts=["right hand"]
-        )
+        action = motor.imagine_action("wave", "Waving right hand", body_parts=["right hand"])
 
         mirrored = motor.mirror(action.id)
 
         assert "left" in str(mirrored.body_parts).lower() or mirrored is not None
+
 
 class TestTactileImagery:
     """Tests for Tactile Imagery System"""
@@ -265,7 +266,7 @@ class TestTactileImagery:
             "silk",
             "Touching silk fabric",
             properties={TactileProperty.TEXTURE: "smooth"},
-            body_location="fingertips"
+            body_location="fingertips",
         )
 
         assert touch.id == "silk"
@@ -293,7 +294,9 @@ class TestTactileImagery:
 
         # Hard textures associate with strength/durability
         hard_associations = [a.lower() for a in hard_texture.semantic_associations]
-        assert any(word in hard_associations for word in ["strength", "durability", "solid", "cold"])
+        assert any(
+            word in hard_associations for word in ["strength", "durability", "solid", "cold"]
+        )
 
     def test_feel_temperature(self):
         """Test temperature sensation"""
@@ -349,13 +352,7 @@ class TestTactileImagery:
         tactile = TactileImagery()
 
         # Create multiple textures and check semantic richness
-        textures = [
-            "rough sandpaper",
-            "smooth glass",
-            "soft velvet",
-            "warm sunshine",
-            "cold ice"
-        ]
+        textures = ["rough sandpaper", "smooth glass", "soft velvet", "warm sunshine", "cold ice"]
 
         all_associations = []
         for tex in textures:
@@ -365,6 +362,7 @@ class TestTactileImagery:
         # Rich tactile imagery should produce diverse semantic associations
         unique_associations = set(all_associations)
         assert len(unique_associations) >= 5  # Multiple distinct associations
+
 
 class TestImagerySystem:
     """Tests for Integrated Imagery System"""
@@ -387,7 +385,7 @@ class TestImagerySystem:
             "A sunny beach with waves",
             include_visual=True,
             include_auditory=True,
-            include_tactile=True
+            include_tactile=True,
         )
 
         assert img.visual is not None
@@ -421,8 +419,7 @@ class TestImagerySystem:
         imagery = ImagerySystem()
 
         experience = imagery.simulate_experience(
-            "Playing piano",
-            modalities=["visual", "motor", "auditory"]
+            "Playing piano", modalities=["visual", "motor", "auditory"]
         )
 
         assert experience.visual is not None
@@ -441,7 +438,7 @@ class TestImagerySystem:
             include_visual=True,
             include_auditory=False,
             include_motor=False,
-            include_tactile=False
+            include_tactile=False,
         )
 
         # Multiple modalities - lower coherence
@@ -451,7 +448,7 @@ class TestImagerySystem:
             include_visual=True,
             include_auditory=True,
             include_motor=True,
-            include_tactile=True
+            include_tactile=True,
         )
 
         assert single.coherence >= multi.coherence
@@ -461,10 +458,7 @@ class TestImagerySystem:
         imagery = ImagerySystem()
 
         img = imagery.create_multimodal_image(
-            "rich_image",
-            "A warm soft red blanket",
-            include_visual=True,
-            include_tactile=True
+            "rich_image", "A warm soft red blanket", include_visual=True, include_tactile=True
         )
 
         associations = imagery.get_all_associations(img.id)
@@ -477,10 +471,7 @@ class TestImagerySystem:
         imagery = ImagerySystem()
 
         original = imagery.create_multimodal_image(
-            "original",
-            "A spinning top",
-            include_visual=True,
-            include_motor=True
+            "original", "A spinning top", include_visual=True, include_motor=True
         )
 
         transformed = imagery.transform_multimodal(original.id, "rotate")
@@ -505,11 +496,7 @@ class TestImagerySystem:
         imagery = ImagerySystem()
 
         img = imagery.create_multimodal_image(
-            "test",
-            "Test image",
-            include_visual=True,
-            include_auditory=True,
-            include_tactile=True
+            "test", "Test image", include_visual=True, include_auditory=True, include_tactile=True
         )
 
         vividness = imagery.get_vividness_by_modality(img.id)
@@ -518,6 +505,7 @@ class TestImagerySystem:
         assert "auditory" in vividness
         assert "tactile" in vividness
         assert all(0 <= v <= 1 for v in vividness.values())
+
 
 class TestImageryIntegration:
     """Tests for imagery integration across modalities"""
@@ -549,18 +537,12 @@ class TestImageryIntegration:
 
         # Image without tactile
         no_tactile = imagery.create_multimodal_image(
-            "no_touch",
-            "An abstract concept",
-            include_visual=True,
-            include_tactile=False
+            "no_touch", "An abstract concept", include_visual=True, include_tactile=False
         )
 
         # Image with tactile
         with_tactile = imagery.create_multimodal_image(
-            "with_touch",
-            "An abstract concept",
-            include_visual=True,
-            include_tactile=True
+            "with_touch", "An abstract concept", include_visual=True, include_tactile=True
         )
 
         assoc_no_tactile = imagery.get_all_associations(no_tactile.id)

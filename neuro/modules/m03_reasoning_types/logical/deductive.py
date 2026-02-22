@@ -24,12 +24,13 @@ class PropositionType(Enum):
 @dataclass
 class Proposition:
     """A logical proposition"""
+
     proposition_id: str
     prop_type: PropositionType
     content: Any
     subject: Optional[str] = None
     predicate: Optional[str] = None
-    components: List['Proposition'] = field(default_factory=list)
+    components: List["Proposition"] = field(default_factory=list)
 
     def __str__(self) -> str:
         if self.prop_type == PropositionType.ATOMIC:
@@ -54,6 +55,7 @@ class Proposition:
 @dataclass
 class Syllogism:
     """A syllogistic argument"""
+
     major_premise: Proposition
     minor_premise: Proposition
     conclusion: Optional[Proposition] = None
@@ -64,6 +66,7 @@ class Syllogism:
 @dataclass
 class Inference:
     """A derived inference"""
+
     inference_id: str
     premises: List[Proposition]
     conclusion: Proposition
@@ -124,8 +127,7 @@ class DeductiveReasoner:
         """
         inferences = []
 
-        conditionals = [p for p in premises
-                       if p.prop_type == PropositionType.CONDITIONAL]
+        conditionals = [p for p in premises if p.prop_type == PropositionType.CONDITIONAL]
 
         for cond in conditionals:
             if len(cond.components) < 2:
@@ -141,7 +143,7 @@ class DeductiveReasoner:
                         premises=[cond, premise],
                         conclusion=consequent,
                         rule_used="modus_ponens",
-                        is_valid=True
+                        is_valid=True,
                     )
                     inferences.append(inference)
 
@@ -153,10 +155,8 @@ class DeductiveReasoner:
         """
         inferences = []
 
-        conditionals = [p for p in premises
-                       if p.prop_type == PropositionType.CONDITIONAL]
-        negations = [p for p in premises
-                    if p.prop_type == PropositionType.NEGATION]
+        conditionals = [p for p in premises if p.prop_type == PropositionType.CONDITIONAL]
+        negations = [p for p in premises if p.prop_type == PropositionType.NEGATION]
 
         for cond in conditionals:
             if len(cond.components) < 2:
@@ -171,7 +171,7 @@ class DeductiveReasoner:
                         proposition_id=f"not_{antecedent.proposition_id}",
                         prop_type=PropositionType.NEGATION,
                         content=f"not ({antecedent.content})",
-                        components=[antecedent]
+                        components=[antecedent],
                     )
 
                     inference = Inference(
@@ -179,7 +179,7 @@ class DeductiveReasoner:
                         premises=[cond, neg],
                         conclusion=negated_antecedent,
                         rule_used="modus_tollens",
-                        is_valid=True
+                        is_valid=True,
                     )
                     inferences.append(inference)
 
@@ -191,8 +191,7 @@ class DeductiveReasoner:
         """
         inferences = []
 
-        universals = [p for p in premises
-                     if p.prop_type == PropositionType.UNIVERSAL]
+        universals = [p for p in premises if p.prop_type == PropositionType.UNIVERSAL]
 
         for p1 in universals:
             for p2 in universals:
@@ -205,7 +204,7 @@ class DeductiveReasoner:
                         prop_type=PropositionType.UNIVERSAL,
                         content=f"All {p1.subject} are {p2.predicate}",
                         subject=p1.subject,
-                        predicate=p2.predicate
+                        predicate=p2.predicate,
                     )
 
                     inference = Inference(
@@ -213,7 +212,7 @@ class DeductiveReasoner:
                         premises=[p1, p2],
                         conclusion=conclusion,
                         rule_used="categorical_syllogism",
-                        is_valid=True
+                        is_valid=True,
                     )
                     inferences.append(inference)
 
@@ -226,7 +225,7 @@ class DeductiveReasoner:
                         prop_type=PropositionType.ATOMIC,
                         content=f"{atomic.subject} is {universal.predicate}",
                         subject=atomic.subject,
-                        predicate=universal.predicate
+                        predicate=universal.predicate,
                     )
 
                     inference = Inference(
@@ -234,7 +233,7 @@ class DeductiveReasoner:
                         premises=[universal, atomic],
                         conclusion=conclusion,
                         rule_used="universal_instantiation",
-                        is_valid=True
+                        is_valid=True,
                     )
                     inferences.append(inference)
 
@@ -246,8 +245,7 @@ class DeductiveReasoner:
         """
         inferences = []
 
-        conjunctions = [p for p in premises
-                       if p.prop_type == PropositionType.CONJUNCTION]
+        conjunctions = [p for p in premises if p.prop_type == PropositionType.CONJUNCTION]
 
         for conj in conjunctions:
             for i, component in enumerate(conj.components):
@@ -256,7 +254,7 @@ class DeductiveReasoner:
                     premises=[conj],
                     conclusion=component,
                     rule_used="conjunction_elimination",
-                    is_valid=True
+                    is_valid=True,
                 )
                 inferences.append(inference)
 
@@ -268,10 +266,8 @@ class DeductiveReasoner:
         """
         inferences = []
 
-        disjunctions = [p for p in premises
-                       if p.prop_type == PropositionType.DISJUNCTION]
-        negations = [p for p in premises
-                    if p.prop_type == PropositionType.NEGATION]
+        disjunctions = [p for p in premises if p.prop_type == PropositionType.DISJUNCTION]
+        negations = [p for p in premises if p.prop_type == PropositionType.NEGATION]
 
         for disj in disjunctions:
             if len(disj.components) != 2:
@@ -289,7 +285,7 @@ class DeductiveReasoner:
                         premises=[disj, neg],
                         conclusion=disj.components[1],
                         rule_used="disjunctive_syllogism",
-                        is_valid=True
+                        is_valid=True,
                     )
                     inferences.append(inference)
 
@@ -299,7 +295,7 @@ class DeductiveReasoner:
                         premises=[disj, neg],
                         conclusion=disj.components[0],
                         rule_used="disjunctive_syllogism",
-                        is_valid=True
+                        is_valid=True,
                     )
                     inferences.append(inference)
 
@@ -324,10 +320,7 @@ class DeductiveReasoner:
 
         return True
 
-    def validate(self,
-                 conclusion: Proposition,
-                 premises: List[Proposition]
-                 ) -> Tuple[bool, str]:
+    def validate(self, conclusion: Proposition, premises: List[Proposition]) -> Tuple[bool, str]:
         """Validate if conclusion follows from premises"""
         inferences = self.derive(premises)
 
@@ -346,10 +339,7 @@ class DeductiveReasoner:
 
         return False, "Could not derive conclusion from premises"
 
-    def syllogism(self,
-                  major_premise: Proposition,
-                  minor_premise: Proposition
-                  ) -> Syllogism:
+    def syllogism(self, major_premise: Proposition, minor_premise: Proposition) -> Syllogism:
         """Evaluate a classical syllogism"""
         inferences = self._apply_syllogism([major_premise, minor_premise])
 
@@ -359,7 +349,7 @@ class DeductiveReasoner:
                 minor_premise=minor_premise,
                 conclusion=inferences[0].conclusion,
                 is_valid=True,
-                validity_explanation="Valid categorical syllogism"
+                validity_explanation="Valid categorical syllogism",
             )
 
         return Syllogism(
@@ -367,13 +357,12 @@ class DeductiveReasoner:
             minor_premise=minor_premise,
             conclusion=None,
             is_valid=False,
-            validity_explanation="No valid conclusion can be drawn"
+            validity_explanation="No valid conclusion can be drawn",
         )
 
-    def modus_ponens(self,
-                     conditional: Proposition,
-                     antecedent: Proposition
-                     ) -> Optional[Proposition]:
+    def modus_ponens(
+        self, conditional: Proposition, antecedent: Proposition
+    ) -> Optional[Proposition]:
         """Apply modus ponens directly"""
         if conditional.prop_type != PropositionType.CONDITIONAL:
             return None
@@ -386,10 +375,9 @@ class DeductiveReasoner:
 
         return None
 
-    def modus_tollens(self,
-                      conditional: Proposition,
-                      negated_consequent: Proposition
-                      ) -> Optional[Proposition]:
+    def modus_tollens(
+        self, conditional: Proposition, negated_consequent: Proposition
+    ) -> Optional[Proposition]:
         """Apply modus tollens directly"""
         if conditional.prop_type != PropositionType.CONDITIONAL:
             return None
@@ -400,22 +388,19 @@ class DeductiveReasoner:
         if len(conditional.components) < 2:
             return None
 
-        if (negated_consequent.components and
-            self._propositions_match(negated_consequent.components[0],
-                                    conditional.components[1])):
+        if negated_consequent.components and self._propositions_match(
+            negated_consequent.components[0], conditional.components[1]
+        ):
             return Proposition(
                 proposition_id=f"not_{conditional.components[0].proposition_id}",
                 prop_type=PropositionType.NEGATION,
                 content=f"not ({conditional.components[0].content})",
-                components=[conditional.components[0]]
+                components=[conditional.components[0]],
             )
 
         return None
 
-    def query(self,
-              subject: str,
-              predicate: str
-              ) -> Tuple[bool, float, str]:
+    def query(self, subject: str, predicate: str) -> Tuple[bool, float, str]:
         """Query if subject has predicate based on knowledge"""
         if subject in self.knowledge_base:
             if predicate in self.knowledge_base[subject]:

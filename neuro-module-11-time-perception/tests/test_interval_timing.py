@@ -7,8 +7,9 @@ from neuro.modules.m11_time_perception.interval_timing import (
     StriatalBeatFrequency,
     IntervalTimer,
     TimingMode,
-    TimingResult
+    TimingResult,
 )
+
 
 class TestPacemakerAccumulator:
     """Tests for pacemaker-accumulator model"""
@@ -136,6 +137,7 @@ class TestPacemakerAccumulator:
         assert np.std(short_errors) < 0.5
         assert np.std(long_errors) < 0.5
 
+
 class TestStriatalBeatFrequency:
     """Tests for striatal beat frequency model"""
 
@@ -191,6 +193,7 @@ class TestStriatalBeatFrequency:
         assert name == "target"
         assert confidence > 0.7
 
+
 class TestIntervalTimer:
     """Tests for combined interval timer"""
 
@@ -241,9 +244,10 @@ class TestIntervalTimer:
 
         stats = timer.get_timing_statistics()
 
-        assert stats['n_trials'] == 10
-        assert 'mean_error' in stats
-        assert 'mean_relative_error' in stats
+        assert stats["n_trials"] == 10
+        assert "mean_error" in stats
+        assert "mean_relative_error" in stats
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
