@@ -686,6 +686,7 @@ class TestIntegration:
 
     def test_meta_learning_integration(self):
         """Test meta-learning integration."""
+        np.random.seed(42)
         system = MockSystem()
 
         dgm = DarwinGodelMachine(DGMParams(improvement_interval=0.0))

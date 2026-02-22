@@ -1,5 +1,6 @@
 """Integration tests for time perception system"""
 
+import numpy as np
 import pytest
 from neuro.modules.m11_time_perception.temporal_integration import (
     SubjectiveTimeSystem,
@@ -66,15 +67,20 @@ class TestSubjectiveTimeSystem:
         assert high_da.perceived_duration < low_da.perceived_duration
 
     def test_age_modulation(self):
-        """Test that age modulates time"""
+        """Test that age modulates time on average"""
+        np.random.seed(42)
         system = SubjectiveTimeSystem()
 
-        young = system.estimate_duration(10.0, age=20)
-        system.reset()
-        old = system.estimate_duration(10.0, age=70)
+        young_total, old_total = 0.0, 0.0
+        trials = 10
+        for _ in range(trials):
+            system.reset()
+            young_total += system.estimate_duration(10.0, age=20).perceived_duration
+            system.reset()
+            old_total += system.estimate_duration(10.0, age=70).perceived_duration
 
-        # Older age should shorten perceived duration
-        assert old.perceived_duration < young.perceived_duration
+        # Older age should shorten perceived duration on average
+        assert old_total / trials < young_total / trials
 
     def test_movement_engages_components(self):
         """Test that movement engages additional components"""

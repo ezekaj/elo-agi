@@ -24,6 +24,7 @@ class TestResponseInhibitor:
 
     def test_go_accumulation(self):
         """Test go process accumulates over time"""
+        np.random.seed(42)
         inhibitor = ResponseInhibitor()
 
         initial = inhibitor.go_activation
