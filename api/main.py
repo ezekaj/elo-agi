@@ -9,6 +9,8 @@ Provides REST endpoints for:
 - Cognitive analysis (dual-process, emotion, reasoning)
 """
 
+import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -27,6 +29,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from api.sandbox import execute_code
+from neuro.wrapper import SmartWrapper
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger("elo-agi-api")
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -43,7 +52,7 @@ app.add_middleware(
     allow_origins=["https://ezekaj.github.io", "http://localhost:3000"],
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Accept"],
+    allow_headers=["Content-Type", "Accept", "X-API-Key"],
 )
 
 
@@ -58,6 +67,18 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return response
+
+
+# ---- SmartWrapper + API Key ----
+
+_API_KEY = os.environ.get("ELO_AGI_API_KEY")
+
+try:
+    _wrapper = SmartWrapper()
+    logger.info(f"SmartWrapper initialized with provider: {_wrapper.provider_name}")
+except Exception as e:
+    logger.warning(f"SmartWrapper initialization failed, using fallback: {e}")
+    _wrapper = None
 
 
 # ---- Request/Response Models ----
@@ -176,6 +197,7 @@ MODULE_DATA = [
 @app.get("/api/health", response_model=HealthResponse)
 @limiter.limit("30/minute")
 async def health(request: Request):
+    logger.info("Health check requested")
     return HealthResponse(
         status="ok",
         uptime=round(time.time() - _start_time, 2),
@@ -222,6 +244,11 @@ async def list_modules(request: Request):
 @app.post("/api/repl", response_model=REPLResponse)
 @limiter.limit("10/minute")
 async def repl(request: REPLRequest, raw_request: Request):
+    if _API_KEY:
+        provided_key = raw_request.headers.get("X-API-Key")
+        if provided_key != _API_KEY:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+
     command = request.command.strip()
     if not command:
         raise HTTPException(status_code=400, detail="Empty command")
@@ -229,6 +256,7 @@ async def repl(request: REPLRequest, raw_request: Request):
     if len(command) > 5000:
         raise HTTPException(status_code=400, detail="Command too long (max 5000 chars)")
 
+    logger.info(f"REPL command received ({len(command)} chars)")
     result = execute_code(command, timeout=10)
 
     return REPLResponse(
@@ -244,6 +272,26 @@ async def chat(request: ChatRequest, raw_request: Request):
     message = request.message.strip()
     if not message:
         raise HTTPException(status_code=400, detail="Empty message")
+
+    logger.info(f"Chat message received ({len(message)} chars)")
+
+    history_dicts = request.history or []
+
+    if _wrapper is not None:
+        try:
+            result = _wrapper.query(message, history=history_dicts)
+            return ChatResponse(
+                response=result.text,
+                cognitive_context={
+                    "mode": result.provider,
+                    "modules_used": result.modules_used,
+                    "confidence": result.confidence,
+                    "processing_steps": result.processing_steps,
+                },
+            )
+        except Exception as e:
+            logger.error(f"SmartWrapper error: {e}")
+            # Fall through to rule-based
 
     try:
         response_text = _generate_cognitive_response(message, request.history)
