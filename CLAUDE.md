@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-NEURO (neuro-agi v0.9.0) — a neuroscience-inspired AGI architecture with 38 cognitive modules. Local-first, privacy-preserving AI that runs entirely on the user's machine. Python 3.9+, MIT licensed.
+NEURO (elo-agi v0.9.0) — a neuroscience-inspired AGI architecture with 38 cognitive modules. Local-first, privacy-preserving AI that runs entirely on the user's machine. Python 3.9+, MIT licensed.
 
 ## Commands
 

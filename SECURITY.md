@@ -41,6 +41,6 @@ When using NEURO:
 This policy applies to:
 - The main NEURO repository
 - Official NEURO modules (neuro-*)
-- The neuro-agi PyPI package
+- The elo-agi PyPI package
 
 Third-party integrations are not covered.

@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rate limiting on all API endpoints (slowapi)
 - CORS whitelist for API access
 - Docker deployment to Fly.io (Frankfurt region)
-- PyPI package distribution (`pip install neuro-agi`)
+- PyPI package distribution (`pip install elo-agi`)
 - CLI entry point (`neuro`) with interactive sessions and streaming
 - Benchmark CLI (`neuro-bench`) with HTML report generation
 - Demo CLI (`neuro-demo`) with 5 demonstration scenarios

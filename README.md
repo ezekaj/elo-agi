@@ -19,8 +19,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/pypi/v/neuro-agi?style=flat-square&color=00d4ff" alt="PyPI">
-  <img src="https://img.shields.io/pypi/pyversions/neuro-agi?style=flat-square" alt="Python">
+  <img src="https://img.shields.io/pypi/v/elo-agi?style=flat-square&color=00d4ff" alt="PyPI">
+  <img src="https://img.shields.io/pypi/pyversions/elo-agi?style=flat-square" alt="Python">
   <img src="https://img.shields.io/github/license/ezekaj/elo-agi?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/modules-38-00d4ff?style=flat-square" alt="Modules">
   <a href="https://github.com/ezekaj/elo-agi/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/ezekaj/elo-agi/test.yml?branch=main&style=flat-square&label=tests" alt="Tests"></a>
@@ -44,7 +44,7 @@
 ## Installation
 
 ```bash
-pip install neuro-agi
+pip install elo-agi
 ```
 
 Or install from source:
@@ -147,7 +147,7 @@ Load the magic extension to query NEURO directly from notebook cells:
 
 ### LangChain
 
-Use NEURO as a drop-in LangChain LLM (requires `pip install neuro-agi[langchain]`):
+Use NEURO as a drop-in LangChain LLM (requires `pip install elo-agi[langchain]`):
 
 ```python
 from neuro.integrations.langchain import NeuroCognitiveLLM

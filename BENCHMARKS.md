@@ -103,7 +103,7 @@ The architecture implements concepts from established cognitive science research
 
 ```bash
 # Install
-pip install neuro-agi
+pip install elo-agi
 
 # Run benchmark suite
 neuro-bench -o report.html

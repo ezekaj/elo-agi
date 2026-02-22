@@ -4,7 +4,7 @@
 
 **Name:** NEURO
 **Tagline:** Local AI That Learns
-**Package:** neuro-agi
+**Package:** elo-agi
 
 ## Color Palette
 

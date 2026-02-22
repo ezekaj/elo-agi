@@ -1871,7 +1871,7 @@ Examples:
     args = parser.parse_args()
 
     if args.version:
-        print(f"neuro-agi {get_version()}")
+        print(f"elo-agi {get_version()}")
         return 0
 
     # Handle subcommands

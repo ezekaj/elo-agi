@@ -123,7 +123,7 @@ function esc(s) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function copyPip(el) {
-  navigator.clipboard.writeText('pip install neuro-agi').then(() => {
+  navigator.clipboard.writeText('pip install elo-agi').then(() => {
     const tip = el.querySelector('.tooltip');
     if (tip) { tip.classList.add('show'); setTimeout(() => tip.classList.remove('show'), 1500); }
   });
@@ -433,7 +433,7 @@ async function handleReplCommand(cmd) {
 
   // Local simulation fallback
   if (cmd === 'help()') {
-    replAddOutput(esc(`Available commands:\n${'─'.repeat(50)}\n  neuro_agi.info()                    Framework info\n  neuro_agi.__version__               Version string\n  neuro_agi.list_modules()            All 38 modules\n  neuro_agi.list_tiers()              Show tiers\n  neuro_agi.cognitive.list()          Cognitive modules\n  neuro_agi.cognitive.DualProcess.run(query)     Dual process\n  neuro_agi.cognitive.EmotionEngine.analyze(t)   Emotions\n  neuro_agi.run_benchmark()           Run benchmarks\n  neuro_agi.benchmark.compare()       Compare frameworks\n  neuro_agi.architecture()            ASCII architecture\n  neuro_agi.demo()                    Cognitive processing demo\n  help()                              This help text\n  clear()                             Clear terminal\n\nInstall locally:\n  pip install neuro-agi              Python library\n  pip install neuro-agi && neuro     CLI (requires Ollama)`));
+    replAddOutput(esc(`Available commands:\n${'─'.repeat(50)}\n  neuro_agi.info()                    Framework info\n  neuro_agi.__version__               Version string\n  neuro_agi.list_modules()            All 38 modules\n  neuro_agi.list_tiers()              Show tiers\n  neuro_agi.cognitive.list()          Cognitive modules\n  neuro_agi.cognitive.DualProcess.run(query)     Dual process\n  neuro_agi.cognitive.EmotionEngine.analyze(t)   Emotions\n  neuro_agi.run_benchmark()           Run benchmarks\n  neuro_agi.benchmark.compare()       Compare frameworks\n  neuro_agi.architecture()            ASCII architecture\n  neuro_agi.demo()                    Cognitive processing demo\n  help()                              This help text\n  clear()                             Clear terminal\n\nInstall locally:\n  pip install elo-agi              Python library\n  pip install elo-agi && neuro     CLI (requires Ollama)`));
     return;
   }
 

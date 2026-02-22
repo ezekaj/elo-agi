@@ -20,7 +20,7 @@ Usage:
 try:
     from importlib.metadata import version as _pkg_version
 
-    __version__ = _pkg_version("neuro-agi")
+    __version__ = _pkg_version("elo-agi")
 except Exception:
     __version__ = "0.9.0"
 __author__ = "Elvi Zekaj"
@@ -92,7 +92,7 @@ def __getattr__(name: str):
         except (ImportError, AttributeError) as e:
             raise ImportError(
                 f"Could not import {class_name} from {module_name}. "
-                f"Make sure neuro-agi is properly installed: {e}"
+                f"Make sure elo-agi is properly installed: {e}"
             )
     raise AttributeError(f"module 'neuro' has no attribute '{name}'")
 

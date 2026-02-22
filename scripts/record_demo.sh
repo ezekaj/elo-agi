@@ -3,7 +3,7 @@
 # Usage: asciinema rec demo.cast -c "bash scripts/record_demo.sh"
 
 echo "# Installing ELO-AGI"
-echo "pip install neuro-agi"
+echo "pip install elo-agi"
 sleep 1
 
 echo ""

@@ -6,7 +6,7 @@ routed through NEURO's 38 cognitive modules (memory, reasoning,
 causal analysis) before hitting the underlying model.
 
 Requires the langchain extra:
-    pip install neuro-agi[langchain]
+    pip install elo-agi[langchain]
 """
 
 from neuro.integrations.langchain import NeuroCognitiveLLM
