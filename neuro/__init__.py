@@ -76,6 +76,10 @@ _lazy_imports = {
     # Smart Wrapper (neuro.wrapper)
     "SmartWrapper": ("neuro.wrapper", "SmartWrapper"),
     "smart_query": ("neuro.wrapper", "smart_query"),
+
+    # Brain API (neuro.brain)
+    "Brain": ("neuro.brain", "Brain"),
+    "think": ("neuro.brain", "think"),
 }
 
 
