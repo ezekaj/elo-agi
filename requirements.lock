@@ -1,0 +1,11 @@
+# Pinned dependency versions for reproducible builds.
+# Generated on 2026-02-22.
+#
+# Core
+numpy==2.4.2
+scipy==1.17.0
+# API
+fastapi==0.115.0
+uvicorn==0.30.0
+pydantic==2.9.0
+slowapi==0.1.9

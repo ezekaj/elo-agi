@@ -88,7 +88,16 @@ neuro check                  # Verify all modules
 from neuro import CognitiveCore
 
 core = CognitiveCore()
-core.step()  # Run one cognitive cycle
+core.initialize()
+core.think()  # Run one cognitive cycle
+```
+
+```python
+# Or use the simple Brain API
+from neuro import Brain
+brain = Brain()
+result = brain.think("What causes inflation?")
+print(result.text)
 ```
 
 ### Demos
@@ -122,6 +131,30 @@ neuro-demo continual         # Continual learning
 - **Intelligent Suggestions** - Context-aware recommendations
 - **Multi-file Reasoning** - Understands project structure
 - **Tool Integration** - Git, shell, file operations
+
+## Integrations
+
+### Jupyter / IPython
+
+Load the magic extension to query NEURO directly from notebook cells:
+
+```python
+%load_ext neuro.jupyter
+%neuro What is the free energy principle?
+```
+
+`SmartResponse` objects render as rich HTML in Jupyter automatically.
+
+### LangChain
+
+Use NEURO as a drop-in LangChain LLM (requires `pip install neuro-agi[langchain]`):
+
+```python
+from neuro.integrations.langchain import NeuroCognitiveLLM
+
+llm = NeuroCognitiveLLM()
+print(llm.invoke("Explain quantum entanglement."))
+```
 
 ## Architecture
 
@@ -207,6 +240,9 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 - [x] Causal reasoning engine
 - [x] Continual learning without forgetting
 - [x] Package restructure and PyPI publishing
+- [x] Brain API for simple one-line queries
+- [x] Jupyter / IPython magic extension
+- [x] LangChain integration
 - [ ] External benchmark validation (ARC, GSM8K)
 - [ ] VS Code extension
 - [ ] Real-time streaming responses

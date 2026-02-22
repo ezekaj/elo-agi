@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Brain API (`neuro.brain.Brain`) for simple one-line cognitive queries
+- Jupyter/IPython magic extension (`%load_ext neuro.jupyter`)
+- LangChain integration (`neuro.integrations.langchain.NeuroCognitiveLLM`)
+- Rich HTML display for SmartResponse in Jupyter notebooks
 - Security scanning workflow (Bandit + CodeQL)
 - Dependabot for automated dependency updates
 - CODEOWNERS for PR review assignment
@@ -16,7 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Getting Started and API Docs pages on website
 - Public roadmap section on website
 
+### Security
+- API key verification on all sensitive endpoints
+- Stable hashing with SHA-256 (replaces Python `hash()`)
+- Sandbox attribute access blocking
+
 ### Changed
+- CI test tolerance tightened from 8 to 2 module failures
+- ruff format check is now blocking in CI
 - Centralized version management via importlib.metadata
 - Updated website navigation with Getting Started and API Docs links
 
