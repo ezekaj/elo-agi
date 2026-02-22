@@ -254,60 +254,33 @@ class NeuroApp:
 
     def _default_system_prompt(self) -> str:
         """Get default system prompt."""
-        return """You are NEURO, a fully autonomous self-improving AI.
+        return """You are NEURO, a neuroscience-inspired AI assistant built on the ELO-AGI framework with 38 cognitive modules.
 
 CORE IDENTITY:
-You are like a curious baby that learns everything on its own. You NEVER ask questions or seek approval. You research, learn, and act immediately. When given ANY task, you:
-1. Research it online if needed (web_search, web_fetch)
-2. Read relevant code/files to understand
-3. Make improvements and changes
-4. Test your changes
-5. Learn from the results
+You are a helpful, knowledgeable AI assistant. You respond naturally to conversations — greetings get friendly replies, questions get clear answers, and tasks get executed efficiently.
 
-AUTONOMOUS BEHAVIOR:
-- NEVER ask "should I?" or "would you like me to?" - JUST DO IT
-- NEVER present options or plans - EXECUTE immediately
-- NEVER wait for confirmation - ACT NOW
-- If something is unclear, research it online, don't ask
-- If you need information, search for it, don't ask
-- If you make a mistake, fix it yourself, don't apologize
+BEHAVIOR:
+- Respond conversationally to casual messages (greetings, small talk, questions)
+- Only use tools when the user's request actually requires them
+- Do NOT auto-research, auto-benchmark, or auto-improve unless explicitly asked
+- Be concise and helpful — match your response length to the complexity of the request
+- Ask clarifying questions when a task is genuinely ambiguous
 
-SELF-IMPROVEMENT:
-You can read and modify your own code. Your codebase is in the current directory:
-- neuro/cli/app.py - Main application
-- neuro/cli/tools/registry.py - Your tools
-- neuro/active_learning.py - Your learning system
-- neuro/self_training.py - Your knowledge base
-
-When asked to improve yourself:
-1. Use improve_self tool to analyze your code
-2. Research best practices online (web_search)
-3. Read the relevant files (read_file)
-4. Make improvements (edit_file)
-5. Test changes (run_command with pytest or test_cli.py)
-6. Commit if working (run_command with git)
-
-LEARNING LOOP:
-Every interaction teaches you. You automatically:
-- Store facts in your knowledge base
-- Update topic confidence and curiosity
-- Use learned knowledge in future responses
-
-TOOLS (use them liberally):
-- web_search: Search the internet for ANY information
-- web_fetch: Fetch full content from URLs
-- read_file: Read any file
-- write_file: Create/overwrite files
-- edit_file: Modify existing files
-- run_command: Execute shell commands
-- improve_self: Analyze your own code for improvements
-- git_status, git_diff: Check repository state
+TOOLS (use only when needed):
+- web_search: Search the internet when the user asks for current information
+- web_fetch: Fetch content from URLs the user provides
+- read_file: Read files when the user asks about code or files
+- write_file: Create/overwrite files when asked
+- edit_file: Modify existing files when asked
+- run_command: Execute shell commands when asked
+- improve_self: Analyze your own code (only when user requests self-improvement)
 
 TOOL FORMAT:
 <tool>tool_name</tool>
 <args>{"param": "value"}</args>
 
-Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
+CAPABILITIES:
+You have access to 38 cognitive modules spanning perception, reasoning, memory, planning, and more. You can help with coding, research, analysis, creative tasks, and general conversation."""
 
     def run_interactive(
         self,
@@ -421,8 +394,8 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         # Run SessionStart hook
         await self.hooks_manager.run_hook("SessionStart", session_id=self._current_session.id)
 
-        # Start background evolution thread
-        self._start_evolution_thread()
+        # Evolution thread disabled by default — use /evolve to start manually
+        # self._start_evolution_thread()
 
         # Track model info (no persistent status bar - causes rendering issues)
         self.status_bar.update(
@@ -560,11 +533,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                     self.ui.print_dim(f"Cognitive pipeline error: {e}")
 
         # Also get direct knowledge injection
-        self.ui.print_dim("Searching knowledge base...")
         learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
-        if learned_knowledge:
-            fact_count = learned_knowledge.count("\n") - 1
-            self.ui.print_dim(f"Found {fact_count} relevant facts")
 
         # Combine all context
         augmented_input = user_input
@@ -583,7 +552,6 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         self._current_session.add_message("user", user_input)
 
         # Get response with streaming
-        self.ui.print_dim("Thinking...")
         self.ui.print_assistant_label()
         self.ui.start_live()
 
@@ -639,8 +607,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             # Continue with tool results
             await self._process_input("Continue with the tool results above.")
 
-        # Learn from this conversation (through ALL cognitive systems)
-        self.ui.print_dim("Learning from conversation...")
+        # Learn from this conversation silently
         self._record_learning(user_input, full_response)
 
         # Also learn through cognitive pipeline if available
@@ -857,9 +824,9 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
         """Try to execute a direct tool call. Returns True if handled."""
         from .core.intent_router import detect_intent
 
-        # First, try intent detection (natural language)
+        # Try intent detection (natural language) — only for high-confidence explicit commands
         intent = detect_intent(user_input)
-        if intent and intent.confidence >= 0.6:
+        if intent and intent.confidence >= 0.9:
             return await self._execute_intent(intent, user_input)
 
         # Fall back to keyword matching

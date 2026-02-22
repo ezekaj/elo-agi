@@ -46,15 +46,12 @@ class IntentRouter:
             ],
         )
 
-        # Research/learning intents
+        # Research/learning intents (only explicit research commands)
         self.register(
             "research",
             [
-                r"research\s+(.+)",
-                r"learn\s+about\s+(.+)",
-                r"study\s+(.+)",
-                r"find\s+out\s+about\s+(.+)",
-                r"what\s+is\s+(.+)",
+                r"^research\s+(.+)",
+                r"^learn\s+about\s+(.+)",
             ],
         )
 
