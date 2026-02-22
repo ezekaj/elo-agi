@@ -12,7 +12,6 @@ Uses Playwright/Selenium to:
 Ported from AGIELO for NEURO AGI v0.9
 """
 
-import os
 import time
 import re
 from datetime import datetime
@@ -34,7 +33,7 @@ except ImportError:
 if not BROWSER_AVAILABLE:
     try:
         from selenium import webdriver
-        from selenium.webdriver.common.by import By
+        from selenium.webdriver.common.by import By  # noqa: F401
         from selenium.webdriver.chrome.options import Options
 
         BROWSER_AVAILABLE = True
@@ -418,7 +417,7 @@ class BrowserAgent:
 
             # Filter valid links
             valid_links = [
-                l for l in links if l.get("href") and l.get("text") and len(l["text"]) > 0
+                lnk for lnk in links if lnk.get("href") and lnk.get("text") and len(lnk["text"]) > 0
             ]
 
             return valid_links[:max_links]
@@ -587,7 +586,7 @@ def run_browser_command(agent: BrowserAgent, command: str) -> str:
 
     elif command == "links":
         links = agent.get_links()
-        return "\n".join([f"- {l['text'][:30]} ({l['href'][:50]})" for l in links[:10]])
+        return "\n".join([f"- {lnk['text'][:30]} ({lnk['href'][:50]})" for lnk in links[:10]])
 
     elif command in ("scroll", "scroll down"):
         agent.scroll("down")

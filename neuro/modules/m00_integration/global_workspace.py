@@ -15,7 +15,7 @@ Based on:
 - arXiv:2103.01197 - Coordination Among Neural Modules
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np
@@ -26,9 +26,9 @@ try:
     from .module_interface import (
         CognitiveModule,
         ModuleProposal,
-        ModuleState,
+        ModuleState,  # noqa: F401
         ModuleType,
-        ContentType,
+        ContentType,  # noqa: F401
     )
     from .attention_competition import AttentionCompetition, CompetitionParams
     from .broadcast_system import BroadcastSystem, BroadcastParams
@@ -38,9 +38,7 @@ except ImportError:
     from module_interface import (
         CognitiveModule,
         ModuleProposal,
-        ModuleState,
         ModuleType,
-        ContentType,
     )
     from attention_competition import AttentionCompetition, CompetitionParams
     from broadcast_system import BroadcastSystem, BroadcastParams
@@ -201,7 +199,7 @@ class GlobalWorkspace:
                 try:
                     proposals = module.propose(input_state)
                     all_proposals.extend(proposals)
-                except Exception as e:
+                except Exception:
                     # Module failed to generate proposals
                     pass
 
@@ -345,7 +343,7 @@ class GlobalWorkspace:
             if module._is_active:
                 try:
                     module.receive_broadcast(broadcast_proposal)
-                except Exception as e:
+                except Exception:
                     # Module failed to receive broadcast
                     pass
 
@@ -388,7 +386,7 @@ class GlobalWorkspace:
             if module._is_active:
                 try:
                     module.process(dt)
-                except Exception as e:
+                except Exception:
                     pass
 
         return self.get_state()

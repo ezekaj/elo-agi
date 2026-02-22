@@ -19,7 +19,7 @@ response = llm.invoke("Explain quantum entanglement in two sentences.")
 print(response)
 
 # Works with LangChain chains and prompts
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate  # noqa: E402
 
 prompt = PromptTemplate.from_template("Summarize {topic} for a beginner.")
 chain = prompt | llm

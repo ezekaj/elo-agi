@@ -16,7 +16,6 @@ import os
 import json
 import hashlib
 import subprocess
-import time
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from datetime import datetime
@@ -156,7 +155,7 @@ class SelfEvolution:
         try:
             with open(self.training_data_file, "r") as f:
                 return sum(1 for _ in f)
-        except:
+        except Exception:
             return 0
 
     def start_new_cycle(self):
@@ -175,8 +174,8 @@ class SelfEvolution:
 
         # Check if MLX is available
         try:
-            import mlx
-            import mlx.core as mx
+            import mlx  # noqa: F401
+            import mlx.core as mx  # noqa: F401
         except ImportError:
             result["message"] = "MLX not installed. Run: pip install mlx mlx-lm"
             return result
@@ -194,7 +193,7 @@ class SelfEvolution:
         # Run MLX fine-tuning
         try:
             print(f"\n[MLX] Starting fine-tuning with {training_count} examples...")
-            print(f"[MLX] This may take a few minutes on your M-series MacBook...")
+            print("[MLX] This may take a few minutes on your M-series MacBook...")
 
             # MLX-LM fine-tuning command
             # Using LoRA for efficient training
@@ -258,7 +257,7 @@ class SelfEvolution:
                             "text": f"<s>[INST] {data['prompt']} [/INST] {data['completion']}</s>"
                         }
                         f_out.write(json.dumps(mlx_entry) + "\n")
-                    except:
+                    except Exception:
                         continue
 
     def add_function(self, name: str, code: str, description: str) -> bool:
@@ -350,7 +349,7 @@ Functions added: {len(self.state["added_functions"])}
             try:
                 with open(self.learned_hashes_file, "r") as f:
                     self.learned_hashes = set(json.load(f))
-            except:
+            except Exception:
                 self.learned_hashes = set()
 
     def _save_hashes(self):
@@ -362,7 +361,7 @@ Functions added: {len(self.state["added_functions"])}
             try:
                 with open(self.benchmark_file, "r") as f:
                     self.benchmark_history = json.load(f)
-            except:
+            except Exception:
                 self.benchmark_history = []
 
     def _save_benchmark_history(self):
@@ -375,7 +374,7 @@ Functions added: {len(self.state["added_functions"])}
                 with open(self.state_file, "r") as f:
                     loaded = json.load(f)
                     self.state.update(loaded)
-            except:
+            except Exception:
                 pass
 
     def _save_state(self):

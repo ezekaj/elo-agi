@@ -10,7 +10,6 @@ The AGI will:
 """
 
 import json
-import os
 import threading
 import time
 from pathlib import Path
@@ -26,8 +25,8 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "neuro-module-06-motivation" / "src"))
 
 try:
-    from curiosity_drive import CuriosityModule, CuriosityType
-    from intrinsic_motivation import PathEntropyMaximizer, DriveType
+    from curiosity_drive import CuriosityModule, CuriosityType  # noqa: F401
+    from intrinsic_motivation import PathEntropyMaximizer, DriveType  # noqa: F401
 
     CURIOSITY_AVAILABLE = True
 except ImportError:
@@ -169,7 +168,7 @@ class AutonomousLearner:
         # Update curiosity module if available
         if self.curiosity:
             embedding = self._text_to_embedding(message)
-            event = self.curiosity.process_stimulus(embedding)
+            self.curiosity.process_stimulus(embedding)
 
             # Register new topics as curiosity targets
             for topic_name in topics:

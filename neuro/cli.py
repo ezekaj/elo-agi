@@ -12,7 +12,6 @@ import time
 import threading
 import asyncio
 from pathlib import Path
-from typing import Optional, Dict, Any
 
 
 # ANSI color codes
@@ -368,7 +367,7 @@ class LearningNotifier:
         self.last_cycle = 0
         self.notifications = []
 
-    def check_and_notify(self, engine) -> List[str]:
+    def check_and_notify(self, engine) -> list:
         """Check for new learning events and return notifications."""
         notifications = []
 
@@ -411,7 +410,7 @@ class LearningNotifier:
             if engine.autonomous:
                 auto = engine.autonomous
                 if auto.initial_benchmark_done and auto.benchmark_results:
-                    score = auto.benchmark_results.get("avg_score", 0)
+                    auto.benchmark_results.get("avg_score", 0)
                     weak = auto.weak_areas
                     if weak and len(notifications) == 0:
                         # Occasionally remind about weak areas
@@ -434,7 +433,7 @@ def cmd_chat(args):
     no_stream = getattr(args, "no_stream", False)
     output_format = getattr(args, "output_format", "text")
     system_prompt = getattr(args, "system_prompt", None)
-    append_system_prompt = getattr(args, "append_system_prompt", None)
+    getattr(args, "append_system_prompt", None)
 
     # Skip header in print mode
     if not print_mode:
@@ -487,12 +486,11 @@ def cmd_chat(args):
             pass
 
     # Initialize tools (for fallback mode)
-    tools = None
     tools_available = False
     try:
         from neuro.modules.model.tools import Tools
 
-        tools = Tools(work_dir=os.getcwd())
+        Tools(work_dir=os.getcwd())
         tools_available = True
     except ImportError:
         pass
@@ -542,8 +540,6 @@ def cmd_chat(args):
             pass
 
     # Initialize Curiosity Loop (DISABLED - replaced by autonomous learning)
-    curiosity_loop = None
-    curiosity_available = False
     # Old curiosity loop is replaced by the new autonomous learning system
     # which is integrated into the engine
 
@@ -1524,7 +1520,6 @@ def cmd_chat(args):
 
                 try:
                     import requests as req
-                    import json as js
                     import re
 
                     # Build enhanced system prompt
@@ -1590,7 +1585,7 @@ To use a tool: <tool>name</tool><args>{"param": "value"}</args>
                     print(f"\n  {Colors.RED}Error: {e}{Colors.RESET}")
         else:
             print(f"\n  {Colors.BRIGHT_GREEN}Neuro:{Colors.RESET} ", end="")
-            print(f"Ollama is not running. Please start it:")
+            print("Ollama is not running. Please start it:")
             print(f"         {Colors.DIM}ollama serve && ollama pull ministral-3:8b{Colors.RESET}")
             print(
                 f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
@@ -1667,7 +1662,7 @@ def cmd_demo(args):
     try:
         from editor import CodeEditor
 
-        editor = CodeEditor(auto_confirm=True)
+        CodeEditor(auto_confirm=True)
         spinner.stop()
         print(f"  {Colors.GREEN}✓{Colors.RESET} Code Editor loaded")
     except Exception as e:
@@ -1699,7 +1694,7 @@ def cmd_demo(args):
     try:
         from executor import ParallelExecutor
 
-        executor = ParallelExecutor(max_parallel=5)
+        ParallelExecutor(max_parallel=5)
         spinner.stop()
         print(f"  {Colors.GREEN}✓{Colors.RESET} Parallel Executor loaded")
     except Exception as e:

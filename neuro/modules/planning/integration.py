@@ -7,15 +7,15 @@ Integrates the planning module with other neuro modules:
 - Motivation for reward signals
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable, Any, Tuple
 import numpy as np
 
 from .goal_hierarchy import MAXQDecomposition, GoalTree, Goal
 from .temporal_abstraction import OptionsFramework, Option
-from .skill_library import SkillLibrary, Skill, SkillType
+from .skill_library import SkillLibrary, Skill
 from .subgoal_discovery import SubgoalDiscovery, Subgoal, Trajectory
-from .planning_search import HierarchicalMCTS, MCTSConfig, PlanResult, WorldModelAdapter
+from .planning_search import HierarchicalMCTS, MCTSConfig, PlanResult
 
 
 @dataclass

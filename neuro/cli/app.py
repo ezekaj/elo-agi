@@ -8,8 +8,7 @@ import asyncio
 import sys
 import os
 import json
-from typing import Optional, Dict, Any, List
-from pathlib import Path
+from typing import Optional, Dict, List
 
 from .core.stream import StreamHandler
 from .core.session import SessionManager
@@ -22,23 +21,20 @@ from .agents.manager import SubagentManager
 from .skills.loader import SkillsLoader
 from .ui.renderer import UIRenderer
 from .ui.status_bar import StatusBar
-from .ide.integration import create_integration, detect_ide, IDEType
+from .ide.integration import create_integration, detect_ide
 
 # Learning systems
 from ..self_training import SelfTrainer
 from ..active_learning import get_active_learner
-from ..self_evolution import get_evolution, SelfEvolution
+from ..self_evolution import get_evolution
 import threading
 import random
 import urllib.request
 import urllib.parse
 import html
-import re
 from datetime import datetime
 
 # Cognitive Pipeline and NeuroAgent (38+ modules)
-import sys
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../neuro-model/src"))
 try:
     from cognitive_pipeline import CognitivePipeline
@@ -641,7 +637,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
                     tool_name=tool_name,
                 )
             # Continue with tool results
-            await self._process_input(f"Continue with the tool results above.")
+            await self._process_input("Continue with the tool results above.")
 
         # Learn from this conversation (through ALL cognitive systems)
         self.ui.print_dim("Learning from conversation...")
@@ -969,7 +965,7 @@ Remember: You are autonomous. Research. Learn. Act. Improve. Never ask."""
             if context:
                 enhanced_prompt += f"\n\n[Tool Results]:\n{context}"
             if knowledge:
-                enhanced_prompt += f"\n\n[Knowledge]:\n" + "\n".join(knowledge[:3])
+                enhanced_prompt += "\n\n[Knowledge]:\n" + "\n".join(knowledge[:3])
 
             # Stream response
             self.ui.print_assistant_label()
@@ -1564,7 +1560,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
             self.ui.print(f"  [cyan]{i}.[/cyan] {sess['id'][:8]} [dim]({time_str})[/dim]")
 
-        self.ui.print(f"  [cyan]n.[/cyan] [dim]New session[/dim]")
+        self.ui.print("  [cyan]n.[/cyan] [dim]New session[/dim]")
         self.ui.print()
 
         try:
@@ -1661,10 +1657,10 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             print(f"[Evolution] {reason}")
 
             if should_train:
-                print(f"[Evolution] Starting MLX fine-tuning...")
+                print("[Evolution] Starting MLX fine-tuning...")
                 result = self.evolution.run_mlx_training(self.model)
                 if result["success"]:
-                    print(f"[Evolution] MLX TRAINING COMPLETE!")
+                    print("[Evolution] MLX TRAINING COMPLETE!")
                     self._add_evolved_capability()
                 else:
                     print(f"[Evolution] Training skipped: {result['message']}")
@@ -1848,7 +1844,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                     print(f"           Q&A pairs: {len(analyzed.get('qa_pairs', []))}")
                     break  # One at a time
 
-        except Exception as e:
+        except Exception:
             pass
 
         self._is_busy = False
@@ -2513,7 +2509,7 @@ JSON:"""
 
                     self.ui.print_dim(f"  -> Learned! Confidence: {current_confidence:.0%}")
                 else:
-                    self.ui.print_dim(f"  -> No results found")
+                    self.ui.print_dim("  -> No results found")
 
             except Exception as e:
                 self.ui.print_dim(f"  -> Search failed: {e}")

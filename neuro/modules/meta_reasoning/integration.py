@@ -9,7 +9,7 @@ Unified meta-reasoning controller combining:
 - Fallacy detection
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any, Callable
 import numpy as np
 
@@ -30,7 +30,7 @@ try:
     from .efficiency_monitor import (
         EfficiencyMonitor,
         EfficiencyConfig,
-        ReasoningMetrics,
+        ReasoningMetrics,  # noqa: F401
         TerminationReason,
     )
     from .orchestrator import (
@@ -44,7 +44,7 @@ try:
         FallacyDetectorConfig,
         FallacyDetection,
         ReasoningStep,
-        FallacyType,
+        FallacyType,  # noqa: F401
     )
 except ImportError:
     from problem_classifier import (
@@ -63,7 +63,6 @@ except ImportError:
     from efficiency_monitor import (
         EfficiencyMonitor,
         EfficiencyConfig,
-        ReasoningMetrics,
         TerminationReason,
     )
     from orchestrator import (
@@ -77,7 +76,6 @@ except ImportError:
         FallacyDetectorConfig,
         FallacyDetection,
         ReasoningStep,
-        FallacyType,
     )
 
 

@@ -12,7 +12,7 @@ from pathlib import Path
 neuro_root = Path(__file__).parent.parent
 sys.path.insert(0, str(neuro_root))
 
-from neuro.apps import ResearchAssistant
+from neuro.apps import ResearchAssistant  # noqa: E402
 
 
 def main():

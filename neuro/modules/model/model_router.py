@@ -15,12 +15,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 try:
     from neuro_meta_reasoning.src.problem_classifier import (
         ProblemClassifier,
-        ProblemType,
-        ProblemDifficulty,
+        ProblemType,  # noqa: F401
+        ProblemDifficulty,  # noqa: F401
     )
     from neuro_meta_reasoning.src.style_selector import (
         StyleSelector,
-        ReasoningStyle,
+        ReasoningStyle,  # noqa: F401
     )
 
     META_REASONING_AVAILABLE = True

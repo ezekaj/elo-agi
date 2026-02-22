@@ -5,11 +5,9 @@ Abstract rule application across levels of abstraction.
 Handles meta-rules, context-dependent rule selection, and exception handling.
 """
 
-import numpy as np
 from typing import Dict, List, Tuple, Optional, Any, Callable, Set
 from dataclasses import dataclass, field
 from enum import Enum
-from abc import ABC, abstractmethod
 
 
 class AbstractionLevel(Enum):
@@ -314,7 +312,7 @@ class HierarchicalReasoner:
         composed = Rule(
             rule_id=f"composed_{rule1_id}_{rule2_id}",
             name=composition_name,
-            level=max(rule1.level, rule2.level, key=lambda l: l.value),
+            level=max(rule1.level, rule2.level, key=lambda lv: lv.value),
             condition=composed_condition,
             action=composed_action,
             priority=min(rule1.priority, rule2.priority),

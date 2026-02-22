@@ -19,7 +19,6 @@ try:
 except ImportError:
     HAS_IPYTHON = False
 
-from typing import Optional
 
 
 MODULE_CATALOG = [
@@ -218,7 +217,7 @@ if HAS_IPYTHON:
                 )
 
         @cell_magic
-        def neuro(self, line: str, cell: str) -> None:
+        def neuro(self, line: str, cell: str) -> None:  # noqa: F811
             """NEURO cell magic -- sends the entire cell body as a think query.
 
             Usage:

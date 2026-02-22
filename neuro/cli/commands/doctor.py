@@ -44,36 +44,30 @@ async def _check_health():
                     ollama_info = f"{len(models)} models available"
                 else:
                     ollama_info = f"Status {r.status}"
-    except Exception as e:
+    except Exception:
         ollama_info = "Not running - run: ollama serve"
     checks.append(("Ollama", "Connected" if ollama_ok else "Not connected", ollama_ok, ollama_info))
 
     # Check aiohttp
-    aiohttp_ok = False
     try:
         import aiohttp
 
-        aiohttp_ok = True
         checks.append(("aiohttp", "Installed", True, ""))
     except ImportError:
         checks.append(("aiohttp", "Missing", False, "pip install aiohttp"))
 
     # Check rich
-    rich_ok = False
     try:
-        import rich
+        import rich  # noqa: F401
 
-        rich_ok = True
         checks.append(("rich", "Installed", True, ""))
     except ImportError:
         checks.append(("rich", "Missing", False, "pip install rich"))
 
     # Check pyyaml
-    yaml_ok = False
     try:
-        import yaml
+        import yaml  # noqa: F401
 
-        yaml_ok = True
         checks.append(("pyyaml", "Installed", True, ""))
     except ImportError:
         checks.append(("pyyaml", "Missing", False, "pip install pyyaml"))

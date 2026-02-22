@@ -73,7 +73,7 @@ PROJECT_AVAILABLE = False
 
 try:
     from elo_cli.agent import Agent
-    from elo_cli.permissions import check_permission
+    from elo_cli.permissions import check_permission  # noqa: F401
 
     AGENT_AVAILABLE = True
 except ImportError:
@@ -87,7 +87,7 @@ except ImportError:
     pass
 
 try:
-    from elo_cli.project import detect_project, get_project_summary
+    from elo_cli.project import detect_project, get_project_summary  # noqa: F401
 
     PROJECT_AVAILABLE = True
 except ImportError:
@@ -114,7 +114,7 @@ def check_ollama() -> tuple[bool, list]:
             data = json.loads(r.read().decode())
             models = [m["name"] for m in data.get("models", [])]
             return True, models
-    except:
+    except Exception:
         return False, []
 
 
@@ -171,7 +171,7 @@ When you need to use a tool, respond with a JSON object like:
                     yield content
                 if chunk.get("done"):
                     break
-            except:
+            except Exception:
                 continue
 
     return full_response
@@ -350,7 +350,7 @@ def save_history(history: list):
     try:
         with open(HISTORY_FILE, "w") as f:
             json.dump(history[-50:], f)
-    except:
+    except Exception:
         pass
 
 
@@ -359,7 +359,7 @@ def load_history() -> list:
     try:
         if HISTORY_FILE.exists():
             return json.loads(HISTORY_FILE.read_text())
-    except:
+    except Exception:
         pass
     return []
 
@@ -398,7 +398,7 @@ def run_with_agent(prompt: str, history: list) -> str:
                 response_text += chunk
                 try:
                     live.update(Markdown(response_text))
-                except:
+                except Exception:
                     live.update(Text(response_text))
     except Exception as e:
         console.print(f"\n[error]Error: {e}[/error]")
@@ -420,7 +420,7 @@ def main():
         console=console,
         transient=True,
     ) as progress:
-        task = progress.add_task("", total=None)
+        progress.add_task("", total=None)
         connected, models = check_ollama()
 
     if not connected:
@@ -639,7 +639,7 @@ def main():
                         response_text += token
                         try:
                             live.update(Markdown(response_text))
-                        except:
+                        except Exception:
                             live.update(Text(response_text))
             except Exception as e:
                 console.print(f"[error]Error: {e}[/error]")

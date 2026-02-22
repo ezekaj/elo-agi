@@ -371,7 +371,7 @@ CONSTRAINTS:
             if i < len(args_matches):
                 try:
                     args = json.loads(args_matches[i])
-                except:
+                except Exception:
                     pass
             calls.append((tool_name, args))
 
@@ -422,4 +422,4 @@ CONSTRAINTS:
 
 
 # Import json for tool call parsing
-import json
+import json  # noqa: E402

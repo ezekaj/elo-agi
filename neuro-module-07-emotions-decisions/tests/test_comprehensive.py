@@ -6,7 +6,6 @@ Tests all components with edge cases, stress conditions, and research validation
 
 import numpy as np
 import pytest
-import sys
 from neuro.modules.m07_emotions_decisions.emotion_circuit import (
     EmotionCircuit,
     Amygdala,
@@ -14,19 +13,16 @@ from neuro.modules.m07_emotions_decisions.emotion_circuit import (
     ACC,
     Insula,
     EmotionType,
-    BodyState,
 )
 from neuro.modules.m07_emotions_decisions.dual_emotion_routes import (
     DualRouteProcessor,
     FastEmotionRoute,
     SlowEmotionRoute,
-    ThalamusRelay,
     ResponseType,
 )
 from neuro.modules.m07_emotions_decisions.motivational_states import (
     MotivationalSystem,
     IncentiveSalience,
-    Drive,
     DriveDirection,
 )
 from neuro.modules.m07_emotions_decisions.emotional_states import (
@@ -39,7 +35,6 @@ from neuro.modules.m07_emotions_decisions.emotional_states import (
 from neuro.modules.m07_emotions_decisions.moral_reasoning import (
     MoralDilemmaProcessor,
     VMPFCLesionModel,
-    DeontologicalSystem,
     UtilitarianSystem,
     create_trolley_switch,
     create_trolley_push,
@@ -54,8 +49,6 @@ from neuro.modules.m07_emotions_decisions.value_computation import (
 )
 from neuro.modules.m07_emotions_decisions.emotion_decision_integrator import (
     EmotionDecisionSystem,
-    Situation,
-    SituationType,
     create_threat_situation,
     create_reward_situation,
     create_moral_situation,
@@ -82,7 +75,7 @@ class ResultsTracker:
         print(f"\n{'=' * 60}")
         print(f"RESULTS: {self.passed}/{total} passed ({100 * self.passed / total:.1f}%)")
         if self.errors:
-            print(f"\nFailed tests:")
+            print("\nFailed tests:")
             for name, details in self.errors:
                 print(f"  - {name}: {details}")
         print(f"{'=' * 60}")
@@ -176,7 +169,7 @@ def test_emotion_circuit_comprehensive(results):
     insula.update_body_state(heart_rate=0.9, muscle_tension=0.8)
     fear_state = insula.map_to_emotion()
     insula.update_body_state(heart_rate=0.8, muscle_tension=0.2)
-    joy_state = insula.map_to_emotion()
+    insula.map_to_emotion()
     results.test(
         "Insula maps body states to correct emotions",
         fear_state.emotion_type == EmotionType.FEAR,
@@ -685,9 +678,9 @@ def test_full_integration_comprehensive(results):
         test_sys = EmotionDecisionSystem()
         test_sys.simulate_lesion(region)
         try:
-            test_dec = test_sys.process_situation(create_reward_situation(0.5))
+            test_sys.process_situation(create_reward_situation(0.5))
             works = True
-        except Exception as e:
+        except Exception:
             works = False
         results.test(f"Lesion simulation works for {region}", works, f"region={region}")
         test_sys.restore_all()
@@ -704,7 +697,7 @@ def test_edge_cases(results):
     try:
         result = circuit.process(np.array([0.0]))
         works = True
-    except:
+    except Exception:
         works = False
     results.test("Handles minimal stimulus", works)
 
@@ -713,7 +706,7 @@ def test_edge_cases(results):
     try:
         result = circuit.process(large_stim)
         works = True
-    except:
+    except Exception:
         works = False
     results.test("Handles large stimulus array", works)
 
@@ -724,7 +717,7 @@ def test_edge_cases(results):
         # Check bounds
         bounded = -1 <= result.valence <= 1 and 0 <= result.arousal <= 1
         works = bounded
-    except:
+    except Exception:
         works = False
     results.test("Handles extreme values with bounded output", works)
 
@@ -734,7 +727,7 @@ def test_edge_cases(results):
         for _ in range(100):
             sys.process_situation(create_reward_situation(np.random.random()))
         works = True
-    except:
+    except Exception:
         works = False
     results.test("Handles 100 rapid decisions", works)
 
@@ -754,7 +747,7 @@ def run_all_tests():
     print("COMPREHENSIVE TEST SUITE: Module 07 - Emotions and Decision-Making")
     print("=" * 70)
 
-    results = TestResults()
+    results = ResultsTracker()
 
     test_emotion_circuit_comprehensive(results)
     test_dual_routes_comprehensive(results)

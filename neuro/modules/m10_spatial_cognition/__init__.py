@@ -13,8 +13,8 @@ Implementation of spatial navigation cells and cognitive maps based on 2025 rese
 from .place_cells import PlaceField, PlaceCell, PlaceCellPopulation
 from .grid_cells import GridParameters, GridCell, GridCellModule, GridCellPopulation
 from .head_direction_cells import HeadDirectionCell, HeadDirectionSystem
-from .border_cells import BorderCell, BorderCellPopulation, WallDirection, Wall
-from .cognitive_map import CognitiveMap, Environment, Landmark, CognitiveMapState
+from .border_cells import BorderCell, BorderCellPopulation, WallDirection, Wall  # noqa: F401
+from .cognitive_map import CognitiveMap, Environment, Landmark, CognitiveMapState  # noqa: F401
 from .path_integration import PathIntegrator
 from .conceptual_space import ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap
 

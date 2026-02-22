@@ -19,7 +19,6 @@ from typing import Optional, List, Dict, Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -29,8 +28,8 @@ PROJECT_ROOT = Path(__file__).parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from api.sandbox import execute_code
-from neuro.wrapper import SmartWrapper
+from api.sandbox import execute_code  # noqa: E402
+from neuro.wrapper import SmartWrapper  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -685,7 +684,6 @@ def _dual_process_analysis(text: str) -> Dict[str, Any]:
 
 
 def _emotion_analysis(text: str) -> Dict[str, Any]:
-    import numpy as np
 
     text_lower = text.lower()
     positive_words = {

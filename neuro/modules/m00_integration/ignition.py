@@ -19,9 +19,9 @@ import numpy as np
 import time
 
 try:
-    from .module_interface import ModuleProposal, ContentType
+    from .module_interface import ModuleProposal, ContentType  # noqa: F401
 except ImportError:
-    from module_interface import ModuleProposal, ContentType
+    from module_interface import ModuleProposal
 
 
 class IgnitionState(Enum):
@@ -131,7 +131,6 @@ class IgnitionDetector:
             trigger_proposal = max(buffer, key=lambda p: p.activation)
 
         # State machine logic
-        old_state = self._state
         ignited = False
         duration = 0.0
 

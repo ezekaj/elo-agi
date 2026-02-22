@@ -11,14 +11,14 @@ Based on:
 - arXiv:2103.01197 - Bandwidth limits force competition
 """
 
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Dict, Any
+from dataclasses import dataclass
+from typing import List, Optional, Tuple, Dict
 import numpy as np
 
 try:
-    from .module_interface import ModuleProposal, ModuleType, ContentType
+    from .module_interface import ModuleProposal, ModuleType, ContentType  # noqa: F401
 except ImportError:
-    from module_interface import ModuleProposal, ModuleType, ContentType
+    from module_interface import ModuleProposal, ContentType
 
 
 @dataclass

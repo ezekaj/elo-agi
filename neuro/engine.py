@@ -16,22 +16,18 @@ This is the production-ready core of NEURO.
 """
 
 import asyncio
-import sys
-import os
-from pathlib import Path
 from typing import Optional, Dict, Any, List, Callable, AsyncGenerator
 from dataclasses import dataclass, field
-from datetime import datetime
 
 # Import engine components
 from neuro.stream import StreamHandler, StreamConfig, StreamChunk, TerminalStreamer
-from neuro.editor import CodeEditor, Edit, EditResult
+from neuro.editor import CodeEditor, EditResult
 from neuro.executor import ParallelExecutor, ToolCall, ToolResult, ToolStatus
-from neuro.git import GitAutomator, GitResult, GitStatus
+from neuro.git import GitAutomator, GitResult
 
 # Import autonomous learning
 try:
-    from neuro.autonomous import AutonomousLoop, WebLearner
+    from neuro.autonomous import AutonomousLoop, WebLearner  # noqa: F401
     from neuro.benchmark import Benchmark
 
     AUTONOMOUS_AVAILABLE = True
@@ -361,12 +357,12 @@ To use a tool, respond with:
         # Add cognitive context if available
         if context:
             if context.get("memories"):
-                base_prompt += f"\n[Relevant memories]\n"
+                base_prompt += "\n[Relevant memories]\n"
                 for mem in context["memories"][:3]:
                     base_prompt += f"- {mem}\n"
 
             if context.get("knowledge"):
-                base_prompt += f"\n[Knowledge context]\n"
+                base_prompt += "\n[Knowledge context]\n"
                 for fact in context["knowledge"][:3]:
                     base_prompt += f"- {fact}\n"
 
@@ -578,7 +574,6 @@ To use a tool, respond with:
             ProcessResult with full details
         """
         import time
-        import re
 
         start_time = time.time()
 

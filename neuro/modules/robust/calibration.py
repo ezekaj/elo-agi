@@ -9,8 +9,8 @@ Implements:
 - Reliability diagrams
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from dataclasses import dataclass
+from typing import Dict, Optional, Any
 from enum import Enum
 import numpy as np
 
@@ -260,7 +260,7 @@ class ConfidenceCalibrator:
         best_temp = 1.0
 
         for temp in np.linspace(0.5, 5.0, 50):
-            probs = np.array([self.temperature_scaling(l, temp) for l in logits])
+            probs = np.array([self.temperature_scaling(lgt, temp) for lgt in logits])
             ece = self._compute_ece(probs, labels)
 
             if ece < best_ece:
@@ -282,7 +282,7 @@ class ConfidenceCalibrator:
 
         for a in np.linspace(0.5, 2.0, 20):
             for b in np.linspace(-1.0, 1.0, 20):
-                probs = np.array([self.platt_scaling(l, a, b) for l in logits])
+                probs = np.array([self.platt_scaling(lgt, a, b) for lgt in logits])
                 ece = self._compute_ece(probs, labels)
 
                 if ece < best_ece:
@@ -300,7 +300,7 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit isotonic regression."""
         n_classes = logits.shape[1]
-        probs = np.array([np.exp(l - np.max(l)) / np.sum(np.exp(l - np.max(l))) for l in logits])
+        probs = np.array([np.exp(lgt - np.max(lgt)) / np.sum(np.exp(lgt - np.max(lgt))) for lgt in logits])
 
         self._isotonic_calibrator = {"mappings": []}
 
@@ -340,7 +340,7 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit histogram binning."""
         n_classes = logits.shape[1]
-        probs = np.array([np.exp(l - np.max(l)) / np.sum(np.exp(l - np.max(l))) for l in logits])
+        probs = np.array([np.exp(lgt - np.max(lgt)) / np.sum(np.exp(lgt - np.max(lgt))) for lgt in logits])
 
         self._histogram_calibrator = []
 
@@ -408,7 +408,7 @@ class ConfidenceCalibrator:
         logits: np.ndarray,
     ) -> np.ndarray:
         """Calibrate batch of logits."""
-        return np.array([self.calibrate(l).calibrated_probs for l in logits])
+        return np.array([self.calibrate(lgt).calibrated_probs for lgt in logits])
 
     def expected_calibration_error(
         self,

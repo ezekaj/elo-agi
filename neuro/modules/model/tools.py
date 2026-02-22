@@ -6,10 +6,9 @@ Real capabilities that the AGI can use to interact with the world.
 
 import subprocess
 import json
-import os
 import re
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from pathlib import Path
 
 
@@ -113,7 +112,7 @@ class Tools:
             # Fallback to HTML scraping if no JSON results
             return self._web_search_html(query, num_results)
 
-        except Exception as e:
+        except Exception:
             # Fallback to HTML scraping
             return self._web_search_html(query, num_results)
 
@@ -242,8 +241,8 @@ class Tools:
                 links = self._browser.get_links()
                 if links:
                     output = "Links on page:\n"
-                    for l in links[:15]:
-                        output += f"- {l['text'][:40]}: {l['href'][:60]}\n"
+                    for lnk in links[:15]:
+                        output += f"- {lnk['text'][:40]}: {lnk['href'][:60]}\n"
                     return ToolResult(True, output)
                 return ToolResult(True, "No links found")
 

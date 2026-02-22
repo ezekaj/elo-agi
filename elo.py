@@ -18,8 +18,8 @@ try:
     from rich.console import Console
     from rich.panel import Panel
     from rich.markdown import Markdown
-    from rich.prompt import Prompt, Confirm
-    from rich.syntax import Syntax
+    from rich.prompt import Prompt, Confirm  # noqa: F401
+    from rich.syntax import Syntax  # noqa: F401
 except ImportError:
     print("Installing dependencies...")
     os.system(f"{sys.executable} -m pip install mlx-lm rich -q")
@@ -27,8 +27,7 @@ except ImportError:
     from rich.console import Console
     from rich.panel import Panel
     from rich.markdown import Markdown
-    from rich.prompt import Prompt, Confirm
-    from rich.syntax import Syntax
+    from rich.prompt import Prompt
 
 console = Console()
 
@@ -68,7 +67,7 @@ def parse_tool_calls(text):
     for m in matches:
         try:
             tools.append(json.loads(m.strip()))
-        except:
+        except Exception:
             pass
     return tools
 

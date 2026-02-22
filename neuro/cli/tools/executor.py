@@ -2,13 +2,21 @@
 Tool Executor - Execute tools with visual feedback.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, Callable
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Dict, Any, Optional
 from enum import Enum
 import asyncio
 import sys
 import time
 import threading
+
+if TYPE_CHECKING:
+    from neuro.cli.tools.registry import ToolRegistry
+    from neuro.cli.core.permissions import PermissionManager
+    from neuro.cli.core.hooks import HooksManager
+    from neuro.cli.ui.renderer import UIRenderer
 
 
 class ToolStatus(Enum):

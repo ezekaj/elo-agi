@@ -14,15 +14,15 @@ import difflib
 import tempfile
 import shutil
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
 try:
-    from rich.console import Console
-    from rich.syntax import Syntax
-    from rich.panel import Panel
-    from rich.table import Table
+    from rich.console import Console  # noqa: F401
+    from rich.syntax import Syntax  # noqa: F401
+    from rich.panel import Panel  # noqa: F401
+    from rich.table import Table  # noqa: F401
     from rich.prompt import Confirm
     from rich.text import Text
 
