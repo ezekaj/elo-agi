@@ -155,7 +155,13 @@ class IntentRouter:
                         params["query"] = match.group(1).strip() if match.group(1) else ""
 
                     # Calculate confidence based on pattern specificity
-                    confidence = 0.8 if len(pattern) > 20 else 0.6
+                    # Explicit tool patterns (anchored or very specific) get high confidence
+                    if pattern.startswith("^") or len(pattern) > 30:
+                        confidence = 1.0
+                    elif len(pattern) > 20:
+                        confidence = 0.95
+                    else:
+                        confidence = 0.7
 
                     return Intent(
                         name=intent_name, confidence=confidence, params=params, action=action
