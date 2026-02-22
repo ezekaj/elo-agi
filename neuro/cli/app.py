@@ -497,11 +497,10 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
             await self._process_with_agent(user_input, ultrathink)
             return
 
-        # Fallback: Show what we're doing - full cognitive processing
+        # Full cognitive processing (skip for short/casual messages)
         cognitive_context = ""
 
-        if self.cognitive_pipeline:
-            self.ui.print_dim("Activating cognitive modules...")
+        if self.cognitive_pipeline and len(user_input.split()) > 3:
             try:
                 # Process through full cognitive pipeline (38+ modules)
                 result = self.cognitive_pipeline.process(
@@ -532,21 +531,14 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
                 if self.verbose:
                     self.ui.print_dim(f"Cognitive pipeline error: {e}")
 
-        # Also get direct knowledge injection
-        learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
-
-        # Combine all context
+        # Only inject knowledge for substantive queries (not greetings/short messages)
         augmented_input = user_input
-        if cognitive_context:
-            augmented_input = f"{user_input}\n\n{cognitive_context}"
-        if learned_knowledge:
-            augmented_input = f"{augmented_input}\n\n{learned_knowledge}"
-
-        # Boost curiosity for topics mentioned
-        words = user_input.lower().split()
-        for word in words:
-            if len(word) > 4:
-                self.active_learner.boost_curiosity(word, amount=0.1)
+        if len(user_input.split()) > 3:
+            learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
+            if cognitive_context:
+                augmented_input = f"{user_input}\n\n{cognitive_context}"
+            if learned_knowledge:
+                augmented_input = f"{augmented_input}\n\n{learned_knowledge}"
 
         # Add to session (original input, not augmented)
         self._current_session.add_message("user", user_input)
