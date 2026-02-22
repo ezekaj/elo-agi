@@ -259,7 +259,7 @@ class NeuroApp:
 
     def _default_system_prompt(self) -> str:
         """Get default system prompt."""
-        return """You are NEURO, a neuroscience-inspired AI assistant built on the ELO-AGI framework with 38 cognitive modules.
+        return """You are ELO, a neuroscience-inspired AI assistant built on the ELO-AGI framework with 38 cognitive modules.
 
 CORE IDENTITY:
 You are a helpful, knowledgeable AI assistant. You respond naturally to conversations — greetings get friendly replies, questions get clear answers, and tasks get executed efficiently.
@@ -286,6 +286,28 @@ TOOL FORMAT:
 
 CAPABILITIES:
 You have access to 38 cognitive modules spanning perception, reasoning, memory, planning, and more. You can help with coding, research, analysis, creative tasks, and general conversation."""
+
+    def _check_for_updates(self):
+        """Check PyPI for newer version (non-blocking, silent on failure)."""
+        import neuro
+
+        def check():
+            try:
+                import json as _json
+                import urllib.request as _req
+
+                url = "https://pypi.org/pypi/elo-agi/json"
+                with _req.urlopen(url, timeout=3) as resp:
+                    data = _json.loads(resp.read())
+                    latest = data["info"]["version"]
+                    current = neuro.__version__
+                    if latest != current:
+                        self.ui.print_dim(f"Update available: {current} → {latest}")
+                        self.ui.print_dim("  Run: pipx upgrade elo-agi")
+            except Exception:
+                pass
+
+        threading.Thread(target=check, daemon=True).start()
 
     def run_interactive(
         self,
@@ -358,14 +380,19 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
             working_dir = "~" + working_dir[len(home) :]
 
         # Print beautiful welcome screen
+        import neuro
+
         self.ui.print_welcome_screen(
-            version="0.9.0",
+            version=neuro.__version__,
             user_name=user_name,
             model=self.model,
             working_dir=working_dir,
             recent_sessions=recent_sessions,
             knowledge_stats=knowledge_stats,
         )
+
+        # Check for updates (non-blocking)
+        self._check_for_updates()
 
         # Load or create session
         if resume_session or session_id:
@@ -519,6 +546,7 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
             except Exception:
                 pass
 
+        learned_knowledge = None
         if self._knowledge_mode:
             learned_knowledge = self.self_trainer.get_knowledge_for_prompt(user_input)
             if learned_knowledge:

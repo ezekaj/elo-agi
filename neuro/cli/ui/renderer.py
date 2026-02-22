@@ -65,8 +65,10 @@ class UIRenderer:
         """Print the branded header."""
         header = Text()
         header.append("\n")
-        header.append("  NEURO", style="bold cyan")
-        header.append(" v3.0\n", style="dim")
+        import neuro
+
+        header.append("  ELO-AGI", style="bold cyan")
+        header.append(f" v{neuro.__version__}\n", style="dim")
         header.append("  Local AI That Learns From Your Code\n", style="dim italic")
         self.console.print(header)
         self.console.print()
@@ -75,7 +77,7 @@ class UIRenderer:
         """Print a minimal one-line header."""
         self.console.print(
             Text.assemble(
-                ("NEURO", "bold cyan"),
+                ("ELO", "bold cyan"),
                 (" ready", "dim"),
             )
         )
@@ -95,9 +97,9 @@ class UIRenderer:
 
         # ASCII art logo for NEURO (using Text with styles)
         logo = Text()
-        logo.append("    ╔╗╔╔═╗╦ ╦╦═╗╔═╗\n", style="bold cyan")
-        logo.append("    ║║║║╣ ║ ║╠╦╝║ ║\n", style="bold cyan")
-        logo.append("    ╝╚╝╚═╝╚═╝╩╚═╚═╝", style="bold cyan")
+        logo.append("    ╔═╗╦  ╔═╗\n", style="bold cyan")
+        logo.append("    ║╣ ║  ║ ║\n", style="bold cyan")
+        logo.append("    ╚═╝╩═╝╚═╝", style="bold cyan")
 
         # Create left panel content
         left_content = Text()
@@ -116,11 +118,11 @@ class UIRenderer:
         tips_content.append("@./file", style="cyan")
         tips_content.append(" to include file content\n", style="dim")
         tips_content.append("Try ", style="dim")
-        tips_content.append("/ultrathink", style="cyan")
-        tips_content.append(" for deep reasoning\n", style="dim")
-        tips_content.append("Run ", style="dim")
-        tips_content.append("/learn", style="cyan")
-        tips_content.append(" to see what I've learned\n", style="dim")
+        tips_content.append("/think", style="cyan")
+        tips_content.append(" to activate cognitive modules\n", style="dim")
+        tips_content.append("Use ", style="dim")
+        tips_content.append("/knowledge", style="cyan")
+        tips_content.append(" to enable knowledge mode\n", style="dim")
 
         # Recent activity section
         activity_content = Text()
@@ -166,7 +168,7 @@ class UIRenderer:
         left_panel = Panel(
             Align.center(left_content),
             border_style="cyan",
-            title="NEURO v" + version,
+            title="ELO v" + version,
             title_align="left",
             padding=(0, 1),
         )
@@ -210,7 +212,7 @@ class UIRenderer:
     def print_assistant_label(self):
         """Print the assistant label before response."""
         self.console.print()
-        self.console.print("[bold green]NEURO[/bold green]", end=" ")
+        self.console.print("[bold green]ELO[/bold green]", end=" ")
 
     def print_status(self, label: str, value: str, style: str = "success"):
         """Print a status indicator."""

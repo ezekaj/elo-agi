@@ -1,45 +1,46 @@
 """
-NEURO CLI Entry Point
+ELO CLI Entry Point
 
 Usage:
-  neuro                          Start interactive REPL
-  neuro "query"                  Start with initial prompt
-  neuro -p "query"               Print mode (non-interactive)
-  neuro -c                       Continue last conversation
-  neuro --model qwen2.5:7b       Use specific model
+  elo                            Start interactive REPL
+  elo "query"                    Start with initial prompt
+  elo -p "query"                 Print mode (non-interactive)
+  elo -c                         Continue last conversation
+  elo --model qwen2.5:7b         Use specific model
 """
 
 import argparse
 import sys
 
+import neuro
+
 
 def get_version() -> str:
-    return "0.9.0"
+    return neuro.__version__
 
 
 def create_parser() -> argparse.ArgumentParser:
     """Create argument parser with Claude-style flags."""
     parser = argparse.ArgumentParser(
-        prog="neuro",
-        description="NEURO - Local AI That Learns From Your Code",
+        prog="elo",
+        description="ELO - Local AI That Learns From Your Code",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  neuro                          Start interactive REPL
-  neuro "explain this code"      Start with initial prompt
-  neuro -p "what is 2+2"         Print mode (no interactive)
-  neuro -c                       Continue last conversation
-  neuro -r abc123 "continue"     Resume specific session
-  neuro --model qwen2.5:7b       Use specific model
+  elo                            Start interactive REPL
+  elo "explain this code"        Start with initial prompt
+  elo -p "what is 2+2"           Print mode (no interactive)
+  elo -c                         Continue last conversation
+  elo -r abc123 "continue"       Resume specific session
+  elo --model qwen2.5:7b         Use specific model
 
 Slash Commands:
-  /help      Show all commands
-  /status    System status
-  /model     Switch models
-  /tools     List tools
-  /compact   Compress context
-  /clear     Clear history
-  /exit      Exit NEURO
+  /help       Show all commands
+  /think      Toggle cognitive pipeline
+  /knowledge  Toggle knowledge injection
+  /status     System status
+  /model      Switch models
+  /exit       Exit ELO
 """,
     )
 
@@ -125,7 +126,7 @@ def main():
     args, remaining = parser.parse_known_args()
 
     if args.version:
-        print(f"neuro {get_version()}")
+        print(f"elo {get_version()}")
         return 0
 
     # Check if first remaining arg is a subcommand
