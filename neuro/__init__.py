@@ -72,6 +72,10 @@ _lazy_imports = {
     "StyleSelector": ("neuro.modules.meta_reasoning.style_selector", "StyleSelector"),
     "DynamicOrchestrator": ("neuro.modules.meta_reasoning.orchestrator", "DynamicOrchestrator"),
     "FallacyDetector": ("neuro.modules.meta_reasoning.fallacy_detector", "FallacyDetector"),
+
+    # Smart Wrapper (neuro.wrapper)
+    "SmartWrapper": ("neuro.wrapper", "SmartWrapper"),
+    "smart_query": ("neuro.wrapper", "smart_query"),
 }
 
 
@@ -112,4 +116,4 @@ def create_agent(config=None):
     return core
 
 
-__all__ = list(_lazy_imports.keys()) + ["create_agent", "__version__"]
+__all__ = list(_lazy_imports.keys()) + ["create_agent", "smart_query", "__version__"]
