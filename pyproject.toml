@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "neuro-agi"
 version = "0.9.0"
 description = "Neuroscience-inspired AGI architecture with 38 cognitive modules"
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.9"
 authors = [
     {name = "Elvi Zekaj", email = "elvizekaj02@gmail.com"}
