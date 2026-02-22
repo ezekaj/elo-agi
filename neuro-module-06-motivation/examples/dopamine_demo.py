@@ -136,14 +136,14 @@ def demo_benefit_cost_ratio():
     # Low dopamine
     evaluator.set_dopamine_level(0.2)
     value_low = evaluator.evaluate(benefits, costs)
-    print(f"\n   Low dopamine (0.2):")
+    print("\n   Low dopamine (0.2):")
     print(f"     Net value: {value_low:.3f}")
     print(f"     Decision: {'DO IT' if value_low > 0.3 else 'SKIP IT'}")
 
     # High dopamine
     evaluator.set_dopamine_level(0.8)
     value_high = evaluator.evaluate(benefits, costs)
-    print(f"\n   High dopamine (0.8):")
+    print("\n   High dopamine (0.8):")
     print(f"     Net value: {value_high:.3f}")
     print(f"     Decision: {'DO IT' if value_high > 0.3 else 'SKIP IT'}")
 

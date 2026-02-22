@@ -9,9 +9,8 @@ without explicit rule representation - patterns are implicit in connection weigh
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-from scipy.spatial.distance import cosine
 
 
 @dataclass

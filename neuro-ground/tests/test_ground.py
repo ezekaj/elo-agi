@@ -6,43 +6,28 @@ Tests sensors, actuators, sim2real, and calibration components.
 
 import pytest
 import numpy as np
-import time
-import os
 
 from neuro.modules.ground.sensors.camera import (
     CameraType,
     ColorSpace,
     CameraConfig,
-    CameraFrame,
-    CameraCalibration,
     Camera,
     VisionProcessor,
 )
 from neuro.modules.ground.sensors.microphone import (
-    AudioFormat,
     MicrophoneConfig,
-    AudioBuffer,
-    AudioEvent,
     Microphone,
     AudioProcessor,
 )
 from neuro.modules.ground.sensors.proprioception import (
     JointType,
-    JointState,
-    EndEffectorState,
-    BodyState,
-    IMUReading,
     ProprioceptionSensor,
     ProprioceptionProcessor,
 )
 
 from neuro.modules.ground.actuators.motor_controller import (
-    ControlMode,
     TrajectoryType,
-    MotorConfig,
     MotorCommand,
-    MotorState,
-    Trajectory,
     MotorController,
     TrajectoryPlanner,
 )
@@ -50,27 +35,18 @@ from neuro.modules.ground.actuators.speech_synth import (
     Voice,
     EmotionType,
     SpeechConfig,
-    Phoneme,
-    Utterance,
     ProsodyParams,
     SpeechSynthesizer,
     ProsodyController,
 )
 
 from neuro.modules.ground.sim2real import (
-    DomainType,
-    RandomizationType,
-    RandomizationConfig,
-    RealityGapMetrics,
     DomainRandomization,
     RealityGap,
     SimToRealTransfer,
 )
 from neuro.modules.ground.calibration import (
-    CalibrationType,
     CalibrationStatus,
-    CalibrationConfig,
-    CalibrationResult,
     SensorCalibrator,
 )
 
@@ -336,7 +312,7 @@ class TestAudioProcessor:
         mic.open()
         buffer = mic.read(n_samples=2048)
 
-        pitch = processor.compute_pitch(buffer)
+        processor.compute_pitch(buffer)
         # May or may not detect pitch depending on test signal
 
 
@@ -982,7 +958,7 @@ class TestIntegration:
             controller.register_motor(f"joint_{i}")
 
         # Read current state
-        state = sensor.read_state()
+        sensor.read_state()
         current_positions = sensor.get_joint_positions()
 
         # Plan trajectory
@@ -1004,7 +980,7 @@ class TestIntegration:
         frame = camera.capture()
 
         # Randomize visual input
-        randomized = transfer.randomization.randomize_visual(frame.data)
+        transfer.randomization.randomize_visual(frame.data)
 
         # Add sensor noise to observation
         obs = np.array([1.0, 2.0, 3.0])
@@ -1034,7 +1010,7 @@ class TestIntegration:
         enc_calibrated = calibrator.apply_calibration("enc_0", enc_raw)
 
         force_raw = np.array([300])
-        force_calibrated = calibrator.apply_calibration("force_0", force_raw)
+        calibrator.apply_calibration("force_0", force_raw)
 
         assert enc_calibrated == pytest.approx(0.25, abs=0.05)
 

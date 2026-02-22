@@ -16,8 +16,8 @@ This explains:
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Tuple
+from dataclasses import dataclass
 from collections import deque
 from enum import Enum
 

@@ -11,7 +11,6 @@ Tests cover:
 
 import pytest
 import numpy as np
-from scipy import stats
 from neuro.modules.causal.causal_discovery import (
     CausalDiscovery,
     ConditionalIndependenceTest,

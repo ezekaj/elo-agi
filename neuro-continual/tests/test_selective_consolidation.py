@@ -1,14 +1,12 @@
 """Tests for selective consolidation."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.continual.selective_consolidation import (
     SelectiveConsolidation,
     ConsolidationConfig,
     ConsolidationStrategy,
     ConsolidationPlan,
-    PerformanceRecord,
 )
 
 

@@ -8,10 +8,9 @@ Brain region: Cerebral cortex (distributed)
 """
 
 import time
-from typing import Optional, Any, List, Dict, Set, Tuple
+from typing import Optional, Any, List, Dict, Tuple
 from dataclasses import dataclass, field
 from collections import defaultdict
-import heapq
 
 
 @dataclass

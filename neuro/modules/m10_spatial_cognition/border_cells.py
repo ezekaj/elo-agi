@@ -9,7 +9,7 @@ Brain region: Medial Entorhinal Cortex (MEC), Subiculum
 """
 
 import numpy as np
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Tuple
 from dataclasses import dataclass
 from enum import Enum
 

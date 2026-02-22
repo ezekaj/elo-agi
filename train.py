@@ -22,13 +22,12 @@ import urllib.parse
 import re
 import html
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List
 
 # Add paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from neuro.self_evolution import get_evolution, SelfEvolution
+from neuro.self_evolution import get_evolution
 from neuro.self_training import SelfTrainer
 
 
@@ -422,7 +421,6 @@ class NeuroTrainer:
         print("\n  Category Scores:")
         for cat, scores in categories.items():
             avg = sum(scores) / len(scores)
-            status = "[green]" if avg >= 0.7 else "[yellow]" if avg >= 0.4 else "[red]"
             print(f"    {cat}: {avg:.0%}")
 
         print(f"\n  Overall: {results['avg']:.0%}")
@@ -465,7 +463,7 @@ class NeuroTrainer:
         result = self.evolution.run_mlx_training(self.model)
 
         if result["success"]:
-            print(f"[TRAINING] MLX fine-tuning completed!")
+            print("[TRAINING] MLX fine-tuning completed!")
             return True
         else:
             print(f"[TRAINING] {result['message']}")
@@ -617,7 +615,7 @@ def main():
     # Check Ollama is running
     try:
         req = urllib.request.Request("http://localhost:11434/api/tags")
-        with urllib.request.urlopen(req, timeout=5) as r:
+        with urllib.request.urlopen(req, timeout=5):
             pass
     except Exception:
         print("ERROR: Ollama not running. Start with: ollama serve")

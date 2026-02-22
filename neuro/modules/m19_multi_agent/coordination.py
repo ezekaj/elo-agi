@@ -13,7 +13,7 @@ Based on:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 import time
@@ -497,7 +497,7 @@ class EmergentCoordination:
                     agents_involved=[a.agent_id for a in agents],
                     strength=float(variance),
                     duration=self.params.detection_window,
-                    description=f"Roles showing differentiated behavior",
+                    description="Roles showing differentiated behavior",
                 )
         return None
 

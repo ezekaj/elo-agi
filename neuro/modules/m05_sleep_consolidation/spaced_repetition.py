@@ -5,8 +5,8 @@ Implements SM-2 style spaced repetition algorithm adapted for
 sleep-based memory consolidation across multiple nights.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
 from enum import Enum
 import numpy as np
 

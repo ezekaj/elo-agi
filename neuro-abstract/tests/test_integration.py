@@ -12,7 +12,7 @@ Tests the interaction between:
 import pytest
 import numpy as np
 from neuro.modules.abstract.symbolic_binder import SymbolicBinder, RoleType
-from neuro.modules.abstract.composition_types import INT, STR, FunctionType, StructuredType
+from neuro.modules.abstract.composition_types import INT, FunctionType, StructuredType
 from neuro.modules.abstract.program_synthesis import ProgramSynthesizer, Example
 from neuro.modules.abstract.abstraction_engine import AbstractionEngine, AbstractionLevel
 from neuro.modules.abstract.integration import SharedSpaceIntegration, SemanticModalityType
@@ -92,7 +92,7 @@ class TestAbstractionWithBinding:
 
     def test_transfer_with_binding(self):
         """Should transfer concepts using binding mappings."""
-        engine = AbstractionEngine(random_seed=42)
+        AbstractionEngine(random_seed=42)
         binder = SymbolicBinder(embedding_dim=128, random_seed=42)
 
         # Source domain

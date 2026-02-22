@@ -1,6 +1,5 @@
 """Tests for importance-weighted experience replay."""
 
-import pytest
 import numpy as np
 
 from neuro.modules.continual.experience_replay import (

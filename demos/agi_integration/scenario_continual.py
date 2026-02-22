@@ -10,7 +10,7 @@ Uses neuro-continual module with EWC, PackNet, and Synaptic Intelligence.
 """
 
 import numpy as np
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict
 
 
 def demo_continual_learning():
@@ -156,10 +156,10 @@ def demo_continual_learning():
                 params[name] -= learning_rate * gradients[name]
 
             # Track SI importance
-            si_importance = forgetting_prevention.compute_synaptic_importance(gradients, params)
+            forgetting_prevention.compute_synaptic_importance(gradients, params)
 
         # End task training and store memory
-        importance = forgetting_prevention.end_task_training(task["name"], params.copy())
+        forgetting_prevention.end_task_training(task["name"], params.copy())
 
         # Add experiences to replay buffer
         for i in range(min(100, len(X))):
@@ -216,7 +216,7 @@ def demo_continual_learning():
     print("-" * 60)
 
     replay_stats = replay.statistics()
-    print(f"\n4. Experience replay buffer:")
+    print("\n4. Experience replay buffer:")
     print(f"      Total experiences: {replay_stats['buffer_size']}")
     print(f"      Buffer capacity: {replay_stats['max_size']}")
 
@@ -235,7 +235,7 @@ def demo_continual_learning():
     print("-" * 60)
 
     inference_stats = task_inference.statistics()
-    print(f"\n5. Task inference system:")
+    print("\n5. Task inference system:")
     print(f"      Registered tasks: {inference_stats['total_tasks']}")
     print(f"      Task changes detected: {inference_stats['task_changes']}")
 
@@ -245,17 +245,17 @@ def demo_continual_learning():
 
     success = avg_forgetting < 10.0 and max_forgetting < 15.0
 
-    print(f"\n   Tasks learned: 3")
+    print("\n   Tasks learned: 3")
     print(f"   Average forgetting: {avg_forgetting:.1f}%")
     print(f"   Maximum forgetting: {max_forgetting:.1f}%")
-    print(f"   Target: <10% average forgetting")
+    print("   Target: <10% average forgetting")
     print(f"   Result: {'PASSED' if success else 'FAILED'}")
 
-    print(f"\n   Methods used:")
-    print(f"   - EWC (Elastic Weight Consolidation)")
-    print(f"   - PackNet (Capacity Allocation)")
-    print(f"   - SI (Synaptic Intelligence)")
-    print(f"   - Experience Replay (Prioritized)")
+    print("\n   Methods used:")
+    print("   - EWC (Elastic Weight Consolidation)")
+    print("   - PackNet (Capacity Allocation)")
+    print("   - SI (Synaptic Intelligence)")
+    print("   - Experience Replay (Prioritized)")
 
     stats = {
         "tasks_learned": 3,

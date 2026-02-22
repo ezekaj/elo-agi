@@ -211,7 +211,7 @@ class ToolRegistry:
                 content = f.read()
 
             if old_text not in content:
-                return f"Error: Text not found in file"
+                return "Error: Text not found in file"
 
             new_content = content.replace(old_text, new_text, 1)
 
@@ -274,7 +274,6 @@ class ToolRegistry:
             import urllib.request
             import urllib.parse
             import json
-            import re
 
             # Use DuckDuckGo Instant Answer API
             encoded_query = urllib.parse.quote(query)

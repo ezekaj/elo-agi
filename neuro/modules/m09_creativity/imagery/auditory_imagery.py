@@ -9,7 +9,7 @@ Located in temporal cortex, auditory imagery allows:
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -164,7 +164,7 @@ class AuditoryImagery:
         transposed_id = f"{sound_id}_pitch_{semitones}"
 
         new_props = original.properties.copy()
-        current_pitch = new_props.get(AuditoryProperty.PITCH, "normal")
+        new_props.get(AuditoryProperty.PITCH, "normal")
 
         if semitones > 0:
             new_props[AuditoryProperty.PITCH] = "higher"

@@ -6,7 +6,7 @@ Key functions: Task switching, rule switching, set shifting
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple, Callable
+from typing import Optional, Dict
 
 
 @dataclass
@@ -48,7 +48,6 @@ class TaskSwitcher:
         if new_task == self.current_task:
             return
 
-        is_switch = True
         self.switch_history.append(
             {"from": self.current_task, "to": new_task, "prepared": self.prepared}
         )

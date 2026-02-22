@@ -6,7 +6,7 @@ Core experiences: "I am the one acting" (agency), "This is my body" (ownership)
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List
 
 
 @dataclass
@@ -191,7 +191,7 @@ class OwnershipProcessor:
         self, visual_hand: np.ndarray, tactile_hand: np.ndarray, synchronous: bool = True
     ) -> Dict:
         """Simulate rubber hand illusion paradigm"""
-        features_per = self.params.n_features // 3
+        self.params.n_features // 3
 
         # Synchronous stimulation increases ownership of visual hand
         if synchronous:

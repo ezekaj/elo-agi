@@ -18,7 +18,6 @@ import numpy as np
 from src import (
     CognitiveMap,
     Environment,
-    Landmark,
 )
 
 
@@ -175,7 +174,7 @@ def demo_navigation():
     dist_food = cmap.distance_to_location("food_found")
     bearing_food = cmap.bearing_to_location("food_found")
 
-    print(f"\nFrom center to food:")
+    print("\nFrom center to food:")
     print(f"  Distance: {dist_food:.3f}")
     print(f"  Bearing: {np.degrees(bearing_food):.1f}°")
 

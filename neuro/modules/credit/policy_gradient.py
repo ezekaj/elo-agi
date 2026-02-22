@@ -7,7 +7,7 @@ Implements policy gradient methods including:
 - Variance reduction techniques
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 

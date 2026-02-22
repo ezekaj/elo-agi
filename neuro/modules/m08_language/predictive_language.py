@@ -12,7 +12,7 @@ Combines:
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 from .language_hierarchy import LanguageProcessingHierarchy
@@ -141,7 +141,7 @@ class PredictiveLanguageProcessor:
         # Parse the utterance
         try:
             parse_tree = self.parser.parse(tokens)
-        except:
+        except Exception:
             parse_tree = None
 
         # Aggregate results

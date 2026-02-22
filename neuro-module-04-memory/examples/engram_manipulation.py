@@ -13,7 +13,7 @@ import sys
 sys.path.insert(0, "..")
 
 import numpy as np
-from src.engram import Engram, EngramState
+from src.engram import Engram
 
 
 def demo_engram_manipulation():
@@ -41,7 +41,7 @@ def demo_engram_manipulation():
 
     # Encode the memory
     engram.encode(memory_pattern)
-    print(f"Encoded memory pattern")
+    print("Encoded memory pattern")
     print(f"State: {engram.state.value}")
     print(f"Strength: {engram.strength:.2f}")
 

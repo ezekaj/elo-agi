@@ -7,7 +7,6 @@ from contextlib import contextmanager
 
 from rich.console import Console
 from rich.status import Status
-from rich.spinner import Spinner as RichSpinner
 
 
 class Spinner:

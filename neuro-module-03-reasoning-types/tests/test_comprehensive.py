@@ -7,12 +7,8 @@ require integration of multiple reasoning types.
 
 import pytest
 import numpy as np
-import os
 from neuro.modules.m03_reasoning_types.perceptual.visual_features import (
     VisualFeatureExtractor,
-    FeatureMap,
-    Feature,
-    FeatureType,
 )
 from neuro.modules.m03_reasoning_types.perceptual.multimodal_integration import (
     MultimodalIntegrator,
@@ -27,12 +23,10 @@ from neuro.modules.m03_reasoning_types.perceptual.object_recognition import (
 from neuro.modules.m03_reasoning_types.dimensional.spatial_reasoning import (
     SpatialReasoner,
     SpatialObject,
-    SpatialRelations,
 )
 from neuro.modules.m03_reasoning_types.dimensional.temporal_reasoning import (
     TemporalReasoner,
     TemporalEvent,
-    SequenceMemory,
 )
 from neuro.modules.m03_reasoning_types.dimensional.hierarchical_reasoning import (
     HierarchicalReasoner,
@@ -61,7 +55,6 @@ from neuro.modules.m03_reasoning_types.interactive.theory_of_mind import (
 from neuro.modules.m03_reasoning_types.interactive.collaborative import (
     CollaborativeReasoner,
     Agent,
-    Task,
 )
 
 from neuro.modules.m03_reasoning_types.reasoning_orchestrator import (
@@ -542,7 +535,7 @@ class TestIntegrationScenarios:
         - Best explanation for evidence (abductive)
         """
         inductive = InductiveReasoner()
-        deductive = DeductiveReasoner()
+        DeductiveReasoner()
         abductive = AbductiveReasoner()
         temporal = TemporalReasoner()
 

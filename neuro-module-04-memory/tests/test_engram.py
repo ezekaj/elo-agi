@@ -1,6 +1,5 @@
 """Tests for engram system"""
 
-import pytest
 import numpy as np
 
 from neuro.modules.m04_memory.engram import Engram, Neuron, EngramState

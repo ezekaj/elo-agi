@@ -6,7 +6,7 @@ enabling multi-step action sequences with learned initiation and termination.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable, Any, Tuple, Set
+from typing import Dict, List, Optional, Callable, Any, Tuple
 from enum import Enum
 import numpy as np
 

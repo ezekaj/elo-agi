@@ -257,7 +257,6 @@ class ActiveLearner:
             return t.related_topics[:k]
 
         # Find topics seen around the same time
-        related = []
         topic_times = [
             (name, top.last_seen)
             for name, top in self.topics.items()

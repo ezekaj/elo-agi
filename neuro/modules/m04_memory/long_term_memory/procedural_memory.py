@@ -8,7 +8,7 @@ Brain regions: Cerebellum, Basal ganglia
 """
 
 import time
-from typing import Optional, Any, List, Dict, Callable, Tuple
+from typing import Optional, Any, List, Dict, Tuple
 from dataclasses import dataclass, field
 import numpy as np
 

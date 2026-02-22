@@ -1,18 +1,13 @@
 """Tests for full emotion-decision integration."""
 
-import numpy as np
-import pytest
 from neuro.modules.m07_emotions_decisions.emotion_decision_integrator import (
     EmotionDecisionSystem,
-    Situation,
-    SituationType,
     create_threat_situation,
     create_reward_situation,
     create_moral_situation,
 )
 from neuro.modules.m07_emotions_decisions.moral_reasoning import (
     create_trolley_push,
-    create_trolley_switch,
 )
 from neuro.modules.m07_emotions_decisions.emotional_states import Outcome, OutcomeType
 

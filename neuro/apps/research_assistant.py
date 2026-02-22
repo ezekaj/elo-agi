@@ -6,8 +6,8 @@ A practical application built on the Neuro AGI cognitive infrastructure.
 
 import re
 import sys
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Any, Tuple
 from pathlib import Path
 
 # Add module paths
@@ -319,7 +319,7 @@ class ResearchAssistant:
     def _find_relevant_facts(self, key_terms: List[str], question: str) -> List[IngestedFact]:
         """Find facts relevant to the query."""
         relevant = []
-        question_lower = question.lower()
+        question.lower()
 
         for fact in self._facts:
             # Check if any key term appears in fact

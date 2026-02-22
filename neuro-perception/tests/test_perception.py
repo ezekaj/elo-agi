@@ -6,13 +6,10 @@ Tests visual, auditory, and multimodal processing.
 
 import pytest
 import numpy as np
-import os
 
 from neuro.modules.perception.visual.retina import (
     Retina,
     RetinaOutput,
-    PhotoreceptorType,
-    GanglionCellType,
 )
 from neuro.modules.perception.visual.v1_v2 import V1Processor, V2Processor, V1Output, V2Output
 from neuro.modules.perception.visual.v4_it import (
@@ -20,7 +17,6 @@ from neuro.modules.perception.visual.v4_it import (
     ITProcessor,
     V4Output,
     ITOutput,
-    ShapeDescriptor,
 )
 from neuro.modules.perception.visual.dorsal_ventral import (
     DorsalStream,

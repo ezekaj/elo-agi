@@ -1,6 +1,5 @@
 """Tests for planning integration."""
 
-import pytest
 import numpy as np
 
 from neuro.modules.planning.integration import (
@@ -379,7 +378,7 @@ class TestEndToEndPlanning:
             )
             trajectories.append(traj)
 
-        subgoals = integration.discover_subgoals(trajectories)
+        integration.discover_subgoals(trajectories)
 
         stats = integration.statistics()
         assert stats["subgoal_stats"]["total_subgoals"] >= 0

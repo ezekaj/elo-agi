@@ -12,12 +12,11 @@ Based on research defining:
 
 import numpy as np
 import time
-from typing import Optional, Any, List, Dict, Tuple, TYPE_CHECKING
+from typing import Optional, Any, List, Dict, TYPE_CHECKING
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
     from .engram import Engram
-    from .long_term_memory.episodic_memory import Episode
 
 
 @dataclass

@@ -13,8 +13,7 @@ Time perception relies on:
 
 import numpy as np
 from typing import Optional, Dict, List, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
+from dataclasses import dataclass
 
 
 @dataclass

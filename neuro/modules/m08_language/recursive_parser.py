@@ -363,7 +363,7 @@ def compare_human_vs_llm(sentence: str) -> Dict[str, any]:
 
     # Human-like: recursive constituent parsing
     grammar = RecursiveGrammar()
-    parser = ConstituentParser(grammar)
+    ConstituentParser(grammar)
 
     # Generate a tree (for demonstration)
     tree = grammar.generate("S", max_depth=4)

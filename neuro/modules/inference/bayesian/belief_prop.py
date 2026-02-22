@@ -5,8 +5,7 @@ Implements loopy belief propagation and sum-product algorithm.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set, Callable
-import numpy as np
+from typing import Dict, List, Optional, Any, Tuple
 from collections import defaultdict
 
 

@@ -9,14 +9,14 @@ Handles:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Type
+from typing import Dict, List, Optional, Any
 from pathlib import Path
 import sys
 import importlib
 import importlib.util
 from enum import Enum
 
-from .config import SystemConfig, ModuleConfig
+from .config import SystemConfig
 
 
 class ModuleStatus(Enum):
@@ -199,7 +199,7 @@ class ModuleLoader:
                     if isinstance(obj, type) and name != "ABC":
                         try:
                             return obj()
-                        except:
+                        except Exception:
                             continue
 
             return None

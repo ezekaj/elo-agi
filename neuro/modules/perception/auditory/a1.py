@@ -5,8 +5,8 @@ Implements tonotopic organization, spectrotemporal receptive fields,
 and basic auditory feature extraction.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Any, Tuple
 import numpy as np
 
 
@@ -210,7 +210,7 @@ class A1Processor:
         Compute modulation power spectrum from STRF responses.
         """
         # Average STRF responses over time and frequency
-        n_strfs = a1_output.strf_responses.shape[0]
+        a1_output.strf_responses.shape[0]
 
         rate_responses = np.zeros(self.n_rates)
         scale_responses = np.zeros(self.n_scales)

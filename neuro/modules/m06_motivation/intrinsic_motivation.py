@@ -19,11 +19,10 @@ Key properties of path entropy maximization:
 """
 
 import numpy as np
-from typing import List, Dict, Optional, Tuple, Set
-from dataclasses import dataclass, field
+from typing import List, Dict, Optional, Tuple
+from dataclasses import dataclass
 from collections import deque
 from enum import Enum
-import scipy.stats as stats
 
 
 class DriveType(Enum):
@@ -228,7 +227,7 @@ class PossibilitySpace:
 
         if actions and len(actions) >= 10:
             # Learn rough action->state_change mapping
-            actions_arr = np.array(actions[-10:])
+            np.array(actions[-10:])
             state_changes = np.diff(states[-11:], axis=0)
 
             # Simple linear estimate

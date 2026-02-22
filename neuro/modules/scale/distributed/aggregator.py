@@ -5,7 +5,7 @@ Implements various aggregation strategies for distributed results.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable, Union
+from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 from abc import ABC, abstractmethod
 import numpy as np
@@ -110,7 +110,7 @@ class WeightedAverage(Aggregator):
                 n_inputs=len(results),
                 confidence=confidence,
             )
-        except:
+        except Exception:
             # Fall back to first result
             return AggregatedResult(
                 value=results[0],
@@ -228,7 +228,7 @@ class ConcatAggregator(Aggregator):
                 n_inputs=len(results),
                 confidence=1.0,
             )
-        except:
+        except Exception:
             # Fall back to list concatenation
             if all(isinstance(r, list) for r in results):
                 concatenated = []
@@ -335,7 +335,7 @@ class ResultAggregator:
                     n_inputs=len(results),
                     confidence=confidence,
                 )
-            except:
+            except Exception:
                 return self.aggregate(results, AggregationStrategy.FIRST)
 
         # Aggregator-based strategies

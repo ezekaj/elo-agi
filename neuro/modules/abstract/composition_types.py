@@ -10,8 +10,8 @@ Implements a type system for compositional generalization:
 - Neural type representations
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable, Union, Set
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 from abc import ABC, abstractmethod
 import numpy as np

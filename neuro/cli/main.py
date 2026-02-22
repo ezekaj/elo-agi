@@ -11,8 +11,6 @@ Usage:
 
 import argparse
 import sys
-import os
-from pathlib import Path
 
 
 def get_version() -> str:

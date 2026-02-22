@@ -5,10 +5,8 @@ Inference to the best explanation. Probabilistic, prefers simpler explanations.
 "The grass is wet" → "It probably rained"
 """
 
-import numpy as np
-from typing import Dict, List, Tuple, Optional, Any, Callable
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field
-from enum import Enum
 
 
 @dataclass
@@ -189,7 +187,7 @@ class AbductiveReasoner:
 
         prior = cause.prior_probability
 
-        total_prior = sum(c.prior_probability for c in self.causal_model.causes.values())
+        sum(c.prior_probability for c in self.causal_model.causes.values())
         total_likelihood = 0.0
         for other_cause in self.causal_model.causes.values():
             if effect.effect_id in self.causal_model.effect_cause_links:

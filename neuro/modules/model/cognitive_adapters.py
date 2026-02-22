@@ -157,7 +157,7 @@ class ProblemClassifierAdapter(ModuleAdapter):
             from problem_classifier import ProblemClassifier
 
             real = ProblemClassifier(random_seed=42)
-        except Exception as e:
+        except Exception:
             pass
 
         super().__init__("problem_classifier", real)

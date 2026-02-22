@@ -22,7 +22,7 @@ import urllib.request
 import urllib.parse
 import threading
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Callable
+from typing import Dict, List, Optional, Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -746,16 +746,16 @@ class AutonomousLoop:
 
         # Create teaching content with step-by-step reasoning
         explanations = {
-            "apples for $2": f"Calculate: 5 × $2 = $10. Change: $20 - $10 = $10. Answer: 10",
-            "60 mph": f"Distance = Speed × Time = 60 × 2.5 = 150 miles. Answer: 150",
-            "length 8 and width 5": f"Area = 8 × 5 = 40. Answer: 40",
-            "cats are mammals": f"Syllogism: cats→mammals→animals. Therefore cats are animals. Answer: yes",
-            "rains, the ground gets wet": f"Affirming consequent fallacy. Wet ground ≠ rain (could be sprinklers). Answer: no",
-            "ice cream in the oven": f"400°F melts and burns ice cream. Answer: melts",
-            "17 sheep. All but 9": f"'All but 9' = 9 remain. Answer: 9",
-            "3 apples and you take away 2": f"YOU took 2, so YOU have 2. Answer: 2",
-            "twice as old as Bob": f"Alice = 2×15 = 30. In 5 years = 35. Answer: 35",
-            "marble in her basket": f"Sally thinks marble is where SHE put it. Answer: basket",
+            "apples for $2": "Calculate: 5 × $2 = $10. Change: $20 - $10 = $10. Answer: 10",
+            "60 mph": "Distance = Speed × Time = 60 × 2.5 = 150 miles. Answer: 150",
+            "length 8 and width 5": "Area = 8 × 5 = 40. Answer: 40",
+            "cats are mammals": "Syllogism: cats→mammals→animals. Therefore cats are animals. Answer: yes",
+            "rains, the ground gets wet": "Affirming consequent fallacy. Wet ground ≠ rain (could be sprinklers). Answer: no",
+            "ice cream in the oven": "400°F melts and burns ice cream. Answer: melts",
+            "17 sheep. All but 9": "'All but 9' = 9 remain. Answer: 9",
+            "3 apples and you take away 2": "YOU took 2, so YOU have 2. Answer: 2",
+            "twice as old as Bob": "Alice = 2×15 = 30. In 5 years = 35. Answer: 35",
+            "marble in her basket": "Sally thinks marble is where SHE put it. Answer: basket",
         }
 
         explanation = f"Answer: {answer}. Keywords: {', '.join(keywords[:3])}"

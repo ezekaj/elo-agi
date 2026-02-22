@@ -1,8 +1,6 @@
 """Search tools: glob, grep, ls."""
 
-import os
 import re
-import fnmatch
 from pathlib import Path
 from .base import Tool, ToolResult
 

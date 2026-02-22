@@ -11,8 +11,8 @@ Based on research showing:
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 import time
 
 from .system1 import PatternRecognition, HabitExecutor, EmotionalValuation
@@ -300,7 +300,6 @@ class DualProcessController:
 
     def _check_conflict(self, s1_output: System1Output) -> bool:
         """Check if System 1 outputs are conflicting"""
-        responses = []
 
         # Check pattern conflicts
         if len(s1_output.patterns) > 1:

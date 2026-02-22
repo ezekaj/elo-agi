@@ -1,8 +1,5 @@
 """Tests for style selector."""
 
-import pytest
-import numpy as np
-
 from neuro.modules.meta_reasoning.style_selector import (
     StyleSelector,
     StyleSelectorConfig,
@@ -143,8 +140,8 @@ class TestStyleSelector:
         # Verify that feedback actually updated rankings
         # With positive feedback (success=True, efficiency=0.9, quality=0.9),
         # the DEDUCTIVE style fitness for LOGICAL should increase
-        deductive_idx = [s for s, _ in new_rankings].index(ReasoningStyle.DEDUCTIVE)
-        initial_deductive_idx = [s for s, _ in initial_rankings].index(ReasoningStyle.DEDUCTIVE)
+        [s for s, _ in new_rankings].index(ReasoningStyle.DEDUCTIVE)
+        [s for s, _ in initial_rankings].index(ReasoningStyle.DEDUCTIVE)
 
         # DEDUCTIVE should be ranked at least as high (lower index = higher rank)
         # or the actual fitness value should have increased

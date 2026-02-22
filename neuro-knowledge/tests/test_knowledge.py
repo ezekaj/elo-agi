@@ -3,43 +3,30 @@ Tests for neuro-knowledge: Knowledge representation and reasoning.
 """
 
 import pytest
-import numpy as np
-import os
 
 from neuro.modules.knowledge.semantic_network import (
     SemanticNetwork,
     Concept,
     SemanticRelation,
     RelationType,
-    ActivationPattern,
 )
 from neuro.modules.knowledge.ontology import (
     Ontology,
     OntologyNode,
-    OntologyRelation,
-    HierarchyType,
-    OntologyQuery,
 )
 from neuro.modules.knowledge.fact_store import (
     FactStore,
     Fact,
     Triple,
-    FactQuery,
-    FactIndex,
 )
 from neuro.modules.knowledge.inference_engine import (
     InferenceEngine,
     Rule,
     Pattern,
-    InferenceResult,
-    InferenceChain,
-    InferenceMode,
 )
 from neuro.modules.knowledge.knowledge_graph import (
     KnowledgeGraph,
     Entity,
-    Relation,
-    GraphEmbedding,
     GraphQuery,
 )
 from neuro.modules.knowledge.common_sense import (
@@ -49,9 +36,6 @@ from neuro.modules.knowledge.common_sense import (
     SocialReasoner,
     TemporalReasoner,
     PhysicsProperty,
-    SocialNorm,
-    TemporalRelation,
-    SocialRelation,
 )
 
 # =============================================================================
@@ -563,7 +547,7 @@ class TestInferenceEngine:
 
     def test_forward_chain(self, engine):
         """Test forward chaining inference."""
-        results = engine.forward_chain()
+        engine.forward_chain()
         # Should derive dog is_a animal
         derived = engine.query("dog", "is_a", "animal")
         assert len(derived) > 0

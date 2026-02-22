@@ -8,7 +8,7 @@ Maintains stability in neural networks through:
 """
 
 import numpy as np
-from typing import Optional, List
+from typing import Optional
 from dataclasses import dataclass
 
 

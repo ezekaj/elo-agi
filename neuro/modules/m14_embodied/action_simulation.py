@@ -6,7 +6,7 @@ Key features: Mirror neurons, motor resonance, action prediction
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List
 
 
 @dataclass

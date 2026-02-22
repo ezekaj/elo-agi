@@ -298,7 +298,7 @@ class TestAttackDefenseInteraction:
         if result.success:
             # Defend
             defended = defense.input_denoising(result.adversarial, method="median")
-            pred_after_defense = model.predict(defended.defended_input)
+            model.predict(defended.defended_input)
             # Prediction may or may not be restored
 
     def test_pgd_stronger_than_fgsm(self, model, sample_input):

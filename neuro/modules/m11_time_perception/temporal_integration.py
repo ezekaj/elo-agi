@@ -10,12 +10,11 @@ Orchestrates all components of time perception:
 
 import numpy as np
 from typing import Optional, Dict, List, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
+from dataclasses import dataclass
 
-from .time_circuits import TimeCircuit, TemporalSignal, TimingScale
-from .interval_timing import IntervalTimer, TimingMode, TimingResult
-from .time_modulation import TimeModulationSystem, EmotionalState, ModulationEffect
+from .time_circuits import TimeCircuit, TimingScale
+from .interval_timing import IntervalTimer, TimingMode
+from .time_modulation import TimeModulationSystem, EmotionalState
 from .embodied_time import EmbodiedTimeSystem, BodyState
 
 

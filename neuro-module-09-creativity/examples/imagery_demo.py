@@ -36,7 +36,7 @@ def main():
 
     # Create images
     sunset = visual.visualize("A golden sunset over calm ocean waters")
-    print(f"\nImage: Sunset")
+    print("\nImage: Sunset")
     print(f"  Vividness: {sunset.vividness:.3f}")
     print(f"  Properties: {sunset.properties}")
 
@@ -45,7 +45,7 @@ def main():
         "A red 3D cube floating in space",
         properties={"color": "red", "shape": "cube", "dimension": "3D"},
     )
-    print(f"\nImage: Cube")
+    print("\nImage: Cube")
     print(f"  Vividness: {cube.vividness:.3f}")
 
     # Mental rotation
@@ -207,7 +207,7 @@ def main():
 
     # Full scene imagination
     beach_scene = imagery.imagine_scene("A tropical beach at sunset")
-    print(f"\nScene: Tropical Beach")
+    print("\nScene: Tropical Beach")
     print(f"  Overall vividness: {beach_scene.overall_vividness:.3f}")
     print(f"  Coherence: {beach_scene.coherence:.3f}")
     print(f"  Visual: {'Present' if beach_scene.visual else 'Absent'}")
@@ -216,7 +216,7 @@ def main():
 
     # Action imagination
     swimming = imagery.imagine_action("Swimming in the ocean")
-    print(f"\nAction: Swimming")
+    print("\nAction: Swimming")
     print(f"  Overall vividness: {swimming.overall_vividness:.3f}")
     print(f"  Visual: {'Present' if swimming.visual else 'Absent'}")
     print(f"  Motor: {'Present' if swimming.motor else 'Absent'}")
@@ -226,7 +226,7 @@ def main():
     custom = imagery.simulate_experience(
         "Playing a violin", modalities=["visual", "motor", "auditory"]
     )
-    print(f"\nExperience: Violin Playing")
+    print("\nExperience: Violin Playing")
     print(f"  Visual: {'Present' if custom.visual else 'Absent'}")
     print(f"  Motor: {'Present' if custom.motor else 'Absent'}")
     print(f"  Auditory: {'Present' if custom.auditory else 'Absent'}")
@@ -242,7 +242,7 @@ def main():
     )
 
     associations = imagery.get_all_associations(rich_image.id)
-    print(f"\n  Associations from 'cozy fireplace':")
+    print("\n  Associations from 'cozy fireplace':")
     print(f"    {associations}")
 
     print("\n--- Image Transformation ---")
@@ -259,7 +259,7 @@ def main():
 
     print("\n--- Vividness by Modality ---")
     vividness = imagery.get_vividness_by_modality(beach_scene.id)
-    print(f"\n  Beach scene vividness breakdown:")
+    print("\n  Beach scene vividness breakdown:")
     for modality, score in vividness.items():
         print(f"    {modality}: {score:.3f}")
 

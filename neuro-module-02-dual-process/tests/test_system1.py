@@ -4,13 +4,10 @@ import pytest
 import numpy as np
 from neuro.modules.m02_dual_process.system1.pattern_recognition import (
     PatternRecognition,
-    Pattern,
-    PatternMatch,
 )
 from neuro.modules.m02_dual_process.system1.habit_executor import (
     HabitExecutor,
     Action,
-    HabitStrength,
 )
 from neuro.modules.m02_dual_process.system1.emotional_valuation import (
     EmotionalValuation,

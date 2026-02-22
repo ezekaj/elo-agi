@@ -177,7 +177,7 @@ class TestSchemaEvolution:
             instances.append(f"cat_{i}")
 
         # Auto-discover schema
-        schemas = refiner.auto_discover_schemas(similarity_threshold=0.8)
+        refiner.auto_discover_schemas(similarity_threshold=0.8)
 
         # May or may not cluster depending on noise, so don't assert on count
 
@@ -265,7 +265,7 @@ class TestAdaptiveLearning:
                 controller.track_consolidation_success(f"mem_{i}", 0.3, 0.35, 5)
 
         # Adapt weights
-        initial_weights = controller.weights.to_dict()
+        controller.weights.to_dict()
         controller.adapt_replay_weights()
         adapted_weights = controller.weights.to_dict()
 

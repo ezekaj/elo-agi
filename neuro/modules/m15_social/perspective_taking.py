@@ -6,7 +6,7 @@ Neural basis: Temporoparietal Junction (TPJ)
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 
 
 @dataclass
@@ -184,7 +184,7 @@ class PerspectiveTaking:
             their_view = occluded
         else:
             # Level 2: How they interpret what they see
-            their_perspective = self.tpj.perspectives.get(agent, np.zeros(self.params.n_features))
+            self.tpj.perspectives.get(agent, np.zeros(self.params.n_features))
             their_view = self.tpj.view_from_perspective(scene)
 
         return {

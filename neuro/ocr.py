@@ -11,7 +11,6 @@ Provides OCR capabilities using deepseek-ocr:latest via Ollama.
 Used by both tools and autonomous learning.
 """
 
-import os
 import base64
 import json
 import requests

@@ -5,8 +5,7 @@ Generalize from specific observations to form general rules.
 Key properties: probabilistic, falsifiable by counterexample.
 """
 
-import numpy as np
-from typing import Dict, List, Tuple, Optional, Any, Callable, Set
+from typing import Dict, List, Tuple, Optional, Any, Callable
 from dataclasses import dataclass, field
 from collections import Counter
 

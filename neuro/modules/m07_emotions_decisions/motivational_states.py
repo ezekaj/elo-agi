@@ -8,7 +8,7 @@ Based on research distinguishing motivational from emotional states:
 Also implements Berridge's wanting/liking distinction.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
 from enum import Enum
 import numpy as np

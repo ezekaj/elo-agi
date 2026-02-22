@@ -4,10 +4,9 @@ Bayesian Network Learning: Structure and parameter learning.
 Implements score-based and constraint-based structure learning.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Set
 from enum import Enum
-import numpy as np
 from collections import Counter
 import math
 
@@ -344,7 +343,7 @@ class StructureLearner:
 
         # Compute chi-squared statistic
         chi_sq = 0.0
-        n = len(data)
+        len(data)
 
         for (x_val, y_val, z_vals), observed in counts_xyz.items():
             n_xz = counts_xz.get((x_val, z_vals), 0)

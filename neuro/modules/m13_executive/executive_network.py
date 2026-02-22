@@ -6,11 +6,11 @@ Includes conflict monitoring (ACC) and goal maintenance
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Optional
 
-from .inhibition import InhibitionSystem, InhibitionParams
-from .working_memory import WorkingMemory, WMParams
-from .cognitive_flexibility import CognitiveFlexibility, FlexibilityParams
+from .inhibition import InhibitionSystem
+from .working_memory import WorkingMemory
+from .cognitive_flexibility import CognitiveFlexibility
 
 
 @dataclass

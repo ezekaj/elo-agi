@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, str(__file__).rsplit("/", 2)[0])
 
 from src.predictive_language import PredictiveLanguageProcessor
-from src.recursive_parser import RecursiveGrammar, ConstituentParser, compare_human_vs_llm
+from src.recursive_parser import RecursiveGrammar, compare_human_vs_llm
 
 
 def demo_sentence_processing():
@@ -38,13 +38,13 @@ def demo_sentence_processing():
         print(f"  Total prediction error: {result['total_error']:.4f}")
 
         timescales = result["layer_timescales"]
-        print(f"\n  Layer timescales (confirms hierarchy):")
+        print("\n  Layer timescales (confirms hierarchy):")
         print(f"    Phonological: {timescales[0] * 1000:.0f}ms")
         print(f"    Syntactic:    {timescales[1] * 1000:.0f}ms")
         print(f"    Semantic:     {timescales[2] * 1000:.0f}ms")
         print(f"    Pragmatic:    {timescales[3] * 1000:.0f}ms")
 
-        print(f"\n  Per-token processing:")
+        print("\n  Per-token processing:")
         for j, token_result in enumerate(result["token_results"]):
             print(
                 f"    '{sentence[j]}': error={token_result.total_error:.3f}, "
@@ -65,22 +65,22 @@ def demo_hierarchical_vs_linear():
     result = compare_human_vs_llm(sentence)
 
     print(f"\nInput: '{sentence}'")
-    print(f"\n--- Human Processing (Hierarchical) ---")
+    print("\n--- Human Processing (Hierarchical) ---")
     print(f"  Has hierarchical structure: {result['human_has_hierarchy']}")
     print(f"  Tree depth: {result['human_depth']}")
-    print(f"\n  Constituent structure:")
+    print("\n  Constituent structure:")
     print(result["human_structure"])
 
-    print(f"\n--- LLM Processing (Linear) ---")
+    print("\n--- LLM Processing (Linear) ---")
     print(f"  Has hierarchical structure: {result['llm_has_hierarchy']}")
-    print(f"  Processing type: Next-token prediction")
-    print(f"\n  Token predictions (each predicts next):")
+    print("  Processing type: Next-token prediction")
+    print("\n  Token predictions (each predicts next):")
     tokens = sentence.split()
     for i, pred in enumerate(result["llm_predictions"]):
         context = " ".join(tokens[: i + 1])
         print(f"    Given '{context}' → predicted '{pred}'")
 
-    print(f"\n--- Key Difference ---")
+    print("\n--- Key Difference ---")
     print(f"  {result['key_difference']}")
 
 
@@ -105,7 +105,7 @@ def demo_recursive_structure():
         terminals = tree.get_terminals()
         print(f"\n  {i + 1}. '{' '.join(terminals)}'")
         print(f"     Depth: {tree.depth()}, Size: {tree.size()} nodes")
-        print(f"     Structure:")
+        print("     Structure:")
         for line in str(tree).split("\n")[:6]:
             print(f"       {line}")
         if tree.depth() > 3:
@@ -124,7 +124,7 @@ def demo_layer_activations():
     sentence = ["the", "quick", "brown", "fox"]
 
     print(f"\nProcessing: '{' '.join(sentence)}'")
-    result = processor.process_utterance(sentence)
+    processor.process_utterance(sentence)
 
     print("\n--- Final Layer States ---")
     activations = processor.get_layer_activations()

@@ -7,7 +7,6 @@ for neural-symbolic integration.
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple, Set
-from enum import Enum
 import numpy as np
 
 

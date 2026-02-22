@@ -14,7 +14,7 @@ Based on:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 from queue import Queue
 import numpy as np

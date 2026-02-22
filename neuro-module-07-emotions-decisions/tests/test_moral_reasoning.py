@@ -1,13 +1,10 @@
 """Tests for moral reasoning."""
 
-import pytest
 from neuro.modules.m07_emotions_decisions.moral_reasoning import (
     DeontologicalSystem,
     UtilitarianSystem,
     MoralDilemmaProcessor,
     VMPFCLesionModel,
-    MoralFramework,
-    HarmType,
     create_trolley_switch,
     create_trolley_push,
     create_crying_baby,

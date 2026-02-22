@@ -1,8 +1,5 @@
 """Tests for fallacy detector."""
 
-import pytest
-import numpy as np
-
 from neuro.modules.meta_reasoning.fallacy_detector import (
     FallacyDetector,
     FallacyDetectorConfig,

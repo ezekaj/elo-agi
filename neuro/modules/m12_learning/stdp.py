@@ -6,7 +6,7 @@ Post before pre = LTD (Long-Term Depression)
 """
 
 import numpy as np
-from typing import Optional, List, Tuple
+from typing import Optional, List
 from dataclasses import dataclass
 
 

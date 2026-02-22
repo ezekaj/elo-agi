@@ -1,6 +1,5 @@
 """Tests for neural time circuits"""
 
-import numpy as np
 import pytest
 from neuro.modules.m11_time_perception.time_circuits import (
     Insula,
@@ -9,7 +8,6 @@ from neuro.modules.m11_time_perception.time_circuits import (
     Cerebellum,
     TimeCircuit,
     TimingScale,
-    TemporalSignal,
 )
 
 

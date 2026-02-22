@@ -5,9 +5,8 @@ Implements camera interface for visual perception.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, Optional, Any, Tuple, Callable
 from enum import Enum
-from abc import ABC, abstractmethod
 import numpy as np
 import time
 

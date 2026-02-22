@@ -8,8 +8,8 @@ Implements advanced counterfactual reasoning:
 - Counterfactual stability analysis
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from dataclasses import dataclass
+from typing import Dict, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 

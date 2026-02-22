@@ -9,7 +9,6 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional, Any, Set
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import defaultdict
 
 
 class MentalStateType(Enum):

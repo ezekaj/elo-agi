@@ -10,9 +10,8 @@ Modules 00-19: Core cognitive modules
 """
 
 import sys
-import os
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
 
 # Add neuro modules to path
@@ -303,7 +302,7 @@ class CognitiveOrchestrator:
             "retrieval": "Two-stage retrieval",
         }
 
-        src_path = Path(__file__).parent
+        Path(__file__).parent
 
         for comp_name, purpose in src_components.items():
             try:
@@ -336,7 +335,7 @@ class CognitiveOrchestrator:
         # Broadcast to all modules
         for module_id, module_data in self.modules.items():
             instance = module_data["instance"]
-            config = module_data["config"]
+            module_data["config"]
 
             # Check if module should activate (based on query relevance)
             should_activate = self._should_activate(module_id, query, context)

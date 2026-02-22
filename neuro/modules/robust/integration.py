@@ -6,16 +6,15 @@ for the shared semantic space.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
 from .uncertainty import (
     SimpleDropoutNN,
     UncertaintyQuantifier,
-    UncertaintyEstimate,
 )
-from .ood_detection import OODDetector, OODMethod, OODResult
+from .ood_detection import OODDetector, OODMethod
 from .calibration import ConfidenceCalibrator, CalibrationMethod
 from .adversarial import AdversarialDefense, DefenseType
 

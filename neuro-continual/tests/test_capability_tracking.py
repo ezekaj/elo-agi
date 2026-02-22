@@ -1,7 +1,6 @@
 """Tests for capability tracking."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.continual.capability_tracking import (
     CapabilityTracker,
@@ -116,7 +115,7 @@ class TestCapabilityTracker:
             tracker.measure_capability("cap1", {"test": 0.5 + i * 0.05})
             tracker.measure_capability("cap2", {"test": 0.9 - i * 0.05})
 
-        reports = tracker.identify_interference([("cap1", "cap2")])
+        tracker.identify_interference([("cap1", "cap2")])
 
         pass
 

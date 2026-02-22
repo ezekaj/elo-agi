@@ -6,7 +6,7 @@ enabling multi-level task decomposition and value function decomposition.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable, Any, Set, Tuple
+from typing import Dict, List, Optional, Callable, Any, Tuple
 from enum import Enum
 import numpy as np
 
@@ -395,7 +395,7 @@ class MAXQDecomposition:
             return
 
         cf = self._completion_functions[goal_name]
-        error = cf.update(state, cumulative_reward, self.learning_rate)
+        cf.update(state, cumulative_reward, self.learning_rate)
 
     def get_hierarchical_policy(
         self,

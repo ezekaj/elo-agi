@@ -12,7 +12,6 @@ import sys
 sys.path.insert(0, ".")
 
 from src.networks import DefaultModeNetwork
-from src.networks.salience_network import NetworkState
 
 
 def main():
@@ -167,7 +166,7 @@ def main():
     novelties = [t.novelty_score for t in thoughts]
     coherences = [t.coherence_score for t in thoughts]
 
-    print(f"\nMind wandering statistics:")
+    print("\nMind wandering statistics:")
     print(f"  Average novelty: {sum(novelties) / len(novelties):.3f}")
     print(f"  Average coherence: {sum(coherences) / len(coherences):.3f}")
     print(f"  Max novelty: {max(novelties):.3f}")

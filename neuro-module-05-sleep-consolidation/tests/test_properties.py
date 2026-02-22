@@ -13,7 +13,6 @@ from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
 from neuro.modules.m05_sleep_consolidation.meta_learning import (
     MetaLearningController,
     MemoryType,
-    ReplayWeights,
 )
 from neuro.modules.m05_sleep_consolidation.interference_resolution import InterferenceResolver
 from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner
@@ -316,7 +315,7 @@ class TestDeterminism:
 
         result1 = run_scheduler(42)
         result2 = run_scheduler(42)
-        result3 = run_scheduler(99)
+        run_scheduler(99)
 
         assert result1 == result2, "Same seed should produce same results"
         # Different seeds might produce same or different results

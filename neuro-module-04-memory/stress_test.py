@@ -14,7 +14,6 @@ Tests include:
 import sys
 import time
 import numpy as np
-from collections import defaultdict
 
 # Ensure we can import from src
 sys.path.insert(0, ".")
@@ -32,7 +31,6 @@ from src import (
 from src.memory_processes import (
     MemoryEncoder,
     MemoryConsolidator,
-    MemoryRetriever,
     Forgetter,
 )
 
@@ -59,7 +57,7 @@ class TestResults:
         print(f"\n{'=' * 60}")
         print(f"RESULTS: {self.passed}/{total} passed ({100 * self.passed / total:.1f}%)")
         if self.errors:
-            print(f"\nFailed tests:")
+            print("\nFailed tests:")
             for name, error in self.errors:
                 print(f"  - {name}: {error}")
         print(f"{'=' * 60}")
@@ -716,7 +714,7 @@ def test_memory_controller():
 
         # Practice to strengthen
         for _ in range(10):
-            result = mc.execute_skill({"situation": "test", "ready": True})
+            mc.execute_skill({"situation": "test", "ready": True})
             mc.procedural.strengthen(skill, success=True)
 
         # Check automaticity
@@ -810,7 +808,7 @@ def test_edge_cases():
     try:
         em = EpisodicMemory()
 
-        ep = em.encode("negative_event", emotional_valence=-0.9)
+        em.encode("negative_event", emotional_valence=-0.9)
         retrieved = em.retrieve_by_emotion(-1.0, -0.5)
 
         results.record("Negative emotional valence handling", len(retrieved) == 1)

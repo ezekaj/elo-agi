@@ -5,11 +5,10 @@ Implements gradient-based learning of causal mechanisms using
 a numpy-based approach that mirrors PyTorch semantics for portability.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Callable, Set
 from enum import Enum
 import numpy as np
-from abc import ABC, abstractmethod
 
 
 class ActivationType(Enum):

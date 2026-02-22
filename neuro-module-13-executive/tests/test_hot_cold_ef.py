@@ -6,7 +6,6 @@ from neuro.modules.m13_executive.hot_cold_ef import (
     HotExecutiveFunction,
     ColdExecutiveFunction,
     EmotionalRegulator,
-    HotColdParams,
 )
 
 

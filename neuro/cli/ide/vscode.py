@@ -11,7 +11,6 @@ import json
 import os
 import subprocess
 import tempfile
-from pathlib import Path
 from typing import Optional, Dict, Any
 
 from .integration import (
@@ -97,7 +96,7 @@ class VSCodeIntegration(IDEIntegration):
             self._connected = True
             return True
 
-        except Exception as e:
+        except Exception:
             # Fallback to TCP
             try:
                 self._socket_server = await asyncio.start_server(

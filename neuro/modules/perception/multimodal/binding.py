@@ -280,7 +280,7 @@ class CrossModalBinder:
         if not inputs:
             return BindingOutput(percepts=[], binding_map=np.array([]), coherence=0.0)
 
-        n = len(inputs)
+        len(inputs)
 
         # Compute binding strengths
         temporal_binding = self.temporal_binder.compute_temporal_binding(inputs)

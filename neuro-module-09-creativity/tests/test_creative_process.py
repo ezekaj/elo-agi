@@ -2,8 +2,6 @@
 Tests for Creative Process Orchestrator
 """
 
-import pytest
-import numpy as np
 from neuro.modules.m09_creativity.creative_process import CreativeProcess, Idea, CreativeOutput
 from neuro.modules.m09_creativity.networks.salience_network import NetworkState
 
@@ -106,7 +104,7 @@ class TestCreativeProcess:
         ideas = cp.generate_ideas(num_ideas=2, use_imagery=True)
 
         # Some ideas may have imagery attached
-        ideas_with_imagery = [i for i in ideas if i.imagery is not None]
+        [i for i in ideas if i.imagery is not None]
         # Not guaranteed but should work
 
     def test_evaluate_ideas(self):
@@ -123,7 +121,7 @@ class TestCreativeProcess:
         cp.set_creative_goal("innovate", "Create innovative solution")
 
         ideas = cp.generate_ideas(num_ideas=3)
-        evaluations = cp.evaluate_ideas()
+        cp.evaluate_ideas()
 
         # All generated ideas should be evaluated
         for idea_id in cp.ideas:
@@ -149,7 +147,7 @@ class TestCreativeProcess:
         cp.evaluate_ideas()
 
         # Refine
-        refined = cp.refine_ideas(target_score=0.9)  # High target to force refinement
+        cp.refine_ideas(target_score=0.9)  # High target to force refinement
 
         # May or may not produce refined ideas depending on evaluation
 
@@ -201,7 +199,7 @@ class TestCreativeProcess:
             ]
         )
 
-        ideas = cp.mind_wander_for_ideas(duration_steps=5)
+        cp.mind_wander_for_ideas(duration_steps=5)
 
         # Should produce some ideas from wandering
         # Ideas are filtered by novelty > 0.5
@@ -226,7 +224,7 @@ class TestCreativeProcess:
             ]
         )
 
-        distant = cp.find_distant_connections("start", max_results=5)
+        cp.find_distant_connections("start", max_results=5)
 
         # Should find connections at distance >= 3
 
@@ -305,7 +303,7 @@ class TestCreativeProcess:
         cp.evaluate_ideas()
 
         # Check that tactile-enhanced ideas exist
-        tactile_ideas = [i for i in ideas if i.imagery and i.imagery.tactile]
+        [i for i in ideas if i.imagery and i.imagery.tactile]
 
         # Tactile imagery should provide semantic associations
 

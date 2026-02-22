@@ -135,8 +135,10 @@ class StructuralCausalModel:
 
         # Default to standard normal
         if distribution is None:
+
             def distribution():
                 return np.random.normal(0, 1)
+
         self._noise_distributions[name] = distribution
 
         return var

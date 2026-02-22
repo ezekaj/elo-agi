@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
-from .base_benchmark import Benchmark, BenchmarkConfig, TrialResult
+from .base_benchmark import Benchmark, BenchmarkConfig
 
 
 @dataclass

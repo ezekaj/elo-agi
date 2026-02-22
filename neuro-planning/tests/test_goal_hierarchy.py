@@ -1,13 +1,11 @@
 """Tests for goal hierarchy and MAXQ decomposition."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.planning.goal_hierarchy import (
     Goal,
     GoalNode,
     GoalTree,
-    GoalStatus,
     MAXQDecomposition,
     CompletionFunction,
 )
@@ -285,7 +283,7 @@ class TestMAXQValueDecomposition:
 
         # Track value updates
         for _ in range(10):
-            td_error = decomp.update_value("primitive", "s1", 1.0, "s2")
+            decomp.update_value("primitive", "s1", 1.0, "s2")
 
         # Verify updates happened
         stats = decomp.statistics()

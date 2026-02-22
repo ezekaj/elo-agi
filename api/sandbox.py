@@ -240,7 +240,7 @@ def execute_code(code: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any]:
         output = stdout_capture.getvalue()
         error = "MemoryError: Execution exceeded 256MB memory limit"
 
-    except Exception as e:
+    except Exception:
         output = stdout_capture.getvalue()
         tb = traceback.format_exc()
         last_line = tb.strip().split("\n")[-1]
@@ -268,7 +268,6 @@ def execute_code(code: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any]:
 
 def _setup_neuro_modules(globals_dict: Dict[str, Any]):
     """Pre-load neuro_agi modules into the sandbox globals."""
-    import os
     from pathlib import Path
 
     project_root = Path(__file__).parent.parent

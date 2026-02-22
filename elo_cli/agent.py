@@ -119,7 +119,7 @@ class Agent:
                         yield content
                     if chunk.get("done"):
                         break
-                except:
+                except Exception:
                     continue
 
     def _execute_tool(self, name: str, args: dict) -> ToolResult:

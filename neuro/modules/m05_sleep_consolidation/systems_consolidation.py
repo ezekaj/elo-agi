@@ -8,9 +8,9 @@ Implements the Active Systems Consolidation model:
 """
 
 import numpy as np
-from typing import List, Optional, Dict, Tuple
-from dataclasses import dataclass, field
-from .memory_replay import MemoryTrace, MemoryType
+from typing import List, Optional, Dict
+from dataclasses import dataclass
+from .memory_replay import MemoryTrace
 
 
 @dataclass

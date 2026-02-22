@@ -17,8 +17,7 @@ from enum import Enum
 import numpy as np
 import time
 
-from .state_encoder import EncodedState, StateEncoder
-from .transition_model import TransitionModel, Transition
+from .transition_model import TransitionModel
 
 
 class RolloutStrategy(Enum):

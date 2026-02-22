@@ -4,7 +4,6 @@ Stress Tests for Module 09 - Creativity and Imagination
 Tests system behavior under high load, edge cases, and adversarial inputs.
 """
 
-import pytest
 import numpy as np
 import time
 from neuro.modules.m09_creativity.creative_process import CreativeProcess
@@ -13,7 +12,7 @@ from neuro.modules.m09_creativity.networks import (
     ExecutiveControlNetwork,
     SalienceNetwork,
 )
-from neuro.modules.m09_creativity.networks.salience_network import NetworkState, SwitchTrigger
+from neuro.modules.m09_creativity.networks.salience_network import SwitchTrigger
 from neuro.modules.m09_creativity.imagery import ImagerySystem
 
 
@@ -394,7 +393,7 @@ class TestCreativeProcessStress:
                 )
 
         # Extended wandering
-        ideas = cp.mind_wander_for_ideas(duration_steps=50)
+        cp.mind_wander_for_ideas(duration_steps=50)
 
         # Should produce some ideas
         # (filtered by novelty > 0.5)
@@ -425,7 +424,7 @@ class TestEdgeCases:
         cp = CreativeProcess()
 
         # Should handle empty gracefully
-        ideas = cp.generate_ideas(num_ideas=5)
+        cp.generate_ideas(num_ideas=5)
         # May generate empty or handle gracefully
 
     def test_disconnected_concepts(self):

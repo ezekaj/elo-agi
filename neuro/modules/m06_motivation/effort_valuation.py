@@ -14,7 +14,7 @@ Key insights from research:
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional
 from dataclasses import dataclass
 from collections import deque
 from enum import Enum
@@ -453,7 +453,7 @@ class MotivationalTransform:
     def predict_engagement(self, task_effort: float, task_reward: float) -> float:
         """Predict engagement level for a task."""
         # Raw value
-        raw_value = task_reward - task_effort * 0.5
+        task_reward - task_effort * 0.5
 
         # Transform
         transformed_cost = self.transform_effort_cost(task_effort * 0.5)

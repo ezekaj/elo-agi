@@ -43,7 +43,7 @@ def demo_basic_composition():
     # Bind them together
     jump_twice = rr.bind_modifier(jump, twice)
 
-    print(f"\nComposed structure:")
+    print("\nComposed structure:")
     print(f"  Elements: {[e.content for e in jump_twice.elements.values()]}")
     print(f"  Relation: {jump_twice.relations[0].relation_type.value}")
 
@@ -74,7 +74,7 @@ def demo_action_with_roles():
     # Create action structure with roles
     structure = rr.create_action_structure(action=bite, agent=dog, patient=cat)
 
-    print(f"\nAction frame structure:")
+    print("\nAction frame structure:")
     print(f"  Elements: {list(structure.elements.keys())}")
     for rel in structure.relations:
         source = structure.elements.get(rel.source)

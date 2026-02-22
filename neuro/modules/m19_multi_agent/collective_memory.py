@@ -12,7 +12,7 @@ Based on:
 - BMAM: Brain-inspired Multi-Agent Memory (arXiv:2601.20465)
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 import time
@@ -249,10 +249,10 @@ class CollectiveMemory:
                 # Keep the one with more contributors
                 if len(mem_i.contributors) >= len(mem_j.contributors):
                     keeper, remove = mem_i, mem_j
-                    keeper_key, remove_key = key_i, key_j
+                    _keeper_key, remove_key = key_i, key_j
                 else:
                     keeper, remove = mem_j, mem_i
-                    keeper_key, remove_key = key_j, key_i
+                    _keeper_key, remove_key = key_j, key_i
 
                 # Merge contributors
                 for c in remove.contributors:

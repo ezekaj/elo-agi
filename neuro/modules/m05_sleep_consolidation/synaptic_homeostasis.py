@@ -11,8 +11,8 @@ Some synapses can be "tagged" for protection from downscaling.
 """
 
 import numpy as np
-from typing import Set, List, Dict, Optional, Tuple
-from dataclasses import dataclass, field
+from typing import Set, List, Dict
+from dataclasses import dataclass
 
 
 @dataclass

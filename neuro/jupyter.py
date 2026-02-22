@@ -20,7 +20,6 @@ except ImportError:
     HAS_IPYTHON = False
 
 
-
 MODULE_CATALOG = [
     ("00", "Global Workspace", "Attention & broadcast coordination"),
     ("01", "Attention", "Selective attention & salience"),

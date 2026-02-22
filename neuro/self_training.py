@@ -17,7 +17,7 @@ import json
 import pickle
 import numpy as np
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from pathlib import Path
 
 
@@ -43,7 +43,7 @@ class KnowledgeBase:
             try:
                 with open(self.facts_file, "r") as f:
                     return json.load(f)
-            except:
+            except Exception:
                 pass
         return []
 
@@ -53,7 +53,7 @@ class KnowledgeBase:
             try:
                 with open(self.embeddings_file, "rb") as f:
                     return pickle.load(f)
-            except:
+            except Exception:
                 pass
         return {}
 
@@ -63,7 +63,7 @@ class KnowledgeBase:
             try:
                 with open(self.stats_file, "r") as f:
                     return json.load(f)
-            except:
+            except Exception:
                 pass
         return {
             "total_facts": 0,

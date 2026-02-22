@@ -5,9 +5,8 @@ Implements orientation selectivity, spatial frequency filtering,
 and basic feature detection.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
 import numpy as np
 
 
@@ -174,7 +173,7 @@ class V1Processor:
         kernels = self._get_kernels(kernel_size)
 
         # Apply all filters
-        n_pairs = len(self._filters) // 2  # Each orientation has 2 phases
+        len(self._filters) // 2  # Each orientation has 2 phases
 
         orientation_responses = np.zeros((h, w, self.n_orientations))
         frequency_responses = np.zeros((h, w, self.n_frequencies))
@@ -296,7 +295,6 @@ class V2Processor:
 
         Uses co-circularity constraint.
         """
-        from scipy.ndimage import maximum_filter
 
         h, w, n_ori = orientation_map.shape
 

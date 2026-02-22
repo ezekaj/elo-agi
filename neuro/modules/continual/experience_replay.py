@@ -7,7 +7,7 @@ Implements sophisticated replay mechanisms for continual learning:
 - Importance weighting
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np

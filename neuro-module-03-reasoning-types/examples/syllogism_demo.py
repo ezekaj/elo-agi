@@ -47,13 +47,13 @@ def demo_socrates_syllogism():
 
     result = reasoner.syllogism(major, minor)
 
-    print(f"\nConclusion:")
+    print("\nConclusion:")
     if result.is_valid and result.conclusion:
         print(f"  {result.conclusion}")
         print(f"  Valid: {result.is_valid}")
         print(f"  Explanation: {result.validity_explanation}")
     else:
-        print(f"  No valid conclusion")
+        print("  No valid conclusion")
 
     print("\n--- Reasoning Chain ---")
     print("1. Major premise establishes: All members of set 'men' have property 'mortal'")
@@ -167,7 +167,7 @@ def demo_modus_tollens():
 
     result = reasoner.modus_tollens(conditional, not_q)
 
-    print(f"\nConclusion:")
+    print("\nConclusion:")
     if result:
         print(f"  {result}")
         print("\nInterpretation: It is NOT raining")

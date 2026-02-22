@@ -1,7 +1,6 @@
 """Tests for eligibility traces."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.credit.eligibility_traces import (
     EligibilityTrace,

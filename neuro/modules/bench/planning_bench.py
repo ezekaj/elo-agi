@@ -8,9 +8,8 @@ Includes:
 - Constraint satisfaction
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Set
-import numpy as np
 
 from .base_benchmark import Benchmark, BenchmarkConfig
 

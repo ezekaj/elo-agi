@@ -9,7 +9,7 @@ languages only, suggesting innate constraints on learnable grammar.
 """
 
 import numpy as np
-from typing import List, Optional, Dict, Tuple, Callable
+from typing import List, Optional, Dict, Callable
 from dataclasses import dataclass
 from enum import Enum
 

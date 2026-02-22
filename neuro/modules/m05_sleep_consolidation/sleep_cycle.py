@@ -10,10 +10,10 @@ Coordinates all sleep components for complete sleep-wake processing:
 """
 
 import numpy as np
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
 from dataclasses import dataclass, field
 
-from .sleep_stages import SleepStage, SleepStageController, StageProperties
+from .sleep_stages import SleepStage, SleepStageController
 from .memory_replay import MemoryTrace, HippocampalReplay, ReplayScheduler
 from .systems_consolidation import HippocampalCorticalDialogue
 from .synaptic_homeostasis import SynapticHomeostasis, SelectiveConsolidation
@@ -281,7 +281,7 @@ class SleepCycleOrchestrator:
 
             # Generate dreams from replayed memories
             if replayed:
-                dream = self.dream_generator.generate_dream(replayed, duration=duration_minutes)
+                self.dream_generator.generate_dream(replayed, duration=duration_minutes)
                 stats["dreams"] = 1
 
             # Minimal synaptic change during REM

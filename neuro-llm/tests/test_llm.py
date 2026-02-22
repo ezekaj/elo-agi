@@ -10,15 +10,13 @@ Covers:
 
 import pytest
 import numpy as np
-from pathlib import Path
 
 # Add src to path
-from neuro.modules.llm.llm_interface import LLMOracle, MockLLM, LLMConfig, LLMResponse, create_llm
-from neuro.modules.llm.semantic_bridge import SemanticBridge, SemanticConfig, Embedding
-from neuro.modules.llm.language_grounding import LanguageGrounding, GroundingConfig, GroundedConcept
+from neuro.modules.llm.llm_interface import MockLLM, LLMConfig, LLMResponse, create_llm
+from neuro.modules.llm.semantic_bridge import SemanticBridge, Embedding
+from neuro.modules.llm.language_grounding import LanguageGrounding, GroundedConcept
 from neuro.modules.llm.dialogue_agent import (
     NeuroDialogueAgent,
-    DialogueConfig,
     ConversationTurn,
     MultiAgentDialogue,
 )
@@ -106,7 +104,7 @@ class TestMockLLM:
 
     def test_cache(self):
         llm = MockLLM()
-        r1 = llm.query("Test prompt")
+        llm.query("Test prompt")
         r2 = llm.query("Test prompt")
         assert r2.cached
         assert llm._cache_hits == 1
@@ -195,7 +193,7 @@ class TestSemanticBridge:
 
     def test_register_concept(self):
         bridge = SemanticBridge()
-        emb = bridge.register_concept("apple", "A red fruit")
+        bridge.register_concept("apple", "A red fruit")
         assert bridge.get_concept("apple") is not None
 
     def test_observation_to_text(self):
@@ -378,8 +376,8 @@ class TestNeuroDialogueAgent:
 
     def test_conversation(self):
         agent = NeuroDialogueAgent()
-        r1 = agent.respond("Hi there")
-        r2 = agent.respond("How are you?")
+        agent.respond("Hi there")
+        agent.respond("How are you?")
         assert len(agent._history) == 4  # 2 user + 2 agent
 
     def test_process_observation(self):
@@ -517,7 +515,7 @@ class TestIntegration:
         grounding = LanguageGrounding(llm, bridge)
 
         obs = np.random.randn(64).astype(np.float32)
-        concept = grounding.ground("red ball", observation=obs)
+        grounding.ground("red ball", observation=obs)
 
         # Concept should be retrievable
         retrieved = grounding.get_concept("red ball")
@@ -540,7 +538,7 @@ class TestIntegration:
         """Test full language processing pipeline."""
         llm = MockLLM()
         bridge = SemanticBridge(llm)
-        grounding = LanguageGrounding(llm, bridge)
+        LanguageGrounding(llm, bridge)
         agent = NeuroDialogueAgent(llm)
 
         # Process observation

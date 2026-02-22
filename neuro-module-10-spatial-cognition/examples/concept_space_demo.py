@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, "..")
 
 import numpy as np
-from src import ConceptCell, ConceptualGrid, SocialDistanceGrid, ConceptualMap
+from src import ConceptCell, SocialDistanceGrid, ConceptualMap
 
 
 def demo_conceptual_space():

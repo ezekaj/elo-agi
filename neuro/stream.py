@@ -7,7 +7,6 @@ Uses aiohttp for efficient async HTTP.
 
 import asyncio
 import json
-import sys
 from typing import AsyncGenerator, Optional, List, Dict, Any, Callable
 from dataclasses import dataclass
 

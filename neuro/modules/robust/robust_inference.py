@@ -9,13 +9,13 @@ Implements:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
-from .uncertainty import UncertaintyQuantifier, UncertaintyEstimate, SimpleDropoutNN
-from .ood_detection import OODDetector, OODResult
-from .calibration import ConfidenceCalibrator, CalibrationResult
+from .uncertainty import UncertaintyQuantifier, SimpleDropoutNN
+from .ood_detection import OODDetector
+from .calibration import ConfidenceCalibrator
 
 
 class RejectionPolicy(Enum):

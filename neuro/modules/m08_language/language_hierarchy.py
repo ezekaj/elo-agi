@@ -11,7 +11,7 @@ Based on the hierarchical nature of language processing in the brain.
 """
 
 import numpy as np
-from typing import List, Optional, Dict, Tuple, Callable
+from typing import List, Optional, Dict
 from dataclasses import dataclass
 
 

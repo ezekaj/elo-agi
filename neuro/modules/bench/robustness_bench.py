@@ -8,7 +8,7 @@ Evaluates:
 - Selective prediction quality
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 

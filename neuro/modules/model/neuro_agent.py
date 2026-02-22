@@ -15,11 +15,9 @@ All components flow together in a unified workflow.
 
 import time
 import json
-import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime
-from pathlib import Path
 
 
 @dataclass
@@ -514,7 +512,7 @@ class NeuroAgent:
                 if result.success and result.output:
                     self.improver.error_solutions[error[:30]] = result.output[:100]
                     self.improver._save_improvements()
-                    self._log("IMPROVE", f"Found solution online")
+                    self._log("IMPROVE", "Found solution online")
 
     # =========================================================================
     # PHASE 4: LEARN - Store knowledge and update patterns
@@ -696,7 +694,7 @@ if __name__ == "__main__":
 
     state = agent.process("Analyze the project structure at /Users/ezekaj/Desktop/forex_2026")
 
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Query: {state.query[:50]}...")
     print(f"  Tools used: {state.tools_used}")
     print(f"  Errors: {state.errors}")
@@ -709,7 +707,7 @@ if __name__ == "__main__":
 
     state = agent.process("Search for the latest news about artificial intelligence")
 
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Tools used: {state.tools_used}")
     print(f"  Response: {state.response[:300]}...")
 

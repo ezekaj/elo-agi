@@ -16,7 +16,6 @@ import sys
 sys.path.insert(0, ".")
 
 from src.creative_process import CreativeProcess
-from src.networks.salience_network import NetworkState
 
 
 def main():
@@ -182,7 +181,7 @@ def main():
         goal="Create biomimetic technology concept", duration_seconds=5.0, target_good_ideas=3
     )
 
-    print(f"\n  Session Results:")
+    print("\n  Session Results:")
     print(f"    Duration: {output.process_duration:.2f} seconds")
     print(f"    Ideas generated: {output.total_generated}")
     print(f"    Ideas evaluated: {output.total_evaluated}")

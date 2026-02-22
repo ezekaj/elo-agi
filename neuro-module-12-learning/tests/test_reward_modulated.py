@@ -6,7 +6,6 @@ from neuro.modules.m12_learning.reward_modulated import (
     DopamineSystem,
     RewardModulatedSTDP,
     ErrorBasedLearning,
-    DopamineParams,
 )
 
 
@@ -34,7 +33,7 @@ class TestDopamineSystem:
         da = DopamineSystem()
         da.expected_reward = 1.0
 
-        level = da.receive_reward(0.5)  # Less than expected
+        da.receive_reward(0.5)  # Less than expected
 
         assert da.prediction_error < 0
 

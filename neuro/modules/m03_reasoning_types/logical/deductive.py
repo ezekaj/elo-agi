@@ -5,7 +5,6 @@ Derive necessary conclusions from premises.
 Key properties: conclusions are CERTAIN if premises are true.
 """
 
-import numpy as np
 from typing import Dict, List, Tuple, Optional, Any, Set
 from dataclasses import dataclass, field
 from enum import Enum
@@ -333,7 +332,7 @@ class DeductiveReasoner:
             new_inferences = self.derive(all_premises)
             for inf in new_inferences:
                 if self._propositions_match(inf.conclusion, conclusion):
-                    return True, f"Valid via chain of inferences"
+                    return True, "Valid via chain of inferences"
                 if inf.conclusion.proposition_id not in [p.proposition_id for p in all_premises]:
                     all_premises.append(inf.conclusion)
 

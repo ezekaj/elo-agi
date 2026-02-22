@@ -10,7 +10,7 @@ Factors that affect subjective time perception:
 
 import numpy as np
 from typing import Optional, Dict, List, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 

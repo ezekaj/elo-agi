@@ -1,6 +1,5 @@
 """Integration tests for time perception system"""
 
-import numpy as np
 import pytest
 from neuro.modules.m11_time_perception.temporal_integration import (
     SubjectiveTimeSystem,
@@ -8,8 +7,6 @@ from neuro.modules.m11_time_perception.temporal_integration import (
     TemporalEstimate,
 )
 from neuro.modules.m11_time_perception.time_modulation import EmotionalState
-from neuro.modules.m11_time_perception.interval_timing import TimingMode
-from neuro.modules.m11_time_perception.embodied_time import BodyState
 
 
 class TestSubjectiveTimeSystem:

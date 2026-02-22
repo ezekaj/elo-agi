@@ -7,7 +7,7 @@ Provides direct integration with Ollama for local model inference.
 import requests
 import json
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any, Iterator
+from typing import Optional, List, Dict, Iterator
 
 
 @dataclass

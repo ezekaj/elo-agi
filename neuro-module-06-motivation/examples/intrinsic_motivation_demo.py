@@ -62,7 +62,7 @@ def demo_path_entropy_vs_reward():
     print(f"   Intrinsic motivation: {metrics_diverse['intrinsic_motivation']:.3f}")
 
     print("\n   Key insight: Diverse exploration has HIGHER intrinsic value")
-    print(f"   even without explicit rewards!")
+    print("   even without explicit rewards!")
 
 
 def demo_children_choose_harder():

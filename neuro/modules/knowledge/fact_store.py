@@ -7,9 +7,7 @@ indexing for fast queries.
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple, Set, Iterator
-from enum import Enum
 import time
-import numpy as np
 
 
 @dataclass

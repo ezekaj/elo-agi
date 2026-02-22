@@ -7,7 +7,7 @@ Tracks reasoning efficiency and decides when to terminate:
 - Resource allocation
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np

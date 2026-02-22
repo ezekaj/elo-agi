@@ -2,8 +2,6 @@
 Tests for Creative Networks (DMN, ECN, Salience)
 """
 
-import pytest
-import numpy as np
 from neuro.modules.m09_creativity.networks import (
     DefaultModeNetwork,
     ExecutiveControlNetwork,
@@ -275,7 +273,7 @@ class TestSalienceNetwork:
         for _ in range(5):
             salience.record_idea_generated(0.7)  # positional argument
 
-        stats = salience.get_switch_statistics()
+        salience.get_switch_statistics()
         # Stats should reflect activity
 
     def test_switch_history(self):
@@ -355,7 +353,7 @@ class TestNetworkIntegration:
         assert salience.current_state == NetworkState.ECN
 
         # Evaluate
-        evaluation = ecn.evaluate_idea(
+        ecn.evaluate_idea(
             "thought_idea",
             thought.concepts[0] if thought.concepts else "idea",
             idea_features={"novelty": thought.novelty_score, "coherence": thought.coherence_score},

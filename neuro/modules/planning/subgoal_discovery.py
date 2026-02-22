@@ -9,7 +9,7 @@ Automatic discovery of subgoals from trajectories using:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable, Any, Tuple, Set
+from typing import Dict, List, Optional, Callable, Any, Tuple
 from enum import Enum
 import numpy as np
 from collections import defaultdict
@@ -274,7 +274,7 @@ class OptionTerminationDetector:
             next_action_enc = action_encoder(trajectory.actions[i + 1])
 
             prev_change = np.linalg.norm(curr_action_enc - prev_action_enc)
-            next_change = np.linalg.norm(next_action_enc - curr_action_enc)
+            np.linalg.norm(next_action_enc - curr_action_enc)
 
             if prev_change > self.action_change_threshold:
                 changes.append((i, prev_change))

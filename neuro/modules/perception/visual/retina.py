@@ -5,8 +5,8 @@ Implements photoreceptor responses, center-surround processing,
 and ganglion cell encoding.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
+from typing import Dict, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
@@ -279,7 +279,7 @@ class Retina:
         """Generate a visualization of center-surround receptive fields."""
         from scipy.ndimage import gaussian_filter
 
-        rf_map = np.zeros(size)
+        np.zeros(size)
         center = (size[0] // 2, size[1] // 2)
 
         # Create impulse

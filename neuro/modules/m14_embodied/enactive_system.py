@@ -8,7 +8,7 @@ Three types of enactivism:
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 
 from .sensorimotor import SensorimotorLoop, SensorimotorParams
 from .grounded_concepts import ConceptGrounding, GroundingParams

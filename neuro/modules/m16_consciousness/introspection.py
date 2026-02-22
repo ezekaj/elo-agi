@@ -6,7 +6,7 @@ Enables self-knowledge and verbal report of conscious contents
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List
 
 
 @dataclass

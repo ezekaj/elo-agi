@@ -2,7 +2,7 @@
 Permission Manager - Tool permission system.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Any, Optional, List, Set
 from enum import Enum
 import json
@@ -196,7 +196,7 @@ class PermissionManager:
                 val_str += "..."
             print(f"    {k}: {val_str}")
 
-        print(f"  [y] Allow  [n] Deny  [a] Always allow  [d] Always deny")
+        print("  [y] Allow  [n] Deny  [a] Always allow  [d] Always deny")
 
         try:
             import asyncio

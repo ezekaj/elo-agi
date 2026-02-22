@@ -13,8 +13,6 @@ sys.path.insert(0, "..")
 
 from src.moral_reasoning import (
     MoralDilemmaProcessor,
-    VMPFCLesionModel,
-    MoralFramework,
     create_trolley_switch,
     create_trolley_push,
     create_crying_baby,
@@ -76,8 +74,8 @@ def demo_switch_vs_push():
     print("\n" + "=" * 70)
     print("COMPARISON")
     print("=" * 70)
-    print(f"\n                    SWITCH         PUSH")
-    print(f"Same utility:       5-1=+4         5-1=+4")
+    print("\n                    SWITCH         PUSH")
+    print("Same utility:       5-1=+4         5-1=+4")
     print(
         f"Would act:          {'Yes' if switch_decision.action_taken else 'No':14} {'Yes' if push_decision.action_taken else 'No'}"
     )

@@ -1,6 +1,5 @@
 """Permission system for tool execution."""
 
-import json
 from enum import Enum
 from rich.console import Console
 from rich.prompt import Confirm
@@ -113,7 +112,7 @@ def check_permission(tool_name: str, args: dict) -> bool:
 
     # ASK mode - prompt user
     console.print()
-    console.print(f"[bold magenta]🔒 Permission Required[/bold magenta]")
+    console.print("[bold magenta]🔒 Permission Required[/bold magenta]")
     console.print(f"[cyan]Tool:[/cyan] {tool_name}")
 
     for key, value in args.items():

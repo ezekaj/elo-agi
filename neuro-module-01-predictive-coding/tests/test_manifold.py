@@ -6,7 +6,6 @@ from neuro.modules.m01_predictive_coding.cognitive_manifold import (
     CognitiveState,
     CognitiveManifold,
     DualProcess,
-    FlowType,
     AttractorLandscape,
 )
 
@@ -318,8 +317,8 @@ class TestDualProcess:
 
         # Should start with mostly System 1 (fast) and transition to System 2 (slow)
         if len(systems) > 10:
-            early_s1 = sum(1 for s in systems[:5] if s == 1) / 5
-            late_s2 = sum(1 for s in systems[-5:] if s == 2) / 5
+            sum(1 for s in systems[:5] if s == 1) / 5
+            sum(1 for s in systems[-5:] if s == 2) / 5
 
             # Early phase should have more System 1
             # Late phase should have more System 2

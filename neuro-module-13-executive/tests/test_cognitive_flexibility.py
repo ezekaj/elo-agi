@@ -6,7 +6,6 @@ from neuro.modules.m13_executive.cognitive_flexibility import (
     TaskSwitcher,
     SetShifter,
     CognitiveFlexibility,
-    FlexibilityParams,
 )
 
 
@@ -52,11 +51,11 @@ class TestTaskSwitcher:
 
         # Repeat trial
         repeat_result = switcher.execute_trial(np.zeros(10), task=0)
-        repeat_rt = repeat_result["rt"]
+        repeat_result["rt"]
 
         # Switch trial
         switch_result = switcher.execute_trial(np.zeros(10), task=1)
-        switch_rt = switch_result["rt"]
+        switch_result["rt"]
 
         # Switch should have higher RT (on average, accounting for noise)
         # Just check the trial executes correctly

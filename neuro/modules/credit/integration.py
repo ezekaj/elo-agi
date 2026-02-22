@@ -4,11 +4,11 @@ Credit Assignment Integration
 Integrates all credit assignment components into a unified system.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any, Callable, Set
 import numpy as np
 
-from .eligibility_traces import EligibilityTraceManager, TraceConfig, TraceType
+from .eligibility_traces import EligibilityTraceManager, TraceConfig
 from .policy_gradient import CrossModulePolicyGradient, GAEConfig, PolicyGradientResult
 from .blame_assignment import BlameAssignment, Failure, FailureType, BlameResult, ModuleAction
 from .surprise_modulation import SurpriseModulatedLearning, SurpriseConfig, SurpriseMetrics

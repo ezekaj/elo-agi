@@ -1,6 +1,5 @@
 """Tests for time perception modulation factors"""
 
-import numpy as np
 import pytest
 from neuro.modules.m11_time_perception.time_modulation import (
     EmotionalModulator,
@@ -9,7 +8,6 @@ from neuro.modules.m11_time_perception.time_modulation import (
     AgeModulator,
     TimeModulationSystem,
     EmotionalState,
-    ModulationEffect,
 )
 
 

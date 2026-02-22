@@ -11,8 +11,7 @@ Key properties:
 - Hierarchical - structures can contain structures
 """
 
-import numpy as np
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import uuid

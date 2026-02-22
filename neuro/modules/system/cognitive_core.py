@@ -15,15 +15,15 @@ Usage:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 import numpy as np
 import time
 
 from .config import SystemConfig, DEFAULT_CONFIG
-from .module_loader import ModuleLoader, LoadedModule, ModuleStatus
+from .module_loader import ModuleLoader
 from .sensory_interface import SensoryInterface, SensoryInput, InputType
 from .motor_interface import MotorInterface, MotorOutput, OutputType
-from .active_inference import ActiveInferenceController, Policy
+from .active_inference import ActiveInferenceController
 
 
 @dataclass

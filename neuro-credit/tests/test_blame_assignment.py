@@ -1,8 +1,5 @@
 """Tests for blame assignment."""
 
-import pytest
-import numpy as np
-
 from neuro.modules.credit.blame_assignment import (
     Failure,
     FailureType,

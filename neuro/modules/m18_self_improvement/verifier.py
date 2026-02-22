@@ -11,13 +11,12 @@ Based on:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 import numpy as np
 import time
-import copy
 
-from .generator import Modification, ModificationType
+from .generator import Modification
 
 
 class VerificationMethod(Enum):
@@ -133,7 +132,6 @@ class ChangeVerifier:
         Returns:
             VerificationResult
         """
-        warnings = []
 
         # Check reversibility requirement
         if self.params.require_reversibility and not modification.reversible:
@@ -289,7 +287,6 @@ class ChangeVerifier:
         rollback_fn: Callable,
     ) -> VerificationResult:
         """Verify with statistical significance testing."""
-        baseline = self._baseline_performance or 0.0
         n_trials = self.params.n_simulations
 
         # Collect baseline samples

@@ -6,7 +6,6 @@ from neuro.modules.m13_executive.executive_network import (
     ConflictMonitor,
     PFCController,
     ExecutiveNetwork,
-    ExecutiveParams,
 )
 
 
@@ -97,7 +96,7 @@ class TestPFCController:
         controller = PFCController(n_goals=3)
         controller.set_goal(0, np.random.rand(100))
 
-        initial = controller.goal_activation[0]
+        controller.goal_activation[0]
 
         for _ in range(10):
             controller.maintain_goals(dt=1.0)

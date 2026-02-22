@@ -6,13 +6,13 @@ for cross-module integration with the rest of the Neuro AGI system.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
 from .symbolic_binder import SymbolicBinder, CompositeBinding, RoleType
 from .abstraction_engine import AbstractionEngine, Abstraction, AbstractionLevel
-from .composition_types import CompositionType, AtomicType, StructuredType
+from .composition_types import CompositionType
 
 
 class SemanticModalityType(Enum):

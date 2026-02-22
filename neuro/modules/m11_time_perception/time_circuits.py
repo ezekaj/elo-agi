@@ -9,8 +9,8 @@ Brain regions involved in temporal processing:
 """
 
 import numpy as np
-from typing import Optional, Dict, List, Tuple
-from dataclasses import dataclass, field
+from typing import Optional, Dict, List
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -213,7 +213,7 @@ class SMA:
             Temporal signal synchronized with environment
         """
         # Count external rhythm cycles
-        cycles = duration * external_rhythm
+        duration * external_rhythm
 
         # Better timing when synchronized with external rhythm
         sync_precision = self.motor_precision * 1.2

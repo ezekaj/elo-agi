@@ -6,14 +6,11 @@ Tests abstraction, curriculum, few-shot, meta-learning, domain adaptation, and s
 
 import pytest
 import numpy as np
-import os
 
 from neuro.modules.transfer.abstraction import (
     AbstractionEngine,
     AbstractionLevel,
-    AbstractConcept,
     StructuralAnalogy,
-    DomainPrinciple,
     RelationExtractor,
     StructureMapper,
     PrincipleExtractor,
@@ -22,7 +19,6 @@ from neuro.modules.transfer.curriculum import (
     CurriculumLearner,
     Task,
     TaskDifficulty,
-    LearningPath,
     ProgressTracker,
     DifficultyEstimator,
     TaskSelector,
@@ -40,7 +36,6 @@ from neuro.modules.transfer.meta_learner import (
     MetaLearner,
     MAML,
     LearningStrategy,
-    TaskDistribution,
     AdaptationResult,
     SimpleNN,
 )
@@ -48,7 +43,6 @@ from neuro.modules.transfer.domain_adapter import (
     DomainAdapter,
     DomainEmbedding,
     DomainAlignment,
-    TransferMapping,
     AdaptedRepresentation,
     SubspaceAlignment,
     CorrelationAlignment,
@@ -56,8 +50,6 @@ from neuro.modules.transfer.domain_adapter import (
 from neuro.modules.transfer.skill_library import (
     SkillLibrary,
     Skill,
-    SkillPrimitive,
-    CompositeSkill,
     SkillExecution,
     SkillType,
     SkillComposer,
@@ -591,7 +583,7 @@ class TestSkillLibrary:
         library.register_skill("sum", "math", "Sum values together")
         library.register_skill("multiply", "math", "Multiply numbers")
 
-        skill = library.get_skill("skill_1")
+        library.get_skill("skill_1")
         similar = library.find_similar_skills("skill_1")
 
         assert isinstance(similar, list)

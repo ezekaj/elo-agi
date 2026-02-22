@@ -1,6 +1,5 @@
 """Tests for surprise-modulated learning."""
 
-import pytest
 import numpy as np
 
 from neuro.modules.credit.surprise_modulation import (

@@ -6,7 +6,6 @@ from neuro.modules.m14_embodied.grounded_concepts import (
     ModalityBindings,
     GroundedConcept,
     ConceptGrounding,
-    GroundingParams,
 )
 
 

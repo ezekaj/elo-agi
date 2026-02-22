@@ -6,7 +6,7 @@ Neural basis: Anterior insula (affective sharing), ACC (empathy for pain)
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 
 
 @dataclass

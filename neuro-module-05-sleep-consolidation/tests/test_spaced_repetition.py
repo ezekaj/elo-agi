@@ -1,12 +1,10 @@
 """Tests for spaced repetition scheduler."""
 
 import pytest
-import numpy as np
 from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
     SpacedRepetitionScheduler,
     RepetitionSchedule,
     ReviewQuality,
-    ReviewResult,
 )
 
 
@@ -125,7 +123,7 @@ class TestSpacedRepetitionScheduler:
         scheduler.schedule_review("mem1", ReviewQuality.EASY_CORRECT)
         scheduler.schedule_review("mem1", ReviewQuality.EASY_CORRECT)
 
-        old_rep_count = scheduler.get_schedule("mem1").repetition_count
+        scheduler.get_schedule("mem1").repetition_count
         scheduler.schedule_review("mem1", ReviewQuality.COMPLETE_BLACKOUT)
 
         schedule = scheduler.get_schedule("mem1")

@@ -12,7 +12,6 @@ These tests push the system to its limits and test edge cases:
 import numpy as np
 import pytest
 from neuro.modules.m01_predictive_coding.predictive_hierarchy import (
-    PredictiveLayer,
     PredictiveHierarchy,
 )
 from neuro.modules.m01_predictive_coding.precision_weighting import (
@@ -21,7 +20,6 @@ from neuro.modules.m01_predictive_coding.precision_weighting import (
     HierarchicalPrecision,
 )
 from neuro.modules.m01_predictive_coding.cognitive_manifold import (
-    CognitiveState,
     CognitiveManifold,
     DualProcess,
     AttractorLandscape,
@@ -325,7 +323,7 @@ class TestIntegration:
         for t in range(100):
             obs = np.sin(2 * np.pi * t * 0.1) * np.ones(5)
             states = temporal.step(obs, dt=0.01)
-            error = sequence_detector.observe(obs, timestamp=t * 0.01)
+            sequence_detector.observe(obs, timestamp=t * 0.01)
 
             for state in states:
                 assert np.all(np.isfinite(state))

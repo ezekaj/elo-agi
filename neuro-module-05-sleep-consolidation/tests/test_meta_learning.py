@@ -1,13 +1,11 @@
 """Tests for meta-learning controller."""
 
 import pytest
-import numpy as np
 from neuro.modules.m05_sleep_consolidation.meta_learning import (
     MetaLearningController,
     LearningCurve,
     ReplayWeights,
     MemoryType,
-    ConsolidationOutcome,
 )
 
 

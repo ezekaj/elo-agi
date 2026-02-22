@@ -6,7 +6,7 @@ Processes: edges → textures → shapes → objects
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -246,8 +246,8 @@ class VisualFeatureExtractor:
         if len(edges) < self.shape_min_edges:
             return shapes
 
-        edge_locs = np.array([e.location for e in edges])
-        edge_oris = np.array([e.orientation for e in edges])
+        np.array([e.location for e in edges])
+        np.array([e.orientation for e in edges])
 
         visited = set()
 

@@ -8,7 +8,7 @@ Key principle: Hebbian learning - "neurons that fire together, wire together"
 """
 
 import numpy as np
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict
 from dataclasses import dataclass, field
 from enum import Enum
 

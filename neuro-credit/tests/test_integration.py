@@ -1,6 +1,5 @@
 """Tests for credit assignment integration."""
 
-import pytest
 import numpy as np
 
 from neuro.modules.credit.integration import CreditConfig, CreditAssignmentSystem

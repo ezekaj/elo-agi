@@ -1,6 +1,5 @@
 """File operation tools: read, write, edit."""
 
-import os
 from pathlib import Path
 from .base import Tool, ToolResult
 

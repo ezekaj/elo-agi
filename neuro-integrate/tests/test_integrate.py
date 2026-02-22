@@ -11,7 +11,6 @@ Covers:
 
 import pytest
 import numpy as np
-from pathlib import Path
 
 # Add src to path
 from neuro.modules.integrate.shared_space import (
@@ -23,7 +22,6 @@ from neuro.modules.integrate.shared_space import (
 )
 from neuro.modules.integrate.cross_module_learning import (
     CrossModuleLearner,
-    LearningSignal,
     SignalType,
     GradientRouter,
     ModuleSynapse,
@@ -31,7 +29,6 @@ from neuro.modules.integrate.cross_module_learning import (
 from neuro.modules.integrate.conflict_resolution import (
     ConflictResolver,
     Conflict,
-    Resolution,
     ConflictType,
     ResolutionStrategy,
 )
@@ -47,7 +44,6 @@ from neuro.modules.integrate.evidence_accumulation import (
 from neuro.modules.integrate.coherence_checker import (
     CoherenceChecker,
     Belief,
-    Inconsistency,
     InconsistencyType,
     BeliefNetwork,
     CoherenceReport,
@@ -348,7 +344,7 @@ class TestCrossModuleLearner:
         learner.register_module("m2")
 
         learner.emit_signal(SignalType.ERROR, "m1", ["m2"], np.random.randn(512))
-        gradients = learner.process_signals()
+        learner.process_signals()
 
         assert len(learner._signal_queue) == 0
 

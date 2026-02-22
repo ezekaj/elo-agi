@@ -4,7 +4,7 @@ Meta-Learner: Learn how to learn.
 Implements MAML, learning strategies, and task adaptation.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Callable
 import numpy as np
 

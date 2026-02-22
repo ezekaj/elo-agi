@@ -7,7 +7,6 @@ with exact and approximate inference.
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple, Set, Union
-from enum import Enum
 import numpy as np
 from collections import deque
 

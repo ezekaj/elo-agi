@@ -6,22 +6,14 @@ This is the "thinking hard" mode that uses the full cognitive architecture.
 """
 
 import time
-import json
 import numpy as np
 import hashlib
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any, Tuple
-from pathlib import Path
+from typing import List, Dict, Optional, Any
 
 # Import cognitive adapters (handles all module loading)
 from .cognitive_adapters import (
     CognitiveModuleFactory,
-    ProblemType,
-    ThinkingStyle,
-    ProblemDifficulty,
-    ProblemAnalysis,
-    StyleSelection,
-    ExecutionPlan,
 )
 
 
@@ -113,7 +105,6 @@ class UltraThink:
 
         # Create embedding for the problem
         embedding = self._text_to_embedding(problem)
-        full_context = f"{problem}\n\nContext: {context}" if context else problem
 
         # === PHASE 1: PERCEPTION & CLASSIFICATION ===
         self._log("Phase 1: Perceiving and classifying problem...")
@@ -586,7 +577,7 @@ def main():
 
     ultra = UltraThink(verbose=True)
 
-    print(f"\nModule Statistics:")
+    print("\nModule Statistics:")
     stats = ultra.get_stats()
     print(f"  Total: {stats['modules_loaded']}")
     print(f"  Active: {stats['active_modules']}")

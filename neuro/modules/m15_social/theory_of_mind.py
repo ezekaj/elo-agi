@@ -6,7 +6,7 @@ Neural basis: mPFC (self-referential), TPJ (attribution to others)
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict
 
 
 @dataclass

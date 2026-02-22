@@ -6,7 +6,6 @@ from neuro.modules.m15_social.empathy import (
     AffectiveSharing,
     EmpathicConcern,
     EmpathySystem,
-    EmpathyParams,
 )
 
 

@@ -8,7 +8,7 @@ Detects reasoning errors and biases:
 - Correction suggestions
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any, Set
 from enum import Enum
 import numpy as np

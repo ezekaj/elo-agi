@@ -11,7 +11,6 @@ tasks similar to those in the ARC benchmark.
 """
 
 import numpy as np
-from typing import List, Dict, Any, Tuple
 
 
 def demo_arc_reasoning():
@@ -34,7 +33,7 @@ def demo_arc_reasoning():
             sys.path.insert(0, str(src_dir))
 
     from symbolic_binder import SymbolicBinder, RoleType
-    from problem_classifier import ProblemClassifier, ProblemType
+    from problem_classifier import ProblemClassifier
     from differentiable_scm import DifferentiableSCM
 
     print("\n" + "-" * 60)
@@ -190,9 +189,9 @@ def demo_arc_reasoning():
 
     # Intervention
     intervention = {"input_shape": 1.0}
-    intervened = scm.intervene(intervention)
-    print(f"   Intervention: do(input_shape = 1.0)")
-    print(f"   Expected output under intervention computed")
+    scm.intervene(intervention)
+    print("   Intervention: do(input_shape = 1.0)")
+    print("   Expected output under intervention computed")
 
     # Counterfactual: What would output be if input was different?
     print("\n8. Counterfactual reasoning...")
@@ -204,8 +203,8 @@ def demo_arc_reasoning():
         "output_shape": 0.7,
     }
     cf_result = scm.counterfactual(evidence=evidence, intervention={"input_shape": 1.0})
-    print(f"   Observed: input_shape=0.5, output_shape=0.7")
-    print(f"   Counterfactual: If input_shape had been 1.0...")
+    print("   Observed: input_shape=0.5, output_shape=0.7")
+    print("   Counterfactual: If input_shape had been 1.0...")
     print(f"   Output would have been: {cf_result.get('output_shape', 'N/A')}")
 
     print("\n" + "-" * 60)
@@ -256,10 +255,10 @@ def demo_arc_reasoning():
     print("=" * 60)
     print(f"\n   Tasks solved: {tasks_solved}/5")
     print(f"   Success rate: {tasks_solved / 5 * 100:.0f}%")
-    print(f"\n   Modules demonstrated:")
-    print(f"   - neuro-abstract (SymbolicBinder): Role-filler binding")
-    print(f"   - neuro-meta-reasoning (ProblemClassifier): Task analysis")
-    print(f"   - neuro-causal (DifferentiableSCM): Pattern causality")
+    print("\n   Modules demonstrated:")
+    print("   - neuro-abstract (SymbolicBinder): Role-filler binding")
+    print("   - neuro-meta-reasoning (ProblemClassifier): Task analysis")
+    print("   - neuro-causal (DifferentiableSCM): Pattern causality")
 
     stats = {
         "tasks_attempted": 5,

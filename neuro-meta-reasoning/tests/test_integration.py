@@ -283,7 +283,7 @@ class TestEndToEndMetaReasoning:
         for i in range(5):
             embedding = np.random.randn(128)
             session = controller.create_session(embedding)
-            result = controller.execute_session(session.session_id, {})
+            controller.execute_session(session.session_id, {})
 
             controller.record_feedback(
                 session.session_id,

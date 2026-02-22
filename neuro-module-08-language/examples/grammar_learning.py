@@ -30,12 +30,12 @@ def demo_grammar_constraints():
 
     manifold = GrammarConstraintManifold(dim=32)
 
-    print(f"\n--- Manifold Properties ---")
+    print("\n--- Manifold Properties ---")
     print(f"  Dimension: {manifold.dim}")
     print(f"  Number of constraints: {len(manifold.constraints)}")
     print(f"  Region radius: {manifold.radius}")
 
-    print(f"\n--- Constraints ---")
+    print("\n--- Constraints ---")
     for constraint in manifold.constraints:
         hard_str = "(HARD)" if constraint.is_hard else "(soft)"
         print(f"  {constraint.name}: weight={constraint.weight} {hard_str}")
@@ -85,15 +85,15 @@ def demo_universal_grammar():
 
     ug = UniversalGrammar(dim=32)
 
-    print(f"\n--- UG Principles ---")
+    print("\n--- UG Principles ---")
     for principle in ug.principles:
         print(f"  - {principle}")
 
-    print(f"\n--- UG Parameters (Principles & Parameters framework) ---")
+    print("\n--- UG Parameters (Principles & Parameters framework) ---")
     for param, value in ug.parameters.items():
         print(f"  {param}: {value}")
 
-    print(f"\n--- Evaluating Random Grammars ---")
+    print("\n--- Evaluating Random Grammars ---")
     for i in range(5):
         params = np.random.randn(32) * 0.5
         results = ug.evaluate(params)
@@ -128,18 +128,18 @@ def demo_selective_inhibition():
         impossible_inhibitions.append(manifold.inhibition_signal(impossible))
 
     print(f"\n--- Inhibition Statistics (n={n_samples} each) ---")
-    print(f"\nPossible grammars:")
+    print("\nPossible grammars:")
     print(f"  Mean inhibition: {np.mean(possible_inhibitions):.3f}")
     print(f"  Std inhibition:  {np.std(possible_inhibitions):.3f}")
     print(f"  Max inhibition:  {np.max(possible_inhibitions):.3f}")
 
-    print(f"\nImpossible grammars:")
+    print("\nImpossible grammars:")
     print(f"  Mean inhibition: {np.mean(impossible_inhibitions):.3f}")
     print(f"  Std inhibition:  {np.std(impossible_inhibitions):.3f}")
     print(f"  Min inhibition:  {np.min(impossible_inhibitions):.3f}")
 
     selectivity = np.mean(impossible_inhibitions) - np.mean(possible_inhibitions)
-    print(f"\n--- Selectivity ---")
+    print("\n--- Selectivity ---")
     print(f"  Difference (impossible - possible): {selectivity:.3f}")
     if selectivity > 0:
         print("  ✓ Broca's shows selective inhibition for impossible grammars")

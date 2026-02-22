@@ -300,7 +300,9 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit isotonic regression."""
         n_classes = logits.shape[1]
-        probs = np.array([np.exp(lgt - np.max(lgt)) / np.sum(np.exp(lgt - np.max(lgt))) for lgt in logits])
+        probs = np.array(
+            [np.exp(lgt - np.max(lgt)) / np.sum(np.exp(lgt - np.max(lgt))) for lgt in logits]
+        )
 
         self._isotonic_calibrator = {"mappings": []}
 
@@ -340,7 +342,9 @@ class ConfidenceCalibrator:
     ) -> None:
         """Fit histogram binning."""
         n_classes = logits.shape[1]
-        probs = np.array([np.exp(lgt - np.max(lgt)) / np.sum(np.exp(lgt - np.max(lgt))) for lgt in logits])
+        probs = np.array(
+            [np.exp(lgt - np.max(lgt)) / np.sum(np.exp(lgt - np.max(lgt))) for lgt in logits]
+        )
 
         self._histogram_calibrator = []
 

@@ -4,16 +4,14 @@ Interface: Connect perception to neuro-system sensory components.
 Provides the bridge between raw sensory input and the cognitive architecture.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Union
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
 from .visual.retina import Retina, RetinaOutput
 from .visual.v1_v2 import V1Processor, V2Processor, V1Output, V2Output
 from .visual.v4_it import V4Processor, ITProcessor, V4Output, ITOutput
 from .visual.dorsal_ventral import (
-    DorsalStream,
-    VentralStream,
     VisualPathways,
     DorsalOutput,
     VentralOutput,

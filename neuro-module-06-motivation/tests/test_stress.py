@@ -4,26 +4,16 @@ import numpy as np
 import pytest
 from neuro.modules.m06_motivation.intrinsic_motivation import (
     PathEntropyMaximizer,
-    PossibilitySpace,
-    ActionDiversityTracker,
-    DriveType,
 )
 from neuro.modules.m06_motivation.dopamine_system import (
     DopamineSystem,
-    PredictionErrorComputer,
-    IncentiveSalience,
-    BenefitCostEvaluator,
 )
 from neuro.modules.m06_motivation.curiosity_drive import (
     CuriosityModule,
-    NoveltyDetector,
-    InformationValue,
-    ExplorationController,
 )
 from neuro.modules.m06_motivation.homeostatic_regulation import (
     HomeostaticState,
     NeedBasedValuation,
-    InternalStateTracker,
     NeedType,
 )
 from neuro.modules.m06_motivation.effort_valuation import (
@@ -216,7 +206,7 @@ class TestLongRunning:
     def test_homeostatic_long_run(self):
         """Test homeostatic regulation over long time"""
         state = HomeostaticState()
-        valuation = NeedBasedValuation(state)
+        NeedBasedValuation(state)
 
         for i in range(1000):
             state.update(dt=0.1)
@@ -263,7 +253,7 @@ class TestEdgeCases:
             maximizer.observe(same_state, same_action)
 
         # Diversity should be low
-        diversity = maximizer.action_tracker.compute_diversity()
+        maximizer.action_tracker.compute_diversity()
         # With identical actions, diversity entropy approaches 0
 
     def test_zero_reward_dopamine(self):
@@ -385,7 +375,7 @@ class TestIntegration:
 
             # Process through dopamine system
             next_state = state + np.random.randn(4) * 0.1
-            signal = dopamine.process_transition(state, action, reward, next_state)
+            dopamine.process_transition(state, action, reward, next_state)
 
             # Process curiosity
             curiosity.process_stimulus(next_state, action)
@@ -426,7 +416,7 @@ class TestIntegration:
     def test_effort_value_tradeoff(self):
         """Test effort-value tradeoff computation"""
         effort_model = EffortCostModel()
-        paradox = ParadoxicalEffort()
+        ParadoxicalEffort()
         transform = MotivationalTransform()
 
         # Low motivation context

@@ -5,16 +5,14 @@ Implements case-based reasoning with analogical retrieval.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Set
 import numpy as np
 
 from .mapping import (
     RelationalStructure,
-    Predicate,
     StructureMapper,
     StructuralAlignment,
     Analogy,
-    RelationOrder,
 )
 
 

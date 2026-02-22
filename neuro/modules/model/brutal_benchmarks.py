@@ -18,12 +18,10 @@ Run with: python brutal_benchmarks.py
 """
 
 import time
-import json
 import random
 import traceback
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Optional, Callable
-from datetime import datetime
+from typing import Dict, List, Any
 
 
 @dataclass
@@ -421,7 +419,7 @@ class BrutalBenchmarks:
                 errors=["Self-improver not available"],
             )
 
-        initial_patterns = len(self.agent.improver.learned_patterns)
+        len(self.agent.improver.learned_patterns)
         initial_solutions = len(self.agent.improver.error_solutions)
 
         # Simulate errors and learning
@@ -436,7 +434,7 @@ class BrutalBenchmarks:
             self.agent._handle_error(f"Error: {error_type}")
             actions += 1
 
-        final_patterns = len(self.agent.improver.learned_patterns)
+        len(self.agent.improver.learned_patterns)
         final_solutions = len(self.agent.improver.error_solutions)
 
         learned = final_solutions - initial_solutions
@@ -1048,7 +1046,7 @@ class BrutalBenchmarks:
             # Run full workflow
             state = self.agent.process("Calculate the factorial of 5", deep_think=True)
 
-            checks = {
+            {
                 "perceive": state.confidence > 0
                 or len(state.knowledge) >= 0,  # Always passes perceive
                 "think": len(state.analysis) > 0 or len(state.plan) > 0,
@@ -1094,7 +1092,7 @@ class BrutalBenchmarks:
         print("=" * 70)
         print("BRUTAL BENCHMARKS - AGI STANDARD TESTING SUITE")
         print("=" * 70)
-        print(f"Categories: ARC-AGI | GAIA | AgentBench | SWE-bench inspired")
+        print("Categories: ARC-AGI | GAIA | AgentBench | SWE-bench inspired")
         print("=" * 70)
 
         tests = [

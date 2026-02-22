@@ -6,7 +6,6 @@ from neuro.modules.m16_consciousness.metacognition import (
     ConfidenceEstimator,
     PerformanceMonitor,
     MetacognitiveSystem,
-    MetaParams,
 )
 
 
@@ -90,7 +89,7 @@ class TestPerformanceMonitor:
         for acc in [0.5, 0.6, 0.7, 0.8, 0.9]:
             monitor.record_outcome(acc)
 
-        trend = monitor.get_performance_trend(window=2)
+        monitor.get_performance_trend(window=2)
         # May be positive or zero depending on window
 
 

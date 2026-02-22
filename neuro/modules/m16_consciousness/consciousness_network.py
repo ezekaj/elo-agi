@@ -5,7 +5,6 @@ Implements global workspace theory aspects
 """
 
 import numpy as np
-from dataclasses import dataclass
 from typing import Optional, Dict, List
 
 from .minimal_self import MinimalSelf, MinimalSelfParams

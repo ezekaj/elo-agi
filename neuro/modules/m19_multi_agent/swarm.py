@@ -13,21 +13,20 @@ Based on:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 import time
 
-from .agent import CognitiveAgent, AgentParams, AgentRole, ModuleProposal
-from .population import AgentPopulation, PopulationParams, PopulationState
+from .agent import CognitiveAgent, AgentParams, AgentRole
+from .population import AgentPopulation, PopulationParams
 from .coordination import (
     EmergentCoordination,
     CoordinationMechanism,
     CoordinationParams,
     Task,
-    Action,
 )
-from .collective_memory import CollectiveMemory, MemoryParams, MemoryEntry
+from .collective_memory import CollectiveMemory, MemoryParams
 
 
 class ProblemStatus(Enum):
@@ -243,7 +242,7 @@ class SwarmIntelligence:
                 break
 
             # Detect emergent patterns
-            patterns = self.coordination.detect_emergence(list(self.population.agents.values()))
+            self.coordination.detect_emergence(list(self.population.agents.values()))
 
         # Compute solution quality
         quality = self._compute_quality(problem, best_output)

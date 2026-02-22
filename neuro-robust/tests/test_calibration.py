@@ -63,7 +63,6 @@ class TestConfidenceCalibrator:
         """Test fitting temperature scaling."""
         logits, labels = logits_and_labels
         calibrator = ConfidenceCalibrator(method=CalibrationMethod.TEMPERATURE)
-        initial_T = calibrator.temperature
         calibrator.fit(logits, labels)
         assert calibrator._is_fitted
         assert isinstance(calibrator.temperature, float)

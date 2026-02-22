@@ -1,7 +1,6 @@
 """Base Tool class and ToolResult dataclass."""
 
 from dataclasses import dataclass, field
-from typing import Any
 from abc import ABC, abstractmethod
 
 

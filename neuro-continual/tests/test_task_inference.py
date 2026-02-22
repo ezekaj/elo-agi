@@ -1,12 +1,10 @@
 """Tests for task inference."""
 
-import pytest
 import numpy as np
 
 from neuro.modules.continual.task_inference import (
     TaskInference,
     TaskInferenceConfig,
-    TaskInfo,
     TaskChangeMethod,
 )
 
@@ -53,7 +51,7 @@ class TestTaskInference:
 
         for i in range(10):
             state = np.random.randn(10) * 0.1
-            changed = ti.detect_task_change(state)
+            ti.detect_task_change(state)
 
         assert ti.get_current_task() == current_task
 
@@ -117,9 +115,9 @@ class TestTaskInference:
         state2 = np.ones(10) * 0.9
         ti.infer_task_id(state2)
 
-        initial_tasks = len(ti.get_all_tasks())
+        len(ti.get_all_tasks())
 
-        merged = ti.merge_similar_tasks(threshold=0.5)
+        ti.merge_similar_tasks(threshold=0.5)
 
         assert ti.get_all_tasks()
 

@@ -9,7 +9,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.interactive.theory_of_mind import TheoryOfMind, Observation, MentalStateModel
+from src.interactive.theory_of_mind import TheoryOfMind, MentalStateModel
 
 
 def run_sally_anne_test():
@@ -65,7 +65,7 @@ def run_sally_anne_test():
         agent_id="sally", object_id="marble", true_location="box", believed_location="basket"
     )
 
-    print(f"\nAnalysis:")
+    print("\nAnalysis:")
     print(f"  True location of marble: {result['true_location']}")
     print(f"  Sally believes marble is at: {result['agent_believes']}")
     print(f"  Has false belief: {result['has_false_belief']}")

@@ -4,7 +4,7 @@ Sim2Real: Transfer from simulation to reality.
 Implements methods for bridging the simulation-reality gap.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Callable
 from enum import Enum
 import numpy as np

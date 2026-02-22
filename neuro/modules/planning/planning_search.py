@@ -9,11 +9,9 @@ Implements Monte Carlo Tree Search with:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable, Any, Tuple, Set
+from typing import Dict, List, Optional, Callable, Any, Tuple
 from enum import Enum
 import numpy as np
-from collections import defaultdict
-import heapq
 
 
 class NodeType(Enum):

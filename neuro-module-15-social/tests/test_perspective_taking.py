@@ -6,7 +6,6 @@ from neuro.modules.m15_social.perspective_taking import (
     SelfOtherDistinction,
     TPJNetwork,
     PerspectiveTaking,
-    PerspectiveParams,
 )
 
 

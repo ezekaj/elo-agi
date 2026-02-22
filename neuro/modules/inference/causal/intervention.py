@@ -4,9 +4,8 @@ Intervention: Do-calculus and causal intervention reasoning.
 Implements Pearl's do-calculus rules for causal inference.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Set
-from enum import Enum
 import numpy as np
 
 

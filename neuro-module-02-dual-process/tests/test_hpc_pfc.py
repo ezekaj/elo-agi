@@ -1,7 +1,6 @@
 """Tests for HPC-PFC Complex"""
 
 import pytest
-import numpy as np
 from neuro.modules.m02_dual_process.hpc_pfc_complex import (
     Hippocampus,
     PrefrontalCortex,
@@ -64,7 +63,7 @@ class TestHippocampus:
         # Create linked episodes
         e1 = hpc.encode_episode("A", {"pos": 1})
         e2 = hpc.encode_episode("B", {"pos": 2})
-        e3 = hpc.encode_episode("C", {"pos": 3})
+        hpc.encode_episode("C", {"pos": 3})
 
         # Note: Path finding depends on context proximity
         # This is a basic test of the mechanism

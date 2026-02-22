@@ -10,7 +10,7 @@ import json
 import random
 import threading
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Optional, Set
 from datetime import datetime
 

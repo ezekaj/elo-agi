@@ -5,9 +5,8 @@ Sequence processing, time-based reasoning, and temporal pattern detection.
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Any, Callable
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field
-from collections import deque
 from enum import Enum
 
 

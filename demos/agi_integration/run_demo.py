@@ -67,7 +67,7 @@ def demo_medical_diagnosis():
 
     # Intervention query: If we treat flu, what happens to fever?
     result = agent.reason_causally("intervention", "flu", "fever", intervention_value=0.0)
-    print(f"\n   Q: If flu is treated (set to 0), what happens to fever?")
+    print("\n   Q: If flu is treated (set to 0), what happens to fever?")
     if result.abstained:
         print(f"   A: Abstained due to uncertainty ({result.uncertainty:.2f})")
     else:
@@ -76,7 +76,7 @@ def demo_medical_diagnosis():
 
     # Counterfactual: What if patient didn't have flu?
     result = agent.reason_causally("counterfactual", "flu", "fatigue")
-    print(f"\n   Q: What would fatigue be if patient hadn't had flu?")
+    print("\n   Q: What would fatigue be if patient hadn't had flu?")
     if result.abstained:
         print(f"   A: Abstained due to uncertainty ({result.uncertainty:.2f})")
     else:
@@ -91,7 +91,7 @@ def demo_medical_diagnosis():
     # Query with uncertainty
     print("\n5. Prediction with uncertainty...")
     prediction, confidence, abstained = agent.predict_with_uncertainty("flu")
-    print(f"   Query: 'flu'")
+    print("   Query: 'flu'")
     print(f"   Confidence: {confidence:.2f}")
     print(f"   Abstained: {abstained}")
 
@@ -154,16 +154,16 @@ def demo_physics_learning():
     print("\n3. Causal chain reasoning...")
 
     result = agent.reason_causally("intervention", "force", "velocity", intervention_value=2.0)
-    print(f"\n   Q: If force is doubled, how does velocity change?")
+    print("\n   Q: If force is doubled, how does velocity change?")
     if result.abstained:
-        print(f"   A: Abstained due to uncertainty")
+        print("   A: Abstained due to uncertainty")
     else:
         print(f"   A: Effect = {result.answer:.2f} (indirect via acceleration)")
 
     result = agent.reason_causally("counterfactual", "force", "position")
-    print(f"\n   Q: What would position be if there were no force?")
+    print("\n   Q: What would position be if there were no force?")
     if result.abstained:
-        print(f"   A: Abstained")
+        print("   A: Abstained")
     else:
         print(f"   A: Effect = {result.answer:.2f}")
         print(f"   Confidence: {result.confidence:.2f}")
@@ -177,7 +177,7 @@ def demo_physics_learning():
 
     # Consolidation restores strength
     print("\n5. Sleep consolidation to restore memories...")
-    stats = agent.sleep_consolidate(n_cycles=5)
+    agent.sleep_consolidate(n_cycles=5)
     force_concept = agent.get_concept("force")
     print(f"   After consolidation: force concept strength = {force_concept.strength:.3f}")
 
@@ -242,16 +242,16 @@ def demo_language_concepts():
     print("\n3. Semantic reasoning...")
 
     result = agent.reason_causally("association", "dog", "food")
-    print(f"\n   Q: How associated are 'dog' and 'food'?")
+    print("\n   Q: How associated are 'dog' and 'food'?")
     if result.abstained:
-        print(f"   A: Abstained")
+        print("   A: Abstained")
     else:
         print(f"   A: Association = {result.answer:.2f}")
 
     result = agent.reason_causally("association", "cat", "food")
-    print(f"\n   Q: How associated are 'cat' and 'food'?")
+    print("\n   Q: How associated are 'cat' and 'food'?")
     if result.abstained:
-        print(f"   A: Abstained - no direct relation found")
+        print("   A: Abstained - no direct relation found")
     else:
         print(f"   A: Association = {result.answer:.2f}")
 
@@ -269,7 +269,7 @@ def demo_language_concepts():
     agent.add_causal_relation("ambiguous", "dog", strength=0.5)
 
     result = agent.reason_causally("association", "ambiguous", "dog")
-    print(f"\n   Q: Association between 'ambiguous' and 'dog'?")
+    print("\n   Q: Association between 'ambiguous' and 'dog'?")
     if result.abstained:
         print(f"   A: Abstained due to uncertainty ({result.uncertainty:.2f})")
     else:
@@ -282,9 +282,9 @@ def demo_language_concepts():
     print(f"   After consolidation: 'ambiguous' uncertainty = {ambig.uncertainty:.2f}")
 
     result = agent.reason_causally("association", "ambiguous", "dog")
-    print(f"\n   Retry query after consolidation:")
+    print("\n   Retry query after consolidation:")
     if result.abstained:
-        print(f"   A: Still abstained")
+        print("   A: Still abstained")
     else:
         print(f"   A: Association = {result.answer:.2f}, confidence = {result.confidence:.2f}")
 

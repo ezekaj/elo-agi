@@ -337,7 +337,7 @@ class BenchmarkSuite:
         if self._results:
             all_scores = [r.mean_score for r in self._results.values()]
             all_success = [r.success_rate for r in self._results.values()]
-            lines.append(f"\n=== Overall ===")
+            lines.append("\n=== Overall ===")
             lines.append(f"  Benchmarks: {len(self._results)}")
             lines.append(f"  Mean Score: {np.mean(all_scores):.3f}")
             lines.append(f"  Mean Success: {np.mean(all_success):.1%}")

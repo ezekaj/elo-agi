@@ -6,7 +6,7 @@ Mathematical form: Δw = η × pre × post
 """
 
 import numpy as np
-from typing import Optional, Tuple, List
+from typing import Optional, List
 from dataclasses import dataclass
 
 
@@ -198,7 +198,7 @@ class HebbianNetwork:
         for epoch in range(n_epochs):
             epoch_error = 0.0
             for x in data:
-                output = self.train_step(x)
+                self.train_step(x)
                 # Reconstruction error as proxy for learning
                 reconstructed = self.weights[0].T @ self.activations[1]
                 error = np.mean((x - reconstructed) ** 2)

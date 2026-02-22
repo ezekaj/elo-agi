@@ -7,7 +7,6 @@ from neuro.modules.m05_sleep_consolidation.sleep_stages import (
     StageProperties,
     SleepStageController,
     OscillationGenerator,
-    OscillationEvent,
 )
 
 
@@ -124,7 +123,7 @@ class TestOscillationGenerator:
         gen = OscillationGenerator()
         events = gen.generate_stage_activity(SleepStage.NREM2, duration=5.0)
 
-        event_types = set(e.event_type for e in events)
+        set(e.event_type for e in events)
         # Should have spindles or K-complexes
         assert len(events) > 0
 
@@ -193,7 +192,7 @@ class TestSleepStageController:
 
         # Advance past NREM1 typical duration
         for _ in range(20):  # 20 * 1 minute = 20 minutes
-            result = controller.advance_time(1.0)
+            controller.advance_time(1.0)
 
         # Should have transitioned at some point
         assert controller.current_stage != SleepStage.NREM1 or controller.total_time >= 5

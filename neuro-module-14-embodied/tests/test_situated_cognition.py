@@ -6,7 +6,6 @@ from neuro.modules.m14_embodied.situated_cognition import (
     ExternalMemory,
     SituatedContext,
     ContextualReasoner,
-    SituatedParams,
 )
 
 

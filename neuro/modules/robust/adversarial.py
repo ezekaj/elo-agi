@@ -10,11 +10,10 @@ Implements:
 - Certified robustness
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
-from abc import ABC, abstractmethod
 
 
 class AttackType(Enum):
@@ -661,7 +660,7 @@ class AdversarialDefense:
 
         # Majority vote
         unique, counts = np.unique(predictions, return_counts=True)
-        majority_pred = unique[np.argmax(counts)]
+        unique[np.argmax(counts)]
         confidence = np.max(counts) / n_samples
 
         # Detection: high variance in predictions suggests adversarial

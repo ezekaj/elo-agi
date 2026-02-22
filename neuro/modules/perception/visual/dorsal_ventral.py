@@ -4,7 +4,7 @@ Dorsal and Ventral Streams: "Where" and "What" pathways.
 Implements the dual-stream model of visual processing.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 

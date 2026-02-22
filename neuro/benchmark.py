@@ -14,7 +14,7 @@ How it works:
 import json
 import os
 from datetime import datetime
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Tuple, Optional
 
 
 class Benchmark:
@@ -505,7 +505,7 @@ class Benchmark:
             try:
                 with open(path, "r") as f:
                     self.history = json.load(f)
-            except:
+            except Exception:
                 self.history = []
 
     def get_best_run(self) -> Optional[Dict]:
@@ -543,7 +543,7 @@ class SelfBenchmark:
             Result with recommendation
         """
         # Run benchmark on both
-        print(f"Testing current AI...")
+        print("Testing current AI...")
         current_result = self.benchmark.run_benchmark(current_ai, "current")
 
         print(f"Testing modified AI ({modification_name})...")
@@ -587,7 +587,7 @@ if __name__ == "__main__":
 
     # Bad AI - doesn't reason well
     def bad_ai(question):
-        return f"I think the answer involves some calculation or logic."
+        return "I think the answer involves some calculation or logic."
 
     # Good AI - shows reasoning
     def good_ai(question):

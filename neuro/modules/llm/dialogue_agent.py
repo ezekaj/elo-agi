@@ -10,9 +10,9 @@ from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 import time
 
-from .llm_interface import LLMOracle, MockLLM, LLMConfig, LLMResponse
-from .semantic_bridge import SemanticBridge, SemanticConfig
-from .language_grounding import LanguageGrounding, GroundingConfig
+from .llm_interface import LLMOracle, MockLLM
+from .semantic_bridge import SemanticBridge
+from .language_grounding import LanguageGrounding
 
 
 @dataclass
@@ -125,12 +125,12 @@ class NeuroDialogueAgent:
 
         # Convert output to action description
         if hasattr(output, "value") and isinstance(output.value, np.ndarray):
-            action_vec = output.value
+            pass
         else:
-            action_vec = internal  # Fallback
+            pass  # Fallback
 
         # Generate response using LLM with cognitive context
-        context = self._build_context()
+        self._build_context()
         state_description = (
             self.bridge.observation_to_text(self._current_state)
             if self._current_state is not None

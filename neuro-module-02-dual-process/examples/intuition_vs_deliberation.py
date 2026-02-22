@@ -68,7 +68,7 @@ def demo_easy_task():
 
     result = controller.process(easy_input)
 
-    print(f"Input: Clear match to familiar pattern")
+    print("Input: Clear match to familiar pattern")
     print(f"System used: {result.system_used}")
     print(f"Confidence: {result.confidence:.2f}")
     print(f"Conflict detected: {result.conflict_detected}")
@@ -92,7 +92,7 @@ def demo_habitual_response():
 
     result = controller.process(habit_trigger)
 
-    print(f"Input: Matches trained habit trigger")
+    print("Input: Matches trained habit trigger")
     print(f"System used: {result.system_used}")
     print(f"Response type: {type(result.response).__name__}")
 
@@ -117,7 +117,7 @@ def demo_conflict_triggers_s2():
 
     result = controller.process(conflicting_input)
 
-    print(f"Input: Partially matches multiple patterns")
+    print("Input: Partially matches multiple patterns")
     print(f"Conflict detected: {result.conflict_detected}")
     print(f"System used: {result.system_used}")
     print(f"System 2 engaged: {result.s2_output is not None}")
@@ -142,7 +142,7 @@ def demo_threat_triggers_careful_processing():
 
     result = controller.process(threatening_input)
 
-    print(f"Input: Associated with learned threat")
+    print("Input: Associated with learned threat")
 
     if result.s1_output:
         print(f"Threat level: {result.s1_output.emotional_valence.threat:.2f}")
@@ -167,8 +167,8 @@ def demo_force_deliberation():
     # Force System 2
     result = controller.override_intuition(easy_input)
 
-    print(f"Input: Would normally be handled by System 1")
-    print(f"Forced System 2: Yes")
+    print("Input: Would normally be handled by System 1")
+    print("Forced System 2: Yes")
     print(f"System used: {result.system_used}")
     print(f"Override occurred: {result.override_occurred}")
 
@@ -193,8 +193,8 @@ def demo_trust_intuition():
     # Trust gut feeling
     result = controller.trust_gut(conflicting_input)
 
-    print(f"Input: Conflicting (would normally trigger S2)")
-    print(f"Trust intuition: Yes")
+    print("Input: Conflicting (would normally trigger S2)")
+    print("Trust intuition: Yes")
     print(f"System used: {result.system_used}")
     print(f"Conflict was present: {result.conflict_detected}")
     print(f"System 2 used anyway: {result.s2_output is not None}")

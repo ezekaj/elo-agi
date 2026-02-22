@@ -12,7 +12,7 @@ import sys
 
 sys.path.insert(0, "..")
 
-from src.dual_emotion_routes import DualRouteProcessor, ResponseType
+from src.dual_emotion_routes import DualRouteProcessor
 
 
 def demo_snake_vs_stick():
@@ -36,12 +36,12 @@ def demo_snake_vs_stick():
 
     fast, slow = processor.process(snake_like)
 
-    print(f"\n   FAST ROUTE (12ms):")
+    print("\n   FAST ROUTE (12ms):")
     print(f"   - Response: {fast.response_type.value}")
     print(f"   - Intensity: {fast.intensity:.2f}")
     print(f"   - Confidence: {fast.confidence:.2f}")
 
-    print(f"\n   SLOW ROUTE (100ms):")
+    print("\n   SLOW ROUTE (100ms):")
     print(f"   - Response: {slow.response_type.value}")
     print(f"   - Intensity: {slow.intensity:.2f}")
     print(f"   - Confidence: {slow.confidence:.2f}")
@@ -53,7 +53,7 @@ def demo_snake_vs_stick():
     fast2, slow2 = processor.process(snake_like)
     final = processor.get_final_response(snake_like)
 
-    print(f"\n   After learning:")
+    print("\n   After learning:")
     print(f"   - Fast route still fires: {fast2.response_type.value}")
     print(f"   - Slow route override: {slow2.response_type.value}")
     print(f"   - Final response: {final.response_type.value}")
@@ -78,13 +78,13 @@ def demo_timing_matters():
 
     print("\nTimeline of threat response:")
     print("-" * 40)
-    print(f"  0ms:  Stimulus arrives at thalamus")
+    print("  0ms:  Stimulus arrives at thalamus")
     print(f" 12ms:  FAST route responds: {fast.response_type.value.upper()}")
     print(f"        (Confidence: {fast.confidence:.2f})")
-    print(f"        Body begins fear response before conscious awareness!")
+    print("        Body begins fear response before conscious awareness!")
     print(f"100ms:  SLOW route responds: {slow.response_type.value.upper()}")
     print(f"        (Confidence: {slow.confidence:.2f})")
-    print(f"        Conscious evaluation can now begin")
+    print("        Conscious evaluation can now begin")
 
     print("\n   Key insight: Fear response starts 88ms before")
     print("   you consciously 'see' the threat!")

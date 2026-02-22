@@ -22,7 +22,6 @@ from src import (
     PlaceCell,
     PlaceCellPopulation,
     GridCell,
-    GridCellModule,
     GridCellPopulation,
     HeadDirectionCell,
     HeadDirectionSystem,
@@ -31,10 +30,8 @@ from src import (
     WallDirection,
     CognitiveMap,
     Environment,
-    Landmark,
     PathIntegrator,
     ConceptCell,
-    ConceptualGrid,
     SocialDistanceGrid,
     ConceptualMap,
 )
@@ -62,7 +59,7 @@ class TestResults:
         print(f"\n{'=' * 60}")
         print(f"RESULTS: {self.passed}/{total} passed ({100 * self.passed / total:.1f}%)")
         if self.errors:
-            print(f"\nFailed tests:")
+            print("\nFailed tests:")
             for name, error in self.errors:
                 print(f"  - {name}: {error}")
         print(f"{'=' * 60}")

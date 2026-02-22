@@ -6,7 +6,6 @@ from neuro.modules.m14_embodied.sensorimotor import (
     MotorSensoryCoupling,
     PredictiveProcessor,
     SensorimotorLoop,
-    SensorimotorParams,
 )
 
 

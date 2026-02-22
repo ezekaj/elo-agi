@@ -5,9 +5,8 @@ Implements frequency decomposition via basilar membrane simulation,
 hair cell transduction, and auditory nerve encoding.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
+from dataclasses import dataclass
+from typing import Dict, List, Any
 import numpy as np
 
 
@@ -116,7 +115,7 @@ class GammatoneFilterbank:
         output = np.zeros((self.n_channels, n_samples))
 
         # Time vector
-        t = np.arange(n_samples) / self.sample_rate
+        np.arange(n_samples) / self.sample_rate
 
         for i, coef in enumerate(self._coefficients):
             cf = coef["cf"]

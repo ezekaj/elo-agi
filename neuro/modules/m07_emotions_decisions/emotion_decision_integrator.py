@@ -17,8 +17,8 @@ import numpy as np
 
 from .emotion_circuit import EmotionCircuit, EmotionalEvaluation
 from .dual_emotion_routes import DualRouteProcessor, EmotionRouteResponse, ResponseType
-from .motivational_states import MotivationalSystem, IncentiveSalience, DriveDirection
-from .emotional_states import OutcomeEvaluator, EmotionalDynamics, Outcome, OutcomeType
+from .motivational_states import MotivationalSystem, IncentiveSalience
+from .emotional_states import OutcomeEvaluator, EmotionalDynamics, Outcome
 from .moral_reasoning import MoralDilemmaProcessor, MoralScenario, MoralDecision
 from .value_computation import VMPFCIntegrator, OFCValueComputer, ValueSignal
 
@@ -95,7 +95,6 @@ class EmotionDecisionSystem:
         """
         Process a situation through the full emotional decision system.
         """
-        processing_start = 0.0  # Would be actual time
 
         # 1. Fast emotional evaluation (dual routes)
         fast_response, slow_response = self.dual_routes.process(

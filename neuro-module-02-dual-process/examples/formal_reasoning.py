@@ -75,15 +75,15 @@ def demo_modus_tollens():
     )
 
     print("Premises:")
-    print(f"  1. If it is raining, then the ground is wet")
-    print(f"  2. The ground is NOT wet")
+    print("  1. If it is raining, then the ground is wet")
+    print("  2. The ground is NOT wet")
 
     inferences = ln.derive_inferences([if_rain_then_wet, not_wet])
 
     print("\nInferences:")
     for inf in inferences:
         if inf.rule_applied == "modus_tollens":
-            print(f"  → It is NOT raining")
+            print("  → It is NOT raining")
             print(f"    (Rule: {inf.rule_applied})")
 
     print("✓ Contrapositive reasoning")
@@ -121,7 +121,7 @@ def demo_syllogism():
     ln.represent_relation(["man", "mortal"], "subset_of")
 
     # Derive
-    inferences = ln.derive_inferences([all_men_mortal, socrates_is_man])
+    ln.derive_inferences([all_men_mortal, socrates_is_man])
 
     print("\nConclusion:")
     print("  → Socrates is mortal")
@@ -159,7 +159,7 @@ def demo_hypothetical_syllogism():
     print("\nInferences:")
     for inf in inferences:
         if inf.rule_applied == "hypothetical_syllogism":
-            print(f"  → If I study, then I graduate")
+            print("  → If I study, then I graduate")
             print(f"    (Rule: {inf.rule_applied})")
 
     print("✓ Transitive reasoning through chain")
@@ -193,7 +193,7 @@ def demo_disjunctive_syllogism():
     print("\nInferences:")
     for inf in inferences:
         if inf.rule_applied == "disjunctive_syllogism":
-            print(f"  → I drink coffee")
+            print("  → I drink coffee")
             print(f"    (Rule: {inf.rule_applied})")
 
     print("✓ Elimination reasoning")

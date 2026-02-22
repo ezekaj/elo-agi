@@ -6,7 +6,6 @@ from neuro.modules.m16_consciousness.minimal_self import (
     AgencyDetector,
     OwnershipProcessor,
     MinimalSelf,
-    MinimalSelfParams,
 )
 
 
@@ -44,7 +43,6 @@ class TestAgencyDetector:
     def test_agency_level_changes(self):
         """Test agency level updates"""
         detector = AgencyDetector()
-        initial = detector.agency_level
 
         # Good prediction
         action = np.ones(50)

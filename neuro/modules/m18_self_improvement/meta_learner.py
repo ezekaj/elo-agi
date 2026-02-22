@@ -11,13 +11,12 @@ Based on:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 import time
 
-from .generator import Modification, ModificationType
-from .verifier import VerificationResult
+from .generator import Modification
 from .updater import UpdateResult, UpdateStatus
 
 

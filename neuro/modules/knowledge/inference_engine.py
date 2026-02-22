@@ -6,9 +6,8 @@ proof generation.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set, Callable
+from typing import Dict, List, Optional, Any, Tuple, Set
 from enum import Enum
-import re
 
 from .fact_store import FactStore, Fact, Triple
 

@@ -6,7 +6,7 @@ Cold EF: Lateral PFC - abstract reasoning, logical processing
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, List, Tuple
 
 
 @dataclass

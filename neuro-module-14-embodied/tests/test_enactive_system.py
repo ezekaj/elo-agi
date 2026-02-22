@@ -6,7 +6,6 @@ from neuro.modules.m14_embodied.enactive_system import (
     AutopoieticSystem,
     SensoriMotorEnaction,
     EnactiveCognitiveSystem,
-    EnactiveParams,
 )
 
 

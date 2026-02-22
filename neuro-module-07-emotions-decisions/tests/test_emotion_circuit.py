@@ -1,7 +1,6 @@
 """Tests for emotion circuit components."""
 
 import numpy as np
-import pytest
 from neuro.modules.m07_emotions_decisions.emotion_circuit import (
     VMPFC,
     Amygdala,
@@ -9,7 +8,6 @@ from neuro.modules.m07_emotions_decisions.emotion_circuit import (
     Insula,
     EmotionCircuit,
     EmotionType,
-    BodyState,
 )
 
 
@@ -140,7 +138,7 @@ class TestEmotionCircuit:
         circuit = EmotionCircuit()
         stimulus = np.array([0.5, 0.5, 0.5])
 
-        normal = circuit.process(stimulus)
+        circuit.process(stimulus)
         circuit.lesion_vmpfc()
         lesioned = circuit.process(stimulus)
 

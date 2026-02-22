@@ -1,17 +1,12 @@
 """Tests for long-term memory systems"""
 
 import pytest
-import time
 
 from neuro.modules.m04_memory.long_term_memory import (
     EpisodicMemory,
-    Episode,
     SemanticMemory,
-    Concept,
     ProceduralMemory,
-    Procedure,
 )
-from neuro.modules.m04_memory.long_term_memory.procedural_memory import Pattern, Action
 
 
 class TestEpisodicMemory:
@@ -21,7 +16,7 @@ class TestEpisodicMemory:
         """Test basic encoding and retrieval"""
         em = EpisodicMemory()
 
-        episode = em.encode(
+        em.encode(
             experience="Had coffee at cafe",
             context={"location": "downtown", "time": "morning"},
             emotional_valence=0.5,

@@ -262,7 +262,7 @@ class TestEndToEndContinualLearning:
             action = step % 4
             reward = float(step % 10) / 10
 
-            result = controller.observe(
+            controller.observe(
                 state=state,
                 action=action,
                 reward=reward,
@@ -284,8 +284,6 @@ class TestEndToEndContinualLearning:
         for i in range(20):
             state = np.ones(10) * i
             controller.observe(state, 0, 1.0, state, False)
-
-        task_changes = controller._total_task_changes
 
         for i in range(20):
             state = -np.ones(10) * i

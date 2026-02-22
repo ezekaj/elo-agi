@@ -4,18 +4,14 @@ Tests for neuro-inference: Probabilistic and causal reasoning.
 
 import pytest
 import numpy as np
-import os
 
 from neuro.modules.inference.bayesian.networks import (
     BayesianNetwork,
     DiscreteNode,
-    ContinuousNode,
     CPT,
-    NetworkQuery,
 )
 from neuro.modules.inference.bayesian.belief_prop import (
     BeliefPropagation,
-    Message,
     FactorGraph,
     Factor,
 )
@@ -26,12 +22,8 @@ from neuro.modules.inference.bayesian.learning import (
 )
 from neuro.modules.inference.causal.scm import (
     StructuralCausalModel,
-    CausalVariable,
-    StructuralEquation,
-    VariableType,
 )
 from neuro.modules.inference.causal.intervention import (
-    Intervention,
     InterventionEngine,
     DoOperator,
 )
@@ -42,10 +34,7 @@ from neuro.modules.inference.causal.counterfactual import (
 )
 from neuro.modules.inference.analogical.mapping import (
     StructureMapper,
-    Analogy,
-    StructuralAlignment,
     RelationalStructure,
-    Predicate,
     RelationOrder,
 )
 from neuro.modules.inference.analogical.retrieval import (
@@ -144,7 +133,7 @@ class TestBayesianNetwork:
     def test_add_node(self):
         """Test adding nodes."""
         bn = BayesianNetwork()
-        node = bn.add_discrete_node("test", ["a", "b"])
+        bn.add_discrete_node("test", ["a", "b"])
         assert bn.has_node("test")
 
     def test_get_topological_order(self, simple_bn):

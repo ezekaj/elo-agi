@@ -4,9 +4,7 @@ import pytest
 import numpy as np
 from neuro.modules.m05_sleep_consolidation.interference_resolution import (
     InterferenceResolver,
-    InterferenceEvent,
     MemoryVector,
-    ResolutionStrategy,
     InterferenceType,
     InterleaveSchedule,
 )

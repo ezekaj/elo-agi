@@ -12,12 +12,11 @@ No fine-tuning is required - the LLM is used as-is.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, Optional, Any
 from abc import ABC, abstractmethod
 import numpy as np
 import time
 import hashlib
-import json
 
 # Try to import API clients
 try:

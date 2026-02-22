@@ -1,7 +1,6 @@
 """Bash tool for shell command execution."""
 
 import subprocess
-import shlex
 from .base import Tool, ToolResult
 
 

@@ -9,7 +9,7 @@ Coordinates:
 """
 
 import time
-from typing import Optional, Any, List, Dict, Union
+from typing import Optional, Any, List, Dict
 import numpy as np
 
 from .sensory_memory import IconicBuffer, EchoicBuffer

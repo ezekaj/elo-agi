@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple, Callable, Set
 from enum import Enum
 import numpy as np
-from abc import ABC, abstractmethod
 
 
 class RoleType(Enum):

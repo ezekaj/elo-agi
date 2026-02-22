@@ -12,8 +12,8 @@ Combines all components into a single coherent pipeline:
 """
 
 import time
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Any
+from dataclasses import dataclass
 from datetime import datetime
 
 
@@ -107,7 +107,7 @@ class CognitivePipeline:
 
         # Bayesian Surprise
         try:
-            from bayesian_surprise import BayesianSurprise, Observation
+            from bayesian_surprise import BayesianSurprise
 
             self.surprise = BayesianSurprise(surprise_threshold=0.3)
             self._active_components.append("bayesian_surprise")

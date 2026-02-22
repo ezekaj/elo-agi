@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 import time
-from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory, MemorySlot
+from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory
 from neuro.modules.m02_dual_process.system2.cognitive_control import (
     CognitiveControl,
     Response,

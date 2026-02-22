@@ -5,7 +5,7 @@ Implements proprioceptive sensing for embodied cognition.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from enum import Enum
 import numpy as np
 import time
@@ -375,7 +375,7 @@ class ProprioceptionProcessor:
         jacobian = np.zeros((2, n_joints))  # 2D position
 
         for i in range(n_joints):
-            angle_sum = np.sum(joint_positions[: i + 1])
+            np.sum(joint_positions[: i + 1])
 
             for j in range(i, n_joints):
                 jacobian[0, i] -= link_lengths[j] * np.sin(np.sum(joint_positions[: j + 1]))

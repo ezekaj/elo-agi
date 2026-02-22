@@ -13,8 +13,7 @@ import sys
 sys.path.insert(0, "..")
 
 import numpy as np
-from src import MemoryController, EpisodicMemory, SemanticMemory
-from src.memory_processes import MemoryConsolidator
+from src import MemoryController
 
 
 def demo_consolidation():
@@ -46,7 +45,7 @@ def demo_consolidation():
     print("Encoding day's experiences:")
     for exp in experiences:
         current_time += 3600  # 1 hour per event
-        episode = mc.encode_experience(
+        mc.encode_experience(
             experience=exp["event"],
             context={
                 "food": exp.get("food"),

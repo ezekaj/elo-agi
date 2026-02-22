@@ -15,10 +15,8 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.sleep_stages import SleepStage
-from src.memory_replay import MemoryTrace, HippocampalReplay
-from src.systems_consolidation import HippocampalCorticalDialogue
-from src.synaptic_homeostasis import SynapticHomeostasis, SelectiveConsolidation, SleepWakeCycle
-from src.sleep_cycle import SleepCycleOrchestrator, NightStatistics
+from src.synaptic_homeostasis import SleepWakeCycle
+from src.sleep_cycle import SleepCycleOrchestrator
 
 
 def encode_test_memories(orchestrator: SleepCycleOrchestrator, n_memories: int = 10):
@@ -53,13 +51,13 @@ def demo_sws_deprivation():
     # Full sleep condition
     print("\n--- Full Sleep Condition ---")
     full_sleep = SleepCycleOrchestrator(n_neurons=100, memory_dim=20)
-    memories_full = encode_test_memories(full_sleep)
+    encode_test_memories(full_sleep)
     full_stats = full_sleep.sleep_consolidation(sleep_hours=8.0)
 
     # SWS deprivation condition
     print("\n--- SWS Deprivation Condition ---")
     sws_deprived = SleepCycleOrchestrator(n_neurons=100, memory_dim=20)
-    memories_deprived = encode_test_memories(sws_deprived)
+    encode_test_memories(sws_deprived)
     deprived_stats = sws_deprived.simulate_sleep_deprivation(skip_stages=[SleepStage.SWS])
 
     # Compare results
@@ -112,13 +110,13 @@ def demo_rem_deprivation():
     # Full sleep condition
     print("\n--- Full Sleep Condition ---")
     full_sleep = SleepCycleOrchestrator(n_neurons=100, memory_dim=20)
-    memories_full = encode_test_memories(full_sleep)
+    encode_test_memories(full_sleep)
     full_stats = full_sleep.sleep_consolidation(sleep_hours=8.0)
 
     # REM deprivation condition
     print("\n--- REM Deprivation Condition ---")
     rem_deprived = SleepCycleOrchestrator(n_neurons=100, memory_dim=20)
-    memories_deprived = encode_test_memories(rem_deprived)
+    encode_test_memories(rem_deprived)
     deprived_stats = rem_deprived.simulate_sleep_deprivation(skip_stages=[SleepStage.REM])
 
     # Compare results

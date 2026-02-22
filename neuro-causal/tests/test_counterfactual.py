@@ -11,7 +11,6 @@ Tests cover:
 """
 
 import pytest
-import numpy as np
 from neuro.modules.causal.differentiable_scm import DifferentiableSCM
 from neuro.modules.causal.counterfactual import (
     NestedCounterfactual,

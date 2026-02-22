@@ -7,8 +7,8 @@ Classifies problems to guide reasoning strategy selection:
 - Subproblem decomposition
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Set
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np
 
@@ -187,7 +187,7 @@ class ProblemClassifier:
             features = type_features.get(ptype, {})
 
             # Map feature names to embedding dimensions deterministically
-            feature_names = list(features.keys())
+            list(features.keys())
             for i, (name, value) in enumerate(features.items()):
                 # Spread features across embedding space
                 base_idx = (hash(name) % (dim - 10)) + 5

@@ -6,7 +6,7 @@ Neural basis: mPFC, pSTS (posterior superior temporal sulcus)
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List
 
 
 @dataclass

@@ -176,7 +176,7 @@ class VisualImagery:
         scaled_id = f"{image_id}_scale_{factor}"
 
         new_properties = image.properties.copy()
-        current_size = new_properties.get(VisualProperty.SIZE, "medium")
+        new_properties.get(VisualProperty.SIZE, "medium")
 
         if factor > 1.5:
             new_properties[VisualProperty.SIZE] = "large"

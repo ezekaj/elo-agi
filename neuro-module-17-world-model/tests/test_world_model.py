@@ -11,8 +11,6 @@ Covers:
 
 import pytest
 import numpy as np
-import os
-import time
 
 from neuro.modules.m17_world_model.state_encoder import (
     StateEncoder,
@@ -24,7 +22,6 @@ from neuro.modules.m17_world_model.transition_model import (
     TransitionModel,
     TransitionParams,
     Transition,
-    ActionType,
 )
 from neuro.modules.m17_world_model.imagination import (
     Imagination,
@@ -43,8 +40,6 @@ from neuro.modules.m17_world_model.world_memory import (
     WorldMemory,
     MemoryParams,
     WorldState,
-    Entity,
-    Relation,
     EntityType,
     RelationType,
 )
@@ -209,7 +204,7 @@ class TestTransitionModel:
             model.train_step(state, action, next_state, 0.0)
 
         # Predict on familiar input
-        familiar = model.predict(np.random.randn(32) * 0.1, np.random.randn(8) * 0.1)
+        model.predict(np.random.randn(32) * 0.1, np.random.randn(8) * 0.1)
 
         # Predict on unfamiliar input (much larger)
         unfamiliar = model.predict(np.random.randn(32) * 10, np.random.randn(8) * 10)
@@ -518,7 +513,7 @@ class TestStress:
         for _ in range(1000):
             state = np.random.randn(64)
             action = np.random.randn(16)
-            transition = model.predict(state, action)
+            model.predict(state, action)
 
         stats = model.get_statistics()
         assert stats["n_predictions"] == 1000

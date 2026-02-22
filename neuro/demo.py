@@ -7,7 +7,6 @@ Usage:
 """
 
 import argparse
-import sys
 
 from neuro.wrapper import SmartWrapper
 

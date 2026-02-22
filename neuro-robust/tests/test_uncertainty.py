@@ -6,7 +6,6 @@ from neuro.modules.robust.uncertainty import (
     SimpleDropoutNN,
     UncertaintyQuantifier,
     UncertaintyEstimate,
-    UncertaintyType,
     EnsembleUncertainty,
     EvidentialUncertainty,
 )

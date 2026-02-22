@@ -6,7 +6,6 @@ from neuro.modules.m05_sleep_consolidation.schema_refinement import (
     SchemaRefiner,
     Schema,
     SchemaUpdateType,
-    SchemaUpdate,
 )
 
 

@@ -6,7 +6,7 @@ Implements exploration-exploitation tradeoff.
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Any, Callable
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field
 from collections import defaultdict
 from enum import Enum

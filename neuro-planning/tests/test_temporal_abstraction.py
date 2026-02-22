@@ -1,7 +1,6 @@
 """Tests for temporal abstraction with options framework."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.planning.temporal_abstraction import (
     Option,
@@ -369,7 +368,6 @@ class TestOptionTerminationBehavior:
     def test_probabilistic_termination(self):
         framework = OptionsFramework(random_seed=42)
 
-        termination_count = [0]
         step_count = [0]
 
         framework.create_option(

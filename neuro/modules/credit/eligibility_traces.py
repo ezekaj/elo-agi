@@ -6,7 +6,7 @@ to past state-action pairs when rewards are received.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Set
+from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np
 

@@ -1,7 +1,5 @@
 """Tests for efficiency monitor."""
 
-import pytest
-import numpy as np
 import time
 
 from neuro.modules.meta_reasoning.efficiency_monitor import (

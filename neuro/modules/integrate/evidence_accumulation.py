@@ -6,7 +6,7 @@ for decision-making based on noisy, partial evidence from modules.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 

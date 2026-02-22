@@ -15,7 +15,7 @@ import numpy as np
 import time
 from neuro.modules.m02_dual_process.dual_process_controller import DualProcessController
 from neuro.modules.m02_dual_process.system1.pattern_recognition import PatternRecognition
-from neuro.modules.m02_dual_process.system1.habit_executor import HabitExecutor, Action
+from neuro.modules.m02_dual_process.system1.habit_executor import Action
 from neuro.modules.m02_dual_process.system1.emotional_valuation import EmotionalValuation
 from neuro.modules.m02_dual_process.system2.working_memory import WorkingMemory
 from neuro.modules.m02_dual_process.system2.cognitive_control import (
@@ -549,7 +549,7 @@ class TestPatternRecognitionStress:
         # Query
         query = np.random.randn(50)
         start = time.time()
-        matches = pr.match(query, top_k=10)
+        pr.match(query, top_k=10)
         elapsed = time.time() - start
 
         # Should be fast (< 100ms)
@@ -586,7 +586,7 @@ class TestPatternRecognitionStress:
             test = original * similarity + np.random.randn(5) * (1 - similarity) * 0.1
             test = test / np.linalg.norm(test)  # Normalize
 
-            matches = pr.match(test)
+            pr.match(test)
             # May or may not match depending on noise
 
 

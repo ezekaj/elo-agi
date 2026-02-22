@@ -5,8 +5,8 @@ Implements phoneme feature extraction, formant tracking,
 and basic speech recognition components.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from dataclasses import dataclass
+from typing import Dict, List, Any, Tuple
 from enum import Enum
 import numpy as np
 
@@ -113,7 +113,7 @@ class FormantTracker:
 
         peaks, properties = find_peaks(spectrum, height=spectrum.max() * 0.1)
         peak_freqs = frequencies[peaks]
-        peak_heights = spectrum[peaks]
+        spectrum[peaks]
 
         # Assign peaks to formants based on expected ranges
         for fi, (low, high) in enumerate(self.formant_ranges):

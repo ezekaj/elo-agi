@@ -9,12 +9,12 @@ Provides grounding of linguistic symbols in:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 import time
 
 from .llm_interface import LLMOracle, MockLLM
-from .semantic_bridge import SemanticBridge, SemanticConfig
+from .semantic_bridge import SemanticBridge
 
 
 @dataclass

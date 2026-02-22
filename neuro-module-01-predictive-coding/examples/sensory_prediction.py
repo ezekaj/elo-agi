@@ -18,7 +18,6 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.predictive_hierarchy import PredictiveHierarchy
-from src.precision_weighting import AdaptivePrecision, HierarchicalPrecision
 from src.omission_detector import OmissionDetector, SequenceOmissionDetector
 from src.temporal_dynamics import TemporalHierarchy
 
@@ -181,7 +180,7 @@ def demo_omission_response(hierarchy: PredictiveHierarchy, sequence: np.ndarray)
     print(f"Error increase: {(omission_error / normal_error - 1) * 100:.1f}%")
 
     if omission_event:
-        print(f"\nOmission detected!")
+        print("\nOmission detected!")
         print(f"  Type: {omission_event[0].omission_type.value}")
         print(f"  Magnitude: {omission_event[0].error_magnitude:.4f}")
 
@@ -288,7 +287,7 @@ def demo_lesion_simulation(sequence: np.ndarray):
     ax.set_title("Effect of Lesions on Predictive Processing")
 
     # Add degradation percentages
-    degradation = [(e / intact_error - 1) * 100 for e in errors[1:]]
+    [(e / intact_error - 1) * 100 for e in errors[1:]]
     ax.axhline(y=intact_error, color="gray", linestyle="--", alpha=0.5, label="Intact baseline")
 
     plt.tight_layout()

@@ -17,7 +17,6 @@ from neuro.modules.causal.differentiable_scm import (
     DifferentiableSCM,
     CausalMechanism,
     NeuralNetwork,
-    MLPLayer,
     ActivationType,
     apply_activation,
     activation_gradient,
@@ -114,7 +113,7 @@ class TestNeuralNetwork:
         """Update should modify parameters."""
         nn = NeuralNetwork(input_dim=5, output_dim=3, hidden_dims=[8], random_seed=42)
         x = np.random.randn(5)
-        y = nn.forward(x)
+        nn.forward(x)
         grad = np.ones(3)
         nn.backward(grad)
 
@@ -245,7 +244,7 @@ class TestDifferentiableSCM:
         scm.add_linear_mechanism("Y", ["X"], {"X": 2.0})
 
         # Without intervention
-        values_natural = scm.forward(noise={v: 0 for v in scm._variables})
+        scm.forward(noise={v: 0 for v in scm._variables})
 
         # With intervention do(X=5)
         values_do = scm.forward(noise={v: 0 for v in scm._variables}, interventions={"X": 5.0})
@@ -438,7 +437,7 @@ class TestComplexCausalStructures:
         assert abs(corr) > 0.9  # Should be highly correlated
 
         # But causal effect should be near zero
-        effect = scm.causal_effect("X", "Y")
+        scm.causal_effect("X", "Y")
         # Note: this might not be exactly zero due to indirect effects through U
         # In a proper front-door or back-door adjustment this would be zero
 

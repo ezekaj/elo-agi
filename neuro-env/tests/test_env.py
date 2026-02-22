@@ -12,27 +12,23 @@ Covers:
 
 import pytest
 import numpy as np
-from pathlib import Path
 
 # Add src to path
 from neuro.modules.env.base_env import (
-    NeuroEnvironment,
     EnvironmentConfig,
     StepResult,
     SimplePatternEnv,
 )
-from neuro.modules.env.text_world import TextWorld, TextWorldConfig, Room, Item, ProcGenTextWorld
-from neuro.modules.env.dialogue_env import DialogueEnvironment, DialogueConfig, DialoguePartner
+from neuro.modules.env.text_world import TextWorld, ProcGenTextWorld
+from neuro.modules.env.dialogue_env import DialogueEnvironment, DialoguePartner
 from neuro.modules.env.curriculum import (
     DevelopmentalCurriculum,
     Stage,
-    CurriculumConfig,
     AdaptiveCurriculum,
 )
 from neuro.modules.env.experience_buffer import (
     ExperienceBuffer,
     Experience,
-    Episode,
     SequenceBuffer,
     ConsolidationBuffer,
 )
@@ -127,7 +123,7 @@ class TestTextWorld:
         # Move north
         action = np.zeros(env.config.action_dim)
         action[0] = 1.0  # "north" is first action
-        result = env.step(action)
+        env.step(action)
         assert env._current_room == "hallway"
 
     def test_item_pickup(self):
@@ -240,7 +236,7 @@ class TestDialogueEnvironment:
         env.reset()
         for _ in range(5):
             action = np.random.randn(env.config.action_dim)
-            result = env.step(action)
+            env.step(action)
         assert len(env._history) == 11  # 1 initial + 5 * (agent + partner)
 
     def test_render(self):

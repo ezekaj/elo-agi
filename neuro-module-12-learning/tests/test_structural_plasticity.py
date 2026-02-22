@@ -42,7 +42,7 @@ class TestStructuralPlasticity:
             sp.record_activity(np.ones(5) * 0.5)
 
         initial_synapses = np.sum(sp.connectivity)
-        formed = sp.form_synapses()
+        sp.form_synapses()
         final_synapses = np.sum(sp.connectivity)
 
         # Should form some synapses (probabilistic)
@@ -57,7 +57,7 @@ class TestStructuralPlasticity:
         sp.weights = sp.weights * 0.1
 
         initial_synapses = np.sum(sp.connectivity)
-        eliminated = sp.eliminate_synapses()
+        sp.eliminate_synapses()
         final_synapses = np.sum(sp.connectivity)
 
         # Should eliminate some synapses
@@ -120,7 +120,7 @@ class TestSynapticPruning:
         for _ in range(50):
             pruner.record_usage(active_pre, active_post)
 
-        pruned = pruner.prune()
+        pruner.prune()
 
         # Should have pruned some weights
         final_weights = pruner.get_weights()

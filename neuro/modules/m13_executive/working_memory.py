@@ -6,7 +6,7 @@ Key features: Capacity limits, active maintenance, updating, interference
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, List, Any, Tuple
+from typing import Optional, List, Tuple
 
 
 @dataclass

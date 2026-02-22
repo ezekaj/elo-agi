@@ -4,8 +4,7 @@ Combines Theory of Mind, mentalizing, empathy, and perspective taking
 """
 
 import numpy as np
-from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 
 from .theory_of_mind import TheoryOfMind, ToMParams
 from .mentalizing import MentalizingNetwork, MentalizingParams

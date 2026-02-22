@@ -7,29 +7,22 @@ and efficiency optimization components.
 
 import pytest
 import numpy as np
-import time
-import os
 
 from neuro.modules.scale.distributed.coordinator import (
     TaskStatus,
-    SchedulingPolicy,
     CoordinatorConfig,
     DistributedTask,
-    WorkerInfo,
     TaskQueue,
     LoadBalancer,
     TaskCoordinator,
 )
 from neuro.modules.scale.distributed.worker import (
     WorkerStatus,
-    WorkResult,
-    WorkerConfig,
     Worker,
     WorkerPool,
 )
 from neuro.modules.scale.distributed.aggregator import (
     AggregationStrategy,
-    AggregatedResult,
     WeightedAverage,
     Voting,
     ConcatAggregator,
@@ -37,9 +30,6 @@ from neuro.modules.scale.distributed.aggregator import (
 )
 
 from neuro.modules.scale.gpu.kernels import (
-    KernelConfig,
-    KernelStats,
-    GPUKernel,
     MatMulKernel,
     ConvolutionKernel,
     SoftmaxKernel,
@@ -48,8 +38,6 @@ from neuro.modules.scale.gpu.kernels import (
 )
 from neuro.modules.scale.gpu.batch_inference import (
     BatchConfig,
-    InferenceBatch,
-    BatchResult,
     InferenceCache,
     BatchBuilder,
     BatchInference,
@@ -57,7 +45,6 @@ from neuro.modules.scale.gpu.batch_inference import (
 
 from neuro.modules.scale.sparse.pruning import (
     PruningStrategy,
-    PruningResult,
     PruningConfig,
     PruningMask,
     MagnitudePruning,
@@ -69,14 +56,11 @@ from neuro.modules.scale.sparse.quantization import (
     QuantizationLevel,
     QuantizationConfig,
     QuantizedTensor,
-    QuantizedModel,
     Quantizer,
 )
 
 from neuro.modules.scale.efficiency import (
     LatencyProfile,
-    ThroughputMetrics,
-    MemoryProfile,
     OptimizationConfig,
     Profiler,
     OperationFuser,
@@ -217,7 +201,7 @@ class TestTaskCoordinator:
         """Test scheduling tasks to workers."""
         coordinator = TaskCoordinator()
         coordinator.register_worker("worker_1")
-        task = coordinator.submit_task("task", lambda: 42)
+        coordinator.submit_task("task", lambda: 42)
 
         scheduled = coordinator.schedule_next()
         assert scheduled is not None
@@ -1381,10 +1365,10 @@ class TestIntegration:
         profile = optimizer.profile_model(matrix_op, np.array([1]), n_runs=5)
 
         # Check targets
-        targets = optimizer.check_targets(latency_ms=profile.mean_latency_ms)
+        optimizer.check_targets(latency_ms=profile.mean_latency_ms)
 
         # Get recommendations
-        recommendations = optimizer.recommend_optimizations(profile, memory_mb=10.0)
+        optimizer.recommend_optimizations(profile, memory_mb=10.0)
 
         # Get statistics
         stats = optimizer.statistics()

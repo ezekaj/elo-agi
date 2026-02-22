@@ -6,11 +6,10 @@ via slash commands like /commit, /review, /test, etc.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List
+from typing import Dict, Optional, List
 from pathlib import Path
 import os
 import yaml
-import re
 
 
 @dataclass

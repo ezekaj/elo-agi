@@ -13,16 +13,15 @@ import time
 from pathlib import Path
 
 # Add src to path
-from neuro.modules.system.config import SystemConfig, ModuleConfig, DEFAULT_CONFIG
+from neuro.modules.system.config import SystemConfig
 from neuro.modules.system.module_loader import ModuleLoader, ModuleStatus, ModuleStub
-from neuro.modules.system.sensory_interface import SensoryInterface, SensoryInput, InputType
+from neuro.modules.system.sensory_interface import SensoryInterface, InputType
 from neuro.modules.system.motor_interface import (
     MotorInterface,
-    MotorOutput,
     OutputType,
     ActionCategory,
 )
-from neuro.modules.system.active_inference import ActiveInferenceController, Policy, EFEResult
+from neuro.modules.system.active_inference import ActiveInferenceController, EFEResult
 from neuro.modules.system.cognitive_core import CognitiveCore, CognitiveState, CycleResult
 
 # =============================================================================

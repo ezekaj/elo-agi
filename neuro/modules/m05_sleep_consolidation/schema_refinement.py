@@ -6,7 +6,7 @@ schemas based on new experiences during consolidation.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 

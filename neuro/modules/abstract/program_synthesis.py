@@ -9,18 +9,13 @@ Implements type-guided program synthesis:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable, Set, Iterator
-from enum import Enum
-import numpy as np
+from typing import Dict, List, Optional, Any, Tuple, Callable, Iterator
 from itertools import product
-import copy
 
 from .composition_types import (
     CompositionType,
-    AtomicType,
     FunctionType,
     ListType,
-    StructuredType,
     INT,
     FLOAT,
     STR,

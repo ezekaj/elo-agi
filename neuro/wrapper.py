@@ -19,7 +19,7 @@ Usage:
 
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
 
 import numpy as np

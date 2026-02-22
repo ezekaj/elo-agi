@@ -19,7 +19,6 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.cognitive_manifold import (
-    CognitiveState,
     CognitiveManifold,
     DualProcess,
     AttractorLandscape,
@@ -234,8 +233,8 @@ def demo_dual_process_emergence():
     x = np.arange(len(names))
     width = 0.35
 
-    bars1 = ax.bar(x - width / 2, s1_props, width, label="System 1 (Fast)", color="coral")
-    bars2 = ax.bar(x + width / 2, s2_props, width, label="System 2 (Slow)", color="steelblue")
+    ax.bar(x - width / 2, s1_props, width, label="System 1 (Fast)", color="coral")
+    ax.bar(x + width / 2, s2_props, width, label="System 2 (Slow)", color="steelblue")
 
     ax.set_xlabel("Scenario")
     ax.set_ylabel("Proportion")

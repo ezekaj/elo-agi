@@ -8,8 +8,8 @@ Implements algorithms for learning causal graph structure from data:
 - Uncertainty quantification
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set, Callable
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple, Set
 from enum import Enum
 import numpy as np
 from itertools import combinations
@@ -360,7 +360,7 @@ class CausalDiscovery:
     ) -> CausalGraph:
         """Learn the skeleton (undirected graph) using CI tests."""
         n_vars = len(var_names)
-        var_idx = {name: i for i, name in enumerate(var_names)}
+        {name: i for i, name in enumerate(var_names)}
 
         # Start with complete graph
         adj = np.ones((n_vars, n_vars)) - np.eye(n_vars)

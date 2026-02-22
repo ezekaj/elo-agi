@@ -4,7 +4,7 @@ Pruning: Remove unnecessary network connections.
 Implements various pruning strategies for model compression.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 from abc import ABC, abstractmethod

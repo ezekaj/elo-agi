@@ -121,7 +121,7 @@ def demo_hexagonal_grids():
             print(f"    {step + 1:2d} | ({pos[0]:.2f}, {pos[1]:.2f})")
 
     print(f"\n  Final position: ({pos[0]:.2f}, {pos[1]:.2f})")
-    print(f"  Expected: (1.00, 0.00)")
+    print("  Expected: (1.00, 0.00)")
     print(f"  Error: {np.linalg.norm(pos - np.array([1.0, 0.0])):.4f}")
 
     # 6. CIRCULAR PATH

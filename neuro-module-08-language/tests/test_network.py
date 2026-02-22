@@ -215,15 +215,15 @@ class TestDistributedLanguageNetwork:
         network = DistributedLanguageNetwork(dim=32)
 
         # Process intact
-        intact_result = network.process(np.random.randn(32))
+        network.process(np.random.randn(32))
 
         # Lesion
         network.lesion("broca", 0.8)
-        lesioned_result = network.process(np.random.randn(32))
+        network.process(np.random.randn(32))
 
         # Restore
         network.restore("broca")
-        restored_result = network.process(np.random.randn(32))
+        network.process(np.random.randn(32))
 
         # Verify damage levels
         damage = network.get_damage_levels()

@@ -77,19 +77,7 @@ line-length = 100
 target-version = "py39"
 
 [tool.ruff.lint]
-ignore = [
-    "F401",  # unused-import (re-exports)
-    "F541",  # f-string-missing-placeholders
-    "F811",  # redefined-while-unused
-    "F821",  # undefined-name (test file issue)
-    "F841",  # unused-variable (legacy tests)
-    "E402",  # module-level-import-not-at-top (needed for path setup)
-    "E712",  # true-false-comparison
-    "E721",  # type-comparison
-    "E722",  # bare-except (legacy modules)
-    "E731",  # lambda-assignment
-    "E741",  # ambiguous-variable-name
-]
+ignore = []
 
 [tool.mypy]
 python_version = "3.9"

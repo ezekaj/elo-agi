@@ -1,7 +1,6 @@
 """Tests for contribution accounting with Shapley values."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.credit.contribution_accounting import (
     Contribution,

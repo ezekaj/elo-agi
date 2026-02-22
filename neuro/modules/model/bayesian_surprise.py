@@ -6,9 +6,8 @@ Computes surprise as KL divergence between prior and posterior beliefs.
 """
 
 import math
-import numpy as np
 from collections import defaultdict
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 

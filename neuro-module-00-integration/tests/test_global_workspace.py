@@ -4,10 +4,8 @@ Tests for the Global Workspace integration system.
 
 import pytest
 import numpy as np
-import os
 
 from neuro.modules.m00_integration.module_interface import (
-    CognitiveModule,
     ModuleProposal,
     ModuleParams,
     ModuleType,
@@ -23,7 +21,7 @@ from neuro.modules.m00_integration.attention_competition import (
     AttentionCompetition,
     CompetitionParams,
 )
-from neuro.modules.m00_integration.broadcast_system import BroadcastSystem, BroadcastParams
+from neuro.modules.m00_integration.broadcast_system import BroadcastSystem
 from neuro.modules.m00_integration.ignition import IgnitionDetector, IgnitionParams, IgnitionState
 
 
@@ -230,7 +228,7 @@ class TestIgnitionDetector:
         detector = IgnitionDetector(params)
 
         # First detection moves to threshold
-        result1 = detector.detect(activation=0.8, buffer=[])
+        detector.detect(activation=0.8, buffer=[])
 
         # Second detection should ignite
         result2 = detector.detect(activation=0.8, buffer=[])

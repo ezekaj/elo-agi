@@ -9,7 +9,7 @@ Implements memory reactivation during sleep:
 
 import numpy as np
 from typing import List, Optional, Tuple, Dict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 

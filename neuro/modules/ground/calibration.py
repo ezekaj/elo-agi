@@ -4,8 +4,8 @@ Calibration: Sensor and actuator calibration.
 Implements calibration procedures for real-world sensors and actuators.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 import time
@@ -176,7 +176,7 @@ class SensorCalibrator:
 
         reprojection_error = np.mean(errors) if errors else 0.0
 
-        params = CameraCalibrationParams(
+        CameraCalibrationParams(
             intrinsic_matrix=intrinsic,
             distortion_coeffs=distortion,
             reprojection_error=reprojection_error,
@@ -244,7 +244,7 @@ class SensorCalibrator:
         gyro_bias = np.mean(gyro_samples, axis=0)
         gyro_scale = np.eye(3)
 
-        params = IMUCalibrationParams(
+        IMUCalibrationParams(
             accelerometer_bias=acc_bias,
             accelerometer_scale=acc_scale,
             gyroscope_bias=gyro_bias,

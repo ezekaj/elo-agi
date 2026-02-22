@@ -184,7 +184,7 @@ class BenchmarkRunner:
             self._save_run(run_result)
 
         if self.config.verbose:
-            print(f"\n=== Overall ===")
+            print("\n=== Overall ===")
             print(f"  Score: {run_result.overall_score:.3f}")
             print(f"  Success Rate: {run_result.overall_success_rate:.1%}")
             print(f"  Time: {total_time:.1f}s")

@@ -11,10 +11,10 @@ Key insight: Dreams REFLECT what's being consolidated, not the other way around.
 
 import numpy as np
 from typing import List, Optional, Dict, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
-from .memory_replay import MemoryTrace, MemoryType
+from .memory_replay import MemoryTrace
 
 
 class DreamEmotionTone(Enum):

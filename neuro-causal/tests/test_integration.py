@@ -9,13 +9,12 @@ Tests the interaction between:
 - CausalActiveInference
 """
 
-import pytest
 import numpy as np
 from neuro.modules.causal.differentiable_scm import DifferentiableSCM
 from neuro.modules.causal.counterfactual import NestedCounterfactual
-from neuro.modules.causal.causal_discovery import CausalDiscovery, CausalGraph, CausalEdge, EdgeType
+from neuro.modules.causal.causal_discovery import CausalDiscovery, EdgeType
 from neuro.modules.causal.causal_representation import CausalRepresentationLearner
-from neuro.modules.causal.active_inference import CausalActiveInference, CausalBelief
+from neuro.modules.causal.active_inference import CausalActiveInference
 
 
 class TestSCMWithCounterfactual:
@@ -95,8 +94,8 @@ class TestSCMWithDiscovery:
         assert "C" in graph.neighbors("B")
 
         # Should NOT have A-C edge (conditional independence)
-        edge_ac = graph.get_edge("A", "C")
-        edge_ca = graph.get_edge("C", "A")
+        graph.get_edge("A", "C")
+        graph.get_edge("C", "A")
         # May have it as undirected in CPDAG, but direct A-C should not exist
         direct_ac = any(
             e.source == "A" and e.target == "C" and e.edge_type == EdgeType.DIRECTED
@@ -324,13 +323,13 @@ class TestCausalBeliefIntegration:
 
         ai = CausalActiveInference(scm)
 
-        initial_entropy = ai.beliefs.entropy()
+        ai.beliefs.entropy()
 
         # Observe data
         ai.infer({"X": 1.0, "Y": 2.0})
         ai.infer({"X": 1.5, "Y": 3.0})
 
-        final_entropy = ai.beliefs.entropy()
+        ai.beliefs.entropy()
 
         # Entropy might not strictly decrease due to implementation
         # but beliefs should be updated

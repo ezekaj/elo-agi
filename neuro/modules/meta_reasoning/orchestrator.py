@@ -7,8 +7,8 @@ Orchestrates reasoning across modules:
 - Dynamic module switching
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Callable
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 import numpy as np
 

@@ -9,7 +9,6 @@ Ported from AGIELO with enhancements:
 """
 
 import json
-import pickle
 import hashlib
 import numpy as np
 from datetime import datetime, timedelta
@@ -265,7 +264,7 @@ class EpisodicMemoryStore:
         Returns number of memories consolidated.
         """
         consolidated = 0
-        now = datetime.now()
+        datetime.now()
 
         for episode in list(self.hot_cache.values()):
             if episode.consolidated:

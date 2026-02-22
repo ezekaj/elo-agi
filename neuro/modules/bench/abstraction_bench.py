@@ -8,7 +8,7 @@ Evaluates:
 - Analogy completion
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Callable
 import numpy as np
 
@@ -200,7 +200,7 @@ class CompositionalBenchmark(Benchmark):
         for op in test_comp:
             result = primitive_fns[op](result)
 
-        task = CompositionTask(
+        CompositionTask(
             primitives=primitives,
             train_compositions=train_comps,
             test_composition=test_comp,

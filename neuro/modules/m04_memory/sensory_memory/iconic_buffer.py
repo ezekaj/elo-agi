@@ -9,7 +9,7 @@ Brain region: Visual cortex
 
 import numpy as np
 import time
-from typing import Optional, Any
+from typing import Optional
 from dataclasses import dataclass
 
 

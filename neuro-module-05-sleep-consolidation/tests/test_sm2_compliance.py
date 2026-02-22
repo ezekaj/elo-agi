@@ -16,10 +16,8 @@ SM-2 Reference:
 """
 
 import pytest
-import numpy as np
 from neuro.modules.m05_sleep_consolidation.spaced_repetition import (
     SpacedRepetitionScheduler,
-    RepetitionSchedule,
     ReviewQuality,
 )
 

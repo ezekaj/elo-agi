@@ -10,8 +10,7 @@ Key properties:
 - Handles relational processing, constraint computation, structure updating
 """
 
-import numpy as np
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import copy

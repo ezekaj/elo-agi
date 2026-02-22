@@ -15,7 +15,7 @@ Usage:
     llm = NeuroCognitiveLLM(provider="ollama", model="llama3.2")
 """
 
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, List, Mapping, Optional
 
 try:
     from langchain_core.language_models.llms import BaseLLM

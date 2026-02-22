@@ -8,7 +8,6 @@ from neuro.modules.m06_motivation.dopamine_system import (
     IncentiveSalience,
     BenefitCostEvaluator,
     DopamineSignal,
-    DopamineChannel,
 )
 
 

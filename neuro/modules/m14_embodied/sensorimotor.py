@@ -6,7 +6,7 @@ Key features: Forward models, efference copies, sensorimotor predictions
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, List, Dict
 
 
 @dataclass

@@ -11,7 +11,7 @@ This implements the finding that predictive coding systems show
 
 import numpy as np
 from typing import List, Optional, Tuple, Dict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from collections import deque
 

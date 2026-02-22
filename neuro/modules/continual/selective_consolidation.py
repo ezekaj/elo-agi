@@ -7,7 +7,7 @@ Implements performance-based memory consolidation:
 - Budget allocation for replay/rehearsal
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np

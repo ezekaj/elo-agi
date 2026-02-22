@@ -36,7 +36,7 @@ def demo_memory_flow():
     # Capture visual input
     visual_data = np.random.rand(10, 10)  # Simulated image
     mc.process_visual(visual_data)
-    print(f"Captured visual data (10x10 array)")
+    print("Captured visual data (10x10 array)")
     print(f"Iconic buffer available: {mc.iconic.is_available()}")
 
     # Check after 100ms
@@ -66,7 +66,7 @@ def demo_memory_flow():
     for i in range(10):
         mc.store_in_working_memory(f"item_{i}")
 
-    print(f"Tried to store 10 items")
+    print("Tried to store 10 items")
     print(f"Working memory load: {mc.working.get_load():.2f}")
     print(f"Actual items: {len(mc.working)}")
 

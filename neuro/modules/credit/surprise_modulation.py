@@ -6,8 +6,8 @@ Implements learning rate adaptation based on prediction surprise:
 - Low surprise = expected event = lower learning rate
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
 from enum import Enum
 import numpy as np
 

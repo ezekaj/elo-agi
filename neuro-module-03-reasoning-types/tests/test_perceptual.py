@@ -183,9 +183,7 @@ class TestObjectRecognition:
         normalized_small = recognizer.invariant_processor.scale_invariance(
             features_small, reference_size=50
         )
-        normalized_large = recognizer.invariant_processor.scale_invariance(
-            features_large, reference_size=50
-        )
+        recognizer.invariant_processor.scale_invariance(features_large, reference_size=50)
 
         assert normalized_small["width"] != features_small["width"]
 

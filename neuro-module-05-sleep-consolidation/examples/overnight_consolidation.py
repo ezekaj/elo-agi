@@ -15,10 +15,8 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.sleep_stages import SleepStage, SleepStageController
 from src.memory_replay import MemoryTrace, HippocampalReplay
 from src.systems_consolidation import HippocampalCorticalDialogue
-from src.synaptic_homeostasis import SynapticHomeostasis, SelectiveConsolidation
 from src.dream_generator import DreamGenerator
 from src.sleep_cycle import SleepCycleOrchestrator, SleepArchitecture
 
@@ -50,7 +48,7 @@ def demo_basic_consolidation():
 
     # Check pre-sleep state
     pre_sleep_stats = orchestrator.get_consolidation_statistics()
-    print(f"\n2. Pre-sleep state:")
+    print("\n2. Pre-sleep state:")
     print(f"   Hippocampal memories: {pre_sleep_stats['hippocampal_memories']}")
     print(f"   Cortical memories: {pre_sleep_stats['cortical_memories']}")
 
@@ -59,8 +57,8 @@ def demo_basic_consolidation():
     night_stats = orchestrator.sleep_consolidation(sleep_hours=8.0)
 
     # Check post-sleep state
-    post_sleep_stats = orchestrator.get_consolidation_statistics()
-    print(f"\n4. Post-sleep state:")
+    orchestrator.get_consolidation_statistics()
+    print("\n4. Post-sleep state:")
     print(f"   Total cycles: {night_stats.total_cycles}")
     print(f"   SWS time: {night_stats.total_sws_minutes:.1f} minutes")
     print(f"   REM time: {night_stats.total_rem_minutes:.1f} minutes")
@@ -70,7 +68,7 @@ def demo_basic_consolidation():
     print(f"   Dreams generated: {night_stats.total_dreams}")
 
     # Synaptic changes
-    print(f"\n5. Synaptic homeostasis:")
+    print("\n5. Synaptic homeostasis:")
     print(f"   Pre-sleep strength: {night_stats.wake_synaptic_strength:.2f}")
     print(f"   Post-sleep strength: {night_stats.post_sleep_synaptic_strength:.2f}")
     print(
@@ -196,7 +194,7 @@ def demo_systems_consolidation():
         if session % 5 == 4:
             print(f"   Session {session + 1}: {stats['total_transferred']} transferred to cortex")
 
-    print(f"\n3. Final state:")
+    print("\n3. Final state:")
     final_stats = dialogue.get_statistics()
     print(f"   Total memories transferred: {final_stats['total_transferred']}")
     print(f"   Consolidation events: {final_stats['total_consolidation_events']}")
@@ -337,7 +335,7 @@ def demo_dream_content():
 
     # Statistics
     dream_stats = dream_gen.get_dream_statistics()
-    print(f"\n3. Dream statistics:")
+    print("\n3. Dream statistics:")
     print(f"   Total dreams: {dream_stats['n_dreams']}")
     print(f"   Mean bizarreness: {dream_stats['mean_bizarreness']:.2f}")
     print(f"   Mean coherence: {dream_stats['mean_coherence']:.2f}")

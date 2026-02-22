@@ -179,7 +179,7 @@ def demo_full_curiosity_system():
     print("\n2. Processing a series of stimuli:")
     for i in range(10):
         stimulus = np.random.randn(3)
-        result = module.process_stimulus(stimulus)
+        module.process_stimulus(stimulus)
 
     print(f"   Curiosity level: {module.curiosity_level:.3f}")
 
@@ -220,14 +220,14 @@ def demo_dopamine_novelty_connection():
 
     # Familiar stimulus
     familiar_result = module.process_stimulus(np.array([0.5, 0.5, 0.5]))
-    print(f"\n   Familiar stimulus:")
+    print("\n   Familiar stimulus:")
     print(f"     Novelty: {familiar_result['novelty']:.3f}")
     print(f"     Info value: {familiar_result['info_value']:.3f}")
     print(f"     Curiosity level: {familiar_result['curiosity_level']:.3f}")
 
     # Novel stimulus (no reward, just different!)
     novel_result = module.process_stimulus(np.array([-1.0, 1.0, -0.5]))
-    print(f"\n   Novel stimulus (no explicit reward):")
+    print("\n   Novel stimulus (no explicit reward):")
     print(f"     Novelty: {novel_result['novelty']:.3f}")
     print(f"     Info value: {novel_result['info_value']:.3f}")
     print(f"     Curiosity level: {novel_result['curiosity_level']:.3f}")

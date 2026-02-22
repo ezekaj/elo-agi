@@ -8,8 +8,8 @@ Creative imagination often involves multiple modalities working together.
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from .visual_imagery import VisualImagery, VisualImage
 from .auditory_imagery import AuditoryImagery, AuditoryImage

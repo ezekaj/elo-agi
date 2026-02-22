@@ -464,10 +464,8 @@ class DualRouteProcessor:
 
         if fast_weight > slow_weight:
             winner = fast
-            loser = slow
         else:
             winner = slow
-            loser = fast
 
         # Modulate intensity by disagreement
         disagreement_penalty = 0.8

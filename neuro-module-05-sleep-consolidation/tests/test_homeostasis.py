@@ -293,7 +293,7 @@ class TestSleepWakeCycle:
         """Test complete wake-sleep cycle"""
         cycle = SleepWakeCycle(n_neurons=50, connectivity=0.1)
 
-        initial_strength = cycle.homeostasis.measure_total_strength()
+        cycle.homeostasis.measure_total_strength()
 
         stats = cycle.run_full_cycle(wake_duration=16.0, sleep_duration=8.0, learning_intensity=0.1)
 

@@ -11,7 +11,7 @@ Lower layers send prediction errors upward.
 
 import numpy as np
 from typing import List, Optional, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

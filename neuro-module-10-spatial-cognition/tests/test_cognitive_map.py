@@ -25,7 +25,7 @@ class TestEnvironment:
 
     def test_add_landmark(self):
         env = Environment(bounds=(0, 1, 0, 1))
-        landmark = env.add_landmark("tree", np.array([0.3, 0.7]), color="green")
+        env.add_landmark("tree", np.array([0.3, 0.7]), color="green")
         assert len(env.landmarks) == 1
         assert env.landmarks[0].name == "tree"
         assert env.landmarks[0].features["color"] == "green"

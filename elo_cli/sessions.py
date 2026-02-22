@@ -2,7 +2,6 @@
 
 import sqlite3
 import uuid
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -160,7 +159,7 @@ class SessionManager:
             try:
                 dt = datetime.fromisoformat(updated)
                 date_str = dt.strftime("%m/%d %H:%M")
-            except:
+            except Exception:
                 date_str = updated[:16]
 
             table.add_row(sid, title[:40], model, date_str)

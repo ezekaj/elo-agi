@@ -8,8 +8,8 @@ Implements automatic task boundary detection and identification:
 - Similar task merging
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Set
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
 from enum import Enum
 import numpy as np
 

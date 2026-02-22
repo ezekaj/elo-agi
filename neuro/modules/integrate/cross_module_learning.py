@@ -6,11 +6,11 @@ the cognitive architecture, enabling transfer and mutual improvement.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
-from .shared_space import SemanticEmbedding, ModalityType
+from .shared_space import SemanticEmbedding
 
 
 class SignalType(Enum):

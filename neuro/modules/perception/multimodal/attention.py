@@ -5,8 +5,8 @@ Implements bottom-up (saliency) and top-down (goal-directed)
 attention across modalities.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
@@ -84,7 +84,6 @@ class SaliencyComputer:
         Returns:
             Saliency map
         """
-        from scipy.ndimage import gaussian_filter
 
         h, w = intensity.shape[:2]
         saliency = np.zeros((h, w))
@@ -146,7 +145,6 @@ class SaliencyComputer:
         Returns:
             Saliency map (n_freq, n_time)
         """
-        from scipy.ndimage import gaussian_filter
 
         n_freq, n_time = spectrogram.shape
         saliency = np.zeros((n_freq, n_time))

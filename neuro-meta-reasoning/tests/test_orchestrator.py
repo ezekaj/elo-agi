@@ -1,13 +1,11 @@
 """Tests for dynamic orchestrator."""
 
 import pytest
-import numpy as np
 
 from neuro.modules.meta_reasoning.orchestrator import (
     DynamicOrchestrator,
     OrchestratorConfig,
     OrchestrationPlan,
-    OrchestrationStep,
     ExecutionResult,
     PlanStatus,
     CheckpointAction,

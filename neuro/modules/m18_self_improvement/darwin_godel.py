@@ -13,13 +13,12 @@ Based on:
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Callable, Tuple
 from enum import Enum
-import numpy as np
 import time
 
 from .generator import ModificationGenerator, GeneratorParams, Modification
-from .verifier import ChangeVerifier, VerifierParams, VerificationResult, VerificationMethod
-from .updater import SystemUpdater, UpdaterParams, UpdateResult, UpdateStatus
-from .meta_learner import MetaLearner, MetaParams, LearningStrategy
+from .verifier import ChangeVerifier, VerifierParams, VerificationMethod
+from .updater import SystemUpdater, UpdaterParams, UpdateStatus
+from .meta_learner import MetaLearner, MetaParams
 
 
 class ImprovementPhase(Enum):

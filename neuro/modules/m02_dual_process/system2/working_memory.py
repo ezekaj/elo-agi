@@ -11,8 +11,7 @@ Key properties:
 - Information must be refreshed to persist
 """
 
-import numpy as np
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 import time
 from collections import OrderedDict
@@ -140,7 +139,7 @@ class WorkingMemory:
     def _apply_decay(self):
         """Apply time-based decay to all items"""
         current_time = time.time()
-        time_delta = current_time - self._last_decay_time
+        current_time - self._last_decay_time
 
         to_remove = []
         for item_id, slot in self.slots.items():

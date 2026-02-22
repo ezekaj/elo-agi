@@ -6,11 +6,11 @@ Handles viewpoint, scale, and lighting invariance.
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Set, Any
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .visual_features import Feature, FeatureMap, FeatureType
+from .visual_features import FeatureMap, FeatureType
 
 
 class CategoryLevel(Enum):

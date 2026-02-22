@@ -2,7 +2,6 @@
 
 import pytest
 import numpy as np
-import time
 
 from neuro.modules.m04_memory.sensory_memory import IconicBuffer, EchoicBuffer
 

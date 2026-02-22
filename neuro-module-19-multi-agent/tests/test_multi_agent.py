@@ -16,7 +16,6 @@ from neuro.modules.m19_multi_agent.agent import (
     AgentParams,
     AgentRole,
     BeliefState,
-    Message,
     ModuleProposal,
     ContentType,
 )
@@ -32,19 +31,16 @@ from neuro.modules.m19_multi_agent.coordination import (
     CoordinationParams,
     Task,
     Action,
-    EmergentPattern,
 )
 from neuro.modules.m19_multi_agent.collective_memory import (
     CollectiveMemory,
     MemoryParams,
-    MemoryEntry,
 )
 from neuro.modules.m19_multi_agent.swarm import (
     SwarmIntelligence,
     SwarmParams,
     Problem,
     Solution,
-    ProblemStatus,
 )
 
 # =============================================================================
@@ -212,7 +208,7 @@ class TestAgentPopulation:
         pop = AgentPopulation(PopulationParams(n_agents=3))
 
         # Spawn
-        new_agent = pop.spawn_agent(AgentParams(agent_id="new_agent"))
+        pop.spawn_agent(AgentParams(agent_id="new_agent"))
         assert len(pop.agents) == 4
         assert "new_agent" in pop.agents
 
@@ -321,7 +317,7 @@ class TestCollectiveMemory:
         mem.store("agent1", "key1", value1, confidence=0.5)
         mem.store("agent2", "key2", value2, confidence=0.5)
 
-        initial_size = len(mem._memories)
+        len(mem._memories)
         merged = mem.consolidate()
 
         # May or may not merge depending on similarity

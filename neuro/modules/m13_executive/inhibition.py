@@ -6,7 +6,7 @@ Key functions: Stop signals, go/no-go tasks, impulse control
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Tuple, List
+from typing import Optional, List
 
 
 @dataclass

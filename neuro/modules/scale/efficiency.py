@@ -6,7 +6,6 @@ Implements profiling, optimization, and efficiency analysis.
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Callable, Tuple
-from enum import Enum
 import time
 import numpy as np
 

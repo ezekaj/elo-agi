@@ -10,20 +10,18 @@ An autonomous agent that:
 """
 
 import json
-import os
 import re
-import time
 import requests
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from datetime import datetime
 
 # Import tools
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent))
-from .tools import Tools, ToolResult
+from .tools import Tools
 from .autonomous_learning import AutonomousLearner
 
 
@@ -336,7 +334,7 @@ When you encounter an error:
             if args_match:
                 try:
                     args = json.loads(args_match.group(1))
-                except:
+                except Exception:
                     pass
             return (tool_name, args)
         return None

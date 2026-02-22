@@ -283,9 +283,9 @@ class MotorController:
             # Cubic interpolation
             tau = (t - t0) / (t1 - t0) if t1 != t0 else 0
             h00 = 2 * tau**3 - 3 * tau**2 + 1
-            h10 = tau**3 - 2 * tau**2 + tau
+            tau**3 - 2 * tau**2 + tau
             h01 = -2 * tau**3 + 3 * tau**2
-            h11 = tau**3 - tau**2
+            tau**3 - tau**2
 
             return h00 * p0 + h01 * p1
 

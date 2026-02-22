@@ -8,7 +8,7 @@ Brain region: Hippocampus
 """
 
 import time
-from typing import Optional, Any, List, Dict, Tuple
+from typing import Optional, Any, List, Dict
 from dataclasses import dataclass, field
 import hashlib
 

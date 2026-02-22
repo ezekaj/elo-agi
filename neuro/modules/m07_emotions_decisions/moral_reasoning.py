@@ -16,7 +16,7 @@ VMPFC lesion patients:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, Tuple, Any
 from enum import Enum
 import numpy as np
 
@@ -122,9 +122,9 @@ class DeontologicalSystem:
 
         # Generate reasoning
         if scenario.harm_type == HarmType.PERSONAL:
-            reasoning = f"Using someone as a means to an end violates their dignity"
+            reasoning = "Using someone as a means to an end violates their dignity"
         else:
-            reasoning = f"Causing harm is wrong, even for good outcomes"
+            reasoning = "Causing harm is wrong, even for good outcomes"
 
         return permissibility, reasoning
 

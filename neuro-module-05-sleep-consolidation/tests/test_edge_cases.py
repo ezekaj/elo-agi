@@ -17,7 +17,6 @@ from neuro.modules.m05_sleep_consolidation.meta_learning import (
 )
 from neuro.modules.m05_sleep_consolidation.interference_resolution import (
     InterferenceResolver,
-    MemoryVector,
 )
 from neuro.modules.m05_sleep_consolidation.schema_refinement import SchemaRefiner, Schema
 
@@ -238,7 +237,7 @@ class TestBoundaryConditions:
         controller.register_memory("perfect", MemoryType.EPISODIC, 1.0)
 
         # Should be considered consolidated
-        curve = controller.get_learning_curve("perfect")
+        controller.get_learning_curve("perfect")
         replays = controller.predict_optimal_replays("perfect")
         # Already at max strength, might need 0 replays
         assert replays >= 0
@@ -282,7 +281,7 @@ class TestNumericalStability:
 
     def test_very_small_variance(self):
         """Schema with very small variance should not cause division issues."""
-        refiner = SchemaRefiner(random_seed=42)
+        SchemaRefiner(random_seed=42)
 
         prototype = np.random.randn(64)
         schema = Schema(

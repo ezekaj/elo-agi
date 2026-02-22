@@ -9,7 +9,7 @@ Integrates causal reasoning with the Free Energy Principle:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
 import numpy as np
 
@@ -253,7 +253,7 @@ class CausalActiveInference:
         belief = belief or self.beliefs
 
         # Predict outcome using counterfactual
-        current_state = {v: belief.state_means.get(v, 0.0) for v in self.scm._variables}
+        {v: belief.state_means.get(v, 0.0) for v in self.scm._variables}
         predicted_state = self.scm.forward(interventions=action)
 
         # Epistemic value: expected information gain
@@ -309,7 +309,7 @@ class CausalActiveInference:
 
             for action in actions:
                 # Imagine outcome
-                imagined_outcome = self.counterfactual.compute(
+                self.counterfactual.compute(
                     evidence=state,
                     intervention=action,
                     outcome_var=list(goal_state.keys())[0] if goal_state else list(state.keys())[0],

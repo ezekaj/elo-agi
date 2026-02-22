@@ -1,6 +1,5 @@
 """Tests for problem classifier."""
 
-import pytest
 import numpy as np
 
 from neuro.modules.meta_reasoning.problem_classifier import (

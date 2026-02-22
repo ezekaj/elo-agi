@@ -6,7 +6,6 @@ from neuro.modules.m15_social.theory_of_mind import (
     BeliefTracker,
     MentalStateAttribution,
     TheoryOfMind,
-    ToMParams,
 )
 
 

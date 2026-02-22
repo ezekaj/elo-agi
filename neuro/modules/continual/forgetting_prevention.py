@@ -7,7 +7,7 @@ Implements multiple strategies to prevent catastrophic forgetting:
 - Synaptic Intelligence (SI)
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Any, Set
 from enum import Enum
 import numpy as np

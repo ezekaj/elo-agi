@@ -129,7 +129,7 @@ class RewardModulatedSTDP(STDPNetwork):
             reward: Reward signal (positive = good, negative = bad)
         """
         # Get dopamine modulation
-        dopamine_level = self.dopamine.receive_reward(reward)
+        self.dopamine.receive_reward(reward)
         modulation = self.dopamine.get_modulation()
 
         # Apply modulated eligibility to weights

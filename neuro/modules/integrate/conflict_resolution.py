@@ -6,7 +6,7 @@ this system resolves the conflict using various strategies.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from typing import Dict, List, Optional, Any
 from enum import Enum
 import numpy as np
 
@@ -137,7 +137,6 @@ class ConflictResolver:
         embeddings = list(module_outputs.values())
 
         max_disagreement = 0.0
-        conflicting_pair = None
 
         for i in range(len(modules)):
             for j in range(i + 1, len(modules)):
@@ -146,7 +145,7 @@ class ConflictResolver:
 
                 if disagreement > max_disagreement:
                     max_disagreement = disagreement
-                    conflicting_pair = (modules[i], modules[j])
+                    (modules[i], modules[j])
 
         if max_disagreement > threshold:
             self._conflict_counter += 1
@@ -361,7 +360,7 @@ class ConflictResolver:
         max_iterations = 10
         convergence_threshold = 0.01
 
-        dim = list(embeddings.values())[0].vector.shape[0]
+        list(embeddings.values())[0].vector.shape[0]
         current = np.mean([e.vector for e in embeddings.values()], axis=0)
 
         for _ in range(max_iterations):

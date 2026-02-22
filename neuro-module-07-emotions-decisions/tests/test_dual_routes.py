@@ -1,12 +1,10 @@
 """Tests for dual emotion routes."""
 
 import numpy as np
-import pytest
 from neuro.modules.m07_emotions_decisions.dual_emotion_routes import (
     FastEmotionRoute,
     SlowEmotionRoute,
     DualRouteProcessor,
-    ThalamusRelay,
     ResponseType,
 )
 

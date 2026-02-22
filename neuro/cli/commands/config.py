@@ -32,7 +32,7 @@ def cmd_config(args):
         console.print("[dim](Config file not found - using defaults)[/dim]")
         console.print()
         console.print("[bold]Create one with:[/bold]")
-        console.print(f"  [cyan]mkdir -p ~/.neuro[/cyan]")
+        console.print("  [cyan]mkdir -p ~/.neuro[/cyan]")
 
         example = {"model": "ministral-3:8b", "permission_mode": "default", "hooks": {}}
         console.print(f"  [cyan]cat > {config_path} << 'EOF'[/cyan]")

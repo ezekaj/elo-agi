@@ -5,7 +5,7 @@ Implements curriculum learning strategies for optimal knowledge transfer.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set, Callable
+from typing import Dict, List, Optional, Any, Set, Callable
 from enum import Enum
 import numpy as np
 

@@ -10,7 +10,6 @@ Tests integration between:
 
 import pytest
 import numpy as np
-import os
 
 
 # Add parent paths for imports
@@ -62,8 +61,8 @@ class TestNeuroAbstractSharedSpaceIntegration:
         """Test querying shared space after projection."""
         # Add some embeddings
         e1 = shared_space_integration.bind_to_shared_space("dog")
-        e2 = shared_space_integration.bind_to_shared_space("cat")
-        e3 = shared_space_integration.bind_to_shared_space("tree")
+        shared_space_integration.bind_to_shared_space("cat")
+        shared_space_integration.bind_to_shared_space("tree")
 
         # Query with dog's vector
         results = shared_space_integration.query(e1.vector, top_k=3)

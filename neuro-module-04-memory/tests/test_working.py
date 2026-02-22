@@ -1,8 +1,5 @@
 """Tests for working memory"""
 
-import pytest
-import time
-
 from neuro.modules.m04_memory.working_memory.working_memory import WorkingMemory, MemorySlot
 
 

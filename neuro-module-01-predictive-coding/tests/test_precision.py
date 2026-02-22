@@ -129,7 +129,7 @@ class TestAdaptivePrecision:
         for _ in range(30):
             ap.update(np.array([0.1, 0.1]))
 
-        stable_volatility = ap.volatility.copy()
+        ap.volatility.copy()
 
         # Sudden change in error pattern
         for _ in range(30):

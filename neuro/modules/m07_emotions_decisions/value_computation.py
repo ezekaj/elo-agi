@@ -8,7 +8,7 @@ Based on research showing VMPFC/OFC computes subjective value that integrates:
 - Temporal factors (delay discounting)
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
@@ -269,7 +269,7 @@ class VMPFCIntegrator:
         if total == 0:
             return False, 0.0
 
-        proportion = offer / total
+        offer / total
         fairness_eval = self.evaluate_fairness(offer, total - offer)
 
         # Subjective value of accepting

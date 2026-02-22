@@ -102,7 +102,7 @@ def load_generic_context(path: Path) -> str:
         files = [f.name for f in path.iterdir() if f.is_file()][:20]
         if files:
             context_parts.append(f"Files: {', '.join(files)}")
-    except:
+    except Exception:
         pass
 
     return "\n\n".join(context_parts)

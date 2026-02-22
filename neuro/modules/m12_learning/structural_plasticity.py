@@ -7,7 +7,7 @@ Structural Plasticity
 """
 
 import numpy as np
-from typing import Optional, List, Tuple, Set
+from typing import Optional, Tuple
 from dataclasses import dataclass
 
 

@@ -13,8 +13,6 @@ import pytest
 import numpy as np
 from neuro.modules.abstract.symbolic_binder import (
     SymbolicBinder,
-    CompositeBinding,
-    RoleBinding,
     RoleType,
     HRROperations,
     TPROperations,

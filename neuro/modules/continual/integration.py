@@ -9,8 +9,8 @@ Unified controller for continual learning combining:
 - Capability tracking
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Callable
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 
 from .task_inference import TaskInference, TaskInferenceConfig

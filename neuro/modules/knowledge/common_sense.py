@@ -4,13 +4,9 @@ Common Sense Reasoning: Physics, social, and temporal reasoning.
 Implements intuitive reasoning about the physical and social world.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple, Set
 from enum import Enum
-import numpy as np
-
-from .semantic_network import SemanticNetwork, RelationType
-from .fact_store import FactStore
 
 
 class PhysicsProperty(Enum):

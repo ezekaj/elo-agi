@@ -8,8 +8,8 @@ Monitors capability growth and regression:
 - Suggest remediation strategies
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Any, Callable
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import numpy as np
 

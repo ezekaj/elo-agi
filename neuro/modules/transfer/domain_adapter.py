@@ -4,7 +4,7 @@ Domain Adapter: Adapt representations across domains.
 Implements domain alignment, transfer mapping, and representation adaptation.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
@@ -108,7 +108,7 @@ class SubspaceAlignment:
         try:
             u, s, vt = np.linalg.svd(data, full_matrices=False)
             return vt[:n].T
-        except:
+        except Exception:
             # Fallback to identity
             return np.eye(data.shape[1])[:, :n]
 
@@ -170,7 +170,7 @@ class CorrelationAlignment:
             eigvals, eigvecs = np.linalg.eigh(A)
             eigvals = np.maximum(eigvals, 1e-10)
             return eigvecs @ np.diag(np.sqrt(eigvals)) @ eigvecs.T
-        except:
+        except Exception:
             return np.eye(A.shape[0])
 
     def _matrix_sqrt_inv(self, A: np.ndarray) -> np.ndarray:
@@ -179,7 +179,7 @@ class CorrelationAlignment:
             eigvals, eigvecs = np.linalg.eigh(A)
             eigvals = np.maximum(eigvals, 1e-10)
             return eigvecs @ np.diag(1.0 / np.sqrt(eigvals)) @ eigvecs.T
-        except:
+        except Exception:
             return np.eye(A.shape[0])
 
 

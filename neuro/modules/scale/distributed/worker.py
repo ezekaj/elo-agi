@@ -4,7 +4,7 @@ Worker: Parallel task execution.
 Implements worker processes for distributed computing.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 import threading

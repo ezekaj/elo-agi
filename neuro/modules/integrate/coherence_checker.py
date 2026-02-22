@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any, Tuple, Set
 from enum import Enum
 import numpy as np
 
-from .shared_space import SemanticEmbedding, ModalityType
+from .shared_space import SemanticEmbedding
 
 
 class InconsistencyType(Enum):
@@ -485,10 +485,10 @@ class CoherenceChecker:
             current_time = float(self._inconsistency_counter)
 
         # Check for staleness
-        stale_inconsistencies = self.check_staleness(current_time)
+        self.check_staleness(current_time)
 
         # Check for circular dependencies
-        circular_inconsistencies = self.check_circular_dependencies()
+        self.check_circular_dependencies()
 
         # Get all unresolved inconsistencies
         unresolved = [i for i in self._inconsistencies if not i.resolved]

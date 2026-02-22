@@ -13,7 +13,6 @@ import sys
 sys.path.insert(0, "..")
 
 from src.moral_reasoning import (
-    MoralDilemmaProcessor,
     VMPFCLesionModel,
     create_trolley_switch,
     create_trolley_push,
@@ -121,16 +120,16 @@ def demo_intellectual_preservation():
     switch = create_trolley_switch()
     decision = lesion.process_moral_dilemma(switch)
 
-    print(f"\n1. Perform utilitarian calculus:")
-    print(f"   5 lives saved - 1 life lost = 4 net lives")
-    print(f"   Patient calculates: Action has positive utility")
+    print("\n1. Perform utilitarian calculus:")
+    print("   5 lives saved - 1 life lost = 4 net lives")
+    print("   Patient calculates: Action has positive utility")
     print(f"   Decision confidence: {decision.confidence:.2f}")
 
-    print(f"\n2. Understand abstract moral concepts:")
+    print("\n2. Understand abstract moral concepts:")
     print(f"   Framework used: {decision.framework_used.value}")
     print(f"   Reasoning preserved: {decision.reasoning}")
 
-    print(f"\n3. Make consistent logical decisions:")
+    print("\n3. Make consistent logical decisions:")
     switch2 = create_trolley_switch()
     decision2 = lesion.process_moral_dilemma(switch2)
     print(f"   Same scenario, same decision: {decision.action_taken == decision2.action_taken}")

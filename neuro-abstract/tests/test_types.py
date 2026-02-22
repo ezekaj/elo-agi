@@ -13,7 +13,6 @@ Tests cover:
 import pytest
 import numpy as np
 from neuro.modules.abstract.composition_types import (
-    CompositionType,
     AtomicType,
     FunctionType,
     StructuredType,
@@ -224,7 +223,7 @@ class TestStructuredType:
     def test_structured_subtype(self):
         """Should support structural subtyping."""
         base = StructuredType("Base", (("x", INT),))
-        sub = StructuredType("Sub", (("x", INT), ("y", STR)))
+        StructuredType("Sub", (("x", INT), ("y", STR)))
 
         # Sub has all fields of base
         # Note: In our implementation, more fields = NOT subtype

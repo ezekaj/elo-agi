@@ -6,8 +6,7 @@ and categorical coding.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
-from enum import Enum
+from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
 

@@ -11,7 +11,7 @@ This enables combining known concepts into novel configurations
 """
 
 import numpy as np
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 import time
 from collections import defaultdict
@@ -494,7 +494,7 @@ class HPCPFCComplex:
                 combined_context[f"component_{i}_{key}"] = value
 
         # Encode novel combination
-        episode = self.hippocampus.encode_episode(
+        self.hippocampus.encode_episode(
             content={"composed": concepts, "relation": relation},
             context=combined_context,
             strength=0.8,  # Novel combinations start slightly weaker

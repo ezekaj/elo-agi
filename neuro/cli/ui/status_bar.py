@@ -6,7 +6,7 @@ Instead, we provide status updates inline when relevant.
 """
 
 from typing import Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from rich.console import Console
 
 

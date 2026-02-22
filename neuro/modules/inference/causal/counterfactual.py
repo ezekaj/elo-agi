@@ -5,7 +5,7 @@ Implements counterfactual inference using the twin network method.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 import numpy as np
 
 

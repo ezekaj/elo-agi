@@ -193,8 +193,8 @@ class TestPredictiveHierarchy:
         prediction = hierarchy.predict_next()
 
         # Prediction should be closer to sequence[1] than random
-        dist_to_next = np.linalg.norm(prediction - sequence[1])
-        dist_to_random = np.linalg.norm(prediction - np.random.randn(3))
+        np.linalg.norm(prediction - sequence[1])
+        np.linalg.norm(prediction - np.random.randn(3))
 
         # Not a strict test, but prediction should have structure
         assert prediction.shape == (3,)
@@ -225,7 +225,7 @@ class TestHierarchyLesion:
         for _ in range(50):
             hierarchy.step(constant)
 
-        normal_error = hierarchy.step(constant)["total_error"]
+        hierarchy.step(constant)["total_error"]
 
         # "Lesion" top-down by zeroing top layer weights
         hierarchy.layers[-1].W_g = np.zeros_like(hierarchy.layers[-1].W_g)
@@ -242,7 +242,7 @@ class TestHierarchyLesion:
 
         # With normal processing
         obs = np.random.randn(5)
-        normal_result = hierarchy.step(obs)
+        hierarchy.step(obs)
 
         # Simulate lesion by not propagating errors
         hierarchy.reset()
