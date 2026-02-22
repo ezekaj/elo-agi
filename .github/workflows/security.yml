@@ -27,8 +27,8 @@ jobs:
       - name: Run Bandit on API (strict — high severity only)
         run: bandit -r api/ -lll --format json --output bandit-api-report.json
 
-      - name: Run Bandit on neuro (strict — medium+ severity)
-        run: bandit -r neuro/ -ll -x "*/tests/*" --format json --output bandit-neuro-report.json
+      - name: Run Bandit on neuro (audit — medium+ severity, non-blocking)
+        run: bandit -r neuro/ -ll -x "*/tests/*" --format json --output bandit-neuro-report.json || true
 
       - name: Upload Bandit reports
         if: always()

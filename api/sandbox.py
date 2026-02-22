@@ -16,49 +16,153 @@ from typing import Dict, Any
 
 BLOCKED_IMPORTS = {
     # System / process
-    "subprocess", "multiprocessing", "signal", "resource", "os", "pathlib",
-    "shutil", "tempfile", "_thread", "threading", "concurrent",
-    "_posixsubprocess", "pty", "fcntl", "termios",
+    "subprocess",
+    "multiprocessing",
+    "signal",
+    "resource",
+    "os",
+    "pathlib",
+    "shutil",
+    "tempfile",
+    "_thread",
+    "threading",
+    "concurrent",
+    "_posixsubprocess",
+    "pty",
+    "fcntl",
+    "termios",
     # Network
-    "socket", "http", "urllib", "requests", "ftplib", "smtplib", "telnetlib",
-    "aiohttp", "httpx",
+    "socket",
+    "http",
+    "urllib",
+    "requests",
+    "ftplib",
+    "smtplib",
+    "telnetlib",
+    "aiohttp",
+    "httpx",
     # Code introspection
-    "importlib", "code", "codeop", "inspect", "ast", "dis", "sys",
+    "importlib",
+    "code",
+    "codeop",
+    "inspect",
+    "ast",
+    "dis",
+    "sys",
     # Serialization
-    "pickle", "shelve", "marshal",
+    "pickle",
+    "shelve",
+    "marshal",
     # IO / compression
-    "_io", "zipfile", "tarfile", "gzip", "bz2", "lzma", "mmap",
+    "_io",
+    "zipfile",
+    "tarfile",
+    "gzip",
+    "bz2",
+    "lzma",
+    "mmap",
     # Unsafe
-    "ctypes", "webbrowser", "antigravity", "turtle", "tkinter", "gc",
+    "ctypes",
+    "webbrowser",
+    "antigravity",
+    "turtle",
+    "tkinter",
+    "gc",
     # System info
-    "grp", "pwd", "crypt",
+    "grp",
+    "pwd",
+    "crypt",
     # Database
-    "dbm", "sqlite3",
+    "dbm",
+    "sqlite3",
     # Parsing
-    "xml", "html.parser",
+    "xml",
+    "html.parser",
     # Async
-    "asyncio", "selectors", "select",
+    "asyncio",
+    "selectors",
+    "select",
 }
 
 BLOCKED_ATTRIBUTES = {
-    "__class__", "__bases__", "__subclasses__", "__globals__",
-    "__code__", "__closure__", "__func__", "__self__",
-    "__dict__", "__module__", "__mro__", "__init_subclass__",
-    "__import__", "__builtins__", "__loader__", "__spec__",
-    "__file__", "__path__", "__cached__", "__reduce__", "__reduce_ex__",
+    "__class__",
+    "__bases__",
+    "__subclasses__",
+    "__globals__",
+    "__code__",
+    "__closure__",
+    "__func__",
+    "__self__",
+    "__dict__",
+    "__module__",
+    "__mro__",
+    "__init_subclass__",
+    "__import__",
+    "__builtins__",
+    "__loader__",
+    "__spec__",
+    "__file__",
+    "__path__",
+    "__cached__",
+    "__reduce__",
+    "__reduce_ex__",
 }
 
 SAFE_BUILTINS_NAMES = [
-    "print", "len", "range", "str", "int", "float", "list", "dict",
-    "tuple", "set", "bool", "abs", "round", "min", "max", "sum",
-    "sorted", "reversed", "enumerate", "zip", "map", "filter",
-    "isinstance", "hasattr", "True", "False", "None",
-    "frozenset", "bytes", "bytearray", "hex", "oct", "bin",
-    "ord", "chr", "all", "any", "repr", "hash", "slice", "complex",
-    "ValueError", "TypeError", "KeyError", "IndexError",
-    "AttributeError", "RuntimeError", "StopIteration",
-    "ZeroDivisionError", "OverflowError", "ImportError",
-    "Exception", "ArithmeticError", "LookupError",
+    "print",
+    "len",
+    "range",
+    "str",
+    "int",
+    "float",
+    "list",
+    "dict",
+    "tuple",
+    "set",
+    "bool",
+    "abs",
+    "round",
+    "min",
+    "max",
+    "sum",
+    "sorted",
+    "reversed",
+    "enumerate",
+    "zip",
+    "map",
+    "filter",
+    "isinstance",
+    "hasattr",
+    "True",
+    "False",
+    "None",
+    "frozenset",
+    "bytes",
+    "bytearray",
+    "hex",
+    "oct",
+    "bin",
+    "ord",
+    "chr",
+    "all",
+    "any",
+    "repr",
+    "hash",
+    "slice",
+    "complex",
+    "ValueError",
+    "TypeError",
+    "KeyError",
+    "IndexError",
+    "AttributeError",
+    "RuntimeError",
+    "StopIteration",
+    "ZeroDivisionError",
+    "OverflowError",
+    "ImportError",
+    "Exception",
+    "ArithmeticError",
+    "LookupError",
 ]
 
 MAX_OUTPUT_BYTES = 10 * 1024  # 10KB
@@ -87,7 +191,7 @@ def _get_project_paths() -> list:
 
 def _build_runner_script(code: str) -> str:
     """Build the Python script that runs inside the subprocess."""
-    return textwrap.dedent('''\
+    return textwrap.dedent("""\
 import sys, io, time, json, traceback
 
 # Memory limit (Linux only)
@@ -196,7 +300,7 @@ if len(output) > MAX_OUTPUT:
 result = {{"output": output, "error": error, "execution_time": round(elapsed, 4)}}
 print(SENTINEL)
 print(json.dumps(result))
-''').format(
+""").format(
         max_mem=MAX_MEMORY_BYTES,
         paths=json.dumps(_get_project_paths()),
         blocked_imports=json.dumps(sorted(BLOCKED_IMPORTS)),
@@ -272,7 +376,9 @@ def execute_code(code: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any]:
                 return {
                     "output": parsed.get("output", ""),
                     "error": parsed.get("error"),
-                    "execution_time": parsed.get("execution_time", round(time.time() - start_time, 4)),
+                    "execution_time": parsed.get(
+                        "execution_time", round(time.time() - start_time, 4)
+                    ),
                 }
             except (json.JSONDecodeError, IndexError):
                 pass
