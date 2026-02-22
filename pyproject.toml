@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "elo-agi"
-version = "0.9.2"
+version = "0.9.3"
 description = "Neuroscience-inspired AGI architecture with 38 cognitive modules"
 license = "MIT"
 requires-python = ">=3.9"
@@ -59,6 +59,7 @@ all = [
 ]
 
 [project.scripts]
+elo = "neuro.cli:main"
 neuro = "neuro.cli:main"
 neuro-demo = "neuro.demos:main"
 neuro-bench = "neuro.benchmarks:main"

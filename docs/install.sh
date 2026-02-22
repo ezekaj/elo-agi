@@ -77,7 +77,14 @@ fi
 # --- Create wrapper scripts ---
 mkdir -p "$BIN_DIR"
 
-# neuro command
+# elo command (primary)
+cat > "$BIN_DIR/elo" << 'WRAPPER'
+#!/usr/bin/env bash
+exec "$HOME/.elo-agi/venv/bin/elo" "$@"
+WRAPPER
+chmod +x "$BIN_DIR/elo"
+
+# neuro command (alias)
 cat > "$BIN_DIR/neuro" << 'WRAPPER'
 #!/usr/bin/env bash
 exec "$HOME/.elo-agi/venv/bin/neuro" "$@"
@@ -136,8 +143,8 @@ echo ""
 success "${BOLD}ELO-AGI v${VERSION} installed successfully!${NC}"
 echo ""
 echo -e "  ${BOLD}Get started:${NC}"
-echo -e "    ${CYAN}neuro${NC}              Interactive session"
-echo -e "    ${CYAN}neuro${NC} --version     Check version"
+echo -e "    ${CYAN}elo${NC}                Interactive session"
+echo -e "    ${CYAN}elo${NC} --version       Check version"
 echo -e "    ${CYAN}neuro-demo${NC} all      Run demos"
 echo ""
 
