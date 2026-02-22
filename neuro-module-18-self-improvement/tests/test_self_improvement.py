@@ -11,7 +11,6 @@ Covers:
 
 import pytest
 import numpy as np
-import os
 import time
 
 from neuro.modules.m18_self_improvement.generator import (
@@ -22,22 +21,18 @@ from neuro.modules.m18_self_improvement.generator import (
 )
 from neuro.modules.m18_self_improvement.verifier import (
     ChangeVerifier,
-    VerifierParams,
     VerificationResult,
     VerificationMethod,
 )
 from neuro.modules.m18_self_improvement.updater import (
     SystemUpdater,
-    UpdaterParams,
     UpdateResult,
     UpdateStatus,
     Checkpoint,
 )
 from neuro.modules.m18_self_improvement.meta_learner import (
     MetaLearner,
-    MetaParams,
     LearningStrategy,
-    StrategyType,
 )
 from neuro.modules.m18_self_improvement.darwin_godel import (
     DarwinGodelMachine,
@@ -127,7 +122,7 @@ class TestModificationGenerator:
         generator = ModificationGenerator()
         generator.register_component("layer1", {"type": "dense"})
 
-        initial_weights = generator._strategy_weights.copy()
+        generator._strategy_weights.copy()
 
         for _ in range(10):
             candidates = generator.generate_candidates(0.5)
@@ -304,7 +299,7 @@ class TestSystemUpdater:
     def test_updater_initialization(self):
         """Test updater initialization."""
         updater = SystemUpdater()
-        assert updater.params.gradual_application == True
+        assert updater.params.gradual_application is True
 
     def test_create_checkpoint(self):
         """Test checkpoint creation."""
@@ -437,7 +432,7 @@ class TestMetaLearner:
         learner = MetaLearner()
 
         for _ in range(20):
-            strategy = learner.select_strategy()
+            learner.select_strategy()
             mod = Modification(
                 mod_id=f"m_{_}",
                 mod_type=ModificationType.WEIGHT_ADJUSTMENT,
@@ -517,7 +512,7 @@ class TestDarwinGodelMachine:
         )
 
         for _ in range(5):
-            cycle = dgm.run_improvement_cycle()
+            dgm.run_improvement_cycle()
 
         assert dgm._cycle_count == 5
 
@@ -663,7 +658,7 @@ class TestIntegration:
         """Test complete improvement pipeline."""
         # Create system
         system = MockSystem()
-        initial_perf = system.get_performance()
+        system.get_performance()
 
         # Create DGM
         dgm = DarwinGodelMachine(

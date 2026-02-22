@@ -4,8 +4,8 @@ Structural Causal Models: Pearl's SCM framework.
 Implements structural equation models for causal reasoning.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set, Callable, Union
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple, Set, Callable
 from enum import Enum
 import numpy as np
 
@@ -135,7 +135,8 @@ class StructuralCausalModel:
 
         # Default to standard normal
         if distribution is None:
-            distribution = lambda: np.random.normal(0, 1)
+            def distribution():
+                return np.random.normal(0, 1)
         self._noise_distributions[name] = distribution
 
         return var

@@ -9,7 +9,6 @@ Tests cover:
 """
 
 import pytest
-import numpy as np
 from neuro.modules.abstract.program_synthesis import (
     ProgramSynthesizer,
     PrimitiveLibrary,
@@ -197,10 +196,10 @@ class TestPrimitiveLibrary:
         lt = library.get("lt")
         gt = library.get("gt")
 
-        assert eq(5, 5) == True
-        assert eq(5, 6) == False
-        assert lt(3, 5) == True
-        assert gt(5, 3) == True
+        assert eq(5, 5) is True
+        assert eq(5, 6) is False
+        assert lt(3, 5) is True
+        assert gt(5, 3) is True
 
     def test_list_primitives(self, library):
         """List primitives should work correctly."""
@@ -442,7 +441,7 @@ class TestEdgeCases:
             Example(inputs=[1], output=1000000),
         ]
 
-        program = synthesizer.synthesize_from_examples(examples, [INT], INT)
+        synthesizer.synthesize_from_examples(examples, [INT], INT)
         # May or may not find, but shouldn't crash
 
     def test_empty_examples(self):

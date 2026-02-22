@@ -27,8 +27,8 @@ class TestMemoryTrace:
 
         assert np.array_equal(trace.content, content)
         assert trace.emotional_salience == 0.5
-        assert trace.hippocampal_index == True
-        assert trace.cortical_index == False
+        assert trace.hippocampal_index is True
+        assert trace.cortical_index is False
 
     def test_similarity(self):
         """Test similarity computation between traces"""
@@ -121,7 +121,7 @@ class TestHippocampalReplay:
 
         # Old memory
         replay.current_time = 0.0
-        old = replay.encode_experience(np.random.randn(10))
+        replay.encode_experience(np.random.randn(10))
 
         replay.current_time = 100.0
 
@@ -244,7 +244,7 @@ class TestCorticalStore:
 
         assert cortex.get_memory_count() == 1
         retrieved = cortex.retrieve(cortical_id)
-        assert retrieved.trace.cortical_index == True
+        assert retrieved.trace.cortical_index is True
 
     def test_abstraction(self):
         """Test abstraction during transfer"""
@@ -352,7 +352,7 @@ class TestHippocampalCorticalDialogue:
         dialogue.transfer_memory(memory_id)
 
         memory = dialogue.hippocampus.retrieve(memory_id)
-        assert memory.trace.cortical_index == True
+        assert memory.trace.cortical_index is True
 
     def test_consolidation_cycle(self):
         """Test complete consolidation cycle"""

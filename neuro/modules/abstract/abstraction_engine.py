@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple, Set, Callable
 from enum import Enum
 import numpy as np
-from itertools import combinations
 
 
 class AbstractionLevel(Enum):
@@ -493,7 +492,7 @@ class AbstractionEngine:
         if v1 is None or v2 is None:
             return 0.0
 
-        if type(v1) != type(v2):
+        if not isinstance(v1, type(v2)):
             return 0.0
 
         if isinstance(v1, (int, float)):

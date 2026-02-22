@@ -11,7 +11,6 @@ from neuro.modules.robust.robust_inference import (
 )
 from neuro.modules.robust.uncertainty import SimpleDropoutNN, UncertaintyQuantifier
 from neuro.modules.robust.ood_detection import OODDetector, OODMethod, SimpleClassifier
-from neuro.modules.robust.calibration import ConfidenceCalibrator, CalibrationMethod
 
 
 class TestRobustInference:
@@ -88,7 +87,7 @@ class TestRobustInference:
     def test_infer_without_ood_check(self, robust_inference, sample_input):
         """Test inference without OOD check."""
         result = robust_inference.infer(sample_input, check_ood=False)
-        assert result.is_ood == False
+        assert result.is_ood is False
 
 
 class TestRejectionPolicies:
@@ -149,7 +148,7 @@ class TestRejectionPolicies:
 
         # Test with extreme input (likely OOD)
         x_extreme = np.ones(10) * 100
-        result = ri.infer(x_extreme)
+        ri.infer(x_extreme)
         # May or may not be rejected depending on detector
 
     def test_combined_rejection(self, model):
@@ -336,8 +335,6 @@ class TestThresholdCalibration:
 
     def test_calibration_updates_thresholds(self, robust_inference, validation_data):
         """Test calibration updates thresholds."""
-        initial_conf = robust_inference.confidence_threshold
-        initial_unc = robust_inference.uncertainty_threshold
 
         robust_inference.calibrate_thresholds(
             validation_data,
@@ -345,10 +342,6 @@ class TestThresholdCalibration:
         )
 
         # At least one should change
-        changed = (
-            robust_inference.confidence_threshold != initial_conf
-            or robust_inference.uncertainty_threshold != initial_unc
-        )
         # May not change if already optimal
         assert isinstance(robust_inference.confidence_threshold, float)
 
@@ -433,7 +426,6 @@ class TestAdaptiveThresholdInference:
 
     def test_adaptive_adjusts_thresholds(self, adaptive_inference):
         """Test thresholds are adjusted."""
-        initial_conf = adaptive_inference.confidence_threshold
 
         # Make many predictions
         for _ in range(100):

@@ -10,14 +10,10 @@ These tests push the system to its limits:
 
 import pytest
 import numpy as np
-import os
 import time
-import gc
 
 from neuro.modules.m00_integration.module_interface import (
-    CognitiveModule,
     ModuleProposal,
-    ModuleParams,
     ModuleType,
     ContentType,
     DummyModule,
@@ -536,7 +532,7 @@ class TestBroadcastSystem:
 
         # Immediate second broadcast should be rate limited
         event2 = system.broadcast(proposal, [ModuleType.EMOTION])
-        assert event2.metadata.get("skipped") == True
+        assert event2.metadata.get("skipped") is True
 
 
 class TestFullIntegration:

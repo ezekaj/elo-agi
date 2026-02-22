@@ -12,10 +12,8 @@ Covers:
 
 import pytest
 import numpy as np
-from pathlib import Path
 
 from neuro.modules.bench.base_benchmark import (
-    Benchmark,
     BenchmarkConfig,
     BenchmarkResult,
     TrialResult,
@@ -477,8 +475,8 @@ class TestRunConfig:
 
     def test_defaults(self):
         config = RunConfig()
-        assert config.verbose == True
-        assert config.save_results == True
+        assert config.verbose is True
+        assert config.save_results is True
 
 
 class TestBenchmarkRunner:
@@ -567,7 +565,7 @@ class TestIntegration:
     def test_full_suite_run(self):
         """Test running a complete suite."""
         runner = BenchmarkRunner(RunConfig(verbose=False, save_results=False))
-        suite = runner.create_default_suite()
+        runner.create_default_suite()
 
         agent = create_random_agent()
         result = runner.run(agent, n_trials=2)

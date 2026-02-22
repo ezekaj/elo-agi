@@ -2,15 +2,12 @@
 Tests for Mental Imagery Systems
 """
 
-import pytest
-import numpy as np
 from neuro.modules.m09_creativity.imagery import (
     VisualImagery,
     AuditoryImagery,
     MotorImagery,
     TactileImagery,
     ImagerySystem,
-    MultimodalImage,
 )
 from neuro.modules.m09_creativity.imagery.visual_imagery import VisualProperty
 from neuro.modules.m09_creativity.imagery.auditory_imagery import AuditoryProperty
@@ -123,7 +120,7 @@ class TestAuditoryImagery:
         speech = auditory.inner_speech("Hello, world!")
 
         assert speech is not None
-        assert speech.is_speech == True
+        assert speech.is_speech is True
         assert speech.duration > 0
 
     def test_imagine_music(self):
@@ -132,7 +129,7 @@ class TestAuditoryImagery:
         music = auditory.imagine_music("A cheerful melody", tempo=120)
 
         assert music is not None
-        assert music.is_music == True
+        assert music.is_music is True
         assert AuditoryProperty.TEMPO in music.properties
 
     def test_change_pitch(self):

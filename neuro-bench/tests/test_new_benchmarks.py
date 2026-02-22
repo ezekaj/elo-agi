@@ -222,9 +222,14 @@ class TestAbstractionBenchmarks:
         """Test program synthesis evaluation."""
         bench = ProgramSynthesisBenchmark()
 
-        target_fn = lambda x: x + 1
-        correct_fn = lambda x: x + 1
-        wrong_fn = lambda x: x * 2
+        def target_fn(x):
+            return x + 1
+
+        def correct_fn(x):
+            return x + 1
+
+        def wrong_fn(x):
+            return x * 2
 
         success, score = bench.evaluate(target_fn, correct_fn)
         assert success
