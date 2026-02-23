@@ -11,9 +11,13 @@ Connects to MCP servers for extended capabilities like:
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List
 from enum import Enum
+import asyncio
 import json
+import logging
 import os
-import subprocess
+
+
+logger = logging.getLogger(__name__)
 
 
 class MCPTransport(Enum):
@@ -62,10 +66,12 @@ class MCPManager:
     Manages MCP server connections.
 
     Features:
-    - Connect to MCP servers via stdio
+    - Connect to MCP servers via stdio using async subprocesses
     - Tool discovery and registration
     - Resource access
-    - Request/response handling
+    - Request/response correlation with futures
+    - Background read loops for each server
+    - Automatic reconnection with exponential backoff
     """
 
     def __init__(
@@ -75,10 +81,12 @@ class MCPManager:
         self.project_dir = os.path.abspath(project_dir)
 
         self._servers: Dict[str, MCPServerConfig] = {}
-        self._processes: Dict[str, subprocess.Popen] = {}
+        self._processes: Dict[str, asyncio.subprocess.Process] = {}
+        self._readers: Dict[str, asyncio.Task] = {}
+        self._pending: Dict[int, asyncio.Future] = {}
         self._tools: Dict[str, MCPTool] = {}
         self._resources: Dict[str, MCPResource] = {}
-        self._request_id = 0
+        self._request_id: int = 0
 
         self._load_config()
 
@@ -105,7 +113,7 @@ class MCPManager:
                             transport=MCPTransport(config.get("transport", "stdio")),
                         )
                 except Exception as e:
-                    print(f"Error loading MCP config from {path}: {e}")
+                    logger.error(f"Error loading MCP config from {path}: {e}")
 
     async def connect_all(self) -> Dict[str, bool]:
         """Connect to all configured MCP servers."""
@@ -127,52 +135,174 @@ class MCPManager:
         return False
 
     async def _connect_stdio(self, config: MCPServerConfig) -> bool:
-        """Connect via stdio transport."""
+        """Connect via stdio transport using async subprocess."""
         try:
             env = {**os.environ, **config.env}
 
-            process = subprocess.Popen(
-                [config.command] + config.args,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+            process = await asyncio.create_subprocess_exec(
+                config.command,
+                *config.args,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
                 env=env,
                 cwd=self.project_dir,
             )
 
             self._processes[config.name] = process
 
-            # Initialize
+            reader_task = asyncio.create_task(self._read_loop(config.name))
+            self._readers[config.name] = reader_task
+
             response = await self._send_request(
                 config.name,
                 "initialize",
                 {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {},
-                    "clientInfo": {"name": "neuro", "version": "0.9.0"},
+                    "clientInfo": {"name": "elo", "version": "0.9.6"},
                 },
             )
 
             if not response:
+                await self._cleanup_server(config.name)
                 return False
 
-            # Send initialized notification
             await self._send_notification(config.name, "notifications/initialized", {})
 
-            # Discover tools
             await self._discover_tools(config.name)
 
-            # Discover resources
             await self._discover_resources(config.name)
 
             return True
 
         except Exception as e:
-            print(f"Failed to connect to MCP server {config.name}: {e}")
+            logger.error(f"Failed to connect to MCP server {config.name}: {e}")
+            await self._cleanup_server(config.name)
             return False
+
+    async def _read_loop(self, server_name: str):
+        """Background task that reads JSON-RPC responses from a server's stdout."""
+        process = self._processes.get(server_name)
+        if not process or not process.stdout:
+            return
+
+        try:
+            while True:
+                line = await process.stdout.readline()
+                if not line:
+                    break
+
+                try:
+                    message = json.loads(line.decode())
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    continue
+
+                if "id" in message:
+                    req_id = message["id"]
+                    future = self._pending.pop(req_id, None)
+                    if future and not future.done():
+                        if "error" in message:
+                            future.set_result(None)
+                            logger.error(f"MCP error from {server_name}: {message['error']}")
+                        else:
+                            future.set_result(message.get("result"))
+                else:
+                    method = message.get("method", "")
+                    if method == "notifications/tools/list_changed":
+                        asyncio.create_task(self._discover_tools(server_name))
+                    elif method == "notifications/resources/list_changed":
+                        asyncio.create_task(self._discover_resources(server_name))
+
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            logger.error(f"Read loop error for {server_name}: {e}")
+
+        if server_name in self._servers:
+            asyncio.create_task(self._reconnect(server_name))
+
+    async def _send_request(
+        self,
+        server_name: str,
+        method: str,
+        params: Dict[str, Any],
+        timeout: float = 30,
+    ) -> Optional[Dict]:
+        """Send a JSON-RPC request and await the correlated response."""
+        if server_name not in self._processes:
+            return None
+
+        process = self._processes[server_name]
+        if not process.stdin:
+            return None
+
+        self._request_id += 1
+        req_id = self._request_id
+
+        request = {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "method": method,
+            "params": params,
+        }
+
+        loop = asyncio.get_running_loop()
+        future: asyncio.Future = loop.create_future()
+        self._pending[req_id] = future
+
+        try:
+            request_json = json.dumps(request) + "\n"
+            process.stdin.write(request_json.encode())
+            await process.stdin.drain()
+
+            result = await asyncio.wait_for(future, timeout=timeout)
+            return result
+
+        except asyncio.TimeoutError:
+            self._pending.pop(req_id, None)
+            if not future.done():
+                future.cancel()
+            logger.error(f"MCP request timed out: {method} on {server_name}")
+            return None
+        except Exception as e:
+            self._pending.pop(req_id, None)
+            if not future.done():
+                future.cancel()
+            logger.error(f"MCP request failed: {e}")
+            return None
+
+    async def _send_notification(
+        self,
+        server_name: str,
+        method: str,
+        params: Dict[str, Any],
+    ):
+        """Send a JSON-RPC notification (no response expected)."""
+        if server_name not in self._processes:
+            return
+
+        process = self._processes[server_name]
+        if not process.stdin:
+            return
+
+        notification = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params,
+        }
+
+        try:
+            notification_json = json.dumps(notification) + "\n"
+            process.stdin.write(notification_json.encode())
+            await process.stdin.drain()
+        except Exception:
+            pass
 
     async def _discover_tools(self, server_name: str):
         """Discover tools from an MCP server."""
+        self._tools = {k: v for k, v in self._tools.items() if v.server != server_name}
+
         response = await self._send_request(server_name, "tools/list", {})
 
         if response and "tools" in response:
@@ -188,6 +318,8 @@ class MCPManager:
 
     async def _discover_resources(self, server_name: str):
         """Discover resources from an MCP server."""
+        self._resources = {k: v for k, v in self._resources.items() if v.server != server_name}
+
         response = await self._send_request(server_name, "resources/list", {})
 
         if response and "resources" in response:
@@ -200,71 +332,58 @@ class MCPManager:
                     mime_type=res_data.get("mimeType", "text/plain"),
                 )
 
-    async def _send_request(
-        self,
-        server_name: str,
-        method: str,
-        params: Dict[str, Any],
-    ) -> Optional[Dict]:
-        """Send a JSON-RPC request to an MCP server."""
-        if server_name not in self._processes:
-            return None
+    async def _reconnect(self, server_name: str):
+        """Attempt to reconnect to a server with exponential backoff."""
+        await self._cleanup_server(server_name)
 
-        process = self._processes[server_name]
-
-        self._request_id += 1
-        request = {
-            "jsonrpc": "2.0",
-            "id": self._request_id,
-            "method": method,
-            "params": params,
-        }
-
-        try:
-            request_json = json.dumps(request) + "\n"
-            process.stdin.write(request_json.encode())
-            process.stdin.flush()
-
-            response_line = process.stdout.readline()
-            if not response_line:
-                return None
-
-            response = json.loads(response_line.decode())
-
-            if "error" in response:
-                print(f"MCP error: {response['error']}")
-                return None
-
-            return response.get("result")
-
-        except Exception as e:
-            print(f"MCP request failed: {e}")
-            return None
-
-    async def _send_notification(
-        self,
-        server_name: str,
-        method: str,
-        params: Dict[str, Any],
-    ):
-        """Send a JSON-RPC notification (no response expected)."""
-        if server_name not in self._processes:
+        if server_name not in self._servers:
             return
 
-        process = self._processes[server_name]
+        config = self._servers[server_name]
+        max_attempts = 3
 
-        notification = {
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params,
-        }
+        for attempt in range(max_attempts):
+            delay = 2**attempt
+            logger.info(f"Reconnecting to {server_name} in {delay}s (attempt {attempt + 1}/{max_attempts})")
+            await asyncio.sleep(delay)
 
-        try:
-            notification_json = json.dumps(notification) + "\n"
-            process.stdin.write(notification_json.encode())
-            process.stdin.flush()
-        except Exception:
-            pass
+            success = await self._connect_stdio(config)
+            if success:
+                logger.info(f"Reconnected to {server_name}")
+                return
+
+        logger.error(f"Failed to reconnect to {server_name} after {max_attempts} attempts")
+
+    async def _cleanup_server(self, server_name: str):
+        """Clean up a single server's process, reader task, and pending futures."""
+        reader = self._readers.pop(server_name, None)
+        if reader and not reader.done():
+            reader.cancel()
+            try:
+                await reader
+            except asyncio.CancelledError:
+                pass
+
+        process = self._processes.pop(server_name, None)
+        if process:
+            try:
+                process.terminate()
+                try:
+                    await asyncio.wait_for(process.wait(), timeout=5)
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+            except ProcessLookupError:
+                pass
+
+        stale_ids = [rid for rid, fut in self._pending.items() if not fut.done()]
+        for rid in stale_ids:
+            fut = self._pending.pop(rid, None)
+            if fut and not fut.done():
+                fut.cancel()
+
+        self._tools = {k: v for k, v in self._tools.items() if v.server != server_name}
+        self._resources = {k: v for k, v in self._resources.items() if v.server != server_name}
 
     def get_tools(self) -> List[MCPTool]:
         """Get all discovered MCP tools."""
@@ -298,7 +417,6 @@ class MCPManager:
         )
 
         if response and "content" in response:
-            # Return text content
             for item in response["content"]:
                 if item.get("type") == "text":
                     return item.get("text", "")
@@ -323,14 +441,13 @@ class MCPManager:
 
     async def disconnect_all(self):
         """Disconnect all MCP servers."""
-        for name, process in self._processes.items():
-            try:
-                process.terminate()
-                process.wait(timeout=5)
-            except Exception:
-                process.kill()
+        server_names = list(self._processes.keys())
+        for name in server_names:
+            await self._cleanup_server(name)
 
         self._processes.clear()
+        self._readers.clear()
+        self._pending.clear()
         self._tools.clear()
         self._resources.clear()
 
