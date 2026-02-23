@@ -667,7 +667,7 @@ TOOLS:
         # Add response to session
         self._current_session.add_message("assistant", full_response)
 
-        # If tools were called, continue the conversation
+        # If tools were called, add results to session (no recursive call)
         if tool_calls:
             for tool_name, tool_output in tool_calls:
                 self._current_session.add_message(
@@ -675,8 +675,6 @@ TOOLS:
                     f"Tool {tool_name} result: {tool_output}",
                     tool_name=tool_name,
                 )
-            # Continue with tool results
-            await self._process_input("Continue with the tool results above.")
 
         # Learn from conversation only when knowledge mode is on
         if self._knowledge_mode:
