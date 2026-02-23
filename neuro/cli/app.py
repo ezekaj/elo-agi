@@ -785,6 +785,17 @@ BEHAVIOR:
                 except Exception:
                     pass
 
+        # Auto-compaction: microcompact tool results when context grows large
+        if self._current_session.token_count > 28000:
+            truncated = self.session_manager.microcompact(self._current_session)
+            if truncated and self.verbose:
+                self.ui.print_dim(f"Microcompacted {truncated} tool results")
+            # Full compaction if still over limit
+            if self._current_session.token_count > 32000:
+                await self.session_manager.compact(self._current_session)
+                if self.verbose:
+                    self.ui.print_dim("Context compacted")
+
         # Save session
         if not self.no_session_persistence:
             self.session_manager.save(self._current_session)

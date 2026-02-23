@@ -52,6 +52,7 @@ class Session:
     # Runtime state
     token_count: int = 0
     is_compacted: bool = False
+    compaction_count: int = 0
 
     def add_message(self, role: str, content: str, **metadata):
         """Add a message to the session."""
@@ -244,33 +245,77 @@ class SessionManager:
 
         return sessions
 
+    def microcompact(self, session: Optional[Session] = None, max_result_len: int = 500) -> int:
+        """
+        Phase 1: Truncate long tool results individually.
+
+        Returns the number of messages truncated.
+        Based on Claude Code's microcompaction pattern — shrink tool outputs
+        before doing full conversation compaction.
+        """
+        session = session or self._current
+        if not session:
+            return 0
+
+        truncated = 0
+        for msg in session.messages:
+            if msg.role in ("tool", "system") and msg.metadata.get("type") == "tool_result":
+                if len(msg.content) > max_result_len:
+                    keep = max_result_len - 30  # Leave room for marker
+                    msg.content = msg.content[:keep] + "\n[...truncated...]"
+                    truncated += 1
+            # Also truncate tool results embedded in user messages from follow-up
+            elif msg.role == "user" and "[Tool " in msg.content and len(msg.content) > max_result_len * 2:
+                keep = max_result_len * 2 - 30
+                msg.content = msg.content[:keep] + "\n[...truncated...]"
+                truncated += 1
+
+        if truncated:
+            session.token_count = sum(len(m.content) // 4 for m in session.messages)
+            session.compaction_count += 1
+
+        return truncated
+
     async def compact(self, session: Optional[Session] = None) -> bool:
         """
-        Compact session context when approaching limit.
-        Summarizes older messages to reduce token count.
+        Phase 2: Full context compaction.
+
+        First runs microcompaction on tool results, then drops older messages
+        while preserving system messages and recent conversation.
         """
         session = session or self._current
         if not session or len(session.messages) < 10:
             return False
 
-        # Keep system messages + last N messages
+        # Phase 1: microcompact tool results first
+        self.microcompact(session)
+
+        # Phase 2: drop old messages if still too many
         system_msgs = [m for m in session.messages if m.role == "system"]
         other_msgs = [m for m in session.messages if m.role != "system"]
 
         if len(other_msgs) > 20:
-            # Add compaction boundary marker
+            # Summarize what was dropped
+            dropped = other_msgs[:-20]
+            user_msgs = [m.content[:100] for m in dropped if m.role == "user"]
+            summary_parts = ["[Previous context compacted]"]
+            if user_msgs:
+                topics = "; ".join(user_msgs[:5])
+                summary_parts.append(f"Topics discussed: {topics}")
+
             session.messages = (
                 system_msgs
                 + [
                     SessionMessage(
                         role="system",
-                        content="[Previous context compacted]",
+                        content="\n".join(summary_parts),
                         metadata={"type": "compact_boundary"},
                     )
                 ]
                 + other_msgs[-20:]
             )
             session.is_compacted = True
+            session.compaction_count += 1
             session.token_count = sum(len(m.content) // 4 for m in session.messages)
             self.save(session)
             return True
