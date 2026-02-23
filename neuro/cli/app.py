@@ -687,14 +687,35 @@ TOOLS:
         # Add response to session
         self._current_session.add_message("assistant", full_response)
 
-        # If tools were called, add results to session (no recursive call)
-        if tool_calls:
+        # If tools were called, feed results back to get a natural language response
+        if tool_calls and not getattr(self, "_tool_followup", False):
             for tool_name, tool_output in tool_calls:
                 self._current_session.add_message(
-                    "tool",
-                    f"Tool {tool_name} result: {tool_output}",
-                    tool_name=tool_name,
+                    "user",
+                    f"[Tool {tool_name} returned]:\n{str(tool_output)[:3000]}\n\n"
+                    "Present these results to the user naturally and concisely.",
                 )
+            # One follow-up call (guarded against recursion)
+            self._tool_followup = True
+            try:
+                self.ui.print_assistant_label()
+                self.ui.start_live()
+                followup_response = ""
+                messages = self._current_session.get_history()
+                async for event in self.stream_handler.stream(
+                    messages=messages,
+                    system_prompt=self.system_prompt,
+                ):
+                    if event.type.value == "token":
+                        followup_response += event.content
+                        self.ui.append_live(event.content)
+                    elif event.type.value == "done":
+                        break
+                self.ui.stop_live()
+                if followup_response:
+                    self._current_session.add_message("assistant", followup_response)
+            finally:
+                self._tool_followup = False
 
         # Learn from conversation only when knowledge mode is on
         if self._knowledge_mode:
