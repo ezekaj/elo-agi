@@ -72,9 +72,18 @@ Slash Commands:
 
     # Model flags
     parser.add_argument(
-        "--model", type=str, default="ministral-3:8b", help="Model to use (default: ministral-3:8b)"
+        "--model",
+        type=str,
+        default=None,
+        help="Model to use (default: ministral-3:8b for Ollama, glm-4.5-flash for cloud)",
     )
     parser.add_argument("--fallback-model", type=str, help="Fallback model if primary unavailable")
+    parser.add_argument("--api-key", type=str, help="API key (or set ELO_API_KEY env var)")
+    parser.add_argument(
+        "--api-base",
+        type=str,
+        help="API base URL (or set ELO_API_BASE env var)",
+    )
 
     # Output flags
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
@@ -151,14 +160,28 @@ def main():
     prompt = " ".join(remaining) if remaining else None
 
     # Default: run the app
+    import os
     from .app import NeuroApp
 
+    api_key = getattr(args, "api_key", None)
+    api_base = getattr(args, "api_base", None)
+
+    # Auto-detect model default based on API type
+    model = args.model
+    if model is None:
+        if api_base or os.environ.get("ELO_API_BASE"):
+            model = "glm-4.5-flash"
+        else:
+            model = "ministral-3:8b"
+
     app = NeuroApp(
-        model=args.model,
+        model=model,
         verbose=args.verbose,
         permission_mode=args.permission_mode,
         system_prompt=args.system_prompt,
         no_session_persistence=getattr(args, "no_session_persistence", False),
+        api_key=api_key,
+        api_base=api_base,
     )
 
     # Handle different modes

@@ -1,5 +1,7 @@
 """
 Stream Handler - Token-by-token streaming from LLM.
+
+Supports both Ollama (local) and OpenAI-compatible APIs (cloud).
 """
 
 from dataclasses import dataclass, field
@@ -38,24 +40,26 @@ class StreamHandler:
     """
     Handles streaming responses from LLM with real-time token output.
 
-    Features:
-    - Token-by-token streaming via SSE
-    - Tool use detection mid-stream
-    - Graceful error handling
-    - Callback support
+    Supports:
+    - Ollama API (local, /api/chat)
+    - OpenAI-compatible APIs (cloud, /chat/completions)
     """
 
     def __init__(
         self,
         base_url: str = "http://localhost:11434",
         model: str = "ministral-3:8b",
+        api_key: Optional[str] = None,
+        api_type: str = "ollama",
         timeout: int = 120,
         on_token: Optional[Callable[[str], None]] = None,
         on_tool_start: Optional[Callable[[str], None]] = None,
         on_tool_end: Optional[Callable[[str, Any], None]] = None,
     ):
-        self.base_url = base_url
+        self.base_url = base_url.rstrip("/")
         self.model = model
+        self.api_key = api_key
+        self.api_type = api_type  # "ollama" or "openai"
         self.timeout = timeout
 
         # Callbacks
@@ -65,31 +69,11 @@ class StreamHandler:
 
         self._session: Optional[Any] = None
 
-        # Native function calling tools (Ollama format)
+        # Native function calling tools
         self.tools = None
 
     def set_tools(self, tools: List[Dict[str, Any]]):
-        """
-        Set tools for native Ollama function calling.
-
-        Format:
-        [
-            {
-                "type": "function",
-                "function": {
-                    "name": "web_search",
-                    "description": "Search the web",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "Search query"}
-                        },
-                        "required": ["query"]
-                    }
-                }
-            }
-        ]
-        """
+        """Set tools for native function calling."""
         self.tools = tools
 
     async def stream(
@@ -98,14 +82,7 @@ class StreamHandler:
         system_prompt: Optional[str] = None,
         ultrathink: bool = False,
     ) -> AsyncGenerator[StreamEvent, None]:
-        """
-        Stream response token-by-token.
-
-        Args:
-            messages: Conversation messages
-            system_prompt: System prompt
-            ultrathink: Enable deep reasoning mode with max tokens
-        """
+        """Stream response token-by-token."""
         if aiohttp is None:
             yield StreamEvent(
                 type=StreamEventType.ERROR,
@@ -113,6 +90,143 @@ class StreamHandler:
             )
             return
 
+        if self.api_type == "openai":
+            async for event in self._stream_openai(messages, system_prompt, ultrathink):
+                yield event
+        else:
+            async for event in self._stream_ollama(messages, system_prompt, ultrathink):
+                yield event
+
+    async def _stream_openai(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        ultrathink: bool = False,
+    ) -> AsyncGenerator[StreamEvent, None]:
+        """Stream from OpenAI-compatible API."""
+        session = await self._get_session()
+
+        all_messages = []
+        if system_prompt:
+            all_messages.append({"role": "system", "content": system_prompt})
+        all_messages.extend(messages)
+
+        payload = {
+            "model": self.model,
+            "messages": all_messages,
+            "stream": True,
+        }
+
+        if ultrathink:
+            payload["temperature"] = 0.4
+            payload["max_tokens"] = 8192
+        else:
+            payload["temperature"] = 0.7
+            payload["max_tokens"] = 2048
+
+        if self.tools:
+            payload["tools"] = self.tools
+
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        url = f"{self.base_url}/chat/completions"
+
+        try:
+            async with session.post(url, json=payload, headers=headers) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    yield StreamEvent(
+                        type=StreamEventType.ERROR,
+                        content=f"API error {response.status}: {error_text}",
+                    )
+                    return
+
+                buffer = ""
+                tool_parsing = False
+
+                async for line in response.content:
+                    line_str = line.decode("utf-8").strip()
+
+                    if not line_str or line_str == "data: [DONE]":
+                        if line_str == "data: [DONE]":
+                            yield StreamEvent(type=StreamEventType.DONE, metadata={})
+                            break
+                        continue
+
+                    # Strip "data: " prefix (SSE format)
+                    if line_str.startswith("data: "):
+                        line_str = line_str[6:]
+
+                    try:
+                        data = json.loads(line_str)
+                    except json.JSONDecodeError:
+                        continue
+
+                    choices = data.get("choices", [])
+                    if not choices:
+                        continue
+
+                    delta = choices[0].get("delta", {})
+                    finish_reason = choices[0].get("finish_reason")
+
+                    # Handle tool calls
+                    tool_calls = delta.get("tool_calls", [])
+                    if tool_calls:
+                        for tc in tool_calls:
+                            func = tc.get("function", {})
+                            name = func.get("name", "")
+                            args_str = func.get("arguments", "")
+                            if name:
+                                try:
+                                    args = json.loads(args_str) if args_str else {}
+                                except json.JSONDecodeError:
+                                    args = {}
+                                yield StreamEvent(
+                                    type=StreamEventType.TOOL_USE_START,
+                                    content=name,
+                                    metadata={
+                                        "name": name,
+                                        "arguments": args,
+                                        "native": True,
+                                    },
+                                )
+
+                    # Handle content
+                    content = delta.get("content", "")
+                    if content:
+                        buffer += content
+
+                        # Detect XML-style tool use
+                        if "<tool>" in buffer and not tool_parsing:
+                            tool_parsing = True
+                            yield StreamEvent(type=StreamEventType.TOOL_USE_START, content=buffer)
+                        elif "</args>" in buffer and tool_parsing:
+                            tool_parsing = False
+                            yield StreamEvent(type=StreamEventType.TOOL_USE_END, content=buffer)
+                            buffer = ""
+                        elif not tool_parsing:
+                            if self.on_token:
+                                self.on_token(content)
+                            yield StreamEvent(type=StreamEventType.TOKEN, content=content)
+
+                    if finish_reason == "stop":
+                        yield StreamEvent(type=StreamEventType.DONE, metadata={})
+                        break
+
+        except asyncio.TimeoutError:
+            yield StreamEvent(type=StreamEventType.ERROR, content="Request timed out")
+        except Exception as e:
+            yield StreamEvent(type=StreamEventType.ERROR, content=str(e))
+
+    async def _stream_ollama(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        ultrathink: bool = False,
+    ) -> AsyncGenerator[StreamEvent, None]:
+        """Stream from Ollama API."""
         session = await self._get_session()
 
         # Build payload
@@ -147,9 +261,9 @@ Begin your response with <thinking> to show your reasoning process, then provide
         # Configure options based on mode
         if ultrathink:
             options = {
-                "temperature": 0.4,  # More focused
-                "num_ctx": 32768,  # Max context
-                "num_predict": 8192,  # Max output tokens
+                "temperature": 0.4,
+                "num_ctx": 32768,
+                "num_predict": 8192,
                 "top_p": 0.9,
                 "repeat_penalty": 1.1,
             }

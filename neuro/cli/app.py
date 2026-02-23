@@ -71,18 +71,35 @@ class NeuroApp:
         system_prompt: Optional[str] = None,
         no_session_persistence: bool = False,
         project_dir: str = ".",
+        api_key: Optional[str] = None,
+        api_base: Optional[str] = None,
     ):
         self.model = model
         self.verbose = verbose
         self.project_dir = os.path.abspath(project_dir)
         self.no_session_persistence = no_session_persistence
 
+        # Detect API type from base URL or env vars
+        env_api_key = api_key or os.environ.get("ELO_API_KEY", "")
+        env_api_base = api_base or os.environ.get("ELO_API_BASE", "http://localhost:11434")
+
+        # Auto-detect API type
+        if env_api_base and "localhost" not in env_api_base and "127.0.0.1" not in env_api_base:
+            api_type = "openai"
+        else:
+            api_type = "ollama"
+
+        self.api_type = api_type
+
         # Initialize components
         self.ui = UIRenderer()
         self.status_bar = StatusBar()
 
         self.stream_handler = StreamHandler(
+            base_url=env_api_base,
             model=model,
+            api_key=env_api_key,
+            api_type=api_type,
             on_token=self._on_token,
         )
 
@@ -408,10 +425,13 @@ TOOLS:
         """Main interactive loop."""
         import getpass
 
-        # Check Ollama connection first (needed for welcome screen)
+        # Check LLM backend connection
         available = await self._check_ollama()
         if not available:
-            self.ui.print_error("Ollama not available. Run: ollama serve")
+            if self.api_type == "openai":
+                self.ui.print_error(f"API not reachable: {self.stream_handler.base_url}")
+            else:
+                self.ui.print_error("Ollama not available. Run: ollama serve")
             return 1
 
         # Connect IDE integration if available (in background)
@@ -1649,15 +1669,30 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         return None
 
     async def _check_ollama(self) -> bool:
-        """Check if Ollama is available."""
+        """Check if LLM backend is available."""
         try:
             import aiohttp
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    "http://localhost:11434/api/tags", timeout=aiohttp.ClientTimeout(total=5)
-                ) as r:
-                    return r.status == 200
+            if self.api_type == "openai":
+                # For OpenAI-compatible APIs, try a lightweight request
+                base = self.stream_handler.base_url
+                headers = {}
+                if self.stream_handler.api_key:
+                    headers["Authorization"] = f"Bearer {self.stream_handler.api_key}"
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                        f"{base}/models",
+                        headers=headers,
+                        timeout=aiohttp.ClientTimeout(total=5),
+                    ) as r:
+                        return r.status in (200, 404)  # 404 ok, means API is up
+            else:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                        "http://localhost:11434/api/tags",
+                        timeout=aiohttp.ClientTimeout(total=5),
+                    ) as r:
+                        return r.status == 200
         except Exception:
             return False
 
