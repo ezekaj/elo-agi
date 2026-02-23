@@ -223,6 +223,16 @@ class NeuroApp:
 
         self.plan_manager = PlanManager(project_dir=self.project_dir)
 
+        # Team Manager
+        from .agents.team import TeamManager
+
+        self.team_manager = TeamManager(
+            project_dir=self.project_dir,
+            chat_fn=self._chat_for_agent,
+            tool_executor=self.tool_executor,
+            ui=self.ui,
+        )
+
         # IDE Integration
         self.ide_type = detect_ide()
         self.ide_integration = create_integration(
@@ -889,6 +899,9 @@ TASK TRACKING:
         elif cmd == "/plan":
             await self._handle_plan_command(args)
 
+        elif cmd == "/team":
+            await self._handle_team_command(args)
+
         # Check if it's a skill command
         elif cmd.startswith("/"):
             skill_name = cmd[1:]  # Remove leading /
@@ -1292,6 +1305,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             ("/agents", "List available agents"),
             ("/tasks", "View task list"),
             ("/plan <task>", "Plan mode (read-only research, then approve)"),
+            ("/team <cmd>", "Manage agent teams (create, add, run, list)"),
             ("/status", "System status"),
             ("/compact", "Compress context"),
             ("/cost", "Token usage"),
@@ -1313,6 +1327,11 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print("[bold]Agents:[/bold]")
         self.ui.print("  [purple]/agent <type> <task>[/purple] Spawn a subagent")
         self.ui.print("  [dim]Types: Explore, Plan, General, Bash[/dim]")
+        self.ui.print()
+        self.ui.print("[bold]Teams:[/bold]")
+        self.ui.print("  [purple]/team create <name> <task>[/purple] Create a team")
+        self.ui.print("  [purple]/team add <name> <role> <task>[/purple] Add a teammate")
+        self.ui.print("  [purple]/team run[/purple]                     Run all teammates")
         self.ui.print()
         self.ui.print("[bold]Syntax:[/bold]")
         self.ui.print("  [purple]@./file[/purple]              Include file content")
@@ -2435,6 +2454,79 @@ JSON:"""
 
         else:
             self.ui.print_dim("IDE commands: status, open <file> [line], context")
+
+    async def _handle_team_command(self, args: str):
+        """Handle /team command - manage agent teams."""
+        parts = args.split(maxsplit=1) if args else []
+        subcmd = parts[0] if parts else "list"
+        subargs = parts[1] if len(parts) > 1 else ""
+
+        if subcmd == "create":
+            name_and_task = subargs.split(maxsplit=1)
+            name = name_and_task[0] if name_and_task else "team"
+            task = name_and_task[1] if len(name_and_task) > 1 else ""
+            if not task:
+                self.ui.print_error("Usage: /team create <name> <task description>")
+                return
+            team = self.team_manager.create_team(name, task)
+            self.ui.print_success(f"Team '{name}' created (id: {team.id})")
+            self.ui.print_dim(f"Task: {task}")
+            self.ui.print_dim("Add teammates: /team add <name> <role> <task>")
+
+        elif subcmd == "add":
+            team = self.team_manager.get_active_team()
+            if not team:
+                self.ui.print_error("No active team. Use /team create first")
+                return
+            p = subargs.split(maxsplit=2)
+            if len(p) < 3:
+                self.ui.print_error("Usage: /team add <name> <role> <task>")
+                return
+            name, role, task = p[0], p[1], p[2]
+            teammate = team.add_teammate(name, role, task)
+            self.ui.print(
+                f"  [{teammate.color}]●[/{teammate.color}] "
+                f"Added [bold]{name}[/bold] as {role}"
+            )
+            self.ui.print_dim(f"  Task: {task}")
+
+        elif subcmd == "run":
+            team = self.team_manager.get_active_team()
+            if not team:
+                self.ui.print_error("No active team. Use /team create first")
+                return
+            if not team.teammates:
+                self.ui.print_error("No teammates. Use /team add first")
+                return
+            await self.team_manager.run_team(team)
+
+        elif subcmd == "status":
+            team = self.team_manager.get_active_team()
+            if not team:
+                self.ui.print_dim("No active team")
+                return
+            self.ui.print(f"[bold]Team: {team.name}[/bold] ({team.status})")
+            self.ui.print_dim(f"Task: {team.task}")
+            for t in team.teammates.values():
+                self.ui.print(
+                    f"  [{t.color}]●[/{t.color}] {t.name} ({t.role}) "
+                    f"— {t.status.value} ({t.turns} turns)"
+                )
+
+        elif subcmd == "list":
+            teams = self.team_manager.list_teams()
+            if not teams:
+                self.ui.print_dim("No teams. Use: /team create <name> <task>")
+            else:
+                self.ui.print("[bold]Teams[/bold]")
+                for team in teams:
+                    self.ui.print(
+                        f"  [{team.status}] {team.name} "
+                        f"({len(team.teammates)} agents) — {team.task[:50]}"
+                    )
+
+        else:
+            self.ui.print_dim("Usage: /team create|add|run|status|list")
 
     async def _handle_plan_command(self, args: str):
         """Handle /plan command - enter plan mode or list plans."""
