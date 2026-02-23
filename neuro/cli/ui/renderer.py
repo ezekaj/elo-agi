@@ -496,7 +496,7 @@ class UIRenderer:
     def print_permission_card(self, tool_name: str, args: Dict[str, Any], risk_level: str = "normal"):
         """Print a permission request card."""
         content = Text()
-        content.append(f"Tool: ", style="dim")
+        content.append("Tool: ", style="dim")
         content.append(f"{tool_name}\n", style="bold")
 
         for k, v in list(args.items())[:3]:

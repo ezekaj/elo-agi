@@ -195,7 +195,7 @@ class PermissionManager:
 
         # Build content
         content = Text()
-        content.append(f"Tool: ", style="dim")
+        content.append("Tool: ", style="dim")
         content.append(f"{tool_name}\n", style="bold")
 
         for k, v in list(tool_input.items())[:3]:

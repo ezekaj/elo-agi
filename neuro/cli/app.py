@@ -774,7 +774,30 @@ TASK TRACKING:
     async def _execute_native_tool(self, tool_name: str, tool_args: Dict) -> Optional[tuple]:
         """Execute a native Ollama function call via registry."""
         try:
+            # Record file state before edit/write for undo support
+            original_content = None
+            file_path = None
+            if tool_name in ("edit_file", "write_file") and hasattr(self, "edit_history"):
+                file_path = os.path.expanduser(tool_args.get("path", ""))
+                if file_path and os.path.exists(file_path):
+                    try:
+                        with open(file_path, "r") as f:
+                            original_content = f.read()
+                    except Exception:
+                        pass
+
             result = await self.tool_registry.execute_tool(tool_name, tool_args)
+
+            # Record edit in history
+            if original_content is not None and file_path and hasattr(self, "edit_history"):
+                try:
+                    with open(file_path, "r") as f:
+                        new_content = f.read()
+                    if new_content != original_content:
+                        self.edit_history.record(file_path, original_content, new_content, tool_name)
+                except Exception:
+                    pass
+
             self.ui.print_tool_result(tool_name, True, str(result)[:2000])
             return (tool_name, result)
         except Exception as e:
