@@ -11,6 +11,7 @@ Provides a production-grade CLI experience with:
 
 from typing import Optional, List, Dict, Any
 from contextlib import contextmanager
+from enum import Enum
 
 from rich.console import Console
 from rich.panel import Panel
@@ -23,6 +24,45 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.rule import Rule
 from rich.tree import Tree
 from rich.theme import Theme
+
+
+class ToolDisplayState(Enum):
+    """Tool execution display states (matches Claude Code pattern)."""
+
+    PROGRESS = "progress"
+    SUCCESS = "success"
+    ERROR = "error"
+    REJECTED = "rejected"
+
+
+# Maps tool names to active verbs for spinner display
+TOOL_VERBS: Dict[str, str] = {
+    "read_file": "Reading",
+    "write_file": "Writing",
+    "edit_file": "Editing",
+    "run_command": "Running",
+    "bash": "Running",
+    "list_files": "Listing",
+    "search_files": "Searching",
+    "grep_files": "Searching",
+    "web_search": "Searching web",
+    "web_fetch": "Fetching",
+    "ask_user": "Waiting for input",
+    "create_task": "Creating task",
+    "update_task": "Updating task",
+    "plan_create": "Planning",
+    "plan_update": "Updating plan",
+}
+
+# Tips shown when tools run longer than 30s
+TOOL_TIPS = [
+    "Long-running commands can be cancelled with Ctrl+C",
+    "Use /compact to reduce context when conversations get long",
+    "Use /cost to see token usage",
+    "Use /status to see current session info",
+    "Try /think for deeper reasoning on complex problems",
+    "Use Tab for input completion",
+]
 
 # Custom theme matching modern CLI aesthetics
 ELO_THEME = Theme(
@@ -517,16 +557,35 @@ class UIRenderer:
         self.console.print(panel)
 
     def print_tool_start(self, tool_name: str, description: str = ""):
-        """Print tool execution start."""
+        """Print tool execution start with active verb."""
+        verb = TOOL_VERBS.get(tool_name, "Running")
         desc = f" [dim]{description}[/dim]" if description else ""
-        self.console.print(f"  [orchid]▶[/orchid] [bold]{tool_name}[/bold]{desc}")
+        self.console.print(f"  [orchid]⠋[/orchid] {verb} [bold]{tool_name}[/bold]{desc}")
 
-    def print_tool_result(self, tool_name: str, success: bool, output: str = ""):
-        """Print tool execution result."""
-        icon = "[green]✓[/green]" if success else "[red]✗[/red]"
-        self.console.print(f"  {icon} [bold]{tool_name}[/bold]")
+    def print_tool_result(
+        self,
+        tool_name: str,
+        success: bool,
+        output: str = "",
+        duration: float = 0.0,
+        state: ToolDisplayState = None,
+    ):
+        """Print tool execution result with state icon and duration."""
+        if state is None:
+            state = ToolDisplayState.SUCCESS if success else ToolDisplayState.ERROR
+
+        icons = {
+            ToolDisplayState.SUCCESS: "[green]✓[/green]",
+            ToolDisplayState.ERROR: "[red]✗[/red]",
+            ToolDisplayState.REJECTED: "[yellow]⊘[/yellow]",
+            ToolDisplayState.PROGRESS: "[orchid]⠋[/orchid]",
+        }
+        icon = icons.get(state, icons[ToolDisplayState.SUCCESS])
+
+        dur_str = f" [dim]({duration:.1f}s)[/dim]" if duration > 0 else ""
+        self.console.print(f"  {icon} [bold]{tool_name}[/bold]{dur_str}")
+
         if output:
-            # Truncate long output
             lines = output.split("\n")
             if len(lines) > 20:
                 for line in lines[:20]:

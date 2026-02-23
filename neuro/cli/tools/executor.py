@@ -43,25 +43,38 @@ class ToolExecution:
 
 
 class ToolSpinner:
-    """Animated spinner for tool execution display."""
+    """Animated spinner for tool execution with verb display and long-run tips."""
 
     FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
     RESET = "\033[0m"
     PURPLE = "\033[35m"
     GREEN = "\033[32m"
     RED = "\033[31m"
+    YELLOW = "\033[33m"
     DIM = "\033[2m"
+
+    # Tips shown after 30s of execution
+    TIPS = [
+        "Long-running commands can be cancelled with Ctrl+C",
+        "Use /compact to reduce context when conversations get long",
+        "Use /cost to see real token usage",
+        "Try /think for deeper reasoning on complex problems",
+    ]
 
     def __init__(self):
         self._running = False
         self._thread: Optional[threading.Thread] = None
         self._frame = 0
         self._message = ""
+        self._start_time = 0.0
+        self._tip_shown = False
 
     def start(self, message: str):
         """Start spinner with message."""
         self._message = message
         self._running = True
+        self._tip_shown = False
+        self._start_time = time.time()
         self._thread = threading.Thread(target=self._animate, daemon=True)
         self._thread.start()
 
@@ -69,22 +82,44 @@ class ToolSpinner:
         """Update spinner message."""
         self._message = message
 
-    def stop(self, success: bool = True, message: str = ""):
-        """Stop spinner with final status."""
+    def stop(self, success: bool = True, message: str = "", rejected: bool = False):
+        """Stop spinner with final status and duration."""
         self._running = False
         if self._thread:
             self._thread.join(timeout=0.5)
 
-        icon = f"{self.GREEN}✓{self.RESET}" if success else f"{self.RED}✗{self.RESET}"
+        duration = time.time() - self._start_time if self._start_time else 0
+        dur_str = f" {self.DIM}({duration:.1f}s){self.RESET}" if duration > 0.1 else ""
+
+        if rejected:
+            icon = f"{self.YELLOW}⊘{self.RESET}"
+        elif success:
+            icon = f"{self.GREEN}✓{self.RESET}"
+        else:
+            icon = f"{self.RED}✗{self.RESET}"
+
         final_msg = message or self._message
-        sys.stdout.write(f"\r\033[K  {icon} {final_msg}\n")
+        sys.stdout.write(f"\r\033[K  {icon} {final_msg}{dur_str}\n")
         sys.stdout.flush()
 
     def _animate(self):
+        import random
+
         while self._running:
             frame = self.FRAMES[self._frame % len(self.FRAMES)]
+            elapsed = time.time() - self._start_time
+
+            # Show tip after 30 seconds
+            tip_line = ""
+            if elapsed > 30 and not self._tip_shown:
+                self._tip_shown = True
+                tip = random.choice(self.TIPS)
+                tip_line = f"\n  {self.DIM}💡 {tip}{self.RESET}"
+
             line = f"\r\033[K  {self.PURPLE}{frame}{self.RESET} {self._message}"
-            sys.stdout.write(line)
+            if elapsed > 5:
+                line += f" {self.DIM}({elapsed:.0f}s){self.RESET}"
+            sys.stdout.write(line + tip_line)
             sys.stdout.flush()
             self._frame += 1
             time.sleep(0.08)
@@ -145,10 +180,14 @@ class ToolExecutor:
                 execution.error = "Permission denied"
                 return execution
 
-        # 3. Start spinner
+        # 3. Start spinner with active verb
         if show_spinner:
+            from neuro.cli.ui.renderer import TOOL_VERBS
+
+            verb = TOOL_VERBS.get(tool_name, "Running")
             preview = self._format_args_preview(args)
-            self._spinner.start(f"{tool_name}: {preview}")
+            spinner_msg = f"{verb} {tool_name}" + (f": {preview}" if preview else "")
+            self._spinner.start(spinner_msg)
 
         execution.status = ToolStatus.RUNNING
 
@@ -169,7 +208,7 @@ class ToolExecutor:
             execution.status = ToolStatus.SUCCESS
 
             if show_spinner:
-                self._spinner.stop(success=True, message=f"{tool_name} completed")
+                self._spinner.stop(success=True, message=tool_name)
 
         except asyncio.TimeoutError:
             execution.status = ToolStatus.TIMEOUT
@@ -181,7 +220,7 @@ class ToolExecutor:
             execution.status = ToolStatus.FAILED
             execution.error = str(e)
             if show_spinner:
-                self._spinner.stop(success=False, message=f"{tool_name} failed: {e}")
+                self._spinner.stop(success=False, message=f"{tool_name}: {e}")
 
         finally:
             execution.duration = time.time() - start_time
