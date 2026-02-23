@@ -218,6 +218,11 @@ class NeuroApp:
 
         self.task_manager = TaskManager(project_dir=self.project_dir)
 
+        # Plan Manager
+        from .core.planner import PlanManager
+
+        self.plan_manager = PlanManager(project_dir=self.project_dir)
+
         # IDE Integration
         self.ide_type = detect_ide()
         self.ide_integration = create_integration(
@@ -241,6 +246,7 @@ class NeuroApp:
         self._think_mode = False  # /think — cognitive pipeline
         self._knowledge_mode = False  # /knowledge — knowledge injection
         self._evolve_mode = False  # /evolve — self-evolution loop
+        self._plan_mode = False  # /plan — read-only research mode
 
         # Cognitive Pipeline (38+ modules - the brain!)
         self.cognitive_pipeline = None
@@ -592,7 +598,14 @@ TASK TRACKING:
         self._current_session.add_message("user", user_input)
 
         # Get response with streaming
-        self.ui.print_assistant_label()
+        if self._plan_mode:
+            self.ui.print()
+            self.ui.print(
+                "[bold bright_magenta]ELO[/bold bright_magenta] [dim](plan mode)[/dim]",
+                end=" ",
+            )
+        else:
+            self.ui.print_assistant_label()
         self.ui.start_live()
 
         full_response = ""
@@ -872,6 +885,9 @@ TASK TRACKING:
 
         elif cmd == "/agent" or cmd == "/task":
             await self._handle_agent_command(args)
+
+        elif cmd == "/plan":
+            await self._handle_plan_command(args)
 
         # Check if it's a skill command
         elif cmd.startswith("/"):
@@ -1275,6 +1291,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             ("/skills", "List available skills"),
             ("/agents", "List available agents"),
             ("/tasks", "View task list"),
+            ("/plan <task>", "Plan mode (read-only research, then approve)"),
             ("/status", "System status"),
             ("/compact", "Compress context"),
             ("/cost", "Token usage"),
@@ -2418,6 +2435,83 @@ JSON:"""
 
         else:
             self.ui.print_dim("IDE commands: status, open <file> [line], context")
+
+    async def _handle_plan_command(self, args: str):
+        """Handle /plan command - enter plan mode or list plans."""
+        from .core.planner import PlanManager, PlanStatus
+        from .core.permissions import PermissionMode
+
+        if not args:
+            plans = self.plan_manager.list_plans()
+            if not plans:
+                self.ui.print_dim("No plans yet. Use: /plan <task description>")
+            else:
+                self.ui.print("[bold]Plans[/bold]")
+                self.ui.print_divider()
+                for p in plans:
+                    self.ui.print(f"  [purple]{p['id']}[/purple] {p['task']}")
+            return
+
+        task = args.strip()
+
+        original_mode = self.permission_manager.mode
+
+        self.permission_manager.set_mode(PermissionMode.PLAN)
+        self._plan_mode = True
+        plan = self.plan_manager.create_plan(task)
+
+        self.ui.print()
+        self.ui.print(
+            "[bold bright_magenta]PLAN MODE[/bold bright_magenta] [dim]Read-only research[/dim]"
+        )
+        self.ui.print_dim(f"Task: {task}")
+        self.ui.print_dim(f"Plan file: {plan.file_path}")
+        self.ui.print()
+
+        plan_prompt = (
+            f"{PlanManager.PLAN_SYSTEM_PROMPT}\n\n"
+            f"TASK TO PLAN: {task}\n\n"
+            f"Research the codebase and create a detailed implementation plan."
+        )
+
+        await self._process_input(plan_prompt)
+
+        if self._current_session and self._current_session.messages:
+            last_msg = None
+            for msg in reversed(self._current_session.messages):
+                if msg.role == "assistant":
+                    last_msg = msg.content
+                    break
+            if last_msg:
+                self.plan_manager.update_plan_from_response(plan, last_msg)
+
+        self.ui.print()
+        self.ui.print_dim(f"Plan saved to: {plan.file_path}")
+        self.ui.print()
+
+        approved = self.ui.confirm("Approve this plan and begin execution?")
+
+        if approved:
+            self.plan_manager.approve_plan(plan)
+
+            self.permission_manager.set_mode(original_mode)
+            self._plan_mode = False
+
+            self.ui.print_success("Plan approved. Executing...")
+            self.ui.print()
+
+            plan.status = PlanStatus.EXECUTING
+            self.plan_manager.save_plan(plan)
+            await self._process_input(
+                f"Execute this approved plan step by step:\n\n{plan.to_context()}"
+            )
+            plan.status = PlanStatus.COMPLETED
+            self.plan_manager.save_plan(plan)
+        else:
+            self.plan_manager.reject_plan(plan)
+            self.permission_manager.set_mode(original_mode)
+            self._plan_mode = False
+            self.ui.print_dim("Plan rejected. Back to normal mode.")
 
     async def _handle_agent_command(self, args: str):
         """Handle /agent command."""

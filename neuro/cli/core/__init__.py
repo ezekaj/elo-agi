@@ -5,6 +5,7 @@ from .session import SessionManager, Session
 from .permissions import PermissionManager, PermissionMode
 from .hooks import HooksManager, HookEvent, HookMatcher
 from .mcp import MCPManager, MCPTool, MCPResource
+from .planner import PlanManager, Plan, PlanStatus, PlanStep
 
 __all__ = [
     "StreamHandler",
@@ -20,4 +21,8 @@ __all__ = [
     "MCPManager",
     "MCPTool",
     "MCPResource",
+    "PlanManager",
+    "Plan",
+    "PlanStatus",
+    "PlanStep",
 ]
