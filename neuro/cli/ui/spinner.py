@@ -32,7 +32,7 @@ class Spinner:
         if message:
             self.message = message
         self._status = self.console.status(
-            f"[cyan]{self.message}[/cyan]",
+            f"[purple]{self.message}[/purple]",
             spinner=self.spinner_type,
         )
         self._status.start()
@@ -41,7 +41,7 @@ class Spinner:
         """Update the spinner message."""
         self.message = message
         if self._status:
-            self._status.update(f"[cyan]{message}[/cyan]")
+            self._status.update(f"[purple]{message}[/purple]")
 
     def stop(self, success: bool = True, message: Optional[str] = None):
         """Stop the spinner with final status."""

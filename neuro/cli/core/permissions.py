@@ -187,7 +187,7 @@ class PermissionManager:
         tool_input: Dict[str, Any],
     ) -> bool:
         """Interactively prompt user for permission."""
-        print(f"\n  \033[33mPermission needed:\033[0m {tool_name}")
+        print(f"\n  \033[35mPermission needed:\033[0m {tool_name}")
 
         # Show input preview
         for k, v in list(tool_input.items())[:3]:

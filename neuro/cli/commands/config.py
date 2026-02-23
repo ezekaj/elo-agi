@@ -16,7 +16,7 @@ def cmd_config(args):
     console.print()
     console.print("[bold]Configuration[/bold]")
     console.print("─" * 50)
-    console.print(f"Config file: [cyan]{config_path}[/cyan]")
+    console.print(f"Config file: [purple]{config_path}[/purple]")
 
     if os.path.exists(config_path):
         try:
@@ -32,13 +32,13 @@ def cmd_config(args):
         console.print("[dim](Config file not found - using defaults)[/dim]")
         console.print()
         console.print("[bold]Create one with:[/bold]")
-        console.print("  [cyan]mkdir -p ~/.neuro[/cyan]")
+        console.print("  [purple]mkdir -p ~/.neuro[/purple]")
 
         example = {"model": "ministral-3:8b", "permission_mode": "default", "hooks": {}}
-        console.print(f"  [cyan]cat > {config_path} << 'EOF'[/cyan]")
+        console.print(f"  [purple]cat > {config_path} << 'EOF'[/purple]")
         syntax = Syntax(json.dumps(example, indent=2), "json", theme="monokai")
         console.print(syntax)
-        console.print("  [cyan]EOF[/cyan]")
+        console.print("  [purple]EOF[/purple]")
 
     console.print()
     return 0

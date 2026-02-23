@@ -109,7 +109,7 @@ async def _check_health():
     console.print()
 
     if issues:
-        console.print(f"[yellow]Found {len(issues)} issue(s):[/yellow]")
+        console.print(f"[orchid]Found {len(issues)} issue(s):[/orchid]")
         for issue in issues:
             console.print(f"  [dim]→[/dim] {issue}")
         console.print()

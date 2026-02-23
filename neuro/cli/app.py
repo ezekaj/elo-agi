@@ -200,139 +200,7 @@ class NeuroApp:
 
     def _register_native_tools(self):
         """Register tools for Ollama native function calling."""
-        ollama_tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "web_search",
-                    "description": "Search the web for information",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {"query": {"type": "string", "description": "Search query"}},
-                        "required": ["query"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "read_file",
-                    "description": "Read contents of a file",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {"path": {"type": "string", "description": "File path"}},
-                        "required": ["path"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "write_file",
-                    "description": "Write content to a file",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "path": {"type": "string", "description": "File path"},
-                            "content": {"type": "string", "description": "Content to write"},
-                        },
-                        "required": ["path", "content"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "run_command",
-                    "description": "Run a shell command",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "command": {"type": "string", "description": "Command to run"}
-                        },
-                        "required": ["command"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "list_files",
-                    "description": "List files and folders in a directory",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Directory path (default: current directory)",
-                            }
-                        },
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "edit_file",
-                    "description": "Edit a file by replacing specific text",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "path": {"type": "string", "description": "File path"},
-                            "old_text": {"type": "string", "description": "Text to find"},
-                            "new_text": {"type": "string", "description": "Replacement text"},
-                        },
-                        "required": ["path", "old_text", "new_text"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "web_fetch",
-                    "description": "Fetch and extract text content from a URL",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {"url": {"type": "string", "description": "URL to fetch"}},
-                        "required": ["url"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "git_status",
-                    "description": "Show git repository status",
-                    "parameters": {"type": "object", "properties": {}},
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "git_diff",
-                    "description": "Show git diff of changes",
-                    "parameters": {"type": "object", "properties": {}},
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "improve_self",
-                    "description": "Analyze and improve ELO's own code",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "area": {
-                                "type": "string",
-                                "description": "Area to improve: core, tools, learning, ui",
-                            }
-                        },
-                        "required": ["area"],
-                    },
-                },
-            },
-        ]
-        self.stream_handler.set_tools(ollama_tools)
+        self.stream_handler.set_tools(self.tool_registry.get_ollama_tools())
 
     def _default_system_prompt(self) -> str:
         """Get default system prompt."""
@@ -498,7 +366,7 @@ TOOLS:
                     self.ui.print_dim("Recent history:")
                     for msg in self._current_session.messages[-4:]:
                         role = (
-                            "[cyan]You:[/cyan]" if msg.role == "user" else "[green]NEURO:[/green]"
+                            "[purple]You:[/purple]" if msg.role == "user" else "[medium_purple3]NEURO:[/medium_purple3]"
                         )
                         content = msg.content[:60] + "..." if len(msg.content) > 60 else msg.content
                         self.ui.print(f"  {role} {content}")
@@ -594,7 +462,7 @@ TOOLS:
 
             self.ui.print()
             self.ui.print(
-                "[bold magenta]ULTRATHINK MODE[/bold magenta] [dim]Deep reasoning enabled[/dim]"
+                "[bold bright_magenta]ULTRATHINK MODE[/bold bright_magenta] [dim]Deep reasoning enabled[/dim]"
             )
 
         # Expand file references (@./file)
@@ -1008,7 +876,7 @@ TOOLS:
 
         if tool_name in direct_tools:
             self.ui.print()
-            self.ui.print(f"[cyan]Executing tool: {tool_name}[/cyan]")
+            self.ui.print(f"[purple]Executing tool: {tool_name}[/purple]")
 
             try:
                 with self.ui.spinner(f"Running {tool_name}..."):
@@ -1226,7 +1094,7 @@ TOOLS:
     async def _autonomous_evolve(self, focus: str = ""):
         """Autonomous self-evolution - research online and improve code."""
         self.ui.print()
-        self.ui.print("[bold magenta]AUTONOMOUS EVOLUTION MODE[/bold magenta]")
+        self.ui.print("[bold bright_magenta]AUTONOMOUS EVOLUTION MODE[/bold bright_magenta]")
         self.ui.print_dim("Researching and improving myself...")
         self.ui.print()
 
@@ -1270,7 +1138,7 @@ Starting now..."""
             return
 
         self.ui.print()
-        self.ui.print(f"[bold cyan]AUTONOMOUS RESEARCH: {topic}[/bold cyan]")
+        self.ui.print(f"[bold purple]AUTONOMOUS RESEARCH: {topic}[/bold purple]")
         self.ui.print_dim("Searching, learning, and storing knowledge...")
         self.ui.print()
 
@@ -1372,12 +1240,12 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         # Agents & Syntax
         self.ui.print("[bold]Agents:[/bold]")
-        self.ui.print("  [cyan]/agent <type> <task>[/cyan] Spawn a subagent")
+        self.ui.print("  [purple]/agent <type> <task>[/purple] Spawn a subagent")
         self.ui.print("  [dim]Types: Explore, Plan, General, Bash[/dim]")
         self.ui.print()
         self.ui.print("[bold]Syntax:[/bold]")
-        self.ui.print("  [cyan]@./file[/cyan]              Include file content")
-        self.ui.print("  [cyan]!command[/cyan]            Execute shell command")
+        self.ui.print("  [purple]@./file[/purple]              Include file content")
+        self.ui.print("  [purple]!command[/purple]            Execute shell command")
         self.ui.print()
 
     async def _print_status(self):
@@ -1410,7 +1278,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             self.status_bar.update(model=args)
             self.ui.print_success(f"Switched to: {args}")
         else:
-            self.ui.print(f"  Current model: [cyan]{self.model}[/cyan]")
+            self.ui.print(f"  Current model: [purple]{self.model}[/purple]")
             # List available models
             try:
                 import aiohttp
@@ -1501,7 +1369,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         all_hooks = self.hooks_manager.list_all_hooks()
         for event, handlers in all_hooks.items():
-            self.ui.print(f"\n  [cyan]{event}[/cyan]")
+            self.ui.print(f"\n  [purple]{event}[/purple]")
             for handler in handlers:
                 if handler.get("command"):
                     self.ui.print(f"    [dim]command:[/dim] {handler['command']}")
@@ -1519,7 +1387,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         # Active learning stats
         al_stats = self.active_learner.get_stats()
-        self.ui.print("[cyan]Active Learning:[/cyan]")
+        self.ui.print("[purple]Active Learning:[/purple]")
         self.ui.print_key_value(
             {
                 "Topics tracked": str(al_stats.get("total_topics", 0)),
@@ -1532,7 +1400,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         # Knowledge base stats
         kb_stats = self.self_trainer.get_stats()
-        self.ui.print("[cyan]Knowledge Base:[/cyan]")
+        self.ui.print("[purple]Knowledge Base:[/purple]")
         self.ui.print_key_value(
             {
                 "Facts stored": str(kb_stats.get("total_facts", 0)),
@@ -1546,7 +1414,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         # Learning recommendations
         recs = self.active_learner.get_learning_recommendations(k=3)
         if recs:
-            self.ui.print("[cyan]Learning Recommendations:[/cyan]")
+            self.ui.print("[purple]Learning Recommendations:[/purple]")
             for topic, priority, reason in recs:
                 self.ui.print(
                     f"  [yellow]●[/yellow] {topic} [dim](priority: {priority:.2f}, {reason})[/dim]"
@@ -1556,7 +1424,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         # Recent facts learned
         recent = self.self_trainer.kb.get_recent_facts(n=3)
         if recent:
-            self.ui.print("[cyan]Recently Learned:[/cyan]")
+            self.ui.print("[purple]Recently Learned:[/purple]")
             for fact in recent:
                 content = (
                     fact["content"][:60] + "..." if len(fact["content"]) > 60 else fact["content"]
@@ -1568,7 +1436,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         if self.cognitive_pipeline:
             try:
                 cp_stats = self.cognitive_pipeline.get_stats()
-                self.ui.print("[cyan]Cognitive Pipeline:[/cyan]")
+                self.ui.print("[purple]Cognitive Pipeline:[/purple]")
                 self.ui.print_key_value(
                     {
                         "Total modules": str(cp_stats.get("num_components", 0)),
@@ -1593,7 +1461,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         stats = self.evolution.get_stats()
 
         # Basic stats
-        self.ui.print("[cyan]Evolution Cycle:[/cyan]")
+        self.ui.print("[purple]Evolution Cycle:[/purple]")
         self.ui.print_key_value(
             {
                 "Current cycle": str(stats["cycle"]),
@@ -1609,7 +1477,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         current = stats.get("current_score")
         improvement = stats.get("improvement", 0)
 
-        self.ui.print("[cyan]Benchmark Performance:[/cyan]")
+        self.ui.print("[purple]Benchmark Performance:[/purple]")
         self.ui.print_key_value(
             {
                 "Baseline score": f"{baseline:.1%}" if baseline is not None else "Not yet tested",
@@ -1620,7 +1488,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print()
 
         # Training status
-        self.ui.print("[cyan]MLX Training:[/cyan]")
+        self.ui.print("[purple]MLX Training:[/purple]")
         self.ui.print_key_value(
             {
                 "Total trainings": str(stats["trainings"]),
@@ -1637,7 +1505,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         # Weak areas
         weak_areas = stats.get("weak_areas", [])
         if weak_areas:
-            self.ui.print("[cyan]Weak Areas (learning focus):[/cyan]")
+            self.ui.print("[purple]Weak Areas (learning focus):[/purple]")
             for area, score in weak_areas[:5]:
                 self.ui.print(f"  [yellow]*[/yellow] {area}: {score:.0%}")
             self.ui.print()
@@ -1670,9 +1538,9 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             else:
                 time_str = f"{age.seconds // 60}m ago"
 
-            self.ui.print(f"  [cyan]{i}.[/cyan] {sess['id'][:8]} [dim]({time_str})[/dim]")
+            self.ui.print(f"  [purple]{i}.[/purple] {sess['id'][:8]} [dim]({time_str})[/dim]")
 
-        self.ui.print("  [cyan]n.[/cyan] [dim]New session[/dim]")
+        self.ui.print("  [purple]n.[/purple] [dim]New session[/dim]")
         self.ui.print()
 
         try:
@@ -2297,7 +2165,7 @@ JSON:"""
 
         for skill in self.skills_loader.list_skills():
             aliases = f" [dim]({', '.join(skill.aliases)})[/dim]" if skill.aliases else ""
-            self.ui.print(f"  [cyan]/{skill.name:12}[/cyan] {skill.description}{aliases}")
+            self.ui.print(f"  [purple]/{skill.name:12}[/purple] {skill.description}{aliases}")
         self.ui.print()
         self.ui.print_dim("Use /<skill> [args] to run a skill")
         self.ui.print()
@@ -2310,7 +2178,7 @@ JSON:"""
 
         for config in self.subagent_manager.get_available():
             tools_str = f" [dim][{len(config.tools)} tools][/dim]" if config.tools else ""
-            self.ui.print(f"  [cyan]{config.name:12}[/cyan] {config.description}{tools_str}")
+            self.ui.print(f"  [purple]{config.name:12}[/purple] {config.description}{tools_str}")
         self.ui.print()
         self.ui.print_dim("Use /agent <type> <task> to spawn an agent")
         self.ui.print()
@@ -2368,7 +2236,7 @@ JSON:"""
                 self.ui.print("[bold]MCP Tools[/bold]")
                 self.ui.print_divider()
                 for tool in tools:
-                    self.ui.print(f"  [cyan]{tool.name}[/cyan]")
+                    self.ui.print(f"  [purple]{tool.name}[/purple]")
                     self.ui.print(f"    [dim]{tool.description}[/dim]")
             else:
                 self.ui.print_dim("No MCP tools available")
@@ -2478,7 +2346,7 @@ JSON:"""
             return
 
         self.ui.print()
-        self.ui.print(f"[cyan]Spawning {agent_type} agent...[/cyan]")
+        self.ui.print(f"[purple]Spawning {agent_type} agent...[/purple]")
         self.ui.print_dim(f"Task: {task}")
 
         try:
@@ -2510,7 +2378,7 @@ JSON:"""
             return
 
         self.ui.print()
-        self.ui.print(f"[cyan]Running /{skill_name}...[/cyan]")
+        self.ui.print(f"[purple]Running /{skill_name}...[/purple]")
 
         # Build the prompt
         prompt = self.skills_loader.execute_skill(skill_name, args)

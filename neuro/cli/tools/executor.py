@@ -47,7 +47,7 @@ class ToolSpinner:
 
     FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
     RESET = "\033[0m"
-    CYAN = "\033[36m"
+    PURPLE = "\033[35m"
     GREEN = "\033[32m"
     RED = "\033[31m"
     DIM = "\033[2m"
@@ -83,7 +83,7 @@ class ToolSpinner:
     def _animate(self):
         while self._running:
             frame = self.FRAMES[self._frame % len(self.FRAMES)]
-            line = f"\r\033[K  {self.CYAN}{frame}{self.RESET} {self._message}"
+            line = f"\r\033[K  {self.PURPLE}{frame}{self.RESET} {self._message}"
             sys.stdout.write(line)
             sys.stdout.flush()
             self._frame += 1
