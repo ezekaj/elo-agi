@@ -126,6 +126,73 @@ class NeuroApp:
             ui=self.ui,
         )
 
+        # Register task tracking tools
+        self.tool_registry.register(
+            name="task_create",
+            description="Create a new task for tracking multi-step work",
+            func=self.task_manager.task_create,
+            schema={
+                "type": "object",
+                "properties": {
+                    "subject": {"type": "string", "description": "Brief task title"},
+                    "description": {"type": "string", "description": "Detailed description"},
+                    "active_form": {
+                        "type": "string",
+                        "description": "Present continuous form (e.g., 'Running tests')",
+                    },
+                },
+                "required": ["subject"],
+            },
+        )
+        self.tool_registry.register(
+            name="task_update",
+            description=(
+                "Update a task status or details. "
+                "Use status: pending, in_progress, completed, or deleted"
+            ),
+            func=self.task_manager.task_update,
+            schema={
+                "type": "object",
+                "properties": {
+                    "task_id": {"type": "string", "description": "Task ID"},
+                    "status": {
+                        "type": "string",
+                        "enum": ["pending", "in_progress", "completed", "deleted"],
+                    },
+                    "subject": {"type": "string"},
+                    "description": {"type": "string"},
+                    "add_blocked_by": {
+                        "type": "string",
+                        "description": "Comma-separated task IDs that block this task",
+                    },
+                    "add_blocks": {
+                        "type": "string",
+                        "description": "Comma-separated task IDs this task blocks",
+                    },
+                },
+                "required": ["task_id"],
+            },
+        )
+        self.tool_registry.register(
+            name="task_list",
+            description="List all tasks with status",
+            func=self.task_manager.task_list,
+            read_only=True,
+        )
+        self.tool_registry.register(
+            name="task_get",
+            description="Get full details of a task by ID",
+            func=self.task_manager.task_get,
+            schema={
+                "type": "object",
+                "properties": {
+                    "task_id": {"type": "string", "description": "Task ID"},
+                },
+                "required": ["task_id"],
+            },
+            read_only=True,
+        )
+
         # Register tools for native Ollama function calling
         self._register_native_tools()
 
@@ -145,6 +212,11 @@ class NeuroApp:
         self.skills_loader = SkillsLoader(
             project_dir=self.project_dir,
         )
+
+        # Task Manager
+        from .tools.tasks import TaskManager
+
+        self.task_manager = TaskManager(project_dir=self.project_dir)
 
         # IDE Integration
         self.ide_type = detect_ide()
@@ -235,7 +307,16 @@ TOOLS:
 - web_fetch: Fetch text from a URL
 - git_status: Show git status
 - git_diff: Show git diff
-- improve_self: Analyze ELO's own code"""
+- improve_self: Analyze ELO's own code
+- task_create: Create a task to track multi-step work
+- task_update: Update task status (pending/in_progress/completed)
+- task_list: List all tasks with status
+- task_get: Get full task details by ID
+
+TASK TRACKING:
+- For complex multi-step work (3+ steps), create tasks to track progress
+- Mark tasks as in_progress before starting, completed when done
+- Use task dependencies (add_blocked_by) when tasks depend on each other"""
 
     def _check_for_updates(self):
         """Check PyPI for newer version (non-blocking, silent on failure)."""
@@ -740,6 +821,9 @@ TOOLS:
         elif cmd == "/agents":
             self._print_agents()
 
+        elif cmd == "/tasks":
+            self._print_tasks()
+
         elif cmd == "/mcp":
             await self._handle_mcp_command(args)
 
@@ -1190,6 +1274,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             ("/tools", "List available tools"),
             ("/skills", "List available skills"),
             ("/agents", "List available agents"),
+            ("/tasks", "View task list"),
             ("/status", "System status"),
             ("/compact", "Compress context"),
             ("/cost", "Token usage"),
@@ -2161,6 +2246,46 @@ JSON:"""
                     f"  [yellow]●[/yellow] {exec.id}: {exec.config.name} - {exec.task[:40]}..."
                 )
             self.ui.print()
+
+    def _print_tasks(self):
+        """Print task list with rich formatting."""
+        from .tools.tasks import TaskStatus
+
+        summary = self.task_manager.get_summary()
+        total = sum(summary.values())
+
+        self.ui.print()
+        self.ui.print("[bold]Tasks[/bold]")
+        self.ui.print_divider()
+
+        if total == 0:
+            self.ui.print_dim("No tasks. The AI creates tasks automatically for complex work.")
+            self.ui.print()
+            return
+
+        self.ui.print_dim(
+            f"  {summary['pending']} pending | "
+            f"{summary['in_progress']} in progress | "
+            f"{summary['completed']} completed"
+        )
+        self.ui.print()
+
+        for task in self.task_manager._tasks.values():
+            if task.status == TaskStatus.DELETED:
+                continue
+
+            if task.status == TaskStatus.COMPLETED:
+                icon = "[green]v[/green]"
+            elif task.status == TaskStatus.IN_PROGRESS:
+                icon = "[purple]o[/purple]"
+            else:
+                icon = "[dim]o[/dim]"
+
+            blocked = " [red](blocked)[/red]" if task.is_blocked() else ""
+            owner = f" [dim]@{task.owner}[/dim]" if task.owner else ""
+            self.ui.print(f"  {icon} [{task.id}] {task.subject}{blocked}{owner}")
+
+        self.ui.print()
 
     async def _handle_mcp_command(self, args: str):
         """Handle /mcp command."""
