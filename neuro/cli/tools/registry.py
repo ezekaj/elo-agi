@@ -150,7 +150,7 @@ class ToolRegistry:
         # Self-improvement
         self.register(
             name="improve_self",
-            description="Analyze and improve NEURO's own code",
+            description="Analyze and improve ELO's own code",
             func=self._improve_self,
             schema={
                 "type": "object",
@@ -532,7 +532,7 @@ class ToolRegistry:
             return f"Web search error: {e}"
 
     def _improve_self(self, area: str) -> str:
-        """Analyze and return info about NEURO's code for self-improvement."""
+        """Analyze and return info about ELO's code for self-improvement."""
         import os
 
         # Get path to neuro/ directory (this file is in neuro/cli/tools/)
@@ -564,7 +564,7 @@ class ToolRegistry:
 
         target_files = areas.get(area.lower(), areas.get("core", []))
 
-        result = [f"NEURO Self-Improvement Analysis: {area}"]
+        result = [f"ELO Self-Improvement Analysis: {area}"]
         result.append(f"Root: {neuro_root}")
         result.append("")
 

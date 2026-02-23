@@ -1,4 +1,4 @@
-"""IDE Integration for NEURO CLI."""
+"""IDE Integration for ELO CLI."""
 
 from .integration import IDEIntegration, IDEType
 from .vscode import VSCodeIntegration

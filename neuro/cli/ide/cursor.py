@@ -1,5 +1,5 @@
 """
-Cursor IDE Integration for NEURO CLI.
+Cursor IDE Integration for ELO CLI.
 
 Cursor is a fork of VSCode, so it inherits most functionality.
 The main difference is the CLI binary name and socket path.

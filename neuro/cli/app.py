@@ -1,5 +1,5 @@
 """
-NEURO CLI Application
+ELO CLI Application
 
 The main application class that orchestrates all components.
 """
@@ -53,7 +53,7 @@ except ImportError:
 
 class NeuroApp:
     """
-    Main NEURO CLI Application.
+    Main ELO CLI Application.
 
     Orchestrates:
     - Streaming LLM responses
@@ -269,7 +269,7 @@ class NeuroApp:
                 self.cognitive_pipeline = CognitivePipeline(verbose=verbose)
             except Exception as e:
                 if verbose:
-                    print(f"[NEURO] Cognitive pipeline init failed: {e}")
+                    print(f"[ELO] Cognitive pipeline init failed: {e}")
 
         # NeuroAgent (full PERCEIVE -> THINK -> ACT -> LEARN -> IMPROVE workflow)
         self.neuro_agent = None
@@ -279,11 +279,11 @@ class NeuroApp:
                 if verbose:
                     stats = self.neuro_agent.get_stats()
                     print(
-                        f"[NEURO] Agent loaded with {len(stats.get('components', {}))} components"
+                        f"[ELO] Agent loaded with {len(stats.get('components', {}))} components"
                     )
             except Exception as e:
                 if verbose:
-                    print(f"[NEURO] NeuroAgent init failed: {e}")
+                    print(f"[ELO] NeuroAgent init failed: {e}")
 
         # Runtime state
         self._current_session = None
@@ -470,7 +470,7 @@ TASK TRACKING:
                     self.ui.print_dim("Recent history:")
                     for msg in self._current_session.messages[-4:]:
                         role = (
-                            "[purple]You:[/purple]" if msg.role == "user" else "[medium_purple3]NEURO:[/medium_purple3]"
+                            "[purple]You:[/purple]" if msg.role == "user" else "[medium_purple3]ELO:[/medium_purple3]"
                         )
                         content = msg.content[:60] + "..." if len(msg.content) > 60 else msg.content
                         self.ui.print(f"  {role} {content}")
@@ -1471,7 +1471,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
     async def _print_status(self):
         """Print system status."""
         self.ui.print()
-        self.ui.print("[bold]NEURO Status[/bold]")
+        self.ui.print("[bold]ELO Status[/bold]")
         self.ui.print_divider()
 
         data = {
@@ -1669,7 +1669,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             except Exception:
                 pass
 
-        self.ui.print_dim("NEURO learns from every conversation using 38+ cognitive modules.")
+        self.ui.print_dim("ELO learns from every conversation using 38+ cognitive modules.")
         self.ui.print()
 
     def _print_evolution_stats(self):

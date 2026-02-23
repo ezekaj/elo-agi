@@ -25,7 +25,7 @@ from rich.tree import Tree
 from rich.theme import Theme
 
 # Custom theme matching modern CLI aesthetics
-NEURO_THEME = Theme(
+ELO_THEME = Theme(
     {
         "info": "purple",
         "success": "green",
@@ -53,7 +53,7 @@ class UIRenderer:
 
     def __init__(self, theme: Optional[Theme] = None):
         self.console = Console(
-            theme=theme or NEURO_THEME,
+            theme=theme or ELO_THEME,
             highlight=True,
             markup=True,
         )
@@ -98,7 +98,7 @@ class UIRenderer:
         from rich.columns import Columns
         from rich.align import Align
 
-        # ASCII art logo for NEURO (using Text with styles)
+        # ASCII art logo for ELO (using Text with styles)
         logo = Text()
         logo.append("    ╔═╗╦  ╔═╗\n", style="bold purple")
         logo.append("    ║╣ ║  ║ ║\n", style="bold purple")

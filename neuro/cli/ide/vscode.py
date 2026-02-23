@@ -1,9 +1,9 @@
 """
-VSCode Integration for NEURO CLI.
+VSCode Integration for ELO CLI.
 
 Communicates with VSCode via:
 1. `code` CLI command for basic operations
-2. Unix socket for bidirectional communication with NEURO extension
+2. Unix socket for bidirectional communication with ELO extension
 """
 
 import asyncio
@@ -27,7 +27,7 @@ class VSCodeIntegration(IDEIntegration):
 
     The socket allows a VSCode extension to:
     - Send editor context updates
-    - Receive commands from NEURO
+    - Receive commands from ELO
     - Sync file changes
     """
 

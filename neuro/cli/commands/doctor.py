@@ -11,14 +11,14 @@ console = Console()
 
 
 def cmd_doctor(args):
-    """Check NEURO installation health."""
+    """Check ELO installation health."""
     return asyncio.run(_check_health())
 
 
 async def _check_health():
     """Run health checks."""
     console.print()
-    console.print("[bold]NEURO Doctor[/bold]")
+    console.print("[bold]ELO Doctor[/bold]")
     console.print("─" * 50)
 
     checks = []

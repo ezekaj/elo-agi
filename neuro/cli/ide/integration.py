@@ -1,7 +1,7 @@
 """
 IDE Integration Base - Abstract interface for IDE integrations.
 
-NEURO can integrate with IDEs to:
+ELO can integrate with IDEs to:
 - Open files at specific lines
 - Get current editor context (file, selection, cursor)
 - Sync with file watchers

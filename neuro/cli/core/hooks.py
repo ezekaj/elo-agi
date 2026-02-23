@@ -1,7 +1,7 @@
 """
 Hooks Manager - Lifecycle hooks for extensibility.
 
-Hooks allow external scripts to intercept and modify NEURO behavior.
+Hooks allow external scripts to intercept and modify ELO behavior.
 They can be used for:
 - Custom validation before tool execution
 - Audit logging
@@ -251,8 +251,8 @@ class HooksManager:
 
             # Build environment
             env = os.environ.copy()
-            env["NEURO_PROJECT_DIR"] = self.project_dir
-            env["NEURO_HOOK_EVENT"] = hook_input.get("event", "")
+            env["ELO_PROJECT_DIR"] = self.project_dir
+            env["ELO_HOOK_EVENT"] = hook_input.get("event", "")
             env.update(handler.env)
 
             # Run command with input on stdin
