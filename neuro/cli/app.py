@@ -126,6 +126,11 @@ class NeuroApp:
             ui=self.ui,
         )
 
+        # Task Manager (must be created before registering task tools)
+        from .tools.tasks import TaskManager
+
+        self.task_manager = TaskManager(project_dir=self.project_dir)
+
         # Register task tracking tools
         self.tool_registry.register(
             name="task_create",
@@ -212,11 +217,6 @@ class NeuroApp:
         self.skills_loader = SkillsLoader(
             project_dir=self.project_dir,
         )
-
-        # Task Manager
-        from .tools.tasks import TaskManager
-
-        self.task_manager = TaskManager(project_dir=self.project_dir)
 
         # Plan Manager
         from .core.planner import PlanManager
