@@ -186,21 +186,40 @@ class PermissionManager:
         tool_name: str,
         tool_input: Dict[str, Any],
     ) -> bool:
-        """Interactively prompt user for permission."""
-        print(f"\n  \033[35mPermission needed:\033[0m {tool_name}")
+        """Interactively prompt user for permission with Rich UI."""
+        from rich.console import Console
+        from rich.panel import Panel
+        from rich.text import Text
 
-        # Show input preview
+        console = Console()
+
+        # Build content
+        content = Text()
+        content.append(f"Tool: ", style="dim")
+        content.append(f"{tool_name}\n", style="bold")
+
         for k, v in list(tool_input.items())[:3]:
-            val_str = str(v)[:50]
-            if len(str(v)) > 50:
+            val_str = str(v)[:60]
+            if len(str(v)) > 60:
                 val_str += "..."
-            print(f"    {k}: {val_str}")
+            content.append(f"  {k}: ", style="dim")
+            content.append(f"{val_str}\n")
 
-        print("  [y] Allow  [n] Deny  [a] Always allow  [d] Always deny")
+        panel = Panel(
+            content,
+            title="[bold]Permission Required[/bold]",
+            border_style="purple",
+            padding=(0, 1),
+        )
+        console.print()
+        console.print(panel)
+        console.print(
+            "  [purple]y[/purple] Allow  [purple]n[/purple] Deny  "
+            "[purple]a[/purple] Always allow  [purple]d[/purple] Always deny"
+        )
 
         try:
             import asyncio
-
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(None, lambda: input("  > ").strip().lower())
         except (EOFError, KeyboardInterrupt):

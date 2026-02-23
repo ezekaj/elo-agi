@@ -233,6 +233,10 @@ class NeuroApp:
             ui=self.ui,
         )
 
+        # Edit History (for /undo support)
+        from .core.edit_history import EditHistory
+        self.edit_history = EditHistory(project_dir=self.project_dir)
+
         # IDE Integration
         self.ide_type = detect_ide()
         self.ide_integration = create_integration(
@@ -323,6 +327,9 @@ TOOLS:
 - web_fetch: Fetch text from a URL
 - git_status: Show git status
 - git_diff: Show git diff
+- glob_files: Find files by pattern (e.g., '**/*.py')
+- grep_content: Search file contents with regex
+- notebook_edit: Edit Jupyter notebook cells
 - improve_self: Analyze ELO's own code
 - task_create: Create a task to track multi-step work
 - task_update: Update task status (pending/in_progress/completed)
@@ -902,6 +909,18 @@ TASK TRACKING:
         elif cmd == "/team":
             await self._handle_team_command(args)
 
+        elif cmd == "/init":
+            self._handle_init_command()
+
+        elif cmd == "/undo":
+            self._handle_undo_command()
+
+        elif cmd == "/diff":
+            self._handle_diff_command()
+
+        elif cmd == "/config":
+            self._handle_config_command(args)
+
         # Check if it's a skill command
         elif cmd.startswith("/"):
             skill_name = cmd[1:]  # Remove leading /
@@ -1288,6 +1307,90 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         return text
 
+    def _handle_init_command(self):
+        """Initialize .neuro/ directory with default config."""
+        neuro_dir = os.path.join(self.project_dir, ".neuro")
+        if os.path.exists(neuro_dir):
+            self.ui.print_dim(f".neuro/ already exists at {neuro_dir}")
+            return
+
+        os.makedirs(neuro_dir, exist_ok=True)
+        os.makedirs(os.path.join(neuro_dir, "plans"), exist_ok=True)
+        os.makedirs(os.path.join(neuro_dir, "agents"), exist_ok=True)
+        os.makedirs(os.path.join(neuro_dir, "skills"), exist_ok=True)
+
+        # Default settings
+        settings = {
+            "permissions": {
+                "allow": [],
+                "deny": [],
+            },
+            "model": self.model,
+        }
+        with open(os.path.join(neuro_dir, "settings.json"), "w") as f:
+            json.dump(settings, f, indent=2)
+
+        self.ui.print_success(f"Initialized .neuro/ at {neuro_dir}")
+        self.ui.print_dim("  settings.json, plans/, agents/, skills/")
+
+    def _handle_undo_command(self):
+        """Undo the last file edit."""
+        if not hasattr(self, 'edit_history'):
+            self.ui.print_dim("No edit history available")
+            return
+
+        edit = self.edit_history.undo_last()
+        if edit:
+            self.ui.print_success(f"Undone: {edit.path}")
+            self.ui.print_dim(f"  Reverted {edit.tool_name} edit from {edit.timestamp}")
+        else:
+            self.ui.print_dim("Nothing to undo")
+
+    def _handle_diff_command(self):
+        """Show recent file changes made by ELO."""
+        if not hasattr(self, 'edit_history'):
+            self.ui.print_dim("No edit history available")
+            return
+
+        edits = self.edit_history.get_diff_summary()
+        if not edits:
+            self.ui.print_dim("No file changes this session")
+            return
+
+        self.ui.print("[bold]Recent Changes[/bold]")
+        self.ui.print_divider()
+        for edit in edits:
+            self.ui.print(f"  [purple]●[/purple] {edit['path']} [dim]({edit['tool']})[/dim]")
+
+    def _handle_config_command(self, args: str):
+        """Show or edit configuration."""
+        if not args:
+            # Show config
+            self.ui.print("[bold]Configuration[/bold]")
+            self.ui.print_divider()
+
+            # Show config sources
+            config_paths = [
+                ("User", os.path.expanduser("~/.neuro/settings.json")),
+                ("Project", os.path.join(self.project_dir, ".neuro", "settings.json")),
+                ("Local", os.path.join(self.project_dir, ".neuro", "settings.local.json")),
+            ]
+            for label, path in config_paths:
+                exists = os.path.exists(path)
+                icon = "[green]✓[/green]" if exists else "[dim]○[/dim]"
+                self.ui.print(f"  {icon} {label}: [dim]{path}[/dim]")
+
+            self.ui.print()
+            self.ui.print_dim("Current settings:")
+            self.ui.print_key_value({
+                "Model": self.model,
+                "Permission mode": self.permission_manager.mode.value,
+                "API type": self.api_type,
+                "Project": self.project_dir,
+            })
+        else:
+            self.ui.print_dim("Config editing not yet supported. Edit files directly.")
+
     def _print_help(self):
         """Print help message."""
         commands = [
@@ -1306,6 +1409,10 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             ("/tasks", "View task list"),
             ("/plan <task>", "Plan mode (read-only research, then approve)"),
             ("/team <cmd>", "Manage agent teams (create, add, run, list)"),
+            ("/init", "Initialize .neuro/ config directory"),
+            ("/undo", "Undo last file edit"),
+            ("/diff", "Show recent file changes"),
+            ("/config", "Show configuration"),
             ("/status", "System status"),
             ("/compact", "Compress context"),
             ("/cost", "Token usage"),

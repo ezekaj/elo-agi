@@ -493,6 +493,29 @@ class UIRenderer:
     # Tool Execution Display
     # =========================================================================
 
+    def print_permission_card(self, tool_name: str, args: Dict[str, Any], risk_level: str = "normal"):
+        """Print a permission request card."""
+        content = Text()
+        content.append(f"Tool: ", style="dim")
+        content.append(f"{tool_name}\n", style="bold")
+
+        for k, v in list(args.items())[:3]:
+            val_str = str(v)[:60]
+            if len(str(v)) > 60:
+                val_str += "..."
+            content.append(f"  {k}: ", style="dim")
+            content.append(f"{val_str}\n")
+
+        border = "red" if risk_level == "high" else "purple"
+        panel = Panel(
+            content,
+            title="[bold]Permission Required[/bold]",
+            border_style=border,
+            padding=(0, 1),
+        )
+        self.console.print()
+        self.console.print(panel)
+
     def print_tool_start(self, tool_name: str, description: str = ""):
         """Print tool execution start."""
         desc = f" [dim]{description}[/dim]" if description else ""
