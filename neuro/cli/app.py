@@ -240,8 +240,68 @@ class NeuroApp:
             {
                 "type": "function",
                 "function": {
+                    "name": "list_files",
+                    "description": "List files and folders in a directory",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "Directory path (default: current directory)",
+                            }
+                        },
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "edit_file",
+                    "description": "Edit a file by replacing specific text",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string", "description": "File path"},
+                            "old_text": {"type": "string", "description": "Text to find"},
+                            "new_text": {"type": "string", "description": "Replacement text"},
+                        },
+                        "required": ["path", "old_text", "new_text"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "web_fetch",
+                    "description": "Fetch and extract text content from a URL",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"url": {"type": "string", "description": "URL to fetch"}},
+                        "required": ["url"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "git_status",
+                    "description": "Show git repository status",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "git_diff",
+                    "description": "Show git diff of changes",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
                     "name": "improve_self",
-                    "description": "Analyze and improve NEURO's own code",
+                    "description": "Analyze and improve ELO's own code",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -272,13 +332,16 @@ BEHAVIOR:
 - Ask clarifying questions when a task is genuinely ambiguous
 
 TOOLS (use only when needed):
-- web_search: Search the internet when the user asks for current information
-- web_fetch: Fetch content from URLs the user provides
-- read_file: Read files when the user asks about code or files
-- write_file: Create/overwrite files when asked
-- edit_file: Modify existing files when asked
-- run_command: Execute shell commands when asked
-- improve_self: Analyze your own code (only when user requests self-improvement)
+- read_file: Read a file's contents (do NOT use on directories)
+- list_files: List files and folders in a directory
+- write_file: Create or overwrite a file
+- edit_file: Replace specific text in a file
+- run_command: Execute a shell command
+- web_search: Search the internet for information
+- web_fetch: Fetch and extract text from a URL
+- git_status: Show git repository status
+- git_diff: Show git diff of changes
+- improve_self: Analyze ELO's own code (only when user requests it)
 
 TOOL FORMAT:
 <tool>tool_name</tool>
@@ -701,6 +764,20 @@ You have access to 38 cognitive modules spanning perception, reasoning, memory, 
                 )
             elif tool_name == "run_command":
                 result = self.tool_registry.tools["run_command"].func(tool_args.get("command", ""))
+            elif tool_name == "list_files":
+                result = self.tool_registry.tools["list_files"].func(tool_args.get("path", "."))
+            elif tool_name == "edit_file":
+                result = self.tool_registry.tools["edit_file"].func(
+                    tool_args.get("path", ""),
+                    tool_args.get("old_text", ""),
+                    tool_args.get("new_text", ""),
+                )
+            elif tool_name == "web_fetch":
+                result = self.tool_registry.tools["web_fetch"].func(tool_args.get("url", ""))
+            elif tool_name == "git_status":
+                result = self.tool_registry.tools["git_status"].func()
+            elif tool_name == "git_diff":
+                result = self.tool_registry.tools["git_diff"].func()
             elif tool_name == "improve_self":
                 result = self.tool_registry.tools["improve_self"].func(
                     tool_args.get("area", "core")

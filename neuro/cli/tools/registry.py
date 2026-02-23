@@ -183,6 +183,8 @@ class ToolRegistry:
         path = os.path.expanduser(path)
         if not os.path.exists(path):
             return f"Error: File not found: {path}"
+        if os.path.isdir(path):
+            return self._list_files(path)
         try:
             with open(path, "r") as f:
                 content = f.read()
