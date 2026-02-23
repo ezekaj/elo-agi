@@ -2,11 +2,10 @@
 Edit History - Track file edits for undo support.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, Dict
 from datetime import datetime
 import os
-import shutil
 
 
 @dataclass

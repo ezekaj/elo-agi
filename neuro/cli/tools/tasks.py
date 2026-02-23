@@ -9,7 +9,7 @@ Provides:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List, Set
+from typing import Dict, Any, List, Set
 from datetime import datetime
 from enum import Enum
 import json
