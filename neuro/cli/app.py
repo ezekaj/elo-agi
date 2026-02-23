@@ -103,9 +103,6 @@ class NeuroApp:
             on_token=self._on_token,
         )
 
-        # Register tools for native Ollama function calling
-        self._register_native_tools()
-
         self.session_manager = SessionManager(
             project_dir=self.project_dir,
             persist=not no_session_persistence,
@@ -128,6 +125,9 @@ class NeuroApp:
             hooks=self.hooks_manager,
             ui=self.ui,
         )
+
+        # Register tools for native Ollama function calling
+        self._register_native_tools()
 
         # MCP Manager
         self.mcp_manager = MCPManager(
@@ -661,42 +661,11 @@ TOOLS:
             self.self_trainer.save()
 
     async def _execute_native_tool(self, tool_name: str, tool_args: Dict) -> Optional[tuple]:
-        """Execute a native Ollama function call."""
+        """Execute a native Ollama function call via registry."""
         try:
-            if tool_name == "web_search":
-                result = self.tool_registry.tools["web_search"].func(tool_args.get("query", ""))
-            elif tool_name == "read_file":
-                result = self.tool_registry.tools["read_file"].func(tool_args.get("path", ""))
-            elif tool_name == "write_file":
-                result = self.tool_registry.tools["write_file"].func(
-                    tool_args.get("path", ""), tool_args.get("content", "")
-                )
-            elif tool_name == "run_command":
-                result = self.tool_registry.tools["run_command"].func(tool_args.get("command", ""))
-            elif tool_name == "list_files":
-                result = self.tool_registry.tools["list_files"].func(tool_args.get("path", "."))
-            elif tool_name == "edit_file":
-                result = self.tool_registry.tools["edit_file"].func(
-                    tool_args.get("path", ""),
-                    tool_args.get("old_text", ""),
-                    tool_args.get("new_text", ""),
-                )
-            elif tool_name == "web_fetch":
-                result = self.tool_registry.tools["web_fetch"].func(tool_args.get("url", ""))
-            elif tool_name == "git_status":
-                result = self.tool_registry.tools["git_status"].func()
-            elif tool_name == "git_diff":
-                result = self.tool_registry.tools["git_diff"].func()
-            elif tool_name == "improve_self":
-                result = self.tool_registry.tools["improve_self"].func(
-                    tool_args.get("area", "core")
-                )
-            else:
-                return None
-
+            result = await self.tool_registry.execute_tool(tool_name, tool_args)
             self.ui.print_tool_result(tool_name, True, str(result)[:2000])
             return (tool_name, result)
-
         except Exception as e:
             self.ui.print_error(f"Tool {tool_name} failed: {e}")
             return (tool_name, f"Error: {e}")

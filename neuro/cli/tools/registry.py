@@ -16,6 +16,7 @@ class Tool:
     description: str
     func: Callable
     schema: Dict[str, Any] = field(default_factory=dict)
+    read_only: bool = False
 
 
 class ToolRegistry:
@@ -41,6 +42,7 @@ class ToolRegistry:
                 "properties": {"path": {"type": "string", "description": "File path"}},
                 "required": ["path"],
             },
+            read_only=True,
         )
 
         self.register(
@@ -74,6 +76,7 @@ class ToolRegistry:
             description="List files in a directory",
             func=self._list_files,
             schema={"type": "object", "properties": {"path": {"type": "string", "default": "."}}},
+            read_only=True,
         )
 
         # Shell
@@ -93,12 +96,14 @@ class ToolRegistry:
             name="git_status",
             description="Get git repository status",
             func=self._git_status,
+            read_only=True,
         )
 
         self.register(
             name="git_diff",
             description="Get git diff",
             func=self._git_diff,
+            read_only=True,
         )
 
         # Web search
@@ -111,6 +116,7 @@ class ToolRegistry:
                 "properties": {"query": {"type": "string", "description": "Search query"}},
                 "required": ["query"],
             },
+            read_only=True,
         )
 
         # Web fetch
@@ -123,6 +129,7 @@ class ToolRegistry:
                 "properties": {"url": {"type": "string", "description": "URL to fetch"}},
                 "required": ["url"],
             },
+            read_only=True,
         )
 
         # Self-improvement
@@ -148,6 +155,7 @@ class ToolRegistry:
         description: str,
         func: Callable,
         schema: Dict[str, Any] = None,
+        read_only: bool = False,
     ):
         """Register a tool."""
         self.tools[name] = Tool(
@@ -155,6 +163,7 @@ class ToolRegistry:
             description=description,
             func=func,
             schema=schema or {},
+            read_only=read_only,
         )
 
     def get_tool(self, name: str) -> Optional[Tool]:
@@ -175,6 +184,50 @@ class ToolRegistry:
             }
             for t in self.tools.values()
         ]
+
+    def get_ollama_tools(self) -> List[Dict]:
+        """Generate Ollama-format tool schemas for all registered tools."""
+        result = []
+        for tool in self.tools.values():
+            result.append({
+                "type": "function",
+                "function": {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.schema or {"type": "object", "properties": {}},
+                },
+            })
+        return result
+
+    async def execute_tool(self, name: str, args: Dict[str, Any]) -> Any:
+        """Execute a tool by name with args dict, mapping to function params."""
+        import asyncio
+        import inspect
+
+        tool = self.tools.get(name)
+        if not tool:
+            raise ValueError(f"Tool not found: {name}")
+
+        sig = inspect.signature(tool.func)
+        params = sig.parameters
+
+        # Map args dict to function parameters
+        call_args = {}
+        for param_name, param in params.items():
+            if param_name in args:
+                call_args[param_name] = args[param_name]
+            elif param.default is not inspect.Parameter.empty:
+                pass  # Use default
+
+        if asyncio.iscoroutinefunction(tool.func):
+            return await tool.func(**call_args)
+        else:
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None, lambda: tool.func(**call_args))
+
+    def get_read_only_tools(self) -> List[str]:
+        """Get names of all read-only (safe) tools."""
+        return [name for name, tool in self.tools.items() if tool.read_only]
 
     # Built-in tool implementations
 
