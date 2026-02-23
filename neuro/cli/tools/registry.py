@@ -272,12 +272,13 @@ class ToolRegistry:
 
     def _web_search(self, query: str) -> str:
         """Search the web using DuckDuckGo."""
-        try:
-            import urllib.request
-            import urllib.parse
-            import json
+        import urllib.request
+        import urllib.parse
+        import json
+        import re
 
-            # Use DuckDuckGo Instant Answer API
+        # Try DuckDuckGo Instant Answer API first (good for factual queries)
+        try:
             encoded_query = urllib.parse.quote(query)
             url = f"https://api.duckduckgo.com/?q={encoded_query}&format=json&no_html=1"
 
@@ -287,60 +288,83 @@ class ToolRegistry:
 
             results = []
 
-            # Abstract (main answer)
             if data.get("Abstract"):
                 results.append(f"Summary: {data['Abstract']}")
                 if data.get("AbstractURL"):
                     results.append(f"Source: {data['AbstractURL']}")
 
-            # Related topics
             for topic in data.get("RelatedTopics", [])[:5]:
                 if isinstance(topic, dict) and topic.get("Text"):
                     results.append(f"- {topic['Text'][:200]}")
 
             if results:
                 return "\n".join(results)
+        except Exception:
+            pass
 
-            # Fallback: try scraping search results
-            return self._web_search_fallback(query)
-
-        except Exception as e:
-            return f"Web search error: {e}. Try web_fetch with a specific URL."
-
-    def _web_search_fallback(self, query: str) -> str:
-        """Fallback web search using HTML scraping."""
+        # Fallback: DuckDuckGo HTML search (better for news/general queries)
         try:
-            import urllib.request
-            import urllib.parse
-            import re
-
             encoded_query = urllib.parse.quote(query)
             url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
 
             req = urllib.request.Request(
                 url,
                 headers={
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                    "User-Agent": (
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/120.0.0.0 Safari/537.36"
+                    )
                 },
             )
             with urllib.request.urlopen(req, timeout=10) as response:
-                html = response.read().decode("utf-8", errors="ignore")
+                html_content = response.read().decode("utf-8", errors="ignore")
 
-            # Extract result snippets
             results = []
-            snippets = re.findall(r'class="result__snippet"[^>]*>([^<]+)', html)
-            for snippet in snippets[:5]:
-                clean = re.sub(r"<[^>]+>", "", snippet).strip()
-                if clean:
-                    results.append(f"- {clean[:200]}")
+
+            # Extract titles and URLs
+            title_matches = re.findall(
+                r'class="result__a"[^>]*href="([^"]*)"[^>]*>(.*?)</a>',
+                html_content,
+                re.DOTALL,
+            )
+
+            # Extract snippets (full inner HTML, then strip tags)
+            snippet_matches = re.findall(
+                r'class="result__snippet"[^>]*>(.*?)</(?:a|td|span)',
+                html_content,
+                re.DOTALL,
+            )
+
+            for i, (url_match, title_html) in enumerate(title_matches[:5]):
+                title = re.sub(r"<[^>]+>", "", title_html).strip()
+                # Decode DuckDuckGo redirect URL
+                if "uddg=" in url_match:
+                    actual_url = urllib.parse.unquote(
+                        re.search(r"uddg=([^&]+)", url_match).group(1)
+                    )
+                else:
+                    actual_url = url_match
+
+                snippet = ""
+                if i < len(snippet_matches):
+                    snippet = re.sub(r"<[^>]+>", "", snippet_matches[i]).strip()
+                    snippet = snippet.replace("&quot;", '"').replace("&amp;", "&")
+                    snippet = snippet.replace("&lt;", "<").replace("&gt;", ">")
+
+                entry = f"- {title}"
+                if snippet:
+                    entry += f"\n  {snippet[:200]}"
+                entry += f"\n  {actual_url}"
+                results.append(entry)
 
             if results:
-                return f"Search results for '{query}':\n" + "\n".join(results)
+                return f"Search results for '{query}':\n\n" + "\n\n".join(results)
 
             return f"No results found for '{query}'"
 
         except Exception as e:
-            return f"Search fallback error: {e}"
+            return f"Web search error: {e}"
 
     def _improve_self(self, area: str) -> str:
         """Analyze and return info about NEURO's code for self-improvement."""
