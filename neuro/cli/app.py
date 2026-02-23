@@ -8,6 +8,7 @@ import asyncio
 import sys
 import os
 import json
+from dataclasses import dataclass, field
 from typing import Optional, Dict, List
 
 from .core.stream import StreamHandler
@@ -49,6 +50,32 @@ try:
     NEURO_AGENT_AVAILABLE = True
 except ImportError:
     NEURO_AGENT_AVAILABLE = False
+
+
+@dataclass
+class UsageStats:
+    """Real token/cost tracking across the session."""
+
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_cost_usd: float = 0.0
+    api_calls: int = 0
+    model_usage: Dict[str, Dict] = field(default_factory=dict)
+
+    def record(self, input_tok: int, output_tok: int, model: str = ""):
+        self.input_tokens += input_tok
+        self.output_tokens += output_tok
+        self.api_calls += 1
+        if model:
+            if model not in self.model_usage:
+                self.model_usage[model] = {"input": 0, "output": 0, "calls": 0}
+            self.model_usage[model]["input"] += input_tok
+            self.model_usage[model]["output"] += output_tok
+            self.model_usage[model]["calls"] += 1
+
+    @property
+    def total_tokens(self) -> int:
+        return self.input_tokens + self.output_tokens
 
 
 class NeuroApp:
@@ -256,6 +283,9 @@ class NeuroApp:
         self._evolution_running = False
         self._evolution_thread = None
 
+        # Token/cost tracking
+        self._usage = UsageStats()
+
         # Feature modes (opt-in via slash commands)
         self._think_mode = False  # /think — cognitive pipeline
         self._knowledge_mode = False  # /knowledge — knowledge injection
@@ -294,52 +324,96 @@ class NeuroApp:
         """Register tools for Ollama native function calling."""
         self.stream_handler.set_tools(self.tool_registry.get_ollama_tools())
 
-    def _default_system_prompt(self) -> str:
-        """Get default system prompt."""
-        import platform
+    def _build_system_prompt(self) -> str:
+        """Build system prompt dynamically from sections (like Claude Code)."""
+        sections = [
+            self._prompt_base(),
+            self._prompt_environment(),
+            self._prompt_project_instructions(),
+            self._prompt_tools(),
+            self._prompt_task_guidance(),
+        ]
+        return "\n\n".join(s for s in sections if s)
 
-        home = os.path.expanduser("~")
-        cwd = os.getcwd()
-        os_name = platform.system()
-
-        return f"""You are ELO, a local AI assistant running on the user's machine.
-
-ENVIRONMENT:
-- OS: {os_name}
-- Home directory: {home}
-- Working directory: {cwd}
-- Desktop: {os.path.join(home, "Desktop")}
+    def _prompt_base(self) -> str:
+        return """You are ELO, a local AI coding assistant running on the user's machine.
 
 BEHAVIOR:
 - Be concise — short replies for simple questions, detailed only when needed
 - Use tools when the request requires file access, web info, or commands
 - Do NOT ramble, do NOT explain what you're about to do — just do it
 - When a tool returns results, present them directly — do NOT re-explain or ask follow-up questions unless the user asks
-- Use absolute paths based on the environment info above
+- Use absolute paths based on the environment info below"""
 
-TOOLS:
-- read_file: Read a file's contents (NOT for directories)
-- list_files: List files/folders in a directory
-- write_file: Create or overwrite a file
-- edit_file: Replace specific text in a file
-- run_command: Execute a shell command
-- web_search: Search the internet
-- web_fetch: Fetch text from a URL
-- git_status: Show git status
-- git_diff: Show git diff
-- glob_files: Find files by pattern (e.g., '**/*.py')
-- grep_content: Search file contents with regex
-- notebook_edit: Edit Jupyter notebook cells
-- improve_self: Analyze ELO's own code
-- task_create: Create a task to track multi-step work
-- task_update: Update task status (pending/in_progress/completed)
-- task_list: List all tasks with status
-- task_get: Get full task details by ID
+    def _prompt_environment(self) -> str:
+        import platform
+        import subprocess as _sp
 
-TASK TRACKING:
+        home = os.path.expanduser("~")
+        cwd = os.getcwd()
+        shell = os.environ.get("SHELL", "unknown")
+
+        git_info = "Not a git repository"
+        try:
+            result = _sp.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True, text=True, timeout=5, cwd=self.project_dir,
+            )
+            if result.returncode == 0:
+                branch = result.stdout.strip()
+                status = _sp.run(
+                    ["git", "status", "--porcelain"],
+                    capture_output=True, text=True, timeout=5, cwd=self.project_dir,
+                )
+                changes = len(status.stdout.strip().splitlines()) if status.stdout.strip() else 0
+                git_info = f"Branch: {branch}, {changes} changed file{'s' if changes != 1 else ''}"
+        except Exception:
+            pass
+
+        return f"""ENVIRONMENT:
+- Working directory: {cwd}
+- Home: {home}
+- Platform: {platform.system()} ({platform.machine()})
+- OS: {platform.platform()}
+- Shell: {shell}
+- Git: {git_info}"""
+
+    def _prompt_project_instructions(self) -> str:
+        instructions = []
+        for fname in ["CLAUDE.md", "NEURO.md", ".neuro/instructions.md"]:
+            path = os.path.join(self.project_dir, fname)
+            if os.path.exists(path):
+                try:
+                    with open(path) as f:
+                        content = f.read()[:4000]
+                    instructions.append(f"# Project instructions from {fname}\n{content}")
+                except Exception:
+                    pass
+        return "\n\n".join(instructions) if instructions else ""
+
+    def _prompt_tools(self) -> str:
+        lines = ["TOOLS:"]
+        for name, tool in self.tool_registry.tools.items():
+            desc = tool.description.split(".")[0] if tool.description else name
+            lines.append(f"- {name}: {desc}")
+
+        mcp_tools = self.mcp_manager.get_tools()
+        if mcp_tools:
+            lines.append("\nMCP TOOLS (from external servers):")
+            for tool in mcp_tools:
+                lines.append(f"- {tool.name}: {tool.description[:80]}")
+
+        return "\n".join(lines)
+
+    def _prompt_task_guidance(self) -> str:
+        return """TASK TRACKING:
 - For complex multi-step work (3+ steps), create tasks to track progress
 - Mark tasks as in_progress before starting, completed when done
 - Use task dependencies (add_blocked_by) when tasks depend on each other"""
+
+    def _default_system_prompt(self) -> str:
+        """Legacy wrapper — calls _build_system_prompt."""
+        return self._build_system_prompt()
 
     def _check_for_updates(self):
         """Check PyPI for newer version (non-blocking, silent on failure)."""
@@ -643,7 +717,6 @@ TASK TRACKING:
                 full_response += event.content
                 self.ui.append_live(event.content)
             elif event.type.value == "tool_use_start":
-                # Check if this is a native function call (from Ollama API)
                 if event.metadata.get("native"):
                     tool_name = event.metadata.get("name", "")
                     tool_args = event.metadata.get("arguments", {})
@@ -651,14 +724,15 @@ TASK TRACKING:
                     tool_result = await self._execute_native_tool(tool_name, tool_args)
                     if tool_result:
                         tool_calls.append(tool_result)
-                else:
-                    # Legacy XML-style tool parsing
-                    tool_result = await self._handle_tool_call(event.content)
-                    if tool_result:
-                        tool_calls.append(tool_result)
             elif event.type.value == "done":
+                # Record real token usage from API response
+                in_tok = event.metadata.get("input_tokens") or 0
+                out_tok = event.metadata.get("output_tokens") or 0
+                model = event.metadata.get("model") or self.model
+                if in_tok or out_tok:
+                    self._usage.record(in_tok, out_tok, model)
                 self.status_bar.update(
-                    tokens=self._current_session.token_count,
+                    tokens=self._usage.total_tokens or self._current_session.token_count,
                 )
 
         self.ui.stop_live()
@@ -1482,7 +1556,10 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         if self._current_session:
             data["Session"] = self._current_session.id[:8]
             data["Messages"] = str(len(self._current_session.messages))
-            data["Tokens"] = f"~{self._current_session.token_count:,}"
+            if self._usage.api_calls > 0:
+                data["Tokens"] = f"{self._usage.total_tokens:,} ({self._usage.input_tokens:,} in / {self._usage.output_tokens:,} out)"
+            else:
+                data["Tokens"] = f"~{self._current_session.token_count:,}"
 
         tools = self.tool_registry.list_tools()
         data["Tools"] = f"{len(tools)} available"
@@ -1532,16 +1609,32 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                 self.ui.print_dim("Not enough context to compact")
 
     def _print_cost(self):
-        """Print token usage."""
+        """Print real token usage from API responses."""
         self.ui.print()
         self.ui.print("[bold]Token Usage[/bold]")
         self.ui.print_divider()
 
-        if self._current_session:
+        u = self._usage
+        if u.api_calls > 0:
+            self.ui.print(f"  Input tokens:  {u.input_tokens:,}")
+            self.ui.print(f"  Output tokens: {u.output_tokens:,}")
+            self.ui.print(f"  Total tokens:  {u.total_tokens:,}")
+            self.ui.print(f"  API calls:     {u.api_calls}")
+            if len(u.model_usage) > 1:
+                self.ui.print()
+                self.ui.print("  [bold]Per model:[/bold]")
+                for model, stats in u.model_usage.items():
+                    self.ui.print(
+                        f"    {model}: {stats['input']:,} in / {stats['output']:,} out ({stats['calls']} calls)"
+                    )
+        elif self._current_session:
             self.ui.print(f"  Messages: {len(self._current_session.messages)}")
             self.ui.print(f"  Est. tokens: ~{self._current_session.token_count:,}")
+            self.ui.print("  [dim](No real usage data from API yet)[/dim]")
+
         self.ui.print(f"  Model: {self.model}")
-        self.ui.print("  [dim](Local model - no API cost)[/dim]")
+        if self.api_type == "ollama":
+            self.ui.print("  [dim](Local model - no API cost)[/dim]")
         self.ui.print()
 
     def _print_context(self):
@@ -1549,12 +1642,14 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         if not self._current_session:
             return
 
-        total = self._current_session.token_count
+        # Use real token counts if available, fall back to estimate
+        total = self._usage.input_tokens if self._usage.api_calls > 0 else self._current_session.token_count
         max_context = 32000
 
         self.ui.print()
         self.ui.print_progress_bar(total, max_context, label="Context")
-        self.ui.print(f"  [dim]~{total:,} / ~{max_context:,} tokens[/dim]")
+        label = f"{total:,}" if self._usage.api_calls > 0 else f"~{total:,}"
+        self.ui.print(f"  [dim]{label} / {max_context:,} tokens[/dim]")
         self.ui.print()
 
     def _print_permissions(self):

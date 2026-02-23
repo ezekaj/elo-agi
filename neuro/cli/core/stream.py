@@ -143,15 +143,23 @@ class StreamHandler:
                     )
                     return
 
-                buffer = ""
-                tool_parsing = False
+                # Accumulate tool call arguments across streamed chunks
+                active_tool_calls: Dict[int, Dict[str, Any]] = {}
+                usage_data: Dict[str, Any] = {}
 
                 async for line in response.content:
                     line_str = line.decode("utf-8").strip()
 
                     if not line_str or line_str == "data: [DONE]":
                         if line_str == "data: [DONE]":
-                            yield StreamEvent(type=StreamEventType.DONE, metadata={})
+                            yield StreamEvent(
+                                type=StreamEventType.DONE,
+                                metadata={
+                                    "input_tokens": usage_data.get("prompt_tokens"),
+                                    "output_tokens": usage_data.get("completion_tokens"),
+                                    "model": self.model,
+                                },
+                            )
                             break
                         continue
 
@@ -164,6 +172,10 @@ class StreamHandler:
                     except json.JSONDecodeError:
                         continue
 
+                    # Capture usage from final chunk (some APIs include it)
+                    if "usage" in data and data["usage"]:
+                        usage_data = data["usage"]
+
                     choices = data.get("choices", [])
                     if not choices:
                         continue
@@ -171,48 +183,62 @@ class StreamHandler:
                     delta = choices[0].get("delta", {})
                     finish_reason = choices[0].get("finish_reason")
 
-                    # Handle tool calls
+                    # Handle streamed tool calls — accumulate arguments
                     tool_calls = delta.get("tool_calls", [])
                     if tool_calls:
                         for tc in tool_calls:
+                            idx = tc.get("index", 0)
                             func = tc.get("function", {})
-                            name = func.get("name", "")
-                            args_str = func.get("arguments", "")
-                            if name:
-                                try:
-                                    args = json.loads(args_str) if args_str else {}
-                                except json.JSONDecodeError:
-                                    args = {}
-                                yield StreamEvent(
-                                    type=StreamEventType.TOOL_USE_START,
-                                    content=name,
-                                    metadata={
-                                        "name": name,
-                                        "arguments": args,
-                                        "native": True,
-                                    },
-                                )
+                            name = func.get("name")
+                            args_chunk = func.get("arguments", "")
 
-                    # Handle content
+                            if idx not in active_tool_calls:
+                                active_tool_calls[idx] = {
+                                    "name": name or "",
+                                    "arguments": "",
+                                }
+                            if name:
+                                active_tool_calls[idx]["name"] = name
+                            active_tool_calls[idx]["arguments"] += args_chunk
+
+                    # When tool calls finish, emit them
+                    if finish_reason == "tool_calls" or (
+                        finish_reason == "stop" and active_tool_calls
+                    ):
+                        for idx in sorted(active_tool_calls.keys()):
+                            tc_data = active_tool_calls[idx]
+                            tc_name = tc_data["name"]
+                            try:
+                                tc_args = json.loads(tc_data["arguments"]) if tc_data["arguments"] else {}
+                            except json.JSONDecodeError:
+                                tc_args = {}
+                            yield StreamEvent(
+                                type=StreamEventType.TOOL_USE_START,
+                                content=tc_name,
+                                metadata={
+                                    "name": tc_name,
+                                    "arguments": tc_args,
+                                    "native": True,
+                                },
+                            )
+                        active_tool_calls.clear()
+
+                    # Handle content tokens
                     content = delta.get("content", "")
                     if content:
-                        buffer += content
-
-                        # Detect XML-style tool use
-                        if "<tool>" in buffer and not tool_parsing:
-                            tool_parsing = True
-                            yield StreamEvent(type=StreamEventType.TOOL_USE_START, content=buffer)
-                        elif "</args>" in buffer and tool_parsing:
-                            tool_parsing = False
-                            yield StreamEvent(type=StreamEventType.TOOL_USE_END, content=buffer)
-                            buffer = ""
-                        elif not tool_parsing:
-                            if self.on_token:
-                                self.on_token(content)
-                            yield StreamEvent(type=StreamEventType.TOKEN, content=content)
+                        if self.on_token:
+                            self.on_token(content)
+                        yield StreamEvent(type=StreamEventType.TOKEN, content=content)
 
                     if finish_reason == "stop":
-                        yield StreamEvent(type=StreamEventType.DONE, metadata={})
+                        yield StreamEvent(
+                            type=StreamEventType.DONE,
+                            metadata={
+                                "input_tokens": usage_data.get("prompt_tokens"),
+                                "output_tokens": usage_data.get("completion_tokens"),
+                                "model": self.model,
+                            },
+                        )
                         break
 
         except asyncio.TimeoutError:
@@ -291,9 +317,6 @@ Begin your response with <thinking> to show your reasoning process, then provide
                     )
                     return
 
-                buffer = ""
-                tool_parsing = False
-
                 async for line in response.content:
                     if not line:
                         continue
@@ -325,34 +348,19 @@ Begin your response with <thinking> to show your reasoning process, then provide
                                 },
                             )
 
+                    # Stream content tokens
                     if content:
-                        buffer += content
-
-                        # Detect tool use start
-                        if "<tool>" in buffer and not tool_parsing:
-                            tool_parsing = True
-                            if self.on_tool_start:
-                                self.on_tool_start(buffer)
-                            yield StreamEvent(type=StreamEventType.TOOL_USE_START, content=buffer)
-
-                        # Detect tool use end
-                        elif "</args>" in buffer and tool_parsing:
-                            tool_parsing = False
-                            yield StreamEvent(type=StreamEventType.TOOL_USE_END, content=buffer)
-                            buffer = ""
-
-                        # Normal token
-                        elif not tool_parsing:
-                            if self.on_token:
-                                self.on_token(content)
-                            yield StreamEvent(type=StreamEventType.TOKEN, content=content)
+                        if self.on_token:
+                            self.on_token(content)
+                        yield StreamEvent(type=StreamEventType.TOKEN, content=content)
 
                     if done:
                         yield StreamEvent(
                             type=StreamEventType.DONE,
                             metadata={
+                                "input_tokens": data.get("prompt_eval_count"),
+                                "output_tokens": data.get("eval_count"),
                                 "total_duration": data.get("total_duration"),
-                                "eval_count": data.get("eval_count"),
                                 "model": data.get("model"),
                             },
                         )
