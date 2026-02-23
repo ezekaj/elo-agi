@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List, Callable
 from enum import Enum
 import asyncio
+import json
 import uuid
 import os
 import subprocess
@@ -314,7 +315,7 @@ class TeamManager:
         return any(p in response.lower() for p in phrases)
 
     def _setup_worktree(self, teammate: Teammate) -> Optional[str]:
-        """Create isolated git worktree for a teammate."""
+        """Create isolated git worktree for a teammate with symlink support."""
         try:
             worktree_dir = os.path.join(self.project_dir, ".neuro", "worktrees", teammate.id)
             branch_name = f"team/{teammate.id}"
@@ -324,9 +325,34 @@ class TeamManager:
                 capture_output=True,
             )
             teammate.worktree_path = worktree_dir
+
+            # Symlink shared directories from main repo into worktree
+            symlink_dirs = self._get_symlink_directories()
+            for dir_name in symlink_dirs:
+                src = os.path.join(self.project_dir, dir_name)
+                dst = os.path.join(worktree_dir, dir_name)
+                if os.path.isdir(src) and not os.path.exists(dst):
+                    try:
+                        os.symlink(src, dst)
+                    except OSError:
+                        pass  # Skip on failure (permissions, etc.)
+
             return worktree_dir
         except Exception:
             return None
+
+    def _get_symlink_directories(self) -> List[str]:
+        """Read symlink directories config from .neuro/settings.json."""
+        defaults = ["node_modules", ".venv", "vendor", "__pycache__"]
+        settings_path = os.path.join(self.project_dir, ".neuro", "settings.json")
+        try:
+            if os.path.exists(settings_path):
+                with open(settings_path) as f:
+                    settings = json.load(f)
+                return settings.get("worktree", {}).get("symlinkDirectories", defaults)
+        except Exception:
+            pass
+        return defaults
 
     def _cleanup_worktree(self, teammate: Teammate):
         """Remove a teammate's worktree."""
