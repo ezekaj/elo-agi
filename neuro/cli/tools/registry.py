@@ -35,11 +35,15 @@ class ToolRegistry:
         # File operations
         self.register(
             name="read_file",
-            description="Read contents of a file",
+            description="Read contents of a file. Supports optional offset and limit for large files.",
             func=self._read_file,
             schema={
                 "type": "object",
-                "properties": {"path": {"type": "string", "description": "File path"}},
+                "properties": {
+                    "path": {"type": "string", "description": "File path"},
+                    "offset": {"type": "integer", "description": "Line number to start from (1-indexed)", "default": 0},
+                    "limit": {"type": "integer", "description": "Number of lines to read", "default": 0},
+                },
                 "required": ["path"],
             },
             read_only=True,
@@ -58,14 +62,15 @@ class ToolRegistry:
 
         self.register(
             name="edit_file",
-            description="Edit specific lines in a file",
+            description="Edit specific text in a file by replacing old_text with new_text. Use replace_all=true to replace all occurrences.",
             func=self._edit_file,
             schema={
                 "type": "object",
                 "properties": {
                     "path": {"type": "string"},
-                    "old_text": {"type": "string"},
-                    "new_text": {"type": "string"},
+                    "old_text": {"type": "string", "description": "Text to find and replace"},
+                    "new_text": {"type": "string", "description": "Replacement text"},
+                    "replace_all": {"type": "boolean", "default": False, "description": "Replace all occurrences"},
                 },
                 "required": ["path", "old_text", "new_text"],
             },
@@ -73,20 +78,30 @@ class ToolRegistry:
 
         self.register(
             name="list_files",
-            description="List files in a directory",
+            description="List files in a directory. Use recursive=true to list all files recursively.",
             func=self._list_files,
-            schema={"type": "object", "properties": {"path": {"type": "string", "default": "."}}},
+            schema={
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "default": "."},
+                    "recursive": {"type": "boolean", "default": False, "description": "List recursively"},
+                },
+            },
             read_only=True,
         )
 
         # Shell
         self.register(
             name="run_command",
-            description="Run a shell command",
+            description="Run a shell command. Supports timeout and background execution.",
             func=self._run_command,
             schema={
                 "type": "object",
-                "properties": {"command": {"type": "string"}},
+                "properties": {
+                    "command": {"type": "string", "description": "Shell command to run"},
+                    "timeout": {"type": "integer", "default": 60, "description": "Timeout in seconds"},
+                    "background": {"type": "boolean", "default": False, "description": "Run in background"},
+                },
                 "required": ["command"],
             },
         )
@@ -146,6 +161,76 @@ class ToolRegistry:
                     }
                 },
                 "required": ["area"],
+            },
+        )
+
+        # Glob (file search)
+        from .builtins.search import glob_files
+        self.register(
+            name="glob_files",
+            description="Fast file pattern matching (e.g., '**/*.py', 'src/**/*.ts'). Returns matching paths sorted by modification time.",
+            func=glob_files,
+            schema={
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string", "description": "Glob pattern (e.g., '**/*.py')"},
+                    "path": {"type": "string", "description": "Base directory to search in", "default": "."},
+                },
+                "required": ["pattern"],
+            },
+            read_only=True,
+        )
+
+        # Grep (content search)
+        from .builtins.search import grep_content
+        self.register(
+            name="grep_content",
+            description="Search file contents with regex. Uses ripgrep if available, falls back to Python. Supports output modes: content (matching lines), files_with_matches (file paths only), count.",
+            func=grep_content,
+            schema={
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string", "description": "Regex pattern to search for"},
+                    "path": {"type": "string", "description": "Directory to search in", "default": "."},
+                    "output_mode": {
+                        "type": "string",
+                        "enum": ["content", "files_with_matches", "count"],
+                        "default": "content",
+                        "description": "Output format",
+                    },
+                    "glob_filter": {"type": "string", "description": "File pattern filter (e.g., '*.py')"},
+                    "case_insensitive": {"type": "boolean", "default": False},
+                    "context_lines": {"type": "integer", "default": 0, "description": "Lines of context around matches"},
+                },
+                "required": ["pattern"],
+            },
+            read_only=True,
+        )
+
+        # Notebook edit
+        from .builtins.notebook import notebook_edit
+        self.register(
+            name="notebook_edit",
+            description="Edit a Jupyter notebook (.ipynb) cell. Supports replace, insert, and delete operations.",
+            func=notebook_edit,
+            schema={
+                "type": "object",
+                "properties": {
+                    "notebook_path": {"type": "string", "description": "Path to .ipynb file"},
+                    "cell_number": {"type": "integer", "description": "0-indexed cell number"},
+                    "new_source": {"type": "string", "description": "New cell content"},
+                    "edit_mode": {
+                        "type": "string",
+                        "enum": ["replace", "insert", "delete"],
+                        "default": "replace",
+                    },
+                    "cell_type": {
+                        "type": "string",
+                        "enum": ["code", "markdown"],
+                        "default": "code",
+                    },
+                },
+                "required": ["notebook_path", "cell_number"],
             },
         )
 
@@ -231,8 +316,8 @@ class ToolRegistry:
 
     # Built-in tool implementations
 
-    def _read_file(self, path: str) -> str:
-        """Read a file."""
+    def _read_file(self, path: str, offset: int = 0, limit: int = 0) -> str:
+        """Read a file with optional offset and limit (line-based)."""
         path = os.path.expanduser(path)
         if not os.path.exists(path):
             return f"Error: File not found: {path}"
@@ -240,8 +325,16 @@ class ToolRegistry:
             return self._list_files(path)
         try:
             with open(path, "r") as f:
-                content = f.read()
-            return content[:50000]  # Limit size
+                if offset > 0 or limit > 0:
+                    lines = f.readlines()
+                    start = max(0, offset - 1) if offset > 0 else 0
+                    end = start + limit if limit > 0 else len(lines)
+                    selected = lines[start:end]
+                    numbered = [f"{i+start+1:6d}\t{line}" for i, line in enumerate(selected)]
+                    return "".join(numbered)[:50000]
+                else:
+                    content = f.read()
+                    return content[:50000]
         except Exception as e:
             return f"Error reading file: {e}"
 
@@ -256,7 +349,7 @@ class ToolRegistry:
         except Exception as e:
             return f"Error writing file: {e}"
 
-    def _edit_file(self, path: str, old_text: str, new_text: str) -> str:
+    def _edit_file(self, path: str, old_text: str, new_text: str, replace_all: bool = False) -> str:
         """Edit a file by replacing text."""
         path = os.path.expanduser(path)
         if not os.path.exists(path):
@@ -268,50 +361,69 @@ class ToolRegistry:
             if old_text not in content:
                 return "Error: Text not found in file"
 
-            new_content = content.replace(old_text, new_text, 1)
+            if replace_all:
+                count = content.count(old_text)
+                new_content = content.replace(old_text, new_text)
+            else:
+                count = 1
+                new_content = content.replace(old_text, new_text, 1)
 
             with open(path, "w") as f:
                 f.write(new_content)
 
-            return f"Successfully edited {path}"
+            return f"Successfully edited {path} ({count} replacement{'s' if count > 1 else ''})"
         except Exception as e:
             return f"Error editing file: {e}"
 
-    def _list_files(self, path: str = ".") -> str:
+    def _list_files(self, path: str = ".", recursive: bool = False) -> str:
         """List files in directory."""
         path = os.path.expanduser(path)
         if not os.path.exists(path):
             return f"Error: Path not found: {path}"
         try:
-            items = os.listdir(path)
-            result = []
-            for item in sorted(items)[:100]:
-                full_path = os.path.join(path, item)
-                if os.path.isdir(full_path):
-                    result.append(f"[DIR] {item}/")
-                else:
-                    size = os.path.getsize(full_path)
-                    result.append(f"      {item} ({size} bytes)")
-            return "\n".join(result)
+            if recursive:
+                results = []
+                for root, dirs, files in os.walk(path):
+                    dirs[:] = [d for d in dirs if not d.startswith(".")]
+                    for f in sorted(files)[:500]:
+                        rel = os.path.relpath(os.path.join(root, f), path)
+                        results.append(rel)
+                    if len(results) >= 500:
+                        break
+                return "\n".join(results[:500])
+            else:
+                items = os.listdir(path)
+                result = []
+                for item in sorted(items)[:100]:
+                    full_path = os.path.join(path, item)
+                    if os.path.isdir(full_path):
+                        result.append(f"[DIR] {item}/")
+                    else:
+                        size = os.path.getsize(full_path)
+                        result.append(f"      {item} ({size} bytes)")
+                return "\n".join(result)
         except Exception as e:
             return f"Error listing files: {e}"
 
-    def _run_command(self, command: str) -> str:
-        """Run a shell command."""
+    def _run_command(self, command: str, timeout: int = 60, background: bool = False) -> str:
+        """Run a shell command with configurable timeout."""
+        if background:
+            import threading
+            def run_bg():
+                subprocess.run(command, shell=True, capture_output=True, text=True)
+            threading.Thread(target=run_bg, daemon=True).start()
+            return f"Command started in background: {command}"
+
         try:
             result = subprocess.run(
-                command,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=60,
+                command, shell=True, capture_output=True, text=True, timeout=timeout,
             )
             output = result.stdout
             if result.stderr:
                 output += f"\nSTDERR:\n{result.stderr}"
             return output[:10000]
         except subprocess.TimeoutExpired:
-            return "Error: Command timed out"
+            return f"Error: Command timed out after {timeout}s"
         except Exception as e:
             return f"Error running command: {e}"
 

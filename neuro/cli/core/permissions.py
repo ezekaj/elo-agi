@@ -82,7 +82,7 @@ class PermissionManager:
     """
 
     # Read-only tools that are always safe
-    SAFE_TOOLS = {"read_file", "Read", "Glob", "Grep", "list_files"}
+    SAFE_TOOLS = {"read_file", "Read", "Glob", "Grep", "list_files", "glob_files", "grep_content"}
 
     def __init__(
         self,
