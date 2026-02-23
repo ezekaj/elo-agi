@@ -502,10 +502,10 @@ class UIRenderer:
         if output:
             # Truncate long output
             lines = output.split("\n")
-            if len(lines) > 5:
-                for line in lines[:5]:
+            if len(lines) > 20:
+                for line in lines[:20]:
                     self.console.print(f"    [dim]{line}[/dim]")
-                self.console.print(f"    [dim]... ({len(lines) - 5} more lines)[/dim]")
+                self.console.print(f"    [dim]... ({len(lines) - 20} more lines)[/dim]")
             else:
                 for line in lines:
                     self.console.print(f"    [dim]{line}[/dim]")

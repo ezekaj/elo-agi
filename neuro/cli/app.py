@@ -785,7 +785,7 @@ TOOLS:
             else:
                 return None
 
-            self.ui.print_tool_result(tool_name, True, str(result)[:200])
+            self.ui.print_tool_result(tool_name, True, str(result)[:2000])
             return (tool_name, result)
 
         except Exception as e:
