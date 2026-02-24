@@ -28,6 +28,7 @@ class ToolRegistry:
 
     def __init__(self):
         self.tools: Dict[str, Tool] = {}
+        self._cwd: str = os.getcwd()  # persistent working directory
         self._register_builtins()
 
     def _register_builtins(self):
@@ -93,13 +94,14 @@ class ToolRegistry:
         # Shell
         self.register(
             name="run_command",
-            description="Run a shell command. Supports timeout and background execution.",
+            description="Run a shell command. Working directory persists between calls. Use 'cd <path>' to change directory, or pass 'cwd' to run in a specific directory. Commands can be chained with '&&'.",
             func=self._run_command,
             schema={
                 "type": "object",
                 "properties": {
                     "command": {"type": "string", "description": "Shell command to run"},
-                    "timeout": {"type": "integer", "default": 60, "description": "Timeout in seconds"},
+                    "cwd": {"type": "string", "description": "Working directory (overrides persistent cwd)"},
+                    "timeout": {"type": "integer", "default": 120, "description": "Timeout in seconds"},
                     "background": {"type": "boolean", "default": False, "description": "Run in background"},
                 },
                 "required": ["command"],
@@ -405,23 +407,42 @@ class ToolRegistry:
         except Exception as e:
             return f"Error listing files: {e}"
 
-    def _run_command(self, command: str, timeout: int = 60, background: bool = False) -> str:
-        """Run a shell command with configurable timeout."""
+    def _run_command(self, command: str, cwd: str = "", timeout: int = 120, background: bool = False) -> str:
+        """Run a shell command with persistent working directory."""
+        # Determine working directory
+        work_dir = os.path.expanduser(cwd) if cwd else self._cwd
+
+        # Handle bare 'cd' commands — update persistent cwd
+        cmd_stripped = command.strip()
+        if cmd_stripped == "cd" or cmd_stripped.startswith("cd "):
+            parts = cmd_stripped.split(None, 1)
+            target = parts[1] if len(parts) > 1 else os.path.expanduser("~")
+            target = os.path.expanduser(target)
+            if not os.path.isabs(target):
+                target = os.path.join(work_dir, target)
+            target = os.path.realpath(target)
+            if os.path.isdir(target):
+                self._cwd = target
+                return target
+            else:
+                return f"Error: Directory not found: {target}"
+
         if background:
             import threading
             def run_bg():
-                subprocess.run(command, shell=True, capture_output=True, text=True)
+                subprocess.run(command, shell=True, capture_output=True, text=True, cwd=work_dir)
             threading.Thread(target=run_bg, daemon=True).start()
-            return f"Command started in background: {command}"
+            return f"Command started in background: {command}\nWorking dir: {work_dir}"
 
         try:
             result = subprocess.run(
-                command, shell=True, capture_output=True, text=True, timeout=timeout,
+                command, shell=True, capture_output=True, text=True,
+                timeout=timeout, cwd=work_dir,
             )
             output = result.stdout
             if result.stderr:
                 output += f"\nSTDERR:\n{result.stderr}"
-            return output[:10000]
+            return output[:10000] if output.strip() else "(command completed successfully)"
         except subprocess.TimeoutExpired:
             return f"Error: Command timed out after {timeout}s"
         except Exception as e:
@@ -429,11 +450,17 @@ class ToolRegistry:
 
     def _git_status(self) -> str:
         """Get git status."""
-        return self._run_command("git status --porcelain")
+        return self._run_command("git status")
 
     def _git_diff(self) -> str:
         """Get git diff."""
         return self._run_command("git diff")
+
+    def set_cwd(self, path: str):
+        """Set the persistent working directory."""
+        path = os.path.expanduser(path)
+        if os.path.isdir(path):
+            self._cwd = os.path.realpath(path)
 
     def _web_search(self, query: str) -> str:
         """Search the web using DuckDuckGo."""

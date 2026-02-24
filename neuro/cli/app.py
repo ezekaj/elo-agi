@@ -147,6 +147,7 @@ class NeuroApp:
         )
 
         self.tool_registry = ToolRegistry()
+        self.tool_registry.set_cwd(self.project_dir)
 
         self.tool_executor = ToolExecutor(
             registry=self.tool_registry,
