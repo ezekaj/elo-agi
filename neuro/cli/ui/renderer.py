@@ -200,6 +200,7 @@ class UIRenderer:
         knowledge_stats: dict = None,
         project_dir: str = None,
         session_id: str = None,
+        git_info: dict = None,
     ):
         """Print full welcome screen (Claude Code dot-separator style)."""
         self.console.print()
@@ -223,8 +224,17 @@ class UIRenderer:
         info.append(model, style="#666666")
         self.console.print(info)
 
-        # Stats line: modules · facts · CLAUDE.md
+        # Stats line: git branch · modules · facts · CLAUDE.md
         stats_parts = []
+
+        # Git info
+        if git_info:
+            branch = git_info.get("branch", "")
+            dirty = git_info.get("dirty", False)
+            if branch:
+                label = branch + (" *" if dirty else "")
+                stats_parts.append(("git", label))
+
         if knowledge_stats:
             modules = knowledge_stats.get("cognitive_modules", 0)
             facts = knowledge_stats.get("total_facts", 0)
@@ -252,6 +262,8 @@ class UIRenderer:
                     stats.append(" \u2714", style="#2C7A39")
                 elif kind == "hint":
                     stats.append(part, style="#666666")
+                elif kind == "git":
+                    stats.append(part, style="#9333EA")
                 else:
                     stats.append(part, style="#AFAFAF")
             self.console.print(stats)
@@ -266,6 +278,23 @@ class UIRenderer:
         tip = random.choice(WELCOME_TIPS)
         self.console.print(f"  [#AFAFAF]Tip: {tip}[/#AFAFAF]")
         self.console.print()
+
+    def print_thinking(self):
+        """Print thinking/requesting indicator before response."""
+        self.console.print("  [#AFAFAF]\u2191[/#AFAFAF]")
+
+    def print_response_meta(self, duration: float = 0, tokens: int = 0, cost: float = 0):
+        """Print response metadata (duration, tokens, cost)."""
+        parts = []
+        if duration > 0.5:
+            parts.append(f"{duration:.1f}s")
+        if tokens > 0:
+            parts.append(f"{tokens:,} tokens")
+        if cost > 0:
+            parts.append(f"${cost:.4f}")
+        if parts:
+            meta = " \u00b7 ".join(parts)
+            self.console.print(f"  [#AFAFAF]{meta}[/#AFAFAF]")
 
     def print_input_prompt(self, placeholder: str = ""):
         """Print the input prompt with placeholder hint."""

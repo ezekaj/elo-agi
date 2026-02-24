@@ -181,6 +181,22 @@ class PermissionManager:
         # 7. Default: prompt user
         return await self._prompt_user(tool_name, tool_input)
 
+    TOOL_DESCRIPTIONS = {
+        "run_command": "Execute a shell command",
+        "bash": "Execute a shell command",
+        "write_file": "Write content to a file",
+        "edit_file": "Edit a file",
+        "delete_file": "Delete a file",
+        "read_file": "Read a file",
+        "list_files": "List directory contents",
+        "search_files": "Search for files",
+        "grep_files": "Search file contents",
+        "web_search": "Search the web",
+        "web_fetch": "Fetch a URL",
+    }
+
+    HIGH_RISK_TOOLS = {"run_command", "bash", "write_file", "delete_file"}
+
     async def _prompt_user(
         self,
         tool_name: str,
@@ -194,10 +210,19 @@ class PermissionManager:
 
         console = Console()
 
+        # Risk-based border color
+        high_risk = tool_name in self.HIGH_RISK_TOOLS
+        border_style = "#AB2B3F" if high_risk else "#06B6D4"
+
         # Build content
         content = Text()
         content.append("Tool: ", style="#AFAFAF")
         content.append(f"{tool_name}\n", style="bold")
+
+        # Tool description
+        desc = self.TOOL_DESCRIPTIONS.get(tool_name)
+        if desc:
+            content.append(f"{desc}\n", style="#AFAFAF italic")
 
         for k, v in list(tool_input.items())[:3]:
             val_str = str(v)[:60]
@@ -210,14 +235,15 @@ class PermissionManager:
             content,
             title="[bold]Permission Required[/bold]",
             box=rich_box.ROUNDED,
-            border_style="#06B6D4",
+            border_style=border_style,
             padding=(0, 1),
         )
         console.print()
         console.print(panel)
+        accent = border_style
         console.print(
-            "  [#06B6D4]y[/#06B6D4] Allow  [#06B6D4]n[/#06B6D4] Deny  "
-            "[#06B6D4]a[/#06B6D4] Always allow  [#06B6D4]d[/#06B6D4] Always deny"
+            f"  [{accent}]y[/{accent}] Allow  [{accent}]n[/{accent}] Deny  "
+            f"[{accent}]a[/{accent}] Always allow  [{accent}]d[/{accent}] Always deny"
         )
 
         try:

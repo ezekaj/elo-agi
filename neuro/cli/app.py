@@ -30,6 +30,8 @@ from ..active_learning import get_active_learner
 from ..self_evolution import get_evolution
 import threading
 import random
+import time
+import subprocess
 import urllib.request
 import urllib.parse
 import html
@@ -471,6 +473,8 @@ BEHAVIOR:
         """Main interactive loop."""
         import getpass
 
+        self._session_start_time = time.time()
+
         # Check LLM backend connection
         available = await self._check_ollama()
         if not available:
@@ -510,6 +514,22 @@ BEHAVIOR:
         if working_dir.startswith(home):
             working_dir = "~" + working_dir[len(home) :]
 
+        # Gather git info for welcome screen
+        git_info = {}
+        try:
+            branch = subprocess.run(
+                ["git", "branch", "--show-current"],
+                cwd=self.project_dir, capture_output=True, text=True, timeout=2,
+            ).stdout.strip()
+            dirty = bool(subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=self.project_dir, capture_output=True, text=True, timeout=2,
+            ).stdout.strip())
+            if branch:
+                git_info = {"branch": branch, "dirty": dirty}
+        except Exception:
+            pass
+
         # Print beautiful welcome screen
         import neuro
 
@@ -521,6 +541,7 @@ BEHAVIOR:
             recent_sessions=recent_sessions,
             knowledge_stats=knowledge_stats,
             project_dir=self.project_dir,
+            git_info=git_info,
         )
 
         # Check for updates (non-blocking)
@@ -696,10 +717,12 @@ BEHAVIOR:
             )
         else:
             self.ui.print_assistant_label()
+        self.ui.print_thinking()
         self.ui.start_live()
 
         full_response = ""
         tool_calls = []
+        response_start = time.time()
 
         # Build messages with augmented last message (includes learned knowledge)
         messages = self._current_session.get_history()
@@ -738,6 +761,18 @@ BEHAVIOR:
                 )
 
         self.ui.stop_live()
+
+        # Show response metadata (duration, tokens, cost)
+        duration = time.time() - response_start
+        last_in = 0
+        last_out = 0
+        if self._usage.api_calls > 0:
+            last_in = self._usage.input_tokens
+            last_out = self._usage.output_tokens
+        resp_cost = 0.0
+        if self.api_type != "ollama" and (last_in or last_out):
+            resp_cost = (last_in * 0.25 + last_out * 1.25) / 1_000_000
+        self.ui.print_response_meta(duration, last_in + last_out, resp_cost)
 
         # Add response to session
         self._current_session.add_message("assistant", full_response)
@@ -885,7 +920,14 @@ BEHAVIOR:
                 except Exception:
                     pass
 
-            self.ui.print_tool_result(tool_name, True, str(result)[:2000])
+            output_str = str(result)
+            lines = output_str.split("\n")
+            if len(lines) > 20:
+                truncated = "\n".join(lines[:20])
+                self.ui.print_tool_result(tool_name, True, truncated)
+                self.ui.print_dim(f"    ... ({len(lines) - 20} more lines)")
+            else:
+                self.ui.print_tool_result(tool_name, True, output_str[:2000])
             return (tool_name, result)
         except Exception as e:
             self.ui.print_error(f"Tool {tool_name} failed: {e}")
@@ -1556,6 +1598,13 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             ("!command", "Execute shell command"),
         ], title="Syntax")
 
+        self.ui.print_help([
+            ("Ctrl+C", "Cancel/interrupt"),
+            ("Ctrl+D", "Exit session"),
+            ("Ctrl+L", "Clear screen"),
+            ("\u2191 / \u2193", "Browse command history"),
+        ], title="Shortcuts")
+
     async def _print_status(self):
         """Print system status."""
         self.ui.print()
@@ -1567,6 +1616,24 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             "Permission mode": self.permission_manager.mode.value,
         }
 
+        # Git branch
+        try:
+            branch = subprocess.run(
+                ["git", "branch", "--show-current"],
+                cwd=self.project_dir, capture_output=True, text=True, timeout=2,
+            ).stdout.strip()
+            if branch:
+                data["Git branch"] = branch
+        except Exception:
+            pass
+
+        # Session duration
+        if hasattr(self, "_session_start_time"):
+            elapsed = time.time() - self._session_start_time
+            mins = int(elapsed // 60)
+            secs = int(elapsed % 60)
+            data["Duration"] = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
+
         if self._current_session:
             data["Session"] = self._current_session.id[:8]
             data["Messages"] = str(len(self._current_session.messages))
@@ -1577,6 +1644,12 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
 
         tools = self.tool_registry.list_tools()
         data["Tools"] = f"{len(tools)} available"
+
+        # Active mode
+        if self.cognitive_pipeline and self.cognitive_pipeline.active:
+            data["Mode"] = "think (cognitive pipeline)"
+        elif hasattr(self, "_plan_mode") and self._plan_mode:
+            data["Mode"] = "plan"
 
         self.ui.print_key_value(data)
 
@@ -2562,15 +2635,18 @@ JSON:"""
                 continue
 
             if task.status == TaskStatus.COMPLETED:
-                icon = "[#2C7A39]\u2714[/#2C7A39]"
+                icon = "[#2C7A39]\u2612[/#2C7A39]"
+                label = f"[strike #AFAFAF]{task.subject}[/strike #AFAFAF]"
             elif task.status == TaskStatus.IN_PROGRESS:
-                icon = "[#9333EA]\u25cf[/#9333EA]"
+                icon = "[#9333EA]\u25a0[/#9333EA]"
+                label = f"[bold]{task.subject}[/bold]"
             else:
-                icon = "[#666666]\u25ef[/#666666]"
+                icon = "[#666666]\u2610[/#666666]"
+                label = task.subject
 
             blocked = " [#AB2B3F](blocked)[/#AB2B3F]" if task.is_blocked() else ""
             owner = f" [#AFAFAF]@{task.owner}[/#AFAFAF]" if task.owner else ""
-            self.ui.print(f"  {icon} [{task.id}] {task.subject}{blocked}{owner}")
+            self.ui.print(f"  {icon} [{task.id}] {label}{blocked}{owner}")
 
         self.ui.print()
 
