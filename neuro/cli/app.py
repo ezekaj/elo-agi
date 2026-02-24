@@ -704,6 +704,10 @@ class NeuroApp:
                         tool_calls.append(tool_result)
                     # Resume streaming for any follow-up content
                     self.ui.start_live()
+            elif event.type.value == "error":
+                self.ui.stop_live()
+                self.ui.print_error(event.content)
+                return
             elif event.type.value == "done":
                 # Record real token usage from API response
                 in_tok = event.metadata.get("input_tokens") or 0
