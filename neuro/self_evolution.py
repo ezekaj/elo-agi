@@ -164,7 +164,7 @@ class SelfEvolution:
         self.state["facts_this_cycle"] = 0
         self._save_state()
 
-    def run_mlx_training(self, model_name: str = "nanbeige4.1:3b") -> Dict:
+    def run_mlx_training(self, model_name: str = "tomng/nanbeige4.1:3b") -> Dict:
         """
         Run actual MLX fine-tuning on MacBook.
 

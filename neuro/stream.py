@@ -23,7 +23,7 @@ class StreamConfig:
     """Configuration for streaming."""
 
     base_url: str = "http://localhost:11434"
-    model: str = "nanbeige4.1:3b"
+    model: str = "tomng/nanbeige4.1:3b"
     timeout: int = 120
     temperature: float = 0.7
     max_tokens: Optional[int] = None
@@ -298,7 +298,7 @@ class TerminalStreamer:
 async def stream_chat(
     query: str,
     system_prompt: str = "You are a helpful AI assistant.",
-    model: str = "nanbeige4.1:3b",
+    model: str = "tomng/nanbeige4.1:3b",
     print_tokens: bool = True,
 ) -> str:
     """
@@ -344,7 +344,7 @@ async def stream_chat(
 def stream_chat_sync(
     query: str,
     system_prompt: str = "You are a helpful AI assistant.",
-    model: str = "nanbeige4.1:3b",
+    model: str = "tomng/nanbeige4.1:3b",
     print_tokens: bool = True,
 ) -> str:
     """Synchronous wrapper for stream_chat."""

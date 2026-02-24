@@ -94,7 +94,7 @@ class NeuroApp:
 
     def __init__(
         self,
-        model: str = "nanbeige4.1:3b",
+        model: str = "tomng/nanbeige4.1:3b",
         verbose: bool = False,
         permission_mode: str = "default",
         system_prompt: Optional[str] = None,

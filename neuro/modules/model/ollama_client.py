@@ -15,7 +15,7 @@ class OllamaConfig:
     """Configuration for Ollama client."""
 
     base_url: str = "http://localhost:11434"
-    default_model: str = "nanbeige4.1:3b"  # NanBeige 4.1 3B - ONLY model
+    default_model: str = "tomng/nanbeige4.1:3b"  # NanBeige 4.1 3B - ONLY model
     timeout: int = 120
     temperature: float = 0.7
     max_tokens: int = 2048

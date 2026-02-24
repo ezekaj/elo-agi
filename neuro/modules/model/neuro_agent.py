@@ -69,7 +69,7 @@ class NeuroAgent:
     └─────────────────────────────────────────────────────────────┘
     """
 
-    def __init__(self, model: str = "nanbeige4.1:3b", verbose: bool = False):
+    def __init__(self, model: str = "tomng/nanbeige4.1:3b", verbose: bool = False):
         self.model = model
         self.verbose = verbose
         self.base_url = "http://localhost:11434"

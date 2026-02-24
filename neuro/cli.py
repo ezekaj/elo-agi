@@ -426,7 +426,7 @@ class LearningNotifier:
 def cmd_chat(args):
     """Chat with Neuro AGI using streaming responses."""
     # Get flags with defaults
-    model = getattr(args, "model", "nanbeige4.1:3b") or "nanbeige4.1:3b"
+    model = getattr(args, "model", "tomng/nanbeige4.1:3b") or "tomng/nanbeige4.1:3b"
     verbose = getattr(args, "verbose", False)
     print_mode = getattr(args, "print_mode", False)
     initial_prompt = getattr(args, "prompt", None)
@@ -556,14 +556,14 @@ def cmd_chat(args):
 
     # Status display
     if ollama_available and models:
-        model = "nanbeige4.1:3b"
+        model = "tomng/nanbeige4.1:3b"
         print(f"  {Colors.GREEN}●{Colors.RESET} Ollama: {Colors.GREEN}connected{Colors.RESET}")
         print(f"  {Colors.DIM}  Model: {model}{Colors.RESET}")
     else:
         print(
             f"  {Colors.YELLOW}●{Colors.RESET} Ollama: {Colors.YELLOW}not available{Colors.RESET}"
         )
-        print(f"  {Colors.DIM}  Run: ollama serve && ollama pull nanbeige4.1:3b{Colors.RESET}")
+        print(f"  {Colors.DIM}  Run: ollama serve && ollama pull tomng/nanbeige4.1:3b{Colors.RESET}")
 
     if engine_available:
         stats = engine.get_stats()
@@ -1586,7 +1586,7 @@ To use a tool: <tool>name</tool><args>{"param": "value"}</args>
         else:
             print(f"\n  {Colors.BRIGHT_GREEN}Neuro:{Colors.RESET} ", end="")
             print("Ollama is not running. Please start it:")
-            print(f"         {Colors.DIM}ollama serve && ollama pull nanbeige4.1:3b{Colors.RESET}")
+            print(f"         {Colors.DIM}ollama serve && ollama pull tomng/nanbeige4.1:3b{Colors.RESET}")
             print(
                 f"\n  {Colors.DIM}─────────────────────────────────────────────────{Colors.RESET}"
             )
@@ -1640,7 +1640,7 @@ def cmd_demo(args):
     try:
         from neuro.engine import NeuroEngine, EngineConfig
 
-        config = EngineConfig(model="nanbeige4.1:3b", show_thinking=False)
+        config = EngineConfig(model="tomng/nanbeige4.1:3b", show_thinking=False)
         engine = NeuroEngine(config)
         spinner.stop()
         print(f"  {Colors.GREEN}✓{Colors.RESET} Streaming Engine loaded")
@@ -1769,7 +1769,7 @@ def cmd_check(args):
                 )
             else:
                 print(
-                    f"  {Colors.YELLOW}!{Colors.RESET} No models. Run: {Colors.DIM}ollama pull nanbeige4.1:3b{Colors.RESET}"
+                    f"  {Colors.YELLOW}!{Colors.RESET} No models. Run: {Colors.DIM}ollama pull tomng/nanbeige4.1:3b{Colors.RESET}"
                 )
             checks.append(True)
         else:
@@ -1835,7 +1835,7 @@ Examples:
         "-r", "--resume", type=str, metavar="SESSION", help="Resume specific session by ID"
     )
     parser.add_argument(
-        "--model", type=str, default="nanbeige4.1:3b", help="Model to use (default: nanbeige4.1:3b)"
+        "--model", type=str, default="tomng/nanbeige4.1:3b", help="Model to use (default: tomng/nanbeige4.1:3b)"
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 

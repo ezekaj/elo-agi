@@ -75,7 +75,7 @@ Slash Commands:
         "--model",
         type=str,
         default=None,
-        help="Model to use (default: nanbeige4.1:3b for Ollama, glm-4.5-flash for cloud)",
+        help="Model to use (default: tomng/nanbeige4.1:3b for Ollama, glm-4.5-flash for cloud)",
     )
     parser.add_argument("--fallback-model", type=str, help="Fallback model if primary unavailable")
     parser.add_argument("--api-key", type=str, help="API key (or set ELO_API_KEY env var)")
@@ -172,7 +172,7 @@ def main():
         if api_base or os.environ.get("ELO_API_BASE"):
             model = "glm-4.5-flash"
         else:
-            model = "nanbeige4.1:3b"
+            model = "tomng/nanbeige4.1:3b"
 
     app = NeuroApp(
         model=model,

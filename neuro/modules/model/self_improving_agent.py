@@ -49,7 +49,7 @@ class SelfImprovingAgent:
     """
 
     def __init__(
-        self, model: str = "nanbeige4.1:3b", max_retries: int = 3, max_tool_calls: int = 10
+        self, model: str = "tomng/nanbeige4.1:3b", max_retries: int = 3, max_tool_calls: int = 10
     ):
         self.model = model
         self.max_retries = max_retries
