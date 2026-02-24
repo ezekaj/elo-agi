@@ -328,7 +328,6 @@ Begin your response with <thinking> to show your reasoning process, then provide
 
                     message = data.get("message", {})
                     content = message.get("content", "")
-                    thinking = message.get("thinking", "")
                     tool_calls = message.get("tool_calls", [])
                     done = data.get("done", False)
 
@@ -355,11 +354,8 @@ Begin your response with <thinking> to show your reasoning process, then provide
                             self.on_token(content)
                         yield StreamEvent(type=StreamEventType.TOKEN, content=content)
 
-                    # Stream thinking tokens (models like Nanbeige4.1 use this)
-                    if thinking and not content:
-                        if self.on_token:
-                            self.on_token(thinking)
-                        yield StreamEvent(type=StreamEventType.TOKEN, content=thinking)
+                    # Thinking tokens (models like Nanbeige4.1) — don't display to user
+                    # The model's chain-of-thought is internal; only tool calls and content matter
 
                     if done:
                         yield StreamEvent(
