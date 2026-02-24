@@ -339,50 +339,12 @@ class NeuroApp:
         return "\n\n".join(s for s in sections if s)
 
     def _prompt_base(self) -> str:
-        return """You are ELO, a local AI coding assistant running on the user's machine.
-
-CRITICAL RULES:
-- ALWAYS use tools to take action. NEVER describe commands in text — call run_command instead.
-- When the user says "run it", "do it", "execute", etc — immediately call the appropriate tool.
-- Be concise — short replies for simple questions, detailed only when needed.
-- Do NOT explain what you're about to do — just do it with tool calls.
-- When a tool returns results, present them briefly. Do NOT re-explain or ask follow-up questions.
-- Use absolute paths. Chain commands with && when they need to run together.
-- When asked to run a project: check package.json/requirements.txt, install deps, then start the server.
-- NEVER output shell commands as code blocks — call run_command to execute them directly."""
+        return """You are ELO, a coding assistant. ALWAYS use tools to take action. NEVER describe commands — call run_command instead. Be concise."""
 
     def _prompt_environment(self) -> str:
-        import platform
-        import subprocess as _sp
-
-        home = os.path.expanduser("~")
         cwd = os.getcwd()
-        shell = os.environ.get("SHELL", "unknown")
-
-        git_info = "Not a git repository"
-        try:
-            result = _sp.run(
-                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                capture_output=True, text=True, timeout=5, cwd=self.project_dir,
-            )
-            if result.returncode == 0:
-                branch = result.stdout.strip()
-                status = _sp.run(
-                    ["git", "status", "--porcelain"],
-                    capture_output=True, text=True, timeout=5, cwd=self.project_dir,
-                )
-                changes = len(status.stdout.strip().splitlines()) if status.stdout.strip() else 0
-                git_info = f"Branch: {branch}, {changes} changed file{'s' if changes != 1 else ''}"
-        except Exception:
-            pass
-
-        return f"""ENVIRONMENT:
-- Working directory: {cwd}
-- Home: {home}
-- Platform: {platform.system()} ({platform.machine()})
-- OS: {platform.platform()}
-- Shell: {shell}
-- Git: {git_info}"""
+        home = os.path.expanduser("~")
+        return f"Working directory: {cwd}\nHome: {home}"
 
     def _prompt_project_instructions(self) -> str:
         instructions = []
@@ -391,36 +353,24 @@ CRITICAL RULES:
             if os.path.exists(path):
                 try:
                     with open(path) as f:
-                        content = f.read()[:4000]
-                    instructions.append(f"# Project instructions from {fname}\n{content}")
+                        content = f.read()[:1000]
+                    instructions.append(f"# {fname}\n{content}")
                 except Exception:
                     pass
         return "\n\n".join(instructions) if instructions else ""
 
     def _prompt_tools(self) -> str:
-        lines = ["AVAILABLE TOOLS (you MUST use these — never just describe actions):"]
-        for name, tool in self.tool_registry.tools.items():
-            desc = tool.description.split(".")[0] if tool.description else name
-            lines.append(f"- {name}: {desc}")
-
+        # Don't list tools in system prompt — Ollama sends them via the tools parameter
         mcp_tools = self.mcp_manager.get_tools()
         if mcp_tools:
-            lines.append("\nMCP TOOLS (from external servers):")
+            lines = ["Additional MCP tools:"]
             for tool in mcp_tools:
-                lines.append(f"- {tool.name}: {tool.description[:80]}")
-
-        lines.append("\nEXAMPLES:")
-        lines.append('- User says "run npm install" → call run_command(command="npm install")')
-        lines.append('- User says "read package.json" → call read_file(path="/full/path/package.json")')
-        lines.append('- User says "run it" → call run_command with the appropriate start command')
-
-        return "\n".join(lines)
+                lines.append(f"- {tool.name}: {tool.description[:60]}")
+            return "\n".join(lines)
+        return ""
 
     def _prompt_task_guidance(self) -> str:
-        return """TASK TRACKING:
-- For complex multi-step work (3+ steps), create tasks to track progress
-- Mark tasks as in_progress before starting, completed when done
-- Use task dependencies (add_blocked_by) when tasks depend on each other"""
+        return ""
 
     def _default_system_prompt(self) -> str:
         """Legacy wrapper — calls _build_system_prompt."""
