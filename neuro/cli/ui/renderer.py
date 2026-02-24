@@ -12,6 +12,8 @@ Color palette extracted from Claude Code source (claude_readable_v2.js lines 113
 mapped to ELO's purple/cyan brand identity.
 """
 
+import os
+import random
 from typing import Optional, List, Dict, Any
 from contextlib import contextmanager
 from enum import Enum
@@ -66,6 +68,20 @@ TOOL_TIPS = [
     "Use /status to see current session info",
     "Try /think for deeper reasoning on complex problems",
     "Use Tab for input completion",
+]
+
+# Welcome screen tips (shown randomly on startup)
+WELCOME_TIPS = [
+    "Start with small features or bug fixes, tell ELO to propose a plan",
+    "Use /plan to prepare for complex requests before making changes",
+    "Use /think for deeper reasoning on complex problems",
+    "Use /compact to reduce context when conversations get long",
+    "Use @./file to include file content in your message",
+    "Use !command to execute shell commands inline",
+    "Use /cost to see token usage and costs",
+    "Use /agent to spawn specialized subagents for complex tasks",
+    "Use /team to coordinate multiple agents working in parallel",
+    "Use /knowledge to inject learned facts into conversations",
 ]
 
 # Icon constants (matching Claude Code's icon set from source)
@@ -182,37 +198,73 @@ class UIRenderer:
         working_dir: str,
         recent_sessions: list = None,
         knowledge_stats: dict = None,
+        project_dir: str = None,
+        session_id: str = None,
     ):
-        """Print a clean, minimal welcome screen (Claude Code style)."""
+        """Print full welcome screen (Claude Code dot-separator style)."""
         self.console.print()
 
-        # Line 1: Brand + version
+        # Title: ELO + version
         header = Text()
-        header.append(" ELO", style="bold #9333EA")
+        header.append("  ELO", style="bold #9333EA")
         header.append(f" v{version}", style="#AFAFAF")
         self.console.print(header)
 
-        # Line 2: Working dir + model
+        # Ellipsis separator (58 chars, matching Claude Code's vkR=58)
+        ellipsis = "\u2026" * 58
+        self.console.print(f"  [#666666]{ellipsis}[/#666666]")
+        self.console.print()
+
+        # Project info: working dir · model
         info = Text()
-        info.append(f" {working_dir}", style="#AFAFAF")
-        info.append(f"  {model}", style="#666666")
+        info.append("  ")
+        info.append(working_dir, style="#AFAFAF")
+        info.append(" \u00b7 ", style="#666666")
+        info.append(model, style="#666666")
         self.console.print(info)
 
-        # Thin divider
-        self.console.print()
-        self.console.print(Rule(style="#666666"))
-
-        # Optional: knowledge stats inline
+        # Stats line: modules · facts · CLAUDE.md
+        stats_parts = []
         if knowledge_stats:
             modules = knowledge_stats.get("cognitive_modules", 0)
             facts = knowledge_stats.get("total_facts", 0)
-            if modules > 0 or facts > 0:
-                stats = Text()
-                stats.append(f" {modules} modules", style="#AFAFAF")
-                if facts > 0:
-                    stats.append(f" \u00b7 {facts} facts", style="#AFAFAF")
-                self.console.print(stats)
+            if modules > 0:
+                stats_parts.append(("text", f"{modules} modules"))
+            if facts > 0:
+                stats_parts.append(("text", f"{facts:,} facts"))
 
+        # Check CLAUDE.md
+        if project_dir:
+            claude_md = os.path.exists(os.path.join(project_dir, "CLAUDE.md"))
+            if claude_md:
+                stats_parts.append(("success", "CLAUDE.md"))
+            else:
+                stats_parts.append(("hint", "run /init to create CLAUDE.md"))
+
+        if stats_parts:
+            stats = Text()
+            stats.append("  ")
+            for i, (kind, part) in enumerate(stats_parts):
+                if i > 0:
+                    stats.append(" \u00b7 ", style="#666666")
+                if kind == "success":
+                    stats.append(part, style="#AFAFAF")
+                    stats.append(" \u2714", style="#2C7A39")
+                elif kind == "hint":
+                    stats.append(part, style="#666666")
+                else:
+                    stats.append(part, style="#AFAFAF")
+            self.console.print(stats)
+
+        # Session ID
+        if session_id:
+            self.console.print(f"  [#AFAFAF]Session: {session_id[:8]}[/#AFAFAF]")
+
+        self.console.print()
+
+        # Random tip
+        tip = random.choice(WELCOME_TIPS)
+        self.console.print(f"  [#AFAFAF]Tip: {tip}[/#AFAFAF]")
         self.console.print()
 
     def print_input_prompt(self, placeholder: str = ""):

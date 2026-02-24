@@ -520,6 +520,7 @@ BEHAVIOR:
             working_dir=working_dir,
             recent_sessions=recent_sessions,
             knowledge_stats=knowledge_stats,
+            project_dir=self.project_dir,
         )
 
         # Check for updates (non-blocking)
@@ -610,12 +611,10 @@ BEHAVIOR:
         """Get input from user."""
         loop = asyncio.get_event_loop()
 
-        # Show placeholder hint on first prompt
+        # Show input guide on first prompt
         if self._first_prompt:
             self._first_prompt = False
-            # Print placeholder hint
-            self.ui.print_dim('Try "explain this code" or "help me fix a bug"')
-            self.ui.print_dim("? for shortcuts")
+            self.ui.print_dim("  Enter to send \u00b7 /help for commands \u00b7 /exit to quit")
             self.ui.print()
 
         return await loop.run_in_executor(None, self.ui.print_user_prompt)
