@@ -53,19 +53,30 @@ class StatusBar:
         """Get current state."""
         return self._state
 
+    # Claude Code mode symbols
+    MODE_SYMBOLS = {
+        "plan": "\u23F8",                # ⏸
+        "acceptEdits": "\u23F5\u23F5",   # ⏵⏵
+        "bypassPermissions": "\u23F5\u23F5",
+        "dontAsk": "\u23F5\u23F5",
+    }
+
+    MODE_COLORS = {
+        "plan": "#006666",
+        "acceptEdits": "#2C7A39",
+        "bypassPermissions": "#AB2B3F",
+        "dontAsk": "#966C1E",
+    }
+
     def render_inline(self) -> str:
         """Render status as inline text."""
         parts = []
 
         if self._state.mode != "default":
-            mode_colors = {
-                "plan": "#006666",
-                "acceptEdits": "#2C7A39",
-                "bypassPermissions": "#AB2B3F",
-                "dontAsk": "#966C1E",
-            }
-            color = mode_colors.get(self._state.mode, "#AFAFAF")
-            parts.append(f"[{color}]{self._state.mode}[/{color}]")
+            color = self.MODE_COLORS.get(self._state.mode, "#AFAFAF")
+            symbol = self.MODE_SYMBOLS.get(self._state.mode, "")
+            label = f"{symbol} {self._state.mode}" if symbol else self._state.mode
+            parts.append(f"[{color}]{label}[/{color}]")
 
         if self._state.model:
             parts.append(f"[#AFAFAF]{self._state.model}[/#AFAFAF]")

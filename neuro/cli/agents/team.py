@@ -151,7 +151,7 @@ class TeamManager:
             self.ui.print()
             self.ui.print(
                 f"[bold]Running team '{team.name}'[/bold] "
-                f"[dim]({len(team.teammates)} agents)[/dim]"
+                f"[#AFAFAF]({len(team.teammates)} agents)[/#AFAFAF]"
             )
             self.ui.print_divider()
 
@@ -170,18 +170,18 @@ class TeamManager:
             self.ui.print()
             for t in team.teammates.values():
                 status_icon = (
-                    "[green]done[/green]"
+                    "[#2C7A39]done[/#2C7A39]"
                     if t.status == TeammateStatus.DONE
-                    else "[red]failed[/red]"
+                    else "[#AB2B3F]failed[/#AB2B3F]"
                 )
                 self.ui.print(
                     f"  [{t.color}]●[/{t.color}] "
                     f"[bold]{t.name}[/bold] ({t.role}) — {status_icon} "
-                    f"[dim]({t.turns} turns)[/dim]"
+                    f"[#AFAFAF]({t.turns} turns)[/#AFAFAF]"
                 )
                 if t.result:
                     preview = t.result[:200].replace("\n", " ")
-                    self.ui.print(f"    [dim]{preview}...[/dim]")
+                    self.ui.print(f"    [#AFAFAF]{preview}...[/#AFAFAF]")
             self.ui.print()
 
         return results
@@ -193,7 +193,7 @@ class TeamManager:
         if self.ui:
             self.ui.print(
                 f"  [{teammate.color}]▶[/{teammate.color}] "
-                f"[bold]{teammate.name}[/bold] [dim]({teammate.role})[/dim] starting..."
+                f"[bold]{teammate.name}[/bold] [#AFAFAF]({teammate.role})[/#AFAFAF] starting..."
             )
 
         system_prompt = (
@@ -238,7 +238,7 @@ class TeamManager:
                     preview = response[:60].replace("\n", " ")
                     self.ui.print(
                         f"    [{teammate.color}]│[/{teammate.color}] "
-                        f"[dim]Turn {turn + 1}: {preview}...[/dim]"
+                        f"[#AFAFAF]Turn {turn + 1}: {preview}...[/#AFAFAF]"
                     )
 
                 # Check for tool calls
@@ -283,14 +283,14 @@ class TeamManager:
 
         if self.ui:
             icon = (
-                "[green]✓[/green]"
+                "[#2C7A39]✓[/#2C7A39]"
                 if teammate.status == TeammateStatus.DONE
-                else "[red]✗[/red]"
+                else "[#AB2B3F]✗[/#AB2B3F]"
             )
             self.ui.print(
                 f"  [{teammate.color}]◀[/{teammate.color}] "
                 f"[bold]{teammate.name}[/bold] {icon} "
-                f"[dim]({teammate.turns} turns)[/dim]"
+                f"[#AFAFAF]({teammate.turns} turns)[/#AFAFAF]"
             )
 
     def _extract_tool_calls(self, response: str) -> List[tuple]:

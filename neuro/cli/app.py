@@ -640,7 +640,7 @@ BEHAVIOR:
 
             self.ui.print()
             self.ui.print(
-                "[bold #FF6A00]ULTRATHINK MODE[/bold #FF6A00] [#AFAFAF]Deep reasoning enabled[/#AFAFAF]"
+                "[bold #FF6A00]\u23F5\u23F5 ULTRATHINK MODE[/bold #FF6A00] [#AFAFAF]Deep reasoning enabled[/#AFAFAF]"
             )
 
         # Expand file references (@./file)
@@ -720,7 +720,10 @@ BEHAVIOR:
                 if event.metadata.get("native"):
                     tool_name = event.metadata.get("name", "")
                     tool_args = event.metadata.get("arguments", {})
-                    self.ui.print_dim(f"Calling tool: {tool_name}")
+                    args_preview = ", ".join(
+                        f"{k}={str(v)[:30]}" for k, v in list(tool_args.items())[:3]
+                    )
+                    self.ui.print_dim(f"{tool_name}({args_preview})")
                     tool_result = await self._execute_native_tool(tool_name, tool_args)
                     if tool_result:
                         tool_calls.append(tool_result)
@@ -1347,7 +1350,7 @@ Starting now..."""
             return
 
         self.ui.print()
-        self.ui.print(f"[bold purple]AUTONOMOUS RESEARCH: {topic}[/bold purple]")
+        self.ui.print(f"[bold #9333EA]AUTONOMOUS RESEARCH: {topic}[/bold #9333EA]")
         self.ui.print_dim("Searching, learning, and storing knowledge...")
         self.ui.print()
 
@@ -1468,7 +1471,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print("[bold]Recent Changes[/bold]")
         self.ui.print_divider()
         for edit in edits:
-            self.ui.print(f"  [#9333EA]●[/#9333EA] {edit['path']} [dim]({edit['tool']})[/dim]")
+            self.ui.print(f"  [#9333EA]●[/#9333EA] {edit['path']} [#AFAFAF]({edit['tool']})[/#AFAFAF]")
 
     def _handle_config_command(self, args: str):
         """Show or edit configuration."""
@@ -1486,7 +1489,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             for label, path in config_paths:
                 exists = os.path.exists(path)
                 icon = "[#2C7A39]\u2714[/#2C7A39]" if exists else "[#AFAFAF]\u25ef[/#AFAFAF]"
-                self.ui.print(f"  {icon} {label}: [dim]{path}[/dim]")
+                self.ui.print(f"  {icon} {label}: [#AFAFAF]{path}[/#AFAFAF]")
 
             self.ui.print()
             self.ui.print_dim("Current settings:")
@@ -1500,35 +1503,46 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             self.ui.print_dim("Config editing not yet supported. Edit files directly.")
 
     def _print_help(self):
-        """Print help message."""
-        commands = [
+        """Print help message with grouped sections."""
+        self.ui.print_help([
             ("/help", "Show this help"),
-            ("/think", "Toggle cognitive pipeline (38 modules)"),
-            ("/knowledge", "Toggle knowledge injection"),
-            ("/evolve", "Start self-evolution loop"),
-            ("/bench", "Run benchmarks"),
-            ("/ultrathink", "Deep reasoning mode (max tokens)"),
-            ("/learn", "View learning & knowledge stats"),
-            ("/evolution", "Self-evolution stats"),
-            ("/model [name]", "View/switch model"),
-            ("/tools", "List available tools"),
-            ("/skills", "List available skills"),
-            ("/agents", "List available agents"),
-            ("/tasks", "View task list"),
-            ("/plan <task>", "Plan mode (read-only research, then approve)"),
-            ("/team <cmd>", "Manage agent teams (create, add, run, list)"),
-            ("/init", "Initialize .neuro/ config directory"),
-            ("/undo", "Undo last file edit"),
-            ("/diff", "Show recent file changes"),
-            ("/config", "Show configuration"),
             ("/status", "System status"),
+            ("/cost", "Token usage & cost"),
             ("/compact", "Compress context"),
-            ("/cost", "Token usage"),
+            ("/model [name]", "View/switch model"),
+            ("/config", "Show configuration"),
             ("/clear", "Clear conversation"),
             ("/exit", "Exit"),
-        ]
+        ], title="Commands")
 
-        self.ui.print_help(commands, title="Commands")
+        self.ui.print_help([
+            ("/think", "Toggle cognitive pipeline (38 modules)"),
+            ("/ultrathink <q>", "Deep reasoning mode"),
+            ("/knowledge", "Toggle knowledge injection"),
+            ("/plan <task>", "Plan mode (research, then approve)"),
+        ], title="Modes")
+
+        self.ui.print_help([
+            ("/tools", "List available tools"),
+            ("/tasks", "View task list"),
+            ("/undo", "Undo last file edit"),
+            ("/diff", "Show recent file changes"),
+            ("/init", "Initialize .neuro/ config"),
+        ], title="Tools & Files")
+
+        self.ui.print_help([
+            ("/agent <type> <task>", "Spawn a subagent"),
+            ("/team create <name>", "Create a team"),
+            ("/team add <n> <r> <t>", "Add a teammate"),
+            ("/team run", "Run all teammates"),
+        ], title="Agents & Teams")
+
+        self.ui.print_help([
+            ("/learn", "Learning & knowledge stats"),
+            ("/evolution", "Self-evolution stats"),
+            ("/evolve", "Start self-evolution loop"),
+            ("/bench", "Run benchmarks"),
+        ], title="Learning")
 
         # Skills
         skills = self.skills_loader.list_skills()
@@ -1538,20 +1552,10 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             if len(skills) > 6:
                 self.ui.print_dim("...use /skills to see all")
 
-        # Agents & Syntax
-        self.ui.print("[bold]Agents:[/bold]")
-        self.ui.print("  [#9333EA]/agent <type> <task>[/#9333EA] Spawn a subagent")
-        self.ui.print("  [dim]Types: Explore, Plan, General, Bash[/dim]")
-        self.ui.print()
-        self.ui.print("[bold]Teams:[/bold]")
-        self.ui.print("  [#9333EA]/team create <name> <task>[/#9333EA] Create a team")
-        self.ui.print("  [#9333EA]/team add <name> <role> <task>[/#9333EA] Add a teammate")
-        self.ui.print("  [#9333EA]/team run[/#9333EA]                     Run all teammates")
-        self.ui.print()
-        self.ui.print("[bold]Syntax:[/bold]")
-        self.ui.print("  [#9333EA]@./file[/#9333EA]              Include file content")
-        self.ui.print("  [#9333EA]!command[/#9333EA]            Execute shell command")
-        self.ui.print()
+        self.ui.print_help([
+            ("@./file", "Include file content"),
+            ("!command", "Execute shell command"),
+        ], title="Syntax")
 
     async def _print_status(self):
         """Print system status."""
@@ -1576,6 +1580,14 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         data["Tools"] = f"{len(tools)} available"
 
         self.ui.print_key_value(data)
+
+        # Context usage bar
+        total = self._usage.input_tokens if self._usage.api_calls > 0 else self._current_session.token_count if self._current_session else 0
+        if total > 0:
+            max_ctx = 32000
+            self.ui.print()
+            self.ui.print_progress_bar(total, max_ctx, label="Context")
+
         self.ui.print()
 
     async def _handle_model_command(self, args: str):
@@ -1596,7 +1608,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                         if r.status == 200:
                             data = await r.json()
                             models = [m["name"] for m in data.get("models", [])]
-                            self.ui.print(f"  Available: [dim]{', '.join(models[:5])}[/dim]")
+                            self.ui.print(f"  Available: [#AFAFAF]{', '.join(models[:5])}[/#AFAFAF]")
             except Exception:
                 pass
 
@@ -1641,11 +1653,15 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         elif self._current_session:
             self.ui.print(f"  Messages: {len(self._current_session.messages)}")
             self.ui.print(f"  Est. tokens: ~{self._current_session.token_count:,}")
-            self.ui.print("  [dim](No real usage data from API yet)[/dim]")
+            self.ui.print("  [#AFAFAF](No real usage data from API yet)[/#AFAFAF]")
 
         self.ui.print(f"  Model: {self.model}")
         if self.api_type == "ollama":
-            self.ui.print("  [dim](Local model - no API cost)[/dim]")
+            self.ui.print("  [#AFAFAF]Local model \u00b7 no API cost[/#AFAFAF]")
+        else:
+            # Estimate cost for cloud APIs
+            cost = (u.input_tokens * 0.25 + u.output_tokens * 1.25) / 1_000_000
+            self.ui.print(f"  Cost: [bold]${cost:.4f}[/bold]")
         self.ui.print()
 
     def _print_context(self):
@@ -1660,7 +1676,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
         self.ui.print()
         self.ui.print_progress_bar(total, max_context, label="Context")
         label = f"{total:,}" if self._usage.api_calls > 0 else f"~{total:,}"
-        self.ui.print(f"  [dim]{label} / {max_context:,} tokens[/dim]")
+        self.ui.print(f"  [#AFAFAF]{label} / {max_context:,} tokens[/#AFAFAF]")
         self.ui.print()
 
     def _print_permissions(self):
@@ -1688,7 +1704,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             self.ui.print()
             self.ui.print_dim("Add hooks to ~/.neuro/settings.json:")
             self.ui.print(
-                '[dim]{"hooks": {"PreToolUse": [{"type": "command", "command": "./script.sh"}]}}[/dim]'
+                '[#AFAFAF]{"hooks": {"PreToolUse": [{"type": "command", "command": "./script.sh"}]}}[/#AFAFAF]'
             )
             self.ui.print()
             return
@@ -1698,11 +1714,11 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             self.ui.print(f"\n  [#9333EA]{event}[/#9333EA]")
             for handler in handlers:
                 if handler.get("command"):
-                    self.ui.print(f"    [dim]command:[/dim] {handler['command']}")
+                    self.ui.print(f"    [#AFAFAF]command:[/#AFAFAF] {handler['command']}")
                 if handler.get("url"):
-                    self.ui.print(f"    [dim]url:[/dim] {handler['url']}")
+                    self.ui.print(f"    [#AFAFAF]url:[/#AFAFAF] {handler['url']}")
                 if handler.get("matcher"):
-                    self.ui.print(f"    [dim]matcher:[/dim] {handler['matcher']}")
+                    self.ui.print(f"    [#AFAFAF]matcher:[/#AFAFAF] {handler['matcher']}")
         self.ui.print()
 
     async def _print_learning_stats(self):
@@ -1743,7 +1759,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             self.ui.print("[#9333EA]Learning Recommendations:[/#9333EA]")
             for topic, priority, reason in recs:
                 self.ui.print(
-                    f"  [#966C1E]\u25cf[/#966C1E] {topic} [dim](priority: {priority:.2f}, {reason})[/dim]"
+                    f"  [#966C1E]\u25cf[/#966C1E] {topic} [#AFAFAF](priority: {priority:.2f}, {reason})[/#AFAFAF]"
                 )
             self.ui.print()
 
@@ -1755,7 +1771,7 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
                 content = (
                     fact["content"][:60] + "..." if len(fact["content"]) > 60 else fact["content"]
                 )
-                self.ui.print(f"  [dim]●[/dim] [{fact['topic']}] {content}")
+                self.ui.print(f"  [#AFAFAF]●[/#AFAFAF] [{fact['topic']}] {content}")
             self.ui.print()
 
         # Cognitive Pipeline stats
@@ -1864,13 +1880,13 @@ Now I will synthesize this into useful knowledge and explain what I learned."""
             else:
                 time_str = f"{age.seconds // 60}m ago"
 
-            self.ui.print(f"  [#9333EA]{i}.[/#9333EA] {sess['id'][:8]} [dim]({time_str})[/dim]")
+            self.ui.print(f"  [#9333EA]{i}.[/#9333EA] {sess['id'][:8]} [#AFAFAF]({time_str})[/#AFAFAF]")
 
-        self.ui.print("  [#9333EA]n.[/#9333EA] [dim]New session[/dim]")
+        self.ui.print("  [#9333EA]n.[/#9333EA] [#AFAFAF]New session[/#AFAFAF]")
         self.ui.print()
 
         try:
-            choice = self.ui.console.input("[dim]Select session:[/dim] ").strip().lower()
+            choice = self.ui.console.input("[#AFAFAF]Select session:[/#AFAFAF] ").strip().lower()
 
             if choice == "n" or choice == "":
                 return None
@@ -2490,7 +2506,7 @@ JSON:"""
         self.ui.print_divider()
 
         for skill in self.skills_loader.list_skills():
-            aliases = f" [dim]({', '.join(skill.aliases)})[/dim]" if skill.aliases else ""
+            aliases = f" [#AFAFAF]({', '.join(skill.aliases)})[/#AFAFAF]" if skill.aliases else ""
             self.ui.print(f"  [#9333EA]/{skill.name:12}[/#9333EA] {skill.description}{aliases}")
         self.ui.print()
         self.ui.print_dim("Use /<skill> [args] to run a skill")
@@ -2503,7 +2519,7 @@ JSON:"""
         self.ui.print_divider()
 
         for config in self.subagent_manager.get_available():
-            tools_str = f" [dim][{len(config.tools)} tools][/dim]" if config.tools else ""
+            tools_str = f" [#AFAFAF][{len(config.tools)} tools][/#AFAFAF]" if config.tools else ""
             self.ui.print(f"  [#9333EA]{config.name:12}[/#9333EA] {config.description}{tools_str}")
         self.ui.print()
         self.ui.print_dim("Use /agent <type> <task> to spawn an agent")
@@ -2536,8 +2552,8 @@ JSON:"""
             return
 
         self.ui.print_dim(
-            f"  {summary['pending']} pending | "
-            f"{summary['in_progress']} in progress | "
+            f"  {summary['pending']} pending \u00b7 "
+            f"{summary['in_progress']} in progress \u00b7 "
             f"{summary['completed']} completed"
         )
         self.ui.print()
@@ -2547,14 +2563,14 @@ JSON:"""
                 continue
 
             if task.status == TaskStatus.COMPLETED:
-                icon = "[green]v[/green]"
+                icon = "[#2C7A39]\u2714[/#2C7A39]"
             elif task.status == TaskStatus.IN_PROGRESS:
-                icon = "[#9333EA]o[/#9333EA]"
+                icon = "[#9333EA]\u25cf[/#9333EA]"
             else:
-                icon = "[dim]o[/dim]"
+                icon = "[#666666]\u25ef[/#666666]"
 
-            blocked = " [red](blocked)[/red]" if task.is_blocked() else ""
-            owner = f" [dim]@{task.owner}[/dim]" if task.owner else ""
+            blocked = " [#AB2B3F](blocked)[/#AB2B3F]" if task.is_blocked() else ""
+            owner = f" [#AFAFAF]@{task.owner}[/#AFAFAF]" if task.owner else ""
             self.ui.print(f"  {icon} [{task.id}] {task.subject}{blocked}{owner}")
 
         self.ui.print()
@@ -2576,7 +2592,7 @@ JSON:"""
             else:
                 for name in servers:
                     connected = self.mcp_manager.is_connected(name)
-                    status = "[green]●[/green]" if connected else "[dim]○[/dim]"
+                    status = "[#2C7A39]●[/#2C7A39]" if connected else "[#AFAFAF]○[/#AFAFAF]"
                     self.ui.print(f"  {status} {name}")
             self.ui.print()
 
@@ -2603,7 +2619,7 @@ JSON:"""
                 self.ui.print_divider()
                 for tool in tools:
                     self.ui.print(f"  [#9333EA]{tool.name}[/#9333EA]")
-                    self.ui.print(f"    [dim]{tool.description}[/dim]")
+                    self.ui.print(f"    [#AFAFAF]{tool.description}[/#AFAFAF]")
             else:
                 self.ui.print_dim("No MCP tools available")
             self.ui.print()
@@ -2624,9 +2640,9 @@ JSON:"""
             self.ui.print(f"  Detected: {self.ide_type.value}")
             if self.ide_integration:
                 status = (
-                    "[green]connected[/green]"
+                    "[#2C7A39]connected[/#2C7A39]"
                     if self.ide_integration.connected
-                    else "[dim]disconnected[/dim]"
+                    else "[#AFAFAF]disconnected[/#AFAFAF]"
                 )
                 self.ui.print(f"  Status: {status}")
 
@@ -2790,7 +2806,7 @@ JSON:"""
 
         self.ui.print()
         self.ui.print(
-            "[bold #006666]PLAN MODE[/bold #006666] [#AFAFAF]Read-only research[/#AFAFAF]"
+            "[bold #006666]\u23F8 PLAN MODE[/bold #006666] [#AFAFAF]Read-only research[/#AFAFAF]"
         )
         self.ui.print_dim(f"Task: {task}")
         self.ui.print_dim(f"Plan file: {plan.file_path}")

@@ -100,8 +100,8 @@ async def _check_health():
 
     issues = []
     for name, status, ok, info in checks:
-        icon = "[green]✓[/green]" if ok else "[red]✗[/red]"
-        table.add_row(f"{icon} {name}", status, f"[dim]{info}[/dim]" if info else "")
+        icon = "[#2C7A39]\u2714[/#2C7A39]" if ok else "[#AB2B3F]\u2718[/#AB2B3F]"
+        table.add_row(f"{icon} {name}", status, f"[#AFAFAF]{info}[/#AFAFAF]" if info else "")
         if not ok and info:
             issues.append(info)
 
@@ -111,10 +111,10 @@ async def _check_health():
     if issues:
         console.print(f"[#06B6D4]Found {len(issues)} issue(s):[/#06B6D4]")
         for issue in issues:
-            console.print(f"  [dim]→[/dim] {issue}")
+            console.print(f"  [#AFAFAF]\u2192[/#AFAFAF] {issue}")
         console.print()
         return 1
 
-    console.print("[green]✓ All checks passed![/green]")
+    console.print("[#2C7A39]\u2714 All checks passed![/#2C7A39]")
     console.print()
     return 0

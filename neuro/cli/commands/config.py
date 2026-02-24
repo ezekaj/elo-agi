@@ -27,9 +27,9 @@ def cmd_config(args):
             syntax = Syntax(json.dumps(cfg, indent=2), "json", theme="monokai")
             console.print(syntax)
         except Exception as e:
-            console.print(f"[red]Error reading config:[/red] {e}")
+            console.print(f"[#AB2B3F]Error reading config:[/#AB2B3F] {e}")
     else:
-        console.print("[dim](Config file not found - using defaults)[/dim]")
+        console.print("[#AFAFAF](Config file not found - using defaults)[/#AFAFAF]")
         console.print()
         console.print("[bold]Create one with:[/bold]")
         console.print("  [#9333EA]mkdir -p ~/.neuro[/#9333EA]")
