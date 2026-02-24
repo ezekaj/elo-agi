@@ -294,7 +294,7 @@ Begin your response with <thinking> to show your reasoning process, then provide
                 "repeat_penalty": 1.1,
             }
         else:
-            options = {"temperature": 0.7, "repeat_penalty": 1.5, "repeat_last_n": 256}
+            options = {"temperature": 0.7}
 
         payload = {
             "model": self.model,
@@ -316,6 +316,8 @@ Begin your response with <thinking> to show your reasoning process, then provide
                         content=f"API error {response.status}: {error_text}",
                     )
                     return
+
+                in_thinking = False  # Track thinking tag state
 
                 async for line in response.content:
                     if not line:
@@ -348,14 +350,25 @@ Begin your response with <thinking> to show your reasoning process, then provide
                                 },
                             )
 
-                    # Stream content tokens
+                    # Filter thinking tags leaked into content
+                    # Some models (Nanbeige4.1) dump <thinking>...</think> into content
+                    if content:
+                        if in_thinking:
+                            if "</think>" in content:
+                                after = content.split("</think>", 1)
+                                content = after[1].strip() if len(after) > 1 else ""
+                                in_thinking = False
+                            else:
+                                content = ""
+                        elif "<thinking" in content:
+                            in_thinking = True
+                            content = ""
+
+                    # Stream content tokens (skip thinking/empty)
                     if content:
                         if self.on_token:
                             self.on_token(content)
                         yield StreamEvent(type=StreamEventType.TOKEN, content=content)
-
-                    # Thinking tokens (models like Nanbeige4.1) — don't display to user
-                    # The model's chain-of-thought is internal; only tool calls and content matter
 
                     if done:
                         yield StreamEvent(

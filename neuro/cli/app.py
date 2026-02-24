@@ -347,17 +347,9 @@ class NeuroApp:
         return f"Working directory: {cwd}\nHome: {home}"
 
     def _prompt_project_instructions(self) -> str:
-        instructions = []
-        for fname in ["CLAUDE.md", "NEURO.md", ".neuro/instructions.md"]:
-            path = os.path.join(self.project_dir, fname)
-            if os.path.exists(path):
-                try:
-                    with open(path) as f:
-                        content = f.read()[:1000]
-                    instructions.append(f"# {fname}\n{content}")
-                except Exception:
-                    pass
-        return "\n\n".join(instructions) if instructions else ""
+        # Skip project instructions in system prompt for small models
+        # They can read CLAUDE.md with read_file if needed
+        return ""
 
     def _prompt_tools(self) -> str:
         # Don't list tools in system prompt — Ollama sends them via the tools parameter
