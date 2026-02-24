@@ -294,7 +294,7 @@ Begin your response with <thinking> to show your reasoning process, then provide
                 "repeat_penalty": 1.1,
             }
         else:
-            options = {"temperature": 0.7, "repeat_penalty": 1.2}
+            options = {"temperature": 0.7, "repeat_penalty": 1.5, "repeat_last_n": 256}
 
         payload = {
             "model": self.model,

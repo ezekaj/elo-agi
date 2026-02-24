@@ -535,50 +535,29 @@ class UIRenderer:
     # =========================================================================
 
     def start_live(self):
-        """Start live updating mode for streaming."""
+        """Start streaming mode — direct token output, no Rich Live."""
+        import sys
         self._current_response = ""
-        self._last_render_len = 0
-        self._live = Live(
-            Text(""),
-            console=self.console,
-            refresh_per_second=10,
-            vertical_overflow="visible",
-        )
-        self._live.start()
+        self._live = True  # flag only
+        self._stream_file = sys.stdout
 
     def update_live(self, text: str):
-        """Update the live display with new text."""
+        """Update is a no-op in direct streaming mode."""
         self._current_response = text
-        if self._live:
-            try:
-                md = Markdown(self._current_response)
-                self._live.update(md)
-            except Exception:
-                self._live.update(Text(self._current_response))
-            self._last_render_len = len(self._current_response)
 
     def append_live(self, token: str):
-        """Append a token to the live display."""
+        """Write token directly to stdout — no re-rendering."""
         self._current_response += token
-        # Throttle markdown re-parsing: only re-render every 30 chars or on newlines
-        delta = len(self._current_response) - self._last_render_len
-        if delta >= 30 or "\n" in token:
-            self.update_live(self._current_response)
+        if self._live:
+            self._stream_file.write(token)
+            self._stream_file.flush()
 
     def stop_live(self):
-        """Stop live updating mode."""
+        """End streaming and print a trailing newline."""
         if self._live:
-            # Final render with complete content
-            if self._current_response:
-                try:
-                    md = Markdown(self._current_response)
-                    self._live.update(md)
-                except Exception:
-                    self._live.update(Text(self._current_response))
-            self._live.stop()
+            self._stream_file.write("\n")
+            self._stream_file.flush()
             self._live = None
-        if self._current_response:
-            self.console.print()
 
     # =========================================================================
     # Prompts & Input
