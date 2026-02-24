@@ -1100,9 +1100,10 @@ CRITICAL RULES:
         """Try to execute a direct tool call. Returns True if handled."""
         from .core.intent_router import detect_intent
 
-        # Try intent detection (natural language) — only for high-confidence explicit commands
+        # Try intent detection — only for very short, explicit commands (e.g. "list files", "git status")
+        # Longer messages with context should go to the LLM for proper parsing
         intent = detect_intent(user_input)
-        if intent and intent.confidence >= 0.9:
+        if intent and intent.confidence >= 0.9 and len(user_input.split()) <= 4:
             return await self._execute_intent(intent, user_input)
 
         # Fall back to keyword matching
@@ -1327,7 +1328,11 @@ CRITICAL RULES:
             return True
 
         elif intent.name == "list_files":
-            result = self.tool_registry.tools["list_files"].func(".")
+            # Extract path from user input if present
+            import re as _re
+            path_match = _re.search(r'(/\S+|~/\S+)', user_input)
+            path = path_match.group(1) if path_match else "."
+            result = self.tool_registry.tools["list_files"].func(path)
             self.ui.print(result)
             return True
 
