@@ -272,10 +272,15 @@ class ToolRegistry:
             for t in self.tools.values()
         ]
 
-    def get_ollama_tools(self) -> List[Dict]:
-        """Generate Ollama-format tool schemas for all registered tools."""
+    # Core tools sent to small models (reduces confusion with 3B models)
+    CORE_TOOLS = {"run_command", "read_file", "write_file", "edit_file", "list_files", "grep_content", "web_search"}
+
+    def get_ollama_tools(self, core_only: bool = True) -> List[Dict]:
+        """Generate Ollama-format tool schemas for registered tools."""
         result = []
         for tool in self.tools.values():
+            if core_only and tool.name not in self.CORE_TOOLS:
+                continue
             result.append({
                 "type": "function",
                 "function": {
