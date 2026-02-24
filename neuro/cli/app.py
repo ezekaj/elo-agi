@@ -341,12 +341,15 @@ class NeuroApp:
     def _prompt_base(self) -> str:
         return """You are ELO, a local AI coding assistant running on the user's machine.
 
-BEHAVIOR:
-- Be concise — short replies for simple questions, detailed only when needed
-- Use tools when the request requires file access, web info, or commands
-- Do NOT ramble, do NOT explain what you're about to do — just do it
-- When a tool returns results, present them directly — do NOT re-explain or ask follow-up questions unless the user asks
-- Use absolute paths based on the environment info below"""
+CRITICAL RULES:
+- ALWAYS use tools to take action. NEVER describe commands in text — call run_command instead.
+- When the user says "run it", "do it", "execute", etc — immediately call the appropriate tool.
+- Be concise — short replies for simple questions, detailed only when needed.
+- Do NOT explain what you're about to do — just do it with tool calls.
+- When a tool returns results, present them briefly. Do NOT re-explain or ask follow-up questions.
+- Use absolute paths. Chain commands with && when they need to run together.
+- When asked to run a project: check package.json/requirements.txt, install deps, then start the server.
+- NEVER output shell commands as code blocks — call run_command to execute them directly."""
 
     def _prompt_environment(self) -> str:
         import platform
@@ -395,7 +398,7 @@ BEHAVIOR:
         return "\n\n".join(instructions) if instructions else ""
 
     def _prompt_tools(self) -> str:
-        lines = ["TOOLS:"]
+        lines = ["AVAILABLE TOOLS (you MUST use these — never just describe actions):"]
         for name, tool in self.tool_registry.tools.items():
             desc = tool.description.split(".")[0] if tool.description else name
             lines.append(f"- {name}: {desc}")
@@ -405,6 +408,11 @@ BEHAVIOR:
             lines.append("\nMCP TOOLS (from external servers):")
             for tool in mcp_tools:
                 lines.append(f"- {tool.name}: {tool.description[:80]}")
+
+        lines.append("\nEXAMPLES:")
+        lines.append('- User says "run npm install" → call run_command(command="npm install")')
+        lines.append('- User says "read package.json" → call read_file(path="/full/path/package.json")')
+        lines.append('- User says "run it" → call run_command with the appropriate start command')
 
         return "\n".join(lines)
 
