@@ -34,7 +34,7 @@ def cmd_config(args):
         console.print("[bold]Create one with:[/bold]")
         console.print("  [#9333EA]mkdir -p ~/.neuro[/#9333EA]")
 
-        example = {"model": "ministral-3:8b", "permission_mode": "default", "hooks": {}}
+        example = {"model": "nanbeige4.1:3b", "permission_mode": "default", "hooks": {}}
         console.print(f"  [#9333EA]cat > {config_path} << 'EOF'[/#9333EA]")
         syntax = Syntax(json.dumps(example, indent=2), "json", theme="monokai")
         console.print(syntax)

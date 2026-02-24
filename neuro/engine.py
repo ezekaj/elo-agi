@@ -39,7 +39,7 @@ except ImportError:
 class EngineConfig:
     """Configuration for the NEURO engine."""
 
-    model: str = "ministral-3:8b"
+    model: str = "nanbeige4.1:3b"
     base_url: str = "http://localhost:11434"
     timeout: int = 120
     temperature: float = 0.7

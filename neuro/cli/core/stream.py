@@ -48,7 +48,7 @@ class StreamHandler:
     def __init__(
         self,
         base_url: str = "http://localhost:11434",
-        model: str = "ministral-3:8b",
+        model: str = "nanbeige4.1:3b",
         api_key: Optional[str] = None,
         api_type: str = "ollama",
         timeout: int = 120,
@@ -404,7 +404,7 @@ Begin your response with <thinking> to show your reasoning process, then provide
 # Sync wrapper for non-async contexts
 def stream_sync(
     messages: List[Dict[str, str]],
-    model: str = "ministral-3:8b",
+    model: str = "nanbeige4.1:3b",
     system_prompt: Optional[str] = None,
 ) -> str:
     """Synchronous streaming (collects all tokens)."""
