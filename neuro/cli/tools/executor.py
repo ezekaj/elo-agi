@@ -47,11 +47,11 @@ class ToolSpinner:
 
     FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
     RESET = "\033[0m"
-    PURPLE = "\033[35m"
-    GREEN = "\033[32m"
-    RED = "\033[31m"
-    YELLOW = "\033[33m"
-    DIM = "\033[2m"
+    BRAND = "\033[38;2;147;51;234m"     # #9333EA
+    SUCCESS = "\033[38;2;44;122;57m"    # #2C7A39
+    ERROR = "\033[38;2;171;43;63m"      # #AB2B3F
+    WARNING = "\033[38;2;150;108;30m"   # #966C1E
+    DIM = "\033[38;2;175;175;175m"      # #AFAFAF
 
     # Tips shown after 30s of execution
     TIPS = [
@@ -92,11 +92,11 @@ class ToolSpinner:
         dur_str = f" {self.DIM}({duration:.1f}s){self.RESET}" if duration > 0.1 else ""
 
         if rejected:
-            icon = f"{self.YELLOW}⊘{self.RESET}"
+            icon = f"{self.WARNING}\u2298{self.RESET}"
         elif success:
-            icon = f"{self.GREEN}✓{self.RESET}"
+            icon = f"{self.SUCCESS}\u2714{self.RESET}"
         else:
-            icon = f"{self.RED}✗{self.RESET}"
+            icon = f"{self.ERROR}\u2718{self.RESET}"
 
         final_msg = message or self._message
         sys.stdout.write(f"\r\033[K  {icon} {final_msg}{dur_str}\n")
@@ -116,13 +116,13 @@ class ToolSpinner:
                 tip = random.choice(self.TIPS)
                 tip_line = f"\n  {self.DIM}💡 {tip}{self.RESET}"
 
-            line = f"\r\033[K  {self.PURPLE}{frame}{self.RESET} {self._message}"
+            line = f"\r\033[K  {self.BRAND}{frame}{self.RESET} {self._message}"
             if elapsed > 5:
                 line += f" {self.DIM}({elapsed:.0f}s){self.RESET}"
             sys.stdout.write(line + tip_line)
             sys.stdout.flush()
             self._frame += 1
-            time.sleep(0.08)
+            time.sleep(0.05)
 
 
 class ToolExecutor:

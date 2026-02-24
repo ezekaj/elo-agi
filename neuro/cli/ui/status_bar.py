@@ -58,24 +58,31 @@ class StatusBar:
         parts = []
 
         if self._state.mode != "default":
-            parts.append(f"[{self._state.mode}]")
+            mode_colors = {
+                "plan": "#006666",
+                "acceptEdits": "#2C7A39",
+                "bypassPermissions": "#AB2B3F",
+                "dontAsk": "#966C1E",
+            }
+            color = mode_colors.get(self._state.mode, "#AFAFAF")
+            parts.append(f"[{color}]{self._state.mode}[/{color}]")
 
         if self._state.model:
-            parts.append(self._state.model)
+            parts.append(f"[#AFAFAF]{self._state.model}[/#AFAFAF]")
 
         if self._state.tokens > 0:
-            parts.append(f"{self._state.tokens:,} tokens")
+            parts.append(f"[#AFAFAF]{self._state.tokens:,} tokens[/#AFAFAF]")
 
         if self._state.tool_running:
-            parts.append(f"running: {self._state.tool_running}")
+            parts.append(f"[#06B6D4]{self._state.tool_running}[/#06B6D4]")
 
         if self._state.message:
-            parts.append(self._state.message)
+            parts.append(f"[#AFAFAF]{self._state.message}[/#AFAFAF]")
 
-        return " | ".join(parts)
+        return " \u00b7 ".join(parts)
 
     def print_status(self):
         """Print current status inline."""
         status = self.render_inline()
         if status:
-            self.console.print(f"  [dim]{status}[/dim]")
+            self.console.print(f"  {status}")

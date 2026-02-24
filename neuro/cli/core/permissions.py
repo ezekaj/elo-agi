@@ -190,32 +190,34 @@ class PermissionManager:
         from rich.console import Console
         from rich.panel import Panel
         from rich.text import Text
+        from rich import box as rich_box
 
         console = Console()
 
         # Build content
         content = Text()
-        content.append("Tool: ", style="dim")
+        content.append("Tool: ", style="#AFAFAF")
         content.append(f"{tool_name}\n", style="bold")
 
         for k, v in list(tool_input.items())[:3]:
             val_str = str(v)[:60]
             if len(str(v)) > 60:
                 val_str += "..."
-            content.append(f"  {k}: ", style="dim")
+            content.append(f"  {k}: ", style="#AFAFAF")
             content.append(f"{val_str}\n")
 
         panel = Panel(
             content,
             title="[bold]Permission Required[/bold]",
-            border_style="purple",
+            box=rich_box.ROUNDED,
+            border_style="#06B6D4",
             padding=(0, 1),
         )
         console.print()
         console.print(panel)
         console.print(
-            "  [purple]y[/purple] Allow  [purple]n[/purple] Deny  "
-            "[purple]a[/purple] Always allow  [purple]d[/purple] Always deny"
+            "  [#06B6D4]y[/#06B6D4] Allow  [#06B6D4]n[/#06B6D4] Deny  "
+            "[#06B6D4]a[/#06B6D4] Always allow  [#06B6D4]d[/#06B6D4] Always deny"
         )
 
         try:

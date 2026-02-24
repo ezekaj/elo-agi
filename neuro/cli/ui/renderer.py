@@ -7,6 +7,9 @@ Provides a production-grade CLI experience with:
 - Panels, tables, and structured output
 - Live streaming updates
 - Diff rendering for file changes
+
+Color palette extracted from Claude Code source (claude_readable_v2.js lines 113971-114399),
+mapped to ELO's purple/cyan brand identity.
 """
 
 from typing import Optional, List, Dict, Any
@@ -24,6 +27,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.rule import Rule
 from rich.tree import Tree
 from rich.theme import Theme
+from rich import box
 
 
 class ToolDisplayState(Enum):
@@ -64,22 +68,67 @@ TOOL_TIPS = [
     "Use Tab for input completion",
 ]
 
-# Custom theme matching modern CLI aesthetics
+# Icon constants (matching Claude Code's icon set from source)
+ICONS = {
+    "success": "\u2714",     # ✔ HEAVY CHECK MARK
+    "error": "\u2718",       # ✘ HEAVY BALLOT X
+    "warning": "\u26a0",     # ⚠ WARNING SIGN
+    "info": "\u25cf",        # ● BLACK CIRCLE
+    "rejected": "\u2298",    # ⊘ CIRCLED DIVISION SLASH
+    "prompt": "\u276f",      # ❯ HEAVY RIGHT-POINTING ANGLE QUOTATION MARK
+    "selected": "\u25c9",    # ◉ FISHEYE
+    "unselected": "\u25ef",  # ◯ LARGE CIRCLE
+    "progress": "\u280b",    # ⠋ BRAILLE
+}
+
+# Tree connectors (matching Claude Code's tool tree from source)
+TREE = {
+    "first": "\u252c\u2500",    # ┬─
+    "middle": "\u251c\u2500",   # ├─
+    "last": "\u2514\u2500",     # └─
+    "single": "\u2500\u2500",   # ──
+    "pipe": "\u2502",           # │
+}
+
+# ELO color palette — hex values extracted from Claude Code source,
+# mapped to ELO brand: Claude orange (#D77757) → ELO purple (#9333EA),
+# Claude blue (#5769F7) → ELO cyan (#06B6D4)
 ELO_THEME = Theme(
     {
-        "info": "purple",
-        "success": "green",
-        "warning": "orchid",
-        "error": "red",
-        "dim": "dim white",
-        "highlight": "bold purple",
-        "user": "bold purple",
-        "assistant": "bold medium_purple3",
-        "tool": "bold orchid",
+        # Brand
+        "brand": "bold #9333EA",
+        "brand.dim": "#7C3AED",
+        # Semantic states (matched from Claude Code source)
+        "info": "#06B6D4",
+        "success": "#2C7A39",
+        "warning": "#966C1E",
+        "error": "#AB2B3F",
+        # Text hierarchy
+        "text.dim": "#AFAFAF",
+        "text.inactive": "#666666",
+        # Roles
+        "user": "bold #9333EA",
+        "assistant": "bold #7C3AED",
+        "tool": "bold #06B6D4",
         "code": "bright_white on grey11",
-        "plan": "bold bright_magenta",
-        "team": "bold blue_violet",
-        "task": "bold plum2",
+        # Modes
+        "plan": "bold #006666",
+        "team": "bold #9333EA",
+        "task": "bold #06B6D4",
+        "fast": "bold #FF6A00",
+        # Diff (exact Claude Code values)
+        "diff.added": "#69DB7C",
+        "diff.removed": "#FFA8B4",
+        "diff.hunk": "#9333EA",
+        # Permission
+        "permission": "#06B6D4",
+        "permission.danger": "#AB2B3F",
+        # Borders
+        "border": "#999999",
+        "border.brand": "#9333EA",
+        # Backwards compat
+        "highlight": "bold #9333EA",
+        "dim": "#AFAFAF",
     }
 )
 
@@ -110,9 +159,9 @@ class UIRenderer:
         header.append("\n")
         import neuro
 
-        header.append("  ELO-AGI", style="bold purple")
-        header.append(f" v{neuro.__version__}\n", style="dim")
-        header.append("  Local AI That Learns From Your Code\n", style="dim italic")
+        header.append("  ELO-AGI", style="bold #9333EA")
+        header.append(f" v{neuro.__version__}\n", style="#AFAFAF")
+        header.append("  Local AI That Learns From Your Code\n", style="#AFAFAF italic")
         self.console.print(header)
         self.console.print()
 
@@ -120,8 +169,8 @@ class UIRenderer:
         """Print a minimal one-line header."""
         self.console.print(
             Text.assemble(
-                ("ELO", "bold purple"),
-                (" ready", "dim"),
+                ("ELO", "bold #9333EA"),
+                (" ready", "#AFAFAF"),
             )
         )
 
@@ -134,100 +183,36 @@ class UIRenderer:
         recent_sessions: list = None,
         knowledge_stats: dict = None,
     ):
-        """Print a beautiful welcome screen like Claude Code."""
-        from rich.columns import Columns
-        from rich.align import Align
-
-        # ASCII art logo for ELO (using Text with styles)
-        logo = Text()
-        logo.append("    ╔═╗╦  ╔═╗\n", style="bold purple")
-        logo.append("    ║╣ ║  ║ ║\n", style="bold purple")
-        logo.append("    ╚═╝╩═╝╚═╝", style="bold purple")
-
-        # Create left panel content
-        left_content = Text()
-        left_content.append(f"\n     Welcome back {user_name}!\n\n", style="bold white")
-        left_content.append_text(logo)
-        left_content.append(f"\n\n    {model}", style="dim")
-        left_content.append(f"\n    {working_dir}\n", style="dim purple")
-
-        # Create right panel - Tips
-        tips_content = Text()
-        tips_content.append("Tips for getting started\n", style="bold orchid")
-        tips_content.append("Run ", style="dim")
-        tips_content.append("/help", style="purple")
-        tips_content.append(" to see all commands\n", style="dim")
-        tips_content.append("Use ", style="dim")
-        tips_content.append("@./file", style="purple")
-        tips_content.append(" to include file content\n", style="dim")
-        tips_content.append("Try ", style="dim")
-        tips_content.append("/think", style="purple")
-        tips_content.append(" to activate cognitive modules\n", style="dim")
-        tips_content.append("Use ", style="dim")
-        tips_content.append("/knowledge", style="purple")
-        tips_content.append(" to enable knowledge mode\n", style="dim")
-
-        # Recent activity section
-        activity_content = Text()
-        activity_content.append("\nRecent activity\n", style="bold orchid")
-
-        if recent_sessions and len(recent_sessions) > 0:
-            from datetime import datetime
-
-            for sess in recent_sessions[:3]:
-                created = datetime.fromisoformat(sess.get("created_at", datetime.now().isoformat()))
-                age = datetime.now() - created
-                if age.days > 0:
-                    time_str = f"{age.days}d ago"
-                elif age.seconds > 3600:
-                    time_str = f"{age.seconds // 3600}h ago"
-                else:
-                    time_str = f"{age.seconds // 60}m ago"
-
-                preview = sess.get("preview", "")[:25] + "..." if sess.get("preview") else ""
-                activity_content.append(f"  {sess['id'][:8]}", style="purple")
-                activity_content.append(f" ({time_str})", style="dim")
-                if preview:
-                    activity_content.append(f" {preview}", style="dim")
-                activity_content.append("\n")
-        else:
-            activity_content.append("  No recent activity\n", style="dim")
-
-        # Knowledge stats if available
-        if knowledge_stats:
-            facts = knowledge_stats.get("total_facts", 0)
-            modules = knowledge_stats.get("cognitive_modules", 0)
-            if facts > 0 or modules > 0:
-                activity_content.append(
-                    f"\n  Brain: {modules} modules, {facts} facts\n", style="dim green"
-                )
-
-        # Combine right panel
-        right_text = Text()
-        right_text.append_text(tips_content)
-        right_text.append_text(activity_content)
-
-        # Create panels
-        left_panel = Panel(
-            Align.center(left_content),
-            border_style="purple",
-            title="ELO v" + version,
-            title_align="left",
-            padding=(0, 1),
-        )
-
-        right_panel = Panel(
-            right_text,
-            border_style="orchid",
-            padding=(0, 1),
-        )
-
-        # Print side by side
+        """Print a clean, minimal welcome screen (Claude Code style)."""
         self.console.print()
 
-        # Use columns for side-by-side layout
-        columns = Columns([left_panel, right_panel], expand=True, equal=True)
-        self.console.print(columns)
+        # Line 1: Brand + version
+        header = Text()
+        header.append(" ELO", style="bold #9333EA")
+        header.append(f" v{version}", style="#AFAFAF")
+        self.console.print(header)
+
+        # Line 2: Working dir + model
+        info = Text()
+        info.append(f" {working_dir}", style="#AFAFAF")
+        info.append(f"  {model}", style="#666666")
+        self.console.print(info)
+
+        # Thin divider
+        self.console.print()
+        self.console.print(Rule(style="#666666"))
+
+        # Optional: knowledge stats inline
+        if knowledge_stats:
+            modules = knowledge_stats.get("cognitive_modules", 0)
+            facts = knowledge_stats.get("total_facts", 0)
+            if modules > 0 or facts > 0:
+                stats = Text()
+                stats.append(f" {modules} modules", style="#AFAFAF")
+                if facts > 0:
+                    stats.append(f" \u00b7 {facts} facts", style="#AFAFAF")
+                self.console.print(stats)
+
         self.console.print()
 
     def print_input_prompt(self, placeholder: str = ""):
@@ -235,13 +220,11 @@ class UIRenderer:
         self.console.print()
         if placeholder:
             prompt_text = Text()
-            prompt_text.append("> ", style="bold purple")
-            prompt_text.append(placeholder, style="dim italic")
-            # Move cursor back to start of placeholder
+            prompt_text.append(f"{ICONS['prompt']} ", style="bold #9333EA")
+            prompt_text.append(placeholder, style="#AFAFAF italic")
             self.console.print(prompt_text, end="")
-            # Clear the line and show just the prompt
             print("\r", end="")
-        return self.console.input("[bold purple]>[/bold purple] ")
+        return self.console.input(f"[#9333EA]{ICONS['prompt']}[/#9333EA] ")
 
     # =========================================================================
     # Messages & Status
@@ -250,42 +233,42 @@ class UIRenderer:
     def print_user_prompt(self):
         """Print the user input prompt."""
         self.console.print()
-        return self.console.input("[bold purple]>[/bold purple] ")
+        return self.console.input(f"[#9333EA]{ICONS['prompt']}[/#9333EA] ")
 
     def print_assistant_label(self):
         """Print the assistant label before response."""
         self.console.print()
-        self.console.print("[bold medium_purple3]ELO[/bold medium_purple3]", end=" ")
+        self.console.print("[bold #7C3AED]ELO[/bold #7C3AED]", end=" ")
 
     def print_status(self, label: str, value: str, style: str = "success"):
         """Print a status indicator."""
         icon = {
-            "success": "[green]●[/green]",
-            "warning": "[yellow]●[/yellow]",
-            "error": "[red]●[/red]",
-            "info": "[purple]●[/purple]",
-        }.get(style, "[dim]●[/dim]")
-        self.console.print(f"  {icon} {label}: [dim]{value}[/dim]")
+            "success": f"[#2C7A39]{ICONS['success']}[/#2C7A39]",
+            "warning": f"[#966C1E]{ICONS['warning']}[/#966C1E]",
+            "error": f"[#AB2B3F]{ICONS['error']}[/#AB2B3F]",
+            "info": f"[#06B6D4]{ICONS['info']}[/#06B6D4]",
+        }.get(style, f"[#AFAFAF]{ICONS['info']}[/#AFAFAF]")
+        self.console.print(f"  {icon} {label}: [#AFAFAF]{value}[/#AFAFAF]")
 
     def print_dim(self, text: str):
         """Print dimmed text."""
-        self.console.print(f"  [dim]{text}[/dim]")
+        self.console.print(f"  [#AFAFAF]{text}[/#AFAFAF]")
 
     def print_error(self, text: str):
         """Print error message."""
-        self.console.print(f"  [red]✗[/red] {text}")
+        self.console.print(f"  [#AB2B3F]{ICONS['error']}[/#AB2B3F] {text}")
 
     def print_success(self, text: str):
         """Print success message."""
-        self.console.print(f"  [green]✓[/green] {text}")
+        self.console.print(f"  [#2C7A39]{ICONS['success']}[/#2C7A39] {text}")
 
     def print_warning(self, text: str):
         """Print warning message."""
-        self.console.print(f"  [orchid]![/orchid] {text}")
+        self.console.print(f"  [#966C1E]{ICONS['warning']}[/#966C1E] {text}")
 
     def print_info(self, text: str):
         """Print info message."""
-        self.console.print(f"  [purple]i[/purple] {text}")
+        self.console.print(f"  [#06B6D4]{ICONS['info']}[/#06B6D4] {text}")
 
     # =========================================================================
     # Dividers & Structure
@@ -294,11 +277,11 @@ class UIRenderer:
     def print_divider(self, title: str = ""):
         """Print a divider line."""
         if title:
-            self.console.print(Rule(title, style="dim"))
+            self.console.print(Rule(title, style="#666666"))
         else:
-            self.console.print(Rule(style="dim"))
+            self.console.print(Rule(style="#666666"))
 
-    def print_rule(self, title: str = "", style: str = "dim"):
+    def print_rule(self, title: str = "", style: str = "#666666"):
         """Print a styled rule."""
         self.console.print(Rule(title, style=style))
 
@@ -323,32 +306,35 @@ class UIRenderer:
         self.console.print(syntax)
 
     def print_diff(self, diff_text: str):
-        """Print a colored diff."""
+        """Print a colored diff (Claude Code palette)."""
         for line in diff_text.split("\n"):
-            if line.startswith("+") and not line.startswith("+++"):
-                self.console.print(f"[green]{line}[/green]")
-            elif line.startswith("-") and not line.startswith("---"):
-                self.console.print(f"[red]{line}[/red]")
+            if line.startswith("+++") or line.startswith("---"):
+                self.console.print(f"[bold #AFAFAF]{line}[/bold #AFAFAF]")
+            elif line.startswith("+"):
+                self.console.print(f"[#69DB7C]{line}[/#69DB7C]")
+            elif line.startswith("-"):
+                self.console.print(f"[#FFA8B4]{line}[/#FFA8B4]")
             elif line.startswith("@@"):
-                self.console.print(f"[purple]{line}[/purple]")
+                self.console.print(f"[#9333EA]{line}[/#9333EA]")
             else:
-                self.console.print(f"[dim]{line}[/dim]")
+                self.console.print(f"[#AFAFAF]{line}[/#AFAFAF]")
 
     # =========================================================================
     # Panels & Boxes
     # =========================================================================
 
-    def print_panel(self, content: str, title: str = "", style: str = "cyan"):
-        """Print content in a bordered panel."""
+    def print_panel(self, content: str, title: str = "", style: str = "#06B6D4"):
+        """Print content in a bordered panel with rounded corners."""
         panel = Panel(
             content,
             title=title if title else None,
+            box=box.ROUNDED,
             border_style=style,
             padding=(0, 1),
         )
         self.console.print(panel)
 
-    def print_box(self, title: str, lines: List[str], style: str = "cyan"):
+    def print_box(self, title: str, lines: List[str], style: str = "#06B6D4"):
         """Print a box with title and content lines."""
         content = "\n".join(lines)
         self.print_panel(content, title=title, style=style)
@@ -368,8 +354,8 @@ class UIRenderer:
         table = Table(
             title=title if title else None,
             show_header=show_header,
-            header_style="bold purple",
-            border_style="dim",
+            header_style="bold #9333EA",
+            border_style="#666666",
         )
 
         for header in headers:
@@ -388,7 +374,7 @@ class UIRenderer:
             box=None,
             padding=(0, 2),
         )
-        table.add_column(style="purple")
+        table.add_column(style="#9333EA")
         table.add_column(style="")
 
         for key, value in data.items():
@@ -410,14 +396,14 @@ class UIRenderer:
         """Recursively build tree nodes."""
         for key, value in items.items():
             if isinstance(value, dict):
-                branch = tree.add(f"[purple]{key}[/purple]")
+                branch = tree.add(f"[#9333EA]{key}[/#9333EA]")
                 self._build_tree(branch, value)
             elif isinstance(value, list):
-                branch = tree.add(f"[purple]{key}[/purple]")
+                branch = tree.add(f"[#9333EA]{key}[/#9333EA]")
                 for item in value:
-                    branch.add(f"[dim]{item}[/dim]")
+                    branch.add(f"[#AFAFAF]{item}[/#AFAFAF]")
             else:
-                tree.add(f"[purple]{key}:[/purple] [dim]{value}[/dim]")
+                tree.add(f"[#9333EA]{key}:[/#9333EA] [#AFAFAF]{value}[/#AFAFAF]")
 
     # =========================================================================
     # Progress & Spinners
@@ -426,7 +412,7 @@ class UIRenderer:
     @contextmanager
     def spinner(self, message: str = "Processing"):
         """Context manager for showing a spinner."""
-        with self.console.status(f"[purple]{message}[/purple]", spinner="dots"):
+        with self.console.status(f"[#9333EA]{message}[/#9333EA]", spinner="dots"):
             yield
 
     @contextmanager
@@ -452,13 +438,15 @@ class UIRenderer:
         filled = int(width * pct)
 
         if pct < 0.5:
-            color = "green"
+            color = "#2C7A39"
         elif pct < 0.8:
-            color = "yellow"
+            color = "#966C1E"
         else:
-            color = "red"
+            color = "#AB2B3F"
 
-        bar = f"[{color}]{'█' * filled}[/{color}][dim]{'░' * (width - filled)}[/dim]"
+        filled_char = "\u2588" * filled
+        empty_char = "\u2591" * (width - filled)
+        bar = f"[{color}]{filled_char}[/{color}][#666666]{empty_char}[/#666666]"
         self.console.print(f"  {label} [{bar}] {pct:.0%}")
 
     # =========================================================================
@@ -480,7 +468,6 @@ class UIRenderer:
         """Update the live display with new text."""
         self._current_response = text
         if self._live:
-            # Render as markdown for nice formatting
             try:
                 md = Markdown(self._current_response)
                 self._live.update(md)
@@ -497,7 +484,6 @@ class UIRenderer:
         if self._live:
             self._live.stop()
             self._live = None
-        # Print final rendered version
         if self._current_response:
             self.console.print()
 
@@ -508,7 +494,9 @@ class UIRenderer:
     def confirm(self, message: str, default: bool = False) -> bool:
         """Ask for confirmation."""
         suffix = " [Y/n]" if default else " [y/N]"
-        response = self.console.input(f"  [purple]?[/purple] {message}{suffix} ").strip().lower()
+        response = self.console.input(
+            f"  [#06B6D4]?[/#06B6D4] {message}{suffix} "
+        ).strip().lower()
 
         if not response:
             return default
@@ -516,40 +504,40 @@ class UIRenderer:
 
     def select(self, message: str, options: List[str]) -> int:
         """Present options and get selection."""
-        self.console.print(f"\n  [purple]?[/purple] {message}")
+        self.console.print(f"\n  [#06B6D4]?[/#06B6D4] {message}")
         for i, option in enumerate(options, 1):
-            self.console.print(f"    [dim]{i}.[/dim] {option}")
+            self.console.print(f"    [#666666]{i}.[/#666666] {option}")
 
         while True:
             try:
-                choice = int(self.console.input("  [dim]Select:[/dim] "))
+                choice = int(self.console.input("  [#AFAFAF]Select:[/#AFAFAF] "))
                 if 1 <= choice <= len(options):
                     return choice - 1
             except (ValueError, EOFError):
                 pass
-            self.console.print("  [red]Invalid selection[/red]")
+            self.console.print("  [#AB2B3F]Invalid selection[/#AB2B3F]")
 
     # =========================================================================
     # Tool Execution Display
     # =========================================================================
 
     def print_permission_card(self, tool_name: str, args: Dict[str, Any], risk_level: str = "normal"):
-        """Print a permission request card."""
+        """Print a permission request card with rounded border."""
         content = Text()
-        content.append("Tool: ", style="dim")
         content.append(f"{tool_name}\n", style="bold")
 
         for k, v in list(args.items())[:3]:
-            val_str = str(v)[:60]
-            if len(str(v)) > 60:
+            val_str = str(v)[:80]
+            if len(str(v)) > 80:
                 val_str += "..."
-            content.append(f"  {k}: ", style="dim")
+            content.append(f"  {k}: ", style="#AFAFAF")
             content.append(f"{val_str}\n")
 
-        border = "red" if risk_level == "high" else "purple"
+        border = "#AB2B3F" if risk_level == "high" else "#06B6D4"
         panel = Panel(
             content,
             title="[bold]Permission Required[/bold]",
+            box=box.ROUNDED,
             border_style=border,
             padding=(0, 1),
         )
@@ -559,8 +547,10 @@ class UIRenderer:
     def print_tool_start(self, tool_name: str, description: str = ""):
         """Print tool execution start with active verb."""
         verb = TOOL_VERBS.get(tool_name, "Running")
-        desc = f" [dim]{description}[/dim]" if description else ""
-        self.console.print(f"  [orchid]⠋[/orchid] {verb} [bold]{tool_name}[/bold]{desc}")
+        desc = f" [#AFAFAF]{description}[/#AFAFAF]" if description else ""
+        self.console.print(
+            f"  [#9333EA]{ICONS['progress']}[/#9333EA] {verb} [bold]{tool_name}[/bold]{desc}"
+        )
 
     def print_tool_result(
         self,
@@ -575,25 +565,69 @@ class UIRenderer:
             state = ToolDisplayState.SUCCESS if success else ToolDisplayState.ERROR
 
         icons = {
-            ToolDisplayState.SUCCESS: "[green]✓[/green]",
-            ToolDisplayState.ERROR: "[red]✗[/red]",
-            ToolDisplayState.REJECTED: "[yellow]⊘[/yellow]",
-            ToolDisplayState.PROGRESS: "[orchid]⠋[/orchid]",
+            ToolDisplayState.SUCCESS: f"[#2C7A39]{ICONS['success']}[/#2C7A39]",
+            ToolDisplayState.ERROR: f"[#AB2B3F]{ICONS['error']}[/#AB2B3F]",
+            ToolDisplayState.REJECTED: f"[#966C1E]{ICONS['rejected']}[/#966C1E]",
+            ToolDisplayState.PROGRESS: f"[#9333EA]{ICONS['progress']}[/#9333EA]",
         }
         icon = icons.get(state, icons[ToolDisplayState.SUCCESS])
 
-        dur_str = f" [dim]({duration:.1f}s)[/dim]" if duration > 0 else ""
+        dur_str = f" [#AFAFAF]({duration:.1f}s)[/#AFAFAF]" if duration > 0 else ""
         self.console.print(f"  {icon} [bold]{tool_name}[/bold]{dur_str}")
 
         if output:
             lines = output.split("\n")
             if len(lines) > 20:
                 for line in lines[:20]:
-                    self.console.print(f"    [dim]{line}[/dim]")
-                self.console.print(f"    [dim]... ({len(lines) - 20} more lines)[/dim]")
+                    self.console.print(f"    [#AFAFAF]{line}[/#AFAFAF]")
+                self.console.print(f"    [#AFAFAF]... ({len(lines) - 20} more lines)[/#AFAFAF]")
             else:
                 for line in lines:
-                    self.console.print(f"    [dim]{line}[/dim]")
+                    self.console.print(f"    [#AFAFAF]{line}[/#AFAFAF]")
+
+    def print_tool_tree_start(self, tool_name: str, description: str = "", position: str = "single"):
+        """Print tool execution start with tree connector."""
+        verb = TOOL_VERBS.get(tool_name, "Running")
+        desc = f" [#AFAFAF]{description}[/#AFAFAF]" if description else ""
+        connector = TREE.get(position, TREE["single"])
+        self.console.print(
+            f"  [#666666]{connector}[/#666666] [#9333EA]{ICONS['progress']}[/#9333EA]"
+            f" {verb} [bold]{tool_name}[/bold]{desc}"
+        )
+
+    def print_tool_tree_result(
+        self,
+        tool_name: str,
+        success: bool,
+        output: str = "",
+        duration: float = 0.0,
+        position: str = "single",
+        state: ToolDisplayState = None,
+    ):
+        """Print tool execution result with tree connector."""
+        if state is None:
+            state = ToolDisplayState.SUCCESS if success else ToolDisplayState.ERROR
+
+        icons_map = {
+            ToolDisplayState.SUCCESS: f"[#2C7A39]{ICONS['success']}[/#2C7A39]",
+            ToolDisplayState.ERROR: f"[#AB2B3F]{ICONS['error']}[/#AB2B3F]",
+            ToolDisplayState.REJECTED: f"[#966C1E]{ICONS['rejected']}[/#966C1E]",
+            ToolDisplayState.PROGRESS: f"[#9333EA]{ICONS['progress']}[/#9333EA]",
+        }
+        icon = icons_map.get(state, icons_map[ToolDisplayState.SUCCESS])
+        connector = TREE.get(position, TREE["single"])
+
+        dur_str = f" [#AFAFAF]({duration:.1f}s)[/#AFAFAF]" if duration > 0 else ""
+        self.console.print(f"  [#666666]{connector}[/#666666] {icon} [bold]{tool_name}[/bold]{dur_str}")
+
+        if output:
+            indent = f"  {TREE['pipe']}   " if position in ("first", "middle") else "      "
+            lines = output.split("\n")
+            show_lines = lines[:20]
+            for line in show_lines:
+                self.console.print(f"{indent}[#AFAFAF]{line}[/#AFAFAF]")
+            if len(lines) > 20:
+                self.console.print(f"{indent}[#AFAFAF]... ({len(lines) - 20} more lines)[/#AFAFAF]")
 
     # =========================================================================
     # Help & Commands
@@ -608,8 +642,8 @@ class UIRenderer:
             padding=(0, 2),
             title_style="bold",
         )
-        table.add_column(style="purple", min_width=18)
-        table.add_column(style="dim")
+        table.add_column(style="#9333EA", min_width=18)
+        table.add_column(style="#AFAFAF")
 
         for cmd, desc in commands:
             table.add_row(cmd, desc)

@@ -32,7 +32,7 @@ class Spinner:
         if message:
             self.message = message
         self._status = self.console.status(
-            f"[purple]{self.message}[/purple]",
+            f"[#9333EA]{self.message}[/#9333EA]",
             spinner=self.spinner_type,
         )
         self._status.start()
@@ -41,7 +41,7 @@ class Spinner:
         """Update the spinner message."""
         self.message = message
         if self._status:
-            self._status.update(f"[purple]{message}[/purple]")
+            self._status.update(f"[#9333EA]{message}[/#9333EA]")
 
     def stop(self, success: bool = True, message: Optional[str] = None):
         """Stop the spinner with final status."""
@@ -51,9 +51,9 @@ class Spinner:
 
         final_msg = message or self.message
         if success:
-            self.console.print(f"  [green]✓[/green] {final_msg}")
+            self.console.print(f"  [#2C7A39]\u2714[/#2C7A39] {final_msg}")
         else:
-            self.console.print(f"  [red]✗[/red] {final_msg}")
+            self.console.print(f"  [#AB2B3F]\u2718[/#AB2B3F] {final_msg}")
 
     def __enter__(self):
         """Context manager entry."""
@@ -85,16 +85,16 @@ class ToolSpinner(Spinner):
             self._status = None
 
         if success:
-            self.console.print(f"  [green]✓[/green] [bold]{self.tool_name}[/bold]")
+            self.console.print(f"  [#2C7A39]\u2714[/#2C7A39] [bold]{self.tool_name}[/bold]")
         else:
-            self.console.print(f"  [red]✗[/red] [bold]{self.tool_name}[/bold]")
+            self.console.print(f"  [#AB2B3F]\u2718[/#AB2B3F] [bold]{self.tool_name}[/bold]")
 
         if output:
             lines = output.strip().split("\n")
             for line in lines[:3]:
-                self.console.print(f"    [dim]{line}[/dim]")
+                self.console.print(f"    [#AFAFAF]{line}[/#AFAFAF]")
             if len(lines) > 3:
-                self.console.print(f"    [dim]... ({len(lines) - 3} more lines)[/dim]")
+                self.console.print(f"    [#AFAFAF]... ({len(lines) - 3} more lines)[/#AFAFAF]")
 
 
 @contextmanager

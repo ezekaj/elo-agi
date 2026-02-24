@@ -18,7 +18,7 @@ import subprocess
 import time
 
 
-AGENT_COLORS = ["purple", "magenta", "orchid", "medium_purple3", "blue_violet", "plum2"]
+AGENT_COLORS = ["#9333EA", "#06B6D4", "#7C3AED", "#FF6A00", "#006666", "#AB2B3F"]
 
 
 class TeammateStatus(Enum):
