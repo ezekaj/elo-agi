@@ -280,8 +280,8 @@ class UIRenderer:
         self.console.print()
 
     def print_thinking(self):
-        """Print thinking/requesting indicator before response."""
-        self.console.print("  [#AFAFAF]\u2191[/#AFAFAF]")
+        """Print thinking/requesting indicator (same line as assistant label)."""
+        self.console.print("[#666666]\u2026[/#666666]")
 
     def print_response_meta(self, duration: float = 0, tokens: int = 0, cost: float = 0):
         """Print response metadata (duration, tokens, cost)."""
@@ -537,10 +537,11 @@ class UIRenderer:
     def start_live(self):
         """Start live updating mode for streaming."""
         self._current_response = ""
+        self._last_render_len = 0
         self._live = Live(
             Text(""),
             console=self.console,
-            refresh_per_second=15,
+            refresh_per_second=10,
             vertical_overflow="visible",
         )
         self._live.start()
@@ -554,15 +555,26 @@ class UIRenderer:
                 self._live.update(md)
             except Exception:
                 self._live.update(Text(self._current_response))
+            self._last_render_len = len(self._current_response)
 
     def append_live(self, token: str):
         """Append a token to the live display."""
         self._current_response += token
-        self.update_live(self._current_response)
+        # Throttle markdown re-parsing: only re-render every 30 chars or on newlines
+        delta = len(self._current_response) - self._last_render_len
+        if delta >= 30 or "\n" in token:
+            self.update_live(self._current_response)
 
     def stop_live(self):
         """Stop live updating mode."""
         if self._live:
+            # Final render with complete content
+            if self._current_response:
+                try:
+                    md = Markdown(self._current_response)
+                    self._live.update(md)
+                except Exception:
+                    self._live.update(Text(self._current_response))
             self._live.stop()
             self._live = None
         if self._current_response:
