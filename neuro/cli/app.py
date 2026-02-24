@@ -749,6 +749,8 @@ CRITICAL RULES:
                 self.ui.append_live(event.content)
             elif event.type.value == "tool_use_start":
                 if event.metadata.get("native"):
+                    # Stop streaming before tool execution
+                    self.ui.stop_live()
                     tool_name = event.metadata.get("name", "")
                     tool_args = event.metadata.get("arguments", {})
                     args_preview = ", ".join(
@@ -758,6 +760,8 @@ CRITICAL RULES:
                     tool_result = await self._execute_native_tool(tool_name, tool_args)
                     if tool_result:
                         tool_calls.append(tool_result)
+                    # Resume streaming for any follow-up content
+                    self.ui.start_live()
             elif event.type.value == "done":
                 # Record real token usage from API response
                 in_tok = event.metadata.get("input_tokens") or 0
