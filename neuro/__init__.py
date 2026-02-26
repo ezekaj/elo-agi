@@ -27,6 +27,12 @@ __author__ = "Elvi Zekaj"
 
 # Lazy imports to avoid loading everything at startup
 _lazy_imports = {
+    # Engine v2 (production refactor)
+    "NeuroEngine": ("neuro.engine_v2", "NeuroEngine"),
+    "EngineConfig": ("neuro.engine_v2", "EngineConfig"),
+    "PersistentMemory": ("neuro.memory", "PersistentMemory"),
+    "PatternStore": ("neuro.patterns", "PatternStore"),
+    "ToolExecutor": ("neuro.tools", "ToolExecutor"),
     # Core (neuro.modules.system)
     "CognitiveCore": ("neuro.modules.system.cognitive_core", "CognitiveCore"),
     "SystemConfig": ("neuro.modules.system.config", "SystemConfig"),
