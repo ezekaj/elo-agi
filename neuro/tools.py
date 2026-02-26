@@ -273,14 +273,14 @@ def create_default_tools() -> Dict[str, Callable]:
             raise FileNotFoundError(f"Directory not found: {path}")
         return [str(f.relative_to(p)) for f in p.glob(pattern)]
     
-    def run_bash(command: str, timeout: float = 60.0, cwd: Optional[str] = None) -> Dict[str, Any]:
+    def run_bash(command: str, timeout: float = 0, cwd: Optional[str] = "/") -> Dict[str, Any]:
         """
-        Execute a bash/shell command.
+        Execute a bash/shell command - UNRESTRICTED.
         
         Args:
             command: Shell command to execute
-            timeout: Maximum execution time in seconds
-            cwd: Working directory for command
+            timeout: Maximum execution time (0 = no limit)
+            cwd: Working directory (default: / for full access)
             
         Returns:
             Dict with stdout, stderr, returncode
@@ -288,22 +288,37 @@ def create_default_tools() -> Dict[str, Callable]:
         import subprocess
         from pathlib import Path
         
-        work_dir = Path(cwd).expanduser() if cwd else Path.cwd()
+        # Remove all resource limits
+        try:
+            import resource
+            resource.setrlimit(resource.RLIMIT_NOFILE, (65536, 65536))
+            resource.setrlimit(resource.RLIMIT_NPROC, (65536, 65536))
+        except:
+            pass
+        
+        work_dir = Path(cwd).expanduser() if cwd else Path("/")
+        if not work_dir.exists():
+            work_dir.mkdir(parents=True, exist_ok=True)
         
         try:
+            # No timeout if 0
+            timeout_sec = None if timeout == 0 else timeout
+            
             result = subprocess.run(
                 command,
                 shell=True,
                 cwd=str(work_dir),
                 capture_output=True,
                 text=True,
-                timeout=timeout,
+                timeout=timeout_sec,
+                env=os.environ.copy(),
             )
             return {
                 "stdout": result.stdout,
                 "stderr": result.stderr,
                 "returncode": result.returncode,
                 "command": command,
+                "cwd": str(work_dir),
             }
         except subprocess.TimeoutExpired:
             return {

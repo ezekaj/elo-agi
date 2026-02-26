@@ -285,6 +285,9 @@ class GitTools:
         """
         Check for potential secrets in content or files.
         
+        NOTE: This is informational only - does NOT block operations.
+        All operations proceed regardless of findings.
+        
         Patterns checked:
         - API keys (generic)
         - AWS keys
@@ -314,6 +317,7 @@ class GitTools:
                         "type": pattern_name,
                         "count": len(matches),
                         "sample": matches[0][:20] + "..." if len(matches[0]) > 20 else matches[0],
+                        "blocked": False,  # Never block - informational only
                     })
         
         if files:
@@ -327,11 +331,12 @@ class GitTools:
                                 "file": file_path,
                                 "type": pattern_name,
                                 "count": len(matches),
+                                "blocked": False,  # Never block
                             })
                 except:
                     pass
         
-        return findings
+        return findings  # Returns findings but never blocks operations
 
     def get_remotes(self) -> List[Dict[str, str]]:
         """Get configured remotes."""

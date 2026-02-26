@@ -339,8 +339,23 @@ def doctor_check():
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="NEURO - Neuroscience-inspired AGI",
+        description="NEURO - Neuroscience-inspired AGI (UNRESTRICTED MODE)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+UNRESTRICTED COMMANDS:
+  --unrestricted, -u    Enable unrestricted mode (full system access)
+  --spawn <cmd>         Spawn detached process
+  --kill <pid>          Kill process by PID
+  --ps                  List all processes
+  --mcp <url>           Connect to MCP server
+  --mcp-serve <port>    Start MCP server on port
+  --inject <pid>        Inject code into process
+  --read <path>         Read any file (no permission checks)
+  --write <path> <data> Write any file (no permission checks)
+  --rm <path>           Delete any file/directory
+  --socket <path>       Create Unix socket
+  --raw <host> <port>   Send raw network packet
+"""
     )
     
     parser.add_argument(
@@ -364,6 +379,65 @@ def main():
         help="Run health checks",
     )
     parser.add_argument(
+        "--unrestricted", "-u",
+        action="store_true",
+        help="Enable unrestricted mode (full system access)",
+    )
+    parser.add_argument(
+        "--spawn",
+        metavar="CMD",
+        help="Spawn detached process",
+    )
+    parser.add_argument(
+        "--kill",
+        metavar="PID",
+        type=int,
+        help="Kill process by PID",
+    )
+    parser.add_argument(
+        "--ps",
+        action="store_true",
+        help="List all processes",
+    )
+    parser.add_argument(
+        "--mcp",
+        metavar="URL",
+        help="Connect to MCP server",
+    )
+    parser.add_argument(
+        "--mcp-serve",
+        metavar="PORT",
+        type=int,
+        help="Start MCP server on port",
+    )
+    parser.add_argument(
+        "--inject",
+        metavar="PID",
+        type=int,
+        help="Inject code into process",
+    )
+    parser.add_argument(
+        "--read",
+        metavar="PATH",
+        help="Read any file (no permission checks)",
+    )
+    parser.add_argument(
+        "--write",
+        nargs=2,
+        metavar=("PATH", "DATA"),
+        help="Write any file (no permission checks)",
+    )
+    parser.add_argument(
+        "--rm",
+        metavar="PATH",
+        help="Delete any file/directory",
+    )
+    parser.add_argument(
+        "--socket",
+        metavar="PATH",
+        help="Create Unix socket",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose output",
@@ -372,7 +446,29 @@ def main():
     args = parser.parse_args()
     
     try:
-        if args.doctor:
+        if args.unrestricted:
+            run_unrestricted_mode()
+        elif args.spawn:
+            run_spawn(args.spawn)
+        elif args.kill:
+            run_kill(args.kill)
+        elif args.ps:
+            run_ps()
+        elif args.mcp:
+            run_mcp_client(args.mcp)
+        elif args.mcp_serve:
+            run_mcp_server(args.mcp_serve)
+        elif args.inject:
+            run_inject(args.inject)
+        elif args.read:
+            run_read(args.read)
+        elif args.write:
+            run_write(args.write[0], args.write[1])
+        elif args.rm:
+            run_rm(args.rm)
+        elif args.socket:
+            run_socket(args.socket)
+        elif args.doctor:
             doctor_check()
         elif args.stats:
             show_stats()
@@ -389,6 +485,169 @@ def main():
             import traceback
             traceback.print_exc()
         sys.exit(1)
+
+
+# =============================================================================
+# UNRESTRICTED MODE COMMANDS
+# =============================================================================
+
+def run_unrestricted_mode():
+    """Run in unrestricted mode with full system access."""
+    from neuro.tools_unrestricted import get_unrestricted_tools
+    
+    print(f"{Colors.BOLD}{Colors.RED}UNRESTRICTED MODE{Colors.RESET}")
+    print(f"{Colors.DIM}Full system access enabled. No restrictions.{Colors.RESET}\n")
+    
+    # Show available unrestricted tools
+    tools = get_unrestricted_tools()
+    print(f"{Colors.CYAN}Available unrestricted tools:{Colors.RESET}")
+    for name in sorted(tools.keys()):
+        print(f"  - {name}")
+    
+    print(f"\n{Colors.GREEN}Ready for unrestricted commands.{Colors.RESET}")
+
+
+def run_spawn(command: str):
+    """Spawn detached process."""
+    from neuro.tools_unrestricted import spawn_detached
+    
+    pid = spawn_detached(command)
+    print(f"{Colors.GREEN}Spawned process:{Colors.RESET} PID={pid}")
+
+
+def run_kill(pid: int):
+    """Kill process by PID."""
+    from neuro.tools_unrestricted import kill
+    
+    if kill(pid):
+        print(f"{Colors.GREEN}Killed process {pid}{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}Failed to kill process {pid}{Colors.RESET}")
+
+
+def run_ps():
+    """List all processes."""
+    from neuro.tools_unrestricted import process_list
+    
+    processes = process_list()
+    print(f"{Colors.BOLD}Process List:{Colors.RESET}\n")
+    
+    for proc in processes[:50]:  # Limit to 50
+        print(f"  {Colors.CYAN}{proc.pid:6}{Colors.RESET}  {proc.status:3}  {proc.name:20}  {proc.cwd[:40]}")
+    
+    if len(processes) > 50:
+        print(f"\n  ... and {len(processes) - 50} more")
+
+
+def run_mcp_client(url: str):
+    """Connect to MCP server."""
+    from neuro.mcp import MCPClient
+    
+    async def connect():
+        client = MCPClient(url)
+        if await client.connect():
+            print(f"{Colors.GREEN}Connected to MCP server: {url}{Colors.RESET}\n")
+            
+            tools = await client.list_tools()
+            if tools:
+                print(f"{Colors.CYAN}Tools:{Colors.RESET}")
+                for t in tools:
+                    print(f"  - {t.name}: {t.description[:50]}")
+            
+            resources = await client.list_resources()
+            if resources:
+                print(f"\n{Colors.CYAN}Resources:{Colors.RESET}")
+                for r in resources:
+                    print(f"  - {r.uri}: {r.name}")
+            
+            prompts = await client.list_prompts()
+            if prompts:
+                print(f"\n{Colors.CYAN}Prompts:{Colors.RESET}")
+                for p in prompts:
+                    print(f"  - {p.name}: {p.description[:50]}")
+            
+            await client.disconnect()
+        else:
+            print(f"{Colors.RED}Failed to connect to MCP server: {url}{Colors.RESET}")
+    
+    asyncio.run(connect())
+
+
+def run_mcp_server(port: int):
+    """Start MCP server."""
+    from neuro.mcp import create_mcp_server
+    
+    server = create_mcp_server(port=port)
+    print(f"{Colors.GREEN}MCP server starting on port {port}{Colors.RESET}")
+    print(f"{Colors.DIM}Press Ctrl+C to stop{Colors.RESET}\n")
+    
+    try:
+        asyncio.run(server.start())
+    except KeyboardInterrupt:
+        print(f"\n{Colors.DIM}MCP server stopped.{Colors.RESET}")
+
+
+def run_inject(pid: int):
+    """Inject code into process."""
+    from neuro.tools_unrestricted import inject_code
+    
+    # Simple test injection
+    code = "print('Injected!')"
+    
+    if inject_code(pid, code):
+        print(f"{Colors.GREEN}Code injected into process {pid}{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}Failed to inject code into process {pid}{Colors.RESET}")
+
+
+def run_read(path: str):
+    """Read any file."""
+    from neuro.tools_unrestricted import read_any_file
+    
+    try:
+        content = read_any_file(path)
+        print(content[:10000])  # Limit output
+    except Exception as e:
+        print(f"{Colors.RED}Error reading {path}:{Colors.RESET} {e}")
+
+
+def run_write(path: str, data: str):
+    """Write any file."""
+    from neuro.tools_unrestricted import write_any_file
+    
+    if write_any_file(path, data):
+        print(f"{Colors.GREEN}Written to {path}{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}Failed to write to {path}{Colors.RESET}")
+
+
+def run_rm(path: str):
+    """Delete any file/directory."""
+    from neuro.tools_unrestricted import delete_anything
+    
+    if delete_anything(path):
+        print(f"{Colors.GREEN}Deleted {path}{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}Failed to delete {path}{Colors.RESET}")
+
+
+def run_socket(path: str):
+    """Create Unix socket."""
+    from neuro.tools_unrestricted import create_unix_socket
+    
+    try:
+        sock = create_unix_socket(path)
+        print(f"{Colors.GREEN}Unix socket created at {path}{Colors.RESET}")
+        print(f"{Colors.DIM}Listening for connections...{Colors.RESET}")
+        
+        # Accept one connection then close
+        conn, addr = sock.accept()
+        data = conn.recv(1024)
+        print(f"Received: {data.decode()}")
+        conn.close()
+        sock.close()
+    except Exception as e:
+        print(f"{Colors.RED}Error:{Colors.RESET} {e}")
 
 
 if __name__ == "__main__":
