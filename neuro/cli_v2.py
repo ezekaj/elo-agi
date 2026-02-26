@@ -51,6 +51,7 @@ async def interactive_session():
     
     print_banner()
     print(f"{Colors.GREEN}Ready!{Colors.RESET} Type your message (or 'quit' to exit)\n")
+    print(f"{Colors.DIM}Commands: /help, /stats, /history, /sessions, /git, /clear{Colors.RESET}\n")
     
     async with NeuroEngine() as engine:
         history = []
@@ -67,20 +68,9 @@ async def interactive_session():
                     print(f"\n{Colors.DIM}Goodbye!{Colors.RESET}")
                     break
                 
-                if user_input == "/stats":
-                    stats = engine.get_stats()
-                    print(f"\n{Colors.CYAN}Memory:{Colors.RESET} {stats['memory']['total']} entries")
-                    print(f"{Colors.CYAN}Patterns:{Colors.RESET} {stats['patterns']['total_patterns']} learned")
-                    print(f"{Colors.CYAN}Tools:{Colors.RESET} {', '.join(stats['tools'])}\n")
-                    continue
-                
-                if user_input == "/help":
-                    print(f"""
-{Colors.BOLD}Commands:{Colors.RESET}
-  /stats   - Show engine statistics
-  /help    - Show this help
-  quit     - Exit session
-""")
+                # Handle slash commands
+                if user_input.startswith("/"):
+                    await handle_command(engine, user_input)
                     continue
                 
                 # Process query
@@ -108,6 +98,104 @@ async def interactive_session():
                 break
             except Exception as e:
                 print(f"\n{Colors.RED}Error:{Colors.RESET} {e}")
+
+
+async def handle_command(engine, command: str):
+    """Handle slash commands."""
+    parts = command.split()
+    cmd = parts[0].lower()
+    args = parts[1:]
+    
+    if cmd == "/help":
+        print(f"""
+{Colors.BOLD}Commands:{Colors.RESET}
+  /help              - Show this help
+  /stats             - Show engine statistics
+  /history [n]       - Show last n messages (default: 10)
+  /sessions          - List saved sessions
+  /resume <id>       - Resume a session
+  /git [status|diff] - Show git status/diff
+  /clear             - Clear conversation history
+  quit               - Exit session
+""")
+    
+    elif cmd == "/stats":
+        stats = engine.get_stats()
+        print(f"\n{Colors.CYAN}Memory:{Colors.RESET} {stats['memory']['total']} entries")
+        print(f"{Colors.CYAN}Patterns:{Colors.RESET} {stats['patterns']['total_patterns']} learned")
+        print(f"{Colors.CYAN}Tools:{Colors.RESET} {', '.join(stats['tools'])}")
+        print(f"{Colors.CYAN}Git Repo:{Colors.RESET} {'Yes' if stats['git_repo'] else 'No'}")
+        print(f"{Colors.CYAN}Session:{Colors.RESET} {stats['session_id']} ({stats['session_history_count']} messages)\n")
+    
+    elif cmd == "/history":
+        limit = int(args[0]) if args else 10
+        history = engine.get_history(limit)
+        print(f"\n{Colors.CYAN}Last {len(history)} messages:{Colors.RESET}")
+        for msg in history:
+            role = "You" if msg["role"] == "user" else "NEURO"
+            preview = msg["content"][:80] + "..." if len(msg["content"]) > 80 else msg["content"]
+            print(f"  {Colors.BOLD}{role}:{Colors.RESET} {preview}")
+        print()
+    
+    elif cmd == "/sessions":
+        sessions = engine.list_sessions()
+        if not sessions:
+            print(f"\n{Colors.DIM}No saved sessions.{Colors.RESET}\n")
+        else:
+            print(f"\n{Colors.CYAN}Saved sessions:{Colors.RESET}")
+            for s in sessions[:10]:
+                print(f"  {s['session_id']} - {s['message_count']} messages")
+            print()
+    
+    elif cmd == "/resume":
+        if not args:
+            print(f"\n{Colors.RED}Usage: /resume <session_id>{Colors.RESET}\n")
+        else:
+            session_id = args[0]
+            history = engine._load_session(session_id)
+            if history:
+                print(f"\n{Colors.GREEN}Resumed session {session_id} ({len(history)} messages){Colors.RESET}\n")
+            else:
+                print(f"\n{Colors.RED}Session {session_id} not found.{Colors.RESET}\n")
+    
+    elif cmd == "/git":
+        subcmd = args[0] if args else "status"
+        if subcmd == "status":
+            status = engine.git.status()
+            if "error" in status:
+                print(f"\n{Colors.RED}{status['error']}{Colors.RESET}\n")
+            else:
+                print(f"\n{Colors.CYAN}Git Status:{Colors.RESET}")
+                print(f"  Branch: {status['branch']}")
+                if status['has_changes']:
+                    print(f"  Changed files:")
+                    for f in status['changed_files'][:10]:
+                        print(f"    [{f['status']}] {f['file']}")
+                else:
+                    print(f"  {Colors.GREEN}Working tree clean{Colors.RESET}")
+                if status['ahead'] or status['behind']:
+                    print(f"  Ahead: {status['ahead']}, Behind: {status['behind']}")
+                print()
+        elif subcmd == "diff":
+            diff = engine.git.diff()
+            if diff:
+                print(f"\n{Colors.CYAN}Git Diff:{Colors.RESET}")
+                print(diff[:2000])  # Limit output
+            else:
+                print(f"\n{Colors.DIM}No changes.{Colors.RESET}\n")
+        elif subcmd == "log":
+            log = engine.git.log(5)
+            print(f"\n{Colors.CYAN}Recent commits:{Colors.RESET}")
+            for commit in log:
+                print(f"  {commit['hash']} - {commit['message'][:50]} ({commit['author']})")
+            print()
+    
+    elif cmd == "/clear":
+        engine.clear_history()
+        print(f"\n{Colors.GREEN}Conversation history cleared.{Colors.RESET}\n")
+    
+    else:
+        print(f"\n{Colors.RED}Unknown command: {cmd}. Type /help for available commands.{Colors.RESET}\n")
 
 
 async def one_shot_query(query: str):
@@ -150,6 +238,104 @@ def show_stats():
                 print(f"  - {ptype}: {data['count']} ({data['success_rate']:.0%} success)")
 
 
+def doctor_check():
+    """Run health checks."""
+    import shutil
+    import sys
+    
+    print(f"{Colors.BOLD}NEURO Health Check{Colors.RESET}\n")
+    
+    checks = []
+    all_passed = True
+    
+    # Check Python version
+    py_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    py_ok = sys.version_info >= (3, 9)
+    checks.append(("Python version", py_version, py_ok))
+    if not py_ok:
+        all_passed = False
+    
+    # Check Ollama
+    ollama_ok = shutil.which("ollama") is not None
+    checks.append(("Ollama installed", "Yes" if ollama_ok else "No", ollama_ok))
+    if not ollama_ok:
+        all_passed = False
+    
+    # Check ripgrep
+    rg_ok = shutil.which("rg") is not None
+    checks.append(("Ripgrep installed", "Yes" if rg_ok else "No", rg_ok))
+    # ripgrep is optional
+    
+    # Check git
+    git_ok = shutil.which("git") is not None
+    checks.append(("Git installed", "Yes" if git_ok else "No", git_ok))
+    if not git_ok:
+        all_passed = False
+    
+    # Check numpy
+    try:
+        import numpy
+        numpy_ok = True
+        numpy_version = numpy.__version__
+    except ImportError:
+        numpy_ok = False
+        numpy_version = "Not installed"
+    checks.append(("NumPy", numpy_version, numpy_ok))
+    if not numpy_ok:
+        all_passed = False
+    
+    # Check scipy
+    try:
+        import scipy
+        scipy_ok = True
+        scipy_version = scipy.__version__
+    except ImportError:
+        scipy_ok = False
+        scipy_version = "Not installed"
+    checks.append(("SciPy", scipy_version, scipy_ok))
+    if not scipy_ok:
+        all_passed = False
+    
+    # Check aiohttp
+    try:
+        import aiohttp
+        aiohttp_ok = True
+    except ImportError:
+        aiohttp_ok = False
+    checks.append(("aiohttp", "Installed" if aiohttp_ok else "Not installed", aiohttp_ok))
+    if not aiohttp_ok:
+        all_passed = False
+    
+    # Check neuro package
+    try:
+        from neuro.engine_v2 import NeuroEngine
+        neuro_ok = True
+    except ImportError as e:
+        neuro_ok = False
+        checks.append(("NEURO engine", str(e), neuro_ok))
+        all_passed = False
+    
+    # Check memory directory
+    from pathlib import Path
+    memory_dir = Path("~/.neuro").expanduser()
+    memory_ok = memory_dir.exists() or memory_dir.mkdir(parents=True, exist_ok=True)
+    checks.append(("Memory directory", str(memory_dir), memory_ok))
+    
+    # Print results
+    for name, value, passed in checks:
+        status = f"{Colors.GREEN}✓{Colors.RESET}" if passed else f"{Colors.RED}✗{Colors.RESET}"
+        print(f"  {status} {name}: {value}")
+    
+    print()
+    if all_passed:
+        print(f"{Colors.GREEN}All checks passed!{Colors.RESET}\n")
+    else:
+        print(f"{Colors.RED}Some checks failed. Please install missing dependencies.{Colors.RESET}\n")
+        print(f"Run: pip install -e '.[all]'{Colors.RESET}\n")
+    
+    return all_passed
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -173,6 +359,11 @@ def main():
         help="Show engine statistics",
     )
     parser.add_argument(
+        "--doctor", "-d",
+        action="store_true",
+        help="Run health checks",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose output",
@@ -181,7 +372,9 @@ def main():
     args = parser.parse_args()
     
     try:
-        if args.stats:
+        if args.doctor:
+            doctor_check()
+        elif args.stats:
             show_stats()
         elif args.query:
             asyncio.run(one_shot_query(args.query))

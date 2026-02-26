@@ -111,6 +111,8 @@ class ToolExecutor:
         Returns:
             ToolResult with status and output/error
         """
+        import inspect
+        
         timeout = timeout or self.default_timeout
         max_retries = retries or self.max_retries
         
@@ -131,7 +133,7 @@ class ToolExecutor:
             
             try:
                 # Execute with timeout
-                if asyncio.iscoroutinefunction(tool_fn):
+                if inspect.iscoroutinefunction(tool_fn):
                     output = await asyncio.wait_for(
                         tool_fn(**args),
                         timeout=timeout,
@@ -244,13 +246,16 @@ class ToolExecutor:
 def create_default_tools() -> Dict[str, Callable]:
     """Create default tool set."""
     
-    def read_file(path: str) -> str:
+    def read_file(path: str, lines: Optional[int] = None) -> str:
         """Read a file and return contents."""
         from pathlib import Path
         p = Path(path).expanduser()
         if not p.exists():
             raise FileNotFoundError(f"File not found: {path}")
-        return p.read_text()
+        content = p.read_text()
+        if lines:
+            return "\n".join(content.split("\n")[:lines])
+        return content
     
     def write_file(path: str, content: str) -> bool:
         """Write content to a file."""
@@ -260,13 +265,60 @@ def create_default_tools() -> Dict[str, Callable]:
         p.write_text(content)
         return True
     
-    def list_files(path: str = ".") -> List[str]:
-        """List files in directory."""
+    def list_files(path: str = ".", pattern: str = "*") -> List[str]:
+        """List files in directory with optional glob pattern."""
         from pathlib import Path
         p = Path(path).expanduser()
         if not p.exists():
             raise FileNotFoundError(f"Directory not found: {path}")
-        return [str(f) for f in p.iterdir()]
+        return [str(f.relative_to(p)) for f in p.glob(pattern)]
+    
+    def run_bash(command: str, timeout: float = 60.0, cwd: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Execute a bash/shell command.
+        
+        Args:
+            command: Shell command to execute
+            timeout: Maximum execution time in seconds
+            cwd: Working directory for command
+            
+        Returns:
+            Dict with stdout, stderr, returncode
+        """
+        import subprocess
+        from pathlib import Path
+        
+        work_dir = Path(cwd).expanduser() if cwd else Path.cwd()
+        
+        try:
+            result = subprocess.run(
+                command,
+                shell=True,
+                cwd=str(work_dir),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+            return {
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "returncode": result.returncode,
+                "command": command,
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                "stdout": "",
+                "stderr": f"Command timed out after {timeout}s",
+                "returncode": -1,
+                "command": command,
+            }
+        except Exception as e:
+            return {
+                "stdout": "",
+                "stderr": str(e),
+                "returncode": -1,
+                "command": command,
+            }
     
     def run_python(code: str) -> str:
         """Execute Python code and return output."""
@@ -274,23 +326,218 @@ def create_default_tools() -> Dict[str, Callable]:
         import sys
         
         old_stdout = sys.stdout
+        old_stderr = sys.stderr
         sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
         
         try:
             exec(code, {"__builtins__": __builtins__})
             return sys.stdout.getvalue()
+        except Exception as e:
+            return f"Error: {e}\n{sys.stderr.getvalue()}"
         finally:
             sys.stdout = old_stdout
+            sys.stderr = old_stderr
     
-    def search_web(query: str) -> List[Dict[str, str]]:
-        """Search web (placeholder - requires API)."""
-        # Placeholder - would integrate with search API
-        return [{"title": f"Result for: {query}", "url": "https://example.com"}]
+    def search_files(pattern: str, path: str = ".") -> List[str]:
+        """
+        Search for files matching a glob pattern.
+        
+        Args:
+            pattern: Glob pattern (e.g., "*.py", "**/*.txt")
+            path: Base directory to search
+            
+        Returns:
+            List of matching file paths
+        """
+        from pathlib import Path
+        base = Path(path).expanduser()
+        if not base.exists():
+            return []
+        return [str(f.relative_to(base)) for f in base.glob(pattern)]
+    
+    def search_grep(pattern: str, path: str = ".", include: str = "*", 
+                    max_results: int = 50) -> List[Dict[str, Any]]:
+        """
+        Search for text pattern in files using ripgrep (if available) or fallback.
+        
+        Args:
+            pattern: Regex pattern to search for
+            path: Directory to search
+            include: File pattern to include (e.g., "*.py")
+            max_results: Maximum number of results
+            
+        Returns:
+            List of dicts with file, line, content
+        """
+        import subprocess
+        from pathlib import Path
+        
+        results = []
+        
+        # Try ripgrep first (much faster)
+        try:
+            rg_cmd = ["rg", "--json", "-n", pattern, path, "--glob", include]
+            result = subprocess.run(rg_cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                for line in result.stdout.strip().split("\n"):
+                    if line:
+                        try:
+                            match = eval(line)  # JSON lines format
+                            if match.get("type") == "match":
+                                results.append({
+                                    "file": match["data"]["path"]["text"],
+                                    "line": match["data"]["line_number"],
+                                    "content": match["data"]["lines"].get("text", ""),
+                                })
+                                if len(results) >= max_results:
+                                    break
+                        except:
+                            pass
+                return results
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+        
+        # Fallback to Python glob + grep
+        base = Path(path).expanduser()
+        for f in base.glob("**/" + include.replace("*", "")):
+            if f.is_file():
+                try:
+                    content = f.read_text()
+                    for i, line in enumerate(content.split("\n"), 1):
+                        if pattern.lower() in line.lower():
+                            results.append({
+                                "file": str(f.relative_to(base)),
+                                "line": i,
+                                "content": line.strip()[:200],
+                            })
+                            if len(results) >= max_results:
+                                return results
+                except:
+                    pass
+        
+        return results
+    
+    def search_web(query: str, num_results: int = 5) -> List[Dict[str, str]]:
+        """
+        Search the web using available API.
+        
+        Tries in order:
+        1. Tavily API (if TAVILY_API_KEY env var set)
+        2. Serper API (if SERPER_API_KEY env var set)
+        3. DuckDuckGo (no API key needed)
+        4. Fallback mock results
+        
+        Args:
+            query: Search query
+            num_results: Number of results to return
+            
+        Returns:
+            List of dicts with title, url, snippet
+        """
+        import os
+        
+        # Try Tavily API
+        api_key = os.environ.get("TAVILY_API_KEY")
+        if api_key:
+            try:
+                import requests
+                resp = requests.post(
+                    "https://api.tavily.com/search",
+                    json={"api_key": api_key, "query": query, "num_results": num_results},
+                    timeout=10
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return [
+                        {"title": r.get("title", ""), "url": r["url"], "snippet": r.get("content", "")}
+                        for r in data.get("results", [])[:num_results]
+                    ]
+            except:
+                pass
+        
+        # Try Serper API
+        api_key = os.environ.get("SERPER_API_KEY")
+        if api_key:
+            try:
+                import requests
+                resp = requests.post(
+                    "https://google.serper.dev/search",
+                    json={"q": query, "num": num_results},
+                    headers={"X-API-KEY": api_key},
+                    timeout=10
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return [
+                        {"title": r.get("title", ""), "url": r.get("link", ""), "snippet": r.get("snippet", "")}
+                        for r in data.get("organic", [])[:num_results]
+                    ]
+            except:
+                pass
+        
+        # Try DuckDuckGo (HTML scraping - basic)
+        try:
+            import requests
+            resp = requests.get(
+                "https://html.duckduckgo.com/html/",
+                data={"q": query},
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                # Basic parsing of DuckDuckGo HTML
+                results = []
+                for line in resp.text.split("\n"):
+                    if 'class="result__a"' in line:
+                        # Extract title and URL
+                        import re
+                        match = re.search(r'href="([^"]+)".*?>([^<]+)', line)
+                        if match:
+                            results.append({
+                                "title": match.group(2),
+                                "url": match.group(1),
+                                "snippet": "",
+                            })
+                            if len(results) >= num_results:
+                                return results
+        except:
+            pass
+        
+        # Fallback - return mock results
+        return [{"title": f"Result for: {query}", "url": "https://example.com", "snippet": "No search API configured"}]
+    
+    def get_file_info(path: str) -> Dict[str, Any]:
+        """Get detailed file information."""
+        from pathlib import Path
+        import os
+        from datetime import datetime
+        
+        p = Path(path).expanduser()
+        if not p.exists():
+            raise FileNotFoundError(f"File not found: {path}")
+        
+        stat = p.stat()
+        return {
+            "name": p.name,
+            "path": str(p.absolute()),
+            "size": stat.st_size,
+            "created": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+            "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            "is_file": p.is_file(),
+            "is_dir": p.is_dir(),
+            "is_symlink": p.is_symlink(),
+            "permissions": oct(stat.st_mode)[-3:],
+        }
     
     return {
         "read_file": read_file,
         "write_file": write_file,
         "list_files": list_files,
+        "run_bash": run_bash,
         "run_python": run_python,
+        "search_files": search_files,
+        "search_grep": search_grep,
         "search_web": search_web,
+        "get_file_info": get_file_info,
     }

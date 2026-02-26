@@ -7,12 +7,15 @@ Unified async processing with:
 - Memory integration
 - Pattern learning
 - Tool execution with retries
+- Git operations
+- Session persistence
 """
 
 import asyncio
 import time
 import json
 import re
+import uuid
 from typing import Optional, Dict, Any, List, AsyncGenerator
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -21,6 +24,7 @@ from pathlib import Path
 from neuro.memory import PersistentMemory
 from neuro.patterns import PatternStore
 from neuro.tools import ToolExecutor, ToolCall, ToolResult, ToolStatus, create_default_tools
+from neuro.git_tools import GitTools
 
 
 @dataclass
@@ -33,6 +37,9 @@ class EngineConfig:
     max_tool_rounds: int = 3
     auto_learn: bool = True
     verbose: bool = False
+    session_id: Optional[str] = None
+    session_dir: str = "~/.neuro/sessions"
+    persist_sessions: bool = True
 
 
 @dataclass
@@ -97,6 +104,16 @@ class NeuroEngine:
         # Register tools
         for name, func in default_tools.items():
             self.executor.register(name, func)
+        
+        # Git tools
+        self.git = GitTools()
+        
+        # Session management
+        self.session_id = self.config.session_id or str(uuid.uuid4())[:8]
+        self.session_dir = Path(self.config.session_dir).expanduser()
+        self.session_history: List[Dict[str, str]] = []
+        if self.config.persist_sessions:
+            self.session_dir.mkdir(parents=True, exist_ok=True)
         
         # LLM client (lazy loaded)
         self._llm = None
@@ -297,6 +314,7 @@ CORE PRINCIPLES:
         - Update pattern success rates
         - Store interaction in memory
         - Extract facts for knowledge base
+        - Save session to disk
         """
         if not self.config.auto_learn:
             return
@@ -331,7 +349,70 @@ CORE PRINCIPLES:
                 importance=0.8,
             )
         
+        # Save session to disk
+        if self.config.persist_sessions:
+            self._save_session()
+        
         result.learned = True
+
+    def _save_session(self):
+        """Save current session to disk."""
+        session_file = self.session_dir / f"session_{self.session_id}.json"
+        session_data = {
+            "session_id": self.session_id,
+            "history": self.session_history[-100:],  # Keep last 100 messages
+            "created_at": time.time(),
+        }
+        try:
+            with open(session_file, "w") as f:
+                json.dump(session_data, f, indent=2)
+        except Exception as e:
+            if self.config.verbose:
+                print(f"  [engine] Failed to save session: {e}")
+
+    def _load_session(self, session_id: str) -> Optional[List[Dict[str, str]]]:
+        """Load a session from disk."""
+        session_file = self.session_dir / f"session_{session_id}.json"
+        if not session_file.exists():
+            return None
+        
+        try:
+            with open(session_file, "r") as f:
+                data = json.load(f)
+                self.session_id = session_id
+                return data.get("history", [])
+        except Exception as e:
+            if self.config.verbose:
+                print(f"  [engine] Failed to load session: {e}")
+            return None
+
+    def list_sessions(self) -> List[Dict[str, Any]]:
+        """List all saved sessions."""
+        sessions = []
+        if not self.session_dir.exists():
+            return sessions
+        
+        for f in self.session_dir.glob("session_*.json"):
+            try:
+                with open(f, "r") as file:
+                    data = json.load(file)
+                    sessions.append({
+                        "session_id": data.get("session_id", f.stem),
+                        "message_count": len(data.get("history", [])),
+                        "created_at": data.get("created_at", 0),
+                    })
+            except:
+                pass
+        
+        return sorted(sessions, key=lambda x: x.get("created_at", 0), reverse=True)
+
+    def get_history(self, limit: int = 20) -> List[Dict[str, str]]:
+        """Get conversation history."""
+        return self.session_history[-limit:]
+
+    def clear_history(self):
+        """Clear conversation history."""
+        self.session_history = []
 
     def _extract_facts(self, response: str) -> List[str]:
         """Extract learnable facts from response."""
@@ -392,16 +473,20 @@ CORE PRINCIPLES:
             if stream:
                 print(token, end="", flush=True)
             response_parts.append(token)
-        
+
         if stream:
             print()  # Newline after response
-        
+
         result.response = "".join(response_parts)
         
+        # Update session history
+        self.session_history.append({"role": "user", "content": query})
+        self.session_history.append({"role": "assistant", "content": result.response})
+
         # 5. LEARN (background)
         if self.config.auto_learn:
             asyncio.create_task(self._learn(query, result))
-        
+
         result.duration = time.time() - start_time
         return result
 
@@ -450,10 +535,17 @@ CORE PRINCIPLES:
             "memory": self.memory.stats(),
             "patterns": self.patterns.get_stats(),
             "tools": self.executor.list_tools(),
+            "git_repo": self.git.is_repo(),
+            "session_id": self.session_id,
+            "session_history_count": len(self.session_history),
         }
 
     async def close(self):
         """Clean up resources."""
+        # Save session before closing
+        if self.config.persist_sessions:
+            self._save_session()
+        
         self.memory.close()
         self.patterns._save()
         if self._streamer:
